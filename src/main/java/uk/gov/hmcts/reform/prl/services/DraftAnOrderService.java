@@ -314,7 +314,6 @@ public class DraftAnOrderService {
         log.info("parent Name " + selectedOrder.getParentName());
         caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
         caseDataMap.put("parentName", selectedOrder.getParentName());
-        caseDataMap.put("appointedGuardianName", selectedOrder.getAppointedGuardianName());
         return caseDataMap;
     }
 
@@ -323,6 +322,7 @@ public class DraftAnOrderService {
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         log.info("order type " + selectedOrder.getOrderType());
         caseDataMap.put("orderType", selectedOrder.getOrderType());
+        caseDataMap.put("parentName", selectedOrder.getParentName());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put("wasTheOrderApprovedAtHearing", selectedOrder.getWasTheOrderApprovedAtHearing());
         caseDataMap.put("judgeOrMagistrateTitle", selectedOrder.getJudgeOrMagistrateTitle());
@@ -404,7 +404,6 @@ public class DraftAnOrderService {
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
             .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .parentName(caseData.getManageOrders().getParentName())
-            .appointedGuardianName(caseData.getAppointedGuardianName())
             .build();
     }
 
