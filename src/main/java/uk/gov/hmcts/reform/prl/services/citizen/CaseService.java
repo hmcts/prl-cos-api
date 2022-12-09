@@ -27,16 +27,20 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
+import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_SUBMISSION_TO_HMCTS;
+import static uk.gov.hmcts.reform.prl.enums.State.DELETED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 
@@ -46,6 +50,9 @@ public class CaseService {
 
     public static final String LINK_CASE = "linkCase";
     public static final String CITIZEN_INTERNAL_CASE_UPDATE = "citizen-internal-case-update";
+    public static final String SEARCH_CRITERIA = "sortDirection";
+    public static final String SEARCH_CRITERIA_DESC = "desc";
+
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
 
@@ -264,4 +271,64 @@ public class CaseService {
         return caseRepository.createCase(authToken, caseData);
     }
 
+    public void sendDeletionNotification(String s2sToken) {
+        Map<String, String> searchCriteria = new HashMap<>();
+        searchCriteria.put(SEARCH_CRITERIA, SEARCH_CRITERIA_DESC);
+        String systemUserToken = systemUserService.getSysUserToken();
+
+        List<CaseData> caseDataList = searchCasesForCaseWorker(systemUserToken, s2sToken, searchCriteria);
+
+        caseDataList
+                .stream()
+                .filter(getDraftCasesToNotifyViaWarning()).collect(Collectors.toList())
+                .forEach(data -> citizenEmailService.sendCitizenCaseDeletionWarningEmail(data, systemUserToken));
+    }
+
+    public void deleteOldDraftCases(String s2sToken) {
+        Map<String, String> searchCriteria = new HashMap<>();
+        searchCriteria.put(SEARCH_CRITERIA, SEARCH_CRITERIA_DESC);
+        String systemUserToken = systemUserService.getSysUserToken();
+
+        List<CaseData> caseDataList = searchCasesForCaseWorker(systemUserToken, s2sToken, searchCriteria);
+
+        caseDataList
+                .stream()
+                .filter(data -> data.getLastModifiedDate().toLocalDate()
+                        .isBefore(LocalDateTime.now().minusDays(30L).toLocalDate()))
+                .map(data -> data.toBuilder().state(DELETED).build())
+                .forEach(data -> caseRepository.updateCase(systemUserToken, String.valueOf(data.getId()),
+                        data, CaseEvent.DELETE_CASE));
+    }
+
+    private List<CaseData> searchCasesForCaseWorker(String authToken, String s2sToken, Map<String, String> searchCriteria) {
+
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        List<CaseDetails> caseDetails = new ArrayList<>();
+        caseDetails.addAll(performSearchForCaseWorker(authToken, userDetails, searchCriteria, s2sToken));
+        return caseDetails
+                .stream()
+                .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
+                .collect(Collectors.toList());
+    }
+
+    private List<CaseDetails> performSearchForCaseWorker(String authToken, UserDetails user, Map<String, String> searchCriteria,
+                                                         String serviceAuthToken) {
+        List<CaseDetails> result;
+
+        result = coreCaseDataApi.searchForCaseworker(
+                authToken,
+                serviceAuthToken,
+                user.getId(),
+                JURISDICTION,
+                CASE_TYPE,
+                searchCriteria
+        );
+
+        return result;
+    }
+
+    private Predicate<CaseData> getDraftCasesToNotifyViaWarning() {
+        return data -> data.getLastModifiedDate().toLocalDate().isEqual(LocalDateTime.now().minusDays(23L).toLocalDate())
+                && data.getState().equals(AWAITING_SUBMISSION_TO_HMCTS);
+    }
 }

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -38,14 +39,19 @@ public class CitizenEmailService {
     public void sendCitizenCaseSubmissionEmail(String authorisation, String caseId) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         EmailTemplateVars email = buildCitizenCaseSubmissionEmail(userDetails, caseId);
-        sendEmail(userDetails.getEmail(), email);
+        sendEmail(userDetails.getEmail(), email, EmailTemplateNames.CITIZEN_CASE_SUBMISSION);
     }
 
-    public void sendEmail(String address, EmailTemplateVars email) {
-        log.info("Sending case submission email to " + address);
+    public void sendCitizenCaseDeletionWarningEmail(CaseData caseData, String authorisation) {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        EmailTemplateVars email = buildCitizenCaseSubmissionEmail(userDetails, String.valueOf(caseData.getId()));
+        sendEmail(userDetails.getEmail(), email, EmailTemplateNames.CITIZEN_CASE_DELETION);
+    }
+
+    public void sendEmail(String address, EmailTemplateVars email, EmailTemplateNames templateName) {
         emailService.send(
             address,
-            EmailTemplateNames.CITIZEN_CASE_SUBMISSION,
+            templateName,
             email,
             LanguagePreference.english
         );

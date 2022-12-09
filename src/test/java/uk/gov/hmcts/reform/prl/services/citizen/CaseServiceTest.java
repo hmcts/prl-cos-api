@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +36,18 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.DELETE_CASE;
+import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_SUBMISSION_TO_HMCTS;
+import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.SEARCH_CRITERIA;
+import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.SEARCH_CRITERIA_DESC;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -106,9 +116,9 @@ public class CaseServiceTest {
         userDetails = UserDetails.builder().build();
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
-        when(caseRepository.updateCase(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(caseDetails);
+        when(caseRepository.updateCase(any(), any(), any(), any())).thenReturn(caseDetails);
         when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(coreCaseDataApi.getCase(Mockito.any(),Mockito.any(), Mockito.any())).thenReturn(caseDetails);
+        when(coreCaseDataApi.getCase(any(), any(), any())).thenReturn(caseDetails);
     }
 
     @Test
@@ -193,5 +203,77 @@ public class CaseServiceTest {
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
+    }
+
+    @Test
+    public void shouldSendDeletionNotifications() {
+        //Given
+        Map<String, String> searchCriteria = new HashMap<>();
+        searchCriteria.put(SEARCH_CRITERIA, SEARCH_CRITERIA_DESC);
+        caseDataMap.put("lastModifiedDate", LocalDateTime.now().minusDays(23L));
+        caseDataMap.put("state", AWAITING_SUBMISSION_TO_HMCTS);
+        UserDetails userDetails = UserDetails
+                .builder()
+                .id("test@gmail.com")
+                .email("test@gmail.com")
+                .build();
+        CaseDetails caseDetails = CaseDetails.builder()
+                .data(caseDataMap)
+                .id(1234567891234567L)
+                .state(AWAITING_SUBMISSION_TO_HMCTS.getValue())
+                .lastModified(LocalDateTime.now().minusDays(23L))
+                .build();
+        CaseData caseData = CaseData.builder()
+                .id(1234567891234567L)
+                .lastModifiedDate(LocalDateTime.now().minusDays(23L))
+                .state(AWAITING_SUBMISSION_TO_HMCTS)
+                .build();
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(systemUserService.getSysUserToken()).thenReturn(authToken);
+        when(coreCaseDataApi.searchForCaseworker(authToken, s2sToken, "test@gmail.com", JURISDICTION,
+                CASE_TYPE, searchCriteria)).thenReturn(List.of(caseDetails));
+        when(objectMapper.convertValue(caseData.toMap(objectMapper), CaseData.class)).thenReturn(caseData);
+
+        //When
+        caseService.sendDeletionNotification(s2sToken);
+
+        //Then
+        verify(citizenEmailService).sendCitizenCaseDeletionWarningEmail(any(CaseData.class), eq(authToken));
+    }
+
+    @Test
+    public void shouldDeleteOldDraftCases() {
+        //Given
+        Map<String, String> searchCriteria = new HashMap<>();
+        searchCriteria.put(SEARCH_CRITERIA, SEARCH_CRITERIA_DESC);
+        caseDataMap.put("lastModifiedDate", LocalDateTime.now().minusDays(31L));
+        caseDataMap.put("state", AWAITING_SUBMISSION_TO_HMCTS);
+        UserDetails userDetails = UserDetails
+                .builder()
+                .id("test@gmail.com")
+                .email("test@gmail.com")
+                .build();
+        CaseDetails caseDetails = CaseDetails.builder()
+                .data(caseDataMap)
+                .id(1234567891234567L)
+                .state(AWAITING_SUBMISSION_TO_HMCTS.getValue())
+                .lastModified(LocalDateTime.now().minusDays(31L))
+                .build();
+        CaseData caseData = CaseData.builder()
+                .id(1234567891234567L)
+                .lastModifiedDate(LocalDateTime.now().minusDays(31L))
+                .state(AWAITING_SUBMISSION_TO_HMCTS)
+                .build();
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(systemUserService.getSysUserToken()).thenReturn(authToken);
+        when(coreCaseDataApi.searchForCaseworker(authToken, s2sToken, "test@gmail.com", JURISDICTION,
+                CASE_TYPE, searchCriteria)).thenReturn(List.of(caseDetails));
+        when(objectMapper.convertValue(caseData.toMap(objectMapper), CaseData.class)).thenReturn(caseData);
+
+        //When
+        caseService.deleteOldDraftCases(s2sToken);
+
+        //Then
+        verify(caseRepository).updateCase(eq(authToken), eq("1234567891234567"), any(CaseData.class), eq(DELETE_CASE));
     }
 }

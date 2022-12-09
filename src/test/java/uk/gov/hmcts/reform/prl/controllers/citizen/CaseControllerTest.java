@@ -27,6 +27,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -267,5 +268,29 @@ public class CaseControllerTest {
 
         //Then
         assertThat(actualCaseData).isEqualTo(caseData);
+    }
+
+    @Test
+    public void shouldSendEmailNotifications() {
+        //Given
+        Mockito.when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+
+        //When
+        caseController.sendEmailNotifications();
+
+        //Then
+        verify(caseService).sendDeletionNotification(servAuthToken);
+    }
+
+    @Test
+    public void shouldDeleteOldDraftCases() {
+        //Given
+        Mockito.when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+
+        //When
+        caseController.deleteOldDraftCases();
+
+        //Then
+        verify(caseService).deleteOldDraftCases(servAuthToken);
     }
 }
