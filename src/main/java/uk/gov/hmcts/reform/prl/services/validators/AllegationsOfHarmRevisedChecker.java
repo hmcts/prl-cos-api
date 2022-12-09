@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
-import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuseBehaviours;
@@ -194,15 +193,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionPassportOfficeNotified());
         Optional<YesOrNo> abductionChildHasPassport =
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionChildHasPassport());
-        Optional<String> abductionChildPassportPosessionOtherDetail = null;
-        Optional<List<AbductionChildPassportPossessionEnum>> abductionChildPassportPosessionList = null;
-        if (Yes.equals(abductionChildHasPassport)) {
-            abductionChildPassportPosessionList =
-                ofNullable(caseData.getAllegationOfHarmRevised().getChildPassportDetails().getNewChildPassportPossession());
-            abductionChildPassportPosessionOtherDetail = ofNullable(caseData.getAllegationOfHarmRevised()
-                                                                                         .getChildPassportDetails()
-                                                                                         .getNewChildPassportPossessionOtherDetails());
-        }
         Optional<YesOrNo> abductionPreviousPoliceInvolvement =
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionPreviousPoliceInvolvement());
         Optional<String> abductionPreviousPoliceInvolvementDetails =
@@ -230,8 +220,12 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                     previousThreatSectionComplete,
                     previousAbductionThreatsCompleted
                 );
-                if (Yes.equals(abductionChildHasPassport)) {
-
+                if (abductionChildHasPassport.isPresent() && Yes.equals(abductionChildHasPassport.get())) {
+                    Optional<List<AbductionChildPassportPossessionEnum>> abductionChildPassportPosessionList =
+                            ofNullable(caseData.getAllegationOfHarmRevised().getChildPassportDetails().getNewChildPassportPossession());
+                    Optional<String> abductionChildPassportPosessionOtherDetail = ofNullable(caseData.getAllegationOfHarmRevised()
+                                                                                                     .getChildPassportDetails()
+                                                                                                     .getNewChildPassportPossessionOtherDetails());
                     boolean abductionChildPassportPosessionCompleted = abductionChildPassportPosessionList.isPresent();
 
                     passportPossessionCompleted = isPassportPossessionCompleted(
@@ -287,10 +281,9 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         Optional<String> abductionChildPassportPossessionOtherDetail,
         boolean passportPossessionCompleted,
         boolean abductionChildPassportPossessionCompleted) {
-
         if (abductionChildPassportPossessionCompleted) {
             if (!abductionChildPassportPossession.isEmpty()
-                && other.equals(abductionChildPassportPossession.get())) {
+                && abductionChildPassportPossession.get().contains(other)) {
                 passportPossessionCompleted = abductionChildPassportPossessionOtherDetail.isPresent();
             } else {
                 passportPossessionCompleted = true;
@@ -318,14 +311,12 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
     public boolean validateDomesticAbuseBehaviours(DomesticAbuseBehaviours domesticAbuseBehaviours) {
 
-        Optional<TypeOfAbuseEnum> typeOfAbuse = ofNullable(domesticAbuseBehaviours.getTypeOfAbuse());
         Optional<String> behavioursStartDateAndLength = ofNullable(domesticAbuseBehaviours.getNewBehavioursStartDateAndLength());
         Optional<String> abuseNatureDescription = ofNullable(domesticAbuseBehaviours.getNewAbuseNatureDescription());
         Optional<YesOrNo> behavioursApplicantSoughtHelp = ofNullable(domesticAbuseBehaviours.getNewBehavioursApplicantSoughtHelp());
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(domesticAbuseBehaviours.getNewBehavioursApplicantHelpSoughtWho());
-
         List<Optional<?>> fields = new ArrayList<>();
-        fields.add(ofNullable(typeOfAbuse.get().getDisplayedValue()));
+        fields.add(ofNullable(domesticAbuseBehaviours.getTypeOfAbuse().getDisplayedValue()));
         fields.add(abuseNatureDescription);
         fields.add(behavioursStartDateAndLength);
         fields.add(behavioursApplicantSoughtHelp);
@@ -343,14 +334,13 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
     public boolean validateChildAbuseBehaviours(ChildAbuseBehaviours childAbuseBehaviours) {
 
-        Optional<TypeOfAbuseEnum> typeOfAbuse = ofNullable(childAbuseBehaviours.getTypeOfAbuse());
         Optional<YesOrNo> allChildrenAreRisk = ofNullable(childAbuseBehaviours.getAllChildrenAreRisk());
         Optional<String> whichChildrenAreRisk = ofNullable(childAbuseBehaviours.getWhichChildrenAreRisk());
         Optional<String> abuseNatureDescription = ofNullable(childAbuseBehaviours.getNewAbuseNatureDescription());
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(childAbuseBehaviours.getNewBehavioursApplicantHelpSoughtWho());
 
         List<Optional<?>> fields = new ArrayList<>();
-        fields.add(ofNullable(typeOfAbuse.get().getDisplayedValue()));
+        fields.add(ofNullable(childAbuseBehaviours.getTypeOfAbuse().getDisplayedValue()));
         if (allChildrenAreRisk.isPresent()
               && allChildrenAreRisk.get().equals(No)) {
             fields.add(whichChildrenAreRisk);
