@@ -212,13 +212,9 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
             if (Yes.equals(childAbduction.get())) {
                 abductionSectionCompleted = childAbductionReasons.isPresent();
 
-                boolean previousAbductionThreatsCompleted = previousAbductionThreats.isPresent();
-
                 previousThreatSectionComplete = isPreviousThreatSectionComplete(
                     previousAbductionThreats,
-                    previousAbductionThreatsDetails,
-                    previousThreatSectionComplete,
-                    previousAbductionThreatsCompleted
+                    previousAbductionThreatsDetails
                 );
                 if (abductionChildHasPassport.isPresent() && Yes.equals(abductionChildHasPassport.get())) {
                     Optional<List<AbductionChildPassportPossessionEnum>> abductionChildPassportPosessionList =
@@ -226,23 +222,17 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                     Optional<String> abductionChildPassportPosessionOtherDetail = ofNullable(caseData.getAllegationOfHarmRevised()
                                                                                                      .getChildPassportDetails()
                                                                                                      .getNewChildPassportPossessionOtherDetails());
-                    boolean abductionChildPassportPosessionCompleted = abductionChildPassportPosessionList.isPresent();
-
                     passportPossessionCompleted = isPassportPossessionCompleted(
                         abductionChildPassportPosessionList,
-                        abductionChildPassportPosessionOtherDetail,
-                        passportPossessionCompleted,
-                        abductionChildPassportPosessionCompleted
+                        abductionChildPassportPosessionOtherDetail
                     );
+                } else {
+                    passportPossessionCompleted = true;
                 }
-                boolean
-                    abductionPreviousPoliceInvolvementCompleted = abductionPreviousPoliceInvolvement.isPresent();
 
                 policeCompleted = isPoliceInvolvementCompleted(
                     abductionPreviousPoliceInvolvement,
-                    abductionPreviousPoliceInvolvementDetails,
-                    policeCompleted,
-                    abductionPreviousPoliceInvolvementCompleted
+                    abductionPreviousPoliceInvolvementDetails
                 );
 
             } else {
@@ -252,6 +242,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                 && previousThreatSectionComplete
                 && passportCompleted
                 && hasPassportCompleted
+                && passportPossessionCompleted
                 && policeCompleted;
 
         } else {
@@ -261,11 +252,9 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
     private boolean isPoliceInvolvementCompleted(
         Optional<YesOrNo> abductionPreviousPoliceInvolvement,
-        Optional<String> abductionPreviousPoliceInvolvementDetails,
-        boolean policeCompleted,
-        boolean abductionPreviousPoliceInvolvementCompleted) {
-
-        if (abductionPreviousPoliceInvolvementCompleted) {
+        Optional<String> abductionPreviousPoliceInvolvementDetails) {
+        boolean policeCompleted = true;
+        if (abductionPreviousPoliceInvolvement.isPresent()) {
             if (!abductionPreviousPoliceInvolvement.isEmpty()
                 && Yes.equals(abductionPreviousPoliceInvolvement.get())) {
                 policeCompleted = abductionPreviousPoliceInvolvementDetails.isPresent();
@@ -278,10 +267,9 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
     private boolean isPassportPossessionCompleted(
         Optional<List<AbductionChildPassportPossessionEnum>> abductionChildPassportPossession,
-        Optional<String> abductionChildPassportPossessionOtherDetail,
-        boolean passportPossessionCompleted,
-        boolean abductionChildPassportPossessionCompleted) {
-        if (abductionChildPassportPossessionCompleted) {
+        Optional<String> abductionChildPassportPossessionOtherDetail) {
+        boolean passportPossessionCompleted = false;
+        if (abductionChildPassportPossession.isPresent()) {
             if (!abductionChildPassportPossession.isEmpty()
                 && abductionChildPassportPossession.get().contains(other)) {
                 passportPossessionCompleted = abductionChildPassportPossessionOtherDetail.isPresent();
@@ -294,11 +282,9 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
     private boolean isPreviousThreatSectionComplete(
         Optional<YesOrNo> previousAbductionThreats,
-        Optional<String> previousAbductionThreatsDetails,
-        boolean previousThreatSectionComplete,
-        boolean previousAbductionThreatsCompleted) {
-
-        if (previousAbductionThreatsCompleted) {
+        Optional<String> previousAbductionThreatsDetails) {
+        boolean previousThreatSectionComplete = true;
+        if (previousAbductionThreats.isPresent() && Yes.equals(previousAbductionThreats)) {
             if (!previousAbductionThreats.isEmpty()
                 && Yes.equals(previousAbductionThreats.get())) {
                 previousThreatSectionComplete = previousAbductionThreatsDetails.isPresent();
