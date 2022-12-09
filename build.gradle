@@ -268,9 +268,9 @@ dependencies {
   implementation group: 'com.github.kirviq', name: 'dumbster', version: versions.dumbster
   implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: versions.puppyCrawl
 
-  implementation( group: 'commons-net', name: 'commons-net'){
+  implementation( group: 'commons-cli', name: 'commons-cli'){
     version{
-      strictly "[3.9.0]"
+      strictly "[1.4]"
     }
   }
   implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
