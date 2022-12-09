@@ -180,7 +180,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
     public boolean validateAbductionSection(CaseData caseData) {
 
-
         Optional<YesOrNo> childAbduction =
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmChildAbductionYesNo());
         Optional<String> childAbductionReasons =
@@ -284,7 +283,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         Optional<YesOrNo> previousAbductionThreats,
         Optional<String> previousAbductionThreatsDetails) {
         boolean previousThreatSectionComplete = true;
-        if (previousAbductionThreats.isPresent() && Yes.equals(previousAbductionThreats)) {
+        if (previousAbductionThreats.isPresent() && Yes.equals(previousAbductionThreats.get())) {
             if (!previousAbductionThreats.isEmpty()
                 && Yes.equals(previousAbductionThreats.get())) {
                 previousThreatSectionComplete = previousAbductionThreatsDetails.isPresent();
