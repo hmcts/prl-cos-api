@@ -20,7 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum.bothLiveWithAndSpendTimeWithOrder;
 import static uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum.liveWithOrder;
+import static uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum.spendTimeWithOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
@@ -279,6 +281,150 @@ public class CaseDataMapperTest {
 
         //Then
         assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testCaseDataMapperForHearingWithoutNotice() throws IOException {
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+            .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
+                                 .build()).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testCaseDataMapperForHearingWithoutNoticeElse() throws IOException {
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+            .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn1.json"))
+                                 .build()).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testCaseDataMapperReasonableAdjustmentsExcludingNeedInterpreter() throws IOException {
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+            .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra2.json"))
+            .build()).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testCaseDataMapperReasonableAdjustmentsDisabilityRequirementsNoSupport() throws IOException {
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+            .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra2.json"))
+            .build()).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testCaseDataMapperReasonableAdjustmentWelshNeededElse() throws IOException {
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+            .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra3.json"))
+            .build()).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testCaseDataMapperForOrderTypeBothLiveWithAndSpendTimeWithOrder() throws IOException {
+
+        //Given
+        CaseData caseData1 = caseData
+            .toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+            .c100RebuildTypeOfOrder(TestUtil.readFileFrom("classpath:c100-rebuild/too.json"))
+            .build()).build();
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+        assertEquals(CASE_TYPE, updatedCaseData.getCaseTypeOfApplication());
+        assertEquals(List.of(childArrangementsOrder, prohibitedStepsOrder, specificIssueOrder),
+                     updatedCaseData.getOrdersApplyingFor());
+        assertEquals(bothLiveWithAndSpendTimeWithOrder, updatedCaseData.getTypeOfChildArrangementsOrder());
+    }
+
+    @Test
+    public void testCaseDataMapperForOrderTypeNatureOfOrderShortStatement() throws IOException {
+
+        //Given
+        CaseData caseData1 = caseData
+            .toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+            .c100RebuildTypeOfOrder(TestUtil.readFileFrom("classpath:c100-rebuild/too2.json"))
+            .build()).build();
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+        assertEquals(CASE_TYPE, updatedCaseData.getCaseTypeOfApplication());
+        assertEquals(List.of(childArrangementsOrder, prohibitedStepsOrder, specificIssueOrder),
+                     updatedCaseData.getOrdersApplyingFor());
+        assertEquals(spendTimeWithOrder, updatedCaseData.getTypeOfChildArrangementsOrder());
+    }
+
+    @Test
+    public void testCaseDataMapperForChildDetailOrdersAppliedForAll() throws IOException {
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+            .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
+                                 .build()).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+        assertNotNull(updatedCaseData.getChildren());
+    }
+
+    @Test
+    public void testCaseDataMapperConsentOrderDetails() throws IOException {
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+            .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
+            .build()).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+        assertNotNull(updatedCaseData.getConsentOrder());
+        assertNotNull(updatedCaseData.getDraftConsentOrderFile());
     }
 
 }
