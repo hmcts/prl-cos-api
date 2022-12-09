@@ -55,6 +55,26 @@
     <cve>CVE-2021-37533</cve>
   </suppress>
   <suppress>
+    <notes><![CDATA[file name: commons-beanutils-1.9.4.jar]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.apache\.commons/commons\-beanutils@.*$</packageUrl>
+    <cve>CVE-2021-37533</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[file name: commons-cli-1.1.jar]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.apache\.commons/commons\-cli@.*$</packageUrl>
+    <cve>CVE-2021-37533</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[file name: commons-codec-1.15.jar]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.apache\.commons/commons\-codec@.*$</packageUrl>
+    <cve>CVE-2021-37533</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[file name: commons-collections-3.2.2.jar]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.apache\.commons/commons\-collections@.*$</packageUrl>
+    <cve>CVE-2021-37533</cve>
+  </suppress>
+  <suppress>
     <notes><![CDATA[
       jackson-databind-2.13.3.jar ]]></notes>
     <cve>CVE-2022-42003</cve>
