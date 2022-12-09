@@ -16,7 +16,8 @@ public class AllegationOfHarmRevisedGeneratorTest {
     @Test
     public void testGenerate() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
-                                                         .allegationOfHarmRevised(uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised.builder()
+                                    .allegationOfHarmRevised(
+                                        uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised.builder()
                                                                                .newAllegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
                                                                                .newAllegationsOfHarmChildAbductionYesNo(YesOrNo.Yes)
                                                                                .newAllegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
@@ -24,10 +25,9 @@ public class AllegationOfHarmRevisedGeneratorTest {
                                                                                .newAllegationsOfHarmSubstanceAbuseYesNo(YesOrNo.Yes)
                                                                                .build())
                                                              .build());
-
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()
-                                         .allegationOfHarmRevised(AllegationOfHarmRevised.builder().
-                                                                      typesOfHarmRevised("Domestic abuse, child abduction, "
+                                         .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                              .typesOfHarmRevised("Domestic abuse, child abduction, "
                                                                                 + "child abuse, drugs,"
                                                                                 + " alcohol or substance abuse, safety "
                                                                                 + "or welfare concerns")
@@ -43,8 +43,8 @@ public class AllegationOfHarmRevisedGeneratorTest {
                                                 .builder().build()).build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()
-                                              .allegationOfHarmRevised(AllegationOfHarmRevised.builder().
-                                                                           typesOfHarmRevised("No Allegations of harm")
+                                              .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                                                           .typesOfHarmRevised("No Allegations of harm")
                                                                     .build())
                                               .build());
     }
