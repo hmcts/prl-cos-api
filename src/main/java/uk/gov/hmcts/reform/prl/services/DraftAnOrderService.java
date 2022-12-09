@@ -450,6 +450,7 @@ public class DraftAnOrderService {
                                   .build()).build();
         } else {
             caseData = caseData.toBuilder()
+                .appointedGuardianName(caseData.getAppointedGuardianName())
                 .manageOrders(ManageOrders.builder()
                                   .parentName(caseData.getManageOrders().getParentName())
                                   .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
