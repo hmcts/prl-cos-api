@@ -26,7 +26,7 @@ def versions = [
   ccdClient                    : '4.7.6',
   commonsBeanUtils             : '1.9.4',
   commonsIo                    : '2.7',
-  commonsLang3                 : '3.11',
+  commonsLang3                 : '3.9',
   commonsMath3                 : '3.6.1',
   dumbster                     : '1.7.1',
   //feignHttpClient              : '10.3.0',
