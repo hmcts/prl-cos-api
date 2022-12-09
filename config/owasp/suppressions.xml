@@ -39,4 +39,8 @@
       jackson-databind-2.13.3.jar ]]></notes>
     <cve>CVE-2022-38752</cve>
   </suppress>
+  <suppress>
+  <packageUrl regex="true">^pkg:maven/org.apache.commons/commons-[a-z1-9]+@[^\n]+</packageUrl>
+  	    <cve>CVE-2021-37533</cve>
+  </suppress>
 </suppressions>

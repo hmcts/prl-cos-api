@@ -141,8 +141,6 @@ allprojects {
       // CVE-2019-10086
       dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
 
-      dependency group: 'commons-net', name: 'commons-net', version: '3.9.0'
-
 
       // CVE-2020-9484
       dependencySet(group: 'org.apache.tomcat.embed', version: versions.tomcat) {
