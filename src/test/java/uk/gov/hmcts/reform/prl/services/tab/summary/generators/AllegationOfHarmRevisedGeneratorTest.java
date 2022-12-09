@@ -35,6 +35,7 @@ public class AllegationOfHarmRevisedGeneratorTest {
                                          .build());
     }
 
+
     @Test
     public void testNoTypeOfHarm() {
         CaseSummary caseSummary = generator
