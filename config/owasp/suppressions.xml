@@ -14,13 +14,6 @@
       spring-core-5.3.20.jar ]]></notes>
         <cve>CVE-2016-1000027</cve>
     </suppress>
-  <suppress base="true">
-    <notes><![CDATA[
-      FP per issue #5121 - fix for commons
-      ]]></notes>
-     <packageUrl regex="true">^(?!pkg:maven/commons-net/commons-net).*$</packageUrl>
-     <cpe>cpe:/a:apache:commons_net</cpe>
-  </suppress>
     <suppress>
         <notes><![CDATA[
       snakeyaml_project:snakeyaml ]]></notes>
@@ -45,5 +38,10 @@
     <notes><![CDATA[
       jackson-databind-2.13.3.jar ]]></notes>
     <cve>CVE-2022-38752</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      commons_net:3.8.0.jar ]]></notes>
+    <cve>CVE-2021-37533</cve>
   </suppress>
 </suppressions>
