@@ -149,7 +149,7 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-demo.service.core-compute-demo.internal
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:W7supXKMJgcEWKBS}
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
     url: https://idam-api.demo.platform.hmcts.net
   client:
@@ -354,7 +354,7 @@ springdoc:
 postcodelookup:
   api:
     url: https://api.os.uk/search/places/v1
-    key: ${POST_CODE_LOOKUP_KEY:TcDHoU6gWt4GaAd6JU0TSendKdGHhaGT}
+    key: ${POST_CODE_LOOKUP_KEY:xxxxxx}
 cafcaas:
   search-case-type-id: PRLAPPS
   caseTypeOfApplicationList: C100
@@ -365,4 +365,4 @@ ccd:
     boost: 2.0
 fis_hearing:
   api:
-    url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
+    url: ${HEARING_API_BASEURL:http://fis-hmc-api-demo.service.core-compute-demo.internal}
