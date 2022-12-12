@@ -315,7 +315,7 @@ public class DraftAnOrderService {
         log.info("parent Name " + selectedOrder.getParentName());
         caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
         caseDataMap.put("parentName", selectedOrder.getParentName());
-        caseDataMap.put("appointedGuardianFullName", selectedOrder.getAppointedGuardianName());
+        caseDataMap.put("appointedGuardianName", selectedOrder.getAppointedGuardianName());
         return caseDataMap;
     }
 
