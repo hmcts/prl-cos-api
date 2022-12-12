@@ -135,6 +135,7 @@ public class CallbackControllerTest {
     @Mock
     private WorkflowResult workflowResult;
 
+
     @Mock
     private CaseSummaryTabService caseSummaryTab;
 
@@ -1025,6 +1026,49 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .copyManageDocsForTabs(authToken, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("furtherEvidences"));
+    }
+
+    @Test
+    public void testPopulateApplicantToChildRelationWithData() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("Abc")
+                .lastName("Xyz")
+                .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+        Child child = Child.builder()
+                .firstName("Test")
+                .lastName("Name")
+                .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        Map<String, Object> caseData = new HashMap<>();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(1L)
+                        .data(caseData).build()).build();
+        CaseData caseData1 = CaseData.builder().applicants(applicantList).children(listOfChildren).build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+                .prePopulateApplicantToChildRelation(authToken, callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantRelationsToChild"));
+    }
+
+    @Test
+    public void testDeleteApplicantToChildRelationWithData() {
+        Map<String, Object> caseData = new HashMap<>();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(1L)
+                        .data(caseData).build()).build();
+        CaseData caseData1 = CaseData.builder().build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+                .deleteApplicantToChildRelation(authToken, callbackRequest);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantRelationsToChild"));
     }
 
     @Test
