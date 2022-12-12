@@ -30,8 +30,6 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1Details;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder2;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder2Details;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
@@ -70,7 +68,7 @@ public class BundlingControllerTest {
     private BundleCreateResponse bundleCreateResponse;
     private CaseDetails caseDetails;
 
-    private Map<String,Object> caseData;
+    private Map<String, Object> caseData;
     @Mock
     private AboutToStartOrSubmitCallbackResponse response;
 
@@ -82,24 +80,31 @@ public class BundlingControllerTest {
 
         List<BundleDocument> bundleDocuments = new ArrayList<>();
         bundleDocuments.add(BundleDocument.builder().value(
-            BundleDocumentDetails.builder().name("CaseDocuments").description("Case Documents").sortIndex(1)
+            BundleDocumentDetails.builder().name("MiamCertificate").description("MiamCertificate").sortIndex(1)
                 .sourceDocument(DocumentLink.builder().build()).build()).build());
-        List<BundleNestedSubfolder2> bundleNestedSubfolders2 = new ArrayList<>();
+        bundleDocuments.add(BundleDocument.builder().value(BundleDocumentDetails.builder().build()).build());
+
         List<BundleNestedSubfolder1> bundleNestedSubfolders1 = new ArrayList<>();
-        bundleNestedSubfolders2.add(BundleNestedSubfolder2.builder()
-            .value(BundleNestedSubfolder2Details.builder().documents(bundleDocuments).build()).build());
         bundleNestedSubfolders1.add(BundleNestedSubfolder1.builder()
-            .value(BundleNestedSubfolder1Details.builder().documents(bundleDocuments).build()).build());
+            .value(BundleNestedSubfolder1Details.builder().name("MiamCertificate").documents(bundleDocuments).build()).build());
+        List<BundleNestedSubfolder1> bundleNestedSubfolders2 = new ArrayList<>();
+        bundleNestedSubfolders2.add(BundleNestedSubfolder1.builder()
+            .value(BundleNestedSubfolder1Details.builder().build()).build());
         List<BundleFolder> bundleFolders = new ArrayList<>();
         List<BundleSubfolder> bundleSubfolders = new ArrayList<>();
         bundleSubfolders.add(BundleSubfolder.builder()
-            .value(BundleSubfolderDetails.builder().documents(bundleDocuments).folders(bundleNestedSubfolders1).build()).build());
-        bundleFolders.add(BundleFolder.builder().value(BundleFolderDetails.builder().folders(bundleSubfolders).build()).build());
+            .value(BundleSubfolderDetails.builder().name("Applicant documents").documents(bundleDocuments)
+                .folders(bundleNestedSubfolders1).build()).build());
+        bundleSubfolders.add(BundleSubfolder.builder()
+            .value(BundleSubfolderDetails.builder().documents(bundleDocuments)
+                .folders(bundleNestedSubfolders2).build()).build());
+        bundleFolders.add(BundleFolder.builder().value(BundleFolderDetails.builder().name("Applications and Orders")
+            .folders(bundleSubfolders).build()).build());
         List<Bundle> bundleList = new ArrayList<>();
         bundleList.add(Bundle.builder().value(BundleDetails.builder().folders(bundleFolders).build()).build());
         bundleCreateResponse = BundleCreateResponse.builder().data(BundleData.builder().id("334").caseBundles(bundleList).build()).build();
         caseData = new HashMap<>();
-        caseData.put("bundleInformation",bundleCreateResponse.getData().getCaseBundles());
+        caseData.put("bundleInformation", bundleCreateResponse.getData().getCaseBundles());
         caseDetails = CaseDetails.builder().data(caseData).state(State.CASE_HEARING.getValue())
             .id(123488888L).createdDate(LocalDateTime.now()).lastModified(LocalDateTime.now()).build();
         List<FurtherEvidence> furtherEvidences = new ArrayList<>();
@@ -161,13 +166,13 @@ public class BundlingControllerTest {
     @Test
     public void testCreateBundle() throws Exception {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
-        when(bundlingService.createBundleServiceRequest(any(CaseData.class),anyString(),anyString())).thenReturn(bundleCreateResponse);
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString())).thenReturn(bundleCreateResponse);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
-        response = bundlingController.createBundle(authToken,"serviceAuth",callbackRequest);
+        response = bundlingController.createBundle(authToken, "serviceAuth", callbackRequest);
         BundlingInformation bundleInformation = (BundlingInformation) response.getData().get("bundleInformation");
         List<Bundle> responseCaseBundles = bundleInformation.getCaseBundles();
-        assertEquals("CaseDocuments",
+        assertEquals("MiamCertificate",
             responseCaseBundles.get(0).getValue().getFolders().get(0)
-                .getValue().getFolders().get(0).getValue().getDocuments().get(0).getValue().getName());
+                .getValue().getFolders().get(0).getValue().getFolders().get(0).getValue().getDocuments().get(0).getValue().getName());
     }
 }
