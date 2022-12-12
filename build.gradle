@@ -536,9 +536,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/exception/*',
   '**uk/gov/hmcts/reform/prl/enums/**/*',
   '**uk/gov/hmcts/reform/prl/config/**/*',
-  'src/main/java/uk/gov/hmcts/reform/prl/services/citizen/CitizenCoreCaseDataService.java',
-  'src/main/java/uk/gov/hmcts/reform/prl/services/PaymentRequestService.java',
-  'src/main/java/uk/gov/hmcts/reform/prl/services/CourtFinderService.java'
+  '**uk/gov/hmcts/reform/prl/utils/*',
+  '**uk/gov/hmcts/reform/prl/Application.*'
 ]
 
 sonarqube {
@@ -598,32 +597,5 @@ pact {
     pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
     tags = [System.getenv("PACT_BRANCH_NAME") ?:'Dev']
     version = project.pactVersion
-  }
-}
-
-task loadEnvSecrets() {
-  doLast {
-    if (!project.file('./.aat-env').exists()) {
-      new ByteArrayOutputStream().withStream { os ->
-        exec {
-          commandLine 'az', 'keyvault', 'secret', 'show', '--vault-name', 'prl-aat', '-o', 'tsv', '--query', 'value', '--name', 'prl-cos-cft-lib-local-config'
-          standardOutput = os
-        }
-        project.file('./.aat-env').write(new String(os.toString().replace('\n', '').decodeBase64(), java.nio.charset.StandardCharsets.UTF_8))
-      }
-    }
-  }
-}
-
-
-bootWithCCD {
-  dependsOn(loadEnvSecrets)
-  doFirst() {
-    project.file('./.aat-env').readLines().each() {
-      def index = it.indexOf("=")
-      def key = it.substring(0, index)
-      def value = it.substring(index + 1)
-      environment key, value
-    }
   }
 }
