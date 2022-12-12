@@ -121,7 +121,8 @@ public class BundleCreateRequestMapperTest {
         fl401UploadWitnessDocuments.add(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("witnessDoc.pdf").build());
 
         List<Document> fl401UploadSupportingDocuments = new ArrayList<>();
-        fl401UploadSupportingDocuments.add(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("supportingDoc.pdf").build());
+        fl401UploadSupportingDocuments.add(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("supportingDoc.pdf")
+            .build());
 
         CaseData c100CaseData = CaseData.builder()
             .id(123456789123L)
