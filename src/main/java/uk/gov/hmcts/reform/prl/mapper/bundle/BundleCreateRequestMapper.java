@@ -146,17 +146,18 @@ public class BundleCreateRequestMapper {
                 applications.add(mapBundlingRequestDocument(caseData.getC1ADocument(), BundlingDocGroupEnum.applicantC1AApplication));
             }
         }
-        List<BundlingRequestDocument> miamCertAndPreviousOrdersUploadedByCourtAdmin = mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences());
+        List<BundlingRequestDocument> miamCertAndPreviousOrdersUploadedByCourtAdmin =
+            mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences());
         if (miamCertAndPreviousOrdersUploadedByCourtAdmin.size() > 0) {
             applications.addAll(miamCertAndPreviousOrdersUploadedByCourtAdmin);
         }
         Document miamCertificateUpload = caseData.getMiamCertificationDocumentUpload();
         if (null != miamCertificateUpload) {
-            applications.add(mapBundlingRequestDocument(miamCertificateUpload,BundlingDocGroupEnum.applicantMiamCertificate));
+            applications.add(mapBundlingRequestDocument(miamCertificateUpload, BundlingDocGroupEnum.applicantMiamCertificate));
         }
         Document miamCertificateUpload1 = caseData.getMiamCertificationDocumentUpload1();
         if (null != miamCertificateUpload1) {
-            applications.add(mapBundlingRequestDocument(miamCertificateUpload1,BundlingDocGroupEnum.applicantMiamCertificate));
+            applications.add(mapBundlingRequestDocument(miamCertificateUpload1, BundlingDocGroupEnum.applicantMiamCertificate));
         }
         List<BundlingRequestDocument> citizenUploadedC7Documents = mapC7DocumentsFromCaseData(caseData.getCitizenResponseC7DocumentList());
         if (citizenUploadedC7Documents.size() > 0) {
