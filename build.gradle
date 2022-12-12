@@ -25,7 +25,7 @@ def versions = [
   bcpkixJdk15on                : '1.64',
   ccdClient                    : '4.7.6',
   commonsBeanUtils             : '1.9.4',
-  commonsIo                    : '2.7',
+  commonsIo                    : '2.11.0',
   commonsLang3                 : '3.9',
   commonsMath3                 : '3.6.1',
   dumbster                     : '1.7.1',
