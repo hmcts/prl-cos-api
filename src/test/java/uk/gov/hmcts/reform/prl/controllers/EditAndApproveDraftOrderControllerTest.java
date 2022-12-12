@@ -22,7 +22,10 @@ import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -54,7 +57,7 @@ public class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    public void shouldGenerateDraftOrderDropdown(){
+    public void shouldGenerateDraftOrderDropdown() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -81,6 +84,13 @@ public class EditAndApproveDraftOrderControllerTest {
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+            draftOrderCollection,
+            null,
+            DraftOrder::getLabelForOrdersDynamicList
+        ));
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -89,12 +99,6 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection())).thenReturn(caseDataMap);
@@ -129,13 +133,6 @@ public class EditAndApproveDraftOrderControllerTest {
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
@@ -143,6 +140,14 @@ public class EditAndApproveDraftOrderControllerTest {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection())).thenReturn(caseDataMap);
@@ -177,6 +182,14 @@ public class EditAndApproveDraftOrderControllerTest {
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+            draftOrderCollection,
+            null,
+            DraftOrder::getLabelForOrdersDynamicList
+        ));
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("adminEditAndApproveAnOrder")
@@ -185,13 +198,6 @@ public class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection())).thenReturn(caseDataMap);
@@ -227,6 +233,14 @@ public class EditAndApproveDraftOrderControllerTest {
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+            draftOrderCollection,
+            null,
+            DraftOrder::getLabelForOrdersDynamicList
+        ));
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("test")
@@ -236,13 +250,6 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
-
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection())).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
@@ -251,7 +258,7 @@ public class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    public void shouldPopulateJudgeOrAdminDraftOrderCustomFields() throws Exception{
+    public void shouldPopulateJudgeOrAdminDraftOrderCustomFields() throws Exception {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -277,6 +284,14 @@ public class EditAndApproveDraftOrderControllerTest {
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+            draftOrderCollection,
+            null,
+            DraftOrder::getLabelForOrdersDynamicList
+        ));
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("test")
@@ -285,13 +300,6 @@ public class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection())).thenReturn(caseDataMap);
@@ -302,7 +310,7 @@ public class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    public void  shouldPopulateCommonFields() throws Exception{
+    public void  shouldPopulateCommonFields() throws Exception {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -328,6 +336,14 @@ public class EditAndApproveDraftOrderControllerTest {
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+            draftOrderCollection,
+            null,
+            DraftOrder::getLabelForOrdersDynamicList
+        ));
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("test")
@@ -336,13 +352,6 @@ public class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.populateCommonDraftOrderFields(caseData)).thenReturn(caseDataMap);
