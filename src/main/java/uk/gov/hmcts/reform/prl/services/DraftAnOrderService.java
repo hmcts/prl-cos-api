@@ -215,20 +215,20 @@ public class DraftAnOrderService {
 
     }
 
-    private Document getGeneratedDocument(GeneratedDocumentInfo generatedDocumentInfo,CaseData caseData,Map<String, String> fieldMap ) {
-            DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
-            if(language.isGenEng()) {
-                return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
+    private Document getGeneratedDocument(GeneratedDocumentInfo generatedDocumentInfo,CaseData caseData,Map<String, String> fieldMap) {
+        DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
+        if (language.isGenEng()) {
+            return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                     .documentHash(generatedDocumentInfo.getHashToken())
                     .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build();
-            } else if(language.isGenWelsh()) {
-                return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
+        } else if (language.isGenWelsh()) {
+            return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                     .documentHash(generatedDocumentInfo.getHashToken())
                     .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build();
-            }
-            return null;
+        }
+        return null;
     }
 
     private String getAllRecipients(CaseData caseData) {
