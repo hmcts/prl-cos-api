@@ -552,6 +552,7 @@ public class CaseData implements MappableObject {
     private LocalDate approvalDate;
     private Document appointmentOfGuardian;
     private Document previewOrderDoc;
+    private Document previewOrderDocWelsh;
 
     private final ManageOrdersOptionsEnum manageOrdersOptions;
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
