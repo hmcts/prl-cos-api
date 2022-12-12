@@ -224,7 +224,7 @@ public class DraftAnOrderService {
                     .documentFileName(!isWelsh ? fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)
                                           : fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build();
         }
-        return Document.builder().build();
+        return null;
     }
 
     private String getAllRecipients(CaseData caseData) {
