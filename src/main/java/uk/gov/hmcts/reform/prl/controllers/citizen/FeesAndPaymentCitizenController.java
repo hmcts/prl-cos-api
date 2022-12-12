@@ -19,9 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
@@ -119,25 +116,11 @@ public class FeesAndPaymentCitizenController {
         if (!isAuthorized(authorization, serviceAuthorization)) {
             throw (new RuntimeException("Invalid Client"));
         }
-        log.info("Payment Reference: {} for the Case id :{}", paymentReference,caseId);
+        log.info("Retrieving payment status for the Case id :{}", caseId);
         return paymentRequestService.fetchPaymentStatus(authorization,paymentReference);
 
 
 
-    }
-
-    private CallbackRequest buildCallBackRequest(CreatePaymentRequest createPaymentRequest) {
-        return CallbackRequest
-                .builder()
-                .caseDetails(CaseDetails
-                        .builder()
-                        .caseId(createPaymentRequest.getCaseId())
-                                .caseData(CaseData
-                                .builder()
-                                .id(Long.parseLong(createPaymentRequest.getCaseId()))
-                                .applicantCaseName(createPaymentRequest.getApplicantCaseName())
-                                .build()).build())
-                .build();
     }
 
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
