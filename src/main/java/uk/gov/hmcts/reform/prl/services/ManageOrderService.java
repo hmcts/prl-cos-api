@@ -728,6 +728,8 @@ public class ManageOrderService {
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
 
+        } else {
+            caseDataUpdated.put("previewOrderDoc", null);
         }
         if (documentLanguage.isGenWelsh()) {
             caseDataUpdated.put("isWelshDocGen", Yes.toString());
@@ -742,6 +744,8 @@ public class ManageOrderService {
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
 
+        } else {
+            caseDataUpdated.put("previewOrderDocWelsh", null);
         }
         return caseDataUpdated;
     }
