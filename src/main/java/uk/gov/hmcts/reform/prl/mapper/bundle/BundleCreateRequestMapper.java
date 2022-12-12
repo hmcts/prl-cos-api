@@ -55,7 +55,7 @@ public class BundleCreateRequestMapper {
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, String bundleConfigFileName) {
         BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder()
             .caseDetails(BundlingCaseDetails.builder()
-                             .id(String.valueOf(caseData.getId()))
+                             .id(caseData.getApplicantName())
                              .caseData(mapCaseData(caseData,
                                                    bundleConfigFileName))
                              .build())
@@ -146,9 +146,17 @@ public class BundleCreateRequestMapper {
                 applications.add(mapBundlingRequestDocument(caseData.getC1ADocument(), BundlingDocGroupEnum.applicantC1AApplication));
             }
         }
-        List<BundlingRequestDocument> documentsUploadedByCourtAdmin = mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences());
-        if (documentsUploadedByCourtAdmin.size() > 0) {
-            applications.addAll(documentsUploadedByCourtAdmin);
+        List<BundlingRequestDocument> miamCertAndPreviousOrdersUploadedByCourtAdmin = mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences());
+        if (miamCertAndPreviousOrdersUploadedByCourtAdmin.size() > 0) {
+            applications.addAll(miamCertAndPreviousOrdersUploadedByCourtAdmin);
+        }
+        Document miamCertificateUpload = caseData.getMiamCertificationDocumentUpload();
+        if (null != miamCertificateUpload) {
+            applications.add(mapBundlingRequestDocument(miamCertificateUpload,BundlingDocGroupEnum.applicantMiamCertificate));
+        }
+        Document miamCertificateUpload1 = caseData.getMiamCertificationDocumentUpload1();
+        if (null != miamCertificateUpload1) {
+            applications.add(mapBundlingRequestDocument(miamCertificateUpload1,BundlingDocGroupEnum.applicantMiamCertificate));
         }
         List<BundlingRequestDocument> citizenUploadedC7Documents = mapC7DocumentsFromCaseData(caseData.getCitizenResponseC7DocumentList());
         if (citizenUploadedC7Documents.size() > 0) {
