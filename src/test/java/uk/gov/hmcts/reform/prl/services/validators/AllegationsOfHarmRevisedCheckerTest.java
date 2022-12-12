@@ -290,10 +290,31 @@ public class AllegationsOfHarmRevisedCheckerTest {
                                   .newPreviousAbductionThreatsDetails("Details")
                                   .newAbductionPassportOfficeNotified(No)
                                   .newAbductionChildHasPassport(Yes)
-                                         .childPassportDetails(childPassportDetails)
-                                  .newAbductionPreviousPoliceInvolvement(No)
+                                  .childPassportDetails(childPassportDetails)
+                                  .newAbductionPreviousPoliceInvolvement(Yes)
+                                  .newAbductionPreviousPoliceInvolvementDetails("Test")
                                   .newAbductionPreviousPoliceInvolvementDetails("Details")
                                   .build())
+            .build();
+
+        assertTrue(allegationsOfHarmChecker.validateAbductionSection(caseData));
+    }
+
+
+    @Test
+    public void whenCaseDataPresentThenAbductionSectionReturnTrueWithNoPassport() {
+        CaseData caseData = CaseData.builder()
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                         .newAllegationsOfHarmChildAbductionYesNo(Yes)
+                                         .newChildAbductionReasons("testing")
+                                         .newPreviousAbductionThreats(Yes)
+                                         .newPreviousAbductionThreatsDetails("Details")
+                                         .newAbductionPassportOfficeNotified(No)
+                                         .newAbductionChildHasPassport(No)
+                                         .newAbductionPreviousPoliceInvolvement(Yes)
+                                         .newAbductionPreviousPoliceInvolvementDetails("Test")
+                                         .newAbductionPreviousPoliceInvolvementDetails("Details")
+                                         .build())
             .build();
 
         assertTrue(allegationsOfHarmChecker.validateAbductionSection(caseData));
@@ -587,4 +608,5 @@ public class AllegationsOfHarmRevisedCheckerTest {
         assertTrue(allegationsOfHarmChecker.validateFields(caseData));
 
     }
+
 }
