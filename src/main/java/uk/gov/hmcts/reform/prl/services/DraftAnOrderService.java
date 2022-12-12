@@ -105,6 +105,7 @@ public class DraftAnOrderService {
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
             .parentName(caseData.getManageOrders().getParentName())
+            .appointedGuardianName(caseData.getAppointedGuardianName())
             .build();
     }
 
@@ -325,6 +326,7 @@ public class DraftAnOrderService {
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
+        caseDataMap.put("appointedGuardianName", selectedOrder.getAppointedGuardianName());
         return caseDataMap;
     }
 
@@ -421,6 +423,7 @@ public class DraftAnOrderService {
             .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
             .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
             .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
+            .appointedGuardianName(caseData.getAppointedGuardianName())
             .build();
     }
 
@@ -465,6 +468,7 @@ public class DraftAnOrderService {
                                   .build()).build();
         } else {
             caseData = caseData.toBuilder()
+                .appointedGuardianName(caseData.getAppointedGuardianName())
                 .manageOrders(ManageOrders.builder()
                                   .parentName(caseData.getManageOrders().getParentName())
                                   .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
