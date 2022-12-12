@@ -195,15 +195,8 @@ public class DraftAnOrderService {
                            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
                            .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
-                           .orderDocument(
-                               Document.builder().documentUrl(generatedDocumentInfo.getUrl())
-                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                   .documentHash(generatedDocumentInfo.getHashToken())
-                                   .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
-                           .orderDocumentWelsh(Document.builder().documentUrl(generatedDocumentInfoWelsh.getUrl())
-                                            .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
-                                            .documentHash(generatedDocumentInfoWelsh.getHashToken())
-                                            .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build())
+                           .orderDocument(getGeneratedDocument(generatedDocumentInfo,caseData,fieldMap))
+                           .orderDocumentWelsh(getGeneratedDocument(generatedDocumentInfoWelsh,caseData,fieldMap))
                            .adminNotes(caseData.getCourtAdminNotes())
                            .dateCreated(draftOrder.getOtherDetails().getDateCreated())
                            .judgeNotes(draftOrder.getJudgeNotes())
@@ -222,6 +215,21 @@ public class DraftAnOrderService {
 
     }
 
+    private Document getGeneratedDocument(GeneratedDocumentInfo generatedDocumentInfo,CaseData caseData,Map<String, String> fieldMap ) {
+            DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
+            if(language.isGenEng()) {
+                return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedDocumentInfo.getHashToken())
+                    .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build();
+            } else if(language.isGenWelsh()) {
+                return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedDocumentInfo.getHashToken())
+                    .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build();
+            }
+            return null;
+    }
 
     private String getAllRecipients(CaseData caseData) {
         StringBuilder recipientsList = new StringBuilder();
