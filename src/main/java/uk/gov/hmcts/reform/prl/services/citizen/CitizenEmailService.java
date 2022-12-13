@@ -20,6 +20,8 @@ import static uk.gov.hmcts.reform.prl.services.pin.CaseInviteEmailService.CITIZE
 @RequiredArgsConstructor
 public class CitizenEmailService {
 
+    public static final String CITIZEN_DASHBOARD = "/dashboard";
+
     @Autowired
     EmailService emailService;
 
@@ -31,7 +33,7 @@ public class CitizenEmailService {
 
     public EmailTemplateVars buildCitizenCaseSubmissionEmail(UserDetails userDetails, String caseId) {
         return new CitizenCaseSubmissionEmail(String.valueOf(caseId),
-                                              citizenSignUpLink + CITIZEN_HOME, userDetails.getFullName()
+                                              citizenSignUpLink + CITIZEN_DASHBOARD, userDetails.getFullName()
         );
     }
 
