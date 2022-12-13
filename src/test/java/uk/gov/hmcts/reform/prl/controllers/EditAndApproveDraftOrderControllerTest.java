@@ -11,7 +11,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -28,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -80,7 +80,7 @@ public class EditAndApproveDraftOrderControllerTest {
                                     .documentFileName("c100DraftWelshFilename")
                                     .build())
             .draftOrderCollection(draftOrderCollection)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -101,7 +101,7 @@ public class EditAndApproveDraftOrderControllerTest {
 
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection())).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(), C100_CASE_TYPE)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.generateDraftOrderDropDown(callbackRequest);
         Assert.assertNotNull(response);
     }
@@ -129,7 +129,7 @@ public class EditAndApproveDraftOrderControllerTest {
                                     .documentFileName("c100DraftWelshFilename")
                                     .build())
             .draftOrderCollection(draftOrderCollection)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -150,7 +150,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection())).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(), C100_CASE_TYPE)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.populateJudgeOrAdminDraftOrder(callbackRequest);
         Assert.assertNotNull(response);
     }
@@ -178,7 +178,7 @@ public class EditAndApproveDraftOrderControllerTest {
                                     .documentFileName("c100DraftWelshFilename")
                                     .build())
             .draftOrderCollection(draftOrderCollection)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -200,7 +200,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection())).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(), C100_CASE_TYPE)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .prepareDraftOrderCollection("test",callbackRequest);
         Assert.assertNotNull(response);
@@ -229,7 +229,7 @@ public class EditAndApproveDraftOrderControllerTest {
                                     .documentFileName("c100DraftWelshFilename")
                                     .build())
             .draftOrderCollection(draftOrderCollection)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -251,7 +251,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection())).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(), C100_CASE_TYPE)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .prepareDraftOrderCollection("test",callbackRequest);
         Assert.assertNotNull(response);
@@ -280,7 +280,7 @@ public class EditAndApproveDraftOrderControllerTest {
                                     .documentFileName("c100DraftWelshFilename")
                                     .build())
             .draftOrderCollection(draftOrderCollection)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -302,7 +302,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection())).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(), C100_CASE_TYPE)).thenReturn(caseDataMap);
         when(manageOrderService.getCaseData("test", caseData)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateJudgeOrAdminDraftOrderCustomFields("test",callbackRequest);
@@ -332,7 +332,7 @@ public class EditAndApproveDraftOrderControllerTest {
                                     .documentFileName("c100DraftWelshFilename")
                                     .build())
             .draftOrderCollection(draftOrderCollection)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
