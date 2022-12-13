@@ -42,6 +42,19 @@ spring:
     import: "optional:configtree:/mnt/secrets/"
   application:
     name: Prl cos api
+  datasource:
+    url: jdbc:h2:mem:mydb
+    username: test
+    password:
+    driverClassName: org.h2.Driver
+  jpa:
+    spring.jpa.database-platform: org.hibernate.dialect.H2Dialect
+
+flyway:
+  url: jdbc:h2:mem:mydb
+  schemas: mydb
+  user: test
+  password:
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
 #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
