@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -21,4 +22,6 @@ public class BundlingInformation {
     private String bundleConfiguration;
     @JsonProperty("multiBundleConfiguration")
     private List<MultiBundleConfig> multiBundleConfiguration;
+    @JsonProperty("bundleCreationDate")
+    private LocalDateTime bundleCreationDate;
 }

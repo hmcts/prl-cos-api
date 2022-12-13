@@ -117,6 +117,12 @@ public class BundleCreateRequestMapperTest {
         uploadedDocuments.add(UploadedDocuments.builder()
             .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("MediaScreenshots.pdf").build())
             .documentType(MAIL_SCREENSHOTS_MEDIA_FILES).isApplicant("Yes").build());
+        List<Document> fl401UploadWitnessDocuments = new ArrayList<>();
+        fl401UploadWitnessDocuments.add(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("witnessDoc.pdf").build());
+
+        List<Document> fl401UploadSupportingDocuments = new ArrayList<>();
+        fl401UploadSupportingDocuments.add(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("supportingDoc.pdf")
+            .build());
 
         CaseData c100CaseData = CaseData.builder()
             .id(123456789123L)
@@ -134,6 +140,11 @@ public class BundleCreateRequestMapperTest {
             .bundleInformation(BundlingInformation.builder().build())
             .citizenResponseC7DocumentList(ElementUtils.wrapElements(citizenC7uploadedDocs))
             .citizenUploadedDocumentList(ElementUtils.wrapElements(uploadedDocuments))
+            .miamCertificationDocumentUpload(Document.builder().documentFileName("maimCertDoc1").documentUrl("Url").build())
+            .miamCertificationDocumentUpload1(Document.builder().documentFileName("maimCertDoc2").documentUrl("Url").build())
+            .applicantName("ApplicantFirstNameAndLastName")
+            .fl401UploadWitnessDocuments(ElementUtils.wrapElements(fl401UploadWitnessDocuments))
+            .fl401UploadSupportDocuments(ElementUtils.wrapElements(fl401UploadSupportingDocuments))
             .build();
 
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI","sample.yaml");

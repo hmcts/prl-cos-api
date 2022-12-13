@@ -100,6 +100,10 @@ public enum BundlingDocGroupEnum {
     @JsonProperty("applicantStatementDocsUploadedByCourtAdmin")
     applicantStatementDocsUploadedByCourtAdmin("applicantStatementDocsUploadedByCourtAdmin", "applicantStatementDocsUploadedByCourtAdmin"),
 
+    @JsonProperty("applicantStatementSupportingEvidence")
+    applicantStatementSupportingEvidence("applicantStatementSupportingEvidence", "applicantStatementSupportingEvidence"),
+
+
     @JsonProperty("c7Documents")
     c7Documents("c7Documents", "c7Documents"),
 
