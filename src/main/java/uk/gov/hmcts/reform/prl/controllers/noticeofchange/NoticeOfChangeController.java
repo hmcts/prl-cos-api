@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.noc;
+package uk.gov.hmcts.reform.prl.controllers.noticeofchange;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
