@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -380,6 +381,23 @@ public class CaseDocumentController {
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
         return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization));
+    }
+
+    @GetMapping("/{documentId}/download")
+    @Operation(description = "Download a Citizen document from client document api")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Downloaded document successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad Request while deleting the document"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "404", description = "Document not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")})
+    public ResponseEntity<?> downloadDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                            @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+                                            @PathVariable("documentId") String documentId) {
+        if (!isAuthorized(authorisation, serviceAuthorization)) {
+            throw (new RuntimeException("Invalid Client"));
+        }
+        return ResponseEntity.ok(documentGenService.downloadDocument(authorisation, documentId));
     }
 }
 
