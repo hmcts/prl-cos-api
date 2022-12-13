@@ -8,6 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -60,6 +64,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_WELSH;
@@ -1244,6 +1249,29 @@ public class DocumentGenServiceTest {
         DocumentResponse response = documentGenService.deleteDocument(authToken, "TEST_DOCUMENT_ID");
         //Then
         assertEquals(documentResponse, response);
+    }
+
+    @Test
+    public void testDownloadDocument() throws Exception {
+        //Given
+        Resource expectedResource = new ClassPathResource("documents/document.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, OK);
+
+        when(uploadService.downloadDocument(authToken, "TEST_DOCUMENT_ID"
+        )).thenReturn(expectedResponse);
+
+        //When
+        ResponseEntity<?> response =  documentGenService.downloadDocument(authToken, "TEST_DOCUMENT_ID");
+        //Then
+        assertEquals(OK, response.getStatusCode());
+    }
+
+    @Test (expected = RuntimeException.class)
+    public void testDownloadDocumentThrowException() {
+        when(uploadService.downloadDocument(authToken, "TEST_DOCUMENT_ID"
+        )).thenThrow(RuntimeException.class);
+        documentGenService.downloadDocument(authToken, "TEST_DOCUMENT_ID");
     }
 
     @Test

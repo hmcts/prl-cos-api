@@ -61,6 +61,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_ID;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -355,7 +356,7 @@ public class CaseDocumentController {
                                                    @RequestParam("file") MultipartFile file) throws IOException {
 
         if (!isAuthorized(authorisation, serviceAuthorization)) {
-            throw (new RuntimeException("Invalid Client"));
+            throw (new RuntimeException(INVALID_CLIENT));
         }
         return ResponseEntity.ok(documentGenService.uploadDocument(authorisation, file));
     }
@@ -372,7 +373,7 @@ public class CaseDocumentController {
                                             @RequestHeader("ServiceAuthorization") String serviceAuthorization,
                                             @PathVariable("documentId") String documentId) {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
-            throw (new RuntimeException("Invalid Client"));
+            throw (new RuntimeException(INVALID_CLIENT));
         }
         return ResponseEntity.ok(documentGenService.deleteDocument(authorisation, documentId));
     }

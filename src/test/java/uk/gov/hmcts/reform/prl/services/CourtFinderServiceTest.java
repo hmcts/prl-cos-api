@@ -45,6 +45,9 @@ public class CourtFinderServiceTest {
     @Mock
     CourtFinderApi courtFinderApi;
 
+    @Mock
+    private CaseData caseDataMock;
+
     private Court londonCourt;
     private Court westLondonCourt;
     private Court newcastleCourt;
@@ -292,6 +295,11 @@ public class CourtFinderServiceTest {
             .c100RebuildData(c100RebuildData)
             .build();
         assertNull(courtFinderService.getNearestFamilyCourt(caseData));
+    }
+
+    @Test
+    public void givenValidCaseData_whenChildLivesWithRespondent_thenReturnNull_logsException() throws NotFoundException {
+        assertNull(courtFinderService.getNearestFamilyCourt(caseDataMock));
     }
 
     @Test
