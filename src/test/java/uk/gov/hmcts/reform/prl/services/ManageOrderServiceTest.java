@@ -9,8 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -51,6 +53,7 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageOrderServiceTest {
@@ -176,6 +179,15 @@ public class ManageOrderServiceTest {
                                  .firstName("app")
                                  .lastName("testLast")
                                  .build())
+            .manageOrders(ManageOrders.builder()
+                              .recitalsOrPreamble("test")
+                              .isCaseWithdrawn(YesOrNo.Yes)
+                              .isTheOrderByConsent(YesOrNo.Yes)
+                              .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
+                              .isOrderDrawnForCafcass(YesOrNo.Yes)
+                              .orderDirections("test")
+                              .furtherDirectionsIfRequired("test")
+                              .build())
             .respondentsFL401(PartyDetails.builder()
                                   .firstName("resp")
                                   .lastName("testLast")
@@ -185,9 +197,6 @@ public class ManageOrderServiceTest {
                                                .postCode("n145kk")
                                                .build())
                                   .build())
-            .manageOrders(ManageOrders.builder()
-                              .recitalsOrPreamble("test")
-                              .build())
             .build();
 
         FL404 expectedDetails = FL404.builder()
