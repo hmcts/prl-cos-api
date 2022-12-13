@@ -4,7 +4,7 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
+import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuseBehaviours;
@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum.other;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR_NEW;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -216,7 +215,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                     previousAbductionThreatsDetails
                 );
                 if (abductionChildHasPassport.isPresent() && Yes.equals(abductionChildHasPassport.get())) {
-                    Optional<List<AbductionChildPassportPossessionEnum>> abductionChildPassportPosessionList =
+                    Optional<List<NewPassportPossessionEnum>> abductionChildPassportPosessionList =
                             ofNullable(caseData.getAllegationOfHarmRevised().getChildPassportDetails().getNewChildPassportPossession());
                     Optional<String> abductionChildPassportPosessionOtherDetail = ofNullable(caseData.getAllegationOfHarmRevised()
                                                                                                      .getChildPassportDetails()
@@ -265,12 +264,12 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     }
 
     private boolean isPassportPossessionCompleted(
-        Optional<List<AbductionChildPassportPossessionEnum>> abductionChildPassportPossession,
+        Optional<List<NewPassportPossessionEnum>> abductionChildPassportPossession,
         Optional<String> abductionChildPassportPossessionOtherDetail) {
         boolean passportPossessionCompleted = false;
         if (abductionChildPassportPossession.isPresent()) {
             if (!abductionChildPassportPossession.isEmpty()
-                && abductionChildPassportPossession.get().contains(other)) {
+                && abductionChildPassportPossession.get().contains(NewPassportPossessionEnum.otherPerson)) {
                 passportPossessionCompleted = abductionChildPassportPossessionOtherDetail.isPresent();
             } else {
                 passportPossessionCompleted = true;

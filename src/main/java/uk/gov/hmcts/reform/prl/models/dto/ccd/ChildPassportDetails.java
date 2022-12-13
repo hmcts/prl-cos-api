@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
+import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 import java.util.List;
@@ -15,8 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ChildPassportDetails {
+
     @JsonProperty("newChildPassportPossession")
-    private List<AbductionChildPassportPossessionEnum> newChildPassportPossession;
+    private List<NewPassportPossessionEnum> newChildPassportPossession;
     private YesOrNo newChildHasMultiplePassports;
     private String newChildPassportPossessionOtherDetails;
 }
