@@ -148,12 +148,5 @@ public class UploadDocumentService {
         );
     }
 
-    public ResponseEntity<Resource> downloadDocument(String authorizationToken, String documentId) {
-        return caseDocumentClient.getDocumentBinary(
-            authorizationToken,
-            authTokenGenerator.generate(),
-            UUID.fromString(documentId)
-        );
-    }
 
 }
