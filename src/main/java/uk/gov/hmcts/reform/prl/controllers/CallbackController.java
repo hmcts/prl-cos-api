@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -238,6 +239,13 @@ public class CallbackController {
         // updating Summary tab to update case status
         caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         caseDataUpdated.putAll(map);
+
+        if (null != caseData.getCaseCreatedBy() && caseData.getCaseCreatedBy().equals(CaseCreatedBy.CITIZEN)) {
+            // updating Summary tab to update case status
+            caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+            caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+            caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
+        }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
