@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.prl.rpa.mappers;
 
 
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
+import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
@@ -114,7 +114,7 @@ public class AllegationsOfHarmRevisedMapper {
                     .add("newChildHasMultiplePassports", CommonUtils.getYesOrNoValue(childPassportDetails.getNewChildHasMultiplePassports()))
                     .add("newChildPassportPossessionOtherDetails", childPassportDetails.getNewChildPassportPossessionOtherDetails())
                     .add("newChildPassportPossession", childPassportDetails.getNewChildPassportPossession().stream()
-                            .map(AbductionChildPassportPossessionEnum::getDisplayedValue).collect(Collectors.joining(COMMA_SEPARATOR))).build();
+                            .map(NewPassportPossessionEnum::getDisplayedValue).collect(Collectors.joining(COMMA_SEPARATOR))).build();
         }
         return JsonValue.EMPTY_JSON_OBJECT;
     }

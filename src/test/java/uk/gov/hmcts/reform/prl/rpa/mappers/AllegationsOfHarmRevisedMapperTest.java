@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
+import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -84,7 +84,7 @@ public class AllegationsOfHarmRevisedMapperTest {
 
         ChildPassportDetails childPassportDetails = ChildPassportDetails.builder().newChildHasMultiplePassports(YesOrNo.Yes)
                 .newChildPassportPossession(List
-                .of(AbductionChildPassportPossessionEnum.father)).newChildPassportPossessionOtherDetails("de").build();
+                .of(NewPassportPossessionEnum.father)).newChildPassportPossessionOtherDetails("de").build();
 
         CaseData caseData = CaseData.builder()
                 .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
