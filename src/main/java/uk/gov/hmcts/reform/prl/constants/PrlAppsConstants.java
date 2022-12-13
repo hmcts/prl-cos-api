@@ -177,4 +177,6 @@ public class PrlAppsConstants {
     public static final String IS_ENG_DOC_GEN = "isEngDocGen";
 
     public static final String IS_WELSH_DOC_GEN = "isWelshDocGen";
+
+    public static final String INVALID_CLIENT = "Invalid Client";
 }
