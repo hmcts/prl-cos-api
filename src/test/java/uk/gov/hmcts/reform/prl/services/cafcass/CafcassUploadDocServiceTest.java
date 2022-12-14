@@ -130,7 +130,7 @@ public class CafcassUploadDocServiceTest {
             Long.valueOf(TEST_CASE_ID)).data(stringObjectMap).build();
 
         when(objectMapper.convertValue(tempCaseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        cafcassUploadDocService.uploadDocument("Bearer abc", file, "FL401",
+        cafcassUploadDocService.uploadDocument("Bearer abc", file, "16_4_Report",
                                            TEST_CASE_ID
         );
         verify(coreCaseDataApi, times(1)).startEventForCaseWorker(
