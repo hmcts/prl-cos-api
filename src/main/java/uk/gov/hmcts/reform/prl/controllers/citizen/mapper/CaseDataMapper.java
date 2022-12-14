@@ -3,19 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildConsentOrderDetails;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildCourtOrderElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildHearingWithoutNoticeElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildInternationalElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildMiamElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherChildrenDetailsElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherPersonDetailsElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildReasonableAdjustmentsElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.*;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -30,6 +18,7 @@ import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherPe
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherProceedingsElementsMapper.updateOtherProceedingsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataReasonableAdjustmentsElementsMapper.updateReasonableAdjustmentsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataRespondentDetailsElementsMapper.updateRespondentDetailsElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataSafetyConcernsElementsMapper.updateSafetyConcernsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
 
@@ -123,6 +112,12 @@ public class CaseDataMapper {
             C100RebuildConsentOrderDetails c100RebuildConsentOrderDetails = mapper
                     .readValue(caseData.getC100RebuildConsentOrderDetails(), C100RebuildConsentOrderDetails.class);
             updateConsentOrderDetailsForCaseData(caseDataBuilder, c100RebuildConsentOrderDetails);
+        }
+
+        if (isNotEmpty(caseData.getC100RebuildSafetyConcerns())) {
+            C100RebuildSafetyConcernsElements c100C100RebuildSafetyConcernsElements = mapper
+                .readValue(caseData.getC100RebuildSafetyConcerns(), C100RebuildSafetyConcernsElements.class);
+            updateSafetyConcernsElementsForCaseData(caseDataBuilder, c100C100RebuildSafetyConcernsElements);
         }
 
         return caseDataBuilder.build();
