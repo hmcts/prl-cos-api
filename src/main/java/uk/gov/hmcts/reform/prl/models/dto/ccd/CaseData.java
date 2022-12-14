@@ -590,6 +590,8 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
 
+    private final RespondentSolicitorMiam respondentSolicitorMiam;
+
     /**
      * Solicitor Details.
      */
