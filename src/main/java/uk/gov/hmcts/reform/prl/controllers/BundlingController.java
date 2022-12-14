@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocument;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolderDetails;
@@ -82,6 +81,36 @@ public class BundlingController extends AbstractCallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+    @PostMapping(path = "/refreshBundleData", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "RefreshBundleData ")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Bundle Created Successfully ."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+
+    public AboutToStartOrSubmitCallbackResponse refreshBundleData(@RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
+                                                                     @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
+                                                                     String serviceAuthorization,
+                                                                     @RequestBody CallbackRequest callbackRequest)
+        throws Exception {
+
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("*** callback to createBundle api in prl-cos-api for the case id : {}", caseData.getId());
+        CaseData updatedCaseData = bundlingService.getCaseDataWithGeneratedPdf(authorization,serviceAuthorization,String.valueOf(caseData.getId()));
+        if (null != updatedCaseData && null != updatedCaseData.getBundleInformation()
+            && null != updatedCaseData.getBundleInformation().getCaseBundles()) {
+            caseDataUpdated.put("bundleInformation",BundlingInformation.builder()
+                .caseBundles(removeEmptyFolders(updatedCaseData.getBundleInformation().getCaseBundles()))
+                .historicalBundles(updatedCaseData.getBundleInformation().getHistoricalBundles())
+                .bundleConfiguration(updatedCaseData.getBundleInformation().getBundleConfiguration())
+                .bundleCreationDate(ZonedDateTime.now(ZoneId.of("Europe/London")).toLocalDateTime())
+                .build());
+            log.info("*** Bundle callback done.. Updating bundle Information in case data for the case id: {}", caseData.getId());
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+
     private List<Bundle> removeEmptyFolders(List<Bundle> caseBundles) {
         List<Bundle> caseBundlesPostEmptyfoldersRemoval = new ArrayList<>();
         if (caseBundles.size() > 0) {
@@ -123,8 +152,8 @@ public class BundlingController extends AbstractCallbackController {
                             }
                         }
                         if (foldersAfterEmptyRemoval.size() > 0) {
-                            caseBundlesPostEmptyfoldersRemoval.add(Bundle.builder().value(BundleDetails.builder()
-                                .folders(foldersAfterEmptyRemoval).build()).build());
+                            bundle.getValue().setFolders(foldersAfterEmptyRemoval);
+                            caseBundlesPostEmptyfoldersRemoval.add(bundle);
                         }
                     });
 
