@@ -293,7 +293,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testDownloadDocument() {
+    public void testDownloadDocument() throws Exception {
         //Given
         Resource expectedResource = new ClassPathResource("documents/document.pdf");
         HttpHeaders headers = new HttpHeaders();
@@ -311,7 +311,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test (expected = RuntimeException.class)
-    public void testDownloadDocumentNotAuthorised() {
+    public void testDownloadDocumentNotAuthorised() throws Exception {
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
 
         caseDocumentController
