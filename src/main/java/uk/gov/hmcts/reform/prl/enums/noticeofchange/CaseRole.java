@@ -5,16 +5,16 @@ import java.util.List;
 public enum CaseRole {
     CREATOR,
     APPLICANTSOLICITOR,
-    RESPONDENTSOLICITORA,
-    RESPONDENTSOLICITORB,
-    RESPONDENTSOLICITORC,
-    RESPONDENTSOLICITORD,
-    RESPONDENTSOLICITORE,
-    RESPONDENTSOLICITORF,
-    RESPONDENTSOLICITORG,
-    RESPONDENTSOLICITORH,
-    RESPONDENTSOLICITORI,
-    RESPONDENTSOLICITORJ;
+    SOLICITORA,
+    SOLICITORB,
+    SOLICITORC,
+    SOLICITORD,
+    SOLICITORE,
+    SOLICITORF,
+    SOLICITORG,
+    SOLICITORH,
+    SOLICITORI,
+    SOLICITORJ;
 
     private final String formattedName;
 
@@ -31,30 +31,30 @@ public enum CaseRole {
     }
 
     public static List<CaseRole> representativeSolicitors() {
-        return List.of(RESPONDENTSOLICITORA,
-                       RESPONDENTSOLICITORB,
-                       RESPONDENTSOLICITORC,
-                       RESPONDENTSOLICITORD,
-                       RESPONDENTSOLICITORE,
-                       RESPONDENTSOLICITORF,
-                       RESPONDENTSOLICITORG,
-                       RESPONDENTSOLICITORH,
-                       RESPONDENTSOLICITORI,
-                       RESPONDENTSOLICITORJ
+        return List.of(SOLICITORA,
+                       SOLICITORB,
+                       SOLICITORC,
+                       SOLICITORD,
+                       SOLICITORE,
+                       SOLICITORF,
+                       SOLICITORG,
+                       SOLICITORH,
+                       SOLICITORI,
+                       SOLICITORJ
         );
     }
 
     public static List<CaseRole> respondentSolicitors() {
-        return List.of(RESPONDENTSOLICITORA,
-                       RESPONDENTSOLICITORB,
-                       RESPONDENTSOLICITORC,
-                       RESPONDENTSOLICITORD,
-                       RESPONDENTSOLICITORE,
-                       RESPONDENTSOLICITORF,
-                       RESPONDENTSOLICITORG,
-                       RESPONDENTSOLICITORH,
-                       RESPONDENTSOLICITORI,
-                       RESPONDENTSOLICITORJ
+        return List.of(SOLICITORA,
+                       SOLICITORB,
+                       SOLICITORC,
+                       SOLICITORD,
+                       SOLICITORE,
+                       SOLICITORF,
+                       SOLICITORG,
+                       SOLICITORH,
+                       SOLICITORI,
+                       SOLICITORJ
         );
     }
 
