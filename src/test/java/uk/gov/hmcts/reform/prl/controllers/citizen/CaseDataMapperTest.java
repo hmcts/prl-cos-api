@@ -244,10 +244,8 @@ public class CaseDataMapperTest {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .c100RebuildSafetyConcerns(TestUtil.readFileFrom("classpath:c100-rebuild/saftycrns.json")).build();
-
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
-
         //Then
         assertNotNull(updatedCaseData);
 
