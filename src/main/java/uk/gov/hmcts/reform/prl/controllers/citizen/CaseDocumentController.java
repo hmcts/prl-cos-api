@@ -7,9 +7,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -392,13 +394,18 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
         @ApiResponse(responseCode = "404", description = "Document not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
-    public ResponseEntity<?> downloadDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                            @RequestHeader("ServiceAuthorization") String serviceAuthorization,
-                                            @PathVariable("documentId") String documentId) {
+    public ResponseEntity<byte[]> downloadDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                   @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+                                   @PathVariable("documentId") String documentId) throws Exception {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException("Invalid Client"));
         }
-        return ResponseEntity.ok(documentGenService.downloadDocument(authorisation, documentId));
+        Resource body = documentGenService.downloadDocument(authorisation, documentId).getBody();
+        if (body != null) {
+            return ResponseEntity.ok(IOUtils.toByteArray(body.getInputStream()));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
 
