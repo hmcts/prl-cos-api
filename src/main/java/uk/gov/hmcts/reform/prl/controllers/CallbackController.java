@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
@@ -25,12 +27,17 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
@@ -40,6 +47,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
@@ -47,6 +55,7 @@ import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
@@ -54,6 +63,7 @@ import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
@@ -63,6 +73,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -98,12 +109,14 @@ public class CallbackController {
 
     private final ObjectMapper objectMapper;
     private final AllTabServiceImpl allTabsService;
+    private final CaseSummaryTabService caseSummaryTab;
     private final UserService userService;
     private final DocumentGenService documentGenService;
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
-
+    private final AuthTokenGenerator authTokenGenerator;
     private final CourtFinderService courtLocatorService;
+    private final LocationRefDataService locationRefDataService;
     private final SearchCasesDataService searchCasesDataService;
 
     private final ConfidentialityTabService confidentialityTabService;
@@ -189,6 +202,7 @@ public class CallbackController {
     @PostMapping(path = "/pre-populate-court-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Generate document after submit application")
     public AboutToStartOrSubmitCallbackResponse prePopulateCourtDetails(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws NotFoundException {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -204,6 +218,11 @@ public class CallbackController {
         } else {
             log.info("Court email not found for case id {}", caseData.getId());
         }
+        log.info("       ------------********--------------      ");
+        List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
+        caseDataUpdated.put("courtList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+            .build());
+        log.info("******** courtDetails {}", courtList);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -216,6 +235,9 @@ public class CallbackController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
         caseData = caseData.toBuilder().applicantsConfidentialDetails(confidentialityTabService
                 .getConfidentialApplicantDetails(caseData.getApplicants().stream()
                     .map(Element::getValue)
@@ -223,13 +245,12 @@ public class CallbackController {
             .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(caseData.getChildren()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList()))).build();
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+                .collect(Collectors.toList()))).state(State.SUBMITTED_NOT_PAID)
+            .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)).build();
 
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
         Map<String,Object> map = documentGenService.generateDocuments(authorisation, caseData);
-
+        // updating Summary tab to update case status
+        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         caseDataUpdated.putAll(map);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -377,8 +398,10 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         requireNonNull(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated = searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated);
 
+        log.info("CASE Data before update --------> {}", caseDataUpdated);
+        caseDataUpdated = searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated);
+        log.info("CASE Data After update --------> {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -394,11 +417,18 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        //Added for Case linking
+        if (caseDataUpdated.get("applicantCaseName") != null) {
+            caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get("applicantCaseName"));
+        }
+
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         // Updating the case name for FL401
         if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
             caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
+            //Added for Case linking
+            caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get("applicantOrRespondentCaseName"));
         }
         if (caseDataUpdated.get("caseTypeOfApplication") != null) {
             caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
@@ -520,6 +550,57 @@ public class CallbackController {
         }
 
         return caseDataUpdated;
+    }
 
+    @PostMapping(path = "/test-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Copy fl401 case name to C100 Case name")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse testEndPointForDynamicList(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
+        if (caseData.getChildren() != null) {
+            caseData.getChildren().forEach(child -> {
+                if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
+                    listElements.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
+                                         .label(child.getValue().getFirstName() + " "
+                                                    + child.getValue().getLastName()).build());
+                }
+            });
+        } else if (caseData.getApplicantChildDetails() != null) {
+            caseData.getApplicantChildDetails().forEach(child -> {
+                listElements.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
+                                     .label(child.getValue().getFullName()).build());
+            });
+        }
+        ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
+            .childOption(DynamicMultiSelectList.builder()
+                             .listItems(listElements).build()).build();
+
+        log.info("**Manage orders with child list {}",manageOrders);
+        caseData = caseData.toBuilder()
+            .manageOrders(manageOrders)
+            .build();
+        return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
+            .data(caseData)
+            .build();
+    }
+
+    @PostMapping(path = "/test-about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",  content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
+        @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) throws Exception {
+        log.info("*** about to submit child option : {}", callbackRequest.getCaseDetails().getData());
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }

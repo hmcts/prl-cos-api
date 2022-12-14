@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNav;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -70,7 +71,11 @@ public class CafcassUploadDocServiceTest {
 
     @Before
     public void setup() {
-        caseData = CaseData.builder().id(Long.parseLong(TEST_CASE_ID)).applicantCaseName("xyz").build();
+        caseData = CaseData.builder().id(Long.parseLong(TEST_CASE_ID)).applicantCaseName("xyz")
+            .courtnav(CourtNav.builder()
+                          .numberOfAttachments("1")
+                          .build())
+            .build();
         when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(randomUserId).build());
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
