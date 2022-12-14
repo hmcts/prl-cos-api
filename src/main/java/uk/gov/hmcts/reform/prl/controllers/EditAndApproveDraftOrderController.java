@@ -51,7 +51,7 @@ public class EditAndApproveDraftOrderController {
             && !caseData.getDraftOrderCollection().isEmpty()) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.getDraftOrderDynamicList(
-                    caseData.getDraftOrderCollection(), caseData.getCaseTypeOfApplication())).build();
+                    caseData.getDraftOrderCollection())).build();
         } else {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
         }
