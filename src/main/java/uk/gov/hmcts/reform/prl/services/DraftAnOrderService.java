@@ -439,14 +439,17 @@ public class DraftAnOrderService {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
-        if (null != callbackRequest.getCaseDetailsBefore().getData().get("caseTypeOfApplication")
-            && null == caseData.getCaseTypeOfApplication()) {
+        log.info("Case Type of application from casedata before if:::{}", caseData.getCaseTypeOfApplication());
+        if (null != callbackRequest.getCaseDetailsBefore().getData().get("caseTypeOfApplication")) {
             caseData.toBuilder().caseTypeOfApplication(callbackRequest.getCaseDetailsBefore().getData().get(
                 "caseTypeOfApplication").toString());
         }
-        log.info("Case Type of application");
-        log.info("Case data {}", caseData);
-        log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
+        log.info("Case Type of application from casedata after:::{}", caseData.getCaseTypeOfApplication());
+
+        log.info("Case Type of application{}", callbackRequest.getCaseDetailsBefore().getData().get(
+            "caseTypeOfApplication").toString());
+        //log.info("Case data {}", caseData);
+        //log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         if (!C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
             fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
