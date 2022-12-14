@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -51,8 +50,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -241,12 +238,4 @@ public class BundlingServiceTest {
     public void testCreateBundleServiceWhenLanguagePreferenceWelshAsYes() throws Exception {
         BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseDataOther,"eventId","authorization");
     }
-
-   /* @Test
-    public void testRefreshBundle() {
-        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(c100CaseData);
-        when(CaseUtils.getCaseData(coreCaseDataApi.getCase(anyString(), anyString(), anyString()), objectMapper)).thenReturn(c100CaseData);
-         CaseData caseDataAfterBundleRefresh = bundlingService.getCaseDataWithGeneratedPdf("auth","serviceAuth","caseId");
-    }*/
-
 }

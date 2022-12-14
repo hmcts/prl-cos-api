@@ -112,7 +112,8 @@ public class BundlingControllerTest {
         List<Bundle> bundleRefreshList = new ArrayList<>();
         bundleRefreshList.add(Bundle.builder().value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().build())
             .stitchStatus("DONE").folders(bundleFolders).build()).build());
-        bundleCreateRefreshResponse = BundleCreateResponse.builder().data(BundleData.builder().id("334").caseBundles(bundleRefreshList).build()).build();
+        bundleCreateRefreshResponse = BundleCreateResponse.builder()
+            .data(BundleData.builder().id("334").caseBundles(bundleRefreshList).build()).build();
         caseData = new HashMap<>();
         caseData.put("bundleInformation", bundleCreateResponse.getData().getCaseBundles());
         caseDetails = CaseDetails.builder().data(caseData).state(State.CASE_HEARING.getValue())
