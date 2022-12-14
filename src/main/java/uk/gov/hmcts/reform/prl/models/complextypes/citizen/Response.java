@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
@@ -25,6 +28,7 @@ public class Response {
     private final CurrentOrPreviousProceedings currentOrPreviousProceedings;
     // TODO: Add safety Concerns here
     private final CitizenInternationalElements citizenInternationalElements;
+    private final AbilityToParticipate abilityToParticipate;
 
     private final CitizenFlags citizenFlags;
     private final String safeToCallOption;

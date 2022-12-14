@@ -16,11 +16,13 @@ public class RespondentSolicitorMiam {
     @JsonProperty("whatIsMiamPlaceHolder")
     private final String whatIsMiamPlaceHolder;
 
-    private final YesOrNo respondentSolicitorHaveYouAttendedMiam;
+    private final YesOrNo haveYouAttendedMiam;
 
     @JsonProperty("helpMiamCostsExemptionsPlaceHolder")
     private final String helpMiamCostsExemptionsPlaceHolder;
 
-    private final YesOrNo respondentSolicitorWillingnessToAttendMiam;
+    private final YesOrNo willingnessToAttendMiam;
+
+    private final String notWillingnessToAttendMiamText;
 
 }
