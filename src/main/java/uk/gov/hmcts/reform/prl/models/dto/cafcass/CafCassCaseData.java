@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -213,4 +214,7 @@ public class CafCassCaseData {
 
     //private List<Element<HearingData>> hearingData;
     private Hearings hearingData;
+
+    @Setter(AccessLevel.NONE)
+    private List<Element<CaseOrder>> orderCollection;
 }
