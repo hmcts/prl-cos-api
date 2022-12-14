@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 
@@ -25,11 +26,13 @@ import java.util.Map;
 public class DgsService {
 
     private final DgsApiClient dgsApiClient;
+    private static final String CASE_DETAILS_STRING = "caseDetails";
+    private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
 
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
 
         Map<String, Object> tempCaseDetails = new HashMap<>();
-        tempCaseDetails.put("caseDetails", AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
+        tempCaseDetails.put(CASE_DETAILS_STRING, AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
@@ -38,7 +41,7 @@ public class DgsService {
                 );
 
         } catch (Exception ex) {
-            log.error("Error generating and storing document for case {}", caseDetails.getCaseId());
+            log.error(ERROR_MESSAGE, caseDetails.getCaseId());
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
         return generatedDocumentInfo;
@@ -59,11 +62,12 @@ public class DgsService {
                                                                                            .getCaseTypeOfApplication()
                                                                                    )
                 );
+                log.info("**** Updated Welsh object ***** {}", updatedWelshObj);
                 caseDataValues.put(k, updatedWelshObj);
             }
         });
         caseDataMap.put("case_data", caseDataValues);
-        tempCaseDetails.put("caseDetails", caseDataMap);
+        tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
@@ -73,7 +77,7 @@ public class DgsService {
                 );
 
         } catch (Exception ex) {
-            log.error("Error generating and storing document for case {}", caseDetails.getCaseId());
+            log.error(ERROR_MESSAGE, caseDetails.getCaseId());
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
         return generatedDocumentInfo;
@@ -84,12 +88,18 @@ public class DgsService {
                                                          String templateName) throws Exception {
 
         Map<String, Object> tempCaseDetails = new HashMap<>();
-        Object documentDetails = null;
+        String freeTextUploadStatements = null;
         if (generateAndUploadDocumentRequest.getValues() != null
-            && generateAndUploadDocumentRequest.getValues().containsKey("freeTextStatements")) {
-            documentDetails = generateAndUploadDocumentRequest.getValues().get("freeTextStatements");
+            && generateAndUploadDocumentRequest.getValues().containsKey("freeTextUploadStatements")) {
+            freeTextUploadStatements = generateAndUploadDocumentRequest.getValues().get("freeTextUploadStatements");
         }
-        tempCaseDetails.put("caseDetails", AppObjectMapper.getObjectMapper().convertValue(documentDetails, Map.class));
+        String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
+        CaseDetails caseDetails = CaseDetails.builder().caseId(caseId).state("ISSUE")
+                                        .caseData(CaseData.builder().id(Long.valueOf(caseId))
+                                                      .citizenUploadedStatement(freeTextUploadStatements).build()).build();
+        tempCaseDetails.put(CASE_DETAILS_STRING, AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
+
+
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
@@ -98,7 +108,7 @@ public class DgsService {
                 );
 
         } catch (Exception ex) {
-            log.error("Error generating and storing document for case {}", generateAndUploadDocumentRequest.getValues().get("caseId"));
+            log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
         return generatedDocumentInfo;

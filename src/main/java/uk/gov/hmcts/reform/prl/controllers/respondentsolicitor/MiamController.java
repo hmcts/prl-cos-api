@@ -16,9 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.RespondentSolicitorMiamService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
 
@@ -45,9 +43,8 @@ public class MiamController {
         @RequestBody CallbackRequest callbackRequest
     ) {
 
-        log.info("===========handleAboutToStart: Callback for Respondent Solicitor - MIAM details  - Load What is MIAM?=================");
+        log.info("handleAboutToStart: Callback for Respondent Solicitor - MIAM details  - Load What is MIAM?");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseDataUpdated.put("whatIsMiamPlaceHolder", miamService.getCollapsableOfWhatIsMiamPlaceHolder());
         caseDataUpdated.put("helpMiamCostsExemptionsPlaceHolder", miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -64,10 +61,9 @@ public class MiamController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        log.info("=========handleMidEvent: Callback for Respondent Solicitor - MIAM details====================");
+        log.info("handleMidEvent: Callback for Respondent Solicitor - MIAM details");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseDataUpdated.put("helpMiamCostsExemptionsPlaceHolder", miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder());
+        log.info("in MiamController - handleMidEvent - caseDataUpdated {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -82,8 +78,9 @@ public class MiamController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        log.info("=========handleAboutToSubmit: Callback for Respondent Solicitor - MIAM details====================");
+        log.info("handleAboutToSubmit: Callback for Respondent Solicitor - MIAM details");
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        log.info("in MiamController - handleAboutToSubmit - caseDataUpdated {}", updatedCaseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
 }

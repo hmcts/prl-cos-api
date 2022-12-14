@@ -77,6 +77,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofh
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.ChildAbductionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.DomesticAbuseVictim;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.services.tab.TabService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.FieldGenerator;
 
@@ -88,7 +89,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 
 
@@ -189,28 +192,31 @@ public class ApplicationsTabService implements TabService {
 
     private ChildDetails mapChildDetails(Child child) {
 
-        List<OtherPersonWhoLivesWithChild> otherPersonList = child.getPersonWhoLivesWithChild().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
         List<Element<OtherPersonWhoLivesWithChildDetails>> otherPersonLiving = new ArrayList<>();
-        for (OtherPersonWhoLivesWithChild otherPersonWhoLivesWithChild : otherPersonList) {
-            otherPersonLiving.add(Element.<OtherPersonWhoLivesWithChildDetails>builder()
-                                      .value(OtherPersonWhoLivesWithChildDetails.builder()
-                          .firstName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                         .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL
-                                         : otherPersonWhoLivesWithChild.getFirstName())
-                          .lastName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+
+        if (nonNull(child.getPersonWhoLivesWithChild())) {
+            List<OtherPersonWhoLivesWithChild> otherPersonList = child.getPersonWhoLivesWithChild().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+
+            for (OtherPersonWhoLivesWithChild otherPersonWhoLivesWithChild : otherPersonList) {
+                otherPersonLiving.add(Element.<OtherPersonWhoLivesWithChildDetails>builder()
+                        .value(OtherPersonWhoLivesWithChildDetails.builder()
+                                .firstName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                        .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL
+                                        : otherPersonWhoLivesWithChild.getFirstName())
+                                .lastName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
                                         .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
                                         otherPersonWhoLivesWithChild.getLastName())
-                          .relationshipToChildDetails((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                         .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
-                                         otherPersonWhoLivesWithChild.getRelationshipToChildDetails())
-                          .isPersonIdentityConfidential(otherPersonWhoLivesWithChild.getIsPersonIdentityConfidential())
-                          .address((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                                            .getIsPersonIdentityConfidential())
-                                       ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
-                                       : otherPersonWhoLivesWithChild.getAddress()).build()).build());
+                                .relationshipToChildDetails((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                        .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
+                                        otherPersonWhoLivesWithChild.getRelationshipToChildDetails())
+                                .isPersonIdentityConfidential(otherPersonWhoLivesWithChild.getIsPersonIdentityConfidential())
+                                .address((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                        .getIsPersonIdentityConfidential())
+                                        ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
+                                        : otherPersonWhoLivesWithChild.getAddress()).build()).build());
+            }
         }
         Optional<RelationshipsEnum> applicantsRelationshipToChild =
             ofNullable(child.getApplicantsRelationshipToChild());
@@ -322,16 +328,23 @@ public class ApplicationsTabService implements TabService {
     public Map<String, Object> getDeclarationTable(CaseData caseData) {
         Map<String, Object> declarationMap = new HashMap<>();
         String solicitor = caseData.getSolicitorName();
+        String statementOfTruthPlaceHolder = null;
+
+        if (nonNull(solicitor)) {
+            statementOfTruthPlaceHolder = solicitor;
+        } else if (isNotEmpty(caseData.getUserInfo())) {
+            UserInfo userInfo = caseData.getUserInfo().get(0).getValue();
+            statementOfTruthPlaceHolder = userInfo.getFirstName() + " " + userInfo.getLastName();
+        }
 
         String declarationText = "I understand that proceedings for contempt of court may be brought"
             + " against anyone who makes, or causes to be made, a false statement in a document verified"
             + " by a statement of truth without an honest belief in its truth. The applicant believes "
-            + "that the facts stated in this form and any continuation sheets are true. " + solicitor
+            + "that the facts stated in this form and any continuation sheets are true. " + statementOfTruthPlaceHolder
             + " is authorised by the applicant to sign this statement.";
 
         declarationMap.put("declarationText", declarationText);
-        declarationMap.put("agreedBy", solicitor);
-
+        declarationMap.put("agreedBy", statementOfTruthPlaceHolder);
         return declarationMap;
     }
 
@@ -359,7 +372,8 @@ public class ApplicationsTabService implements TabService {
         TypeOfApplication typeOfApplication = TypeOfApplication.builder()
             .ordersApplyingFor(String.join(", ", ordersApplyingFor))
             .typeOfChildArrangementsOrder(typeOfChildArrangementsOrder)
-            .applicationPermissionRequired(caseData.getApplicationPermissionRequired().getDisplayedValue())
+            .applicationPermissionRequired(nonNull(caseData.getApplicationPermissionRequired())
+                    ? caseData.getApplicationPermissionRequired().getDisplayedValue() : null)
             .applicationPermissionRequiredReason(caseData.getApplicationPermissionRequiredReason())
             .natureOfOrder(natureOfOrder)
             .build();
@@ -852,9 +866,12 @@ public class ApplicationsTabService implements TabService {
             .map(ApplicantStopFromRespondentDoingEnum::getDisplayedValue)
             .collect(Collectors.toList());
 
-        List<String> applicantStopFromRespondentDoingToChildEnum = respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild().stream()
-            .map(ApplicantStopFromRespondentDoingToChildEnum::getDisplayedValue)
-            .collect(Collectors.toList());
+        List<String> applicantStopFromRespondentDoingToChildEnum = new ArrayList<>();
+        if (respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild() != null) {
+            applicantStopFromRespondentDoingToChildEnum = respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild().stream()
+                .map(ApplicantStopFromRespondentDoingToChildEnum::getDisplayedValue)
+                .collect(Collectors.toList());
+        }
 
         rs.applicantWantToStopFromRespondentDoing(String.join(", ", applicantStopFromRespondentDoingEnum))
             .applicantWantToStopFromRespondentDoingToChild(String.join(", ", applicantStopFromRespondentDoingToChildEnum))
@@ -923,7 +940,7 @@ public class ApplicationsTabService implements TabService {
             .livingSituation(String.join(", ", livingSituationEnum))
             .isThereMortgageOnProperty(home.getIsThereMortgageOnProperty());
 
-        if (home.getMortgages() != null) {
+        if (home.getMortgages() != null && home.getMortgages().getMortgageNamedAfter() != null) {
             Mortgage mortgage = home.getMortgages();
 
             List<String> mortgageNameAft = mortgage.getMortgageNamedAfter().stream()
@@ -935,8 +952,7 @@ public class ApplicationsTabService implements TabService {
                 .mortgageNamedAfter(String.join(", ", mortgageNameAft))
                 .mortgageLenderName(mortgage.getMortgageLenderName());
         }
-
-        if (home.getLandlords() != null) {
+        if (home.getLandlords() != null && home.getLandlords().getMortgageNamedAfterList() != null) {
             Landlord landlord = home.getLandlords();
 
             List<String> landlordNamedAft = landlord.getMortgageNamedAfterList().stream()

@@ -19,6 +19,7 @@ public class OrderDetails {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime dateCreated;
+    private final String typeOfOrder;
     private final String orderType;
     private final String orderTypeId;
     private final Document orderDocument;
