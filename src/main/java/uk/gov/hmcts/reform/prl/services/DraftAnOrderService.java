@@ -112,7 +112,7 @@ public class DraftAnOrderService {
             .build();
     }
 
-    public Map<String, Object> getDraftOrderDynamicList(List<Element<DraftOrder>> draftOrderCollection) {
+    public Map<String, Object> getDraftOrderDynamicList(List<Element<DraftOrder>> draftOrderCollection, String caseTypeOfApplication) {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
@@ -120,6 +120,7 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
+        caseDataMap.put("caseTypeOfApplication", caseTypeOfApplication);
         return caseDataMap;
     }
 
@@ -331,8 +332,6 @@ public class DraftAnOrderService {
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
         caseDataMap.put("appointedGuardianName", selectedOrder.getAppointedGuardianName());
-        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
-        log.info("CaseType of application in draft order custom fields: {}", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
 
@@ -354,8 +353,6 @@ public class DraftAnOrderService {
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
-        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
-        log.info("CaseType of application in draft order common fields: {}", caseData.getCaseTypeOfApplication());
         log.info("Common fields map {}", caseDataMap);
         return caseDataMap;
     }
