@@ -439,7 +439,7 @@ public class DraftAnOrderService {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
-        log.info("Case Type of application from casedata before :::{}", caseData.getCaseTypeOfApplication());
+        log.info("Case Type of application from case data before :::{}", caseData.getCaseTypeOfApplication());
 
         log.info("Case data {}", caseData);
         //log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
