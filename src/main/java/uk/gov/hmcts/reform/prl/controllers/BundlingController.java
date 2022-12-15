@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocument;
@@ -87,7 +88,7 @@ public class BundlingController extends AbstractCallbackController {
         @ApiResponse(responseCode = "200", description = "Bundle Created Successfully ."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
 
-    public AboutToStartOrSubmitCallbackResponse refreshBundleData(@RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
+    public void refreshBundleData(@RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
                                                                      @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
                                                                      String serviceAuthorization,
                                                                      @RequestBody CallbackRequest callbackRequest)
@@ -99,15 +100,15 @@ public class BundlingController extends AbstractCallbackController {
         CaseData updatedCaseData = bundlingService.getCaseDataWithGeneratedPdf(authorization,serviceAuthorization,String.valueOf(caseData.getId()));
         if (null != updatedCaseData && null != updatedCaseData.getBundleInformation()
             && null != updatedCaseData.getBundleInformation().getCaseBundles()) {
-            caseDataUpdated.put("bundleInformation",BundlingInformation.builder()
+            caseData.setBundleInformation(BundlingInformation.builder()
                 .caseBundles(removeEmptyFolders(updatedCaseData.getBundleInformation().getCaseBundles()))
                 .historicalBundles(updatedCaseData.getBundleInformation().getHistoricalBundles())
                 .bundleConfiguration(updatedCaseData.getBundleInformation().getBundleConfiguration())
                 .bundleCreationDate(ZonedDateTime.now(ZoneId.of("Europe/London")).toLocalDateTime())
                 .build());
+            publishEvent(new CaseDataChanged(caseData));
             log.info("*** Bundle callback done.. Updating bundle Information in case data for the case id: {}", caseData.getId());
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
 

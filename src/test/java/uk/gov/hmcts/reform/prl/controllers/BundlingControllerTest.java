@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -46,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -63,6 +64,9 @@ public class BundlingControllerTest {
     private BundlingController bundlingController;
     @Mock
     private BundlingService bundlingService;
+
+    @Mock
+    private EventService eventService;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -82,7 +86,6 @@ public class BundlingControllerTest {
 
     @Before
     public void setUp() {
-
         List<BundleDocument> bundleDocuments = new ArrayList<>();
         bundleDocuments.add(BundleDocument.builder().value(
             BundleDocumentDetails.builder().name("MiamCertificate").description("MiamCertificate").sortIndex(1)
@@ -188,23 +191,5 @@ public class BundlingControllerTest {
         assertEquals("MiamCertificate",
             responseCaseBundles.get(0).getValue().getFolders().get(0)
                 .getValue().getFolders().get(0).getValue().getFolders().get(0).getValue().getDocuments().get(0).getValue().getName());
-    }
-
-    @Test
-    public void testRefreshBundle() throws Exception {
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
-        c100CaseData.getBundleInformation().setCaseBundles(bundleCreateRefreshResponse.data.getCaseBundles());
-        when(bundlingService.getCaseDataWithGeneratedPdf(anyString(),anyString(),anyString())).thenReturn(c100CaseData);
-        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString())).thenReturn(bundleCreateRefreshResponse);
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
-        response = bundlingController.refreshBundleData(authToken, "serviceAuth", callbackRequest);
-        BundlingInformation bundleInformation = (BundlingInformation) response.getData().get("bundleInformation");
-        List<Bundle> responseCaseBundles = bundleInformation.getCaseBundles();
-        assertEquals("MiamCertificate",
-            responseCaseBundles.get(0).getValue().getFolders().get(0)
-                .getValue().getFolders().get(0).getValue().getFolders().get(0).getValue().getDocuments().get(0).getValue().getName());
-        assertEquals("DONE",
-            responseCaseBundles.get(0).getValue().getStitchStatus());
-        assertNotNull(responseCaseBundles.get(0).getValue().getStitchedDocument());
     }
 }
