@@ -331,6 +331,8 @@ public class DraftAnOrderService {
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
         caseDataMap.put("appointedGuardianName", selectedOrder.getAppointedGuardianName());
+        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        log.info("CaseType of application in draft order custom fields: {}", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
 
@@ -352,6 +354,8 @@ public class DraftAnOrderService {
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
+        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        log.info("CaseType of application in draft order common fields: {}", caseData.getCaseTypeOfApplication());
         log.info("Common fields map {}", caseDataMap);
         return caseDataMap;
     }
@@ -440,7 +444,7 @@ public class DraftAnOrderService {
         }
         log.info("Case Type of application from casedata before :::{}", caseData.getCaseTypeOfApplication());
 
-        //log.info("Case data {}", caseData);
+        log.info("Case data {}", caseData);
         //log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         if (!C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
