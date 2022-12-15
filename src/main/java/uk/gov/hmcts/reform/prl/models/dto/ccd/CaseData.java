@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.CaseLinksElement;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
@@ -678,6 +679,5 @@ public class CaseData implements MappableObject {
     @JsonProperty("bundleInformation")
     private BundlingInformation bundleInformation;
 
-    @JsonIgnore
-    private final List<Element<CaseLink>> caseLinks;
+    private final List<CaseLinksElement<CaseLink>> caseLinks;
 }

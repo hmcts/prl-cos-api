@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
-import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
@@ -152,8 +151,6 @@ public class BundlingControllerTest {
         uploadedDocuments.add(UploadedDocuments.builder()
             .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("WitnessStatement.pdf").build())
             .documentType(YOUR_WITNESS_STATEMENTS).isApplicant("No").build());
-        List<CaseLink> caseLinks = new ArrayList<>();
-        caseLinks.add(CaseLink.builder().caseReference("122").build());
 
         //uploadedDocuments.add(uploadedDocuments);
         c100CaseData = CaseData.builder()
@@ -176,7 +173,6 @@ public class BundlingControllerTest {
             .bundleInformation(BundlingInformation.builder().bundleConfiguration("sample.yaml").historicalBundles(bundleList).build())
             .miamCertificationDocumentUpload(Document.builder().documentFileName("maimCertDoc1").documentUrl("Url").build())
             .miamCertificationDocumentUpload1(Document.builder().documentFileName("maimCertDoc2").documentUrl("Url").build())
-            .caseLinks(ElementUtils.wrapElements(caseLinks))
             .build();
     }
 
