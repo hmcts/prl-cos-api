@@ -50,6 +50,9 @@ public class AllTabServiceImpl implements AllTabsService {
         if (caseData.getCourtId() != null) {
             combinedFieldsMap.put("courtId", caseData.getCourtId());
         }
+        if (caseData.getBundleInformation() != null) {
+            combinedFieldsMap.put("bundleInformation", caseData.getBundleInformation());
+        }
         // Calling event to refresh the page.
         refreshCcdUsingEvent(caseData, combinedFieldsMap);
     }
@@ -77,6 +80,9 @@ public class AllTabServiceImpl implements AllTabsService {
         }
         if (caseData.getCourtId() != null) {
             combinedFieldsMap.put("courtId", caseData.getCourtId());
+        }
+        if (caseData.getBundleInformation() != null) {
+            combinedFieldsMap.put("bundleInformation", caseData.getBundleInformation());
         }
         getDocumentsMap(caseData,combinedFieldsMap);
         // Calling event to refresh the page.

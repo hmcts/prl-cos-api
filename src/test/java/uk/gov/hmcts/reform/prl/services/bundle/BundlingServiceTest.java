@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.BundleApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -34,8 +35,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -54,6 +58,9 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 public class BundlingServiceTest {
     @Mock
     private BundleApiClient bundleApiClient;
+
+    @Mock
+    private CoreCaseDataApi coreCaseDataApi;
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -176,6 +183,10 @@ public class BundlingServiceTest {
         List<Element<ApplicantConfidentialityDetails>> applicantConfidentialList = Collections.singletonList(
             applicantConfidential);
 
+        List<Bundle> bundleList = new ArrayList<>();
+        bundleList.add(Bundle.builder().value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().build())
+            .stitchStatus("DONE").stitchedDocument(DocumentLink.builder().build()).build()).build());
+
         c100CaseData = CaseData.builder()
             .id(123456789123L)
             .languagePreferenceWelsh(No)
@@ -213,7 +224,7 @@ public class BundlingServiceTest {
             .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
             .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
             .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
-            .bundleInformation(BundlingInformation.builder().build())
+            .bundleInformation(BundlingInformation.builder().caseBundles(bundleList).build())
             //.home(homefull)
             .build();
     }
@@ -227,5 +238,4 @@ public class BundlingServiceTest {
     public void testCreateBundleServiceWhenLanguagePreferenceWelshAsYes() throws Exception {
         BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseDataOther,"eventId","authorization");
     }
-
 }
