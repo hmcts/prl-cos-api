@@ -2,11 +2,13 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
@@ -27,7 +29,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CaseDataMapperTest {
 
     private static final String CASE_TYPE = "C100";
@@ -38,7 +40,7 @@ public class CaseDataMapperTest {
 
     private CaseData caseData;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         mapper.registerModule(new JSR310Module());
         caseData = CaseData.builder()
@@ -185,12 +187,13 @@ public class CaseDataMapperTest {
         assertNull(updatedCaseData.getOtherChildren());
     }
 
-    @Test
-    public void testCaseDataMapperReasonableAdjustmentsExtraFields() throws IOException {
+    @ParameterizedTest
+    @ValueSource(strings = {"ra1.json", "ra2.json", "ra3.json"})
+    public void testCaseDataMapperReasonableAdjustmentsExtraFields(String fileName) throws IOException {
         CaseData caseData1 = caseData
                 .toBuilder()
                 .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-                        .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra1.json"))
+                        .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/" + fileName))
                         .build())
                 .build();
 
@@ -305,48 +308,6 @@ public class CaseDataMapperTest {
             .c100RebuildData(caseData.getC100RebuildData().toBuilder()
             .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn1.json"))
                                  .build()).build();
-
-        //When
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
-
-        //Then
-        assertNotNull(updatedCaseData);
-    }
-
-    @Test
-    public void testCaseDataMapperReasonableAdjustmentsExcludingNeedInterpreter() throws IOException {
-        CaseData caseData1 = caseData.toBuilder()
-            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-            .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra2.json"))
-            .build()).build();
-
-        //When
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
-
-        //Then
-        assertNotNull(updatedCaseData);
-    }
-
-    @Test
-    public void testCaseDataMapperReasonableAdjustmentsDisabilityRequirementsNoSupport() throws IOException {
-        CaseData caseData1 = caseData.toBuilder()
-            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-            .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra2.json"))
-            .build()).build();
-
-        //When
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
-
-        //Then
-        assertNotNull(updatedCaseData);
-    }
-
-    @Test
-    public void testCaseDataMapperReasonableAdjustmentWelshNeededElse() throws IOException {
-        CaseData caseData1 = caseData.toBuilder()
-            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-            .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra3.json"))
-            .build()).build();
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
