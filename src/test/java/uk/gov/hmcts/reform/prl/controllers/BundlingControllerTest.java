@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -191,4 +192,17 @@ public class BundlingControllerTest {
             responseCaseBundles.get(0).getValue().getFolders().get(0)
                 .getValue().getFolders().get(0).getValue().getFolders().get(0).getValue().getDocuments().get(0).getValue().getName());
     }
+
+    @Test
+    public void testRefreshBundle() throws Exception {
+        Mockito.doNothing().when(eventService).publishEvent(any());
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
+        c100CaseData.getBundleInformation().setCaseBundles(bundleCreateRefreshResponse.data.getCaseBundles());
+        when(bundlingService.getCaseDataWithGeneratedPdf(anyString(),anyString(),anyString())).thenReturn(c100CaseData);
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString())).thenReturn(bundleCreateRefreshResponse);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
+        bundlingController.refreshBundleData(authToken, "serviceAuth", callbackRequest);
+
+    }
+
 }
