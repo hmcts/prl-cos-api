@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
@@ -35,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -63,9 +66,15 @@ public class BundlingControllerTest {
     private BundlingService bundlingService;
 
     @Mock
+    private EventService eventService;
+
+    @Mock
     private ObjectMapper objectMapper;
 
     private BundleCreateResponse bundleCreateResponse;
+
+    private BundleCreateResponse bundleCreateRefreshResponse;
+
     private CaseDetails caseDetails;
 
     private Map<String, Object> caseData;
@@ -77,7 +86,6 @@ public class BundlingControllerTest {
 
     @Before
     public void setUp() {
-
         List<BundleDocument> bundleDocuments = new ArrayList<>();
         bundleDocuments.add(BundleDocument.builder().value(
             BundleDocumentDetails.builder().name("MiamCertificate").description("MiamCertificate").sortIndex(1)
@@ -101,8 +109,14 @@ public class BundlingControllerTest {
         bundleFolders.add(BundleFolder.builder().value(BundleFolderDetails.builder().name("Applications and Orders")
             .folders(bundleSubfolders).build()).build());
         List<Bundle> bundleList = new ArrayList<>();
-        bundleList.add(Bundle.builder().value(BundleDetails.builder().folders(bundleFolders).build()).build());
+        bundleList.add(Bundle.builder().value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().build())
+            .stitchStatus("New").folders(bundleFolders).build()).build());
         bundleCreateResponse = BundleCreateResponse.builder().data(BundleData.builder().id("334").caseBundles(bundleList).build()).build();
+        List<Bundle> bundleRefreshList = new ArrayList<>();
+        bundleRefreshList.add(Bundle.builder().value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().build())
+            .stitchStatus("DONE").folders(bundleFolders).build()).build());
+        bundleCreateRefreshResponse = BundleCreateResponse.builder()
+            .data(BundleData.builder().id("334").caseBundles(bundleRefreshList).build()).build();
         caseData = new HashMap<>();
         caseData.put("bundleInformation", bundleCreateResponse.getData().getCaseBundles());
         caseDetails = CaseDetails.builder().data(caseData).state(State.CASE_HEARING.getValue())
@@ -138,6 +152,8 @@ public class BundlingControllerTest {
         uploadedDocuments.add(UploadedDocuments.builder()
             .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("WitnessStatement.pdf").build())
             .documentType(YOUR_WITNESS_STATEMENTS).isApplicant("No").build());
+        List<CaseLink> caseLinks = new ArrayList<>();
+        caseLinks.add(CaseLink.builder().caseReference("122").build());
 
         //uploadedDocuments.add(uploadedDocuments);
         c100CaseData = CaseData.builder()
@@ -160,6 +176,7 @@ public class BundlingControllerTest {
             .bundleInformation(BundlingInformation.builder().bundleConfiguration("sample.yaml").historicalBundles(bundleList).build())
             .miamCertificationDocumentUpload(Document.builder().documentFileName("maimCertDoc1").documentUrl("Url").build())
             .miamCertificationDocumentUpload1(Document.builder().documentFileName("maimCertDoc2").documentUrl("Url").build())
+            .caseLinks(ElementUtils.wrapElements(caseLinks))
             .build();
     }
 
@@ -175,4 +192,17 @@ public class BundlingControllerTest {
             responseCaseBundles.get(0).getValue().getFolders().get(0)
                 .getValue().getFolders().get(0).getValue().getFolders().get(0).getValue().getDocuments().get(0).getValue().getName());
     }
+
+    @Test
+    public void testRefreshBundle() throws Exception {
+        Mockito.doNothing().when(eventService).publishEvent(any());
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
+        c100CaseData.getBundleInformation().setCaseBundles(bundleCreateRefreshResponse.data.getCaseBundles());
+        when(bundlingService.getCaseDataWithGeneratedPdf(anyString(),anyString(),anyString())).thenReturn(c100CaseData);
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString())).thenReturn(bundleCreateRefreshResponse);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
+        bundlingController.refreshBundleData(authToken, "serviceAuth", callbackRequest);
+
+    }
+
 }
