@@ -33,7 +33,6 @@ public class CftLibConfig implements CFTLibConfigurer {
 
         var def = Files.readAllBytes(Path.of("bin/ccd-config-PRL-local.xlsx"));
         lib.importDefinition(def);
-        System.out.println("*****************Definitionuploaded******************");
     }
 }
 
