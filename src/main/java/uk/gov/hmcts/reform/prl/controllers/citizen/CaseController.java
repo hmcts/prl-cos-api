@@ -218,6 +218,8 @@ public class CaseController {
             Field field = CaseData.class.getDeclaredField("childrenInProceeding");
             field.setAccessible(true);
             Object value = field.get(CaseData.builder().childrenInProceeding("test").build());
+
+            //We can implement comparison logic here
         }
 
       return caseData.toBuilder().id(caseDetails.getId()).build();
