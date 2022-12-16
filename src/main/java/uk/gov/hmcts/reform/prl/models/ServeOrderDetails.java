@@ -24,7 +24,7 @@ public class ServeOrderDetails {
     private final YesOrNo cafcassServed;
     private final String cafcassEmail;
     private final YesOrNo otherPartiesServed;
-    private final PostalInformation postalInformation;
-    private final EmailInformation emailInformation;
+    private final List<Element<PostalInformation>> postalInformation;
+    private final List<Element<EmailInformation>> emailInformation;
 
 }

@@ -1246,9 +1246,11 @@ public class ManageOrderServiceTest {
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .deliveryByOptionsCA(DeliveryByEnum.post)
-            .emailInformationCA(EmailInformation.builder().emailAddress("test").build())
-            .postalInformationCA(PostalInformation.builder().postalAddress(
-                Address.builder().postCode("NE65LA").build()).build())
+            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                            .value(EmailInformation.builder().emailAddress("test").build()).build()))
+            .postalInformationCA(List.of(Element.<PostalInformation>builder()
+                                             .value(PostalInformation.builder().postalAddress(
+                Address.builder().postCode("NE65LA").build()).build()).build()))
             .build();
 
         Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
@@ -1319,9 +1321,11 @@ public class ManageOrderServiceTest {
             .servingRespondentsOptionsDA(ServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .deliveryByOptionsDA(DeliveryByEnum.post)
-            .emailInformationDA(EmailInformation.builder().emailAddress("test").build())
-            .postalInformationDA(PostalInformation.builder().postalAddress(
-                Address.builder().postCode("NE65LA").build()).build())
+            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                            .value(EmailInformation.builder().emailAddress("test").build()).build()))
+            .postalInformationCA(List.of(Element.<PostalInformation>builder()
+                                             .value(PostalInformation.builder().postalAddress(
+                                                 Address.builder().postCode("NE65LA").build()).build()).build()))
             .build();
 
         CaseData caseData = CaseData.builder()

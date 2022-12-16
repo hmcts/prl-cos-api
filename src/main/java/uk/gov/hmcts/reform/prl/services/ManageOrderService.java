@@ -697,8 +697,8 @@ public class ManageOrderService {
                                 .getServingRespondentsOptionsCA();
                         }
                         YesOrNo otherPartiesServed = No;
-                        PostalInformation postalInformation = null;
-                        EmailInformation emailInformation = null;
+                        List<Element<PostalInformation>> postalInformation = null;
+                        List<Element<EmailInformation>> emailInformation = null;
                         if (!caseData.getManageOrders().getServeOtherPartiesCA().isEmpty()) {
                             otherPartiesServed = Yes;
                             if (caseData.getManageOrders().getEmailInformationCA() != null) {
@@ -737,8 +737,8 @@ public class ManageOrderService {
                         ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
                             .getServingRespondentsOptionsDA();
                         YesOrNo otherPartiesServed = No;
-                        PostalInformation postalInformation = null;
-                        EmailInformation emailInformation = null;
+                        List<Element<PostalInformation>> postalInformation = null;
+                        List<Element<EmailInformation>> emailInformation = null;
                         if (!caseData.getManageOrders().getServeOtherPartiesDA().isEmpty()) {
                             otherPartiesServed = Yes;
                             if (caseData.getManageOrders().getEmailInformationDA() != null) {
@@ -769,8 +769,8 @@ public class ManageOrderService {
     private static void updateServedOrderDetails(YesOrNo cafcassServed, String cafCassEmail, List<Element<OrderDetails>> orders,
                                                  Element<OrderDetails> order, YesOrNo serveOnRespondent,
                                                  ServingRespondentsEnum servingRespondentsOptions,
-                                                 YesOrNo otherPartiesServed, PostalInformation postalInformation,
-                                                 EmailInformation emailInformation, List<Element<Document>> additionalDocuments) {
+                                                 YesOrNo otherPartiesServed, List<Element<PostalInformation>> postalInformation,
+                                                 List<Element<EmailInformation>> emailInformation, List<Element<Document>> additionalDocuments) {
         ServeOrderDetails serveOrderDetails = ServeOrderDetails.builder().serveOnRespondent(serveOnRespondent)
             .servingRespondent(servingRespondentsOptions)
             .cafcassServed(cafcassServed)
