@@ -70,11 +70,12 @@ public class BundlingController extends AbstractCallbackController {
             callbackRequest.getEventId(), authorization);
         log.info("*** Bundle response from api : {}", new ObjectMapper().writeValueAsString(bundleCreateResponse));
         if (null != bundleCreateResponse && null != bundleCreateResponse.getData() && null != bundleCreateResponse.getData().getCaseBundles()) {
-
+            CaseData updatedCaseData =
+                bundlingService.getCaseDataWithGeneratedPdf(authorization,serviceAuthorization,String.valueOf(caseData.getId()));
             caseDataUpdated.put("bundleInformation",
-                BundlingInformation.builder().caseBundles(removeEmptyFolders(bundleCreateResponse.getData().getCaseBundles()))
-                    .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
-                    .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration())
+                BundlingInformation.builder().caseBundles(removeEmptyFolders(updatedCaseData.getBundleInformation().getCaseBundles()))
+                    .historicalBundles(updatedCaseData.getBundleInformation().getHistoricalBundles())
+                    .bundleConfiguration(updatedCaseData.getBundleInformation().getBundleConfiguration())
                     .bundleCreationDate(ZonedDateTime.now(ZoneId.of("Europe/London")).toLocalDateTime())
                     .build());
             log.info("*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}", caseData.getId());
