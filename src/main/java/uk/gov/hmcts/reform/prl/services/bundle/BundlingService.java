@@ -57,13 +57,29 @@ public class BundlingService {
 
     public CaseData getCaseDataWithGeneratedPdf(String authorization, String serviceAuthorization,String caseId) {
         CaseData updatedCaseData = null;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 5; i++) {
+            if (i == 1) {
+                try {
+                    log.info("*** Invoking Thread.sleep(500) before triggering the core case data api for the case id: {}", caseId);
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             log.info("*** Invoking the core case data api to get the latest bundle for the case id: {}", caseId);
             updatedCaseData = CaseUtils.getCaseData(coreCaseDataApi.getCase(authorization, serviceAuthorization, caseId), objectMapper);
             String stitchStatus = getBundleStatus(updatedCaseData.getBundleInformation().getCaseBundles());
             if ("NEW".equals(stitchStatus)) {
+                try {
+                    log.info("*** Invoking Thread.sleep(1000) before retriggering the core case data api for the case id: {}", caseId);
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    log.info("*** Got exception during Thread.sleep(1000) for the case id: {}", caseId);
+                    throw new RuntimeException(e);
+                }
                 log.info("*** Created Bundle is still NEW for the case id: {}", caseId);
             } else if ("DONE".equals(stitchStatus)) {
+                log.info("*** Created Bundle status is DONE for the case id: {}", caseId);
                 break;
             } else if ("FAILED".equals(stitchStatus)) {
                 log.info("*** Created Bundle is FAILED for the case id: {}", caseId);

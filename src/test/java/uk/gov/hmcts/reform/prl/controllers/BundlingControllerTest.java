@@ -83,6 +83,8 @@ public class BundlingControllerTest {
     public static final String authToken = "Bearer TestAuthToken";
     private CaseData c100CaseData;
 
+    private CaseData caseDataUpdated;
+
     @Before
     public void setUp() {
         List<BundleDocument> bundleDocuments = new ArrayList<>();
@@ -174,12 +176,44 @@ public class BundlingControllerTest {
             .miamCertificationDocumentUpload(Document.builder().documentFileName("maimCertDoc1").documentUrl("Url").build())
             .miamCertificationDocumentUpload1(Document.builder().documentFileName("maimCertDoc2").documentUrl("Url").build())
             .build();
+
+        caseDataUpdated = CaseData.builder()
+            .id(123456789123L)
+            .languagePreferenceWelsh(No)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.CASE_HEARING)
+            .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
+            .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
+            //.allegationsOfHarmYesNo(No)
+            .otherDocuments(ElementUtils.wrapElements(otherDocuments))
+            .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
+            .orderCollection(ElementUtils.wrapElements(orders))
+            .bundleInformation(BundlingInformation.builder().build())
+            .citizenResponseC7DocumentList(ElementUtils.wrapElements(citizenC7uploadedDocs))
+            .citizenUploadedDocumentList(ElementUtils.wrapElements(uploadedDocuments))
+            .bundleInformation(BundlingInformation.builder().bundleConfiguration("sample.yaml")
+                .caseBundles(bundleRefreshList).historicalBundles(bundleList).build())
+            .miamCertificationDocumentUpload(Document.builder().documentFileName("maimCertDoc1").documentUrl("Url").build())
+            .miamCertificationDocumentUpload1(Document.builder().documentFileName("maimCertDoc2").documentUrl("Url").build())
+            //.caseLinks(ElementUtils.wrapElements(caseLinks))
+            .build();
     }
 
     @Test
     public void testCreateBundle() throws Exception {
+        List<Bundle> bundleRefreshList = new ArrayList<>();
+        bundleRefreshList.add(Bundle.builder().value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().build())
+            .stitchStatus("DONE").folders(bundleCreateResponse.getData().caseBundles.get(0).getValue().getFolders()).build()).build());
+        bundleCreateRefreshResponse = BundleCreateResponse.builder()
+            .data(BundleData.builder().id("334").caseBundles(bundleRefreshList).build()).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
-        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString())).thenReturn(bundleCreateResponse);
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString())).thenReturn(bundleCreateRefreshResponse);
+        bundleCreateRefreshResponse.data.getCaseBundles().get(0).getValue().setStitchStatus("DONE");
+        c100CaseData.getBundleInformation().setCaseBundles(bundleCreateRefreshResponse.data.getCaseBundles());
+        when(bundlingService.getCaseDataWithGeneratedPdf(anyString(),anyString(),anyString())).thenReturn(caseDataUpdated);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
         response = bundlingController.createBundle(authToken, "serviceAuth", callbackRequest);
         BundlingInformation bundleInformation = (BundlingInformation) response.getData().get("bundleInformation");
@@ -194,7 +228,7 @@ public class BundlingControllerTest {
         Mockito.doNothing().when(eventService).publishEvent(any());
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
         c100CaseData.getBundleInformation().setCaseBundles(bundleCreateRefreshResponse.data.getCaseBundles());
-        when(bundlingService.getCaseDataWithGeneratedPdf(anyString(),anyString(),anyString())).thenReturn(c100CaseData);
+        when(bundlingService.getCaseDataWithGeneratedPdf(anyString(),anyString(),anyString())).thenReturn(caseDataUpdated);
         when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString())).thenReturn(bundleCreateRefreshResponse);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
         bundlingController.refreshBundleData(authToken, "serviceAuth", callbackRequest);
