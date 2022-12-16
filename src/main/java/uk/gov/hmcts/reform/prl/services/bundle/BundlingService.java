@@ -58,6 +58,14 @@ public class BundlingService {
     public CaseData getCaseDataWithGeneratedPdf(String authorization, String serviceAuthorization,String caseId) {
         CaseData updatedCaseData = null;
         for (int i = 0; i < 5; i++) {
+            if (i == 1) {
+                try {
+                    log.info("*** Invoking Thread.sleep(500) before triggering the core case data api for the case id: {}", caseId);
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             log.info("*** Invoking the core case data api to get the latest bundle for the case id: {}", caseId);
             updatedCaseData = CaseUtils.getCaseData(coreCaseDataApi.getCase(authorization, serviceAuthorization, caseId), objectMapper);
             String stitchStatus = getBundleStatus(updatedCaseData.getBundleInformation().getCaseBundles());
