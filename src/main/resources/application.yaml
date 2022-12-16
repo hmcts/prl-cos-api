@@ -188,6 +188,10 @@ core_case_data:
   api:
     url: https://ccd-data-store-api-prl-ccd-definitions-pr-676.service.core-compute-preview.internal
 
+ccd_definition_store:
+  api:
+    url: https://ccd-definition-store-prl-ccd-definitions-pr-790.service.core-compute-preview.internal
+
 auth:
   idam:
     client:

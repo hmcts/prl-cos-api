@@ -19,16 +19,23 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.ChallengeQuestion;
+import uk.gov.hmcts.reform.prl.clients.CcdDefinitionStoreApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.ChallengeQuestionsResult;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -36,6 +43,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 public class CaseController {
+
+    private static final String CHALLENGE_QUESTION_ID = "PrlChallengeQuestion";
 
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
@@ -48,6 +57,12 @@ public class CaseController {
 
     @Autowired
     AuthorisationService authorisationService;
+
+    @Autowired
+    SystemUserService systemUserService;
+
+    @Autowired
+    CcdDefinitionStoreApi ccdDefinitionStoreApi;
 
     @Autowired
     AuthTokenGenerator authTokenGenerator;
@@ -180,5 +195,35 @@ public class CaseController {
         }
         return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder().id(caseDetails.getId()).build();
+    }
+
+    @GetMapping(path = "/poc/{caseId}", produces = APPLICATION_JSON)
+    @Operation(description = "Frontend to fetch the data for POC")
+    public CaseData getCaseForPoc(@PathVariable("caseId") String caseId) throws NoSuchFieldException, IllegalAccessException {
+        String userToken = systemUserService.getSysUserToken();
+        CaseDetails caseDetails = caseService.getCase(userToken, caseId);
+        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
+
+        ChallengeQuestionsResult challengeQuestionsResult = ccdDefinitionStoreApi
+                .fetchChallengeQuestions(userToken, authTokenGenerator.generate(), caseDetails.getJurisdiction(), CHALLENGE_QUESTION_ID);
+
+        Optional<ChallengeQuestion> challengeQuestion = challengeQuestionsResult.getQuestions()
+                .stream()
+                .filter(question -> question.getQuestionId().equalsIgnoreCase("PrlChallengeQ2"))
+                .findFirst();
+
+        boolean fieldPresentInCaseData = doesObjectContainField("childrenInProceeding");
+
+        if (fieldPresentInCaseData) {
+            Field field = CaseData.class.getDeclaredField("childrenInProceeding");
+            field.setAccessible(true);
+            Object value = field.get(CaseData.builder().childrenInProceeding("test").build());
+        }
+
+      return caseData.toBuilder().id(caseDetails.getId()).build();
+    }
+
+    public boolean doesObjectContainField(String fieldName) {
+        return Arrays.stream(CaseData.class.getDeclaredFields()).anyMatch(f -> f.getName().equals(fieldName));
     }
 }
