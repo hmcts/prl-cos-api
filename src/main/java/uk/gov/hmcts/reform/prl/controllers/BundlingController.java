@@ -78,7 +78,8 @@ public class BundlingController extends AbstractCallbackController {
                     .bundleConfiguration(updatedCaseData.getBundleInformation().getBundleConfiguration())
                     .bundleCreationDate(ZonedDateTime.now(ZoneId.of("Europe/London")).toLocalDateTime())
                     .build());
-            log.info("*** Bundle information post emptyfolders removal from api : {}", new ObjectMapper().writeValueAsString(caseDataUpdated.get("bundleInformation")));
+            log.info("*** Bundle information post emptyfolders removal from api : {}",
+                new ObjectMapper().writeValueAsString(caseDataUpdated.get("bundleInformation")));
             log.info("*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}", caseData.getId());
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
