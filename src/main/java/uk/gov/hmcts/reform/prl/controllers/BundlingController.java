@@ -76,7 +76,7 @@ public class BundlingController extends AbstractCallbackController {
                 BundlingInformation.builder().caseBundles(removeEmptyFolders(updatedCaseData.getBundleInformation().getCaseBundles()))
                     .historicalBundles(updatedCaseData.getBundleInformation().getHistoricalBundles())
                     .bundleConfiguration(updatedCaseData.getBundleInformation().getBundleConfiguration())
-                    .bundleCreationDate(ZonedDateTime.now(ZoneId.of("Europe/London")).toLocalDateTime())
+                    .bundleCreationDate(ZonedDateTime.now(ZoneId.of("Europe/London")).toString())
                     .build());
             log.info("*** Bundle information post emptyfolders removal from api : {}",
                 new ObjectMapper().writeValueAsString(caseDataUpdated.get("bundleInformation")));
@@ -107,7 +107,7 @@ public class BundlingController extends AbstractCallbackController {
                 .caseBundles(removeEmptyFolders(updatedCaseData.getBundleInformation().getCaseBundles()))
                 .historicalBundles(updatedCaseData.getBundleInformation().getHistoricalBundles())
                 .bundleConfiguration(updatedCaseData.getBundleInformation().getBundleConfiguration())
-                .bundleCreationDate(ZonedDateTime.now(ZoneId.of("Europe/London")).toLocalDateTime())
+                .bundleCreationDate(ZonedDateTime.now(ZoneId.of("Europe/London")).toString())
                 .build());
             publishEvent(new CaseDataChanged(caseData));
             log.info("*** Bundle callback done.. Updating bundle Information in case data for the case id: {}", caseData.getId());

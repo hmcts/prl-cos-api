@@ -198,7 +198,7 @@ public class BundlingControllerTest {
                 .caseBundles(bundleRefreshList).historicalBundles(bundleList).build())
             .miamCertificationDocumentUpload(Document.builder().documentFileName("maimCertDoc1").documentUrl("Url").build())
             .miamCertificationDocumentUpload1(Document.builder().documentFileName("maimCertDoc2").documentUrl("Url").build())
-            .caseLinks(ElementUtils.wrapElements(caseLinks))
+            //.caseLinks(ElementUtils.wrapElements(caseLinks))
             .build();
     }
 
