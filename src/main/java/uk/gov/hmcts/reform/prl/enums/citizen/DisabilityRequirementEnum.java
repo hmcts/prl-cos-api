@@ -14,7 +14,6 @@ public enum DisabilityRequirementEnum {
     extraSupport("I need to bring support with me to a hearing"),
     feelComfortableSupport("I need something to feel comfortable during a hearing"),
     helpTravellingMovingBuildingSupport("I need help travelling to, or moving around court buildings"),
-    noSupport("No, I do not need any support at this time"),
 
     specifiedColorDocuments("Documents in a specified colour"),
     easyReadFormatDocuments("Documents in Easy Read format"),
@@ -24,7 +23,7 @@ public enum DisabilityRequirementEnum {
     readOutDocuments("Documents read out to me"),
     emailInformation("Information emailed to me"),
     documentHelpOther("Other"),
-    none("No, I do not need any support at this time"),
+    noSupportRequired("No, I do not need any support at this time"),
 
     hearingLoop("Hearing loop (hearing enhancement system)"),
     infraredReceiver("Infrared receiver (hearing enhancement system)"),
