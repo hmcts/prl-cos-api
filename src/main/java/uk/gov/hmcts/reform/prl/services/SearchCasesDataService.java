@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
 import java.util.List;
 import java.util.Map;
@@ -18,11 +19,13 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.RESPONDENT;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class SearchCasesDataService {
+    private final NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     public Map<String, Object> updateApplicantAndChildNames(ObjectMapper objectMapper, Map<String, Object> caseDetails) {
 
@@ -42,6 +45,7 @@ public class SearchCasesDataService {
                 caseDetails.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
             }
         } else {
+            caseDetails.putAll(noticeOfChangePartiesService.generate(caseData, RESPONDENT));
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
             if (!applicantsWrapped.isEmpty() && !applicantsWrapped.get().isEmpty()) {
                 List<PartyDetails> applicants = applicantsWrapped.get()
@@ -52,14 +56,10 @@ public class SearchCasesDataService {
                 if (Objects.nonNull(applicant1)) {
                     caseDetails.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
                 }
-
             }
-
         }
 
         return caseDetails;
-
-
     }
 
 }
