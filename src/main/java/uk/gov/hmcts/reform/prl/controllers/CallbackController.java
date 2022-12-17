@@ -379,6 +379,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) throws IOException {
+        //TODO Change the method signature and corresponding methods as this methods serves all the parties in the case.
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         requireNonNull(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
