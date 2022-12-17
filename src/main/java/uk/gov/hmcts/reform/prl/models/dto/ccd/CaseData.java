@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
+import uk.gov.hmcts.reform.prl.models.complextypes.ConfirmEditDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
@@ -555,6 +556,8 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
 
+    private final RespondentSolicitorMiam respondentSolicitorMiam;
+
     /**
      * Solicitor Details.
      */
@@ -655,6 +658,9 @@ public class CaseData implements MappableObject {
     private final List<Element<Behaviours>> respondentChildAbuseBehaviour;
     private final RespondentChildAbduction respondentChildAbduction;
     private final RespondentOtherConcerns respondentOtherConcerns;
+    
+    /** Confirm or Edit your contact details. **/
+    private final ConfirmEditDetails rsConfirmEditContactDetails;
 
     /**
      * Respondent solicitor's Draft PDF response.
