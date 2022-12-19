@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -35,7 +37,6 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
-import uk.gov.hmcts.reform.prl.models.documents.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentDetails;
@@ -354,12 +355,12 @@ public class CaseDocumentController {
     })
     public ResponseEntity<Object> uploadCitizenDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                    @RequestHeader("ServiceAuthorization") String serviceAuthorization,
-                                                   @RequestBody DocumentRequest documentRequest) throws IOException {
+                                                   @RequestParam("file") MultipartFile file) throws IOException {
 
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-        return ResponseEntity.ok(documentGenService.uploadDocument(authorisation, documentRequest.getFile()));
+        return ResponseEntity.ok(documentGenService.uploadDocument(authorisation, file));
     }
 
     @DeleteMapping("/{documentId}/delete")
