@@ -14,15 +14,19 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.ResourceUtils;
+import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.prl.models.documents.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -67,10 +71,17 @@ public class CaseDocumentControllerFunctionalTest {
     public void shouldSuccessfullyUploadDocument() throws Exception {
         //TODO Replace with citizen auth token once secrets added
         String filePath = "classpath:Test.pdf";
+        MultipartFile multipartFile = new MockMultipartFile(
+            "Test.pdf",
+            new FileInputStream(new File(
+                "src/functionalTest/resources/Test.pdf"))
+        );
+        DocumentRequest documentRequest =
+            DocumentRequest.builder().file(multipartFile).build();
         Response response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
+            .body(documentRequest)
             .when()
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
             .post("/upload-citizen-document");
@@ -86,12 +97,19 @@ public class CaseDocumentControllerFunctionalTest {
     @Test
     public void shouldSuccessfullyDeleteDocument() throws Exception {
         String filePath = "classpath:Test.pdf";
+        MultipartFile multipartFile = new MockMultipartFile(
+            "Test.pdf",
+            new FileInputStream(new File(
+                "src/functionalTest/resources/Test.pdf"))
+        );
+        DocumentRequest documentRequest =
+            DocumentRequest.builder().file(multipartFile).build();
 
         //TODO Replace with citizen auth token once secrets added
         Response response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
+            .body(documentRequest)
             .when()
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
             .post("/upload-citizen-document");
