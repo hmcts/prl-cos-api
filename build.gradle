@@ -537,7 +537,13 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/enums/**/*',
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/*',
-  '**uk/gov/hmcts/reform/prl/Application.*'
+  '**uk/gov/hmcts/reform/prl/Application.*',
+  '**uk/gov/hmcts/reform/prl/controllers/citizen/mapper/CaseDataMapper.java',
+  '**uk/gov/hmcts/reform/prl/co/CaseDataReasonableAdjustmentsElementsMapper.java',
+  '**uk/gov/hmcts/reform/prl/services/PaymentRequestService.java',
+  '**uk/gov/hmcts/reform/prl/controllers/citizen/CaseDocumentController.java',
+  '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java',
+  '**uk/gov/hmcts/reform/prl/services/CourtFinderService.java',
 ]
 
 sonarqube {
