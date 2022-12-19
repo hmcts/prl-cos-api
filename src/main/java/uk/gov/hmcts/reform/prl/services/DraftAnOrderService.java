@@ -355,6 +355,8 @@ public class DraftAnOrderService {
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
+        log.info("Case typ of application {}", caseData.getCaseTypeOfApplication());
+        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         log.info("Common fields map {}", caseDataMap);
         return caseDataMap;
     }
