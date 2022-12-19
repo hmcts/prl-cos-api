@@ -355,7 +355,7 @@ public class CaseDocumentController {
     })
     public ResponseEntity<?> uploadCitizenDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                    @RequestHeader("ServiceAuthorization") String serviceAuthorization,
-                                                   @RequestBody DocumentRequest documentRequest) throws IOException {
+                                                   @ModelAttribute DocumentRequest documentRequest) throws IOException {
 
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
