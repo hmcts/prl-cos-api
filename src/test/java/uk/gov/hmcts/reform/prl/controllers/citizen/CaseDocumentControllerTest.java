@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.documents.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
@@ -237,6 +238,7 @@ public class CaseDocumentControllerTest {
     public void testDocumentUpload() throws IOException {
         //Given
         MultipartFile mockFile = mock(MultipartFile.class);
+        DocumentRequest documentRequest = DocumentRequest.builder().file(mockFile).build();
         Document mockDocument = Document.builder().build();
         DocumentResponse documentResponse = DocumentResponse
                 .builder()
@@ -250,7 +252,7 @@ public class CaseDocumentControllerTest {
 
         //When
         ResponseEntity<?> response = caseDocumentController
-                .uploadCitizenDocument(authToken, s2sToken, mockFile);
+                .uploadCitizenDocument(authToken, s2sToken, documentRequest);
         //Then
         assertEquals(documentResponse, response.getBody());
     }
@@ -258,11 +260,12 @@ public class CaseDocumentControllerTest {
     @Test (expected = RuntimeException.class)
     public void testDocumentUploadNotAuthorised() throws IOException {
         MultipartFile mockFile = mock(MultipartFile.class);
+        DocumentRequest documentRequest = DocumentRequest.builder().file(mockFile).build();
 
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
 
         caseDocumentController
-            .uploadCitizenDocument(authToken, s2sToken, mockFile);
+            .uploadCitizenDocument(authToken, s2sToken, documentRequest);
     }
 
     @Test
