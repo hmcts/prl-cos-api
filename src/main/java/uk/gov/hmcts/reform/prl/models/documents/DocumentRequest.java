@@ -12,6 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DocumentRequest {
+    @JsonProperty("caseId")
+    private String caseId;
     @JsonProperty("file")
     private MultipartFile file;
 }
