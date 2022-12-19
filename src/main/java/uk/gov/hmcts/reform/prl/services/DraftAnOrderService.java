@@ -332,6 +332,8 @@ public class DraftAnOrderService {
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
         caseDataMap.put("appointedGuardianName", selectedOrder.getAppointedGuardianName());
+        log.info("Case typ of application {}", caseData.getCaseTypeOfApplication());
+        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
 
