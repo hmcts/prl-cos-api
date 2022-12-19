@@ -10,13 +10,9 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.BundleApiClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.bundle.BundleCreateRequestMapper;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-
-import java.util.List;
 
 @Slf4j
 @Service
