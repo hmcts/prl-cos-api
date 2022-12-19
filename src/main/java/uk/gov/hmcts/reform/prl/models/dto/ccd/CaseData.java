@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
@@ -685,4 +686,8 @@ public class CaseData implements MappableObject {
     private String helpWithFeesReferenceNumber;
     private String c100RebuildChildPostCode;
     private String c100RebuildConsentOrderDetails;
+
+    @JsonUnwrapped
+    @Builder.Default
+    private Flags caseFlags = Flags.builder().build();
 }
