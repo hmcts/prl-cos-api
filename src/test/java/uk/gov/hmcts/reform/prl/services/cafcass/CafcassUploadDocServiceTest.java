@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNav;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -70,7 +71,11 @@ public class CafcassUploadDocServiceTest {
 
     @Before
     public void setup() {
-        caseData = CaseData.builder().id(Long.parseLong(TEST_CASE_ID)).applicantCaseName("xyz").build();
+        caseData = CaseData.builder().id(Long.parseLong(TEST_CASE_ID)).applicantCaseName("xyz")
+            .courtnav(CourtNav.builder()
+                          .numberOfAttachments("1")
+                          .build())
+            .build();
         when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(randomUserId).build());
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
@@ -97,7 +102,7 @@ public class CafcassUploadDocServiceTest {
             .event(Event.builder()
                        .id("cafcass-document-upload")
                        .build())
-            .data(Map.of("FL401", tempDoc))
+            .data(Map.of("16_4_Report", tempDoc))
             .build();
         CaseDetails tempCaseDetails = CaseDetails.builder().data(Map.of("id", TEST_CASE_ID)).state(
             "SUBMITTED_PAID").createdDate(
@@ -122,7 +127,7 @@ public class CafcassUploadDocServiceTest {
              )
         ).thenReturn(CaseDetails.builder().id(Long.valueOf(TEST_CASE_ID)).data(Map.of(
             "typeOfDocument",
-            "fl401Doc1"
+            "16_4_ReportDoc1"
         )).build());
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -169,7 +174,7 @@ public class CafcassUploadDocServiceTest {
             MediaType.TEXT_PLAIN_VALUE,
             "FL401 case".getBytes()
         );
-        cafcassUploadDocService.uploadDocument("Bearer abc", file, "FL401",
+        cafcassUploadDocService.uploadDocument("Bearer abc", file, "16_4_Report",
                                            "1234567891234567"
         );
     }
@@ -188,15 +193,67 @@ public class CafcassUploadDocServiceTest {
             .event(Event.builder()
                        .id("cafcass-document-upload")
                        .build())
-            .data(Map.of("FL401", tempDoc))
+            .data(Map.of("16_4_Report", tempDoc))
             .build();
         CaseDetails tempCaseDetails = CaseDetails.builder().data(Map.of("id", TEST_CASE_ID)).state(
             "SUBMITTED_PAID").createdDate(
             LocalDateTime.now()).lastModified(LocalDateTime.now()).id(Long.valueOf(TEST_CASE_ID)).build();
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
         when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(null);
-        cafcassUploadDocService.uploadDocument("Bearer abc", file, "FL401",
+        cafcassUploadDocService.uploadDocument("Bearer abc", file, "16_4_Report",
                                                "1234567891234567"
+        );
+    }
+
+
+
+    @Test(expected = ResponseStatusException.class)
+    public void testWhenCaseDetailsNull() throws Exception {
+
+        uk.gov.hmcts.reform.prl.models.documents.Document tempDoc = uk.gov.hmcts.reform.prl.models.documents
+            .Document.builder()
+            .documentFileName("private-law.pdf")
+            .documentUrl(randomAlphaNumeric)
+            .documentBinaryUrl(randomAlphaNumeric)
+            .build();
+        Document document = testDocument();
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .eventToken("eventToken")
+            .event(Event.builder()
+                       .id("cafcass-document-upload")
+                       .build())
+            .data(Map.of("16_4_Report", tempDoc))
+            .build();
+        CaseDetails tempCaseDetails = null;
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(tempCaseDetails);
+        when(coreCaseDataApi.startEventForCaseWorker(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                                                     Mockito.any(), Mockito.any(), Mockito.any())
+        ).thenReturn(StartEventResponse.builder().eventId("cafcass-document-upload").token("eventToken").build());
+        when(caseDocumentClient.uploadDocuments(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                                                Mockito.any())).thenReturn(uploadResponse);
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(idamClient.getUserInfo(Mockito.any())).thenReturn(UserInfo.builder().uid(randomUserId).build());
+        when(coreCaseDataApi.submitEventForCaseWorker(
+                 authToken,
+                 s2sToken,
+                 randomUserId, PrlAppsConstants.JURISDICTION,
+                 PrlAppsConstants.CASE_TYPE,
+                 TEST_CASE_ID,
+                 true,
+                 caseDataContent
+             )
+        ).thenReturn(CaseDetails.builder().id(Long.valueOf(TEST_CASE_ID)).data(Map.of(
+            "typeOfDocument",
+            "16_4_ReportDoc1"
+        )).build());
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            Long.valueOf(TEST_CASE_ID)).data(stringObjectMap).build();
+
+        cafcassUploadDocService.uploadDocument("Bearer abc", file, "16_4_Report",
+                                               TEST_CASE_ID
         );
     }
 
