@@ -92,11 +92,10 @@ public class EditAndApproveDraftOrderController {
 
         log.info(" {}", WhatToDoWithOrderEnum.FINALIZE_SAVE_TO_SERVE_LATER);
         log.info(" {}", caseData.getServeOrderData().getWhatDoWithOrder());
-        log.info(" {}", caseData.getServeOrderData().getWhatDoWithOrder().getId());
 
         if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
             && WhatToDoWithOrderEnum.FINALIZE_SAVE_TO_SERVE_LATER
-            .equals(caseData.getServeOrderData().getWhatDoWithOrder().getId())) {
+            .getId().equals(caseData.getServeOrderData().getWhatDoWithOrder().getId())) {
             caseDataUpdated.putAll(draftAnOrderService.removeDraftOrderAndAddToFinalOrder(authorisation, caseData));
         } else {
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
