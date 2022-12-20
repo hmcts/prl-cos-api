@@ -91,7 +91,8 @@ public class EditAndApproveDraftOrderController {
         );
 
         if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
-            && WhatToDoWithOrderEnum.FINALIZE_SAVE_TO_SERVE_LATER.equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
+            && WhatToDoWithOrderEnum.FINALIZE_SAVE_TO_SERVE_LATER.getId()
+            .equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
             caseDataUpdated.putAll(draftAnOrderService.removeDraftOrderAndAddToFinalOrder(authorisation, caseData));
         } else {
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
