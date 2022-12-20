@@ -22,6 +22,7 @@ java:
         - idam-solicitor-password
         - courtnav-functional-test-user
         - courtnav-functional-test-pwd
+        - postcode-lookup-token
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
