@@ -22,6 +22,7 @@ public class OrderDetails {
     private final String typeOfOrder;
     private final String orderType;
     private final String orderTypeId;
+    private final String childrenList;
     private final Document orderDocument;
     private final OtherOrderDetails otherDetails;
 
