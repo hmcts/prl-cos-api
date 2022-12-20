@@ -52,12 +52,12 @@ public class CaseDataService {
             authTokenGenerator.generate(),
             cafCassSearchCaseTypeId
         );
-        log.debug("CCD response: " + objectMapper.writeValueAsString(searchResult));
+        log.debug("CCD response:  " + objectMapper.writeValueAsString(searchResult));
 
         CafCassResponse cafCassResponse = objectMapper.convertValue(searchResult,
                                                              CafCassResponse.class);
         cafCassFilter.filter(cafCassResponse);
-        //        getHearingDetails(authorisation,cafCassResponse);
+        getHearingDetails(authorisation,cafCassResponse);
         return cafCassResponse;
     }
 
