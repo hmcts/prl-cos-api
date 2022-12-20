@@ -10,21 +10,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum CafcassCymruDocumentsEnum {
     @JsonProperty("safeGuardingLetter")
-    SAFEGUARDING_LETTER("safeGuardingLetter", "Safeguarding letter"),
+    safeGuardingLetter("safeGuardingLetter", "Safeguarding letter"),
     @JsonProperty("section7Report")
-    SECTION_7_LETTER("section7Report", "Section 7 report"),
+    section7Report("section7Report", "Section 7 report"),
     @JsonProperty("s7AddendumReport")
-    S7_ADDENDUM_REPORT("s7AddendumReport", "S7 addendum report"),
+    s7AddendumReport("s7AddendumReport", "S7 addendum report"),
     @JsonProperty("report164")
-    REPORT_164("report164", "16.4 report"),
+    report164("report164", "16.4 report"),
     @JsonProperty("updateToSafeGuardingLetter")
-    UPDATE_SAFEGUARDING_LETTER("updateToSafeGuardingLetter", "Update to safeguarding letter"),
+    updateToSafeGuardingLetter("updateToSafeGuardingLetter", "Update to safeguarding letter"),
     @JsonProperty("s16RiskAssessment")
-    S16_RISK_ASSESSMENT("s16RiskAssessment", "S16A risk assessment"),
+    s16RiskAssessment("s16RiskAssessment", "S16A risk assessment"),
     @JsonProperty("childImpactReport")
-    CHILD_IMPACT_REPORT("childImpactReport", "Child Impact report"),
+    childImpactReport("childImpactReport", "Child Impact report"),
     @JsonProperty("otherReports")
-    OTHER_REPORTS("otherReports", "Other reports");
+    otherReports("otherReports", "Other reports");
 
 
     private final String id;

@@ -11,9 +11,9 @@ import lombok.RequiredArgsConstructor;
 public enum WhatToDoWithOrderEnum {
 
     @JsonProperty("saveAsDraft")
-    SAVE_AS_DRAFT("saveAsDraft", "Save the order as a draft"),
+    saveAsDraft("saveAsDraft", "Save the order as a draft"),
     @JsonProperty("finalizeSaveToServeLater")
-    FINALIZE_SAVE_TO_SERVE_LATER("finalizeSaveToServeLater", "Finalise the order, and save to serve later");
+    finalizeSaveToServeLater("finalizeSaveToServeLater", "Finalise the order, and save to serve later");
 
     private final String id;
     private final String displayedValue;

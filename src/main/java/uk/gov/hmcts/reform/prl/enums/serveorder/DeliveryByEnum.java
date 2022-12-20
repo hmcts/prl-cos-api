@@ -10,9 +10,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum DeliveryByEnum {
     @JsonProperty("email")
-    EMAIL("email", "Email"),
+    email("email", "Email"),
     @JsonProperty("post")
-    POST("post", "Post");
+    post("post", "Post");
 
 
     private final String id;

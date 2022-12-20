@@ -186,7 +186,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .serveOrderData(ServeOrderData.builder()
                                 .doYouWantToServeOrder(No)
-                                .whatDoWithOrder(WhatToDoWithOrderEnum.SAVE_AS_DRAFT).build())
+                                .whatDoWithOrder(WhatToDoWithOrderEnum.saveAsDraft).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -239,7 +239,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .serveOrderData(ServeOrderData.builder()
-                                .whatDoWithOrder(WhatToDoWithOrderEnum.SAVE_AS_DRAFT)
+                                .whatDoWithOrder(WhatToDoWithOrderEnum.saveAsDraft)
                                 .doYouWantToServeOrder(No).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());

@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 public enum OtherOrganisationOptions {
 
     @JsonProperty("anotherOrganisation")
-    ANOTHER_ORGANISATION_OPTION("anotherOrganisation", "Another organisation (optional)");
+    anotherOrganisation("anotherOrganisation", "Another organisation (optional)");
 
 
     private final String id;

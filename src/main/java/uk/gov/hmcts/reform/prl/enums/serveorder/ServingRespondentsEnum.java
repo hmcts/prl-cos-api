@@ -10,13 +10,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ServingRespondentsEnum {
     @JsonProperty("applicantLegalRepresentative")
-    APPLICANT_LEGAL_REPRESENTATIVE("applicantLegalRepresentative", "Applicant's legal representative"),
+    applicantLegalRepresentative("applicantLegalRepresentative", "Applicant's legal representative"),
     @JsonProperty("courtBailiff")
-    COURT_BAILIFF("courtBailiff", "Court bailiff"),
+    courtBailiff("courtBailiff", "Court bailiff"),
     @JsonProperty("unrepresentedApplicant")
-    UNREPRESENTED_APPLICANT("unrepresentedApplicant", "Unrepresented applicant who is arranging service"),
+    unrepresentedApplicant("unrepresentedApplicant", "Unrepresented applicant who is arranging service"),
     @JsonProperty("courtAdmin")
-    COURT_ADMIN("courtAdmin", "Court admin");
+    courtAdmin("courtAdmin", "Court admin");
 
 
     private final String id;
