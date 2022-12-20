@@ -57,7 +57,7 @@ public class CaseDataService {
         CafCassResponse cafCassResponse = objectMapper.convertValue(searchResult,
                                                              CafCassResponse.class);
         cafCassFilter.filter(cafCassResponse);
-        getHearingDetails(authorisation,cafCassResponse);
+        //        getHearingDetails(authorisation,cafCassResponse);
         return cafCassResponse;
     }
 

@@ -4,7 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -16,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
@@ -26,6 +30,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -69,6 +74,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENG_DOC_GEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH_DOC_GEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
@@ -281,6 +288,24 @@ public class DocumentGenService {
         return caseData;
     }
 
+    /*
+    Need to remove this method once we have clarity on document generation for citizen
+     */
+    public Map<String, Object> generateDocumentsForCitizenSubmission(String authorisation, CaseData caseData) throws Exception {
+
+        Map<String, Object> updatedCaseData = new HashMap<>();
+
+        caseData = fillOrgDetails(caseData);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        updatedCaseData.put(IS_ENG_DOC_GEN, Yes.toString());
+        updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
+        if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, null);
+        }
+        return updatedCaseData;
+
+    }
+
     public Map<String, Object> generateDocuments(String authorisation, CaseData caseData) throws Exception {
 
         Map<String, Object> updatedCaseData = new HashMap<>();
@@ -289,7 +314,7 @@ public class DocumentGenService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         if (documentLanguage.isGenEng()) {
-            updatedCaseData.put("isEngDocGen", Yes.toString());
+            updatedCaseData.put(IS_ENG_DOC_GEN, Yes.toString());
             if (isConfidentialInformationPresentForC100(caseData)) {
                 if (State.CASE_ISSUE.equals(caseData.getState())) {
                     updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
@@ -326,7 +351,7 @@ public class DocumentGenService {
             }
         }
         if (documentLanguage.isGenWelsh()) {
-            updatedCaseData.put("isWelshDocGen", Yes.toString());
+            updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
             if (isConfidentialInformationPresentForC100(caseData)) {
                 if (State.CASE_ISSUE.equals(caseData.getState())) {
                     updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
@@ -399,11 +424,11 @@ public class DocumentGenService {
             documentLanguage.isGenWelsh()
         );
         if (documentLanguage.isGenEng()) {
-            updatedCaseData.put("isEngDocGen", Yes.toString());
+            updatedCaseData.put(IS_ENG_DOC_GEN, Yes.toString());
             updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
         }
         if (documentLanguage.isGenWelsh()) {
-            updatedCaseData.put("isWelshDocGen", Yes.toString());
+            updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
             updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
         }
 
@@ -418,7 +443,9 @@ public class DocumentGenService {
         );
     }
 
-    private UploadedDocuments getDocument(String authorisation, GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest, String fileName)
+    private UploadedDocuments getDocument(String authorisation,
+                                          GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
+                                          String fileName)
         throws Exception {
         return generateCitizenUploadDocument(
             fileName,
@@ -743,14 +770,16 @@ public class DocumentGenService {
 
     }
 
-    private boolean isChildrenDetailsConfidentiality(CaseData caseData, Optional<TypeOfApplicationOrders> typeOfApplicationOrders) {
+    private boolean isChildrenDetailsConfidentiality(CaseData caseData,
+                                                     Optional<TypeOfApplicationOrders> typeOfApplicationOrders) {
         boolean childrenConfidentiality = false;
 
         if (typeOfApplicationOrders.isPresent() && typeOfApplicationOrders.get().getOrderType().contains(
             FL401OrderTypeEnum.occupationOrder)
             && Objects.nonNull(caseData.getHome())
             && YesOrNo.Yes.equals(caseData.getHome().getDoAnyChildrenLiveAtAddress())) {
-            List<ChildrenLiveAtAddress> childrenLiveAtAddresses = caseData.getHome().getChildren().stream().map(Element::getValue).collect(
+            List<ChildrenLiveAtAddress> childrenLiveAtAddresses =
+                caseData.getHome().getChildren().stream().map(Element::getValue).collect(
                 Collectors.toList());
 
             for (ChildrenLiveAtAddress address : childrenLiveAtAddresses) {
@@ -793,7 +822,8 @@ public class DocumentGenService {
         return getDocument(authorisation, generateAndUploadDocumentRequest, fileName);
     }
 
-    private UploadedDocuments generateCitizenUploadDocument(String fileName, GeneratedDocumentInfo generatedDocumentInfo,
+    private UploadedDocuments generateCitizenUploadDocument(String fileName,
+                                                            GeneratedDocumentInfo generatedDocumentInfo,
                                                             GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest) {
         if (null == generatedDocumentInfo) {
             return null;
@@ -847,5 +877,56 @@ public class DocumentGenService {
                 fileName,
                 generatedDocumentInfo
             )).build();
+    }
+
+    public DocumentResponse uploadDocument(String authorization, MultipartFile file) throws IOException {
+        try {
+            uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument
+                = uploadService.uploadDocument(
+                file.getBytes(),
+                file.getOriginalFilename(),
+                file.getContentType(),
+                authorization
+            );
+            log.info("Stored Doc Detail: " + stampedDocument.toString());
+            return DocumentResponse.builder().status("Success").document(Document.builder()
+                                                                             .documentBinaryUrl(stampedDocument.links.binary.href)
+                                                                             .documentUrl(stampedDocument.links.self.href)
+                                                                             .documentFileName(stampedDocument.originalDocumentName)
+                                                                             .documentCreatedOn(stampedDocument.createdOn)
+                                                                             .build()).build();
+
+        } catch (Exception e) {
+            log.error("Error while uploading document ." + e.getMessage());
+            throw e;
+        }
+    }
+
+    public DocumentResponse deleteDocument(String authorization, String documentId) {
+        try {
+            uploadService.deleteDocument(
+                authorization,
+                documentId
+            );
+            log.info("document deleted successfully..");
+            return DocumentResponse.builder().status("Success").build();
+
+        } catch (Exception e) {
+            log.error("Error while deleting  document ." + e.getMessage());
+            throw e;
+        }
+    }
+
+    public ResponseEntity<Resource> downloadDocument(String authorization, String documentId) {
+        try {
+            return uploadService.downloadDocument(
+                authorization,
+                documentId
+            );
+
+        } catch (Exception e) {
+            log.error("Error while downloading  document ." + e.getMessage());
+            throw e;
+        }
     }
 }

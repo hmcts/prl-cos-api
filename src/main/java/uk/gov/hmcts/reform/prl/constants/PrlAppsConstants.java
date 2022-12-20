@@ -10,6 +10,7 @@ import java.util.List;
 public class PrlAppsConstants {
     public static final String JURISDICTION = "PRIVATELAW";
     public static final String CASE_TYPE = "PRLAPPS";
+    public static final String PRL_SERVICE_IDENTIFIER = "ABA5";
 
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
@@ -110,6 +111,12 @@ public class PrlAppsConstants {
     public static final String FINAL_TEMPLATE_NAME = "finalTemplateName";
     public static final String GENERATE_FILE_NAME = "generateFileName";
 
+    public static final String DRAFT_TEMPLATE_WELSH = "draftTemplateWelsh";
+    public static final String DRAFT_WELSH_FILE_NAME = "draftWelshFileName";
+
+    public static final String FINAL_TEMPLATE_WELSH = "finaltemplateWelsh";
+    public static final String WELSH_FILE_NAME = "welshFileName";
+
     public static final String URL_STRING = "/";
     public static final String D_MMMM_YYYY = "d MMMM yyyy";
 
@@ -161,4 +168,30 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_REQUEST = "documentRequestedByCourt";
 
     public static final String CITIZEN_UPLOAD_DOC_DATE_FORMAT = "dd-MMM-yyyy";
+
+    public static final String CITIZEN_PRL_CREATE_EVENT = "citizenCreate";
+    public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
+    public static final String CITIZEN_ROLE = "citizen";
+
+    public static final String REGION_SCOTLAND = "Scotland";
+
+    public static final String OTHER = "Other";
+
+    public static final String WAITING_TO_BE_LISTED = "WAITING_TO_BE_LISTED";
+    public static final String LISTED = "LISTED";
+    public static final String AWAITING_HEARING_DETAILS = "AWAITING_HEARING_DETAILS";
+    public static final String CANCELLED = "CANCELLED";
+    public static final String ADJOURNED = "ADJOURNED";
+    public static final String POSTPONED = "POSTPONED";
+    public static final String COMPLETED = "COMPLETED";
+    public static final String CAFCASS_REPORTS = "Cafcass reports";
+    public static final String EXPERT_REPORTS = "Expert reports";
+    public static final String APPLICANT_STATMENT =
+        "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot";
+
+    public static final String IS_ENG_DOC_GEN = "isEngDocGen";
+
+    public static final String IS_WELSH_DOC_GEN = "isWelshDocGen";
+
+    public static final String INVALID_CLIENT = "Invalid Client";
 }

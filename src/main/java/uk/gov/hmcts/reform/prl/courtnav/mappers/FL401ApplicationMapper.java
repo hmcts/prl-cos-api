@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ApplicantsDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ChildAtAddress;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNav;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtnavAddress;
@@ -91,16 +92,19 @@ public class FL401ApplicationMapper {
 
     public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData) throws NotFoundException {
         CaseData caseData = null;
+        CourtNav courtNav = CourtNav.builder().build();
         caseData = CaseData.builder()
             .isCourtNavCase(YesOrNo.Yes)
             .state(State.SUBMITTED_PAID)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .caseOrigin(courtNavCaseData.getMetaData().getCaseOrigin())
-            .courtNavApproved(courtNavCaseData.getMetaData().isCourtNavApproved() ? YesOrNo.Yes : YesOrNo.No)
-            .hasDraftOrder(courtNavCaseData.getMetaData().isHasDraftOrder() ? YesOrNo.Yes : YesOrNo.No)
-            .numberOfAttachments(String.valueOf(courtNavCaseData.getMetaData().getNumberOfAttachments()))
-            .specialCourtName(courtNavCaseData.getMetaData().getCourtSpecialRequirements())
-            .applicantAge(ApplicantAge.getValue(String.valueOf(courtNavCaseData.getFl401().getBeforeStart().getApplicantHowOld())))
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin(courtNavCaseData.getMetaData().getCaseOrigin())
+                          .courtNavApproved(courtNavCaseData.getMetaData().isCourtNavApproved() ? YesOrNo.Yes : YesOrNo.No)
+                          .hasDraftOrder(courtNavCaseData.getMetaData().isHasDraftOrder() ? YesOrNo.Yes : YesOrNo.No)
+                          .numberOfAttachments(String.valueOf(courtNavCaseData.getMetaData().getNumberOfAttachments()))
+                          .specialCourtName(courtNavCaseData.getMetaData().getCourtSpecialRequirements())
+                          .applicantAge(ApplicantAge.getValue(String.valueOf(courtNavCaseData.getFl401().getBeforeStart().getApplicantHowOld())))
+                          .build())
             .applicantCaseName(getCaseName(courtNavCaseData))
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
                                          .orderType(courtNavCaseData.getFl401().getSituation().getOrdersAppliedFor())
@@ -173,10 +177,7 @@ public class FL401ApplicationMapper {
                                                                                                           .mergeDate()))
                                                     .relationshipDateComplexEndDate(getRelationShipEndDate(courtNavCaseData))
                                                     .build())
-                .applicantRelationshipDate(LocalDate.parse(courtNavCaseData
-                                                               .getFl401()
-                                                               .getRelationshipWithRespondent()
-                                                               .getCeremonyDate().mergeDate()))
+                .applicantRelationshipDate(getRelationShipCeremonyDate(courtNavCaseData))
                 .build()) : null)
             .respondentRelationOptions((courtNavCaseData
                 .getFl401()
@@ -258,6 +259,20 @@ public class FL401ApplicationMapper {
             .getRespondentBehaviour().getStopBehaviourTowardsApplicant())
             ? getBehaviourTowardsApplicant(courtNavCaseData) : null;
     }
+
+
+    private LocalDate getRelationShipCeremonyDate(CourtNavFl401 courtNavCaseData) {
+        LocalDate cermonyDate = null;
+
+        if (null != courtNavCaseData.getFl401().getRelationshipWithRespondent().getCeremonyDate()) {
+            cermonyDate = LocalDate.parse(courtNavCaseData
+                                              .getFl401()
+                                              .getRelationshipWithRespondent()
+                                              .getCeremonyDate().mergeDate());
+        }
+        return cermonyDate;
+    }
+
 
     private LocalDate getRelationShipEndDate(CourtNavFl401 courtNavCaseData) {
         LocalDate endDate = null;

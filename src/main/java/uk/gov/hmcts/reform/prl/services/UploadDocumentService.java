@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -84,9 +87,7 @@ public class UploadDocumentService {
             }
 
         }
-
         if (!uploadedDocumentRequest.getFiles().isEmpty()) {
-
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -96,7 +97,7 @@ public class UploadDocumentService {
             );
             UploadedDocuments uploadedDocuments = null;
 
-            for (MultipartFile file: uploadedDocumentRequest.getFiles()) {
+            for (MultipartFile file : uploadedDocumentRequest.getFiles()) {
 
                 uploadedDocuments = UploadedDocuments.builder().dateCreated(LocalDate.now())
                     .uploadedBy(partyId)
@@ -121,6 +122,23 @@ public class UploadDocumentService {
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    public void deleteDocument(String authorizationToken, String documentId) {
+        caseDocumentClient.deleteDocument(
+            authorizationToken,
+            authTokenGenerator.generate(),
+            UUID.fromString(documentId),
+            true
+        );
+    }
+
+    public ResponseEntity<Resource> downloadDocument(String authorizationToken, String documentId) {
+        return caseDocumentClient.getDocumentBinary(
+            authorizationToken,
+            authTokenGenerator.generate(),
+            UUID.fromString(documentId)
+        );
     }
 
 }
