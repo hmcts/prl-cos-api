@@ -119,10 +119,10 @@ public class CafcassUploadDocService {
     }
 
     private void checkIfNumberOfAttachmentExceeds(CaseData caseData) {
-        if (caseData.getNumberOfAttachments() != null && caseData.getCafcassUploadedDocs() != null
-            && Integer.valueOf(caseData.getNumberOfAttachments())
+        if (caseData.getCourtnav().getNumberOfAttachments() != null && caseData.getCafcassUploadedDocs() != null
+            && Integer.parseInt(caseData.getCourtnav().getNumberOfAttachments())
             <= caseData.getCafcassUploadedDocs().size()) {
-            log.error("Number of attachments size is reached {}", caseData.getNumberOfAttachments());
+            log.error("Number of attachments size is reached {}", caseData.getCourtnav().getNumberOfAttachments());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
     }

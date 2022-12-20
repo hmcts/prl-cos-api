@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ApplicantsDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.BeforeStart;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ChildAtAddress;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNav;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavDate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
@@ -92,9 +93,12 @@ public class FL401ApplicationMapperTest {
     private CourtNavStmtOfTruth stmtOfTruth;
     private GoingToCourt goingToCourt;
     private CourtNavMetaData courtNavMetaData;
+    private CourtNav courtNav;
 
     @Before
     public void setUp() {
+
+        courtNav = CourtNav.builder().build();
 
         court = Court.builder()
             .courtName("testcourt")
@@ -355,10 +359,12 @@ public class FL401ApplicationMapperTest {
                           .build())
             .build();
         CaseData caseData = CaseData.builder()
-            .caseOrigin(null)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin(null)
+                          .build())
             .build();
 
-        assertEquals(courtNavFl401.getMetaData().getCaseOrigin(), caseData.getCaseOrigin());
+        assertEquals(courtNavFl401.getMetaData().getCaseOrigin(), caseData.getCourtnav().getCaseOrigin());
         assertNull(courtNavFl401.getMetaData().getCaseOrigin());
 
     }
@@ -379,7 +385,9 @@ public class FL401ApplicationMapperTest {
 
 
         CaseData caseData = CaseData.builder()
-            .applicantAge(ApplicantAge.eighteenOrOlder)
+            .courtnav(courtNav.toBuilder()
+                          .applicantAge(ApplicantAge.eighteenOrOlder)
+                          .build())
             .build();
 
         courtNavFl401 = CourtNavFl401.builder()
@@ -390,7 +398,7 @@ public class FL401ApplicationMapperTest {
                        .build())
             .build();
 
-        assertEquals(courtNavFl401.getFl401().getBeforeStart().getApplicantHowOld(), caseData.getApplicantAge());
+        assertEquals(courtNavFl401.getFl401().getBeforeStart().getApplicantHowOld(), caseData.getCourtnav().getApplicantAge());
         assertNotNull(courtNavFl401.getFl401().getBeforeStart().getApplicantHowOld());
 
     }
@@ -501,8 +509,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                            .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -549,8 +559,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -598,8 +610,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -649,8 +663,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -705,8 +721,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -758,8 +776,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -831,8 +851,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -881,8 +903,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -927,8 +951,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -974,8 +1000,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -1023,8 +1051,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -1072,8 +1102,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -1129,8 +1161,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -1182,8 +1216,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -1247,8 +1283,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
@@ -1312,8 +1350,10 @@ public class FL401ApplicationMapperTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .caseOrigin("courtnav")
-            .courtNavApproved(YesOrNo.No)
+            .courtnav(courtNav.toBuilder()
+                          .caseOrigin("courtnav")
+                          .courtNavApproved(YesOrNo.No)
+                          .build())
             .build();
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
