@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
-import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -37,7 +36,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class C100IssueCaseController {
 
     private final OrganisationService organisationService;
-    private final CaseWorkerEmailService caseWorkerEmailService;
     private final ObjectMapper objectMapper;
     private final AllTabServiceImpl allTabsService;
     private final DocumentGenService documentGenService;
@@ -55,8 +53,18 @@ public class C100IssueCaseController {
             requireNonNull(caseData);
             sendgridService.sendEmail(c100JsonMapper.map(caseData));
         }
-        caseData = caseData.toBuilder().issueDate(LocalDate.now()).build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
+            String[] venueDetails = caseData.getCourtList().getValue().getCode().split("-");
+            String baseLocation = Arrays.stream(venueDetails).toArray()[0].toString();
+            String region = Arrays.stream(venueDetails).toArray()[1].toString();
+            String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
+            caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
+                .region(region).baseLocation(baseLocation).build());
+            caseData = caseData.toBuilder().issueDate(LocalDate.now()).courtName(courtName).build();
+            log.info("******* CaseManagementLocation {}", caseDataUpdated.get("caseManagementLocation"));
+        }
 
         // Generate All Docs and set to casedataupdated.
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
@@ -64,24 +72,8 @@ public class C100IssueCaseController {
         // Refreshing the page in the same event. Hence no external event call needed.
         // Getting the tab fields and add it to the casedetails..
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-
         caseDataUpdated.putAll(allTabsFields);
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
-
-        try {
-            caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            log.error("Email notification could not be sent");
-        }
-        if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
-            String[] venueDetails = caseData.getCourtList().getValue().getCode().split("-");
-            String baseLocation = Arrays.stream(venueDetails).toArray()[0].toString();
-            String region = Arrays.stream(venueDetails).toArray()[1].toString();
-            caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-                .region(region).baseLocation(baseLocation).build());
-            log.info("******* CaseManagementLocation {}", caseDataUpdated.get("caseManagementLocation"));
-        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
 }

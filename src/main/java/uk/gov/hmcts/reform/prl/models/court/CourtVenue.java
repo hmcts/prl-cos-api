@@ -11,6 +11,8 @@ public class CourtVenue {
     private String courtVenueId;
     @JsonProperty("epimms_id")
     private String courtEpimmsId;
+    @JsonProperty("court_type_id")
+    private String courtTypeId;
     @JsonProperty("site_name")
     private String siteName;
     @JsonProperty("region_id")
