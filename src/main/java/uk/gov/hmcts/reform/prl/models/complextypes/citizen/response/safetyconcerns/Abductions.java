@@ -12,15 +12,15 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class Abductions {
-    private final String c1A_abductionReasonOutsideUk;
-    private final String c1A_childsCurrentLocation;
-    private final YesOrNo c1A_childrenMoreThanOnePassports;
-    private final List<PassportPossessionEnum> c1A_possessionChildrenPassport;
-    private final String c1A_provideOtherDetails;
-    private final YesOrNo c1A_passportOffice;
-    private final YesOrNo c1A_abductionPassportOfficeNotified;
-    private final String c1A_previousAbductionsShortDesc;
-    private final YesOrNo c1A_policeOrInvestigatorInvolved;
-    private final String c1A_policeOrInvestigatorOtherDetails;
-    private final YesOrNo c1A_childAbductedBefore;
+    private final String c1AabductionReasonOutsideUk;
+    private final String c1AchildsCurrentLocation;
+    private final YesOrNo c1AchildrenMoreThanOnePassports;
+    private final List<PassportPossessionEnum> c1ApossessionChildrenPassport;
+    private final String c1AprovideOtherDetails;
+    private final YesOrNo c1ApassportOffice;
+    private final YesOrNo c1AabductionPassportOfficeNotified;
+    private final String c1ApreviousAbductionsShortDesc;
+    private final YesOrNo c1ApoliceOrInvestigatorInvolved;
+    private final String c1ApoliceOrInvestigatorOtherDetails;
+    private final YesOrNo c1AchildAbductedBefore;
 }
