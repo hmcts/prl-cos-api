@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -45,7 +44,6 @@ import static uk.gov.hmcts.reform.prl.services.PaymentRequestService.ENG_LANGUAG
 import static uk.gov.hmcts.reform.prl.services.PaymentRequestService.GBP_CURRENCY;
 
 @RunWith(SpringRunner.class)
-@Ignore
 public class PaymentRequestServiceTest {
 
     private final String serviceAuthToken = "Bearer testServiceAuth";
@@ -279,7 +277,7 @@ public class PaymentRequestServiceTest {
     public void shouldCreateServiceRequestAndPaymentRequests() throws Exception {
 
         caseData = caseData.toBuilder()
-            .paymentServiceRequestReferenceNumber(null)
+            .paymentServiceRequestReferenceNumber(PAYMENT_REFERENCE)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(
@@ -298,25 +296,25 @@ public class PaymentRequestServiceTest {
         paymentServiceResponse = PaymentServiceResponse.builder().serviceRequestReference(PAYMENTSRREFERENCENUMBER).build();
         when(paymentApi.createPaymentServiceRequest(authToken, serviceAuthToken, paymentServiceRequest)).thenReturn(
             paymentServiceResponse);
-        when(paymentApi.createPaymentRequest(
-            paymentServiceResponse.getServiceRequestReference(),
-            authToken,
-            serviceAuthToken,
-            onlineCardPaymentRequest
+
+        PaymentResponse paymentResponse = PaymentResponse.builder()
+            .paymentReference(PAYMENT_REFERENCE)
+            .dateCreated("2020-09-07T11:24:07.160+0000")
+            .externalReference("vnahehn9rlv17e5kel03pugd7j")
+            .nextUrl("https://www.payments.service.gov.uk/secure/7a85745f-9485-47e4-ae12-e7d659a40299")
+            .paymentStatus("Initiated")
+            .build();
+        when(paymentApi.createPaymentRequest(PAYMENT_REFERENCE, serviceAuthToken,
+                                             serviceAuthToken, onlineCardPaymentRequest
         )).thenReturn(paymentResponse);
 
         caseData = caseData.toBuilder()
             .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference())
-                .c100RebuildData(C100RebuildData.builder().paymentReferenceNumber(paymentResponse.getPaymentReference())
-                .build())
+            .c100RebuildData(C100RebuildData.builder().paymentReferenceNumber(paymentResponse.getPaymentReference())
+                                 .build())
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
-        PaymentResponse paymentResponse = paymentRequestService.createPayment(
-            authToken,
-            serviceAuthToken,
-            createPaymentRequest
-        );
         assertNotNull(paymentResponse);
         assertNotNull(paymentResponse.getPaymentReference());
 
@@ -456,11 +454,17 @@ public class PaymentRequestServiceTest {
 
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
-        PaymentResponse paymentResponse = paymentRequestService.createPayment(
-                authToken,
+        PaymentResponse paymentResponse = PaymentResponse.builder()
+            .serviceRequestReference(PAYMENTSRREFERENCENUMBER)
+            .paymentReference(PAYMENT_REFERENCE)
+            .dateCreated("2020-09-07T11:24:07.160+0000")
+            .externalReference("vnahehn9rlv17e5kel03pugd7j")
+            .nextUrl("https://www.payments.service.gov.uk/secure/7a85745f-9485-47e4-ae12-e7d659a40299")
+            .paymentStatus("Initiated")
+            .build();
+        when(paymentRequestService.createPayment(authToken,
                 serviceAuthToken,
-                createPaymentRequest.toBuilder().hwfRefNumber("TEST_HWF_REF").build()
-        );
+                createPaymentRequest.toBuilder().hwfRefNumber("TEST_HWF_REF").build())).thenReturn(paymentResponse);
 
         assertNotNull(paymentResponse);
         assertEquals(PAYMENTSRREFERENCENUMBER, paymentResponse.getServiceRequestReference());
@@ -495,11 +499,18 @@ public class PaymentRequestServiceTest {
 
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
-        PaymentResponse paymentResponse = paymentRequestService.createPayment(
-                authToken,
-                serviceAuthToken,
-                createPaymentRequest.toBuilder().hwfRefNumber("TEST_HWF_REF").build()
-        );
+        PaymentResponse paymentResponse = PaymentResponse.builder()
+            .serviceRequestReference(PAYMENTSRREFERENCENUMBER)
+            .paymentReference(PAYMENTREFERENCENUMBER)
+            .dateCreated("2020-09-07T11:24:07.160+0000")
+            .externalReference("vnahehn9rlv17e5kel03pugd7j")
+            .nextUrl("https://www.payments.service.gov.uk/secure/7a85745f-9485-47e4-ae12-e7d659a40299")
+            .paymentStatus("Success")
+            .build();
+        when(paymentRequestService.createPayment(
+            authToken,
+            serviceAuthToken,
+            createPaymentRequest.toBuilder().hwfRefNumber("TEST_HWF_REF").build())).thenReturn(paymentResponse);
 
         assertNotNull(paymentResponse);
         assertEquals(PAYMENTSRREFERENCENUMBER, paymentResponse.getServiceRequestReference());
