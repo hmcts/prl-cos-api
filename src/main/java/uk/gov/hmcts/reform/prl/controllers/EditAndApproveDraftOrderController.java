@@ -90,9 +90,6 @@ public class EditAndApproveDraftOrderController {
             caseData.getJudgeDirectionsToAdmin()
         );
 
-        log.info(" {}", WhatToDoWithOrderEnum.finalizeSaveToServeLater);
-        log.info(" {}", caseData.getServeOrderData().getWhatDoWithOrder());
-
         if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
             && WhatToDoWithOrderEnum.finalizeSaveToServeLater
             .equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
@@ -147,8 +144,15 @@ public class EditAndApproveDraftOrderController {
             CaseData.class
         );
         log.info("Case data {}", caseData);
+        Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(caseData);
+        String orderStatus = (String) response.get("status");
+        log.info("** Order status {}", orderStatus);
+        if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
+            && !("Judge reviewed".equalsIgnoreCase(orderStatus))) {
+            return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("Selected order is not reviewed by Judge.")).build();
+        }
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(draftAnOrderService.populateCommonDraftOrderFields(caseData)).build();
+            .data(response).build();
     }
     /*@PostMapping(path = "/populate-draft-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
