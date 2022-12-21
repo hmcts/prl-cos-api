@@ -145,7 +145,7 @@ public class EditAndApproveDraftOrderController {
         );
         log.info("Case data {}", caseData);
         Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(caseData);
-        String orderStatus = (String) response.get("status");
+        String orderStatus = (String) response.remove("status");
         log.info("** Order status {}", orderStatus);
         if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
             && !("Judge reviewed".equalsIgnoreCase(orderStatus))) {
