@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationa
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.safetyconcerns.SafetyConcerns;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
 
 @Data
 @Builder(toBuilder = true)
@@ -30,4 +31,5 @@ public class Response {
     private final CitizenFlags citizenFlags;
     private final String safeToCallOption;
     private final SafetyConcerns safetyConcerns;
+    private final ReasonableAdjustmentsSupport supportYouNeed;
 }
