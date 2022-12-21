@@ -527,9 +527,8 @@ public class ManageOrderService {
                     .map(Element::getValue)
                     .collect(Collectors.toList());
             }
-            for (int i = 0; i < children.size(); i++) {
-                Child child = children.get(i);
-                builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + " " + child.getLastName()));
+            for (Child child : children) {
+                builder.append(child.getFirstName()).append(" ").append(child.getLastName());
                 builder.append("\n");
             }
         } else {
@@ -539,9 +538,8 @@ public class ManageOrderService {
                 List<ApplicantChild> children = applicantChildDetails.get().stream()
                     .map(Element::getValue)
                     .collect(Collectors.toList());
-                for (int i = 0; i < children.size(); i++) {
-                    ApplicantChild child = children.get(i);
-                    builder.append(String.format("Child %d: %s", i + 1, child.getFullName()));
+                for (ApplicantChild child : children) {
+                    builder.append(child.getFullName());
                     builder.append("\n");
                 }
             }
