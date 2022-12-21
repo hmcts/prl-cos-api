@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
-public class All_Concerns {
+public class AllConcerns {
     private final SafetyConcerns c1asafetyconcerns;
     private final Otherconcerns otherconcerns;
     private final Abductions abductions;
