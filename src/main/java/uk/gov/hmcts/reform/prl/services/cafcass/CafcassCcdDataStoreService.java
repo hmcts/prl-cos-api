@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 
 @Service
+@Slf4j
 public class CafcassCcdDataStoreService {
 
     @Autowired
@@ -22,6 +24,12 @@ public class CafcassCcdDataStoreService {
      * @return SearchResult object.
      */
     public SearchResult searchCases(String authorisation, String searchString, String serviceAuthorisation, String caseType) {
+
+        log.info("HHHHHH {}",authorisation);
+        log.info("serviceAuthorisation {}",serviceAuthorisation);
+        log.info("caseType {}",caseType);
+        log.info("searchString {}",searchString);
+
 
         return coreCaseDataApi.searchCases(authorisation, serviceAuthorisation, caseType,
                                            searchString);
