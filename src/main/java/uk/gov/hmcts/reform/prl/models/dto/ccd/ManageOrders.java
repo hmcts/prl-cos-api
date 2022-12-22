@@ -30,6 +30,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
+@SuppressWarnings("unchecked")
 public class ManageOrders {
 
     private final String childListForSpecialGuardianship;
