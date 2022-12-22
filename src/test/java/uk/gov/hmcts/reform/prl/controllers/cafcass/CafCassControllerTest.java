@@ -64,7 +64,7 @@ public class CafCassControllerTest {
             "startDate",
             "endDate"
         );
-        assertEquals("true","true");
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         //        CafCassResponse realCafCassResponse = (CafCassResponse) responseEntity.getBody();
         //        assertEquals(
         //            objectMapper.writeValueAsString(expectedCafCassResponse),
