@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.enums.citizen;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -9,14 +10,22 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ReasonableAdjustmentsEnum {
 
-    docsformat("I need documents in an alternative format"),
-    commhelp("I need help communicating and understanding"),
-    hearingsupport("I need to bring support with me to a hearing"),
-    hearingcomfort("I need something to feel comfortable during a hearing"),
-    travellinghelp("I need help travelling to, or moving around court buildings"),
-    unabletotakecourtproceedings("Is there a reason you are unable to take part in the court proceedings?"),
-    nosupport("No, I do not need any extra support at this time");
+    @JsonProperty("docsformat")
+    docsformat("docsformat","I need documents in an alternative format"),
+    @JsonProperty("commhelp")
+    commhelp("commhelp","I need help communicating and understanding"),
+    @JsonProperty("hearingsupport")
+    hearingsupport("hearingsupport","I need to bring support with me to a hearing"),
+    @JsonProperty("hearingcomfort")
+    hearingcomfort("hearingcomfort","I need something to feel comfortable during a hearing"),
+    @JsonProperty("travellinghelp")
+    travellinghelp("travellinghelp","I need help travelling to, or moving around court buildings"),
+    @JsonProperty("unabletotakecourtproceedings")
+    unabletotakecourtproceedings("unabletotakecourtproceedings","Is there a reason you are unable to take part in the court proceedings?"),
+    @JsonProperty("nosupport")
+    nosupport("nosupport","No, I do not need any extra support at this time");
 
+    private final String id;
     private final String displayedValue;
 
     @JsonValue
