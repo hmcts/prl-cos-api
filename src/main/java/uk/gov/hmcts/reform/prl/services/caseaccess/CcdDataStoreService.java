@@ -5,7 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.exception.AuthorisationException;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
+import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesRequest;
+import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.caseaccess.RemoveUserRolesRequest;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
@@ -23,7 +26,7 @@ public class CcdDataStoreService {
     private final CaseRoleClient caseRoleClient;
 
     public void removeCreatorRole(String caseId, String authorisation) {
-        UserDetails userDetails =  userService.getUserDetails(authorisation);
+        UserDetails userDetails = userService.getUserDetails(authorisation);
         String userId = userDetails.getId();
 
         log.info("CaseID: {} removing [CREATOR] case roles from user {}", caseId, userId);
@@ -56,5 +59,41 @@ public class CcdDataStoreService {
         return asList(
             buildCaseUser(caseId, "[CREATOR]", userId)
         );
+    }
+
+    public FindUserCaseRolesResponse findUserCaseRoles(String caseId, String authorisation) {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String userId = userDetails.getId();
+        log.info("Finding case roles for the user {} for CaseID: {}", userId, caseId);
+
+        return caseRoleClient.findUserCaseRoles(
+            authorisation,
+            authTokenGenerator.generate(),
+            buildFindUserCaseRolesRequest(caseId, userId)
+        );
+    }
+
+    public CaseUser findRespondentSolicitorCaseRoles(String caseId, String authorisation) {
+        log.info("Finding Respondent solicitor case roles for the for CaseID: {}", caseId);
+        FindUserCaseRolesResponse findUserCaseRolesResponse = findUserCaseRoles(caseId, authorisation);
+        if (findUserCaseRolesResponse != null
+            && findUserCaseRolesResponse.getCaseUsers() != null
+            && !findUserCaseRolesResponse.getCaseUsers().isEmpty()) {
+            return findUserCaseRolesResponse.getCaseUsers()
+                .stream()
+                .filter(x -> x.getCaseRole().startsWith("SOLICITOR"))
+                .findFirst()
+                .orElseThrow(
+                    () -> new AuthorisationException("Invalid respondent solicitor access"));
+        }
+        return null;
+    }
+
+    private FindUserCaseRolesRequest buildFindUserCaseRolesRequest(String caseId, String userId) {
+        return FindUserCaseRolesRequest
+            .builder()
+            .caseIds(List.of(caseId))
+            .userIds(List.of(userId))
+            .build();
     }
 }

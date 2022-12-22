@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.services;
+package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
 
 import lombok.RequiredArgsConstructor;

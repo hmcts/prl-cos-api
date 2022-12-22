@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.respondentsolicitor;
+package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.RespondentSolicitorMiamService;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorMiamService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,11 +21,11 @@ import static org.mockito.Mockito.when;
 
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class MiamControllerTest {
+public class C100RespondentSolicitorControllerTest {
 
 
     @InjectMocks
-    private MiamController miamController;
+    private C100RespondentSolicitorController c100RespondentSolicitorController;
 
     @Mock
     private RespondentSolicitorMiamService respondentSolicitorMiamService;
@@ -52,8 +52,8 @@ public class MiamControllerTest {
                              .data(caseData).build()).build();
 
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = miamController
-            .handleAboutToStart(callbackRequest);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = c100RespondentSolicitorController
+            .handleAboutToStartMiam(callbackRequest);
         assertEquals("Collapsable", aboutToStartOrSubmitCallbackResponse.getData().get("whatIsMiamPlaceHolder"));
         assertEquals("1", aboutToStartOrSubmitCallbackResponse.getData().get("option1"));
         assertEquals("TestHeader", aboutToStartOrSubmitCallbackResponse.getData().get("miamHeader"));
@@ -72,8 +72,8 @@ public class MiamControllerTest {
                              .data(caseData).build()).build();
 
         when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse result = miamController.handleAboutToSubmit("test auth",
-                                                                                            callbackRequest);
+        AboutToStartOrSubmitCallbackResponse result = c100RespondentSolicitorController.handleAboutToSubmit("test auth",
+                                                                                                            callbackRequest);
         assertNotNull(result);
 
     }
@@ -91,8 +91,8 @@ public class MiamControllerTest {
                              .data(caseData).build()).build();
 
         when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse result = miamController.handleMidEvent("test auth",
-                                                                                         callbackRequest);
+        AboutToStartOrSubmitCallbackResponse result = c100RespondentSolicitorController.handleMidEvent("test auth",
+                                                                                                       callbackRequest);
         assertNotNull(result);
 
     }
