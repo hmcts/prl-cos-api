@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.enums.citizen;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
@@ -34,10 +33,5 @@ public enum SafetyArrangemensEnum {
     @JsonValue
     public String getDisplayedValue() {
         return displayedValue;
-    }
-
-    @JsonCreator
-    public static SafetyArrangemensEnum getValue(String key) {
-        return SafetyArrangemensEnum.valueOf(key);
     }
 }
