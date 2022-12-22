@@ -65,13 +65,13 @@ public class CafCassControllerTest {
             "endDate"
         );
         assertEquals("true","true");
-//        CafCassResponse realCafCassResponse = (CafCassResponse) responseEntity.getBody();
-//        assertEquals(
-//            objectMapper.writeValueAsString(expectedCafCassResponse),
-//            objectMapper.writeValueAsString(realCafCassResponse)
-//        );
-//        assertEquals(realCafCassResponse.getTotal(), 2);
-//        assertEquals(realCafCassResponse.getCases().size(), 2);
+        //        CafCassResponse realCafCassResponse = (CafCassResponse) responseEntity.getBody();
+        //        assertEquals(
+        //            objectMapper.writeValueAsString(expectedCafCassResponse),
+        //            objectMapper.writeValueAsString(realCafCassResponse)
+        //        );
+        //        assertEquals(realCafCassResponse.getTotal(), 2);
+        //        assertEquals(realCafCassResponse.getCases().size(), 2);
     }
 
     @Test
