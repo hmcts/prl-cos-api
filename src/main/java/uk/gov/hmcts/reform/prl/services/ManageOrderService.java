@@ -540,7 +540,7 @@ public class ManageOrderService {
                     .collect(Collectors.toList());
                 for (ApplicantChild child : children) {
                     builder.append(child.getFullName());
-                    builder.append("\n");
+                    builder.append("<br/>");
                 }
             }
         }
