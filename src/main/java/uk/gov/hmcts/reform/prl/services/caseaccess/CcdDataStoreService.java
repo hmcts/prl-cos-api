@@ -76,12 +76,17 @@ public class CcdDataStoreService {
     public CaseUser findRespondentSolicitorCaseRoles(String caseId, String authorisation) {
         log.info("Finding Respondent solicitor case roles for the for CaseID: {}", caseId);
         FindUserCaseRolesResponse findUserCaseRolesResponse = findUserCaseRoles(caseId, authorisation);
+        log.info("findUserCaseRolesResponse {}", findUserCaseRolesResponse);
         if (findUserCaseRolesResponse != null
             && findUserCaseRolesResponse.getCaseUsers() != null
             && !findUserCaseRolesResponse.getCaseUsers().isEmpty()) {
+            findUserCaseRolesResponse.getCaseUsers()
+                .stream()
+                .forEach(x -> log.info("data found {}, {}, {}", x.getCaseId(), x.getUserId(), x.getCaseRole()));
+
             return findUserCaseRolesResponse.getCaseUsers()
                 .stream()
-                .filter(x -> x.getCaseRole().startsWith("SOLICITOR"))
+                .filter(x -> x.getCaseRole().startsWith("[SOLICITOR"))
                 .findFirst()
                 .orElseThrow(
                     () -> new AuthorisationException("Invalid respondent solicitor access"));
