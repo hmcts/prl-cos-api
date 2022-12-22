@@ -63,7 +63,8 @@ public class CafCassFilter {
         List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases()
             .stream().filter(cafCassCaseDetail -> {
                 if (!ObjectUtils.isEmpty(cafCassCaseDetail.getCaseData().getApplicants())) {
-                    log.info("66666666");
+                    log.info("66666666 {}",cafCassCaseDetail);
+                    log.info("6161616161 {}",cafCassCaseDetail.getCaseData());
                     return hasApplicantValidPostcode(cafCassCaseDetail.getCaseData());
                 } else {
                     return false;
