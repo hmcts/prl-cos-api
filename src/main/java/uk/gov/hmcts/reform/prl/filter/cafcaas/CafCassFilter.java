@@ -60,6 +60,13 @@ public class CafCassFilter {
 
     private void filterCasesByApplicationValidPostcode(CafCassResponse cafCassResponse) {
         log.info("5555555");
+        log.info("cafCassResponse==> {}",cafCassResponse);
+        log.info("cafCassResponse.getCases()==> {}",cafCassResponse.getCases());
+        for (CafCassCaseDetail cafCassCaseDetail: cafCassResponse.getCases()) {
+            log.info("inside for 11=> {}",cafCassCaseDetail);
+            log.info("inside for 22=> {}",cafCassCaseDetail.getCaseData());
+            log.info("inside for 33=> {}",cafCassCaseDetail.getCaseData().getApplicants());
+        }
         List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases()
             .stream().filter(cafCassCaseDetail -> {
                 if (!ObjectUtils.isEmpty(cafCassCaseDetail.getCaseData().getApplicants())) {
@@ -70,6 +77,7 @@ public class CafCassFilter {
                     return false;
                 }
             }).collect(Collectors.toList());
+        log.info("justtt bfr 6666 {}",cafCassCaseDetailList);
         log.info("after 6666666666");
         cafCassResponse.setCases(cafCassCaseDetailList);
     }
