@@ -1,13 +1,11 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.launchdarkly.shaded.com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
@@ -23,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
+import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
@@ -180,7 +179,6 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
         }
-        log.info("Application data {}", new Gson().toJson(applicationTab));
         return applicationTab;
     }
 
@@ -902,7 +900,7 @@ public class ApplicationsTabService implements TabService {
         if (YesOrNo.Yes.equals(revisedChildAbductionDetails.getNewAbductionChildHasPassport()) && childPassportDetails.isPresent()) {
             revisedChildAbductionDetails.setNewChildHasMultiplePassports(childPassportDetails.get().getNewChildHasMultiplePassports());
             revisedChildAbductionDetails.setNewChildPassportPossession(childPassportDetails.get().getNewChildPassportPossession().stream()
-                    .map(AbductionChildPassportPossessionEnum::getDisplayedValue).collect(Collectors.joining(COMMA_SEPARATOR)));
+                    .map(NewPassportPossessionEnum::getDisplayedValue).collect(Collectors.joining(COMMA_SEPARATOR)));
         }
         return toMap(revisedChildAbductionDetails);
     }

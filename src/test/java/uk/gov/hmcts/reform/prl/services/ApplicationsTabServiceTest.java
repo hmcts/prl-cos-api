@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
@@ -25,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
+import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
@@ -537,7 +537,7 @@ public class ApplicationsTabServiceTest {
         CaseData caseData = caseDataWithParties.toBuilder().isNewCaseCreated(Yes)
                 .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                         .childPassportDetails(ChildPassportDetails.builder().newChildPassportPossession(List
-                                .of(AbductionChildPassportPossessionEnum.father)).build())
+                                .of(NewPassportPossessionEnum.father)).build())
                         .newAllegationsOfHarmYesNo(Yes).build()).build();
 
         when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class))

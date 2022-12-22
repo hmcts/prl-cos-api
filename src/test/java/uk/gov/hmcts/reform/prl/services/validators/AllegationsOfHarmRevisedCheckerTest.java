@@ -5,7 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
+import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -274,9 +274,9 @@ public class AllegationsOfHarmRevisedCheckerTest {
     @Test
     public void whenCaseDataPresentThenAbductionSectionReturnTrue() {
 
-        List<AbductionChildPassportPossessionEnum> abductionChildPassportPosessionList =
+        List<NewPassportPossessionEnum> abductionChildPassportPosessionList =
             new ArrayList<>();
-        abductionChildPassportPosessionList.add(AbductionChildPassportPossessionEnum.mother);
+        abductionChildPassportPosessionList.add(NewPassportPossessionEnum.mother);
         ChildPassportDetails childPassportDetails = ChildPassportDetails.builder()
             .newChildPassportPossession(abductionChildPassportPosessionList)
             .newChildHasMultiplePassports(Yes)
@@ -290,10 +290,31 @@ public class AllegationsOfHarmRevisedCheckerTest {
                                   .newPreviousAbductionThreatsDetails("Details")
                                   .newAbductionPassportOfficeNotified(No)
                                   .newAbductionChildHasPassport(Yes)
-                                         .childPassportDetails(childPassportDetails)
-                                  .newAbductionPreviousPoliceInvolvement(No)
+                                  .childPassportDetails(childPassportDetails)
+                                  .newAbductionPreviousPoliceInvolvement(Yes)
+                                  .newAbductionPreviousPoliceInvolvementDetails("Test")
                                   .newAbductionPreviousPoliceInvolvementDetails("Details")
                                   .build())
+            .build();
+
+        assertTrue(allegationsOfHarmChecker.validateAbductionSection(caseData));
+    }
+
+
+    @Test
+    public void whenCaseDataPresentThenAbductionSectionReturnTrueWithNoPassport() {
+        CaseData caseData = CaseData.builder()
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                         .newAllegationsOfHarmChildAbductionYesNo(Yes)
+                                         .newChildAbductionReasons("testing")
+                                         .newPreviousAbductionThreats(Yes)
+                                         .newPreviousAbductionThreatsDetails("Details")
+                                         .newAbductionPassportOfficeNotified(No)
+                                         .newAbductionChildHasPassport(No)
+                                         .newAbductionPreviousPoliceInvolvement(Yes)
+                                         .newAbductionPreviousPoliceInvolvementDetails("Test")
+                                         .newAbductionPreviousPoliceInvolvementDetails("Details")
+                                         .build())
             .build();
 
         assertTrue(allegationsOfHarmChecker.validateAbductionSection(caseData));
@@ -587,4 +608,5 @@ public class AllegationsOfHarmRevisedCheckerTest {
         assertTrue(allegationsOfHarmChecker.validateFields(caseData));
 
     }
+
 }
