@@ -32,7 +32,7 @@ public class CafCassFilter {
     private PostcodeLookupService postcodeLookupService;
 
     public void filter(CafCassResponse cafCassResponse) {
-        log.info("222222");
+        log.info("222222 {} ",cafCassResponse);
         if (caseTypeList != null && !caseTypeList.isEmpty()) {
             log.info("333");
             caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
