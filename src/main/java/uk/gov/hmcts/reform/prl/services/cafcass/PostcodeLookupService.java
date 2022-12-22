@@ -62,6 +62,7 @@ public class PostcodeLookupService {
             String url = configuration.getUrl();
             String key = configuration.getAccessKey();
             params.put("key", key);
+            log.info("keyyyyyyyy {}",key);
             if (StringUtils.isEmpty(url)) {
                 throw new PostcodeValidationException("Postcode URL is null");
             }
