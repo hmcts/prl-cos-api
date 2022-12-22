@@ -90,7 +90,7 @@ public class PostcodeLookupService {
                 return objectMapper.readValue(response.getBody(), PostcodeResponse.class);
             }
         } catch (Exception e) {
-            log.error("Postcode Lookup Failed - ", e.getMessage());
+            log.error("Postcode Lookup Failed - {} ", e.getMessage());
             throw new PostcodeValidationException(e.getMessage(), e);
         }
 
