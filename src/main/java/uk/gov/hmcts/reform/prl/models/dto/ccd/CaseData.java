@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.CaseLinksElement;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
@@ -686,5 +687,5 @@ public class CaseData implements MappableObject {
     private String helpWithFeesReferenceNumber;
     private String c100RebuildChildPostCode;
     private String c100RebuildConsentOrderDetails;
-    private final List<Element<CaseLink>> caseLinks;
+    private final List<CaseLinksElement<CaseLink>> caseLinks;
 }
