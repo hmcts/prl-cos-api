@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.enums.citizen;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -9,11 +10,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum LanguageRequirementsEnum {
 
-    speakwelsh("I need to speak in Welsh"),
-    readandwritewelsh("I need to read and write in Welsh"),
-    languageinterpreter("I need an interpreter in a certain language"),
-    nointerpreter("No, I do not have any language requirements at this time");
+    @JsonProperty("speakwelsh")
+    speakwelsh("speakwelsh","I need to speak in Welsh"),
+    @JsonProperty("readandwritewelsh")
+    readandwritewelsh("readandwritewelsh","I need to read and write in Welsh"),
+    @JsonProperty("languageinterpreter")
+    languageinterpreter("languageinterpreter","I need an interpreter in a certain language"),
+    @JsonProperty("nointerpreter")
+    nointerpreter("nointerpreter","No, I do not have any language requirements at this time");
 
+    private final String id;
     private final String displayedValue;
 
     @JsonValue

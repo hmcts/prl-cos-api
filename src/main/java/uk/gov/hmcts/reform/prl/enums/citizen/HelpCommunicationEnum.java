@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.enums.citizen;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -9,20 +10,34 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum HelpCommunicationEnum {
 
-    hearingloop("Hearing loop (hearing enhancement system)"),
-    infraredreceiver("Infrared receiver (hearing enhancement system)"),
-    needspeakinghelp("Need to be close to who is speaking"),
-    lipspeaker("Lip speaker"),
-    lipspeakerhint("hearing person who has been trained to be easily lip read"),
-    signlanguage("British Sign Language interpreter"),
-    speechreporter("Speech to text reporter (palantypist)"),
-    extratime("Extra time to think and explain myself"),
-    courtvisit("Visit to court before the court hearing"),
-    courthearing("Explanation of the court hearing room layout and who will be in the room"),
-    intermediary("Intermediary"),
-    other("Other"),
-    nosupport("No, I do not need any extra support at this time");
+    @JsonProperty("hearingloop")
+    hearingloop("hearingloop","Hearing loop (hearing enhancement system)"),
+    @JsonProperty("infraredreceiver")
+    infraredreceiver("infraredreceiver","Infrared receiver (hearing enhancement system)"),
+    @JsonProperty("needspeakinghelp")
+    needspeakinghelp("needspeakinghelp","Need to be close to who is speaking"),
+    @JsonProperty("lipspeaker")
+    lipspeaker("lipspeaker","Lip speaker"),
+    @JsonProperty("lipspeakerhint")
+    lipspeakerhint("lipspeakerhint","hearing person who has been trained to be easily lip read"),
+    @JsonProperty("signlanguage")
+    signlanguage("signlanguage","British Sign Language interpreter"),
+    @JsonProperty("speechreporter")
+    speechreporter("speechreporter","Speech to text reporter (palantypist)"),
+    @JsonProperty("extratime")
+    extratime("extratime","Extra time to think and explain myself"),
+    @JsonProperty("courtvisit")
+    courtvisit("courtvisit","Visit to court before the court hearing"),
+    @JsonProperty("courthearing")
+    courthearing("courthearing","Explanation of the court hearing room layout and who will be in the room"),
+    @JsonProperty("intermediary")
+    intermediary("intermediary","Intermediary"),
+    @JsonProperty("other")
+    other("other","Other"),
+    @JsonProperty("nosupport")
+    nosupport("nosupport","No, I do not need any extra support at this time");
 
+    private final String id;
     private final String displayedValue;
 
     @JsonValue

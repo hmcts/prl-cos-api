@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.enums.citizen;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -9,13 +10,20 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum CourtHearingEnum {
 
-    supportworker("A support worker or carer"),
-    familymember("A friend or family member"),
-    assistance("Assistance / guide dog"),
-    animal("Therapy animal"),
-    other("Other"),
-    nosupport("No, I do not need any extra support at this time");
+    @JsonProperty("supportworker")
+    supportworker("supportworker","A support worker or carer"),
+    @JsonProperty("familymember")
+    familymember("familymember","A friend or family member"),
+    @JsonProperty("assistance")
+    assistance("assistance","Assistance / guide dog"),
+    @JsonProperty("animal")
+    animal("animal","Therapy animal"),
+    @JsonProperty("other")
+    other("other","Other"),
+    @JsonProperty("nosupport")
+    nosupport("nosupport","No, I do not need any extra support at this time");
 
+    private final String id;
     private final String displayedValue;
 
     @JsonValue
