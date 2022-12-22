@@ -101,6 +101,7 @@ public class CaseService {
                     .build());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
+        log.info("** CaseData before updating case *** citizen **** {}", caseData);
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
