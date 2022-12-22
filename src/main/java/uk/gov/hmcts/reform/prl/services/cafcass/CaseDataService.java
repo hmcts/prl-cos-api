@@ -44,7 +44,7 @@ public class CaseDataService {
     public CafCassResponse getCaseData(String authorisation, String serviceAuthorisation, String startDate, String endDate) throws IOException {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
-
+        log.info("in getCaseDataaaaaa");
         String searchString = objectMapper.writeValueAsString(ccdQueryParam);
         SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
             authorisation,
@@ -52,10 +52,12 @@ public class CaseDataService {
             authTokenGenerator.generate(),
             cafCassSearchCaseTypeId
         );
-
+        log.info("after getCaseDataaaaaa");
         CafCassResponse cafCassResponse = objectMapper.convertValue(searchResult,
                                                              CafCassResponse.class);
+        log.info("111111111111111111");
         cafCassFilter.filter(cafCassResponse);
+        log.info("after filter 111111111111111111");
         getHearingDetails(authorisation,cafCassResponse);
         return cafCassResponse;
     }
