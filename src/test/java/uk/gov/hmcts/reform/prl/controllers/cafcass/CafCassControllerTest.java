@@ -64,14 +64,13 @@ public class CafCassControllerTest {
             "startDate",
             "endDate"
         );
-        assertEquals("true", "true");
-//        CafCassResponse realCafCassResponse = (CafCassResponse) responseEntity.getBody();
-//        assertEquals(
-//            objectMapper.writeValueAsString(expectedCafCassResponse),
-//            objectMapper.writeValueAsString(realCafCassResponse)
-//        );
-//        assertEquals(realCafCassResponse.getTotal(), 2);
-//        assertEquals(realCafCassResponse.getCases().size(), 2);
+        CafCassResponse realCafCassResponse = (CafCassResponse) responseEntity.getBody();
+        assertEquals(
+            objectMapper.writeValueAsString(expectedCafCassResponse),
+            objectMapper.writeValueAsString(realCafCassResponse)
+        );
+        assertEquals(realCafCassResponse.getTotal(), 2);
+        assertEquals(realCafCassResponse.getCases().size(), 2);
     }
 
     @Test
@@ -86,8 +85,7 @@ public class CafCassControllerTest {
         );
         assertEquals(UNAUTHORIZED, response.getStatusCode());
         final ApiError body = (ApiError) response.getBody();
-        assertEquals("true", "true");
-        //assertEquals("401 UNAUTHORIZED", body.getMessage());
+        assertEquals("401 UNAUTHORIZED", body.getMessage());
 
     }
 
@@ -104,8 +102,7 @@ public class CafCassControllerTest {
             "startDate",
             "endDate"
         );
-        assertEquals("true", "true");
-        //assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
@@ -121,8 +118,7 @@ public class CafCassControllerTest {
             "startDate",
             "endDate"
         );
-        assertEquals("true", "true");
-        //assertEquals(UNAUTHORIZED, response.getStatusCode());
+        assertEquals(UNAUTHORIZED, response.getStatusCode());
     }
 
     @Test
@@ -138,8 +134,7 @@ public class CafCassControllerTest {
             "startDate",
             "endDate"
         );
-        assertEquals("true", "true");
-        //assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
 
     public static FeignException feignException(int status, String message) {
