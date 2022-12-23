@@ -11,6 +11,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.prl.config.cafcass.PostcodeLookupConfiguration;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
@@ -43,6 +44,9 @@ public class CaseDataServiceTest {
     @InjectMocks
     private CaseDataService caseDataService;
 
+    @Mock
+    PostcodeLookupConfiguration postcodeLookupConfiguration;
+
 
     @BeforeEach
     public void setUp() {
@@ -63,6 +67,7 @@ public class CaseDataServiceTest {
         CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
 
         when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
+        when(postcodeLookupConfiguration.getAccessKey()).thenReturn("test");
         Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
         when(hearingService.getHearings(anyString(),anyString())).thenReturn(hearings);
 

@@ -42,11 +42,9 @@ public class CaseDataService {
 
     private final  AuthTokenGenerator authTokenGenerator;
 
-    @Autowired
-    private PostcodeLookupConfiguration postcodeLookupConfiguration;
+    private final PostcodeLookupConfiguration postcodeLookupConfiguration;
 
-    @Autowired
-    private PostcodeLookupConfiguration configuration;
+    private final PostcodeLookupConfiguration configuration;
 
     public CafCassResponse getCaseData(String authorisation, String serviceAuthorisation, String startDate, String endDate) throws IOException {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
