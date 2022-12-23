@@ -87,7 +87,6 @@ public class CafCassControllerTest {
     //        assertEquals("401 UNAUTHORIZED", body.getMessage());
     //
     //    }
-
     @Test
     public void testFeignExceptionBadRequest() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
