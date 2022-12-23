@@ -27,8 +27,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 public class OtherProceedingsGenerator implements  FieldGenerator {
     @Override
     public CaseSummary generate(CaseData caseData) {
-        log.info("Inside OtherProceedingsGenerator caseTypeOfApplication before getOtherProceedingsDetails()::{} ",
-                 caseData.getCaseTypeOfApplication());
         List<Element<OtherProceedings>> otherProceedingsDetails = getOtherProceedingsDetails(caseData);
 
         return CaseSummary.builder().otherProceedingsForSummaryTab(otherProceedingsDetails)
@@ -59,7 +57,6 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
     }
 
     public List<Element<OtherProceedings>> getOtherProceedingsDetails(CaseData caseData) {
-        log.info("Inside getOtherProceedingsDetails() for caseTypeOfApplication::{} ", caseData.getCaseTypeOfApplication());
         if (null != caseData.getCaseTypeOfApplication()
             && caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
             return getC100OtherProceedingsDetails(caseData);

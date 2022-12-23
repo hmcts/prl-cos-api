@@ -88,8 +88,6 @@ public class CaseSummaryTabService implements TabService {
             }, HashMap::putAll);
 
         // For Collection Fields, We should do manually since it should have element structure..
-        log.info("From CaseSummaryTabService caseTypeOfApplication before calling otherProceedingsGenerator.generate::{} ",
-                 caseData.getCaseTypeOfApplication());
         CaseSummary caseSummary = otherProceedingsGenerator.generate(caseData);
 
         summaryTabFields.put("otherProceedingsForSummaryTab", otherProceedingsGenerator.getOtherProceedingsDetails(caseData));
