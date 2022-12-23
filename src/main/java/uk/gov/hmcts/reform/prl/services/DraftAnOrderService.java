@@ -109,6 +109,24 @@ public class DraftAnOrderService {
             .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
             .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
             .appointedGuardianName(caseData.getAppointedGuardianName())
+            .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
+            .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
+            .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
+            .manageOrdersApplicant(caseData.getManageOrders().getManageOrdersApplicant())
+            .manageOrdersApplicantReference(caseData.getManageOrders().getManageOrdersApplicantReference())
+            .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
+            .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
+            .manageOrdersRespondentDob(caseData.getManageOrders().getManageOrdersRespondentDob())
+            .manageOrdersRespondentAddress(caseData.getManageOrders().getManageOrdersRespondentAddress())
+            .manageOrdersUnderTakingRepr(caseData.getManageOrders().getManageOrdersUnderTakingRepr())
+            .underTakingSolicitorCounsel(caseData.getManageOrders().getUnderTakingSolicitorCounsel())
+            .manageOrdersUnderTakingPerson(caseData.getManageOrders().getManageOrdersUnderTakingPerson())
+            .manageOrdersUnderTakingAddress(caseData.getManageOrders().getManageOrdersUnderTakingAddress())
+            .manageOrdersUnderTakingTerms(caseData.getManageOrders().getManageOrdersUnderTakingTerms())
+            .manageOrdersDateOfUnderTaking(caseData.getManageOrders().getManageOrdersDateOfUnderTaking())
+            .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
+            .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
+            .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
             .build();
     }
 
@@ -331,7 +349,24 @@ public class DraftAnOrderService {
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
-        caseDataMap.put("appointedGuardianName", selectedOrder.getAppointedGuardianName());
+        caseDataMap.put("manageOrdersCourtName", selectedOrder.getManageOrdersCourtName());
+        caseDataMap.put("manageOrdersCourtAddress", selectedOrder.getManageOrdersCourtAddress());
+        caseDataMap.put("manageOrdersCaseNo", selectedOrder.getManageOrdersCaseNo());
+        caseDataMap.put("manageOrdersApplicant", selectedOrder.getManageOrdersApplicant());
+        caseDataMap.put("manageOrdersApplicantReference", selectedOrder.getManageOrdersApplicantReference());
+        caseDataMap.put("manageOrdersRespondent", selectedOrder.getManageOrdersRespondent());
+        caseDataMap.put("manageOrdersRespondentReference", selectedOrder.getManageOrdersRespondentReference());
+        caseDataMap.put("manageOrdersRespondentDob", selectedOrder.getManageOrdersRespondentDob());
+        caseDataMap.put("manageOrdersRespondentAddress", selectedOrder.getManageOrdersRespondentAddress());
+        caseDataMap.put("manageOrdersUnderTakingRepr", selectedOrder.getManageOrdersUnderTakingRepr());
+        caseDataMap.put("underTakingSolicitorCounsel", selectedOrder.getUnderTakingSolicitorCounsel());
+        caseDataMap.put("manageOrdersUnderTakingPerson", selectedOrder.getManageOrdersUnderTakingPerson());
+        caseDataMap.put("manageOrdersUnderTakingAddress", selectedOrder.getManageOrdersUnderTakingAddress());
+        caseDataMap.put("manageOrdersUnderTakingTerms", selectedOrder.getManageOrdersUnderTakingTerms());
+        caseDataMap.put("manageOrdersDateOfUnderTaking", selectedOrder.getManageOrdersDateOfUnderTaking());
+        caseDataMap.put("underTakingDateExpiry", selectedOrder.getUnderTakingDateExpiry());
+        caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
+        caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
         return caseDataMap;
     }
 
@@ -350,9 +385,6 @@ public class DraftAnOrderService {
         caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
         caseDataMap.put("furtherDirectionsIfRequired", selectedOrder.getFurtherDirectionsIfRequired());
-        caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
-        caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
-        caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
         log.info("Common fields map {}", caseDataMap);
         return caseDataMap;
     }
@@ -423,6 +455,24 @@ public class DraftAnOrderService {
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
+            .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
+            .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
+            .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
+            .manageOrdersApplicant(caseData.getManageOrders().getManageOrdersApplicant())
+            .manageOrdersApplicantReference(caseData.getManageOrders().getManageOrdersApplicantReference())
+            .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
+            .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
+            .manageOrdersRespondentDob(caseData.getManageOrders().getManageOrdersRespondentDob())
+            .manageOrdersRespondentAddress(caseData.getManageOrders().getManageOrdersRespondentAddress())
+            .manageOrdersUnderTakingRepr(caseData.getManageOrders().getManageOrdersUnderTakingRepr())
+            .underTakingSolicitorCounsel(caseData.getManageOrders().getUnderTakingSolicitorCounsel())
+            . manageOrdersUnderTakingPerson(caseData.getManageOrders().getManageOrdersUnderTakingPerson())
+            .manageOrdersUnderTakingAddress(caseData.getManageOrders().getManageOrdersUnderTakingAddress())
+            .manageOrdersUnderTakingTerms(caseData.getManageOrders().getManageOrdersUnderTakingTerms())
+            .manageOrdersDateOfUnderTaking(caseData.getManageOrders().getManageOrdersDateOfUnderTaking())
+            .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
+            .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
+            .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
             .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .parentName(caseData.getManageOrders().getParentName())
             .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
@@ -472,6 +522,24 @@ public class DraftAnOrderService {
                                   .orderDirections(caseData.getManageOrders().getOrderDirections())
                                   .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
                                   .fl404CustomFields(fl404CustomFields)
+                                  .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
+                                  .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
+                                  .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
+                                  .manageOrdersApplicant(caseData.getManageOrders().getManageOrdersApplicant())
+                                  .manageOrdersApplicantReference(caseData.getManageOrders().getManageOrdersApplicantReference())
+                                  .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
+                                  .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
+                                  .manageOrdersRespondentDob(caseData.getManageOrders().getManageOrdersRespondentDob())
+                                  .manageOrdersRespondentAddress(caseData.getManageOrders().getManageOrdersRespondentAddress())
+                                  .manageOrdersUnderTakingRepr(caseData.getManageOrders().getManageOrdersUnderTakingRepr())
+                                  .underTakingSolicitorCounsel(caseData.getManageOrders().getUnderTakingSolicitorCounsel())
+                                  .manageOrdersUnderTakingPerson(caseData.getManageOrders().getManageOrdersUnderTakingPerson())
+                                  .manageOrdersUnderTakingAddress(caseData.getManageOrders().getManageOrdersUnderTakingAddress())
+                                  .manageOrdersUnderTakingTerms(caseData.getManageOrders().getManageOrdersUnderTakingTerms())
+                                  .manageOrdersDateOfUnderTaking(caseData.getManageOrders().getManageOrdersDateOfUnderTaking())
+                                  .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
+                                  .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
+                                  .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
                                   .build()).build();
         } else {
             caseData = caseData.toBuilder()
