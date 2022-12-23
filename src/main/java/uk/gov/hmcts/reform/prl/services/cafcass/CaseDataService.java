@@ -56,8 +56,8 @@ public class CaseDataService {
             authTokenGenerator.generate(),
             cafCassSearchCaseTypeId
         );
-        log.info("postcodeLookupConfiguration=11=> {}",postcodeLookupConfiguration.getAccessKey());
-        log.info("postcodeLookupConfiguration=22=> {}",configuration.getAccessKey());
+        log.info("postcodeLookupConfiguration=aa=> {}",postcodeLookupConfiguration.getAccessKey());
+        log.info("postcodeLookupConfiguration=bb=> {}",configuration.getAccessKey());
         CafCassResponse cafCassResponse = objectMapper.convertValue(searchResult,
                                                              CafCassResponse.class);
         log.info("cafCassResponse ==> ",cafCassResponse);
