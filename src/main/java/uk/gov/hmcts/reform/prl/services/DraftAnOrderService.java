@@ -495,22 +495,25 @@ public class DraftAnOrderService {
         //log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         if (!C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
-            fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
-                    PrlAppsConstants.FORMAT,
-                    caseData.getApplicantsFL401().getFirstName(),
-                    caseData.getApplicantsFL401().getLastName()
-                ))
-                .fl404bRespondentName(String.format(PrlAppsConstants.FORMAT,
-                                                    caseData.getRespondentsFL401().getFirstName(),
-                                                    caseData.getRespondentsFL401().getLastName()
-                )).build();
-            if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
-                fl404CustomFields = fl404CustomFields.toBuilder()
-                    .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
-            }
-            if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
-                fl404CustomFields = fl404CustomFields.toBuilder()
-                    .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+            if (null != fl404CustomFields) {
+                fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
+                        PrlAppsConstants.FORMAT,
+                        caseData.getApplicantsFL401().getFirstName(),
+                        caseData.getApplicantsFL401().getLastName()
+                    ))
+                    .fl404bRespondentName(String.format(
+                        PrlAppsConstants.FORMAT,
+                        caseData.getRespondentsFL401().getFirstName(),
+                        caseData.getRespondentsFL401().getLastName()
+                    )).build();
+                if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+                    fl404CustomFields = fl404CustomFields.toBuilder()
+                        .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+                }
+                if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+                    fl404CustomFields = fl404CustomFields.toBuilder()
+                        .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+                }
             }
             caseData = caseData.toBuilder()
                 .manageOrders(ManageOrders.builder()
