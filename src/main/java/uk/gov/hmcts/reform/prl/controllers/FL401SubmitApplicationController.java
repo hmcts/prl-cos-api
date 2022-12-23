@@ -166,6 +166,7 @@ public class FL401SubmitApplicationController {
         caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
         caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
 
+        log.info("From FL401Submit controller caseTypeOfApplication before calling AllTabService:: {}", caseData.getCaseTypeOfApplication());
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder()

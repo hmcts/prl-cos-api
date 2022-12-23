@@ -107,6 +107,7 @@ public class AllTabServiceImpl implements AllTabsService {
         Map<String, Object> applicationTabFields = applicationsTabService.updateTab(
             caseData);
 
+        log.info("From AllTabServiceImpl caseTypeOfApplication before calling caseSummaryTabService::{} ", caseData.getCaseTypeOfApplication());
         Map<String, Object> summaryTabFields = caseSummaryTabService.updateTab(caseData);
 
         return Stream.concat(
@@ -118,6 +119,7 @@ public class AllTabServiceImpl implements AllTabsService {
 
     @Override
     public Map<String, Object> getAllTabsFields(CaseData caseData) {
+        log.info("Inside AllTabServiceImpl caseTypeOfApplication before calling CombinedMap::{} ", caseData.getCaseTypeOfApplication());
         return getCombinedMap(caseData);
     }
 
