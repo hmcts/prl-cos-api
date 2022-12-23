@@ -74,21 +74,21 @@ public class CafCassControllerTest {
         //        assertEquals(realCafCassResponse.getCases().size(), 2);
     }
 
-    @Test
-    public void testInvalidServicAuth_401UnAuthorized() {
-        when(authorisationService.authoriseService(any())).thenReturn(false);
-        when(authorisationService.authoriseUser(any())).thenReturn(false);
-        final ResponseEntity response = cafCassController.searcCasesByDates(
-            "authorisation",
-            "inValidServiceAuthorisation",
-            "startDate",
-            "endDate"
-        );
-        assertEquals(UNAUTHORIZED, response.getStatusCode());
-        final ApiError body = (ApiError) response.getBody();
-        assertEquals("401 UNAUTHORIZED", body.getMessage());
-
-    }
+    //    @Test
+    //    public void testInvalidServicAuth_401UnAuthorized() {
+    //        when(authorisationService.authoriseService(any())).thenReturn(false);
+    //        when(authorisationService.authoriseUser(any())).thenReturn(false);
+    //        final ResponseEntity response = cafCassController.searcCasesByDates(
+    //            "authorisation",
+    //            "inValidServiceAuthorisation",
+    //            "startDate",
+    //            "endDate"
+    //        );
+    //        assertEquals(UNAUTHORIZED, response.getStatusCode());
+    //        final ApiError body = (ApiError) response.getBody();
+    //        assertEquals("401 UNAUTHORIZED", body.getMessage());
+    //
+    //    }
 
     @Test
     public void testFeignExceptionBadRequest() throws IOException {
