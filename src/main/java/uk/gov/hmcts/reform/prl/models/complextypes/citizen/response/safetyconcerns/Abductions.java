@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.citizen.PassportPossessionEnum;
+import uk.gov.hmcts.reform.prl.enums.PassportPossessionEnum;
 
 import java.util.List;
 
