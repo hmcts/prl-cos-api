@@ -36,7 +36,6 @@ public class PostcodeLookupService {
     PostcodeLookupConfiguration configuration;
 
     public boolean isValidNationalPostCode(String postcode, String countryCode) {
-        log.info("10101010101");
         if (StringUtils.isEmpty(postcode) || StringUtils.isEmpty(countryCode)) {
             return false;
         }
@@ -55,7 +54,6 @@ public class PostcodeLookupService {
     }
 
     private PostcodeResponse fetchNationalPostcodeBuildings(String postcode) {
-        log.info("AAAAAAAAAA");
         PostcodeResponse results = null;
         try {
             Map<String, String> params = new HashMap<>();

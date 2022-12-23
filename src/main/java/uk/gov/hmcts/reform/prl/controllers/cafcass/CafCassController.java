@@ -44,9 +44,6 @@ public class CafCassController extends AbstractCallbackController {
     @Autowired
     private PostcodeLookupService postcodeLookupService;
 
-    @Autowired
-    private PostcodeLookupConfiguration postcodeLookupConfiguration;
-
     @GetMapping(path = "/searchCases", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "search case data")
     @ApiResponses(value = {
@@ -61,8 +58,8 @@ public class CafCassController extends AbstractCallbackController {
         try {
             if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))) {
-                log.info("processing request after authorizationnnnnnnnn");
-                log.info("MMMMMM {}",postcodeLookupConfiguration.getAccessKey());
+                log.info("processing request after authorization");
+
                 return ResponseEntity.ok(caseDataService.getCaseData(
                     authorisation,
                     serviceAuthorisation,
