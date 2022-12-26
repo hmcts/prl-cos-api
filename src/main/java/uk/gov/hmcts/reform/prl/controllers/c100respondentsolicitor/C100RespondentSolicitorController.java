@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorMiamService;
 
@@ -100,7 +102,10 @@ public class C100RespondentSolicitorController {
     ) {
         log.info("handleAboutToStart: Callback for Respondent Solicitor - Load the case data");
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        respondentSolicitorService.prePopulateRespondentSolicitorCaseData(String.valueOf(caseDetails.getId()), authorisation);
+        respondentSolicitorService.prePopulateRespondentSolicitorCaseData(
+            String.valueOf(caseDetails.getId()),
+            authorisation
+        );
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -136,8 +141,26 @@ public class C100RespondentSolicitorController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         log.info("handleAboutToSubmit: Callback for Respondent Solicitor - MIAM details");
-        Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         log.info("in C100RespondentSolicitorController - handleAboutToSubmit - caseDataUpdated {}", updatedCaseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
+    }
+
+    @PostMapping(path = "/populate-solicitor-respondent-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to populate the header")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Populated Headers"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse populateSolicitorRespondentList(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(respondentSolicitorService.populateSolicitorRespondentList(caseData, authorisation))
+            .build();
     }
 }
