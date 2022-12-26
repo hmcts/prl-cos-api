@@ -173,14 +173,16 @@ public class C100RespondentSolicitorController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Populated Headers"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse populateSolicitorRespondentList(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        log.info("populateSolicitorRespondentList: Callback for getting the respondent listing");
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("populateSolicitorRespondentList: casedata is:: " + caseData);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(respondentSolicitorService.populateSolicitorRespondentList(caseData, authorisation))
             .build();

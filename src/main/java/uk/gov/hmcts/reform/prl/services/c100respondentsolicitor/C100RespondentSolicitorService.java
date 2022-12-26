@@ -60,14 +60,17 @@ public class C100RespondentSolicitorService {
 
     public Map<String, Object> populateSolicitorRespondentList(CaseData caseData, String authorisation) {
         Map<String, Object> headerMap = new HashMap<>();
-
+        log.info("populateSolicitorRespondentList service: casedata is:: " + caseData);
         FindUserCaseRolesResponse findUserCaseRolesResponse = ccdDataStoreService.findUserCaseRoles(
             String.valueOf(caseData.getId()),
             authorisation
         );
+        log.info("findUserCaseRolesResponse:: " + findUserCaseRolesResponse);
         if (findUserCaseRolesResponse != null) {
+            log.info("findUserCaseRolesResponse not null ");
             List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
             for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
+                log.info("caseUser is:: " + caseUser.getCaseRole());
                 SolicitorRole.from(caseUser.getCaseRole()).ifPresent(
                     x -> solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex())));
             }
@@ -76,6 +79,7 @@ public class C100RespondentSolicitorService {
                 null,
                 PartyDetails::getLabelForDynamicList
             ));
+            log.info("headerMap:: " + headerMap);
         }
         return headerMap;
     }
