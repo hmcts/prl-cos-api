@@ -146,6 +146,22 @@ public class C100RespondentSolicitorController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
 
+    @PostMapping(path = "/test-about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback for Respondent Solicitor - test event details")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleTestAboutToSubmit(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+
+        log.info("handleAboutToSubmit: Callback for Respondent Solicitor - MIAM details");
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        log.info("in C100RespondentSolicitorController - handleAboutToSubmit - caseDataUpdated {}", updatedCaseData);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
+    }
+
     @PostMapping(path = "/populate-solicitor-respondent-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate the header")
     @ApiResponses(value = {
