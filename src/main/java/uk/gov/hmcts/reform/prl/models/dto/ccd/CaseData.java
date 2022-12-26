@@ -635,11 +635,11 @@ public class CaseData implements MappableObject {
      * Respondent Solicitor.
      */
 
-    private final Consent respondentConsentToApplication;
+    private Consent respondentConsentToApplication;
 
-    private final KeepDetailsPrivate keepContactDetailsPrivate;
-    private final KeepDetailsPrivate keepContactDetailsPrivateOther;
-    private final String confidentialListDetails;
+    private KeepDetailsPrivate keepContactDetailsPrivate;
+    private KeepDetailsPrivate keepContactDetailsPrivateOther;
+    private String confidentialListDetails;
 
     private final AttendToCourt respondentAttendingToCourt;
 
@@ -659,7 +659,7 @@ public class CaseData implements MappableObject {
     private final List<Element<Behaviours>> respondentChildAbuseBehaviour;
     private final RespondentChildAbduction respondentChildAbduction;
     private final RespondentOtherConcerns respondentOtherConcerns;
-    
+
     /** Confirm or Edit your contact details. **/
     private final ConfirmEditDetails rsConfirmEditContactDetails;
 
