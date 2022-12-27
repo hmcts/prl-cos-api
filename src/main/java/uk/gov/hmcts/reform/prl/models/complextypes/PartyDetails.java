@@ -78,8 +78,6 @@ public class PartyDetails {
     private Response response;
     private YesOrNo currentRespondent;
 
-    private final SolicitorResponse solicitorResponse;
-
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
             || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);

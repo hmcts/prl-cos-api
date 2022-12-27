@@ -26,7 +26,8 @@ public class Response {
     private final CurrentOrPreviousProceedings currentOrPreviousProceedings;
     // TODO: Add safety Concerns here
     private final CitizenInternationalElements citizenInternationalElements;
-    private final AbilityToParticipate abilityToParticipate;
+    // TODO: Need to recheck this one
+    // private final AbilityToParticipate abilityToParticipate;
 
     private final CitizenFlags citizenFlags;
     private final String safeToCallOption;

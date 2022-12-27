@@ -88,11 +88,28 @@ public class C100RespondentSolicitorService {
         return headerMap;
     }
 
-    public Map<String, Object> updateRespondents(CaseData caseData) {
+    public Map<String, Object> updateRespondents(CaseData caseData, String authorisation) {
         log.info("updateRespondents:: caseData" + caseData);
+        List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
+        FindUserCaseRolesResponse findUserCaseRolesResponse = ccdDataStoreService.findUserCaseRoles(
+            String.valueOf(caseData.getId()),
+            authorisation
+        );
+        log.info("findUserCaseRolesResponse:: " + findUserCaseRolesResponse);
+        if (findUserCaseRolesResponse != null) {
+            log.info("findUserCaseRolesResponse is not null ");
+
+            for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
+                log.info("caseUser is:: " + caseUser.getCaseRole());
+                SolicitorRole.from(caseUser.getCaseRole()).ifPresent(
+                    x -> solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex())));
+            }
+        }
+
         UUID selectedRespondentId = caseData.getChooseRespondentDynamicList().getValueCodeAsUuid();
         log.info("updateRespondents:: selectedRespondentId" + selectedRespondentId);
         List<Element<PartyDetails>> partyDetails = caseData.getRespondents();
+
         partyDetails.stream()
             .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
             .findFirst()
@@ -105,6 +122,22 @@ public class C100RespondentSolicitorService {
                 partyDetails.set(partyDetails.indexOf(party), element(party.getId(), amended));
                 log.info("updateRespondents:: party found. after update " + party);
             });
+
+        for(Element<PartyDetails> solicitorRepresentedParty : solicitorRepresentedParties) {
+            partyDetails.stream()
+                .filter(party -> Objects.equals(party.getId(), solicitorRepresentedParty.getId())
+                    && !Objects.equals(party.getId(), selectedRespondentId))
+                .forEach(party -> {
+                    log.info("updateRespondents:: party found which needs to be set to false. before update " + party);
+                    PartyDetails amended = party.getValue().toBuilder()
+                        .response(party.getValue().getResponse().toBuilder().activeRespondent(YesOrNo.No).build())
+                        .build();
+
+                    partyDetails.set(partyDetails.indexOf(party), element(party.getId(), amended));
+                    log.info("updateRespondents:: party found which needs to be set to false. after update " + party);
+                });
+        }
+
         return Map.of("respondents", partyDetails);
     }
 }
