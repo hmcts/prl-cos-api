@@ -109,11 +109,13 @@ public class C100RespondentSolicitorController {
             CaseData.class
         );
         log.info("case data is ready " + caseData);
-        caseDataUpdated.put("respondentConsentToApplication",
-                            respondentSolicitorService.prePopulateRespondentSolicitorCaseData(
-                                caseData,
-                                authorisation
-                            ));
+        caseDataUpdated.put(
+            "respondentConsentToApplication",
+            respondentSolicitorService.prePopulateRespondentSolicitorCaseData(
+                caseData,
+                authorisation
+            )
+        );
         log.info("case data is updated " + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -168,10 +170,16 @@ public class C100RespondentSolicitorController {
             CaseData.class
         );
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info("in C100RespondentSolicitorController - handleTestAboutToSubmit - caseDataUpdated {}", updatedCaseData);
+        log.info(
+            "in C100RespondentSolicitorController - handleTestAboutToSubmit - caseDataUpdated {}",
+            updatedCaseData
+        );
 
         updatedCaseData.putAll(respondentSolicitorService.updateRespondents(caseData, authorisation));
-        log.info("in C100RespondentSolicitorController - handleTestAboutToSubmit - after update caseDataUpdated {}", updatedCaseData);
+        log.info(
+            "in C100RespondentSolicitorController - handleTestAboutToSubmit - after update caseDataUpdated {}",
+            updatedCaseData
+        );
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
 
@@ -210,11 +218,13 @@ public class C100RespondentSolicitorController {
             caseDataUpdated,
             CaseData.class
         );
-        caseDataUpdated.put("respondentConsentToApplication",
-                            respondentSolicitorService.prePopulateRespondentSolicitorCaseData(
-            caseData,
-            authorisation
-        ));
+        caseDataUpdated.put(
+            "respondentConsentToApplication",
+            respondentSolicitorService.prePopulateRespondentSolicitorCaseData(
+                caseData,
+                authorisation
+            )
+        );
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -234,8 +244,12 @@ public class C100RespondentSolicitorController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("in C100RespondentSolicitorController - handleConsentToApplicationAboutToSubmit - caseDataUpdated {}", caseDataUpdated);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        updatedCaseData.putAll(respondentSolicitorService.updateConsentToApplication(caseData, authorisation));
+        log.info(
+            "in C100RespondentSolicitorController - handleConsentToApplicationAboutToSubmit - updatedCaseData {}",
+            updatedCaseData
+        );
+        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
 }
