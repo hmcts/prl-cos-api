@@ -170,7 +170,7 @@ public class C100RespondentSolicitorController {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         log.info("in C100RespondentSolicitorController - handleTestAboutToSubmit - caseDataUpdated {}", updatedCaseData);
 
-        updatedCaseData.putAll(respondentSolicitorService.updateRespondents(caseData));
+        updatedCaseData.putAll(respondentSolicitorService.updateRespondents(caseData, authorisation));
         log.info("in C100RespondentSolicitorController - handleTestAboutToSubmit - after update caseDataUpdated {}", updatedCaseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
