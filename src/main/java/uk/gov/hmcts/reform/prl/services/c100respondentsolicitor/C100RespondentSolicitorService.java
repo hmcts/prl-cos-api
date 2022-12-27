@@ -18,7 +18,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
@@ -82,5 +86,25 @@ public class C100RespondentSolicitorService {
             log.info("headerMap:: " + headerMap);
         }
         return headerMap;
+    }
+
+    public Map<String, Object> updateRespondents(CaseData caseData) {
+        log.info("updateRespondents:: caseData" + caseData);
+        UUID selectedRespondentId = caseData.getChooseRespondentDynamicList().getValueCodeAsUuid();
+        log.info("updateRespondents:: selectedRespondentId" + selectedRespondentId);
+        List<Element<PartyDetails>> partyDetails = caseData.getRespondents();
+        partyDetails.stream()
+            .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
+            .findFirst()
+            .ifPresent(party -> {
+                log.info("updateRespondents:: party found. before update " + party);
+                PartyDetails amended = party.getValue().toBuilder()
+                    .response(party.getValue().getResponse().toBuilder().activeRespondent(YesOrNo.Yes).build())
+                    .build();
+
+                partyDetails.set(partyDetails.indexOf(party), element(party.getId(), amended));
+                log.info("updateRespondents:: party found. after update " + party);
+            });
+        return Map.of("respondents", partyDetails);
     }
 }

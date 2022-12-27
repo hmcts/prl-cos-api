@@ -162,9 +162,16 @@ public class C100RespondentSolicitorController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        log.info("handleAboutToSubmit: Callback for Respondent Solicitor - MIAM details");
+        log.info("handleTestAboutToSubmit: Callback for Respondent Solicitor - test-about-to-submit select solicitor");
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info("in C100RespondentSolicitorController - handleAboutToSubmit - caseDataUpdated {}", updatedCaseData);
+        log.info("in C100RespondentSolicitorController - handleTestAboutToSubmit - caseDataUpdated {}", updatedCaseData);
+
+        updatedCaseData.putAll(respondentSolicitorService.updateRespondents(caseData));
+        log.info("in C100RespondentSolicitorController - handleTestAboutToSubmit - after update caseDataUpdated {}", updatedCaseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
 
@@ -222,9 +229,13 @@ public class C100RespondentSolicitorController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        log.info("handleAboutToSubmit: Callback for Respondent Solicitor - MIAM details");
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info("in C100RespondentSolicitorController - handleAboutToSubmit - caseDataUpdated {}", updatedCaseData);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
+        log.info("handleConsentToApplicationAboutToSubmit: Callback for consent-to-application-about-to-submit");
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("in C100RespondentSolicitorController - handleConsentToApplicationAboutToSubmit - caseDataUpdated {}", caseDataUpdated);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
