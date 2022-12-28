@@ -12,11 +12,13 @@ import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -29,6 +31,7 @@ import java.util.Map;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -181,6 +184,9 @@ public class EditAndApproveDraftOrderControllerTest {
             .draftOrderCollection(draftOrderCollection)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .serveOrderData(ServeOrderData.builder()
+                                .doYouWantToServeOrder(No)
+                                .whatDoWithOrder(WhatToDoWithOrderEnum.saveAsDraft).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -232,6 +238,9 @@ public class EditAndApproveDraftOrderControllerTest {
             .draftOrderCollection(draftOrderCollection)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .serveOrderData(ServeOrderData.builder()
+                                .whatDoWithOrder(WhatToDoWithOrderEnum.saveAsDraft)
+                                .doYouWantToServeOrder(No).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
