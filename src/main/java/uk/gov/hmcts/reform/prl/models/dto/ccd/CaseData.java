@@ -587,6 +587,10 @@ public class CaseData implements MappableObject {
 
     @JsonUnwrapped
     @Builder.Default
+    private final StandardDirectionOrder standardDirectionOrder;
+
+    @JsonUnwrapped
+    @Builder.Default
     private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
 
     /**
