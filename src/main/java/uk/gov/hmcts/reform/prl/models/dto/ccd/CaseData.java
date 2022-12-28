@@ -680,4 +680,5 @@ public class CaseData implements MappableObject {
     private BundlingInformation bundleInformation;
 
     private final List<CaseLinksElement<CaseLink>> caseLinks;
+
 }

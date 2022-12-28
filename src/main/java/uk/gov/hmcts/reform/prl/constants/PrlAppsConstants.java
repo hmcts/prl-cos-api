@@ -188,4 +188,10 @@ public class PrlAppsConstants {
     public static final String EXPERT_REPORTS = "Expert reports";
     public static final String APPLICANT_STATMENT =
         "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot";
+
+    public static final String IS_ENG_DOC_GEN = "isEngDocGen";
+
+    public static final String IS_WELSH_DOC_GEN = "isWelshDocGen";
+
+    public static final String INVALID_CLIENT = "Invalid Client";
 }
