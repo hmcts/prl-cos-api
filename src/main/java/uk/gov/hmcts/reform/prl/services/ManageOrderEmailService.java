@@ -75,25 +75,7 @@ public class ManageOrderEmailService {
         CaseData caseData = emailService.getCaseData(caseDetails);
         SelectTypeOfOrderEnum isFinalOrder = caseData.getSelectTypeOfOrder();
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            Map<String, String> applicantsMap = getEmailPartyWithName(caseData
-                                                                         .getApplicants());
-            Map<String, String> respondentMap = getEmailPartyWithName(caseData
-                                                                         .getRespondents());
-            for (Map.Entry<String, String> appValues : applicantsMap.entrySet()) {
-                if (!StringUtils.isEmpty(appValues.getKey())) {
-                    sendEmailToParty(isFinalOrder, appValues.getKey(),
-                                     buildApplicantRespondentEmail(caseDetails, appValues.getValue())
-                    );
-                }
-            }
-
-            for (Map.Entry<String, String> appValues : respondentMap.entrySet()) {
-                if (!StringUtils.isEmpty(appValues.getKey())) {
-                    sendEmailToParty(isFinalOrder, appValues.getKey(),
-                                     buildApplicantRespondentEmail(caseDetails, appValues.getValue())
-                    );
-                }
-            }
+            c100(caseDetails, caseData, isFinalOrder);
         } else {
             if (!StringUtils.isEmpty(caseData.getApplicantsFL401().getEmail())) {
                 sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getEmail(),
@@ -111,6 +93,28 @@ public class ManageOrderEmailService {
         }
 
 
+    }
+
+    private void c100(CaseDetails caseDetails, CaseData caseData, SelectTypeOfOrderEnum isFinalOrder) {
+        Map<String, String> applicantsMap = getEmailPartyWithName(caseData
+                                                                     .getApplicants());
+        Map<String, String> respondentMap = getEmailPartyWithName(caseData
+                                                                     .getRespondents());
+        for (Map.Entry<String, String> appValues : applicantsMap.entrySet()) {
+            if (!StringUtils.isEmpty(appValues.getKey())) {
+                sendEmailToParty(isFinalOrder, appValues.getKey(),
+                                 buildApplicantRespondentEmail(caseDetails, appValues.getValue())
+                );
+            }
+        }
+
+        for (Map.Entry<String, String> appValues : respondentMap.entrySet()) {
+            if (!StringUtils.isEmpty(appValues.getKey())) {
+                sendEmailToParty(isFinalOrder, appValues.getKey(),
+                                 buildApplicantRespondentEmail(caseDetails, appValues.getValue())
+                );
+            }
+        }
     }
 
     public void sendFinalOrderIssuedNotification(CaseDetails caseDetails) {

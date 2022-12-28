@@ -111,52 +111,60 @@ public class ApplicationsTabService implements TabService {
 
         Map<String, Object> applicationTab = new HashMap<>();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
-            applicationTab.put("applicantTable", getApplicantsTable(caseData));
-            applicationTab.put("respondentTable", getRespondentsTable(caseData));
-            applicationTab.put("declarationTable", getDeclarationTable(caseData));
-            applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
-            applicationTab.put("allegationsOfHarmOverviewTable", getAllegationsOfHarmOverviewTable(caseData));
-            applicationTab.put("miamTable", getMiamTable(caseData));
-            applicationTab.put("miamExemptionsTable", getMiamExemptionsTable(caseData));
-            applicationTab.put("otherProceedingsTable", getOtherProceedingsTable(caseData));
-            applicationTab.put("otherProceedingsDetailsTable", getOtherProceedingsDetailsTable(caseData));
-            applicationTab.put("internationalElementTable", getInternationalElementTable(caseData));
-            applicationTab.put("attendingTheHearingTable", getAttendingTheHearingTable(caseData));
-            applicationTab.put("litigationCapacityTable", getLitigationCapacityDetails(caseData));
-            applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
-            applicationTab.put("otherPeopleInTheCaseTable", getOtherPeopleInTheCaseTable(caseData));
-            applicationTab.put("allegationsOfHarmOrdersTable", getAllegationsOfHarmOrdersTable(caseData));
-            applicationTab.put("allegationsOfHarmDomesticAbuseTable", getDomesticAbuseTable(caseData));
-            applicationTab.put("allegationsOfHarmChildAbductionTable", getChildAbductionTable(caseData));
-            applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
-            applicationTab.put("childDetailsTable", getChildDetails(caseData));
-            applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
+            citizen(caseData, applicationTab);
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
-            applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));
-            applicationTab.put("fl401ApplicantTable", getFl401ApplicantsTable(caseData));
-            applicationTab.put("fl401SolicitorDetailsTable", getFl401ApplicantsSolictorDetailsTable(caseData));
-            applicationTab.put("fl401RespondentTable", getFl401RespondentTable(caseData));
-            Map<String,Object> applicantFamilyMap = getApplicantsFamilyDetails(caseData);
-            applicationTab.put("applicantFamilyTable", applicantFamilyMap);
-            if (("Yes").equals(applicantFamilyMap.get("doesApplicantHaveChildren"))) {
-                applicationTab.put("fl401ChildDetailsTable", applicantFamilyMap.get("applicantChild"));
-            }
-            applicationTab.put("respondentBehaviourTable", getFl401RespondentBehaviourTable(caseData));
-            applicationTab.put("relationshipToRespondentTable", getFl401RelationshipToRespondentTable(caseData));
-            Map<String, Object> homeDetails = getHomeDetails(caseData);
-            applicationTab.put("homeDetailsTable", homeDetails);
-            applicationTab.put("isHomeEntered", !homeDetails.isEmpty() ? "true" : "false");
-
-            applicationTab.put("otherProceedingsTable", getFL401OtherProceedingsTable(caseData));
-            applicationTab.put("fl401OtherProceedingsDetailsTable", getFl401OtherProceedingsDetailsTable(caseData));
-            applicationTab.put("internationalElementTable", getInternationalElementTable(caseData));
-            applicationTab.put("attendingTheHearingTable", getAttendingTheHearingTable(caseData));
-            applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
-            applicationTab.put("declarationTable", getDeclarationTable(caseData));
+            fl401(caseData, applicationTab);
         }
         return applicationTab;
+    }
+
+    private void fl401(CaseData caseData, Map<String, Object> applicationTab) {
+        applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
+        applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));
+        applicationTab.put("fl401ApplicantTable", getFl401ApplicantsTable(caseData));
+        applicationTab.put("fl401SolicitorDetailsTable", getFl401ApplicantsSolictorDetailsTable(caseData));
+        applicationTab.put("fl401RespondentTable", getFl401RespondentTable(caseData));
+        Map<String,Object> applicantFamilyMap = getApplicantsFamilyDetails(caseData);
+        applicationTab.put("applicantFamilyTable", applicantFamilyMap);
+        if (("Yes").equals(applicantFamilyMap.get("doesApplicantHaveChildren"))) {
+            applicationTab.put("fl401ChildDetailsTable", applicantFamilyMap.get("applicantChild"));
+        }
+        applicationTab.put("respondentBehaviourTable", getFl401RespondentBehaviourTable(caseData));
+        applicationTab.put("relationshipToRespondentTable", getFl401RelationshipToRespondentTable(caseData));
+        Map<String, Object> homeDetails = getHomeDetails(caseData);
+        applicationTab.put("homeDetailsTable", homeDetails);
+        applicationTab.put("isHomeEntered", !homeDetails.isEmpty() ? "true" : "false");
+
+        applicationTab.put("otherProceedingsTable", getFL401OtherProceedingsTable(caseData));
+        applicationTab.put("fl401OtherProceedingsDetailsTable", getFl401OtherProceedingsDetailsTable(caseData));
+        applicationTab.put("internationalElementTable", getInternationalElementTable(caseData));
+        applicationTab.put("attendingTheHearingTable", getAttendingTheHearingTable(caseData));
+        applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
+        applicationTab.put("declarationTable", getDeclarationTable(caseData));
+    }
+
+    private void citizen(CaseData caseData, Map<String, Object> applicationTab) {
+        applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
+        applicationTab.put("applicantTable", getApplicantsTable(caseData));
+        applicationTab.put("respondentTable", getRespondentsTable(caseData));
+        applicationTab.put("declarationTable", getDeclarationTable(caseData));
+        applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
+        applicationTab.put("allegationsOfHarmOverviewTable", getAllegationsOfHarmOverviewTable(caseData));
+        applicationTab.put("miamTable", getMiamTable(caseData));
+        applicationTab.put("miamExemptionsTable", getMiamExemptionsTable(caseData));
+        applicationTab.put("otherProceedingsTable", getOtherProceedingsTable(caseData));
+        applicationTab.put("otherProceedingsDetailsTable", getOtherProceedingsDetailsTable(caseData));
+        applicationTab.put("internationalElementTable", getInternationalElementTable(caseData));
+        applicationTab.put("attendingTheHearingTable", getAttendingTheHearingTable(caseData));
+        applicationTab.put("litigationCapacityTable", getLitigationCapacityDetails(caseData));
+        applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
+        applicationTab.put("otherPeopleInTheCaseTable", getOtherPeopleInTheCaseTable(caseData));
+        applicationTab.put("allegationsOfHarmOrdersTable", getAllegationsOfHarmOrdersTable(caseData));
+        applicationTab.put("allegationsOfHarmDomesticAbuseTable", getDomesticAbuseTable(caseData));
+        applicationTab.put("allegationsOfHarmChildAbductionTable", getChildAbductionTable(caseData));
+        applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
+        applicationTab.put("childDetailsTable", getChildDetails(caseData));
+        applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
     }
 
     @Override
@@ -807,7 +815,7 @@ public class ApplicationsTabService implements TabService {
                 List<String> reasonForOrderWithoutNoticeEnum = reason.getReasonForOrderWithoutGivingNotice() != null
                     ? reason.getReasonForOrderWithoutGivingNotice().stream()
                     .map(ReasonForOrderWithoutGivingNoticeEnum::getDisplayedValue)
-                    .collect(Collectors.toList()) : new ArrayList<String>();
+                    .collect(Collectors.toList()) : new ArrayList<>();
                 builder.reasonForOrderWithoutGivingNotice(String.join(", ",
                     reasonForOrderWithoutNoticeEnum)).futherDetails(reason.getFutherDetails());
             }
