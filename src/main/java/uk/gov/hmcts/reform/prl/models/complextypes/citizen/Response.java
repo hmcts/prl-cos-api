@@ -34,5 +34,4 @@ public class Response {
     private final YesOrNo activeRespondent;
     private final YesOrNo c7ResponseSubmitted;
     private final YesOrNo c1AResponseSubmitted;
-    private final String respondentSolicitorTaskList;
 }
