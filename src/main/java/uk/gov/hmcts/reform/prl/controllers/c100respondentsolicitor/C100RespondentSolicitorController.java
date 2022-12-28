@@ -271,7 +271,7 @@ public class C100RespondentSolicitorController {
         );
         log.info("case data is ready " + caseData);
         caseDataUpdated.put(
-            "KeepDetailsPrivate",
+            "keepDetailsPrivate",
             respondentSolicitorService.prePopulateRespondentKeepYourDetailsPrivateCaseData(
                 caseData,
                 authorisation
