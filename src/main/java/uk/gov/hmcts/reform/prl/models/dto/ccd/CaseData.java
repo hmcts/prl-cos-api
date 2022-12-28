@@ -682,6 +682,7 @@ public class CaseData implements MappableObject {
 
     private final List<CaseLinksElement<CaseLink>> caseLinks;
 
-    private Flags caseFlags;
+    @Builder.Default
+    private Flags caseFlags = Flags.builder().build();
 
 }
