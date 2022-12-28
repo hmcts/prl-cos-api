@@ -21,4 +21,6 @@ public class BundlingInformation {
     private List<MultiBundleConfig> multiBundleConfiguration;
     @JsonProperty("bundleCreationDate")
     private String bundleCreationDate;
+    @JsonProperty("bundlingProgressInfo")
+    private String bundlingProgressInfo;
 }

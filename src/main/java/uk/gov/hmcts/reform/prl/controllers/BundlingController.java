@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -74,12 +75,21 @@ public class BundlingController extends AbstractCallbackController {
                     .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
                     .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration())
                     .bundleCreationDate(ZonedDateTime.now(ZoneId.of("Europe/London")).toString())
+                    .bundlingProgressInfo(getBundlingProgressInfo())
                     .build());
             log.info("*** Bundle information post emptyfolders removal from api : {}",
                 new ObjectMapper().writeValueAsString(caseDataUpdated.get("bundleInformation")));
             log.info("*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}", caseData.getId());
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private String getBundlingProgressInfo() {
+        final List<String> lines = new LinkedList<>();
+        lines.add("<div class='govuk-box-highlight'><strong><h2>");
+        lines.add("Bundle generation is in progress.. Please refresh the page if you see the Stitch Status as NEW ");
+        lines.add("</h2></strong></div>");
+        return String.join("\n", lines);
     }
 
     private List<Bundle> removeEmptyFolders(List<Bundle> caseBundles) {
