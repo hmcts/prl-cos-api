@@ -120,6 +120,7 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
+        log.info("caseTypeOfApplication {} ", caseTypeOfApplication);
         caseDataMap.put("caseTypeOfApplication", caseTypeOfApplication);
         return caseDataMap;
     }
@@ -353,7 +354,8 @@ public class DraftAnOrderService {
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
-        log.info("Common fields map {}", caseDataMap);
+        caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
+        log.info("Case typ of application {}", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
 
