@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
@@ -30,15 +31,40 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class C100RespondentSolicitorService {
     private final CcdDataStoreService ccdDataStoreService;
 
-    public Consent prePopulateRespondentSolicitorCaseData(CaseData caseData, String authorisation) {
-        log.info("Inside prePopulateRespondentSolicitorCaseData");
+    public Consent prePopulateRespondentConsentToTheApplicationCaseData(CaseData caseData, String authorisation) {
+        log.info("Inside prePopulateRespondentConsentToTheApplicationCaseData");
+        Optional<Element<PartyDetails>> respondentParty;
+        Consent respondentConsentToApplication = null;
+        respondentParty = findActiveRespondent(caseData, authorisation);
+        if (respondentParty.isPresent()) {
+            log.info("finding respondentParty is present ");
+            respondentConsentToApplication = respondentParty.get().getValue().getResponse().getConsent();
+            log.info("finding respondentConsentToApplication = " + respondentConsentToApplication);
+        }
+        return respondentConsentToApplication;
+    }
+
+    public KeepDetailsPrivate prePopulateRespondentKeepYourDetailsPrivateCaseData(CaseData caseData, String authorisation) {
+        log.info("Inside prePopulateRespondentKeepYourDetailsPrivateCaseData");
+        Optional<Element<PartyDetails>> respondentParty;
+        KeepDetailsPrivate respondentKeepDetailsPrivate = null;
+        respondentParty = findActiveRespondent(caseData, authorisation);
+        if (respondentParty.isPresent()) {
+            log.info("finding respondentParty is present ");
+            respondentKeepDetailsPrivate = respondentParty.get().getValue().getResponse().getKeepDetailsPrivate();
+            log.info("finding respondentKeepDetailsPrivate = " + respondentKeepDetailsPrivate);
+        }
+        return respondentKeepDetailsPrivate;
+    }
+
+    private Optional<Element<PartyDetails>> findActiveRespondent(CaseData caseData, String authorisation) {
+        Optional<Element<PartyDetails>> respondentParty = null;
         FindUserCaseRolesResponse findUserCaseRolesResponse = ccdDataStoreService.findUserCaseRoles(
             String.valueOf(caseData.getId()),
             authorisation
         );
         log.info("findUserCaseRolesResponse = " + findUserCaseRolesResponse);
-        Optional<Element<PartyDetails>> respondentParty = null;
-        Consent respondentConsentToApplication = null;
+
         if (findUserCaseRolesResponse != null) {
             log.info("findUserCaseRolesResponse is not null ");
             List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
@@ -53,14 +79,10 @@ public class C100RespondentSolicitorService {
                 .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
                 .findFirst();
             log.info("finding respondentParty " + respondentParty);
-            if (respondentParty.isPresent()) {
-                log.info("finding respondentParty is present ");
-                respondentConsentToApplication = respondentParty.get().getValue().getResponse().getConsent();
-                log.info("finding respondentConsentToApplication = " + respondentConsentToApplication);
-            }
         }
-        return respondentConsentToApplication;
+        return respondentParty;
     }
+
 
     public Map<String, Object> populateSolicitorRespondentList(CaseData caseData, String authorisation) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -144,46 +166,59 @@ public class C100RespondentSolicitorService {
     public Map<String, Object> updateConsentToApplication(CaseData caseData, String authorisation) {
         log.info("updateConsentToApplication:: caseData" + caseData);
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
-        FindUserCaseRolesResponse findUserCaseRolesResponse = ccdDataStoreService.findUserCaseRoles(
-            String.valueOf(caseData.getId()),
-            authorisation
-        );
-        log.info("findUserCaseRolesResponse = " + findUserCaseRolesResponse);
-        Optional<Element<PartyDetails>> respondentParty = null;
-        if (findUserCaseRolesResponse != null) {
-            log.info("findUserCaseRolesResponse is not null ");
-            List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
-            for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-                log.info("caseUser is = " + caseUser);
-                SolicitorRole.from(caseUser.getCaseRole()).ifPresent(
-                    x -> solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex())));
-            }
-            log.info("finding solicitorRepresentedParties Party " + solicitorRepresentedParties);
-            solicitorRepresentedParties
-                .stream()
-                .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-                .findFirst().ifPresent(y -> {
-                    Consent respondentConsentToApplication = caseData.getRespondentConsentToApplication();
-                    respondents.stream()
-                        .filter(party -> Objects.equals(party.getId(), y.getId()))
-                        .findFirst()
-                        .ifPresent(party -> {
-                            log.info("updateRespondents:: party found. before update " + party);
-                            PartyDetails amended = party.getValue().toBuilder()
-                                .response(party.getValue().getResponse().toBuilder()
-                                              .consent(party.getValue().getResponse().getConsent().toBuilder()
-                                                           .consentToTheApplication(respondentConsentToApplication.getConsentToTheApplication())
-                                                           .noConsentReason(respondentConsentToApplication.getNoConsentReason())
-                                                           .applicationReceivedDate(respondentConsentToApplication.getApplicationReceivedDate())
-                                                           .courtOrderDetails(respondentConsentToApplication.getCourtOrderDetails())
-                                                           .permissionFromCourt(respondentConsentToApplication.getPermissionFromCourt())
-                                                           .build())
-                                              .build())
-                                .build();
+        Optional<Element<PartyDetails>> respondingParty = findActiveRespondent(caseData, authorisation);
 
-                            respondents.set(respondents.indexOf(party), element(party.getId(), amended));
-                            log.info("updateRespondents:: party found. after update " + party);
-                        });
+        Consent respondentConsentToApplication = caseData.getRespondentConsentToApplication();
+        if (respondingParty.isPresent()) {
+            respondents.stream()
+                .filter(party -> Objects.equals(party.getId(), respondingParty.get().getId()))
+                .findFirst()
+                .ifPresent(party -> {
+                    log.info("updateRespondents:: party found. before update " + party);
+                    PartyDetails amended = party.getValue().toBuilder()
+                        .response(party.getValue().getResponse().toBuilder()
+                                      .consent(party.getValue().getResponse().getConsent().toBuilder()
+                                                   .consentToTheApplication(respondentConsentToApplication.getConsentToTheApplication())
+                                                   .noConsentReason(respondentConsentToApplication.getNoConsentReason())
+                                                   .applicationReceivedDate(respondentConsentToApplication.getApplicationReceivedDate())
+                                                   .courtOrderDetails(respondentConsentToApplication.getCourtOrderDetails())
+                                                   .permissionFromCourt(respondentConsentToApplication.getPermissionFromCourt())
+                                                   .build())
+                                      .build())
+                        .build();
+
+                    respondents.set(respondents.indexOf(party), element(party.getId(), amended));
+                    log.info("updateRespondents:: party found. after update " + party);
+                });
+        }
+        return Map.of("respondents", respondents);
+    }
+
+    public Map<String, Object> updateKeepDetailsPrivate(CaseData caseData, String authorisation) {
+        log.info("updateKeepDetailsPrivate:: caseData" + caseData);
+        List<Element<PartyDetails>> respondents = caseData.getRespondents();
+        Optional<Element<PartyDetails>> respondingParty = findActiveRespondent(caseData, authorisation);
+
+        KeepDetailsPrivate respondentKeepDetailsPrivate = caseData.getKeepContactDetailsPrivate();
+        if (respondingParty.isPresent()) {
+            respondents.stream()
+                .filter(party -> Objects.equals(party.getId(), respondingParty.get().getId()))
+                .findFirst()
+                .ifPresent(party -> {
+                    log.info("updateRespondents:: party found. before update " + party);
+                    PartyDetails amended = party.getValue().toBuilder()
+                        .response(party.getValue().getResponse().toBuilder()
+                                      .keepDetailsPrivate(party.getValue().getResponse().getKeepDetailsPrivate().toBuilder()
+                                                              .confidentiality(respondentKeepDetailsPrivate.getConfidentiality())
+                                                              .confidentialityList(respondentKeepDetailsPrivate.getConfidentialityList())
+                                                              .otherPeopleKnowYourContactDetails(
+                                                                  respondentKeepDetailsPrivate.getOtherPeopleKnowYourContactDetails())
+                                                              .build())
+                                      .build())
+                        .build();
+
+                    respondents.set(respondents.indexOf(party), element(party.getId(), amended));
+                    log.info("updateRespondents:: party found. after update " + party);
                 });
         }
         return Map.of("respondents", respondents);

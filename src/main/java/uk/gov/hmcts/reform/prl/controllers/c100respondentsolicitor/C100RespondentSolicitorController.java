@@ -111,7 +111,7 @@ public class C100RespondentSolicitorController {
         log.info("case data is ready " + caseData);
         caseDataUpdated.put(
             "respondentConsentToApplication",
-            respondentSolicitorService.prePopulateRespondentSolicitorCaseData(
+            respondentSolicitorService.prePopulateRespondentConsentToTheApplicationCaseData(
                 caseData,
                 authorisation
             )
@@ -212,20 +212,21 @@ public class C100RespondentSolicitorController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        log.info("handleAboutToStart: Callback for Respondent Solicitor - Consent To Application");
+        log.info("handleAboutToStart: Callback for Respondent Solicitor - Load the case data");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             caseDataUpdated,
             CaseData.class
         );
+        log.info("case data is ready " + caseData);
         caseDataUpdated.put(
             "respondentConsentToApplication",
-            respondentSolicitorService.prePopulateRespondentSolicitorCaseData(
+            respondentSolicitorService.prePopulateRespondentConsentToTheApplicationCaseData(
                 caseData,
                 authorisation
             )
         );
-
+        log.info("case data is updated " + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -248,6 +249,57 @@ public class C100RespondentSolicitorController {
         updatedCaseData.putAll(respondentSolicitorService.updateConsentToApplication(caseData, authorisation));
         log.info(
             "in C100RespondentSolicitorController - handleConsentToApplicationAboutToSubmit - updatedCaseData {}",
+            updatedCaseData
+        );
+        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
+    }
+
+    @PostMapping(path = "/keep-details-private-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback for Respondent Solicitor for keep-details-private")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse handleKeepDetailsPrivateAboutToStart(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        log.info("handleAboutToStart: Callback for Respondent Solicitor - Load the case data");
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = objectMapper.convertValue(
+            caseDataUpdated,
+            CaseData.class
+        );
+        log.info("case data is ready " + caseData);
+        caseDataUpdated.put(
+            "KeepDetailsPrivate",
+            respondentSolicitorService.prePopulateRespondentKeepYourDetailsPrivateCaseData(
+                caseData,
+                authorisation
+            )
+        );
+        log.info("case data is updated " + caseDataUpdated);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/keep-details-private-about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Submit callback for Respondent Solicitor for keep-details-private")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleKeepDetailsPrivateAboutToSubmit(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+
+        log.info("handleKeepDetailsPrivateAboutToSubmit: Callback for keep-details-private-about-to-submit");
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        updatedCaseData.putAll(respondentSolicitorService.updateKeepDetailsPrivate(caseData, authorisation));
+        log.info(
+            "in C100RespondentSolicitorController - handleKeepDetailsPrivateAboutToSubmit - updatedCaseData {}",
             updatedCaseData
         );
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
