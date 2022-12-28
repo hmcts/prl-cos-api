@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum SDOCafcassOrCymruEnum {
+public enum SdoCafcassOrCymruEnum {
 
     @JsonProperty("safeguardingCafcass")
     safeguardingCafcass("safeguardingCafcass", "Safeguarding next steps Cafcass"),
@@ -29,8 +29,8 @@ public enum SDOCafcassOrCymruEnum {
     }
 
     @JsonCreator
-    public static SDOCafcassOrCymruEnum getValue(String key) {
-        return SDOCafcassOrCymruEnum.valueOf(key);
+    public static SdoCafcassOrCymruEnum getValue(String key) {
+        return SdoCafcassOrCymruEnum.valueOf(key);
     }
 
 }

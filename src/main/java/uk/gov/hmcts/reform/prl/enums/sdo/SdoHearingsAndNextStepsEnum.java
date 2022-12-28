@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum SDOHearingsAndNextStepsEnum {
+public enum SdoHearingsAndNextStepsEnum {
 
     @JsonProperty("nextStepsAfterGateKeeping")
     nextStepsAfterGateKeeping("nextStepsAfterGateKeeping", "Next steps after second gatekeeping appointment (PD36Q)"),
@@ -51,8 +51,8 @@ public enum SDOHearingsAndNextStepsEnum {
     }
 
     @JsonCreator
-    public static SDOHearingsAndNextStepsEnum getValue(String key) {
-        return SDOHearingsAndNextStepsEnum.valueOf(key);
+    public static SdoHearingsAndNextStepsEnum getValue(String key) {
+        return SdoHearingsAndNextStepsEnum.valueOf(key);
     }
 
 }

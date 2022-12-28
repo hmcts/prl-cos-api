@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum SDOCourtEnum {
+public enum SdoCourtEnum {
 
     @JsonProperty("transferApplication")
     transferApplication("transferApplication", "Transfer application to another family court"),
@@ -32,8 +32,8 @@ public enum SDOCourtEnum {
     }
 
     @JsonCreator
-    public static SDOCourtEnum getValue(String key) {
-        return SDOCourtEnum.valueOf(key);
+    public static SdoCourtEnum getValue(String key) {
+        return SdoCourtEnum.valueOf(key);
     }
 
 }

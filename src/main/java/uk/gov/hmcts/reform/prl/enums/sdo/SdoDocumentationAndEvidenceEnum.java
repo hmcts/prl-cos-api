@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum SDODocumentationAndEvidenceEnum {
+public enum SdoDocumentationAndEvidenceEnum {
 
     @JsonProperty("witnessStatements")
     witnessStatements("witnessStatements", "Witness statements"),
@@ -37,8 +37,8 @@ public enum SDODocumentationAndEvidenceEnum {
     }
 
     @JsonCreator
-    public static SDODocumentationAndEvidenceEnum getValue(String key) {
-        return SDODocumentationAndEvidenceEnum.valueOf(key);
+    public static SdoDocumentationAndEvidenceEnum getValue(String key) {
+        return SdoDocumentationAndEvidenceEnum.valueOf(key);
     }
 
 }

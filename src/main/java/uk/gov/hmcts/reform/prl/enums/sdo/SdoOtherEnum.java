@@ -9,10 +9,13 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum SDOLocalAuthorityEnum {
+public enum SdoOtherEnum {
 
-    @JsonProperty("localAuthorityLetter")
-    localAuthorityLetter("localAuthorityLetter", "Local authority letter");
+    @JsonProperty("disclosureOfPapers")
+    disclosureOfPapers("disclosureOfPapers", "Disclosure of papers from previous proceedings"),
+
+    @JsonProperty("parentWithCare")
+    parentWithCare("parentWithCare", "Parent with care can apply to transfer");
 
     private final String id;
     private final String displayedValue;
@@ -23,8 +26,8 @@ public enum SDOLocalAuthorityEnum {
     }
 
     @JsonCreator
-    public static SDOLocalAuthorityEnum getValue(String key) {
-        return SDOLocalAuthorityEnum.valueOf(key);
+    public static SdoOtherEnum getValue(String key) {
+        return SdoOtherEnum.valueOf(key);
     }
 
 }

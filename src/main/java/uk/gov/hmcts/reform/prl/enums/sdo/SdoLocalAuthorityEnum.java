@@ -9,13 +9,10 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum SDOPreamblesEnum {
+public enum SdoLocalAuthorityEnum {
 
-    @JsonProperty("rightToAskCourt")
-    rightToAskCourt("rightToAskCourt", "Right to ask court to reconsider this order"),
-
-    @JsonProperty("partyRaisedDomesticAbuse")
-    partyRaisedDomesticAbuse("partyRaisedDomesticAbuse", "Party/parties raised domestic abuse issues");
+    @JsonProperty("localAuthorityLetter")
+    localAuthorityLetter("localAuthorityLetter", "Local authority letter");
 
     private final String id;
     private final String displayedValue;
@@ -26,8 +23,8 @@ public enum SDOPreamblesEnum {
     }
 
     @JsonCreator
-    public static SDOPreamblesEnum getValue(String key) {
-        return SDOPreamblesEnum.valueOf(key);
+    public static SdoLocalAuthorityEnum getValue(String key) {
+        return SdoLocalAuthorityEnum.valueOf(key);
     }
 
 }

@@ -9,13 +9,13 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum SDOOtherEnum {
+public enum SdoPreamblesEnum {
 
-    @JsonProperty("disclosureOfPapers")
-    disclosureOfPapers("disclosureOfPapers", "Disclosure of papers from previous proceedings"),
+    @JsonProperty("rightToAskCourt")
+    rightToAskCourt("rightToAskCourt", "Right to ask court to reconsider this order"),
 
-    @JsonProperty("parentWithCare")
-    parentWithCare("parentWithCare", "Parent with care can apply to transfer");
+    @JsonProperty("partyRaisedDomesticAbuse")
+    partyRaisedDomesticAbuse("partyRaisedDomesticAbuse", "Party/parties raised domestic abuse issues");
 
     private final String id;
     private final String displayedValue;
@@ -26,8 +26,8 @@ public enum SDOOtherEnum {
     }
 
     @JsonCreator
-    public static SDOOtherEnum getValue(String key) {
-        return SDOOtherEnum.valueOf(key);
+    public static SdoPreamblesEnum getValue(String key) {
+        return SdoPreamblesEnum.valueOf(key);
     }
 
 }
