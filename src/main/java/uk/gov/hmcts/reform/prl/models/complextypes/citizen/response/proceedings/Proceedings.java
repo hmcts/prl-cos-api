@@ -10,5 +10,5 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class Proceedings {
     private final TypeOfOrderEnum orderType;
-    private final List<ProceedingDetails> proceedingDetails;
+    private final List<OtherProceedingDetails> proceedingDetails;
 }
