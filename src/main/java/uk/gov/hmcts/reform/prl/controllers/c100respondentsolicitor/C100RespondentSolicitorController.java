@@ -103,21 +103,12 @@ public class C100RespondentSolicitorController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         log.info("handleAboutToStart: Callback for Respondent Solicitor - Load the case data");
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = objectMapper.convertValue(
-            caseDataUpdated,
-            CaseData.class
-        );
-        log.info("case data is ready " + caseData);
-        caseDataUpdated.put(
-            "respondentConsentToApplication",
-            respondentSolicitorService.prePopulateRespondentConsentToTheApplicationCaseData(
-                caseData,
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(respondentSolicitorService.prePopulateAboutToStartCaseData(
+                callbackRequest,
                 authorisation
-            )
-        );
-        log.info("case data is updated " + caseDataUpdated);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            )).build();
     }
 
 

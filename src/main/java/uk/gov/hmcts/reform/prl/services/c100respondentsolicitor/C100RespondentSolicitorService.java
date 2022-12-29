@@ -1,9 +1,13 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
@@ -30,6 +34,42 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class C100RespondentSolicitorService {
     private final CcdDataStoreService ccdDataStoreService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    public Map<String, Object> prePopulateAboutToStartCaseData(CallbackRequest callbackRequest, String authorisation) {
+        log.info("Inside prePopulateAboutToStartCaseData");
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = objectMapper.convertValue(
+            caseDataUpdated,
+            CaseData.class
+        );
+        findActiveRespondent(caseData, authorisation).ifPresent(x -> {
+            log.info("finding respondentParty is present ");
+            RespondentSolicitorEvents.getCaseFieldName(callbackRequest.getEventId()).ifPresent(event -> {
+                switch (event) {
+                    case CONSENT:
+                        caseDataUpdated.put(
+                            event.getCaseFieldName(),
+                            x.getValue().getResponse().getConsent()
+                        );
+                        log.info("finding respondentConsentToApplication = " + x.getValue().getResponse().getConsent());
+                        break;
+                    case KEEP_DETAILS_PRIVATE:
+                        caseDataUpdated.put(
+                            event.getCaseFieldName(),
+                            x.getValue().getResponse().getKeepDetailsPrivate()
+                        );
+                        log.info("finding respondentKeepDetailsPrivate = " + x.getValue().getResponse().getKeepDetailsPrivate());
+                        break;
+                    default:
+                        break;
+                }
+            });
+        });
+        return caseDataUpdated;
+    }
 
     public Consent prePopulateRespondentConsentToTheApplicationCaseData(CaseData caseData, String authorisation) {
         log.info("Inside prePopulateRespondentConsentToTheApplicationCaseData");
@@ -58,29 +98,43 @@ public class C100RespondentSolicitorService {
     }
 
     private Optional<Element<PartyDetails>> findActiveRespondent(CaseData caseData, String authorisation) {
-        Optional<Element<PartyDetails>> respondentParty = null;
+        Optional<Element<PartyDetails>> activeRespondent = null;
+        FindUserCaseRolesResponse findUserCaseRolesResponse = findUserCaseRoles(caseData, authorisation);
+
+        if (findUserCaseRolesResponse != null) {
+            log.info("findUserCaseRolesResponse is not null ");
+            List<Element<PartyDetails>> solicitorRepresentedRespondents = getSolicitorRepresentedRespondents(
+                caseData,
+                findUserCaseRolesResponse
+            );
+
+            activeRespondent = solicitorRepresentedRespondents
+                .stream()
+                .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
+                .findFirst();
+            log.info("finding activeRespondent " + activeRespondent);
+        }
+        return activeRespondent;
+    }
+
+    private List<Element<PartyDetails>> getSolicitorRepresentedRespondents(CaseData caseData, FindUserCaseRolesResponse findUserCaseRolesResponse) {
+        List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
+        for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
+            log.info("caseUser is = " + caseUser);
+            SolicitorRole.from(caseUser.getCaseRole()).ifPresent(
+                x -> solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex())));
+        }
+        log.info("finding solicitorRepresentedParties Party " + solicitorRepresentedParties);
+        return solicitorRepresentedParties;
+    }
+
+    private FindUserCaseRolesResponse findUserCaseRoles(CaseData caseData, String authorisation) {
         FindUserCaseRolesResponse findUserCaseRolesResponse = ccdDataStoreService.findUserCaseRoles(
             String.valueOf(caseData.getId()),
             authorisation
         );
         log.info("findUserCaseRolesResponse = " + findUserCaseRolesResponse);
-
-        if (findUserCaseRolesResponse != null) {
-            log.info("findUserCaseRolesResponse is not null ");
-            List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
-            for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-                log.info("caseUser is = " + caseUser);
-                SolicitorRole.from(caseUser.getCaseRole()).ifPresent(
-                    x -> solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex())));
-            }
-            log.info("finding solicitorRepresentedParties Party " + solicitorRepresentedParties);
-            respondentParty = solicitorRepresentedParties
-                .stream()
-                .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-                .findFirst();
-            log.info("finding respondentParty " + respondentParty);
-        }
-        return respondentParty;
+        return findUserCaseRolesResponse;
     }
 
 
