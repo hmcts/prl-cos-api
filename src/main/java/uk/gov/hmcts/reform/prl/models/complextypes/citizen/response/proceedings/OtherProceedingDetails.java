@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.OrderDate;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 @Data
 @Builder(toBuilder = true)
