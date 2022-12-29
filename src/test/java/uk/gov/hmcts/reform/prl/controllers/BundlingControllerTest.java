@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -213,7 +212,6 @@ public class BundlingControllerTest {
         when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString())).thenReturn(bundleCreateRefreshResponse);
         bundleCreateRefreshResponse.data.getCaseBundles().get(0).getValue().setStitchStatus("DONE");
         c100CaseData.getBundleInformation().setCaseBundles(bundleCreateRefreshResponse.data.getCaseBundles());
-        when(bundlingService.getCaseDataWithGeneratedPdf(anyString(),anyString(),anyString())).thenReturn(caseDataUpdated);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
         response = bundlingController.createBundle(authToken, "serviceAuth", callbackRequest);
         BundlingInformation bundleInformation = (BundlingInformation) response.getData().get("bundleInformation");
@@ -221,18 +219,6 @@ public class BundlingControllerTest {
         assertEquals("MiamCertificate",
             responseCaseBundles.get(0).getValue().getFolders().get(0)
                 .getValue().getFolders().get(0).getValue().getFolders().get(0).getValue().getDocuments().get(0).getValue().getName());
-    }
-
-    @Test
-    public void testRefreshBundle() throws Exception {
-        Mockito.doNothing().when(eventService).publishEvent(any());
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
-        c100CaseData.getBundleInformation().setCaseBundles(bundleCreateRefreshResponse.data.getCaseBundles());
-        when(bundlingService.getCaseDataWithGeneratedPdf(anyString(),anyString(),anyString())).thenReturn(caseDataUpdated);
-        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString())).thenReturn(bundleCreateRefreshResponse);
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
-        bundlingController.refreshBundleData(authToken, "serviceAuth", callbackRequest);
-
     }
 
 }
