@@ -20,6 +20,8 @@ public enum TypeOfOrderEnum {
     careOrder("careOrder", "Care Order"),
     @JsonProperty("childAbduction")
     childAbduction("childAbduction", "Child Abduction"),
+    @JsonProperty("childAbductionOrder")
+    childAbductionOrder("childAbductionOrder", "Child Abduction"),
     @JsonProperty("contactOrderForDivorce")
     contactOrderForDivorce("contactOrderForDivorce",
                            "A contact or residence order made within"
