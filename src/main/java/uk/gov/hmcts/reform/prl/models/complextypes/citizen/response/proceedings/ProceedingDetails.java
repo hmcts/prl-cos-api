@@ -1,17 +1,26 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
 
 @Data
 @Builder(toBuilder = true)
 public class ProceedingDetails {
+    private final String orderDetail;
+    @JsonProperty("caseNo")
     private final String caseNumber;
-    private final LocalDate orderMadeOn;
-    private final String howLongWasTheOrder;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate orderDate;
+    @JsonProperty("currentOrder")
     private final YesOrNo isCurrentOrder;
-    private final String nameOfCourtIssuedOrder;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate orderEndDate;
+    private final YesOrNo orderCopy;
+    private final Document orderDocument;
 }
