@@ -15,7 +15,7 @@ public enum TypeOfOrderEnum {
     @JsonProperty("emergencyProtectionOrder")
     emergencyProtectionOrder("emergencyProtectionOrder", "Emergency Protection Order"),
     @JsonProperty("supervisionOrder")
-    superviosionOrder("supervisionOrder", "Supervision Order"),
+    supervisionOrder("supervisionOrder", "Supervision Order"),
     @JsonProperty("careOrder")
     careOrder("careOrder", "Care Order"),
     @JsonProperty("childAbduction")
