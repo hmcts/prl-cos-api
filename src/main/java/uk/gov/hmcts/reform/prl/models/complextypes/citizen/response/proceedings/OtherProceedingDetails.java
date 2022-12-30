@@ -5,8 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.OrderDate;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
 
@@ -16,16 +15,13 @@ public class OtherProceedingDetails {
     private final String orderDetail;
     @JsonProperty("caseNo")
     private final String caseNumber;
-    private final OrderDate orderDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate proceedingOrderDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate proceedingOrderEndDate;
+    private final LocalDate orderDate;
     @JsonProperty("currentOrder")
     private final YesOrNo isCurrentOrder;
-    private final OrderDate orderEndDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate orderEndDate;
     private final YesOrNo orderCopy;
     private final Document orderDocument;
-    private final uk.gov.hmcts.reform.prl.models.documents.Document proceedingOrderDocument;
 
 }
