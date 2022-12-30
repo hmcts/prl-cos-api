@@ -12,12 +12,14 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleHearingInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingData;
@@ -52,11 +54,12 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundleCreateRequestMapper {
-    public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, String bundleConfigFileName) {
+    public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, Hearings hearingDetails,
+                                                                String bundleConfigFileName) {
         BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder()
             .caseDetails(BundlingCaseDetails.builder()
                              .id(caseData.getApplicantName())
-                             .caseData(mapCaseData(caseData,
+                             .caseData(mapCaseData(caseData,hearingDetails,
                                                    bundleConfigFileName))
                              .build())
             .caseTypeId(CASE_TYPE).jurisdictionId(JURISDICTION).eventId(eventId).build();
@@ -68,13 +71,21 @@ public class BundleCreateRequestMapper {
         return bundleCreateRequest;
     }
 
-    private BundlingCaseData mapCaseData(CaseData caseData, String bundleConfigFileName) {
+    private BundlingCaseData mapCaseData(CaseData caseData, Hearings hearingDetails, String bundleConfigFileName) {
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
+                .hearingDetails(mapHearingDetails(hearingDetails))
                       .applications(mapApplicationsFromCaseData(caseData))
                       .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
                       .allOtherDocuments(mapAllOtherDocuments(caseData)).build()).build();
+    }
+
+    private BundleHearingInfo mapHearingDetails(Hearings hearingDetails) {
+        if (null != hearingDetails) {
+            return BundleHearingInfo.builder().build();//need to write logic based on the inputs
+        }
+        return BundleHearingInfo.builder().hearingVenueId("").hearingJudgeId("").hearingDateAndTime("").build();
     }
 
     private List<Element<BundlingRequestDocument>> mapAllOtherDocuments(CaseData caseData) {

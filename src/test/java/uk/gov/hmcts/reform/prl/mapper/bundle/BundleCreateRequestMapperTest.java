@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
@@ -147,7 +148,8 @@ public class BundleCreateRequestMapperTest {
             .fl401UploadSupportDocuments(ElementUtils.wrapElements(fl401UploadSupportingDocuments))
             .build();
 
-        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI","sample.yaml");
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
+            Hearings.hearingsWith().build(),"sample.yaml");
         assertNotNull(bundleCreateRequest);
     }
 
@@ -170,7 +172,8 @@ public class BundleCreateRequestMapperTest {
             .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
             .build();
 
-        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI","sample.yaml");
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
+            Hearings.hearingsWith().build(), "sample.yaml");
         assertNotNull(bundleCreateRequest);
     }
 

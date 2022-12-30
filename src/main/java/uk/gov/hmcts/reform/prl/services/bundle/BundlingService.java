@@ -10,9 +10,13 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.BundleApiClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.bundle.BundleCreateRequestMapper;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
+
+import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 
 @Slf4j
 @Service
@@ -25,6 +29,9 @@ public class BundlingService {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    HearingService hearingService;
 
     @Autowired
     private BundleCreateRequestMapper bundleCreateRequestMapper;
@@ -40,9 +47,13 @@ public class BundlingService {
 
     public BundleCreateResponse createBundleServiceRequest(CaseData caseData,String eventId,
                                                            String authorization) throws Exception {
+        Hearings hearingDetails = null;
+        if (DECISION_OUTCOME.getValue().equals(caseData.getState())) {
+            hearingDetails = hearingService.getHearings(authorization, String.valueOf(caseData.getId()));
+        }
         return createBundle(authorization,authTokenGenerator.generate(),
             bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(
-                caseData, eventId,
+                caseData, eventId, hearingDetails,
                 getBundleConfig(null != caseData.getLanguagePreferenceWelsh() ? caseData.getLanguagePreferenceWelsh() : YesOrNo.No)));
     }
 
