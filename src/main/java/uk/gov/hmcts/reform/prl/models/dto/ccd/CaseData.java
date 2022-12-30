@@ -687,7 +687,5 @@ public class CaseData implements MappableObject {
     private String c100RebuildChildPostCode;
     private String c100RebuildConsentOrderDetails;
 
-    @JsonUnwrapped
-    @Builder.Default
-    private Flags caseFlags = Flags.builder().build();
+    private Flags caseFlags;
 }
