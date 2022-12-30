@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -74,6 +75,13 @@ public class C100RespondentSolicitorService {
                     );
                     log.info("finding respondentKeepDetailsPrivate = " + x.getValue().getResponse().getKeepDetailsPrivate());
                     break;
+                case CONFIRM_EDIT_CONTACT_DETAILS:
+                    caseDataUpdated.put(
+                        event.getCaseFieldName(),
+                        x.getValue().getResponse().getCitizenDetails()
+                    );
+                    log.info("finding respondentConfirmYourDetails = " + x.getValue().getResponse().getCitizenDetails());
+                    break;
                 default:
                     break;
             }
@@ -132,6 +140,21 @@ public class C100RespondentSolicitorService {
                                             .otherPeopleKnowYourContactDetails(
                                                 respondentKeepDetailsPrivate.getOtherPeopleKnowYourContactDetails())
                                             .build())
+                    .build();
+                break;
+            case CONFIRM_EDIT_CONTACT_DETAILS:
+                CitizenDetails citizenDetails = caseData.getResSolConfirmEditContactDetails();
+                buildResponseForRespondent = buildResponseForRespondent.toBuilder()
+                    .citizenDetails(buildResponseForRespondent.getCitizenDetails().toBuilder()
+                                        .firstName(citizenDetails.getFirstName())
+                                        .lastName(citizenDetails.getLastName())
+                                        .dateOfBirth(citizenDetails.getDateOfBirth())
+                                        .previousName(citizenDetails.getPreviousName())
+                                        .placeOfBirth(citizenDetails.getPlaceOfBirth())
+                                        .address(citizenDetails.getAddress())
+                                        .addressHistory(citizenDetails.getAddressHistory())
+                                        .contact(citizenDetails.getContact())
+                                        .build())
                     .build();
                 break;
             default:

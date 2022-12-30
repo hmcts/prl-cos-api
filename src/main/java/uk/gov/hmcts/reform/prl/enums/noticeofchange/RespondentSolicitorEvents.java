@@ -11,7 +11,8 @@ import java.util.Optional;
 public enum RespondentSolicitorEvents {
     START_RESPONSE("c100ResSolStartingResponse", "c100ResSolStartingResponse"),
     CONSENT("c100ResSolConsentingToApplication", "respondentConsentToApplication"),
-    KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "keepContactDetailsPrivate");
+    KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "keepContactDetailsPrivate"),
+    CONFIRM_EDIT_CONTACT_DETAILS("c100ResSolConfirmOrEditContactDetails", "resSolConfirmEditContactDetails");
 
     private final String eventId;
     private final String caseFieldName;
