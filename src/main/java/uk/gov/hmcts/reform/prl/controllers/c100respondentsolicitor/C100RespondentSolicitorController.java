@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorMiamService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -99,12 +101,14 @@ public class C100RespondentSolicitorController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         log.info("handleAboutToStart: Callback for Respondent Solicitor - Load the case data");
+        List<String> errorList = new ArrayList<>();
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(respondentSolicitorService.populateAboutToStartCaseData(
                 callbackRequest,
-                authorisation
-            )).build();
+                authorisation,
+                errorList
+            )).errors(errorList).build();
     }
 
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -117,12 +121,15 @@ public class C100RespondentSolicitorController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         log.info("handleAboutToSubmit: Callback for about-to-submit");
+        List<String> errorList = new ArrayList<>();
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(respondentSolicitorService.populateAboutToSubmitCaseData(
                 callbackRequest,
-                authorisation
-            )).build();
+                authorisation,
+                errorList
+            ))
+            .errors(errorList).build();
     }
 
     @PostMapping(path = "/populate-solicitor-respondent-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

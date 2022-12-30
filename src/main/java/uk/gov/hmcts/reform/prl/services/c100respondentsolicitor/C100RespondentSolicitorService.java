@@ -36,21 +36,23 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class C100RespondentSolicitorService {
     public static final String CHOOSE_RESPONDENT_DYNAMIC_LIST = "chooseRespondentDynamicList";
     public static final String RESPONDENTS = "respondents";
+    public static final String NO_ACTIVE_RESPONDENT_ERR_MSG
+        = "You must select an active respondent from the list to start representing through 'Select Respondent' event";
     private final CcdDataStoreService ccdDataStoreService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest, String authorisation) {
+    public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
         log.info("Inside prePopulateAboutToStartCaseData");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             caseDataUpdated,
             CaseData.class
         );
-        findActiveRespondent(caseData, authorisation).ifPresent(x -> {
+        findActiveRespondent(caseData, authorisation).ifPresentOrElse(x -> {
             retrieveExistingResponseForSolicitor(callbackRequest, caseDataUpdated, x);
-        });
+        }, () -> errorList.add("You must select a respondent to represent through 'Select Respondent' event"));
         return caseDataUpdated;
     }
 
@@ -78,7 +80,7 @@ public class C100RespondentSolicitorService {
         });
     }
 
-    public Map<String, Object> populateAboutToSubmitCaseData(CallbackRequest callbackRequest, String authorisation) {
+    public Map<String, Object> populateAboutToSubmitCaseData(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
         log.info("Inside populateAboutToSubmitCaseData");
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
@@ -89,7 +91,7 @@ public class C100RespondentSolicitorService {
         log.info("populateAboutToSubmitCaseData:: caseData" + caseData);
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
 
-        findActiveRespondent(caseData, authorisation).ifPresent(x -> {
+        findActiveRespondent(caseData, authorisation).ifPresentOrElse(x -> {
             respondents.stream()
                 .filter(party -> Objects.equals(party.getId(), x.getId()))
                 .findFirst()
@@ -99,7 +101,7 @@ public class C100RespondentSolicitorService {
                         buildResponseForRespondent(caseData, respondents, party, event);
                     });
                 });
-        });
+        }, () -> errorList.add(NO_ACTIVE_RESPONDENT_ERR_MSG));
         updatedCaseData.put(RESPONDENTS, respondents);
         return updatedCaseData;
     }
