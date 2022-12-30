@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -81,6 +82,13 @@ public class C100RespondentSolicitorService {
                         x.getValue().getResponse().getCitizenDetails()
                     );
                     log.info("finding respondentConfirmYourDetails = " + x.getValue().getResponse().getCitizenDetails());
+                    break;
+                case ATTENDING_THE_COURT:
+                    caseDataUpdated.put(
+                        event.getCaseFieldName(),
+                        x.getValue().getResponse().getAttendToCourt()
+                    );
+                    log.info("finding respondentAttendingToCourt = " + x.getValue().getResponse().getAttendToCourt());
                     break;
                 default:
                     break;
@@ -155,6 +163,11 @@ public class C100RespondentSolicitorService {
                                         .addressHistory(citizenDetails.getAddressHistory())
                                         .contact(citizenDetails.getContact())
                                         .build())
+                    .build();
+                break;
+            case ATTENDING_THE_COURT:
+                buildResponseForRespondent = buildResponseForRespondent.toBuilder()
+                    .attendToCourt(caseData.getRespondentAttendingTheCourt())
                     .build();
                 break;
             default:

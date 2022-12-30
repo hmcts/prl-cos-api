@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 
 @Data
 @Builder(toBuilder = true)
@@ -27,6 +28,7 @@ public class Response {
     private final CitizenInternationalElements citizenInternationalElements;
     // TODO: Need to recheck this one
     // private final AbilityToParticipate abilityToParticipate;
+    private final AttendToCourt attendToCourt;
 
     private final CitizenFlags citizenFlags;
     private final String safeToCallOption;

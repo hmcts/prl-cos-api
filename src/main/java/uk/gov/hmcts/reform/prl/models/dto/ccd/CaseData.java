@@ -642,7 +642,7 @@ public class CaseData implements MappableObject {
     private KeepDetailsPrivate keepContactDetailsPrivateOther;
     private String confidentialListDetails;
 
-    private final AttendToCourt respondentAttendingToCourt;
+    private final AttendToCourt respondentAttendingTheCourt;
 
     /**
      * Respondent solicitor's international element.
