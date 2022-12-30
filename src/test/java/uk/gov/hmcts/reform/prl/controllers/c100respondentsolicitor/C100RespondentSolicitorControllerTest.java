@@ -58,25 +58,6 @@ public class C100RespondentSolicitorControllerTest {
         assertEquals("1", aboutToStartOrSubmitCallbackResponse.getData().get("option1"));
         assertEquals("TestHeader", aboutToStartOrSubmitCallbackResponse.getData().get("miamHeader"));
     }
-
-    @Test
-    public void testHandleAboutToSubmit() throws Exception {
-        CaseData cd = CaseData.builder()
-            .build();
-
-        Map<String, Object> caseData = new HashMap<>();
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(1L)
-                             .data(caseData).build()).build();
-
-        when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse result = c100RespondentSolicitorController.handleAboutToSubmit("test auth",
-                                                                                                            callbackRequest);
-        assertNotNull(result);
-
-    }
 }
 
 
