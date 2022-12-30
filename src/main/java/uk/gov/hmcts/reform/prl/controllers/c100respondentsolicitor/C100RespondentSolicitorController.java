@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorMiamService;
 
@@ -39,7 +38,6 @@ public class C100RespondentSolicitorController {
     @Autowired
     private ObjectMapper objectMapper;
 
-
     @PostMapping(path = "/about-to-start-miam", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Respondent Solicitor - MIAM details  - Load What is MIAM?")
     @ApiResponses(value = {
@@ -59,7 +57,6 @@ public class C100RespondentSolicitorController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-
     @PostMapping(path = "/mid-event-miam", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Respondent Solicitor - MIAM details - handleMidEvent")
     @ApiResponses(value = {
@@ -75,7 +72,6 @@ public class C100RespondentSolicitorController {
         log.info("in C100RespondentSolicitorController - handleMidEvent - caseDataUpdated {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
 
     @PostMapping(path = "/about-to-submit-miam", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Respondent Solicitor - MIAM details")
@@ -105,32 +101,14 @@ public class C100RespondentSolicitorController {
         log.info("handleAboutToStart: Callback for Respondent Solicitor - Load the case data");
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(respondentSolicitorService.prePopulateAboutToStartCaseData(
+            .data(respondentSolicitorService.populateAboutToStartCaseData(
                 callbackRequest,
                 authorisation
             )).build();
     }
 
-
-    @PostMapping(path = "/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for Respondent Solicitor - MIAM details - handleMidEvent")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleMidEvent(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-
-        log.info("handleMidEvent: Callback for Respondent Solicitor - MIAM details");
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("in C100RespondentSolicitorController - handleMidEvent - caseDataUpdated {}", caseDataUpdated);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for Respondent Solicitor - MIAM details")
+    @Operation(description = "Callback for Respondent Solicitor about to submit event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
@@ -138,40 +116,13 @@ public class C100RespondentSolicitorController {
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-
-        log.info("handleAboutToSubmit: Callback for Respondent Solicitor - MIAM details");
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info("in C100RespondentSolicitorController - handleAboutToSubmit - caseDataUpdated {}", updatedCaseData);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
-    }
-
-    @PostMapping(path = "/test-about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for Respondent Solicitor - test event details")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleTestAboutToSubmit(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-
-        log.info("handleTestAboutToSubmit: Callback for Respondent Solicitor - test-about-to-submit select solicitor");
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info(
-            "in C100RespondentSolicitorController - handleTestAboutToSubmit - caseDataUpdated {}",
-            updatedCaseData
-        );
-
-        updatedCaseData.putAll(respondentSolicitorService.updateRespondents(caseData, authorisation));
-        log.info(
-            "in C100RespondentSolicitorController - handleTestAboutToSubmit - after update caseDataUpdated {}",
-            updatedCaseData
-        );
-        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
+        log.info("handleAboutToSubmit: Callback for about-to-submit");
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(respondentSolicitorService.populateAboutToSubmitCaseData(
+                callbackRequest,
+                authorisation
+            )).build();
     }
 
     @PostMapping(path = "/populate-solicitor-respondent-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -184,115 +135,27 @@ public class C100RespondentSolicitorController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         log.info("populateSolicitorRespondentList: Callback for getting the respondent listing");
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        log.info("populateSolicitorRespondentList: casedata is:: " + caseData);
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(respondentSolicitorService.populateSolicitorRespondentList(caseData, authorisation))
+            .data(respondentSolicitorService.populateSolicitorRespondentList(callbackRequest, authorisation))
             .build();
     }
 
-    @PostMapping(path = "/consent-to-application-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for Respondent Solicitor")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse handleConsentToApplicationAboutToStart(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        log.info("handleAboutToStart: Callback for Respondent Solicitor - Load the case data");
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = objectMapper.convertValue(
-            caseDataUpdated,
-            CaseData.class
-        );
-        log.info("case data is ready " + caseData);
-        caseDataUpdated.put(
-            "respondentConsentToApplication",
-            respondentSolicitorService.prePopulateRespondentConsentToTheApplicationCaseData(
-                caseData,
-                authorisation
-            )
-        );
-        log.info("case data is updated " + caseDataUpdated);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    @PostMapping(path = "/consent-to-application-about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for Respondent Solicitor - MIAM details")
+    @PostMapping(path = "/respondent-selection-about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback for Respondent Solicitor - submit active respondent selection")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleConsentToApplicationAboutToSubmit(
+    public AboutToStartOrSubmitCallbackResponse handleActiveRespondentSelection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        log.info("handleConsentToApplicationAboutToSubmit: Callback for consent-to-application-about-to-submit");
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        updatedCaseData.putAll(respondentSolicitorService.updateConsentToApplication(caseData, authorisation));
-        log.info(
-            "in C100RespondentSolicitorController - handleConsentToApplicationAboutToSubmit - updatedCaseData {}",
-            updatedCaseData
-        );
-        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
-    }
-
-    @PostMapping(path = "/keep-details-private-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for Respondent Solicitor for keep-details-private")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse handleKeepDetailsPrivateAboutToStart(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        log.info("handleAboutToStart: Callback for Respondent Solicitor - Load the case data");
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = objectMapper.convertValue(
-            caseDataUpdated,
-            CaseData.class
-        );
-        log.info("case data is ready " + caseData);
-        caseDataUpdated.put(
-            "keepContactDetailsPrivate",
-            respondentSolicitorService.prePopulateRespondentKeepYourDetailsPrivateCaseData(
-                caseData,
+        log.info("handleActiveRespondentSelection: Callback for Respondent Solicitor - handle select respondent");
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(respondentSolicitorService.updateActiveRespondentSelectionBySolicitor(
+                callbackRequest,
                 authorisation
-            )
-        );
-        log.info("case data is updated " + caseDataUpdated);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    @PostMapping(path = "/keep-details-private-about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Submit callback for Respondent Solicitor for keep-details-private")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleKeepDetailsPrivateAboutToSubmit(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-
-        log.info("handleKeepDetailsPrivateAboutToSubmit: Callback for keep-details-private-about-to-submit");
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        updatedCaseData.putAll(respondentSolicitorService.updateKeepDetailsPrivate(caseData, authorisation));
-        log.info(
-            "in C100RespondentSolicitorController - handleKeepDetailsPrivateAboutToSubmit - updatedCaseData {}",
-            updatedCaseData
-        );
-        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
+            )).build();
     }
 }

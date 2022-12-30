@@ -77,25 +77,6 @@ public class C100RespondentSolicitorControllerTest {
         assertNotNull(result);
 
     }
-
-    @Test
-    public void testHandleMidEvent() throws Exception {
-        CaseData cd = CaseData.builder()
-            .build();
-
-        Map<String, Object> caseData = new HashMap<>();
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(1L)
-                             .data(caseData).build()).build();
-
-        when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse result = c100RespondentSolicitorController.handleMidEvent("test auth",
-                                                                                                       callbackRequest);
-        assertNotNull(result);
-
-    }
 }
 
 
