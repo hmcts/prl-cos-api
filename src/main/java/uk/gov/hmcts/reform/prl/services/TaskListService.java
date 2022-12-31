@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.validators.EventsChecker;
@@ -47,6 +49,13 @@ import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.ALLEGATION_OF_HARM;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.ATTENDING_THE_COURT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.CONSENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
+
 
 @Slf4j
 @Service
@@ -60,6 +69,14 @@ public class TaskListService {
             .map(event -> Task.builder()
                 .event(event)
                 .state(getTaskState(caseData, event))
+                .build())
+            .collect(toList());
+    }
+
+    public List<RespondentTask> getRespondentSolicitorTasks() {
+        return getRespondentsEvents().stream()
+            .map(event -> RespondentTask.builder()
+                .event(event)
                 .build())
             .collect(toList());
     }
@@ -137,5 +154,18 @@ public class TaskListService {
             eventsList.add(RESPONDENT_BEHAVIOUR);
         }
         return eventsList;
+    }
+
+    public List<RespondentSolicitorEvents> getRespondentsEvents() {
+        return new ArrayList<>(List.of(
+            CONSENT,
+            KEEP_DETAILS_PRIVATE,
+            CONFIRM_EDIT_CONTACT_DETAILS,
+            ATTENDING_THE_COURT,
+            RespondentSolicitorEvents.MIAM,
+            CURRENT_OR_PREVIOUS_PROCEEDINGS,
+            ALLEGATION_OF_HARM
+        ));
+
     }
 }

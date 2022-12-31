@@ -8,12 +8,15 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.RespondentSolicitorTaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +25,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
-
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseEventHandler {
@@ -30,6 +32,7 @@ public class CaseEventHandler {
     private final CoreCaseDataService coreCaseDataService;
     private final TaskListService taskListService;
     private final TaskListRenderer taskListRenderer;
+    private final RespondentSolicitorTaskListRenderer respondentSolicitorTaskListRenderer;
     private final TaskErrorService taskErrorService;
 
     @EventListener
@@ -43,7 +46,7 @@ public class CaseEventHandler {
             CASE_TYPE,
             caseData.getId(),
             "internal-update-task-list",
-            Map.of("taskList", taskList,"id",String.valueOf(caseData.getId()))
+            Map.of("taskList", taskList, "id", String.valueOf(caseData.getId()))
 
         );
     }
@@ -65,6 +68,17 @@ public class CaseEventHandler {
 
         return taskListRenderer
             .render(tasks, eventErrors, caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE), caseData);
+
+    }
+
+    public String getRespondentTaskList(CaseData caseData) {
+        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks();
+
+        List<EventValidationErrors> eventErrors = new ArrayList<>();
+
+
+        return respondentSolicitorTaskListRenderer
+            .render(tasks);
 
     }
 }

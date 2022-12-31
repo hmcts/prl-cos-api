@@ -9,16 +9,27 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Getter
 public enum RespondentSolicitorEvents {
-    START_RESPONSE("c100ResSolStartingResponse", "c100ResSolStartingResponse"),
-    CONSENT("c100ResSolConsentingToApplication", "respondentConsentToApplication"),
-    KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "keepContactDetailsPrivate"),
-    CONFIRM_EDIT_CONTACT_DETAILS("c100ResSolConfirmOrEditContactDetails", "resSolConfirmEditContactDetails"),
-    ATTENDING_THE_COURT("c100ResSolAttendingTheCourt","respondentAttendingToCourt"),
-    MIAM("c100ResSolSolicitorMiam","respondentSolicitorWillingnessToAttendMiam,whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder"),
-    CURRENT_OR_PREVIOUS_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings","currentOrPastProceedingsForChildren,respondentExistingProceedings"),
-    ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "");
+    START_RESPONSE("c100ResSolStartingResponse", "c100ResSolStartingResponse", "c100ResSolStartingResponse"),
+    CONSENT("c100ResSolConsentingToApplication", "respondentConsentToApplication", "respondentConsentToApplication"),
+    KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "keepContactDetailsPrivate", "keepContactDetailsPrivate"),
+    CONFIRM_EDIT_CONTACT_DETAILS(
+        "c100ResSolConfirmOrEditContactDetails",
+        "resSolConfirmEditContactDetails",
+        "resSolConfirmEditContactDetails"
+    ),
+    ATTENDING_THE_COURT("c100ResSolAttendingTheCourt", "respondentAttendingToCourt", "respondentAttendingToCourt"),
+    MIAM(
+        "c100ResSolSolicitorMiam",
+        "c100ResSolSolicitorMiam",
+        "respondentSolicitorWillingnessToAttendMiam,whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder"
+    ),
+    CURRENT_OR_PREVIOUS_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "c100ResSolCurrentOrPreviousProceedings",
+                                    "currentOrPastProceedingsForChildren,respondentExistingProceedings"
+    ),
+    ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "c100ResSolAllegationsOfHarm", "");
 
     private final String eventId;
+    private final String eventName;
     private final String caseFieldName;
 
     public String getEventId() {
