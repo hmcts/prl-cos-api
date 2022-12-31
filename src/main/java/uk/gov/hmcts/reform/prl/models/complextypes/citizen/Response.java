@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
@@ -32,7 +31,7 @@ public class Response {
     private final CurrentOrPreviousProceedings currentOrPreviousProceedings;
     //Applicable only for C100 solicitor respondent
     private final YesNoDontKnow currentOrPastProceedingsForChildren;
-    private final List<Element<ProceedingDetails>> respondentExistingProceedings;
+    private final List<ProceedingDetails> respondentExistingProceedings;
     // TODO: Add safety Concerns here
     private final CitizenInternationalElements citizenInternationalElements;
     // TODO: Need to recheck this one
