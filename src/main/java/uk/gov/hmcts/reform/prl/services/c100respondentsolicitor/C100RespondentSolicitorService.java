@@ -93,13 +93,25 @@ public class C100RespondentSolicitorService {
                     log.info("finding respondentAttendingToCourt = " + x.getValue().getResponse().getAttendToCourt());
                     break;
                 case MIAM:
-                    String caseFields[] = event.getCaseFieldName().split(",");
-                    caseDataUpdated.put(caseFields[0], x.getValue().getResponse().getMiam());
-                    caseDataUpdated.put(caseFields[1], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
+                    String[] miamFields = event.getCaseFieldName().split(",");
+                    caseDataUpdated.put(miamFields[0], x.getValue().getResponse().getMiam());
+                    caseDataUpdated.put(miamFields[1], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
                     caseDataUpdated.put(
-                        caseFields[2],
+                        miamFields[2],
                         miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder()
                     );
+                    break;
+                case CURRENT_OR_PREVIOUS_PROCEEDINGS:
+                    String[] proceedingsFields = event.getCaseFieldName().split(",");
+                    caseDataUpdated.put(
+                        proceedingsFields[0],
+                        x.getValue().getResponse().getCurrentOrPastProceedingsForChildren()
+                    );
+                    caseDataUpdated.put(
+                        proceedingsFields[1],
+                        x.getValue().getResponse().getRespondentExistingProceedings()
+                    );
+                    break;
                 default:
                     break;
             }
@@ -183,6 +195,12 @@ public class C100RespondentSolicitorService {
             case MIAM:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .miam(caseData.getRespondentSolicitorMiam())
+                    .build();
+                break;
+            case CURRENT_OR_PREVIOUS_PROCEEDINGS:
+                buildResponseForRespondent = buildResponseForRespondent.toBuilder()
+                    .currentOrPastProceedingsForChildren(caseData.getCurrentOrPastProceedingsForChildren())
+                    .respondentExistingProceedings(caseData.getRespondentExistingProceedings())
                     .build();
                 break;
             default:

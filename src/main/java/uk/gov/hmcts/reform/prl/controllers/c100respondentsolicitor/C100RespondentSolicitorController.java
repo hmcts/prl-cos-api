@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolici
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -39,38 +38,6 @@ public class C100RespondentSolicitorController {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @PostMapping(path = "/mid-event-miam", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for Respondent Solicitor - MIAM details - handleMidEvent")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleMidEventMiam(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-
-        log.info("handleMidEvent: Callback for Respondent Solicitor - MIAM details");
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("in C100RespondentSolicitorController - handleMidEvent - caseDataUpdated {}", caseDataUpdated);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    @PostMapping(path = "/about-to-submit-miam", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for Respondent Solicitor - MIAM details")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmitMiam(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-
-        log.info("handleAboutToSubmit: Callback for Respondent Solicitor - MIAM details");
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info("in C100RespondentSolicitorController - handleAboutToSubmit - caseDataUpdated {}", updatedCaseData);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
-    }
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Respondent Solicitor")
