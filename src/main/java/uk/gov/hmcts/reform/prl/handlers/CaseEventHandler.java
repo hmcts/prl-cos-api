@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +39,7 @@ public class CaseEventHandler {
         final CaseData caseData = event.getCaseData();
 
         final String taskList = getUpdatedTaskList(caseData);
-        final String respondentTaskList = getRespondentTaskList(caseData);
+        final String respondentTaskList = getRespondentTaskList();
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
@@ -50,12 +49,11 @@ public class CaseEventHandler {
             Map.of(
                 "taskList",
                 taskList,
-                "id",
-                String.valueOf(caseData.getId()),
                 "respondentTaskList",
-                respondentTaskList
+                respondentTaskList,
+                "id",
+                String.valueOf(caseData.getId())
             )
-
         );
     }
 
@@ -79,11 +77,8 @@ public class CaseEventHandler {
 
     }
 
-    public String getRespondentTaskList(CaseData caseData) {
+    public String getRespondentTaskList() {
         final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks();
-
-        List<EventValidationErrors> eventErrors = new ArrayList<>();
-
 
         return respondentSolicitorTaskListRenderer
             .render(tasks);
