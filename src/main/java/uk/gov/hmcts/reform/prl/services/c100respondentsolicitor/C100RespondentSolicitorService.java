@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -41,6 +40,9 @@ public class C100RespondentSolicitorService {
     public static final String NO_ACTIVE_RESPONDENT_ERR_MSG
         = "You must select an active respondent from the list to start representing through 'Select Respondent' event";
     private final CcdDataStoreService ccdDataStoreService;
+
+    @Autowired
+    private RespondentSolicitorMiamService miamService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -90,6 +92,14 @@ public class C100RespondentSolicitorService {
                     );
                     log.info("finding respondentAttendingToCourt = " + x.getValue().getResponse().getAttendToCourt());
                     break;
+                case MIAM:
+                    String caseFields[] = event.getCaseFieldName().split(",");
+                    caseDataUpdated.put(caseFields[0], x.getValue().getResponse().getMiam());
+                    caseDataUpdated.put(caseFields[1], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
+                    caseDataUpdated.put(
+                        caseFields[2],
+                        miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder()
+                    );
                 default:
                     break;
             }
@@ -168,6 +178,11 @@ public class C100RespondentSolicitorService {
             case ATTENDING_THE_COURT:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .attendToCourt(caseData.getRespondentAttendingTheCourt())
+                    .build();
+                break;
+            case MIAM:
+                buildResponseForRespondent = buildResponseForRespondent.toBuilder()
+                    .miam(caseData.getRespondentSolicitorMiam())
                     .build();
                 break;
             default:

@@ -13,7 +13,8 @@ public enum RespondentSolicitorEvents {
     CONSENT("c100ResSolConsentingToApplication", "respondentConsentToApplication"),
     KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "keepContactDetailsPrivate"),
     CONFIRM_EDIT_CONTACT_DETAILS("c100ResSolConfirmOrEditContactDetails", "resSolConfirmEditContactDetails"),
-    ATTENDING_THE_COURT("c100ResSolAttendingTheCourt","respondentAttendingToCourt");
+    ATTENDING_THE_COURT("c100ResSolAttendingTheCourt","respondentAttendingToCourt"),
+    MIAM("c100ResSolSolicitorMiam","respondentSolicitorWillingnessToAttendMiam,whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder");
 
     private final String eventId;
     private final String caseFieldName;

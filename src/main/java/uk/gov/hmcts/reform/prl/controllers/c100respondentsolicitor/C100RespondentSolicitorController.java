@@ -40,25 +40,6 @@ public class C100RespondentSolicitorController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @PostMapping(path = "/about-to-start-miam", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for Respondent Solicitor - MIAM details  - Load What is MIAM?")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse handleAboutToStartMiam(
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-
-        log.info("handleAboutToStart: Callback for Respondent Solicitor - MIAM details  - Load What is MIAM?");
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("whatIsMiamPlaceHolder", miamService.getCollapsableOfWhatIsMiamPlaceHolder());
-        caseDataUpdated.put(
-            "helpMiamCostsExemptionsPlaceHolder",
-            miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder()
-        );
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
     @PostMapping(path = "/mid-event-miam", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Respondent Solicitor - MIAM details - handleMidEvent")
     @ApiResponses(value = {
