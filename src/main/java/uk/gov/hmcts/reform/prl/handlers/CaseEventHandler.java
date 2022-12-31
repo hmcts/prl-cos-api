@@ -40,13 +40,21 @@ public class CaseEventHandler {
         final CaseData caseData = event.getCaseData();
 
         final String taskList = getUpdatedTaskList(caseData);
+        final String respondentTaskList = getRespondentTaskList(caseData);
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
             caseData.getId(),
             "internal-update-task-list",
-            Map.of("taskList", taskList, "id", String.valueOf(caseData.getId()))
+            Map.of(
+                "taskList",
+                taskList,
+                "id",
+                String.valueOf(caseData.getId()),
+                "respondentTaskList",
+                respondentTaskList
+            )
 
         );
     }
