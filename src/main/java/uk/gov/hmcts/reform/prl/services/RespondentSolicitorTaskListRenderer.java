@@ -34,6 +34,9 @@ public class RespondentSolicitorTaskListRenderer {
 
     public String render(List<RespondentTask> allTasks) {
         final List<String> lines = new LinkedList<>();
+        lines.add("<div class='width-50'>><h3>Respond to the application</h3><p>This online response combines forms C7 and C8." +
+                      " It also allows you to make your own allegations of harm and violence (C1A)" +
+                      " in the section of safety concerns.</p><div>");
 
         lines.add("<div class='width-50'>");
 
@@ -53,13 +56,36 @@ public class RespondentSolicitorTaskListRenderer {
         final RespondentTaskSection consent = newSection("1. Consent to the Application")
             .withTask(tasks.get(RespondentSolicitorEvents.CONSENT));
 
-        final RespondentTaskSection details = newSection("2. Your details")
+        final RespondentTaskSection yourDetails = newSection("2. Your details")
             .withTask(tasks.get(RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE))
-            .withTask(tasks.get(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS));
+            .withTask(tasks.get(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS))
+            .withTask(tasks.get(RespondentSolicitorEvents.ATTENDING_THE_COURT));
+
+        final RespondentTaskSection applicationDetails = newSection("3. Application details")
+            .withTask(tasks.get(RespondentSolicitorEvents.MIAM))
+            .withTask(tasks.get(RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS));
+
+        final RespondentTaskSection safetyConcerns = newSection("4. Safety Concerns")
+            .withTask(tasks.get(RespondentSolicitorEvents.ALLEGATION_OF_HARM));
+
+        final RespondentTaskSection additionalInformation = newSection("5. Additional information")
+            .withTask(tasks.get(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT))
+            .withTask(tasks.get(RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE));
+
+        final RespondentTaskSection viewResponse = newSection("6. View PDF response")
+            .withTask(tasks.get(RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE));
+
+        final RespondentTaskSection submit = newSection("7. Submit")
+            .withTask(tasks.get(RespondentSolicitorEvents.SUBMIT));
 
         return Stream.of(
             consent,
-            details
+            yourDetails,
+            applicationDetails,
+            safetyConcerns,
+            additionalInformation,
+            viewResponse,
+            submit
         )
             .filter(RespondentTaskSection::hasAnyTask)
             .collect(toList());
@@ -76,14 +102,14 @@ public class RespondentSolicitorTaskListRenderer {
 
         section.add(HORIZONTAL_LINE);
         sec.getRespondentTasks().forEach(task -> {
-            section.addAll(renderTask(task));
+            section.addAll(renderRespondentTask(task));
             section.add(HORIZONTAL_LINE);
         });
 
         return section;
     }
 
-    private List<String> renderTask(RespondentTask respondentTask) {
+    private List<String> renderRespondentTask(RespondentTask respondentTask) {
         final List<String> lines = new LinkedList<>();
 
         lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask));
