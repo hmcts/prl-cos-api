@@ -112,6 +112,16 @@ public class C100RespondentSolicitorService {
                         x.getValue().getResponse().getRespondentExistingProceedings()
                     );
                     break;
+                case ALLEGATION_OF_HARM:
+                    break;
+                case INTERNATIONAL_ELEMENT:
+                    break;
+                case ABILITY_TO_PARTICIPATE:
+                    break;
+                case VIEW_DRAFT_RESPONSE:
+                    break;
+                case SUBMIT:
+                    break;
                 default:
                     break;
             }
@@ -202,6 +212,16 @@ public class C100RespondentSolicitorService {
                     .currentOrPastProceedingsForChildren(caseData.getCurrentOrPastProceedingsForChildren())
                     .respondentExistingProceedings(caseData.getRespondentExistingProceedings())
                     .build();
+                break;
+            case ALLEGATION_OF_HARM:
+                break;
+            case INTERNATIONAL_ELEMENT:
+                break;
+            case ABILITY_TO_PARTICIPATE:
+                break;
+            case VIEW_DRAFT_RESPONSE:
+                break;
+            case SUBMIT:
                 break;
             default:
                 break;
