@@ -17,11 +17,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
-import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorMiamService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -31,10 +34,10 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class C100RespondentSolicitorController {
 
     @Autowired
-    private RespondentSolicitorMiamService miamService;
+    C100RespondentSolicitorService respondentSolicitorService;
 
     @Autowired
-    C100RespondentSolicitorService respondentSolicitorService;
+    private DocumentGenService documentGenService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -112,5 +115,33 @@ public class C100RespondentSolicitorController {
                 callbackRequest,
                 authorisation
             )).build();
+    }
+
+    @PostMapping(path = "/keep-details-private-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to send FL401 application notification. ")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Application Submitted."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse generateConfidentialityDynamicSelectionDisplay(
+        @RequestBody CallbackRequest callbackRequest) {
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest))
+            .build();
+    }
+
+    @PostMapping(path = "/generate-c7response-draft-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to generate and store document")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse generateC7ResponseDraftDocument(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody @Parameter(name = "CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest request
+    ) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
+
+        Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
+
+        caseDataUpdated.putAll(documentGenService.generateC7DraftDocuments(authorisation, caseData));
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }

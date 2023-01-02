@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -338,5 +339,26 @@ public class C100RespondentSolicitorService {
             });
         updatedCaseData.put(RESPONDENTS, respondents);
         return updatedCaseData;
+    }
+
+    public Map<String, Object> generateConfidentialityDynamicSelectionDisplay(CallbackRequest callbackRequest) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        StringBuilder selectedList = new StringBuilder();
+
+        selectedList.append("<ul>");
+        for (ConfidentialityListEnum confidentiality: caseData.getKeepContactDetailsPrivateOther()
+            .getConfidentialityList()) {
+            selectedList.append("<li>");
+            selectedList.append(confidentiality.getDisplayedValue());
+            selectedList.append("</li>");
+        }
+        selectedList.append("</ul>");
+
+        Map<String, Object> keepDetailsPrivateList = new HashMap<>();
+        keepDetailsPrivateList.put("confidentialListDetails", selectedList);
+        return keepDetailsPrivateList;
     }
 }
