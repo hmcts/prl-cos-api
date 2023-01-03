@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -132,6 +133,17 @@ public class DraftAnOrderController {
             && caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()) {
             log.info("Please select at least one directions the case needs............");
             throw new Exception("Please select at least one directions the case needs");
+        } else {
+            if (!caseData.getStandardDirectionOrder().getSdoPreamblesList().isEmpty()
+                && caseData.getStandardDirectionOrder().getSdoPreamblesList().contains(SdoPreamblesEnum.rightToAskCourt)) {
+                caseDataUpdated.put(
+                    "sdoRightToAskCourt",
+                    "As the direction has been made without hearing may ask the court to reconsider this order. "
+                        + "You must do that within seven days of receiving the order by writing to the court"
+                        + "(and notifying any other party) and asking the court to reconsider. "
+                        + "Alternatively, the court may reconsider the directions at the first hearing"
+                );
+            }
         }
         log.info("Case data updated map {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
