@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AbuseDTO {
+public class AbuseDto {
 
     @JsonProperty("behaviourDetails")
     private String behaviourDetails;

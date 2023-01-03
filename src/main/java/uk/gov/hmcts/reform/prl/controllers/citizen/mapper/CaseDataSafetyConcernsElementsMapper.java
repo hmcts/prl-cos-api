@@ -1,9 +1,14 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
 
 import org.apache.commons.lang3.StringUtils;
-import uk.gov.hmcts.reform.prl.enums.*;
+import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
+import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.*;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.AbuseDto;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.ApplicantSafteConcernDto;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildSafetyConcernsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildSafetyConcernsDto;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
@@ -23,7 +28,7 @@ public class CaseDataSafetyConcernsElementsMapper {
     private static final String Applicant = "applicant";
     private static final String Children = "children";
     private static final String Child_Abduction = "Abduction";
-    private static final String All_Children="All of the children in the application";
+    private static final String All_Children = "All of the children in the application";
     private static final String Supervised = "Yes, but I prefer that it is supervised";
 
     private CaseDataSafetyConcernsElementsMapper() {
@@ -54,7 +59,8 @@ public class CaseDataSafetyConcernsElementsMapper {
                                                           ? c100RebuildSafetyConcernsElements.getC1AChildSafetyConcernsDetails() : null)
             .domesticBehaviours(buildDomesticAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
             .childAbuseBehaviours(buildChildAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
-            .newPreviousAbductionThreats(isNotEmpty(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc()) ? YesOrNo.No : Yes)
+            .newPreviousAbductionThreats(isNotEmpty(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc())
+             ? uk.gov.hmcts.reform.prl.enums.YesOrNo.No : Yes)
             .newPreviousAbductionThreatsDetails(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc())
             .newChildrenLocationNow(c100RebuildSafetyConcernsElements.getC1AChildsCurrentLocation())
             .newAbductionPassportOfficeNotified(c100RebuildSafetyConcernsElements.getC1AAbductionPassportOfficeNotified())
@@ -88,113 +94,106 @@ public class CaseDataSafetyConcernsElementsMapper {
     }
 
     private static ChildPassportDetails buildChildPassportDetails(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
-        List<AbductionChildPassportPossessionEnum> possessionChildrenPassport = new ArrayList<>();
+        List<NewPassportPossessionEnum> possessionChildrenPassport = new ArrayList<>();
         for (String possession : c100RebuildSafetyConcernsElements.getC1APossessionChildrenPassport()) {
             if (possession.equalsIgnoreCase("Mother")) {
-                possessionChildrenPassport.add(AbductionChildPassportPossessionEnum.mother);
+                possessionChildrenPassport.add(NewPassportPossessionEnum.mother);
             }
             if (possession.equalsIgnoreCase("father")) {
-                possessionChildrenPassport.add(AbductionChildPassportPossessionEnum.father);
+                possessionChildrenPassport.add(NewPassportPossessionEnum.father);
             }
             if (possession.equalsIgnoreCase("other")) {
-                possessionChildrenPassport.add(AbductionChildPassportPossessionEnum.other);
+                possessionChildrenPassport.add(NewPassportPossessionEnum.otherPerson);
 
             }
         }
         return ChildPassportDetails.builder().newChildPassportPossession(possessionChildrenPassport)
-            .newChildPassportPossessionOtherDetails(isNotEmpty(c100RebuildSafetyConcernsElements.getC1AProvideOtherDetails()) ? c100RebuildSafetyConcernsElements.getC1AProvideOtherDetails() : null)
+            .newChildPassportPossessionOtherDetails(isNotEmpty(c100RebuildSafetyConcernsElements.getC1AProvideOtherDetails())
+             ? c100RebuildSafetyConcernsElements.getC1AProvideOtherDetails() : null)
             .newChildHasMultiplePassports(c100RebuildSafetyConcernsElements.getC1AChildrenMoreThanOnePassport())
             .build();
 
     }
 
 
-    private static List<Element<ChildAbuseBehaviours>> buildChildAbuseBehavioursDetails(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
+    private static List<Element<ChildAbuseBehaviours>> buildChildAbuseBehavioursDetails(
+        C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
         List<Element<ChildAbuseBehaviours>> childElements = new ArrayList<>();
         ChildSafetyConcernsDto childAbuse = c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild();
-        AbuseDTO physicalAbuseDto = childAbuse.getPhysicalAbuse();
-        AbuseDTO emotionalAbuse = childAbuse.getEmotionalAbuse();
-        AbuseDTO financialAbuse = childAbuse.getFinancialAbuse();
-        AbuseDTO sexualAbuse = childAbuse.getSexualAbuse();
-        AbuseDTO psychologicalAbuse = childAbuse.getPsychologicalAbuse();
 
-        if (isNotEmpty(physicalAbuseDto)) {
-            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1, physicalAbuseDto));
+        if (isNotEmpty(childAbuse.getPhysicalAbuse())) {
+            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1, childAbuse.getPhysicalAbuse()));
         }
-        if (isNotEmpty(emotionalAbuse)) {
-            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_4, emotionalAbuse));
+        if (isNotEmpty(childAbuse.getEmotionalAbuse())) {
+            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_4, childAbuse.getEmotionalAbuse()));
         }
-        if (isNotEmpty(financialAbuse)) {
-            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_5, financialAbuse));
+        if (isNotEmpty(childAbuse.getFinancialAbuse())) {
+            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_5, childAbuse.getFinancialAbuse()));
         }
-        if (isNotEmpty(sexualAbuse)) {
-            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_3, sexualAbuse));
+        if (isNotEmpty(childAbuse.getSexualAbuse())) {
+            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_3, childAbuse.getSexualAbuse()));
         }
-        if (isNotEmpty(psychologicalAbuse)) {
-            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_2, psychologicalAbuse));
+        if (isNotEmpty(childAbuse.getPsychologicalAbuse())) {
+            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_2, childAbuse.getPsychologicalAbuse()));
         }
 
 
         return childElements;
     }
 
-    private static List<Element<DomesticAbuseBehaviours>> buildDomesticAbuseBehavioursDetails(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
+    private static List<Element<DomesticAbuseBehaviours>> buildDomesticAbuseBehavioursDetails(
+        C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
         List<Element<DomesticAbuseBehaviours>> applicantElements = new ArrayList<>();
-        List<ApplicantSafteConcernDTO> abuseTypeList = List.of(c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant());
-        ApplicantSafteConcernDTO applicantAbuse = c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant();
-        AbuseDTO physicalAbuseDto = applicantAbuse.getPhysicalAbuse();
-        AbuseDTO emotionalAbuse = applicantAbuse.getEmotionalAbuse();
-        AbuseDTO financialAbuse = applicantAbuse.getFinancialAbuse();
-        AbuseDTO sexualAbuse = applicantAbuse.getSexualAbuse();
-        AbuseDTO psychologicalAbuse = applicantAbuse.getPsychologicalAbuse();
+        List<ApplicantSafteConcernDto> abuseTypeList = List.of(c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant());
+        ApplicantSafteConcernDto applicantAbuse = c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant();
 
-        if (isNotEmpty(physicalAbuseDto)) {
-            applicantElements.add(mapToDomesticAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1, physicalAbuseDto));
+        if (isNotEmpty(applicantAbuse.getPhysicalAbuse())) {
+            applicantElements.add(mapToDomesticAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1, applicantAbuse.getPhysicalAbuse()));
         }
-        if (isNotEmpty(emotionalAbuse)) {
-            applicantElements.add(mapToDomesticAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_4, emotionalAbuse));
+        if (isNotEmpty(applicantAbuse.getEmotionalAbuse())) {
+            applicantElements.add(mapToDomesticAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_4, applicantAbuse.getEmotionalAbuse()));
         }
-        if (isNotEmpty(financialAbuse)) {
-            applicantElements.add(mapToDomesticAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_5, financialAbuse));
+        if (isNotEmpty(applicantAbuse.getFinancialAbuse())) {
+            applicantElements.add(mapToDomesticAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_5, applicantAbuse.getFinancialAbuse()));
         }
-        if (isNotEmpty(sexualAbuse)) {
-            applicantElements.add(mapToDomesticAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_3, sexualAbuse));
+        if (isNotEmpty(applicantAbuse.getSexualAbuse())) {
+            applicantElements.add(mapToDomesticAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_3, applicantAbuse.getSexualAbuse()));
         }
-        if (isNotEmpty(psychologicalAbuse)) {
-            applicantElements.add(mapToDomesticAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_2, psychologicalAbuse));
+        if (isNotEmpty(applicantAbuse.getPsychologicalAbuse())) {
+            applicantElements.add(mapToDomesticAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_2, applicantAbuse.getPsychologicalAbuse()));
         }
 
         return applicantElements;
 
     }
 
-    private static Element<ChildAbuseBehaviours> mapToChildAbuse(TypeOfAbuseEnum typeOfAbuseEnum, AbuseDTO abuseDTO) {
+    private static Element<ChildAbuseBehaviours> mapToChildAbuse(TypeOfAbuseEnum typeOfAbuseEnum, AbuseDto abuseDto) {
 
         YesOrNo allChildrenAreRisk = All_Children
-            .equalsIgnoreCase(String.valueOf(abuseDTO.getChildrenConcernedAbout()))
+            .equalsIgnoreCase(String.valueOf(abuseDto.getChildrenConcernedAbout()))
                                   ? YesOrNo.Yes : YesOrNo.No;
-        String whichChildrenAreRisk = (allChildrenAreRisk == YesOrNo.No) ?
-            StringUtils.join(abuseDTO.getChildrenConcernedAbout(), ",") : null;
+        String whichChildrenAreRisk = (allChildrenAreRisk == YesOrNo.No)
+            ? StringUtils.join(abuseDto.getChildrenConcernedAbout(), ",") : null;
 
         return Element.<ChildAbuseBehaviours>builder().value(ChildAbuseBehaviours.builder()
                                                                  .typeOfAbuse(typeOfAbuseEnum)
-                                                                 .newAbuseNatureDescription(abuseDTO.getBehaviourDetails())
-                                                                 .newBehavioursApplicantSoughtHelp(abuseDTO.getSeekHelpFromPersonOrAgency())
-                                                                 .newBehavioursStartDateAndLength(abuseDTO.getBehaviourStartDate())
-                                                                 .newBehavioursApplicantHelpSoughtWho(abuseDTO.getSeekHelpDetails())
+                                                                 .newAbuseNatureDescription(abuseDto.getBehaviourDetails())
+                                                                 .newBehavioursApplicantSoughtHelp(abuseDto.getSeekHelpFromPersonOrAgency())
+                                                                 .newBehavioursStartDateAndLength(abuseDto.getBehaviourStartDate())
+                                                                 .newBehavioursApplicantHelpSoughtWho(abuseDto.getSeekHelpDetails())
                                                                  .allChildrenAreRisk(allChildrenAreRisk)
                                                                  .whichChildrenAreRisk(whichChildrenAreRisk)
                                                                  .build()).build();
 
     }
 
-    private static Element<DomesticAbuseBehaviours> mapToDomesticAbuse(TypeOfAbuseEnum typeOfAbuseEnum, AbuseDTO abuseDTO) {
+    private static Element<DomesticAbuseBehaviours> mapToDomesticAbuse(TypeOfAbuseEnum typeOfAbuseEnum, AbuseDto abuseDto) {
         return Element.<DomesticAbuseBehaviours>builder().value(DomesticAbuseBehaviours.builder()
                                                                     .typeOfAbuse(typeOfAbuseEnum)
-                                                                    .newAbuseNatureDescription(abuseDTO.getBehaviourDetails())
-                                                                    .newBehavioursApplicantSoughtHelp(abuseDTO.getSeekHelpFromPersonOrAgency())
-                                                                    .newBehavioursStartDateAndLength(abuseDTO.getBehaviourStartDate())
-                                                                    .newBehavioursApplicantHelpSoughtWho(abuseDTO.getSeekHelpDetails())
+                                                                    .newAbuseNatureDescription(abuseDto.getBehaviourDetails())
+                                                                    .newBehavioursApplicantSoughtHelp(abuseDto.getSeekHelpFromPersonOrAgency())
+                                                                    .newBehavioursStartDateAndLength(abuseDto.getBehaviourStartDate())
+                                                                    .newBehavioursApplicantHelpSoughtWho(abuseDto.getSeekHelpDetails())
                                                                     .build()).build();
     }
 
