@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
@@ -15,7 +14,7 @@ import java.util.List;
 public class C100SafetyConcerns {
 
     @JsonProperty("applicant")
-    private ApplicantSafteConcernDTO applicant;
+    private ApplicantSafteConcernDto applicant;
     @JsonProperty("child")
     private ChildSafetyConcernsDto child;
 }

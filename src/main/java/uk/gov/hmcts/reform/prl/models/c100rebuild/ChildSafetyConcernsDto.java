@@ -15,16 +15,16 @@ import lombok.NoArgsConstructor;
 public class ChildSafetyConcernsDto {
 
     @JsonProperty("physicalAbuse")
-    private AbuseDTO physicalAbuse;
+    private AbuseDto physicalAbuse;
     @JsonProperty("psychologicalAbuse")
-    private AbuseDTO psychologicalAbuse;
+    private AbuseDto psychologicalAbuse;
     @JsonProperty("emotionalAbuse")
-    private AbuseDTO emotionalAbuse;
+    private AbuseDto emotionalAbuse;
     @JsonProperty("sexualAbuse")
-    private AbuseDTO sexualAbuse;
+    private AbuseDto sexualAbuse;
     @JsonProperty("financialAbuse")
-    private AbuseDTO financialAbuse;
+    private AbuseDto financialAbuse;
     @JsonProperty("somethingElse")
-    private AbuseDTO somethingElse;
+    private AbuseDto somethingElse;
 
 }

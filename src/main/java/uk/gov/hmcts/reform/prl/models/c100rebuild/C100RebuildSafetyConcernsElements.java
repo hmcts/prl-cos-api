@@ -19,7 +19,7 @@ public class C100RebuildSafetyConcernsElements {
     @JsonProperty("c1A_haveSafetyConcerns")
     private YesOrNo haveSafetyConcerns;
     @JsonProperty("c1A_safetyConernAbout")
-    private String[] WhoConcernAbout;
+    private String[] whoConcernAbout;
     @JsonProperty("c1A_concernAboutChild")
     private String[] c1AConcernAboutChild;
 
@@ -55,7 +55,7 @@ public class C100RebuildSafetyConcernsElements {
     private YesOrNo c1AAbductionPassportOfficeNotified;
     @JsonProperty("c1A_childAbductedBefore")
     private YesOrNo c1AChildAbductedBefore;
-    @JsonProperty( "c1A_previousAbductionsShortDesc")
+    @JsonProperty("c1A_previousAbductionsShortDesc")
     private String c1APreviousAbductionsShortDesc;
     @JsonProperty("c1A_policeOrInvestigatorInvolved")
     private YesOrNo c1APoliceOrInvestigatorInvolved;
@@ -64,11 +64,11 @@ public class C100RebuildSafetyConcernsElements {
     @JsonProperty("c1A_concernAboutApplicant")
     private String[] c1AConcernAboutApplicant;
 
-    @JsonProperty( "c1A_keepingSafeStatement")
+    @JsonProperty("c1A_keepingSafeStatement")
     private String c1AKeepingSafeStatement;
-    @JsonProperty( "c1A_supervisionAgreementDetails")
+    @JsonProperty("c1A_supervisionAgreementDetails")
     private String c1ASupervisionAgreementDetails;
-    @JsonProperty( "c1A_agreementOtherWaysDetails")
+    @JsonProperty("c1A_agreementOtherWaysDetails")
     private YesOrNo c1AAgreementOtherWaysDetails;
     @JsonProperty("c1A_safteyConcerns")
     private C100SafetyConcerns c100SafetyConcerns;
