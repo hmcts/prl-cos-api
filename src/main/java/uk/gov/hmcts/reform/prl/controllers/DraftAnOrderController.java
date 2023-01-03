@@ -154,6 +154,59 @@ public class DraftAnOrderController {
                         + "and made a decision on how to progress your case."
                 );
             }
+            if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
+                && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded)) {
+                caseDataUpdated.put(
+                    "sdoHearingNotNeeded",
+                    "A[Judge/justices' legal adviser] has decided that appropriate directions "
+                        + "can be given to progress the matter without the need for a hearing"
+                );
+            }
+            if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
+                && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded)) {
+                caseDataUpdated.put(
+                    "sdoParticipationDirections",
+                    "If they not already done so, any part who considers that specific "
+                        + "measures need to be taken to enable a party or witness to understand the"
+                        + "proceedings and their role in them when in court, put their views to the  "
+                        + "court, instruct their representatives before, during, and after the hearing "
+                        + "or attend the hearing without significant distress should file an application "
+                        + "notice and include the following information as far as practicable:"
+                        + System.lineSeparator()
+                        + "a.why the party or witness would benefit from assistance;"
+                        + System.lineSeparator()
+                        + "b.the measure or measures that would be likely to maximise as fas as practicable the "
+                        + "quality of their evidence or participation and why;"
+                        + System.lineSeparator()
+                        + "c.written confirmations from any relevant witness of his/her views."
+                );
+            }
+            if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
+                && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
+                SdoHearingsAndNextStepsEnum.joiningInstructions)) {
+                caseDataUpdated.put(
+                    "sdoJoiningInstructionsForRH",
+                    "Joining instructions"
+                );
+            }
+            if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
+                && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
+                SdoHearingsAndNextStepsEnum.updateContactDetails)) {
+                caseDataUpdated.put(
+                    "sdoUpdateContactDetailsSelection",
+                    "The parties must, if their contact details have changed or missing from "
+                        + "the applications, contact Cafcass or Cafcass Cymru quoting the case "
+                        + "number at [CafcassCymruCAT@gov.wales/ privatelawapplications@cafcass.gov.uk]"
+                        + "The email must include telephone contact details and email address so that they "
+                        + "may be contacted for safeguarding purposes."
+                        + System.lineSeparator()
+                        + "Alternatively if any party is managing their case using the online dashboard, "
+                        + "they can update their contact details on the and donot have to also contact "
+                        + "Cafcass or Cafcass Cymru."
+                );
+            }
         }
         log.info("Case data updated map {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
