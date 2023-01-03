@@ -74,7 +74,8 @@ public class BundlingController extends AbstractCallbackController {
                 BundlingInformation.builder().caseBundles(removeEmptyFolders(bundleCreateResponse.getData().getCaseBundles()))
                     .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
                     .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration())
-                    .bundleCreationDateAndTime(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("Europe/London"))).toString())
+                    .bundleCreationDateAndTime(DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                        .format(ZonedDateTime.now(ZoneId.of("Europe/London"))).toString())
                     .bundleHearingDateAndTime(bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime())
                     .build());
             log.info("*** Bundle information post emptyfolders removal from api : {}",
