@@ -20,7 +20,7 @@ public enum SdoDocumentationAndEvidenceEnum {
     @JsonProperty("spipAttendance")
     spipAttendance("spipAttendance", "SPIP attendance"),
     @JsonProperty("medicalDisclosure")
-    fhdra("medicalDisclosure", "Medical disclosure"),
+    medicalDisclosure("medicalDisclosure", "Medical disclosure"),
     @JsonProperty("letterFromGP")
     letterFromGP("letterFromGP", "Letter from GP"),
     @JsonProperty("letterFromSchool")

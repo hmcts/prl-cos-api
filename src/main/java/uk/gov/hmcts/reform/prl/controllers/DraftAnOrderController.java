@@ -123,7 +123,7 @@ public class DraftAnOrderController {
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
+        if (caseData.getStandardDirectionOrder().getSdoPreamblesList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoLocalAuthorityList().isEmpty()
