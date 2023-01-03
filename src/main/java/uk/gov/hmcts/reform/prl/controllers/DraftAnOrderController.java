@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -142,6 +143,15 @@ public class DraftAnOrderController {
                         + "You must do that within seven days of receiving the order by writing to the court"
                         + "(and notifying any other party) and asking the court to reconsider. "
                         + "Alternatively, the court may reconsider the directions at the first hearing"
+                );
+            }
+            if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
+                && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping)) {
+                caseDataUpdated.put(
+                    "sdoNextStepsAfterSecondGK",
+                    "The court has considered the safeguarding letter from Cafcass or Cafcass Cymru "
+                        + "and made a decision on how to progress your case."
                 );
             }
         }
