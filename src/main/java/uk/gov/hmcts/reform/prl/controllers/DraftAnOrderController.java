@@ -109,6 +109,35 @@ public class DraftAnOrderController {
             .data(caseDataUpdated).build();
     }
 
+    @PostMapping(path = "/populate-standard-direction-order-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to populate standard direction order fields")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Populated Headers"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse populateSdoFields(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) throws Exception {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoLocalAuthorityList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()) {
+            log.info("Please select at least one directions the case needs............");
+            throw new Exception("Please select at least one directions the case needs");
+        }
+        log.info("Case data updated map {}", caseDataUpdated);
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated).build();
+    }
+
     @PostMapping(path = "/generate-doc", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate the header")
     @ApiResponses(value = {
