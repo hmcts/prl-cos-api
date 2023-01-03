@@ -429,6 +429,7 @@ public class DraftAnOrderService {
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
             .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .parentName(caseData.getManageOrders().getParentName())
+            .dateOrderMade(caseData.getDateOrderMade())
             .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
             .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
             .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
@@ -480,6 +481,7 @@ public class DraftAnOrderService {
         } else {
             caseData = caseData.toBuilder()
                 .appointedGuardianName(caseData.getAppointedGuardianName())
+                .dateOrderMade(caseData.getDateOrderMade())
                 .manageOrders(ManageOrders.builder()
                                   .parentName(caseData.getManageOrders().getParentName())
                                   .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
@@ -491,6 +493,7 @@ public class DraftAnOrderService {
                                   .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
                                   .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                                   .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
+                                  .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
                                   .build()).build();
         }
         log.info("Case data after prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
