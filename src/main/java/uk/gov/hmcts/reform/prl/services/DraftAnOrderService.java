@@ -94,6 +94,7 @@ public class DraftAnOrderService {
                               .dateCreated(dateTime.now())
                               .status("Draft").build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
+            .dateOrderMade(caseData.getDateOrderMade())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
             .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
             .judgeOrMagistratesLastName(caseData.getJudgeOrMagistratesLastName())
@@ -342,6 +343,7 @@ public class DraftAnOrderService {
         log.info("order type " + selectedOrder.getOrderType());
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
+        caseDataMap.put("dateOrderMade", selectedOrder.getDateOrderMade());
         caseDataMap.put("wasTheOrderApprovedAtHearing", selectedOrder.getWasTheOrderApprovedAtHearing());
         caseDataMap.put("judgeOrMagistrateTitle", selectedOrder.getJudgeOrMagistrateTitle());
         caseDataMap.put("judgeOrMagistratesLastName", selectedOrder.getJudgeOrMagistratesLastName());
