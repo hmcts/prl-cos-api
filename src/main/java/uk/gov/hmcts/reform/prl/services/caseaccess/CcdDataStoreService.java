@@ -62,6 +62,7 @@ public class CcdDataStoreService {
     }
 
     public FindUserCaseRolesResponse findUserCaseRoles(String caseId, String authorisation) {
+        log.info("findUserCaseRoles : caseId is:: " + caseId);
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String userId = userDetails.getId();
         log.info("Finding case roles for the user {} for CaseID: {}", userId, caseId);
@@ -71,27 +72,6 @@ public class CcdDataStoreService {
             authTokenGenerator.generate(),
             buildFindUserCaseRolesRequest(caseId, userId)
         );
-    }
-
-    public CaseUser findRespondentSolicitorCaseRoles(String caseId, String authorisation) {
-        log.info("Finding Respondent solicitor case roles for the for CaseID: {}", caseId);
-        FindUserCaseRolesResponse findUserCaseRolesResponse = findUserCaseRoles(caseId, authorisation);
-        log.info("findUserCaseRolesResponse {}", findUserCaseRolesResponse);
-        if (findUserCaseRolesResponse != null
-            && findUserCaseRolesResponse.getCaseUsers() != null
-            && !findUserCaseRolesResponse.getCaseUsers().isEmpty()) {
-            findUserCaseRolesResponse.getCaseUsers()
-                .stream()
-                .forEach(x -> log.info("data found {}, {}, {}", x.getCaseId(), x.getUserId(), x.getCaseRole()));
-
-            return findUserCaseRolesResponse.getCaseUsers()
-                .stream()
-                .filter(x -> x.getCaseRole().startsWith("[SOLICITOR"))
-                .findFirst()
-                .orElseThrow(
-                    () -> new AuthorisationException("Invalid respondent solicitor access"));
-        }
-        return null;
     }
 
     private FindUserCaseRolesRequest buildFindUserCaseRolesRequest(String caseId, String userId) {

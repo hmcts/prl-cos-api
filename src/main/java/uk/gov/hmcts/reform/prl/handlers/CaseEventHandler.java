@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseEventHandler {
@@ -79,6 +81,7 @@ public class CaseEventHandler {
 
     public String getRespondentTaskList() {
         final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks();
+        log.info("tasks found: " + tasks.size());
 
         return respondentSolicitorTaskListRenderer
             .render(tasks);

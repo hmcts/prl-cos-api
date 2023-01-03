@@ -57,7 +57,7 @@ public class C100RespondentSolicitorService {
         );
         findActiveRespondent(caseData, authorisation).ifPresentOrElse(x -> {
             retrieveExistingResponseForSolicitor(callbackRequest, caseDataUpdated, x);
-        }, () -> errorList.add("You must select a respondent to represent through 'Select Respondent' event"));
+        }, () -> errorList.add("You must select a respondent to represent through 'Respond to application' event"));
         return caseDataUpdated;
     }
 
@@ -274,6 +274,7 @@ public class C100RespondentSolicitorService {
     }
 
     private FindUserCaseRolesResponse findUserCaseRoles(CaseData caseData, String authorisation) {
+        log.info("findUserCaseRoles : caseId is:: " + caseData.getId());
         FindUserCaseRolesResponse findUserCaseRolesResponse = ccdDataStoreService.findUserCaseRoles(
             String.valueOf(caseData.getId()),
             authorisation
