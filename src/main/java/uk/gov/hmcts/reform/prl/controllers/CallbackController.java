@@ -432,6 +432,22 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+    @PostMapping(path = "/c100-modify-case-test", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback for modifying case test")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse modificationSubmitted(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("c100CaseTestField", caseDataUpdated.get("c100CaseTestField"));
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
     private static boolean getPreviousState(String eachState) {
         return (!WITHDRAWN_STATE.equalsIgnoreCase(eachState)
             && (!DRAFT_STATE.equalsIgnoreCase(eachState))
