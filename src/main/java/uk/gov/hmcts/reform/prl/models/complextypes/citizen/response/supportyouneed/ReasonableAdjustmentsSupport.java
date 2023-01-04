@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.HelpCommunicationEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.LanguageRequirementsEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
-import uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangemensEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.TravellingToCourtEnum;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class ReasonableAdjustmentsSupport {
     private final List<DocsSupportEnum> docsSupport;
     private final String otherDetails;
     private final List<LanguageRequirementsEnum> languageRequirements;
-    private final List<SafetyArrangemensEnum> safetyArrangements;
+    private final List<SafetyArrangementsEnum> safetyArrangements;
     private final String safetyArrangementsDetails;
     private final List<TravellingToCourtEnum> travellingToCourt;
     private final String travellingOtherDetails;

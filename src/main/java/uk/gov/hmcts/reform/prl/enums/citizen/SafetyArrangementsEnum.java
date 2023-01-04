@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.enums.citizen;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
@@ -7,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum SafetyArrangemensEnum {
+public enum SafetyArrangementsEnum {
 
     @JsonProperty("waitingroom")
     waitingroom("waitingroom","Separate waiting room"),
@@ -33,5 +34,10 @@ public enum SafetyArrangemensEnum {
     @JsonValue
     public String getDisplayedValue() {
         return displayedValue;
+    }
+
+    @JsonCreator
+    public static SafetyArrangementsEnum getValue(String key) {
+        return SafetyArrangementsEnum.valueOf(key);
     }
 }
