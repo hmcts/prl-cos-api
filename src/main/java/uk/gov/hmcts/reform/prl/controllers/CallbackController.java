@@ -240,7 +240,7 @@ public class CallbackController {
         caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         caseDataUpdated.putAll(map);
 
-        if (null != caseData.getCaseCreatedBy() && caseData.getCaseCreatedBy().equals(CaseCreatedBy.CITIZEN)) {
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             // updating Summary tab to update case status
             caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
