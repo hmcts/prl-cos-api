@@ -979,6 +979,20 @@ public class CallbackControllerTest {
     }
 
     @Test
+    public void modifyCationSubmitted() throws Exception {
+
+        Map<String, Object> caseData = new HashMap<>();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .modificationSubmitted(authToken, callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c100CaseTestField"));
+    }
+
+    @Test
     public void aboutToSubmitCaseCreationToC100ForNullCaseNameWithException() {
 
         Map<String, Object> caseData = new HashMap<>();
