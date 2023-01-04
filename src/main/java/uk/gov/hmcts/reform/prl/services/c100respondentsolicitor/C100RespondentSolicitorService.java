@@ -55,9 +55,9 @@ public class C100RespondentSolicitorService {
             caseDataUpdated,
             CaseData.class
         );
-        findActiveRespondent(caseData, authorisation).ifPresentOrElse(x -> {
-            retrieveExistingResponseForSolicitor(callbackRequest, caseDataUpdated, x);
-        }, () -> errorList.add("You must select a respondent to represent through 'Respond to application' event"));
+        findActiveRespondent(caseData, authorisation)
+            .ifPresentOrElse(x -> retrieveExistingResponseForSolicitor(callbackRequest, caseDataUpdated, x), ()
+                -> errorList.add("You must select a respondent to represent through 'Respond to application' event"));
         return caseDataUpdated;
     }
 
@@ -95,6 +95,7 @@ public class C100RespondentSolicitorService {
                     break;
                 case MIAM:
                     String[] miamFields = event.getCaseFieldName().split(",");
+                    log.info("MIAM fields, :::{}", (Object) miamFields);
                     caseDataUpdated.put(miamFields[0], x.getValue().getResponse().getMiam());
                     caseDataUpdated.put(miamFields[1], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
                     caseDataUpdated.put(
@@ -114,15 +115,10 @@ public class C100RespondentSolicitorService {
                     );
                     break;
                 case ALLEGATION_OF_HARM:
-                    break;
                 case INTERNATIONAL_ELEMENT:
-                    break;
                 case ABILITY_TO_PARTICIPATE:
-                    break;
                 case VIEW_DRAFT_RESPONSE:
-                    break;
                 case SUBMIT:
-                    break;
                 default:
                     break;
             }
@@ -140,17 +136,15 @@ public class C100RespondentSolicitorService {
         log.info("populateAboutToSubmitCaseData:: caseData" + caseData);
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
 
-        findActiveRespondent(caseData, authorisation).ifPresentOrElse(x -> {
-            respondents.stream()
+        findActiveRespondent(caseData, authorisation).ifPresentOrElse(
+            x -> respondents.stream()
                 .filter(party -> Objects.equals(party.getId(), x.getId()))
                 .findFirst()
                 .ifPresent(party -> {
                     log.info("finding respondentParty is present ");
-                    RespondentSolicitorEvents.getCaseFieldName(callbackRequest.getEventId()).ifPresent(event -> {
-                        buildResponseForRespondent(caseData, respondents, party, event);
-                    });
-                });
-        }, () -> errorList.add(NO_ACTIVE_RESPONDENT_ERR_MSG));
+                    RespondentSolicitorEvents.getCaseFieldName(callbackRequest.getEventId())
+                        .ifPresent(event -> buildResponseForRespondent(caseData, respondents, party, event));
+                }), () -> errorList.add(NO_ACTIVE_RESPONDENT_ERR_MSG));
         updatedCaseData.put(RESPONDENTS, respondents);
         return updatedCaseData;
     }
@@ -215,15 +209,10 @@ public class C100RespondentSolicitorService {
                     .build();
                 break;
             case ALLEGATION_OF_HARM:
-                break;
             case INTERNATIONAL_ELEMENT:
-                break;
             case ABILITY_TO_PARTICIPATE:
-                break;
             case VIEW_DRAFT_RESPONSE:
-                break;
             case SUBMIT:
-                break;
             default:
                 break;
         }
@@ -234,7 +223,7 @@ public class C100RespondentSolicitorService {
     }
 
     private Optional<Element<PartyDetails>> findActiveRespondent(CaseData caseData, String authorisation) {
-        Optional<Element<PartyDetails>> activeRespondent = null;
+        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
         List<Element<PartyDetails>> solicitorRepresentedRespondents
             = findSolicitorRepresentedRespondents(caseData, authorisation);
 
@@ -324,7 +313,7 @@ public class C100RespondentSolicitorService {
             });
 
         findSolicitorRepresentedRespondents(caseData, authorisation)
-            .forEach(solicitorRepresentedParty -> {
+            .forEach(solicitorRepresentedParty ->
                 respondents.stream()
                     .filter(party -> Objects.equals(party.getId(), solicitorRepresentedParty.getId())
                         && !Objects.equals(party.getId(), selectedRespondentId))
@@ -336,8 +325,8 @@ public class C100RespondentSolicitorService {
 
                         respondents.set(respondents.indexOf(party), element(party.getId(), amended));
                         log.info("updateRespondents:: party found which needs to be set to false. after update " + party);
-                    });
-            });
+                    })
+            );
         updatedCaseData.put(RESPONDENTS, respondents);
         return updatedCaseData;
     }
