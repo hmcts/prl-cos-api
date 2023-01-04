@@ -133,7 +133,12 @@ public class DraftAnOrderController {
             && caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()) {
-            throw new Exception("Please select at least one from the below");
+            List<String> errorList = new ArrayList<>();
+            errorList.add(
+                "Please select at least one options from below");
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errorList)
+                .build();
         } else {
             if (!caseData.getStandardDirectionOrder().getSdoPreamblesList().isEmpty()
                 && caseData.getStandardDirectionOrder().getSdoPreamblesList().contains(SdoPreamblesEnum.rightToAskCourt)) {
