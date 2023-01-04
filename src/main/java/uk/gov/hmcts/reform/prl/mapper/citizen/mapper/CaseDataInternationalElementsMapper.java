@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
+package uk.gov.hmcts.reform.prl.mapper.citizen.mapper;
 
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildInternationalElements;
@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper.COMMA_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -36,7 +35,7 @@ public class CaseDataInternationalElementsMapper {
         return Stream.of(c100RebuildInternationalElements.getChildInternationalResidenceDetails(),
                         c100RebuildInternationalElements.getChildsParentHaveInternationalResidenceDetails())
                 .filter(s -> nonNull(s) && !s.isEmpty())
-                .collect(Collectors.joining(COMMA_SEPARATOR));
+                .collect(Collectors.joining(CaseDataMapper.COMMA_SEPARATOR));
     }
 
     private static YesOrNo buildHabitualResidentInOtherState(C100RebuildInternationalElements c100RebuildInternationalElements) {

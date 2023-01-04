@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
+package uk.gov.hmcts.reform.prl.mapper.citizen.mapper;
 
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;

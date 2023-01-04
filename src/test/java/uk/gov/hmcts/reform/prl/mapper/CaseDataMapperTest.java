@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.citizen;
+package uk.gov.hmcts.reform.prl.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
-import uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.mapper.citizen.mapper.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;

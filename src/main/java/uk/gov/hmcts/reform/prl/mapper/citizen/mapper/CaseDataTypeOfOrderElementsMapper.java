@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
+package uk.gov.hmcts.reform.prl.mapper.citizen.mapper;
 
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
@@ -15,8 +15,6 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper.COMMA_SEPARATOR;
-import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum.bothLiveWithAndSpendTimeWithOrder;
 import static uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum.liveWithOrder;
 import static uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum.spendTimeWithOrder;
@@ -56,13 +54,13 @@ public class CaseDataTypeOfOrderElementsMapper {
                         .collect(Collectors.toList()) : Collections.emptyList();
 
         String natureOfOrder = Stream.concat(prohibitedOrderList.stream(), specificIssueOrderList.stream())
-                .collect(Collectors.joining(COMMA_SEPARATOR));
+                .collect(Collectors.joining(CaseDataMapper.COMMA_SEPARATOR));
 
         if (isNotEmpty(natureOfOrder) && isNotEmpty(c100RebuildCourtOrderElements.getShortStatement())) {
-            return natureOfOrder + COMMA_SEPARATOR + SHORT_STATEMENT_INFO + HYPHEN_SEPARATOR
+            return natureOfOrder + CaseDataMapper.COMMA_SEPARATOR + SHORT_STATEMENT_INFO + CaseDataMapper.HYPHEN_SEPARATOR
                     + c100RebuildCourtOrderElements.getShortStatement();
         } else if (isNotEmpty(c100RebuildCourtOrderElements.getShortStatement())) {
-            return SHORT_STATEMENT_INFO + HYPHEN_SEPARATOR
+            return SHORT_STATEMENT_INFO + CaseDataMapper.HYPHEN_SEPARATOR
                     + c100RebuildCourtOrderElements.getShortStatement();
         } else {
             return natureOfOrder;

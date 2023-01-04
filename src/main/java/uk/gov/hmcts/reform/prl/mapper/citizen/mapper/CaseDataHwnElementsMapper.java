@@ -1,10 +1,8 @@
-package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
+package uk.gov.hmcts.reform.prl.mapper.citizen.mapper;
 
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildHearingWithoutNoticeElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper.COMMA_SEPARATOR;
-import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 public class CaseDataHwnElementsMapper {
@@ -31,8 +29,8 @@ public class CaseDataHwnElementsMapper {
             C100RebuildHearingWithoutNoticeElements c100RebuildHearingWithoutNoticeElements) {
         if (Yes.equals(c100RebuildHearingWithoutNoticeElements.getDoYouNeedHearingWithoutNoticeAsOtherPplDoSomething())) {
             return c100RebuildHearingWithoutNoticeElements.getReasonsOfHearingWithoutNotice()
-                    + COMMA_SEPARATOR + DETAILS_OF_NOTICE_OTHER_PEOPLE_WILL_DO_SOMETHING
-                    + HYPHEN_SEPARATOR +  c100RebuildHearingWithoutNoticeElements
+                    + CaseDataMapper.COMMA_SEPARATOR + DETAILS_OF_NOTICE_OTHER_PEOPLE_WILL_DO_SOMETHING
+                    + CaseDataMapper.HYPHEN_SEPARATOR +  c100RebuildHearingWithoutNoticeElements
                     .getDoYouNeedHearingWithoutNoticeAsOtherPplDoSomethingDetails();
         } else {
             return c100RebuildHearingWithoutNoticeElements.getReasonsOfHearingWithoutNotice();
