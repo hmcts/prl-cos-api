@@ -23,9 +23,12 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -49,6 +52,8 @@ public class DraftAnOrderController {
 
     @Autowired
     private DraftAnOrderService draftAnOrderService;
+
+    private final LocationRefDataService locationRefDataService;
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to reset fields")
@@ -249,10 +254,30 @@ public class DraftAnOrderController {
                         + "for the hearing listed on [date] at [time] at [name of court]."
                 );
             }
+            populateCourtDynamicList(authorisation, caseDataUpdated);
+
         }
         log.info("Case data updated map {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
+    }
+
+    private void populateCourtDynamicList(String authorisation, Map<String, Object> caseDataUpdated) {
+        List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
+        DynamicList courtDynamicList =  DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+            .build();
+        caseDataUpdated.put(
+            "sdoUrgentHearingCourtDynamicList", courtDynamicList);
+        caseDataUpdated.put(
+            "sdoFhdraCourtDynamicList", courtDynamicList);
+        caseDataUpdated.put(
+            "sdoDirectionsDraCourtDynamicList", courtDynamicList);
+        caseDataUpdated.put(
+            "sdoSettlementConferenceCourtDynamicList", courtDynamicList);
+        caseDataUpdated.put(
+            "sdoTransferApplicationCourtDynamicList", courtDynamicList);
+        caseDataUpdated.put(
+            "sdoCrossExaminationCourtDynamicList", courtDynamicList);
     }
 
     @PostMapping(path = "/generate-doc", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
