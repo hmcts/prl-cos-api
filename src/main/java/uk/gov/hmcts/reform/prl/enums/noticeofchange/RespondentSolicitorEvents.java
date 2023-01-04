@@ -19,7 +19,7 @@ public enum RespondentSolicitorEvents {
     ),
     ATTENDING_THE_COURT("c100ResSolAttendingTheCourt", "Attending the court", "respondentAttendingToCourt"),
     MIAM(
-        "c100ResSolSolicitorMiam",
+        "c100ResSolMiam",
         "MIAM",
         "respondentSolicitorWillingnessToAttendMiam,whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder"
     ),
