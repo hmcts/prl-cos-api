@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
@@ -132,8 +133,7 @@ public class DraftAnOrderController {
             && caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()) {
-            log.info("Please select at least one directions the case needs............");
-            throw new Exception("Please select at least one directions the case needs");
+            throw new Exception("Please select at least one from the below");
         } else {
             if (!caseData.getStandardDirectionOrder().getSdoPreamblesList().isEmpty()
                 && caseData.getStandardDirectionOrder().getSdoPreamblesList().contains(SdoPreamblesEnum.rightToAskCourt)) {
@@ -175,9 +175,9 @@ public class DraftAnOrderController {
                         + "or attend the hearing without significant distress should file an application "
                         + "notice and include the following information as far as practicable:"
                         + System.lineSeparator()
-                        + "a.why the party or witness would benefit from assistance;"
+                        + "a. why the party or witness would benefit from assistance;"
                         + System.lineSeparator()
-                        + "b.the measure or measures that would be likely to maximise as fas as practicable the "
+                        + "b. the measure or measures that would be likely to maximise as fas as practicable the "
                         + "quality of their evidence or participation and why;"
                         + System.lineSeparator()
                         + "c.written confirmations from any relevant witness of his/her views."
@@ -205,6 +205,43 @@ public class DraftAnOrderController {
                         + "Alternatively if any party is managing their case using the online dashboard, "
                         + "they can update their contact details on the and donot have to also contact "
                         + "Cafcass or Cafcass Cymru."
+                );
+            }
+            if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
+                && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
+                SdoCourtEnum.crossExaminationEx740)) {
+                caseDataUpdated.put(
+                    "sdoCrossExaminationEx740Section",
+                    "Under Section 31U of the MFPA, it appears to the court that the quality of "
+                        + "the party's evidence on cross-examination is likely to be diminshed if the "
+                        + "cross examination is conducted in person, or if the conduct of cross-examination "
+                        + "in person would cause significant distress to a party and it would not be "
+                        + "contrary of justice to make the direction."
+                        + System.lineSeparator()
+                        + "It is ordered that:"
+                        + System.lineSeparator()
+                        + "a. The applicant and respondent(delete as appropriate) must notify the court by "
+                        + "4pm on[date] whether they intend to appoint their own qualified legal representative."
+                        + System.lineSeparator()
+                        + "b. If the applicant/respondent does not intend to appoint their own qulaified leagl "
+                        + "representative, they (whichever party is the (alleged) victim of domestic abuse) "
+                        + "must complete form EX740 (name the form) and return it to the court by 4pm on [date] "
+                );
+            }
+            if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
+                && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
+                SdoCourtEnum.crossExaminationQualifiedLegal)) {
+                caseDataUpdated.put(
+                    "sdoCrossExaminationQualifiedLegalSection",
+                    "Should a qualified legal representative be appointed by the court "
+                        + System.lineSeparator()
+                        + "The court has considered whether it necessary in the interest of justice for the "
+                        + "witness(es) to be cross-examined by a qualified legal representative(s) and concluded "
+                        + "that it is neccessary to appoint such a qualified legal representative(s) to conduct "
+                        + "the cross examination."
+                        + System.lineSeparator()
+                        + "1. The court is to appoint a qualified leagal representaive on behalf of [name/s] "
+                        + "for the hearing listed on [date] at [time] at [name of court]."
                 );
             }
         }
