@@ -13,7 +13,6 @@ public class NoticeOfChangePartiesConverter {
         return NoticeOfChangeParties.builder()
             .respondentFirstName(respondent.getFirstName())
             .respondentLastName(respondent.getLastName())
-            .respondentDoB(respondent.getDateOfBirth())
             .build();
     }
 }
