@@ -47,7 +47,8 @@ public class ServiceOfApplicationEmailService {
             .map(Element::getValue)
             .collect(Collectors.toMap(
                 PartyDetails::getSolicitorEmail,
-                i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName()
+                i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
+                (x, y) -> x
             ));
 
         for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
