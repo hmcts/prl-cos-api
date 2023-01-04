@@ -41,7 +41,7 @@ class CaseDataMapperTest {
     private CaseData caseData;
 
     @BeforeEach
-    public void setUp() throws IOException {
+    void setUp() throws IOException {
         mapper.registerModule(new JSR310Module());
         caseData = CaseData.builder()
                 .id(1234567891234567L)
