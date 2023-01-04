@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.util.List;
 
@@ -13,5 +14,5 @@ import java.util.List;
 public class Proceedings {
     private final String orderType;
     @JsonProperty("proceedingDetails")
-    private final List<OtherProceedingDetails> proceedingDetails;
+    private final List<Element<OtherProceedingDetails>> proceedingDetails;
 }
