@@ -173,4 +173,8 @@ public class PrlAppsConstants {
     public static final String CITIZEN_ROLE = "citizen";
 
     public static final String OTHER = "Other";
+
+    public static final String APPLICANT_CASE_NAME = "applicantCaseName";
+
+    public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
 }
