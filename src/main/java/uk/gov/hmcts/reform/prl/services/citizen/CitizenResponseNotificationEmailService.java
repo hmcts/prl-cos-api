@@ -41,7 +41,7 @@ public class CitizenResponseNotificationEmailService {
     @Autowired
     private final ObjectMapper objectMapper;
 
-    public void sendC100ApplicantSolicitorNotification(CaseDetails caseDetails) throws Exception {
+    public void sendC100ApplicantSolicitorNotification(CaseDetails caseDetails) {
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (!State.CASE_WITHDRAWN.equals(caseData.getState())) {
