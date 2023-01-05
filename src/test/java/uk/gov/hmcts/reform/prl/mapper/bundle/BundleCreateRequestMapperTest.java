@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
@@ -20,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +31,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXPERT_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
@@ -155,7 +159,12 @@ public class BundleCreateRequestMapperTest {
 
     @Test
     public void testBundleCreateRequestMapperForEmptyDetails() {
-
+        List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
+        hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().hearingJudgeId("123").hearingJudgeName("hearingJudgeName")
+            .hearingVenueName("venueName").hearingVenueId("venueId").hearingVenueAddress("venueAddress")
+            .hearingStartDateTime(LocalDateTime.now()).build());
+        List<CaseHearing> caseHearings = new ArrayList<>();
+        caseHearings.add(CaseHearing.caseHearingWith().hmcStatus(LISTED).hearingDaySchedule(hearingDaySchedules).build());
 
         CaseData c100CaseData = CaseData.builder()
             .id(123456789123L)
@@ -164,7 +173,7 @@ public class BundleCreateRequestMapperTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .state(State.CASE_HEARING)
+            .state(State.DECISION_OUTCOME)
             .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
             .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
             .bundleInformation(BundlingInformation.builder().build())
@@ -173,7 +182,7 @@ public class BundleCreateRequestMapperTest {
             .build();
 
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
-            Hearings.hearingsWith().build(), "sample.yaml");
+            Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
         assertNotNull(bundleCreateRequest);
     }
 

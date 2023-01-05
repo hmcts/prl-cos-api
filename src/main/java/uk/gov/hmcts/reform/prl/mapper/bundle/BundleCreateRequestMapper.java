@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
@@ -40,6 +42,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXPERT_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
@@ -82,10 +85,17 @@ public class BundleCreateRequestMapper {
     }
 
     private BundleHearingInfo mapHearingDetails(Hearings hearingDetails) {
-        if (null != hearingDetails) {
-            return BundleHearingInfo.builder().build();//need to write logic based on the inputs
+        if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
+            List<CaseHearing> listedCaseHearings = hearingDetails.getCaseHearings().stream()
+                .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).collect(Collectors.toList());
+            if (null != listedCaseHearings && listedCaseHearings.size() > 0) {
+                HearingDaySchedule hearingDaySchedule = listedCaseHearings.get(0).getHearingDaySchedule().get(0);
+                return BundleHearingInfo.builder().hearingVenueAddress(hearingDaySchedule.getHearingVenueAddress())
+                    .hearingDateAndTime(hearingDaySchedule.getHearingStartDateTime().toString())
+                    .hearingJudgeName(hearingDaySchedule.getHearingJudgeName()).build();
+            }
         }
-        return BundleHearingInfo.builder().hearingVenueId("").hearingJudgeId("").hearingDateAndTime("").build();
+        return BundleHearingInfo.builder().build();
     }
 
     private List<Element<BundlingRequestDocument>> mapAllOtherDocuments(CaseData caseData) {

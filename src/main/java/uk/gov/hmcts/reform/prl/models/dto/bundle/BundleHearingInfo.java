@@ -9,12 +9,12 @@ import lombok.Value;
 @Value
 @Builder(toBuilder = true)
 public class BundleHearingInfo {
-    @JsonProperty("hearingVenueId")
-    private final String hearingVenueId;
+    @JsonProperty("hearingVenueAddress")
+    private final String hearingVenueAddress;
 
     @JsonProperty("hearingDateAndTime")
     private final String hearingDateAndTime;
 
-    @JsonProperty("hearingJudgeId")
-    private final String hearingJudgeId;
+    @JsonProperty("hearingJudgeName")
+    private final String hearingJudgeName;
 }

@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocument;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocumentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolderDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleHearingInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1Details;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolder;
@@ -113,7 +114,7 @@ public class BundlingControllerTest {
         bundleList.add(Bundle.builder().value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().build())
             .stitchStatus("New").folders(bundleFolders).build()).build());
         bundleCreateResponse = BundleCreateResponse.builder().data(BundleData.builder().id("334").caseBundles(bundleList).data(BundlingData.builder()
-            .build()).build()).build();
+            .hearingDetails(BundleHearingInfo.builder().build()).build()).build()).build();
         List<Bundle> bundleRefreshList = new ArrayList<>();
         bundleRefreshList.add(Bundle.builder().value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().build())
             .stitchStatus("DONE").folders(bundleFolders).build()).build());

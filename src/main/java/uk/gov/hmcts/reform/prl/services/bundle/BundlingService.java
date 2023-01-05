@@ -48,7 +48,7 @@ public class BundlingService {
     public BundleCreateResponse createBundleServiceRequest(CaseData caseData,String eventId,
                                                            String authorization) throws Exception {
         Hearings hearingDetails = null;
-        if (DECISION_OUTCOME.getValue().equals(caseData.getState())) {
+        if (DECISION_OUTCOME.equals(caseData.getState())) {
             hearingDetails = hearingService.getHearings(authorization, String.valueOf(caseData.getId()));
         }
         return createBundle(authorization,authTokenGenerator.generate(),
