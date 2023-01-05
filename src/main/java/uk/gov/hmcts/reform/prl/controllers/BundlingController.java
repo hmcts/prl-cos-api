@@ -94,8 +94,8 @@ public class BundlingController extends AbstractCallbackController {
             caseBundles.stream().forEach(bundle -> {
                 List<BundleFolder> folders = bundle.getValue().getFolders();
                 if (null != folders) {
+                    List<BundleFolder> foldersAfterEmptyRemoval = new ArrayList<>();
                     folders.stream().forEach(rootFolder -> {
-                        List<BundleFolder> foldersAfterEmptyRemoval = new ArrayList<>();
                         if (null != rootFolder.getValue().getFolders()) {
                             List<BundleSubfolder> bundleSubfoldersAfterEmptyRemoval = new ArrayList<>();
                             rootFolder.getValue().getFolders().stream().forEach(rootSubFolder -> {
@@ -128,12 +128,12 @@ public class BundlingController extends AbstractCallbackController {
                                         .folders(bundleSubfoldersAfterEmptyRemoval).build()).build());
                             }
                         }
-                        if (foldersAfterEmptyRemoval.size() > 0) {
-                            bundle.getValue().setFolders(foldersAfterEmptyRemoval);
-                        }
                     });
+                    if (foldersAfterEmptyRemoval.size() > 0) {
+                        bundle.getValue().setFolders(foldersAfterEmptyRemoval);
+                        caseBundlesPostEmptyfoldersRemoval.add(bundle);
+                    }
                 }
-                caseBundlesPostEmptyfoldersRemoval.add(bundle);
             });
 
         }
