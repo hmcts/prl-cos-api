@@ -111,14 +111,14 @@ public class ApplicationsTabService implements TabService {
 
         Map<String, Object> applicationTab = new HashMap<>();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            citizen(caseData, applicationTab);
+            populateApplicationTabForC100(caseData, applicationTab);
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            fl401(caseData, applicationTab);
+            populateApplicationTabForFL401(caseData, applicationTab);
         }
         return applicationTab;
     }
 
-    private void fl401(CaseData caseData, Map<String, Object> applicationTab) {
+    private void populateApplicationTabForFL401(CaseData caseData, Map<String, Object> applicationTab) {
         applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
         applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));
         applicationTab.put("fl401ApplicantTable", getFl401ApplicantsTable(caseData));
@@ -143,7 +143,7 @@ public class ApplicationsTabService implements TabService {
         applicationTab.put("declarationTable", getDeclarationTable(caseData));
     }
 
-    private void citizen(CaseData caseData, Map<String, Object> applicationTab) {
+    private void populateApplicationTabForC100(CaseData caseData, Map<String, Object> applicationTab) {
         applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
         applicationTab.put("applicantTable", getApplicantsTable(caseData));
         applicationTab.put("respondentTable", getRespondentsTable(caseData));

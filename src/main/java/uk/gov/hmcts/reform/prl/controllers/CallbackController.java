@@ -17,10 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.ccd.client.model.*;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -221,18 +218,25 @@ public class CallbackController {
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
+        caseDataUpdated.put(
+            CASE_DATE_AND_TIME_SUBMITTED_FIELD,
+            DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
+        );
         caseData = caseData.toBuilder().applicantsConfidentialDetails(confidentialityTabService
-                .getConfidentialApplicantDetails(caseData.getApplicants().stream()
-                    .map(Element::getValue)
-                    .collect(Collectors.toList())))
+                                                                          .getConfidentialApplicantDetails(caseData.getApplicants().stream()
+                                                                                                               .map(
+                                                                                                                   Element::getValue)
+                                                                                                               .collect(
+                                                                                                                   Collectors.toList())))
             .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(caseData.getChildren()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList()))).state(State.SUBMITTED_NOT_PAID)
+                                                                                                      .stream()
+                                                                                                      .map(Element::getValue)
+                                                                                                      .collect(
+                                                                                                          Collectors.toList()))).state(
+                State.SUBMITTED_NOT_PAID)
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)).build();
 
-        Map<String,Object> map = documentGenService.generateDocuments(authorisation, caseData);
+        Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData);
         // updating Summary tab to update case status
         caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         caseDataUpdated.putAll(map);
@@ -273,8 +277,8 @@ public class CallbackController {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         List<String> stateList = List.of(DRAFT_STATE, "CLOSED",
-            PENDING_STATE,
-            SUBMITTED_STATE, RETURN_STATE
+                                         PENDING_STATE,
+                                         SUBMITTED_STATE, RETURN_STATE
         );
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
@@ -316,7 +320,8 @@ public class CallbackController {
             solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
             caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(
                 caseDetails,
-                caseData.getCourtEmailAddress());
+                caseData.getCourtEmailAddress()
+            );
         }
     }
 
@@ -403,22 +408,10 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        // Updating the case name for FL401
-        if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
-            caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
-        }
-        if (caseDataUpdated.get("caseTypeOfApplication") != null) {
-            caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
-        }
-
-
-        // Saving the logged-in Solicitor and Org details for the docs..
-        getSolicitorDetails(authorisation, caseDataUpdated, caseData);
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(getSolicitorDetails(authorisation, callbackRequest))
+            .build();
     }
 
     @PostMapping(path = "/fl401-add-case-number", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -502,9 +495,19 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated, CaseData caseData) {
+    private Map<String, Object> getSolicitorDetails(String authorisation, CallbackRequest callbackRequest) {
 
         log.info("Fetching the user and Org Details ");
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        // Updating the case name for FL401
+        if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
+            caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
+        }
+        if (caseDataUpdated.get("caseTypeOfApplication") != null) {
+            caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
+        }
         try {
             UserDetails userDetails = userService.getUserDetails(authorisation);
             Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
@@ -515,9 +518,9 @@ public class CallbackController {
                 if (launchDarklyClient.isFeatureEnabled("share-a-case")) {
                     OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
                         .organisation(Organisation.builder()
-                            .organisationID(userOrganisation.get().getOrganisationIdentifier())
-                            .organisationName(userOrganisation.get().getName())
-                            .build())
+                                          .organisationID(userOrganisation.get().getOrganisationIdentifier())
+                                          .organisationName(userOrganisation.get().getName())
+                                          .build())
                         .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
                         .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
                         .build();
@@ -528,8 +531,6 @@ public class CallbackController {
         } catch (Exception e) {
             log.error("Error while fetching User or Org details for the logged in user ", e);
         }
-
         return caseDataUpdated;
-
     }
 }

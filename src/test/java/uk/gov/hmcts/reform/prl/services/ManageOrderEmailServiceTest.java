@@ -643,7 +643,7 @@ public class ManageOrderEmailServiceTest {
             .caseLink("/dummyURL")
             .build();
 
-        manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
+        manageOrderEmailService.sendEmailToC100ApplicantAndRespondent(caseDetails);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 
@@ -729,7 +729,7 @@ public class ManageOrderEmailServiceTest {
             .caseLink("/dummyURL")
             .build();
 
-        manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
+        manageOrderEmailService.sendEmailToC100ApplicantAndRespondent(caseDetails);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 
@@ -809,7 +809,7 @@ public class ManageOrderEmailServiceTest {
             .caseLink("/dummyURL")
             .build();
 
-        manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
+        manageOrderEmailService.sendEmailToC100ApplicantAndRespondent(caseDetails);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 
@@ -895,7 +895,7 @@ public class ManageOrderEmailServiceTest {
             .caseLink("/dummyURL")
             .build();
 
-        manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
+        manageOrderEmailService.sendEmailToC100ApplicantAndRespondent(caseDetails);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 

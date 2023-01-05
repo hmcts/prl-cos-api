@@ -189,7 +189,7 @@ public class ManageOrdersController {
     ) {
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
-        manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
+        manageOrderEmailService.sendEmailToC100ApplicantAndRespondent(caseDetails);
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();

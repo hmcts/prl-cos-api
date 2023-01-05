@@ -71,31 +71,33 @@ public class ManageOrderEmailService {
 
     }
 
-    public void sendEmailToApplicantAndRespondent(CaseDetails caseDetails) {
+    public void sendEmailToC100ApplicantAndRespondent(CaseDetails caseDetails) {
         CaseData caseData = emailService.getCaseData(caseDetails);
         SelectTypeOfOrderEnum isFinalOrder = caseData.getSelectTypeOfOrder();
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            c100(caseDetails, caseData, isFinalOrder);
+            sendEmailToC100ApplicantAndRespondent(caseDetails, caseData, isFinalOrder);
         } else {
-            if (!StringUtils.isEmpty(caseData.getApplicantsFL401().getEmail())) {
-                sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getEmail(),
-                                 buildApplicantRespondentEmail(
-                                     caseDetails, caseData.getApplicantsFL401().getFirstName()
-                                     + " " + caseData.getApplicantsFL401().getFirstName()));
-
-
-            }
-            if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
-                sendEmailToParty(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
-                                 buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
-                                     + " " + caseData.getRespondentsFL401().getFirstName()));
-            }
+            sendEmailToFL401ApplicantAndRespondent(caseDetails, caseData, isFinalOrder);
         }
-
-
     }
 
-    private void c100(CaseDetails caseDetails, CaseData caseData, SelectTypeOfOrderEnum isFinalOrder) {
+    private void sendEmailToFL401ApplicantAndRespondent(CaseDetails caseDetails, CaseData caseData, SelectTypeOfOrderEnum isFinalOrder) {
+        if (!StringUtils.isEmpty(caseData.getApplicantsFL401().getEmail())) {
+            sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getEmail(),
+                             buildApplicantRespondentEmail(
+                                 caseDetails, caseData.getApplicantsFL401().getFirstName()
+                                 + " " + caseData.getApplicantsFL401().getFirstName()));
+
+
+        }
+        if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
+            sendEmailToParty(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
+                             buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
+                                 + " " + caseData.getRespondentsFL401().getFirstName()));
+        }
+    }
+
+    private void sendEmailToC100ApplicantAndRespondent(CaseDetails caseDetails, CaseData caseData, SelectTypeOfOrderEnum isFinalOrder) {
         Map<String, String> applicantsMap = getEmailPartyWithName(caseData
                                                                      .getApplicants());
         Map<String, String> respondentMap = getEmailPartyWithName(caseData

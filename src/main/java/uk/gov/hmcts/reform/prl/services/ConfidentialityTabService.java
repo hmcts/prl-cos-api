@@ -69,8 +69,8 @@ public class ConfidentialityTabService {
                     fl401Applicant);
             }
 
-            List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(
-                caseData);
+            List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails
+                = getFl401ChildrenConfidentialDetails(caseData);
 
             return Map.of(
                 "applicantsConfidentialDetails",
