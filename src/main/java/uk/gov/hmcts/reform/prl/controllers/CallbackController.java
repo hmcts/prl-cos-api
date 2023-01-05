@@ -113,6 +113,10 @@ public class CallbackController {
 
     private final LaunchDarklyClient launchDarklyClient;
 
+    public static final String applicantCaseName = "applicantCaseName";
+
+    public static final String applicantOrRespondentCaseName = "applicantOrRespondentCaseName";
+
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
     @ApiResponses(value = {
@@ -400,16 +404,16 @@ public class CallbackController {
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         //Added for Case linking
-        if (caseDataUpdated.get("applicantCaseName") != null) {
-            caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get("applicantCaseName"));
+        if (caseDataUpdated.get(applicantCaseName) != null) {
+            caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(applicantCaseName));
         }
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         // Updating the case name for FL401
-        if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
-            caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
+        if (caseDataUpdated.get(applicantOrRespondentCaseName) != null) {
+            caseDataUpdated.put(applicantCaseName, caseDataUpdated.get(applicantOrRespondentCaseName));
             //Added for Case linking
-            caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get("applicantOrRespondentCaseName"));
+            caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(applicantOrRespondentCaseName));
         }
         if (caseDataUpdated.get("caseTypeOfApplication") != null) {
             caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
