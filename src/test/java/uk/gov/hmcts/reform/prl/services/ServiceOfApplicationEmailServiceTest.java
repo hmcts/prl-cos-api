@@ -10,7 +10,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -56,17 +55,11 @@ public class ServiceOfApplicationEmailServiceTest {
                                             .solicitorEmail("test@gmail.com")
                                             .representativeLastName("LastName")
                                             .representativeFirstName("FirstName")
-                                            .firstName("test")
-                                            .lastName("test")
-                                            .email("test@gmail.com")
                                             .build())))
             .respondents(List.of(element(PartyDetails.builder()
                                              .solicitorEmail("test@gmail.com")
                                              .representativeLastName("LastName")
                                              .representativeFirstName("FirstName")
-                                             .firstName("test")
-                                             .lastName("test")
-                                             .email("test@gmail.com")
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                                              .build())))
 
