@@ -62,19 +62,6 @@ public class CcdCaseApi {
         );
     }
 
-    /*private void revokeAccessToCase(UserDetails userDetails, String anonymousUserToken, String caseId) {
-        LOGGER.debug("Revoking access to case {}", caseId);
-        caseAccessApi.revokeAccessToCase(
-            anonymousUserToken,
-            authTokenGenerator.generate(),
-            idamClient.getUserDetails(anonymousUserToken).getId(),
-            PrlAppsConstants.JURISDICTION,
-            PrlAppsConstants.CASE_TYPE,
-            caseId,
-            userDetails.getId()
-        );
-    }*/
-
     private CaseDetails linkCitizen(
         String anonymousUserToken,
         String caseId,

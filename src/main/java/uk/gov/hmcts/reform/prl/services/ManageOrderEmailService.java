@@ -256,13 +256,6 @@ public class ManageOrderEmailService {
             .map(Element::getValue)
             .collect(Collectors.toList());
     }
-    /* private List<PartyDetails> getRespondents(CaseData caseData) {
-        return caseData
-            .getRespondents()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-    }*/
 
     private List<Map<String, List<String>>> getRespondentSolicitor(CaseDetails caseDetails) {
         CaseData caseData = emailService.getCaseData(caseDetails);
