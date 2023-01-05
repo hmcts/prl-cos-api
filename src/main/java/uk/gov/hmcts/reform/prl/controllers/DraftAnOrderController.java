@@ -19,7 +19,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -252,6 +254,40 @@ public class DraftAnOrderController {
                         + System.lineSeparator()
                         + "1. The court is to appoint a qualified leagal representaive on behalf of [name/s] "
                         + "for the hearing listed on [date] at [time] at [name of court]."
+                );
+            }
+            if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
+                && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
+                SdoDocumentationAndEvidenceEnum.specifiedDocuments)) {
+                caseDataUpdated.put(
+                    "sdoSpecifiedDocumentsSection",
+                    "No document other than a document specified in an order or filled in accordance "
+                        + "with the Rules or any Practice Direction shall be filled without the court's permission."
+                );
+            }
+            if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
+                && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
+                SdoDocumentationAndEvidenceEnum.spipAttendance)) {
+                caseDataUpdated.put(
+                    "sdoSpipAttendanceSection",
+                    "Both parents must attend the following programme at dates and at times to be confirmed by the activity provider."
+                        + System.lineSeparator()
+                        + "a. The required activity is a Separated Parenting Information programme"
+                        + System.lineSeparator()
+                        + "b. The Court shall spend this order to Cafcass/Cafcass Cymeru with parties contact details"
+                        + System.lineSeparator()
+                        + "c. The activity provider must notify the Court whether the course was at the conclusion of the activity directed"
+                );
+            }
+            if (!caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()
+                && caseData.getStandardDirectionOrder().getSdoOtherList().contains(
+                SdoOtherEnum.parentWithCare)) {
+                caseDataUpdated.put(
+                    "sdoParentWithCareSection",
+                    "The application is transferred to the Family Court at [place]"
+                        + System.lineSeparator()
+                        + "The reason for transfer is another court is in the the area where the child usually lives / there "
+                        + "are on-going proceedings in another court / free-text box reason"
                 );
             }
             populateCourtDynamicList(authorisation, caseDataUpdated);
