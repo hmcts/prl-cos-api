@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ChildSelectorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.RespondentOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -193,4 +194,7 @@ public class ManageOrders {
     private final YesOrNo isOrderDrawnForCafcass;
     @JsonProperty("cafcassReports")
     private final List<CafcassReportsEnum> cafcassReports;
+
+    @JsonProperty("withdrawnOrRefusedOrder")
+    private final WithDrawTypeOfOrderEnum withdrawnOrRefusedOrder;
 }

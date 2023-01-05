@@ -895,6 +895,10 @@ public class ManageOrderService {
 
         return element(OrderDetails.builder().orderType(flagSelectedOrder)
                            .orderTypeId(flagSelectedOrderId)
+                           .withdrawnRequestType(caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue())
+                           .isWithdrawnRequestApproved(caseData.getManageOrders().getWithdrawnOrRefusedOrder()
+                                                           .getDisplayedValue().equals("Withdrawn application")
+                                                           ? String.valueOf(caseData.getManageOrders().getIsCaseWithdrawn()) : null)
                            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
                            .childrenList(getChildInfoFromCaseData(caseData))

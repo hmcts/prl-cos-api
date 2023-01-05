@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -79,8 +80,15 @@ public class ManageOrderServiceTest {
     @Mock
     private DocumentLanguageService documentLanguageService;
 
+    private ManageOrders manageOrders;
+
     @Before
     public void setup() {
+        manageOrders = ManageOrders.builder()
+            .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
+            .isCaseWithdrawn(YesOrNo.No)
+            .build();
+
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
     }
@@ -655,6 +663,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrders(manageOrders)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -726,6 +735,7 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrders(manageOrders)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -806,6 +816,7 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrders(manageOrders)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -837,6 +848,7 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrders(manageOrders)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -1041,6 +1053,7 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrders(manageOrders)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -1085,6 +1098,7 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrders(manageOrders)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -1158,6 +1172,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrders(manageOrders)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
