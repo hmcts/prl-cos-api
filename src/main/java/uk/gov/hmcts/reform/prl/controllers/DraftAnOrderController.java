@@ -207,7 +207,7 @@ public class DraftAnOrderController {
                 && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
                 SdoHearingsAndNextStepsEnum.updateContactDetails)) {
                 caseDataUpdated.put(
-                    "sdoUpdateContactDetailsSelection",
+                    "sdoUpdateContactDetails",
                     "The parties must, if their contact details have changed or missing from "
                         + "the applications, contact Cafcass or Cafcass Cymru quoting the case "
                         + "number at [CafcassCymruCAT@gov.wales/ privatelawapplications@cafcass.gov.uk]"
@@ -223,7 +223,7 @@ public class DraftAnOrderController {
                 && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
                 SdoCourtEnum.crossExaminationEx740)) {
                 caseDataUpdated.put(
-                    "sdoCrossExaminationEx740Section",
+                    "sdoCrossExaminationEx740",
                     "Under Section 31U of the MFPA, it appears to the court that the quality of "
                         + "the party's evidence on cross-examination is likely to be diminshed if the "
                         + "cross examination is conducted in person, or if the conduct of cross-examination "
@@ -244,7 +244,7 @@ public class DraftAnOrderController {
                 && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
                 SdoCourtEnum.crossExaminationQualifiedLegal)) {
                 caseDataUpdated.put(
-                    "sdoCrossExaminationQualifiedLegalSection",
+                    "sdoCrossExaminationQualifiedLegal",
                     "Should a qualified legal representative be appointed by the court "
                         + System.lineSeparator()
                         + "The court has considered whether it necessary in the interest of justice for the "
@@ -260,7 +260,7 @@ public class DraftAnOrderController {
                 && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
                 SdoDocumentationAndEvidenceEnum.specifiedDocuments)) {
                 caseDataUpdated.put(
-                    "sdoSpecifiedDocumentsSection",
+                    "sdoSpecifiedDocuments",
                     "No document other than a document specified in an order or filled in accordance "
                         + "with the Rules or any Practice Direction shall be filled without the court's permission."
                 );
@@ -269,7 +269,7 @@ public class DraftAnOrderController {
                 && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
                 SdoDocumentationAndEvidenceEnum.spipAttendance)) {
                 caseDataUpdated.put(
-                    "sdoSpipAttendanceSection",
+                    "sdoSpipAttendance",
                     "Both parents must attend the following programme at dates and at times to be confirmed by the activity provider."
                         + System.lineSeparator()
                         + "a. The required activity is a Separated Parenting Information programme"
@@ -283,7 +283,7 @@ public class DraftAnOrderController {
                 && caseData.getStandardDirectionOrder().getSdoOtherList().contains(
                 SdoOtherEnum.parentWithCare)) {
                 caseDataUpdated.put(
-                    "sdoParentWithCareSection",
+                    "sdoParentWithCare",
                     "The application is transferred to the Family Court at [place]"
                         + System.lineSeparator()
                         + "The reason for transfer is another court is in the the area where the child usually lives / there "
