@@ -27,8 +27,8 @@ public enum WithDrawTypeOfOrderEnum {
     }
 
     @JsonCreator
-    public static JudgeOrMagistrateTitleEnum getValue(String key) {
-        return JudgeOrMagistrateTitleEnum.valueOf(key);
+    public static WithDrawTypeOfOrderEnum getValue(String key) {
+        return WithDrawTypeOfOrderEnum.valueOf(key);
     }
 
 }
