@@ -81,27 +81,11 @@ public class ManageOrderEmailService {
         }
     }
 
-    private void sendEmailToFL401ApplicantAndRespondent(CaseDetails caseDetails, CaseData caseData, SelectTypeOfOrderEnum isFinalOrder) {
-        if (!StringUtils.isEmpty(caseData.getApplicantsFL401().getEmail())) {
-            sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getEmail(),
-                             buildApplicantRespondentEmail(
-                                 caseDetails, caseData.getApplicantsFL401().getFirstName()
-                                 + " " + caseData.getApplicantsFL401().getFirstName()));
-
-
-        }
-        if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
-            sendEmailToParty(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
-                             buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
-                                 + " " + caseData.getRespondentsFL401().getFirstName()));
-        }
-    }
-
     private void sendEmailToC100ApplicantAndRespondent(CaseDetails caseDetails, CaseData caseData, SelectTypeOfOrderEnum isFinalOrder) {
         Map<String, String> applicantsMap = getEmailPartyWithName(caseData
-                                                                     .getApplicants());
+                                                                      .getApplicants());
         Map<String, String> respondentMap = getEmailPartyWithName(caseData
-                                                                     .getRespondents());
+                                                                      .getRespondents());
         for (Map.Entry<String, String> appValues : applicantsMap.entrySet()) {
             if (!StringUtils.isEmpty(appValues.getKey())) {
                 sendEmailToParty(isFinalOrder, appValues.getKey(),
@@ -116,6 +100,22 @@ public class ManageOrderEmailService {
                                  buildApplicantRespondentEmail(caseDetails, appValues.getValue())
                 );
             }
+        }
+    }
+
+    private void sendEmailToFL401ApplicantAndRespondent(CaseDetails caseDetails, CaseData caseData, SelectTypeOfOrderEnum isFinalOrder) {
+        if (!StringUtils.isEmpty(caseData.getApplicantsFL401().getEmail())) {
+            sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getEmail(),
+                             buildApplicantRespondentEmail(
+                                 caseDetails, caseData.getApplicantsFL401().getFirstName()
+                                 + " " + caseData.getApplicantsFL401().getFirstName()));
+
+
+        }
+        if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
+            sendEmailToParty(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
+                             buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
+                                 + " " + caseData.getRespondentsFL401().getFirstName()));
         }
     }
 
