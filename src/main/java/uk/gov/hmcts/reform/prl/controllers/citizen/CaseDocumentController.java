@@ -350,7 +350,7 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "401", description = "Provided Authroization token is missing or invalid"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    public ResponseEntity uploadCitizenDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+    public ResponseEntity<Object> uploadCitizenDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                    @RequestHeader("ServiceAuthorization") String serviceAuthorization,
                                                    @RequestParam("file") MultipartFile file) throws IOException {
 
@@ -368,7 +368,7 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
         @ApiResponse(responseCode = "404", description = "Document not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
-    public ResponseEntity deleteDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+    public ResponseEntity<Object> deleteDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                             @RequestHeader("ServiceAuthorization") String serviceAuthorization,
                                             @PathVariable("documentId") String documentId) {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
