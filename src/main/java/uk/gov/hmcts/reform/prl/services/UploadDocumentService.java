@@ -45,12 +45,11 @@ public class UploadDocumentService {
                                                                      CASE_TYPE, JURISDICTION, newArrayList(file)
         );
 
-        Document document = response.getDocuments().stream()
+        return response.getDocuments().stream()
             .findFirst()
             .orElseThrow(() ->
                              new RuntimeException("Document upload failed due to empty result"));
 
-        return document;
     }
 
     public UploadedDocuments uploadCitizenDocument(String authorisation, UploadedDocumentRequest uploadedDocumentRequest, String caseId) {

@@ -170,7 +170,7 @@ public class ServiceOfApplicationEmailService {
             .build();
     }
 
-    private EmailTemplateVars buildLocalAuthorityEmail(CaseDetails caseDetails) throws Exception {
+    private EmailTemplateVars buildLocalAuthorityEmail(CaseDetails caseDetails) {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         return LocalAuthorityEmail.builder()

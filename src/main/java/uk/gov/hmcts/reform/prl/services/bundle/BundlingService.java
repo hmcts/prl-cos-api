@@ -35,7 +35,7 @@ public class BundlingService {
     }
 
     private BundleCreateResponse createBundle(String authorization, String serviceAuthorization,
-                                              BundleCreateRequest bundleCreateRequest) throws Exception {
+                                              BundleCreateRequest bundleCreateRequest) {
         return bundleApiClient.createBundleServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
     }
 
