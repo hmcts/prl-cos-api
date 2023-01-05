@@ -28,7 +28,7 @@ public class BundlingService {
     @Value("${bundle.welsh.config}")
     private String bundleWelshConfig;
 
-    public BundleCreateResponse createBundleServiceRequest(CaseData caseData, String authorization){
+    public BundleCreateResponse createBundleServiceRequest(CaseData caseData, String authorization) {
         return createBundle(authorization, authTokenGenerator.generate(),
             bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(
                 caseData, getBundleConfig(caseData.getLanguagePreferenceWelsh())));
