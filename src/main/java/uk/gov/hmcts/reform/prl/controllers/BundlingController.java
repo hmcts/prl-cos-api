@@ -130,12 +130,10 @@ public class BundlingController extends AbstractCallbackController {
                         }
                         if (foldersAfterEmptyRemoval.size() > 0) {
                             bundle.getValue().setFolders(foldersAfterEmptyRemoval);
-                            caseBundlesPostEmptyfoldersRemoval.add(bundle);
                         }
                     });
-
                 }
-
+                caseBundlesPostEmptyfoldersRemoval.add(bundle);
             });
 
         }
