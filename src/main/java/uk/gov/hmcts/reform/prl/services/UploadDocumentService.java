@@ -72,7 +72,9 @@ public class UploadDocumentService {
             }
             if (null != uploadedDocumentRequest.getDocumentType()) {
                 documentType = uploadedDocumentRequest.getDocumentType();
-                partyName = getPartyName(uploadedDocumentRequest, partyName);
+                if (null != uploadedDocumentRequest.getPartyName()) {
+                    partyName = uploadedDocumentRequest.getPartyName();
+                }
             }
             if (null != uploadedDocumentRequest.getIsApplicant()) {
                 isApplicant = uploadedDocumentRequest.getIsApplicant();
@@ -117,13 +119,6 @@ public class UploadDocumentService {
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-    }
-
-    private String getPartyName(UploadedDocumentRequest uploadedDocumentRequest, String partyName) {
-        if (null != uploadedDocumentRequest.getPartyName()) {
-            partyName = uploadedDocumentRequest.getPartyName();
-        }
-        return partyName;
     }
 
     private String getParentDocumentType(UploadedDocumentRequest uploadedDocumentRequest) {
