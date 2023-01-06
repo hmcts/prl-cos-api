@@ -36,4 +36,7 @@ public class StandardDirectionOrder {
     @JsonProperty("sdoOtherList")
     private final List<SdoOtherEnum> sdoOtherList;
 
+    @JsonProperty("sdoRightToAskCourt")
+    private final String sdoRightToAskCourt;
+
 }
