@@ -325,11 +325,10 @@ dependencies {
       exclude group: 'io.reactivex', module: 'rxnetty-contexts'
       exclude group: 'io.reactivex', module: 'rxnetty-servo'
     }
-
-  implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-actuator')
-    {
-      exclude group: 'org.latencyutils', module: 'org.latencyutils'
+  compile("org.latencyutils:LatencyUtils:2.0.3") {
+      exclude group: "org.hdrhistogram", module: '*'
     }
+
   implementation(group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils)
   implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: versions.jackson)
   implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson)
@@ -401,6 +400,7 @@ dependencies {
       exclude group: 'io.reactivex', module: 'rxnetty-contexts'
       exclude group: 'io.reactivex', module: 'rxnetty-servo'
     }
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: '2.7.1'
   integrationTestImplementation(group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator)
     {
       exclude group: 'io.reactivex', module: 'io.reactivex'
