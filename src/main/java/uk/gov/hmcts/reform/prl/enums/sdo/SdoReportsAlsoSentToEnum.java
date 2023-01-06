@@ -23,7 +23,7 @@ public enum SdoReportsAlsoSentToEnum {
     }
 
     @JsonCreator
-    public static SdoRemoteHearingEnum getValue(String key) {
-        return SdoRemoteHearingEnum.valueOf(key);
+    public static SdoReportsAlsoSentToEnum getValue(String key) {
+        return SdoReportsAlsoSentToEnum.valueOf(key);
     }
 }

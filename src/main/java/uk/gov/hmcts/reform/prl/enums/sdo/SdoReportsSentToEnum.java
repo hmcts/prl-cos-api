@@ -14,7 +14,7 @@ public enum SdoReportsSentToEnum {
     @JsonProperty("party")
     party("party", "Party"),
     @JsonProperty("parties")
-    teams("parties", "Parties");
+    parties("parties", "Parties");
 
 
     private final String id;
