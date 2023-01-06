@@ -617,23 +617,27 @@ public class ManageOrderService {
     }
 
     private String getApplicantSolicitorDetails(CaseData caseData) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            List<PartyDetails> applicants = caseData
-                .getApplicants()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
+        String applicantSolicitorDetails = null;
+        if (caseData != null && caseData.getCaseTypeOfApplication() != null) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                List<PartyDetails> applicants = caseData
+                    .getApplicants()
+                    .stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
 
-            List<String> applicantSolicitorNames = applicants.stream()
-                .map(party -> Objects.nonNull(party.getSolicitorOrg().getOrganisationName())
-                    ? party.getSolicitorOrg().getOrganisationName() + APPLICANT_SOLICITOR
-                    : APPLICANT_SOLICITOR)
-                .collect(Collectors.toList());
-            return String.join("\n", applicantSolicitorNames);
-        } else {
-            PartyDetails applicantFl401 = caseData.getApplicantsFL401();
-            return applicantFl401.getRepresentativeLastName();
+                List<String> applicantSolicitorNames = applicants.stream()
+                    .map(party -> Objects.nonNull(party.getSolicitorOrg().getOrganisationName())
+                        ? party.getSolicitorOrg().getOrganisationName() + APPLICANT_SOLICITOR
+                        : APPLICANT_SOLICITOR)
+                    .collect(Collectors.toList());
+                applicantSolicitorDetails = String.join("\n", applicantSolicitorNames);
+            } else {
+                PartyDetails applicantFl401 = caseData.getApplicantsFL401();
+                applicantSolicitorDetails = applicantFl401.getRepresentativeLastName();
+            }
         }
+        return applicantSolicitorDetails;
     }
 
     private String getRespondentSolicitorDetails(CaseData caseData) {
