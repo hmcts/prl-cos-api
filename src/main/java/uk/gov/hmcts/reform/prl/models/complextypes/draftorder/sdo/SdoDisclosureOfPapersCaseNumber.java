@@ -10,6 +10,7 @@ import lombok.Data;
 public class SdoDisclosureOfPapersCaseNumber {
     @JsonProperty("caseNumber")
     private final String caseNumber;
+
     @JsonCreator
     public SdoDisclosureOfPapersCaseNumber(String caseNumber) {
         this.caseNumber  = caseNumber;
