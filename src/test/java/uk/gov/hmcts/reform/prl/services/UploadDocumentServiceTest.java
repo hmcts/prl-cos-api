@@ -83,7 +83,7 @@ public class UploadDocumentServiceTest {
 
     @Test
     public void uploadCitizenDocumentFailure() {
-         assertThrows(ResponseStatusException.class, () -> uploadDocumentService.uploadCitizenDocument(AUTH, null));
+        assertThrows(ResponseStatusException.class, () -> uploadDocumentService.uploadCitizenDocument(AUTH, null));
     }
 
     @Test
