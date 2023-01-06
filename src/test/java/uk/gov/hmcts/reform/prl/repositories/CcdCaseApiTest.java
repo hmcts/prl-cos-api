@@ -64,5 +64,21 @@ public class CcdCaseApiTest {
         assertEquals(caseDetails.getCaseTypeId(),expectedResponse.getCaseTypeId());
     }
 
+    @Test
+    public void testGetCase() {
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .amendOrderDynamicList(DynamicList.builder()
+                                                         .value(DynamicListElement.builder()
+                                                                    .code(UUID.randomUUID())
+                                                                    .build()).build()).build())
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId("dsd").build();
+        when(citizenCoreCaseDataService.getCase(AUTH, "12345")).thenReturn(caseDetails);
+        CaseDetails expectedResponse = ccdCaseApi.getCase(AUTH,"12345");
+        assertEquals(caseDetails.getCaseTypeId(),expectedResponse.getCaseTypeId());
+    }
+
 
 }
