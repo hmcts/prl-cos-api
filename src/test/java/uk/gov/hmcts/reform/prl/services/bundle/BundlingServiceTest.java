@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -72,6 +73,9 @@ public class BundlingServiceTest {
 
     @Mock
     private BundleCreateRequestMapper bundleCreateRequestMapper;
+
+    @Mock
+    private HearingService hearingService;
 
     @InjectMocks
     private BundlingService bundlingService;
@@ -216,7 +220,7 @@ public class BundlingServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
-            .state(State.CASE_HEARING)
+            .state(State.DECISION_OUTCOME)
             //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
