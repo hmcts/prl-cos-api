@@ -40,12 +40,22 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_EX740;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_QUALIFIED_LEGAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEEDED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFE_GUARDING_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 public class DraftAnOrderController {
-
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -151,10 +161,7 @@ public class DraftAnOrderController {
                 && caseData.getStandardDirectionOrder().getSdoPreamblesList().contains(SdoPreamblesEnum.rightToAskCourt)) {
                 caseDataUpdated.put(
                     "sdoRightToAskCourt",
-                    "As the direction has been made without hearing may ask the court to reconsider this order. "
-                        + "You must do that within seven days of receiving the order by writing to the court"
-                        + "(and notifying any other party) and asking the court to reconsider. "
-                        + "Alternatively, the court may reconsider the directions at the first hearing"
+                    RIGHT_TO_ASK_COURT
                 );
             }
             if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
@@ -162,8 +169,7 @@ public class DraftAnOrderController {
                 SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping)) {
                 caseDataUpdated.put(
                     "sdoNextStepsAfterSecondGK",
-                    "The court has considered the safeguarding letter from Cafcass or Cafcass Cymru "
-                        + "and made a decision on how to progress your case."
+                    SAFE_GUARDING_LETTER
                 );
             }
             if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
@@ -171,8 +177,7 @@ public class DraftAnOrderController {
                 SdoHearingsAndNextStepsEnum.hearingNotNeeded)) {
                 caseDataUpdated.put(
                     "sdoHearingNotNeeded",
-                    "A[Judge/justices' legal adviser] has decided that appropriate directions "
-                        + "can be given to progress the matter without the need for a hearing"
+                    HEARING_NOT_NEEDED
                 );
             }
             if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
@@ -180,19 +185,7 @@ public class DraftAnOrderController {
                 SdoHearingsAndNextStepsEnum.hearingNotNeeded)) {
                 caseDataUpdated.put(
                     "sdoParticipationDirections",
-                    "If they not already done so, any part who considers that specific "
-                        + "measures need to be taken to enable a party or witness to understand the"
-                        + "proceedings and their role in them when in court, put their views to the  "
-                        + "court, instruct their representatives before, during, and after the hearing "
-                        + "or attend the hearing without significant distress should file an application "
-                        + "notice and include the following information as far as practicable:"
-                        + System.lineSeparator()
-                        + "a. why the party or witness would benefit from assistance;"
-                        + System.lineSeparator()
-                        + "b. the measure or measures that would be likely to maximise as fas as practicable the "
-                        + "quality of their evidence or participation and why;"
-                        + System.lineSeparator()
-                        + "c.written confirmations from any relevant witness of his/her views."
+                    PARTICIPATION_DIRECTIONS
                 );
             }
             if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
@@ -200,7 +193,7 @@ public class DraftAnOrderController {
                 SdoHearingsAndNextStepsEnum.joiningInstructions)) {
                 caseDataUpdated.put(
                     "sdoJoiningInstructionsForRH",
-                    "Joining instructions"
+                    JOINING_INSTRUCTIONS
                 );
             }
             if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
@@ -208,15 +201,7 @@ public class DraftAnOrderController {
                 SdoHearingsAndNextStepsEnum.updateContactDetails)) {
                 caseDataUpdated.put(
                     "sdoUpdateContactDetails",
-                    "The parties must, if their contact details have changed or missing from "
-                        + "the applications, contact Cafcass or Cafcass Cymru quoting the case "
-                        + "number at [CafcassCymruCAT@gov.wales/ privatelawapplications@cafcass.gov.uk]"
-                        + "The email must include telephone contact details and email address so that they "
-                        + "may be contacted for safeguarding purposes."
-                        + System.lineSeparator()
-                        + "Alternatively if any party is managing their case using the online dashboard, "
-                        + "they can update their contact details on the and donot have to also contact "
-                        + "Cafcass or Cafcass Cymru."
+                    UPDATE_CONTACT_DETAILS
                 );
             }
             if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
@@ -224,20 +209,7 @@ public class DraftAnOrderController {
                 SdoCourtEnum.crossExaminationEx740)) {
                 caseDataUpdated.put(
                     "sdoCrossExaminationEx740",
-                    "Under Section 31U of the MFPA, it appears to the court that the quality of "
-                        + "the party's evidence on cross-examination is likely to be diminshed if the "
-                        + "cross examination is conducted in person, or if the conduct of cross-examination "
-                        + "in person would cause significant distress to a party and it would not be "
-                        + "contrary of justice to make the direction."
-                        + System.lineSeparator()
-                        + "It is ordered that:"
-                        + System.lineSeparator()
-                        + "a. The applicant and respondent(delete as appropriate) must notify the court by "
-                        + "4pm on[date] whether they intend to appoint their own qualified legal representative."
-                        + System.lineSeparator()
-                        + "b. If the applicant/respondent does not intend to appoint their own qulaified leagl "
-                        + "representative, they (whichever party is the (alleged) victim of domestic abuse) "
-                        + "must complete form EX740 (name the form) and return it to the court by 4pm on [date] "
+                    CROSS_EXAMINATION_EX740
                 );
             }
             if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
@@ -245,15 +217,7 @@ public class DraftAnOrderController {
                 SdoCourtEnum.crossExaminationQualifiedLegal)) {
                 caseDataUpdated.put(
                     "sdoCrossExaminationQualifiedLegal",
-                    "Should a qualified legal representative be appointed by the court "
-                        + System.lineSeparator()
-                        + "The court has considered whether it necessary in the interest of justice for the "
-                        + "witness(es) to be cross-examined by a qualified legal representative(s) and concluded "
-                        + "that it is neccessary to appoint such a qualified legal representative(s) to conduct "
-                        + "the cross examination."
-                        + System.lineSeparator()
-                        + "1. The court is to appoint a qualified leagal representaive on behalf of [name/s] "
-                        + "for the hearing listed on [date] at [time] at [name of court]."
+                    CROSS_EXAMINATION_QUALIFIED_LEGAL
                 );
             }
             if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
@@ -261,8 +225,7 @@ public class DraftAnOrderController {
                 SdoDocumentationAndEvidenceEnum.specifiedDocuments)) {
                 caseDataUpdated.put(
                     "sdoSpecifiedDocuments",
-                    "No document other than a document specified in an order or filled in accordance "
-                        + "with the Rules or any Practice Direction shall be filled without the court's permission."
+                    SPECIFIED_DOCUMENTS
                 );
             }
             if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
@@ -270,13 +233,7 @@ public class DraftAnOrderController {
                 SdoDocumentationAndEvidenceEnum.spipAttendance)) {
                 caseDataUpdated.put(
                     "sdoSpipAttendance",
-                    "Both parents must attend the following programme at dates and at times to be confirmed by the activity provider."
-                        + System.lineSeparator()
-                        + "a. The required activity is a Separated Parenting Information programme"
-                        + System.lineSeparator()
-                        + "b. The Court shall spend this order to Cafcass/Cafcass Cymeru with parties contact details"
-                        + System.lineSeparator()
-                        + "c. The activity provider must notify the Court whether the course was at the conclusion of the activity directed"
+                    SPIP_ATTENDANCE
                 );
             }
             if (!caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()
@@ -284,10 +241,7 @@ public class DraftAnOrderController {
                 SdoOtherEnum.parentWithCare)) {
                 caseDataUpdated.put(
                     "sdoParentWithCare",
-                    "The application is transferred to the Family Court at [place]"
-                        + System.lineSeparator()
-                        + "The reason for transfer is another court is in the the area where the child usually lives / there "
-                        + "are on-going proceedings in another court / free-text box reason"
+                    PARENT_WITHCARE
                 );
             }
             populateCourtDynamicList(authorisation, caseDataUpdated);
