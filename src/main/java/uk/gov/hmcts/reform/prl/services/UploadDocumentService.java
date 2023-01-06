@@ -57,7 +57,7 @@ public class UploadDocumentService {
         UploadedDocuments uploadedDocuments = null;
 
         if (uploadedDocumentRequest != null) {
-            uploadedDocuments = sample(uploadedDocumentRequest,authorisation);
+            uploadedDocuments = uploadedDocuments(uploadedDocumentRequest,authorisation);
 
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -75,7 +75,7 @@ public class UploadDocumentService {
         );
     }
 
-    public UploadedDocuments sample(UploadedDocumentRequest uploadedDocumentRequest, String authorisation) {
+    public UploadedDocuments uploadedDocuments(UploadedDocumentRequest uploadedDocumentRequest, String authorisation) {
 
         String parentDocumentType = "";
         String documentType = "";
