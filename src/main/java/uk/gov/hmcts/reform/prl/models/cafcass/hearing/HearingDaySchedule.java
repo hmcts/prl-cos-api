@@ -24,9 +24,17 @@ public class HearingDaySchedule {
 
     private String hearingVenueId;
 
+    private String hearingVenueName;
+
+    private String hearingVenueLocationCode;
+
+    private String hearingVenueAddress;
+
     private String hearingRoomId;
 
     private String hearingJudgeId;
+
+    private String hearingJudgeName;
 
     private List<String> panelMemberIds;
 

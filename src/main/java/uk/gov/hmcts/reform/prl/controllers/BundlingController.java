@@ -74,7 +74,11 @@ public class BundlingController extends AbstractCallbackController {
                 BundlingInformation.builder().caseBundles(removeEmptyFolders(bundleCreateResponse.getData().getCaseBundles()))
                     .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
                     .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration())
-                    .bundleCreationDate(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("Europe/London"))).toString())
+                    .bundleCreationDateAndTime(DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                        .format(ZonedDateTime.now(ZoneId.of("Europe/London"))).toString())
+                    .bundleHearingDateAndTime(null != bundleCreateResponse.getData().getData()
+                        && null != bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime()
+                        ? bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime() : "")
                     .build());
             log.info("*** Bundle information post emptyfolders removal from api : {}",
                 new ObjectMapper().writeValueAsString(caseDataUpdated.get("bundleInformation")));
@@ -90,8 +94,8 @@ public class BundlingController extends AbstractCallbackController {
             caseBundles.stream().forEach(bundle -> {
                 List<BundleFolder> folders = bundle.getValue().getFolders();
                 if (null != folders) {
+                    List<BundleFolder> foldersAfterEmptyRemoval = new ArrayList<>();
                     folders.stream().forEach(rootFolder -> {
-                        List<BundleFolder> foldersAfterEmptyRemoval = new ArrayList<>();
                         if (null != rootFolder.getValue().getFolders()) {
                             List<BundleSubfolder> bundleSubfoldersAfterEmptyRemoval = new ArrayList<>();
                             rootFolder.getValue().getFolders().stream().forEach(rootSubFolder -> {
@@ -124,14 +128,12 @@ public class BundlingController extends AbstractCallbackController {
                                         .folders(bundleSubfoldersAfterEmptyRemoval).build()).build());
                             }
                         }
-                        if (foldersAfterEmptyRemoval.size() > 0) {
-                            bundle.getValue().setFolders(foldersAfterEmptyRemoval);
-                            caseBundlesPostEmptyfoldersRemoval.add(bundle);
-                        }
                     });
-
+                    if (foldersAfterEmptyRemoval.size() > 0) {
+                        bundle.getValue().setFolders(foldersAfterEmptyRemoval);
+                        caseBundlesPostEmptyfoldersRemoval.add(bundle);
+                    }
                 }
-
             });
 
         }

@@ -28,10 +28,12 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocument;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocumentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolderDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleHearingInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1Details;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolderDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingData;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -111,7 +113,8 @@ public class BundlingControllerTest {
         List<Bundle> bundleList = new ArrayList<>();
         bundleList.add(Bundle.builder().value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().build())
             .stitchStatus("New").folders(bundleFolders).build()).build());
-        bundleCreateResponse = BundleCreateResponse.builder().data(BundleData.builder().id("334").caseBundles(bundleList).build()).build();
+        bundleCreateResponse = BundleCreateResponse.builder().data(BundleData.builder().id("334").caseBundles(bundleList).data(BundlingData.builder()
+            .hearingDetails(BundleHearingInfo.builder().build()).build()).build()).build();
         List<Bundle> bundleRefreshList = new ArrayList<>();
         bundleRefreshList.add(Bundle.builder().value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().build())
             .stitchStatus("DONE").folders(bundleFolders).build()).build());
@@ -153,7 +156,6 @@ public class BundlingControllerTest {
             .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("WitnessStatement.pdf").build())
             .documentType(YOUR_WITNESS_STATEMENTS).isApplicant("No").build());
 
-        //uploadedDocuments.add(uploadedDocuments);
         c100CaseData = CaseData.builder()
             .id(123456789123L)
             .languagePreferenceWelsh(No)
@@ -164,7 +166,6 @@ public class BundlingControllerTest {
             .state(State.CASE_HEARING)
             .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
             .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
-            //.allegationsOfHarmYesNo(No)
             .otherDocuments(ElementUtils.wrapElements(otherDocuments))
             .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
             .orderCollection(ElementUtils.wrapElements(orders))
@@ -175,43 +176,12 @@ public class BundlingControllerTest {
             .miamCertificationDocumentUpload(Document.builder().documentFileName("maimCertDoc1").documentUrl("Url").build())
             .miamCertificationDocumentUpload1(Document.builder().documentFileName("maimCertDoc2").documentUrl("Url").build())
             .build();
-
-        caseDataUpdated = CaseData.builder()
-            .id(123456789123L)
-            .languagePreferenceWelsh(No)
-            .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
-            .languageRequirementApplicationNeedWelsh(Yes)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .state(State.CASE_HEARING)
-            .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
-            .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
-            //.allegationsOfHarmYesNo(No)
-            .otherDocuments(ElementUtils.wrapElements(otherDocuments))
-            .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
-            .orderCollection(ElementUtils.wrapElements(orders))
-            .bundleInformation(BundlingInformation.builder().build())
-            .citizenResponseC7DocumentList(ElementUtils.wrapElements(citizenC7uploadedDocs))
-            .citizenUploadedDocumentList(ElementUtils.wrapElements(uploadedDocuments))
-            .bundleInformation(BundlingInformation.builder().bundleConfiguration("sample.yaml")
-                .caseBundles(bundleRefreshList).historicalBundles(bundleList).build())
-            .miamCertificationDocumentUpload(Document.builder().documentFileName("maimCertDoc1").documentUrl("Url").build())
-            .miamCertificationDocumentUpload1(Document.builder().documentFileName("maimCertDoc2").documentUrl("Url").build())
-            //.caseLinks(ElementUtils.wrapElements(caseLinks))
-            .build();
     }
 
     @Test
     public void testCreateBundle() throws Exception {
-        List<Bundle> bundleRefreshList = new ArrayList<>();
-        bundleRefreshList.add(Bundle.builder().value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().build())
-            .stitchStatus("DONE").folders(bundleCreateResponse.getData().caseBundles.get(0).getValue().getFolders()).build()).build());
-        bundleCreateRefreshResponse = BundleCreateResponse.builder()
-            .data(BundleData.builder().id("334").caseBundles(bundleRefreshList).build()).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
-        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString())).thenReturn(bundleCreateRefreshResponse);
-        bundleCreateRefreshResponse.data.getCaseBundles().get(0).getValue().setStitchStatus("DONE");
-        c100CaseData.getBundleInformation().setCaseBundles(bundleCreateRefreshResponse.data.getCaseBundles());
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString())).thenReturn(bundleCreateResponse);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
         response = bundlingController.createBundle(authToken, "serviceAuth", callbackRequest);
         BundlingInformation bundleInformation = (BundlingInformation) response.getData().get("bundleInformation");
