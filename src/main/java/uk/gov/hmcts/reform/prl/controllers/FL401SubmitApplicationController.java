@@ -105,6 +105,8 @@ public class FL401SubmitApplicationController {
             errorList.add(
                 "Statement of truth and submit is not allowed for this case unless you finish all the mandatory events");
         }
+
+        log.info("CASE Data  --------> {}", caseData);
         return CallbackResponse.builder()
             .errors(errorList).data(caseData)
             .build();
