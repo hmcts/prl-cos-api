@@ -54,95 +54,17 @@ public class UploadDocumentService {
 
     public UploadedDocuments uploadCitizenDocument(String authorisation, UploadedDocumentRequest uploadedDocumentRequest) {
 
-        String parentDocumentType = "";
-        String documentType = "";
-        String partyName = "";
-        String partyId = "";
-        LocalDate today = LocalDate.now();
-        String formattedDateCreated = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-        String isApplicant = "";
-        YesOrNo documentRequest = null;
+        UploadedDocuments uploadedDocuments = null;
 
         if (uploadedDocumentRequest != null) {
-            if (null != uploadedDocumentRequest.getParentDocumentType()) {
-                parentDocumentType = getParentDocumentType(uploadedDocumentRequest);
-            }
-            if (null != uploadedDocumentRequest.getPartyId()) {
-                partyId = uploadedDocumentRequest.getPartyId();
-            }
-            if (null != uploadedDocumentRequest.getDocumentType()) {
-                documentType = uploadedDocumentRequest.getDocumentType();
-                if (null != uploadedDocumentRequest.getPartyName()) {
-                    partyName = uploadedDocumentRequest.getPartyName();
-                }
-            }
-            if (null != uploadedDocumentRequest.getIsApplicant()) {
-                isApplicant = uploadedDocumentRequest.getIsApplicant();
-            }
-            if (null != uploadedDocumentRequest.getDocumentRequestedByCourt()) {
-                documentRequest = uploadedDocumentRequest.getDocumentRequestedByCourt();
-            }
-
-        }
-        if (!uploadedDocumentRequest.getFiles().isEmpty()) {
-            UploadedDocuments uploadedDocuments = getUploadedDocuments(
-                authorisation,
-                uploadedDocumentRequest,
-                parentDocumentType,
-                documentType,
-                partyName,
-                partyId,
-                formattedDateCreated,
-                isApplicant,
-                documentRequest
-            );
-
-            return uploadedDocuments;
+            uploadedDocuments = sample(uploadedDocumentRequest,authorisation);
 
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-    }
-
-    private UploadedDocuments getUploadedDocuments(String authorisation, UploadedDocumentRequest uploadedDocumentRequest,
-                                                   String parentDocumentType, String documentType, String partyName, String partyId,
-                                                   String formattedDateCreated, String isApplicant, YesOrNo documentRequest) {
-        UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
-            authorisation,
-            authTokenGenerator.generate(),
-            CASE_TYPE,
-            JURISDICTION,
-            uploadedDocumentRequest.getFiles()
-        );
-        UploadedDocuments uploadedDocuments = null;
-
-        for (MultipartFile file : uploadedDocumentRequest.getFiles()) {
-
-            uploadedDocuments = UploadedDocuments.builder().dateCreated(LocalDate.now())
-                .uploadedBy(partyId)
-                .documentDetails(DocumentDetails.builder().documentName(file.getOriginalFilename())
-                                     .documentUploadedDate(formattedDateCreated).build())
-                .partyName(partyName)
-                .isApplicant(isApplicant)
-                .parentDocumentType(parentDocumentType)
-                .documentType(documentType)
-                .dateCreated(LocalDate.now())
-                .documentRequestedByCourt(documentRequest)
-                .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                                     .documentUrl(uploadResponse.getDocuments().get(0).links.self.href)
-                                     .documentBinaryUrl(uploadResponse.getDocuments().get(0).links.binary.href)
-                                     .documentHash(uploadResponse.getDocuments().get(0).hashToken)
-                                     .documentFileName(file.getOriginalFilename())
-                                     .build()).build();
-        }
         return uploadedDocuments;
     }
 
-    private String getParentDocumentType(UploadedDocumentRequest uploadedDocumentRequest) {
-        String parentDocumentType;
-        parentDocumentType = uploadedDocumentRequest.getParentDocumentType();
-        return parentDocumentType;
-    }
 
     public void deleteDocument(String authorizationToken, String documentId) {
         caseDocumentClient.deleteDocument(
@@ -151,6 +73,69 @@ public class UploadDocumentService {
             UUID.fromString(documentId),
             true
         );
+    }
+
+    public UploadedDocuments sample(UploadedDocumentRequest uploadedDocumentRequest, String authorisation) {
+
+        String parentDocumentType = "";
+        String documentType = "";
+        String partyName = "";
+        String partyId = "";
+        String isApplicant = "";
+        YesOrNo documentRequest = null;
+        LocalDate today = LocalDate.now();
+        String formattedDateCreated = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
+        UploadedDocuments uploadedDocuments = null;
+
+        if (null != uploadedDocumentRequest.getParentDocumentType()) {
+            parentDocumentType = uploadedDocumentRequest.getParentDocumentType();
+        }
+        if (null != uploadedDocumentRequest.getPartyId()) {
+            partyId = uploadedDocumentRequest.getPartyId();
+        }
+        if (null != uploadedDocumentRequest.getDocumentType()) {
+            documentType = uploadedDocumentRequest.getDocumentType();
+            if (null != uploadedDocumentRequest.getPartyName()) {
+                partyName = uploadedDocumentRequest.getPartyName();
+            }
+        }
+        if (null != uploadedDocumentRequest.getIsApplicant()) {
+            isApplicant = uploadedDocumentRequest.getIsApplicant();
+        }
+        if (null != uploadedDocumentRequest.getDocumentRequestedByCourt()) {
+            documentRequest = uploadedDocumentRequest.getDocumentRequestedByCourt();
+        }
+        if (!uploadedDocumentRequest.getFiles().isEmpty()) {
+            UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
+                authorisation,
+                authTokenGenerator.generate(),
+                CASE_TYPE,
+                JURISDICTION,
+                uploadedDocumentRequest.getFiles()
+            );
+
+            for (MultipartFile file : uploadedDocumentRequest.getFiles()) {
+
+                uploadedDocuments = UploadedDocuments.builder().dateCreated(LocalDate.now())
+                    .uploadedBy(partyId)
+                    .documentDetails(DocumentDetails.builder().documentName(file.getOriginalFilename())
+                                         .documentUploadedDate(formattedDateCreated).build())
+                    .partyName(partyName)
+                    .isApplicant(isApplicant)
+                    .parentDocumentType(parentDocumentType)
+                    .documentType(documentType)
+                    .dateCreated(LocalDate.now())
+                    .documentRequestedByCourt(documentRequest)
+                    .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                                         .documentUrl(uploadResponse.getDocuments().get(0).links.self.href)
+                                         .documentBinaryUrl(uploadResponse.getDocuments().get(0).links.binary.href)
+                                         .documentHash(uploadResponse.getDocuments().get(0).hashToken)
+                                         .documentFileName(file.getOriginalFilename())
+                                         .build()).build();
+            }
+        }
+        return uploadedDocuments;
+
     }
 
 }
