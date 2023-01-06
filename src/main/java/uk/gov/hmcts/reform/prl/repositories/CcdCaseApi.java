@@ -43,9 +43,6 @@ public class CcdCaseApi {
         LOGGER.info("linkToCase  Linking the case {} ", caseId);
         LOGGER.debug("Granting access to case {} for citizen {}", caseId, userDetails.getId());
         this.grantAccessToCase(userDetails.getId(), anonymousUserToken, caseId);
-
-        // LOGGER.debug("Revoking access to case {} ", caseId);
-        // this.revokeAccessToCase(userDetails, anonymousUserToken, caseId);
         this.linkCitizen(anonymousUserToken, caseId, caseData);
         LOGGER.info("case is now linked " + caseId);
     }

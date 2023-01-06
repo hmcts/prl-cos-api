@@ -245,8 +245,7 @@ public class CaseDocumentController {
 
         UploadedDocuments uploadedDocuments = uploadService.uploadCitizenDocument(
             authorisation,
-            uploadedDocumentRequest,
-            caseId
+            uploadedDocumentRequest
         );
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         if (uploadedDocuments != null) {

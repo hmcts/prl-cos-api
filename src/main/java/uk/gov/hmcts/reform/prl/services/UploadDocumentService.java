@@ -52,7 +52,7 @@ public class UploadDocumentService {
 
     }
 
-    public UploadedDocuments uploadCitizenDocument(String authorisation, UploadedDocumentRequest uploadedDocumentRequest, String caseId) {
+    public UploadedDocuments uploadCitizenDocument(String authorisation, UploadedDocumentRequest uploadedDocumentRequest) {
 
         String parentDocumentType = "";
         String documentType = "";
