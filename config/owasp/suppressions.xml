@@ -46,4 +46,9 @@
     <cve>CVE-2022-38752</cve>
     <cve>CVE-2021-37533</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+      LatencyUtils-2.0.3.jar ]]></notes>
+    <cve>CVE-2021-4277</cve>
+  </suppress>
 </suppressions>
