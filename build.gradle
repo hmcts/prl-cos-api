@@ -325,15 +325,15 @@ dependencies {
       exclude group: 'io.reactivex', module: 'rxnetty-contexts'
       exclude group: 'io.reactivex', module: 'rxnetty-servo'
     }
-  compile("org.latencyutils:LatencyUtils:2.0.3") {
-      exclude group: "org.hdrhistogram", module: '*'
+  implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-actuator')
+    {
+      exclude group: 'org.latencyutils', module: '*'
     }
-
   implementation(group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils)
   implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: versions.jackson)
   implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson)
   implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jackson)
-
+  implementation group: 'org.latencyutils', name: 'LatencyUtils', version: '2.0.2'
   implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
 
   implementation(group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: versions.bcpkixJdk15on) {
