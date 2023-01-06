@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoBeforeAEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtRequestedEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoCrossExaminationSittingBeforeEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
@@ -20,12 +21,17 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoNextStepsAllocationEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoRemoteHearingEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportSentByEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportsAlsoSentToEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportsSentToEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoScheduleOfAllegationsEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoWitnessStatementsSentToEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoLanguageDialect;
 
 import java.time.LocalDate;
@@ -137,4 +143,69 @@ public class StandardDirectionOrder {
     private final List<Element<SdoLanguageDialect>> sdoInterpreterDialectRequired;
     @JsonProperty("sdoUpdateContactDetails")
     private final String sdoUpdateContactDetails;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate sdoCafcassFileAndServe;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate sdoCafcassCymruFileAndServe;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate sdoNewPartnersToCafcass;
+    @JsonProperty("sdoSection7ChildImpactAnalysis")
+    private final SdoReportSentByEnum sdoSection7ChildImpactAnalysis;
+    @JsonProperty("sdoNameOfCouncil")
+    private final String sdoNameOfCouncil;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate sdoCafcassCymruReportSentByDate;
+    @JsonProperty("sdoLocalAuthorityName")
+    private final String sdoLocalAuthorityName;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate sdoLocalAuthorityReportSubmitByDate;
+    private final DynamicList sdoTransferApplicationCourtDynamicList;
+    @JsonProperty("sdoTransferApplicationReason")
+    private final List<SdoTransferApplicationReasonEnum> sdoTransferApplicationReason;
+    @JsonProperty("sdoTransferApplicationSpecificReason")
+    private final String sdoTransferApplicationSpecificReason;
+    @JsonProperty("sdoCrossExaminationSittingBeforeOptions")
+    private final SdoCrossExaminationSittingBeforeEnum sdoCrossExaminationSittingBeforeOptions;
+    private final DynamicList sdoCrossExaminationCourtDynamicList;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
+    private final LocalDateTime sdoCrossExaminationStartDateTime;
+    @JsonProperty("sdoCrossExaminationCourtHavingHeard")
+    private final String sdoCrossExaminationCourtHavingHeard;
+    @JsonProperty("sdoCrossExaminationEx740")
+    private final String sdoCrossExaminationEx740;
+    @JsonProperty("sdoCrossExaminationQualifiedLegal")
+    private final String sdoCrossExaminationQualifiedLegal;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate sdoWitnessStatementsDeadlineDate;
+    @JsonProperty("sdoWitnessStatementsSentTo")
+    private final SdoWitnessStatementsSentToEnum sdoWitnessStatementsSentTo;
+    @JsonProperty("sdoWitnessStatementsCopiesSentTo")
+    private final SdoReportsSentToEnum sdoWitnessStatementsCopiesSentTo;
+    @JsonProperty("sdoWitnessStatementsCopiesSentToCafcass")
+    private final List<SdoWitnessStatementsSentToEnum> sdoWitnessStatementsCopiesSentToCafcass;
+    @JsonProperty("sdoWitnessStatementsMaximumPages")
+    private final String sdoWitnessStatementsMaximumPages;
+    @JsonProperty("sdoSpecifiedDocuments")
+    private final String sdoSpecifiedDocuments;
+    private final DynamicList sdoInstructionsFilingPartiesDynamicList;
+    @JsonProperty("sdoSpipAttendance")
+    private final String sdoSpipAttendance;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate sdoHospitalRecordsDeadlineDate;
+    @JsonProperty("sdoMedicalDisclosureUploadedBy")
+    private final List<SdoApplicantRespondentEnum> sdoMedicalDisclosureUploadedBy;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate sdoLetterFromGpDeadlineDate;
+    @JsonProperty("sdoLetterFromGpUploadedBy")
+    private final List<SdoApplicantRespondentEnum> sdoLetterFromGpUploadedBy;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate sdoLetterFromSchoolDeadlineDate;
+    @JsonProperty("sdoLetterFromSchoolUploadedBy")
+    private final List<SdoApplicantRespondentEnum> sdoLetterFromSchoolUploadedBy;
+    @JsonProperty("sdoScheduleOfAllegationsOption")
+    private final List<SdoScheduleOfAllegationsEnum> sdoScheduleOfAllegationsOption;
+    private final List<Element<SdoDisclosureOfPapersCaseNumber>> sdoDisclosureOfPapersCaseNumbers;
+    @JsonProperty("sdoParentWithCare")
+    private final String sdoParentWithCare;
+
 }
