@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
@@ -71,12 +72,18 @@ public class UploadDocumentServiceTest {
             .partyId("partyId")
             .documentType("documentType")
             .isApplicant("applicant")
+            .partyName("partyName")
             .documentRequestedByCourt(YesOrNo.Yes)
             .files(newArrayList(file))
             .build();
         UploadedDocuments uploadedDocuments = uploadDocumentService.uploadCitizenDocument(AUTH, uploadDocumentRequest);
         assertNotNull(uploadedDocuments.getDocumentDetails());
 
+    }
+
+    @Test
+    public void uploadCitizenDocumentFailure() {
+         assertThrows(ResponseStatusException.class, () -> uploadDocumentService.uploadCitizenDocument(AUTH, null));
     }
 
     @Test
@@ -87,7 +94,6 @@ public class UploadDocumentServiceTest {
         when(authTokenGenerator.generate()).thenReturn("s2s");
         when(caseDocumentClient.uploadDocuments(AUTH, "s2s", CASE_TYPE, JURISDICTION, newArrayList(file))).thenReturn(uploadResponse);
         assertThrows(RuntimeException.class, () -> uploadDocumentService.uploadDocument(pdf, FILE_NAME, CONTENT_TYPE, AUTH));
-
 
     }
 
