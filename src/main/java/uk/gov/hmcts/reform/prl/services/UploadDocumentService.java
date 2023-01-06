@@ -65,16 +65,14 @@ public class UploadDocumentService {
 
         if (uploadedDocumentRequest != null) {
             if (null != uploadedDocumentRequest.getParentDocumentType()) {
-                parentDocumentType = uploadedDocumentRequest.getParentDocumentType();
+                parentDocumentType = getParentDocumentType(uploadedDocumentRequest);
             }
             if (null != uploadedDocumentRequest.getPartyId()) {
                 partyId = uploadedDocumentRequest.getPartyId();
             }
             if (null != uploadedDocumentRequest.getDocumentType()) {
                 documentType = uploadedDocumentRequest.getDocumentType();
-                if (null != uploadedDocumentRequest.getPartyName()) {
-                    partyName = uploadedDocumentRequest.getPartyName();
-                }
+                partyName = getPartyName(uploadedDocumentRequest, partyName);
             }
             if (null != uploadedDocumentRequest.getIsApplicant()) {
                 isApplicant = uploadedDocumentRequest.getIsApplicant();
@@ -119,6 +117,19 @@ public class UploadDocumentService {
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    private String getPartyName(UploadedDocumentRequest uploadedDocumentRequest, String partyName) {
+        if (null != uploadedDocumentRequest.getPartyName()) {
+            partyName = uploadedDocumentRequest.getPartyName();
+        }
+        return partyName;
+    }
+
+    private String getParentDocumentType(UploadedDocumentRequest uploadedDocumentRequest) {
+        String parentDocumentType;
+        parentDocumentType = uploadedDocumentRequest.getParentDocumentType();
+        return parentDocumentType;
     }
 
     public void deleteDocument(String authorizationToken, String documentId) {
