@@ -6,7 +6,6 @@ import lombok.Data;
 
 @Data
 @Builder(toBuilder = true)
-@AllArgsConstructor
 public class SdoDisclosureOfPapersCaseNumber {
     private final String caseNumber;
 }

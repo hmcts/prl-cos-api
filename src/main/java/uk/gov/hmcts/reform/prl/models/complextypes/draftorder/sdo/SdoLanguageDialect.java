@@ -6,7 +6,6 @@ import lombok.Data;
 
 @Data
 @Builder(toBuilder = true)
-@AllArgsConstructor
 public class SdoLanguageDialect {
     private final String interpreterNeedFor;
     private final String languageOrDialect;
