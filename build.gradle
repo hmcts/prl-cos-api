@@ -333,7 +333,7 @@ dependencies {
   implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: versions.jackson)
   implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson)
   implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jackson)
-  implementation group: 'org.latencyutils', name: 'LatencyUtils', version: '2.0.2'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: '2.7.7'
   implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
 
   implementation(group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: versions.bcpkixJdk15on) {
