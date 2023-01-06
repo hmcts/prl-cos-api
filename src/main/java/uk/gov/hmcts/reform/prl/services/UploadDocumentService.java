@@ -85,55 +85,41 @@ public class UploadDocumentService {
 
         }
         if (!uploadedDocumentRequest.getFiles().isEmpty()) {
-            UploadedDocuments uploadedDocuments = getUploadedDocuments(
+            UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 authorisation,
-                uploadedDocumentRequest,
-                parentDocumentType,
-                documentType,
-                partyName,
-                partyId,
-                formattedDateCreated,
-                isApplicant,
-                documentRequest
+                authTokenGenerator.generate(),
+                CASE_TYPE,
+                JURISDICTION,
+                uploadedDocumentRequest.getFiles()
             );
+            UploadedDocuments uploadedDocuments = null;
+
+            for (MultipartFile file : uploadedDocumentRequest.getFiles()) {
+
+                uploadedDocuments = UploadedDocuments.builder().dateCreated(LocalDate.now())
+                    .uploadedBy(partyId)
+                    .documentDetails(DocumentDetails.builder().documentName(file.getOriginalFilename())
+                                         .documentUploadedDate(formattedDateCreated).build())
+                    .partyName(partyName)
+                    .isApplicant(isApplicant)
+                    .parentDocumentType(parentDocumentType)
+                    .documentType(documentType)
+                    .dateCreated(LocalDate.now())
+
+                    .documentRequestedByCourt(documentRequest)
+                    .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                                         .documentUrl(uploadResponse.getDocuments().get(0).links.self.href)
+                                         .documentBinaryUrl(uploadResponse.getDocuments().get(0).links.binary.href)
+                                         .documentHash(uploadResponse.getDocuments().get(0).hashToken)
+                                         .documentFileName(file.getOriginalFilename())
+                                         .build()).build();
+            }
 
             return uploadedDocuments;
 
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-    }
-
-    private UploadedDocuments getUploadedDocuments(String authorisation, UploadedDocumentRequest uploadedDocumentRequest, String parentDocumentType, String documentType, String partyName, String partyId, String formattedDateCreated, String isApplicant, YesOrNo documentRequest) {
-        UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
-            authorisation,
-            authTokenGenerator.generate(),
-            CASE_TYPE,
-            JURISDICTION,
-            uploadedDocumentRequest.getFiles()
-        );
-        UploadedDocuments uploadedDocuments = null;
-
-        for (MultipartFile file : uploadedDocumentRequest.getFiles()) {
-
-            uploadedDocuments = UploadedDocuments.builder().dateCreated(LocalDate.now())
-                .uploadedBy(partyId)
-                .documentDetails(DocumentDetails.builder().documentName(file.getOriginalFilename())
-                                     .documentUploadedDate(formattedDateCreated).build())
-                .partyName(partyName)
-                .isApplicant(isApplicant)
-                .parentDocumentType(parentDocumentType)
-                .documentType(documentType)
-                .dateCreated(LocalDate.now())
-                .documentRequestedByCourt(documentRequest)
-                .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                                     .documentUrl(uploadResponse.getDocuments().get(0).links.self.href)
-                                     .documentBinaryUrl(uploadResponse.getDocuments().get(0).links.binary.href)
-                                     .documentHash(uploadResponse.getDocuments().get(0).hashToken)
-                                     .documentFileName(file.getOriginalFilename())
-                                     .build()).build();
-        }
-        return uploadedDocuments;
     }
 
     private String getParentDocumentType(UploadedDocumentRequest uploadedDocumentRequest) {
