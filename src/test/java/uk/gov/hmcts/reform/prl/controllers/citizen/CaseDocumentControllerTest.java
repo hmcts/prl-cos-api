@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
@@ -36,16 +37,15 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -54,7 +54,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.OK;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseDocumentControllerTest {
@@ -280,13 +283,13 @@ public class CaseDocumentControllerTest {
 
     @Test
     public void testGenerateCitizenStatementDocumentt() throws Exception {
-        HashMap<String,String> map=new HashMap<>();
+        HashMap<String,String> map = new HashMap<>();
         map.put("caseId","1656350492135029");
         map.put("state","AWAITING_SUBMISSION_TO_HMCTS");
         map.put("documentType","test");
         map.put("partyName","test");
         map.put("partyId","test");
-        Document document=Document.builder().documentUrl("")
+        Document document = Document.builder().documentUrl("")
             .documentFileName("test")
             .build();
         UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
@@ -298,7 +301,7 @@ public class CaseDocumentControllerTest {
             .build();
         Element<UploadedDocuments> uploadedDocumentsElement1 = Element.<UploadedDocuments>builder().value(
             uploadedDocuments).build();
-        List<Element<UploadedDocuments>> listOfUploadedDocuments =new ArrayList<>(List.of(
+        List<Element<UploadedDocuments>> listOfUploadedDocuments = new ArrayList<>(List.of(
             uploadedDocumentsElement1
         ));
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest
@@ -326,16 +329,16 @@ public class CaseDocumentControllerTest {
 
     @Test
     public void testUploadCitizenStatementDocument() throws Exception {
-        HashMap<String,String> map=new HashMap<>();
+        HashMap<String,String> map = new HashMap<>();
         map.put("caseId","1656350492135029");
         map.put("state","AWAITING_SUBMISSION_TO_HMCTS");
         map.put("documentType","test");
         map.put("partyName","test");
         map.put("partyId","test");
-        Document document=Document.builder().documentUrl("")
+        Document document = Document.builder().documentUrl("")
             .documentFileName("test")
             .build();
-        UploadedDocumentRequest uploadedDocumentRequest=UploadedDocumentRequest.builder()
+        UploadedDocumentRequest uploadedDocumentRequest = UploadedDocumentRequest.builder()
             .caseId("1656350492135029")
             .documentType("test")
             .partyId("test")
@@ -375,7 +378,7 @@ public class CaseDocumentControllerTest {
             uploadedDocumentRequest,
             "1656350492135029"
         )).thenReturn(uploadedDocuments);
-        StartEventResponse startEventResponse =StartEventResponse.builder().eventId("")
+        StartEventResponse startEventResponse = StartEventResponse.builder().eventId("")
             .token("")
             .caseDetails(caseDetails)
             .build();
@@ -383,14 +386,15 @@ public class CaseDocumentControllerTest {
             .uid("123456")
             .build();
         when(idamClient.getUserInfo(authToken)).thenReturn(userInfo);
-        when(coreCaseDataApi.startEventForCitizen(authToken, s2sToken, "123456" , JURISDICTION, CASE_TYPE, "1656350492135029",
+        when(coreCaseDataApi.startEventForCitizen(authToken, s2sToken, "123456", JURISDICTION, CASE_TYPE, "1656350492135029",
                                                                                 CITIZEN_UPLOADED_DOCUMENT)).thenReturn(startEventResponse);
-        ResponseEntity responseEntity=caseDocumentController.uploadCitizenStatementDocument(authToken,s2sToken,uploadedDocumentRequest);
+        ResponseEntity responseEntity = caseDocumentController.uploadCitizenStatementDocument(authToken,s2sToken,uploadedDocumentRequest);
         assertNotNull(responseEntity);
     }
+
     @Test
     public void testDeleteCitizenStatementDocument() throws Exception {
-        HashMap<String,String> map=new HashMap<>();
+        HashMap<String,String> map = new HashMap<>();
         map.put("caseId","1656350492135029");
         map.put("state","AWAITING_SUBMISSION_TO_HMCTS");
         map.put("documentType","test");
@@ -398,10 +402,10 @@ public class CaseDocumentControllerTest {
         map.put("partyId","test");
         map.put("documentId","123455");
         map.put("id","123455");
-        Document document=Document.builder().documentUrl("")
+        Document document = Document.builder().documentUrl("")
             .documentFileName("test")
             .build();
-        DeleteDocumentRequest deleteDocumentRequest=DeleteDocumentRequest.builder()
+        DeleteDocumentRequest deleteDocumentRequest = DeleteDocumentRequest.builder()
             .values(map).build();
         UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
             .documentType("test")
@@ -431,9 +435,10 @@ public class CaseDocumentControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
         when(coreCaseDataApi.getCase(authToken, s2sToken, "1656350492135029")).thenReturn(
             caseDetails);
-        caseDocumentController.deleteCitizenStatementDocument(deleteDocumentRequest,authToken,s2sToken);
-
+        String deleteStatus = caseDocumentController.deleteCitizenStatementDocument(deleteDocumentRequest,authToken,s2sToken);
+        assertNotNull(deleteStatus);
     }
+
     @Test (expected = RuntimeException.class)
     public void testDocumentUploadNotAuthorised() throws IOException {
         MultipartFile mockFile = mock(MultipartFile.class);

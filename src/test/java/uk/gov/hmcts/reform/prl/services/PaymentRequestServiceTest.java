@@ -325,8 +325,6 @@ public class PaymentRequestServiceTest {
 
         caseData = caseData.toBuilder().build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(
-            Long.parseLong(TEST_CASE_ID)).data(stringObjectMap).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(
@@ -340,6 +338,8 @@ public class PaymentRequestServiceTest {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(
+            Long.parseLong(TEST_CASE_ID)).data(stringObjectMap).build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest.getCaseId())).thenReturn(
             caseDetails);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
@@ -458,7 +458,7 @@ public class PaymentRequestServiceTest {
         );
         assertNotNull(paymentResponse);
         createPaymentRequest.setHwfRefNumber("referNumber");
-         paymentResponse = paymentRequestService.createPayment(
+        paymentResponse = paymentRequestService.createPayment(
             authToken,
             serviceAuthToken,
             createPaymentRequest
@@ -560,7 +560,7 @@ public class PaymentRequestServiceTest {
 
         assertNotNull(paymentResponse);
         createPaymentRequest.setHwfRefNumber("refer");
-         paymentResponse = paymentRequestService.createPayment(
+        paymentResponse = paymentRequestService.createPayment(
             authToken,
             serviceAuthToken,
             createPaymentRequest
