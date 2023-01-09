@@ -398,7 +398,7 @@ bundle:
 postcodelookup:
   api:
     url: https://api.os.uk/search/places/v1
-    key: ${POST_CODE_LOOKUP_KEY:XXXXXXXXXXXXXXXX}
+    key: ${POST_CODE_LOOKUP_TOKEN:XXXXXXXXXXXXXXXX}
 
 cafcaas:
   search-case-type-id: PRLAPPS
