@@ -19,6 +19,8 @@ public class BundlingInformation {
     private String bundleConfiguration;
     @JsonProperty("multiBundleConfiguration")
     private List<MultiBundleConfig> multiBundleConfiguration;
-    @JsonProperty("bundleCreationDate")
-    private String bundleCreationDate;
+    @JsonProperty("bundleCreationDateAndTime")
+    private String bundleCreationDateAndTime;
+    @JsonProperty("bundleHearingDateAndTime")
+    private String bundleHearingDateAndTime;
 }

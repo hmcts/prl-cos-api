@@ -75,7 +75,7 @@ public class ServiceOfApplicationController {
         List<DynamicMultiselectListElement> respondentList = new ArrayList<>();
         List<DynamicMultiselectListElement> respondentSolicitorList = new ArrayList<>();
         List<DynamicMultiselectListElement> otherPeopleList = new ArrayList<>();
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase("C100")) {
+        if (caseData != null && caseData.getCaseTypeOfApplication() != null && caseData.getCaseTypeOfApplication().equalsIgnoreCase("C100")) {
             caseData.getApplicants().forEach(applicant -> {
                 applicantList.add(DynamicMultiselectListElement.builder()
                                                                       .code(applicant.getId().toString())

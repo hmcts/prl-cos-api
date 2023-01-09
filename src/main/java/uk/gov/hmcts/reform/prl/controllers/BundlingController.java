@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocument;
@@ -32,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,48 +70,21 @@ public class BundlingController extends AbstractCallbackController {
             callbackRequest.getEventId(), authorization);
         log.info("*** Bundle response from api : {}", new ObjectMapper().writeValueAsString(bundleCreateResponse));
         if (null != bundleCreateResponse && null != bundleCreateResponse.getData() && null != bundleCreateResponse.getData().getCaseBundles()) {
-            CaseData updatedCaseData =
-                bundlingService.getCaseDataWithGeneratedPdf(authorization,serviceAuthorization,String.valueOf(caseData.getId()));
             caseDataUpdated.put("bundleInformation",
-                BundlingInformation.builder().caseBundles(removeEmptyFolders(updatedCaseData.getBundleInformation().getCaseBundles()))
-                    .historicalBundles(updatedCaseData.getBundleInformation().getHistoricalBundles())
-                    .bundleConfiguration(updatedCaseData.getBundleInformation().getBundleConfiguration())
-                    .bundleCreationDate(ZonedDateTime.now(ZoneId.of("Europe/London")).toString())
+                BundlingInformation.builder().caseBundles(removeEmptyFolders(bundleCreateResponse.getData().getCaseBundles()))
+                    .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
+                    .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration())
+                    .bundleCreationDateAndTime(DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                        .format(ZonedDateTime.now(ZoneId.of("Europe/London"))).toString())
+                    .bundleHearingDateAndTime(null != bundleCreateResponse.getData().getData()
+                        && null != bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime()
+                        ? bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime() : "")
                     .build());
             log.info("*** Bundle information post emptyfolders removal from api : {}",
                 new ObjectMapper().writeValueAsString(caseDataUpdated.get("bundleInformation")));
             log.info("*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}", caseData.getId());
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    @PostMapping(path = "/refreshBundleData", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "RefreshBundleData ")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Bundle Created Successfully ."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-
-    public void refreshBundleData(@RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
-                                                                     @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
-                                                                     String serviceAuthorization,
-                                                                     @RequestBody CallbackRequest callbackRequest)
-        throws Exception {
-
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("*** callback to createBundle api in prl-cos-api for the case id : {}", caseData.getId());
-        CaseData updatedCaseData = bundlingService.getCaseDataWithGeneratedPdf(authorization,serviceAuthorization,String.valueOf(caseData.getId()));
-        if (null != updatedCaseData && null != updatedCaseData.getBundleInformation()
-            && null != updatedCaseData.getBundleInformation().getCaseBundles()) {
-            caseData.setBundleInformation(BundlingInformation.builder()
-                .caseBundles(removeEmptyFolders(updatedCaseData.getBundleInformation().getCaseBundles()))
-                .historicalBundles(updatedCaseData.getBundleInformation().getHistoricalBundles())
-                .bundleConfiguration(updatedCaseData.getBundleInformation().getBundleConfiguration())
-                .bundleCreationDate(ZonedDateTime.now(ZoneId.of("Europe/London")).toString())
-                .build());
-            publishEvent(new CaseDataChanged(caseData));
-            log.info("*** Bundle callback done.. Updating bundle Information in case data for the case id: {}", caseData.getId());
-        }
     }
 
 
@@ -121,8 +94,8 @@ public class BundlingController extends AbstractCallbackController {
             caseBundles.stream().forEach(bundle -> {
                 List<BundleFolder> folders = bundle.getValue().getFolders();
                 if (null != folders) {
+                    List<BundleFolder> foldersAfterEmptyRemoval = new ArrayList<>();
                     folders.stream().forEach(rootFolder -> {
-                        List<BundleFolder> foldersAfterEmptyRemoval = new ArrayList<>();
                         if (null != rootFolder.getValue().getFolders()) {
                             List<BundleSubfolder> bundleSubfoldersAfterEmptyRemoval = new ArrayList<>();
                             rootFolder.getValue().getFolders().stream().forEach(rootSubFolder -> {
@@ -155,14 +128,12 @@ public class BundlingController extends AbstractCallbackController {
                                         .folders(bundleSubfoldersAfterEmptyRemoval).build()).build());
                             }
                         }
-                        if (foldersAfterEmptyRemoval.size() > 0) {
-                            bundle.getValue().setFolders(foldersAfterEmptyRemoval);
-                            caseBundlesPostEmptyfoldersRemoval.add(bundle);
-                        }
                     });
-
+                    if (foldersAfterEmptyRemoval.size() > 0) {
+                        bundle.getValue().setFolders(foldersAfterEmptyRemoval);
+                        caseBundlesPostEmptyfoldersRemoval.add(bundle);
+                    }
                 }
-
             });
 
         }

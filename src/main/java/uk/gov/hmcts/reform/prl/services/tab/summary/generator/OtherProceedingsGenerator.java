@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.tab.summary.generator;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
+@Slf4j
 @Component
 public class OtherProceedingsGenerator implements  FieldGenerator {
     @Override
@@ -34,7 +36,8 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
     }
 
     private boolean hasOtherProceedings(CaseData caseData) {
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
+        if (null != caseData.getCaseTypeOfApplication()
+            && caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
             Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getPreviousOrOngoingProceedingsForChildren());
             Optional<List<Element<ProceedingDetails>>> proceedingsCheck = ofNullable(caseData.getExistingProceedings());
             return proceedingsCheck.isPresent() && (proceedingCheck.isEmpty() || proceedingCheck.get()
@@ -54,7 +57,8 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
     }
 
     public List<Element<OtherProceedings>> getOtherProceedingsDetails(CaseData caseData) {
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
+        if (null != caseData.getCaseTypeOfApplication()
+            && caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
             return getC100OtherProceedingsDetails(caseData);
         }
 
