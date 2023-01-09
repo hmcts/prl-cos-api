@@ -107,7 +107,7 @@ public class CafCassControllerTest {
             "startDate",
             "endDate"
         );
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
@@ -123,7 +123,7 @@ public class CafCassControllerTest {
             "startDate",
             "endDate"
         );
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(UNAUTHORIZED, response.getStatusCode());
     }
 
     @Test
