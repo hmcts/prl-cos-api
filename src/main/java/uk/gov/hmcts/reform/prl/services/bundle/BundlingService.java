@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.bundle;
 
-import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,6 +12,8 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+
+import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 
 @Service
 public class BundlingService {
