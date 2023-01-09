@@ -80,7 +80,6 @@ public class BulkPrintServiceTest {
     @Test(expected = NullPointerException.class)
     public void senLetterServiceWithInValidInput() {
         assertEquals(bulkPrintService.send("123", authToken, "abc", null), uuid);
-
     }
 
 }
