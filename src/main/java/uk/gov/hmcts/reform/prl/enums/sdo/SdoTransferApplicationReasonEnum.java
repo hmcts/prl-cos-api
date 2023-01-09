@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum SdoTransferApplicationReasonEnum {
 
-    @JsonProperty("anotherCourtInArea")
-    anotherCourtInArea("anotherCourtInArea", "Another court is in the area where the child usually lives"),
+    @JsonProperty("courtInAreaChildLives")
+    courtInAreaChildLives("courtInAreaChildLives", "Another court is in the area where the child usually lives"),
     @JsonProperty("ongoingProceedings")
     ongoingProceedings("ongoingProceedings", "There are ongoing procedings in another court"),
     @JsonProperty("other")

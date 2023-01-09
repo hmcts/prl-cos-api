@@ -28,7 +28,7 @@ public enum SdoHearingsAndNextStepsEnum {
     @JsonProperty("miamAttendance")
     miamAttendance("miamAttendance", "MIAM attendance"),
     @JsonProperty("permissionHearing")
-    permissionHearing("permissionHearing", "Permission hearing for Direction 91 (14)"),
+    permissionHearing("permissionHearing", "Permission hearing for Direction 91(14)"),
     @JsonProperty("directionForDra")
     directionForDra("directionForDra", "Directions for DRA"),
     @JsonProperty("settlementConference")
