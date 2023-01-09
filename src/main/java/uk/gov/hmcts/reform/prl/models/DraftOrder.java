@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -53,6 +54,17 @@ public class DraftOrder {
     private final String furtherDirectionsIfRequired;
     private final String parentName;
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
+    private final String manageOrdersFl402CourtName;
+    private final Address manageOrdersFl402CourtAddress;
+    private final String manageOrdersFl402CaseNo;
+    private final String manageOrdersFl402Applicant;
+    private final String manageOrdersFl402ApplicantRef;
+    private final String fl402HearingCourtname;
+    private final Address fl402HearingCourtAddress;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate manageOrdersDateOfhearing;
+    private final String dateOfHearingTime;
+    private final String dateOfHearingTimeEstimate;
 
     /**
      * C43.
