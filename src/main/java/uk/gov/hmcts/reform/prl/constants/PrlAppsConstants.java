@@ -180,4 +180,5 @@ public class PrlAppsConstants {
     public static final String APPLICANT_STATMENT =
         "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot";
 
+
 }
