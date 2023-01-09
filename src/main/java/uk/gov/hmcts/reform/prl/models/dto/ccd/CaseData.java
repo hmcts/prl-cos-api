@@ -560,6 +560,10 @@ public class CaseData implements MappableObject {
 
     @JsonUnwrapped
     @Builder.Default
+    private final DirectionOnIssue directionOnIssue;
+
+    @JsonUnwrapped
+    @Builder.Default
     private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
 
     /**

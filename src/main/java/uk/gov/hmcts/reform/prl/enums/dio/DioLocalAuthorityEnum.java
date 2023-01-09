@@ -9,11 +9,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum DioCafcassOrCymruEnum {
-    @JsonProperty("cafcassSafeguarding")
-    cafcassSafeguarding("cafcassSafeguarding", "CAFCASS safeguarding on issue"),
-    @JsonProperty("cafcassCymruSafeguarding")
-    cafcassCymruSafeguarding("cafcassCymruSafeguarding", "CAFCASS Cymru safeguarding on issue");
+public enum DioLocalAuthorityEnum {
+    @JsonProperty("localAuthorityLetter")
+    localAuthorityLetter("localAuthorityLetter", "Local authority letter");
 
     private final String id;
     private final String displayedValue;
@@ -24,7 +22,8 @@ public enum DioCafcassOrCymruEnum {
     }
 
     @JsonCreator
-    public static DioCafcassOrCymruEnum getValue(String key) {
-        return DioCafcassOrCymruEnum.valueOf(key);
+    public static DioLocalAuthorityEnum getValue(String key) {
+        return DioLocalAuthorityEnum.valueOf(key);
     }
+
 }

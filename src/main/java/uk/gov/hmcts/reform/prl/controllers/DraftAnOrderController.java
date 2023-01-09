@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
@@ -336,6 +337,59 @@ public class DraftAnOrderController {
         }
         caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/populate-standard-direction-order-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to populate standard direction order fields")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Populated Headers"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse populateDioFields(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) throws Exception {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (caseData.getDirectionOnIssue().getDioPreamblesList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioHearingsAndNextStepsList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioCafcassOrCymruList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioLocalAuthorityList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioCourtList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioOtherList().isEmpty()) {
+            List<String> errorList = new ArrayList<>();
+            errorList.add(
+                "Please select at least one options from below");
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        } else {
+            if (!caseData.getDirectionOnIssue().getDioPreamblesList().isEmpty()
+                && caseData.getDirectionOnIssue().getDioPreamblesList().contains(DioPreamblesEnum.rightToAskCourt)) {
+                caseDataUpdated.put(
+                    "sdoRightToAskCourt",
+                    "As the direction has been made without hearing may ask the court to reconsider this order. "
+                        + "You must do that within seven days of receiving the order by writing to the court"
+                        + "(and notifying any other party) and asking the court to reconsider. "
+                        + "Alternatively, the court may reconsider the directions at the first hearing"
+                );
+            }
+            if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
+                && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping)) {
+                caseDataUpdated.put(
+                    "sdoNextStepsAfterSecondGK",
+                    "The court has considered the safeguarding letter from Cafcass or Cafcass Cymru "
+                        + "and made a decision on how to progress your case."
+                );
+            }
+
+            log.info("Case data updated map {}", caseDataUpdated);
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated).build();
+        }
     }
 
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
