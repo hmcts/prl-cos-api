@@ -12,12 +12,16 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleHearingInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingData;
@@ -38,6 +42,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXPERT_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
@@ -52,11 +57,12 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundleCreateRequestMapper {
-    public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, String bundleConfigFileName) {
+    public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, Hearings hearingDetails,
+                                                                String bundleConfigFileName) {
         BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder()
             .caseDetails(BundlingCaseDetails.builder()
                              .id(caseData.getApplicantName())
-                             .caseData(mapCaseData(caseData,
+                             .caseData(mapCaseData(caseData,hearingDetails,
                                                    bundleConfigFileName))
                              .build())
             .caseTypeId(CASE_TYPE).jurisdictionId(JURISDICTION).eventId(eventId).build();
@@ -68,13 +74,28 @@ public class BundleCreateRequestMapper {
         return bundleCreateRequest;
     }
 
-    private BundlingCaseData mapCaseData(CaseData caseData, String bundleConfigFileName) {
+    private BundlingCaseData mapCaseData(CaseData caseData, Hearings hearingDetails, String bundleConfigFileName) {
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
+                .hearingDetails(mapHearingDetails(hearingDetails))
                       .applications(mapApplicationsFromCaseData(caseData))
                       .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
                       .allOtherDocuments(mapAllOtherDocuments(caseData)).build()).build();
+    }
+
+    private BundleHearingInfo mapHearingDetails(Hearings hearingDetails) {
+        if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
+            List<CaseHearing> listedCaseHearings = hearingDetails.getCaseHearings().stream()
+                .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).collect(Collectors.toList());
+            if (null != listedCaseHearings && listedCaseHearings.size() > 0) {
+                HearingDaySchedule hearingDaySchedule = listedCaseHearings.get(0).getHearingDaySchedule().get(0);
+                return BundleHearingInfo.builder().hearingVenueAddress(hearingDaySchedule.getHearingVenueAddress())
+                    .hearingDateAndTime(hearingDaySchedule.getHearingStartDateTime().toString())
+                    .hearingJudgeName(hearingDaySchedule.getHearingJudgeName()).build();
+            }
+        }
+        return BundleHearingInfo.builder().build();
     }
 
     private List<Element<BundlingRequestDocument>> mapAllOtherDocuments(CaseData caseData) {

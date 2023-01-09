@@ -31,6 +31,10 @@ public class SearchCasesDataService {
 
         CaseData caseData = objectMapper.convertValue(caseDetails, CaseData.class);
 
+        final Flags caseFlags = Flags.builder().build();
+
+        caseDetails.put("caseFlags", caseFlags);
+
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();

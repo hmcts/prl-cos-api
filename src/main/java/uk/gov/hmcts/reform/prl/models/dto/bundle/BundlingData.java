@@ -19,6 +19,9 @@ public class BundlingData {
     @JsonProperty("caseNumber")
     private final String caseNumber;
 
+    @JsonProperty("hearingDetails")
+    private final BundleHearingInfo hearingDetails;
+
     @JsonProperty("orders")
     private final List<Element<BundlingRequestDocument>> orders;
 
