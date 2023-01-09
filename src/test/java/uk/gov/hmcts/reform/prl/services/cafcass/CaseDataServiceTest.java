@@ -44,10 +44,6 @@ public class CaseDataServiceTest {
     @InjectMocks
     private CaseDataService caseDataService;
 
-    @Mock
-    PostcodeLookupConfiguration postcodeLookupConfiguration;
-
-
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -67,7 +63,6 @@ public class CaseDataServiceTest {
         CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
 
         when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
-        when(postcodeLookupConfiguration.getAccessKey()).thenReturn("test");
         Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
         when(hearingService.getHearings(anyString(),anyString())).thenReturn(hearings);
 

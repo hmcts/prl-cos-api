@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
-import uk.gov.hmcts.reform.prl.config.cafcass.PostcodeLookupConfiguration;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
@@ -42,10 +41,6 @@ public class CaseDataService {
 
     private final  AuthTokenGenerator authTokenGenerator;
 
-    private final PostcodeLookupConfiguration postcodeLookupConfiguration;
-
-    private final PostcodeLookupConfiguration configuration;
-
     public CafCassResponse getCaseData(String authorisation, String serviceAuthorisation, String startDate, String endDate) throws IOException {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
@@ -56,12 +51,11 @@ public class CaseDataService {
             authTokenGenerator.generate(),
             cafCassSearchCaseTypeId
         );
-        log.info("postcodeLookupConfiguration=aa=> {}",postcodeLookupConfiguration.getAccessKey());
-        log.info("postcodeLookupConfiguration=bb=> {}",configuration.getAccessKey());
         CafCassResponse cafCassResponse = objectMapper.convertValue(searchResult,
                                                              CafCassResponse.class);
-        log.info("cafCassResponse ==> ",cafCassResponse);
+        log.info("cafCassResponse111 ==> {}",cafCassResponse);
         cafCassFilter.filter(cafCassResponse);
+        log.info("cafCassResponse222 ==> {}",cafCassResponse);
         getHearingDetails(authorisation,cafCassResponse);
         return cafCassResponse;
     }

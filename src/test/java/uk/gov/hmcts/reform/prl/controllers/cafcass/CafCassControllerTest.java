@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -63,31 +64,30 @@ public class CafCassControllerTest {
             "startDate",
             "endDate"
         );
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        //        CafCassResponse realCafCassResponse = (CafCassResponse) responseEntity.getBody();
-        //        assertEquals(
-        //            objectMapper.writeValueAsString(expectedCafCassResponse),
-        //            objectMapper.writeValueAsString(realCafCassResponse)
-        //        );
-        //        assertEquals(realCafCassResponse.getTotal(), 2);
-        //        assertEquals(realCafCassResponse.getCases().size(), 2);
+                CafCassResponse realCafCassResponse = (CafCassResponse) responseEntity.getBody();
+                assertEquals(
+                    objectMapper.writeValueAsString(expectedCafCassResponse),
+                    objectMapper.writeValueAsString(realCafCassResponse)
+                );
+                assertEquals(realCafCassResponse.getTotal(), 2);
+                assertEquals(realCafCassResponse.getCases().size(), 2);
     }
 
-    //    @Test
-    //    public void testInvalidServicAuth_401UnAuthorized() {
-    //        when(authorisationService.authoriseService(any())).thenReturn(false);
-    //        when(authorisationService.authoriseUser(any())).thenReturn(false);
-    //        final ResponseEntity response = cafCassController.searcCasesByDates(
-    //            "authorisation",
-    //            "inValidServiceAuthorisation",
-    //            "startDate",
-    //            "endDate"
-    //        );
-    //        assertEquals(UNAUTHORIZED, response.getStatusCode());
-    //        final ApiError body = (ApiError) response.getBody();
-    //        assertEquals("401 UNAUTHORIZED", body.getMessage());
-    //
-    //    }
+    @Test
+    public void testInvalidServicAuth_401UnAuthorized() {
+        when(authorisationService.authoriseService(any())).thenReturn(false);
+        when(authorisationService.authoriseUser(any())).thenReturn(false);
+        final ResponseEntity response = cafCassController.searcCasesByDates(
+            "authorisation",
+            "inValidServiceAuthorisation",
+            "startDate",
+            "endDate"
+        );
+        assertEquals(UNAUTHORIZED, response.getStatusCode());
+        final ApiError body = (ApiError) response.getBody();
+        assertEquals("401 UNAUTHORIZED", body.getMessage());
+
+    }
 
     @Test
     public void testFeignExceptionBadRequest() throws IOException {

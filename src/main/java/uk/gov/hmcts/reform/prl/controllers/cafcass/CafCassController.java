@@ -59,21 +59,21 @@ public class CafCassController extends AbstractCallbackController {
         @RequestParam(name = "start_date") String startDate,  @RequestParam(name = "end_date") String endDate
     )  {
         try {
-            //             if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
-            //             authorisationService.authoriseService(serviceAuthorisation))) {
-            log.info("processing request after authorization");
-            log.info("postcodeLookupConfiguration=11=> {}",postcodeLookupConfiguration.getAccessKey());
+            if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
+                  && Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorisation))) {
+                log.info("processing request after authorization");
+                log.info("postcodeLookupConfiguration=11=> {}",postcodeLookupConfiguration.getAccessKey());
 
-            return ResponseEntity.ok(caseDataService.getCaseData(
-                authorisation,
-                serviceAuthorisation,
-                startDate,
-                endDate
-            ));
+                return ResponseEntity.ok(caseDataService.getCaseData(
+                    authorisation,
+                    serviceAuthorisation,
+                    startDate,
+                    endDate
+                ));
 
-            //            } else {
-            //                throw new ResponseStatusException(UNAUTHORIZED);
-            //            }
+            } else {
+                throw new ResponseStatusException(UNAUTHORIZED);
+            }
         } catch (ResponseStatusException e) {
             return status(UNAUTHORIZED).body(new ApiError(e.getMessage()));
         } catch (FeignException feignException) {
