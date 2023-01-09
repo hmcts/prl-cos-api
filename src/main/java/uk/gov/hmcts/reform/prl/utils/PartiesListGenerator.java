@@ -39,23 +39,27 @@ public class PartiesListGenerator {
         List<DynamicListElement> parties = new ArrayList<>();
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            Map<String, String> applicantSolicitors = caseData.getApplicants().stream().map(Element::getValue).collect(
-                Collectors.toMap(
-                    PartyDetails::getSolicitorEmail,
-                    i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName()
-                ));
+            List<Element<PartyDetails>> applicants = caseData.getApplicants();
+            if (!applicants.isEmpty()) {
+                Map<String, String> applicantSolicitors = applicants.stream().map(Element::getValue).collect(
+                    Collectors.toMap(
+                        PartyDetails::getSolicitorEmail,
+                        i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName()
+                    ));
 
-            for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
-                parties.add(DynamicListElement.builder().code(appSols.getKey()).label(appSols.getValue()).build());
+                for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
+                    parties.add(DynamicListElement.builder().code(appSols.getKey()).label(appSols.getValue()).build());
+                }
             }
         } else {
             PartyDetails fl401Applicant = caseData.getApplicantsFL401();
-            if (!fl401Applicant.getSolicitorEmail().isEmpty() && !fl401Applicant.getRepresentativeFirstName().isEmpty()
+            if (fl401Applicant != null && !fl401Applicant.getSolicitorEmail().isEmpty() && !fl401Applicant.getRepresentativeFirstName().isEmpty()
                 && !fl401Applicant.getRepresentativeLastName().isEmpty()) {
                 String solicitorName = fl401Applicant.getRepresentativeFirstName() + " " + fl401Applicant.getRepresentativeLastName();
                 String solicitorEmailAddress = fl401Applicant.getSolicitorEmail();
                 parties.add(DynamicListElement.builder().code(solicitorEmailAddress).label(solicitorName).build());
             }
+
         }
         return parties;
     }
@@ -65,24 +69,24 @@ public class PartiesListGenerator {
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             List<Element<PartyDetails>> respondents = caseData.getRespondents();
+            if (!respondents.isEmpty()) {
+                Map<String, String> respondentSolicitors = respondents
+                    .stream()
+                    .map(Element::getValue)
+                    .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
+                    .collect(
+                        Collectors.toMap(
+                            PartyDetails::getSolicitorEmail,
+                            i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName()
+                        ));
 
-            Map<String,String> respondentSolicitors = caseData
-                .getRespondents()
-                .stream()
-                .map(Element::getValue)
-                .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
-                .collect(
-                Collectors.toMap(
-                    PartyDetails::getSolicitorEmail,
-                    i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName()
-                ));
-
-            for (Map.Entry<String, String> appSols : respondentSolicitors.entrySet()) {
-                parties.add(DynamicListElement.builder().code(appSols.getKey()).label(appSols.getValue()).build());
+                for (Map.Entry<String, String> appSols : respondentSolicitors.entrySet()) {
+                    parties.add(DynamicListElement.builder().code(appSols.getKey()).label(appSols.getValue()).build());
+                }
             }
         } else {
             PartyDetails fl401Respondent = caseData.getRespondentsFL401();
-            if (YesNoDontKnow.yes.equals(fl401Respondent.getDoTheyHaveLegalRepresentation())) {
+            if (fl401Respondent != null && YesNoDontKnow.yes.equals(fl401Respondent.getDoTheyHaveLegalRepresentation())) {
                 String solicitorName = fl401Respondent.getRepresentativeFirstName() + " " + fl401Respondent.getRepresentativeLastName();
                 String solicitorEmailAddress = fl401Respondent.getSolicitorEmail();
                 parties.add(DynamicListElement.builder().code(solicitorEmailAddress).label(solicitorName).build());
