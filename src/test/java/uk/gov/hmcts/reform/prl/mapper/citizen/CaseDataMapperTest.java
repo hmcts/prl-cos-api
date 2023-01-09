@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.citizen;
+package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
