@@ -406,3 +406,7 @@ bundle:
     config: ${BUNDLE_ENGLISH_CONFIG:sample-config.yaml}
   welsh:
     config: ${BUNDLE_WELSH_CONFIG:sample-config.yaml}
+
+fis_hearing:
+  api:
+    url: ${HEARING_API_BASEURL:http://fis-hmc-api-demo.service.core-compute-demo.internal}
