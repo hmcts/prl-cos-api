@@ -470,22 +470,24 @@ public class DraftAnOrderService {
         //log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         if (!C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
-            fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
-                    PrlAppsConstants.FORMAT,
-                    caseData.getApplicantsFL401().getFirstName(),
-                    caseData.getApplicantsFL401().getLastName()
-                ))
-                .fl404bRespondentName(String.format(PrlAppsConstants.FORMAT,
-                                                    caseData.getRespondentsFL401().getFirstName(),
-                                                    caseData.getRespondentsFL401().getLastName()
-                )).build();
-            if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
-                fl404CustomFields = fl404CustomFields.toBuilder()
-                    .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
-            }
-            if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
-                fl404CustomFields = fl404CustomFields.toBuilder()
-                    .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+            if (fl404CustomFields != null) {
+                fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
+                        PrlAppsConstants.FORMAT,
+                        caseData.getApplicantsFL401().getFirstName(),
+                        caseData.getApplicantsFL401().getLastName()
+                    ))
+                    .fl404bRespondentName(String.format(PrlAppsConstants.FORMAT,
+                                                        caseData.getRespondentsFL401().getFirstName(),
+                                                        caseData.getRespondentsFL401().getLastName()
+                    )).build();
+                if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+                    fl404CustomFields = fl404CustomFields.toBuilder()
+                        .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+                }
+                if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+                    fl404CustomFields = fl404CustomFields.toBuilder()
+                        .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+                }
             }
             caseData = caseData.toBuilder()
                 .manageOrders(ManageOrders.builder()
@@ -497,6 +499,16 @@ public class DraftAnOrderService {
                                   .orderDirections(caseData.getManageOrders().getOrderDirections())
                                   .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
                                   .fl404CustomFields(fl404CustomFields)
+                                  .manageOrdersFl402CourtName(caseData.getManageOrders().getManageOrdersFl402CourtName())
+                                  .manageOrdersFl402CourtAddress(caseData.getManageOrders().getManageOrdersFl402CourtAddress())
+                                  .manageOrdersFl402CaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
+                                  .manageOrdersFl402Applicant(caseData.getManageOrders().getManageOrdersFl402Applicant())
+                                  .manageOrdersFl402ApplicantRef(caseData.getManageOrders().getManageOrdersFl402ApplicantRef())
+                                  .fl402HearingCourtname(caseData.getManageOrders().getFl402HearingCourtname())
+                                  .fl402HearingCourtAddress(caseData.getManageOrders().getFl402HearingCourtAddress())
+                                  .manageOrdersDateOfhearing(caseData.getManageOrders().getManageOrdersDateOfhearing())
+                                  .dateOfHearingTime(caseData.getManageOrders().getDateOfHearingTime())
+                                  .dateOfHearingTimeEstimate(caseData.getManageOrders().getDateOfHearingTimeEstimate())
                                   .build()).build();
         } else {
             caseData = caseData.toBuilder()
