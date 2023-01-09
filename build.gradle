@@ -150,7 +150,6 @@ allprojects {
       //CVE-2017-18640
       dependency group: 'org.yaml',name: 'snakeyaml', version: '1.32'
 
-
     }
   }
 }
@@ -325,17 +324,14 @@ dependencies {
       exclude group: 'io.reactivex', module: 'rxnetty-contexts'
       exclude group: 'io.reactivex', module: 'rxnetty-servo'
     }
-  implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-actuator')
-    {
-      exclude group: 'org.latencyutils', module: '*'
-    }
+
   implementation(group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils)
   implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: versions.jackson)
   implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson)
   implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jackson)
-  //implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: '2.7.7'
+
   implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
-  testImplementation group: 'io.sniffy', name: 'sniffy-core', version: '3.1.12'
+
   implementation(group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: versions.bcpkixJdk15on) {
     force = true
   }
@@ -400,7 +396,6 @@ dependencies {
       exclude group: 'io.reactivex', module: 'rxnetty-contexts'
       exclude group: 'io.reactivex', module: 'rxnetty-servo'
     }
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: '2.7.1'
   integrationTestImplementation(group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator)
     {
       exclude group: 'io.reactivex', module: 'io.reactivex'
