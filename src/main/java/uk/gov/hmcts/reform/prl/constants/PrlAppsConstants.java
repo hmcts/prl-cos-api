@@ -173,4 +173,5 @@ public class PrlAppsConstants {
     public static final String CITIZEN_ROLE = "citizen";
 
     public static final String OTHER = "Other";
+    public static final String ENGDOCGEN = "isEngDocGen";
 }
