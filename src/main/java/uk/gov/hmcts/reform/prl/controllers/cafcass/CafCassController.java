@@ -63,14 +63,12 @@ public class CafCassController extends AbstractCallbackController {
                   && Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorisation))) {
                 log.info("processing request after authorization");
                 log.info("postcodeLookupConfiguration=11=> {}",postcodeLookupConfiguration.getAccessKey());
-
                 return ResponseEntity.ok(caseDataService.getCaseData(
                     authorisation,
                     serviceAuthorisation,
                     startDate,
                     endDate
                 ));
-
             } else {
                 throw new ResponseStatusException(UNAUTHORIZED);
             }
