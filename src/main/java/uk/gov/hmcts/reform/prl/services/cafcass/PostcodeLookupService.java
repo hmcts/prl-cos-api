@@ -33,7 +33,7 @@ public class PostcodeLookupService {
     private RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
-    PostcodeLookupConfiguration configuration;
+    PostcodeLookupConfiguration postcodeLookupConfiguration;
 
     public boolean isValidNationalPostCode(String postcode, String countryCode) {
         if (StringUtils.isEmpty(postcode) || StringUtils.isEmpty(countryCode)) {
@@ -58,8 +58,8 @@ public class PostcodeLookupService {
         try {
             Map<String, String> params = new HashMap<>();
             params.put("postcode", StringUtils.deleteWhitespace(postcode));
-            String url = configuration.getUrl();
-            String key = configuration.getAccessKey();
+            String url = postcodeLookupConfiguration.getUrl();
+            String key = postcodeLookupConfiguration.getAccessKey();
             params.put("key", key);
             log.info("keyyyyyyyy {}",key);
             if (StringUtils.isEmpty(url)) {
