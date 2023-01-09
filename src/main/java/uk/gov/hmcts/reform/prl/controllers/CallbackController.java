@@ -325,9 +325,6 @@ public class CallbackController {
             }
         } else {
             solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
-            caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(
-                caseDetails,
-                caseData.getCourtEmailAddress());
         }
     }
 
