@@ -60,7 +60,6 @@ public class CaseDataApplicantElementsMapper {
                 .otherGender(applicantDto.getPersonalDetails().getOtherGenderDetails())
                 .dateOfBirth(buildDateOfBirth(applicantDto.getPersonalDetails().getDateOfBirth()))
                 .placeOfBirth(applicantDto.getPersonalDetails().getApplicantPlaceOfBirth())
-                //TODO Needs to updated once solictior mapping is finalized
                 //.relationshipToChildren(buildChildRelationship(applicantDto.getRelationshipDetails()))
                 .phoneNumber(isNotEmpty(applicantDto.getApplicantContactDetail().getTelephoneNumber())
                         ? applicantDto.getApplicantContactDetail().getTelephoneNumber() : null)

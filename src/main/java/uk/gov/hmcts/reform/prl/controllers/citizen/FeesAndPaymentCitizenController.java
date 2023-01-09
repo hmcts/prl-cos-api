@@ -37,6 +37,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequestMapping("/fees-and-payment-apis")
 public class FeesAndPaymentCitizenController {
     private static final String SERVICE_AUTH = "ServiceAuthorization";
+    private static final String LOGGERMESSAGE = "Invalid Client";
 
     @Autowired
     private AuthorisationService authorisationService;
@@ -64,7 +65,7 @@ public class FeesAndPaymentCitizenController {
             if (isAuthorized(authorisation, serviceAuthorization)) {
                 feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
             } else {
-                throw (new RuntimeException("Invalid Client"));
+                throw (new RuntimeException(LOGGERMESSAGE));
             }
         } catch (Exception e) {
             return FeeResponseForCitizen.builder()
@@ -90,7 +91,7 @@ public class FeesAndPaymentCitizenController {
     ) throws Exception {
 
         if (!isAuthorized(authorization, serviceAuthorization)) {
-            throw (new RuntimeException("Invalid Client"));
+            throw (new RuntimeException(LOGGERMESSAGE));
         }
 
         return paymentRequestService.createPayment(authorization,serviceAuthorization,createPaymentRequest);
@@ -114,7 +115,7 @@ public class FeesAndPaymentCitizenController {
         @PathVariable String caseId
     ) throws Exception {
         if (!isAuthorized(authorization, serviceAuthorization)) {
-            throw (new RuntimeException("Invalid Client"));
+            throw (new RuntimeException(LOGGERMESSAGE));
         }
         log.info("Retrieving payment status for the Case id :{}", caseId);
         return paymentRequestService.fetchPaymentStatus(authorization,paymentReference);
@@ -122,6 +123,7 @@ public class FeesAndPaymentCitizenController {
 
 
     }
+
 
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
         return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
