@@ -148,7 +148,7 @@ allprojects {
         entry 'tomcat-embed-el'
       }
       //CVE-2017-18640
-      dependency group: 'org.yaml',name: 'snakeyaml', version: '1.32'
+      dependency group: 'org.yaml',name: 'snakeyaml', version: '1.33'
 
     }
   }
@@ -246,7 +246,7 @@ dependencyCheck {
     assemblyEnabled = false
   }
 }
-ext['snakeyaml.version'] = '1.32'
+ext['snakeyaml.version'] = '1.33'
 
 dependencies {
   implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.9'
