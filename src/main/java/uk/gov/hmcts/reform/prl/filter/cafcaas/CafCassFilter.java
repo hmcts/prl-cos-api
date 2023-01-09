@@ -56,6 +56,7 @@ public class CafCassFilter {
     }
 
     private void filterCasesByApplicationValidPostcode(CafCassResponse cafCassResponse) {
+
         List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases()
             .stream().filter(cafCassCaseDetail -> {
                 if (!ObjectUtils.isEmpty(cafCassCaseDetail.getCaseData().getApplicants())) {

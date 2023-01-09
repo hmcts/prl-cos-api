@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
+import uk.gov.hmcts.reform.prl.config.cafcass.PostcodeLookupConfiguration;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
+import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -39,6 +41,12 @@ public class CafCassController extends AbstractCallbackController {
     @Autowired
     private AuthorisationService authorisationService;
 
+    @Autowired
+    private PostcodeLookupService postcodeLookupService;
+
+    @Autowired
+    private PostcodeLookupConfiguration postcodeLookupConfiguration;
+
     @GetMapping(path = "/searchCases", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "search case data")
     @ApiResponses(value = {
@@ -51,16 +59,17 @@ public class CafCassController extends AbstractCallbackController {
         @RequestParam(name = "start_date") String startDate,  @RequestParam(name = "end_date") String endDate
     )  {
         try {
-            if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
-                authorisationService.authoriseService(serviceAuthorisation))) {
+            if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
+                  && Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorisation))) {
                 log.info("processing request after authorization");
+
+                log.info("postcodeLookupConfiguration=11=> {}",postcodeLookupConfiguration.getAccessKey());
                 return ResponseEntity.ok(caseDataService.getCaseData(
                     authorisation,
                     serviceAuthorisation,
                     startDate,
                     endDate
                 ));
-
             } else {
                 throw new ResponseStatusException(UNAUTHORIZED);
             }
