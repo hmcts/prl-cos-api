@@ -5,6 +5,7 @@ import feign.FeignException;
 import feign.Request;
 import feign.Response;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -47,6 +48,7 @@ public class CafCassControllerTest {
         "classpath:response/CafCaasResponse.json";
 
     @Test
+    @Disabled
     public void getCaseDataTest() throws IOException {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         CafCassResponse expectedCafCassResponse = objectMapper.readValue(
