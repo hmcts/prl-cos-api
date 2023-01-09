@@ -10,8 +10,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.prl.config.cafcass.PostcodeLookupConfiguration;
 import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
@@ -44,11 +46,13 @@ public class CafCassControllerTest {
     @Mock
     private CaseDataService caseDataService;
 
+    @Mock
+    private PostcodeLookupConfiguration postcodeLookupConfiguration;
+
     private static final String jsonInString =
         "classpath:response/CafCaasResponse.json";
 
     @Test
-    @Disabled
     public void getCaseDataTest() throws IOException {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         CafCassResponse expectedCafCassResponse = objectMapper.readValue(
@@ -66,6 +70,7 @@ public class CafCassControllerTest {
             "startDate",
             "endDate"
         );
+
         CafCassResponse realCafCassResponse = (CafCassResponse) responseEntity.getBody();
         assertEquals(
             objectMapper.writeValueAsString(expectedCafCassResponse),
