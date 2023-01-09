@@ -13,10 +13,6 @@
     <notes>Temporary Suppression</notes>
     <cve>CVE-2021-37533</cve>
   </suppress>
-  <suppress>
-    <notes>Temporary Suppression</notes>
-    <cve>CVE-2021-4277</cve>
-  </suppress>
     <suppress>
         <notes><![CDATA[
       spring-core-5.3.20.jar ]]></notes>
