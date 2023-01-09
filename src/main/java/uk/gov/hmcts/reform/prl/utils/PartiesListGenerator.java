@@ -40,7 +40,7 @@ public class PartiesListGenerator {
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             List<Element<PartyDetails>> applicants = caseData.getApplicants();
-            if (!applicants.isEmpty()) {
+            if (applicants != null && !applicants.isEmpty()) {
                 Map<String, String> applicantSolicitors = applicants.stream().map(Element::getValue).collect(
                     Collectors.toMap(
                         PartyDetails::getSolicitorEmail,
@@ -69,7 +69,7 @@ public class PartiesListGenerator {
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             List<Element<PartyDetails>> respondents = caseData.getRespondents();
-            if (!respondents.isEmpty()) {
+            if (respondents != null && !respondents.isEmpty()) {
                 Map<String, String> respondentSolicitors = respondents
                     .stream()
                     .map(Element::getValue)
