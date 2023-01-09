@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.mapper.bundle;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,11 +64,11 @@ public class BundleCreateRequestMapper {
                     bundleConfigFileName))
                 .build())
             .caseTypeId(CASE_TYPE).jurisdictionId(JURISDICTION).eventId(eventId).build();
-        try {
+        /*try {
             log.info("*** createbundle request payload  : {}", new ObjectMapper().writeValueAsString(bundleCreateRequest));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
-        }
+        }*/
         return bundleCreateRequest;
     }
 

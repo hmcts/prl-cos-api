@@ -80,7 +80,7 @@ public class BundlingController extends AbstractCallbackController {
                         ? bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime() : "")
                     .build());
             //log.info("*** Bundle information post emptyfolders removal from api : {}",
-               // new ObjectMapper().writeValueAsString(caseDataUpdated.get("bundleInformation")));
+            // new ObjectMapper().writeValueAsString(caseDataUpdated.get("bundleInformation")));
             log.info("*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}", caseData.getId());
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
