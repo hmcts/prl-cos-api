@@ -68,11 +68,11 @@ class CaseDataMapperTest {
     void testCaseDataMapper() throws IOException {
 
         //When
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData);
+        CaseData updatedCaseData1 = caseDataMapper.buildUpdatedCaseData(caseData);
 
         //Then
         JSONAssert.assertEquals(TestUtil.readFileFrom("classpath:c100-rebuild/mapper-response.json"),
-                mapper.writeValueAsString(updatedCaseData), false);
+                mapper.writeValueAsString(updatedCaseData1), false);
     }
 
     @Test
