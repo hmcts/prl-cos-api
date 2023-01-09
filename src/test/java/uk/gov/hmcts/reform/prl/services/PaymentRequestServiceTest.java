@@ -325,8 +325,6 @@ public class PaymentRequestServiceTest {
 
         caseData = caseData.toBuilder().build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(
-            Long.parseLong(TEST_CASE_ID)).data(stringObjectMap).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(
@@ -334,9 +332,14 @@ public class PaymentRequestServiceTest {
                 .id(Long.valueOf(TEST_CASE_ID)).build(),
             CaseData.class
         )).thenReturn(CaseData.builder().id(Long.parseLong(TEST_CASE_ID)).applicantCaseName(APPLICANT_NAME).build());
+        paymentServiceResponse = PaymentServiceResponse.builder().serviceRequestReference(PAYMENTREFERENCENUMBER).build();
+        when(paymentApi.fetchPaymentStatus(authToken, serviceAuthToken, PAYMENTREFERENCENUMBER)).thenReturn(
+            PaymentStatusResponse.builder().status("Success").build());
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(
+            Long.parseLong(TEST_CASE_ID)).data(stringObjectMap).build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest.getCaseId())).thenReturn(
             caseDetails);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
@@ -364,6 +367,208 @@ public class PaymentRequestServiceTest {
         assertNotNull(paymentResponse.getPaymentReference());
 
     }
+
+    @Test
+    public void shouldCreatePaymentRequestWithPaymentNull() throws Exception {
+        paymentServiceRequest = PaymentServiceRequest.builder()
+            .callBackUrl(null)
+            .casePaymentRequest(CasePaymentRequestDto.builder()
+                                    .action(PrlAppsConstants.PAYMENT_ACTION)
+                                    .responsibleParty(APPLICANT_NAME).build())
+            .caseReference(String.valueOf(TEST_CASE_ID))
+            .ccdCaseNumber(String.valueOf(TEST_CASE_ID))
+            .fees(new FeeDto[]{
+                FeeDto.builder()
+                    .calculatedAmount(feeResponse.getAmount())
+                    .code(feeResponse.getCode())
+                    .version(feeResponse.getVersion())
+                    .volume(1).build()
+            })
+            .build();
+
+
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .caseId(TEST_CASE_ID)
+                             .caseData(CaseData.builder()
+                                           .id(Long.parseLong(TEST_CASE_ID))
+                                           .applicantCaseName(APPLICANT_NAME)
+                                           .build())
+                             .build())
+            .build();
+
+        createPaymentRequest = CreatePaymentRequest.builder().caseId(TEST_CASE_ID).applicantCaseName(APPLICANT_NAME).returnUrl(
+            null).build();
+
+        paymentResponse = PaymentResponse.builder()
+            .paymentReference(PAYMENT_REFERENCE)
+            .dateCreated("2020-09-07T11:24:07.160+0000")
+            .externalReference("vnahehn9rlv17e5kel03pugd7j")
+            .nextUrl("https://www.payments.service.gov.uk/secure/7a85745f-9485-47e4-ae12-e7d659a40299")
+            .paymentStatus("Initiated")
+            .build();
+
+        onlineCardPaymentRequest = OnlineCardPaymentRequest
+            .builder().returnUrl(null).amount(feeResponse.getAmount())
+            .currency(GBP_CURRENCY).language(ENG_LANGUAGE).build();
+
+        caseData = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName(APPLICANT_NAME)
+            .c100RebuildData(C100RebuildData.builder()
+                                 .paymentReferenceNumber(null).build())
+            .paymentServiceRequestReferenceNumber(null)
+            .build();
+        caseData = caseData.toBuilder().build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(
+            Long.parseLong(TEST_CASE_ID)).data(stringObjectMap).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(
+            CaseData.builder().applicantCaseName(APPLICANT_NAME)
+                .id(Long.valueOf(TEST_CASE_ID)).build(),
+            CaseData.class
+        )).thenReturn(CaseData.builder().id(Long.parseLong(TEST_CASE_ID)).applicantCaseName(APPLICANT_NAME).build());
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest.getCaseId())).thenReturn(
+            caseDetails);
+        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        paymentServiceResponse = PaymentServiceResponse.builder().serviceRequestReference(PAYMENTSRREFERENCENUMBER).build();
+        when(paymentApi.createPaymentServiceRequest(authToken, serviceAuthToken, paymentServiceRequest)).thenReturn(
+            paymentServiceResponse);
+        when(paymentApi.createPaymentRequest(
+            paymentServiceResponse.getServiceRequestReference(),
+            authToken,
+            serviceAuthToken,
+            onlineCardPaymentRequest
+        )).thenReturn(paymentResponse);
+        caseData = caseData.builder()
+            .paymentServiceRequestReferenceNumber(null)
+            .c100RebuildData(C100RebuildData.builder().paymentReferenceNumber(null).build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+
+        PaymentResponse paymentResponse = paymentRequestService.createPayment(
+            authToken,
+            serviceAuthToken,
+            createPaymentRequest
+        );
+        assertNotNull(paymentResponse);
+        createPaymentRequest.setHwfRefNumber("referNumber");
+        paymentResponse = paymentRequestService.createPayment(
+            authToken,
+            serviceAuthToken,
+            createPaymentRequest
+        );
+        assertNotNull(paymentResponse);
+
+
+    }
+
+
+    @Test
+    public void shouldCreatePaymentRequestWithPaymentReferenceNumberNull() throws Exception {
+        paymentServiceRequest = PaymentServiceRequest.builder()
+            .callBackUrl(null)
+            .casePaymentRequest(CasePaymentRequestDto.builder()
+                                    .action(PrlAppsConstants.PAYMENT_ACTION)
+                                    .responsibleParty(APPLICANT_NAME).build())
+            .caseReference(String.valueOf(TEST_CASE_ID))
+            .ccdCaseNumber(String.valueOf(TEST_CASE_ID))
+            .fees(new FeeDto[]{
+                FeeDto.builder()
+                    .calculatedAmount(feeResponse.getAmount())
+                    .code(feeResponse.getCode())
+                    .version(feeResponse.getVersion())
+                    .volume(1).build()
+            })
+            .build();
+
+
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .caseId(TEST_CASE_ID)
+                             .caseData(CaseData.builder()
+                                           .id(Long.parseLong(TEST_CASE_ID))
+                                           .applicantCaseName(APPLICANT_NAME)
+                                           .build())
+                             .build())
+            .build();
+
+        createPaymentRequest = CreatePaymentRequest.builder().caseId(TEST_CASE_ID).applicantCaseName(APPLICANT_NAME).returnUrl(
+            null).build();
+
+        paymentResponse = PaymentResponse.builder()
+            .paymentReference(PAYMENT_REFERENCE)
+            .dateCreated("2020-09-07T11:24:07.160+0000")
+            .externalReference("vnahehn9rlv17e5kel03pugd7j")
+            .nextUrl("https://www.payments.service.gov.uk/secure/7a85745f-9485-47e4-ae12-e7d659a40299")
+            .paymentStatus("Initiated")
+            .build();
+
+        onlineCardPaymentRequest = OnlineCardPaymentRequest
+            .builder().returnUrl(null).amount(feeResponse.getAmount())
+            .currency(GBP_CURRENCY).language(ENG_LANGUAGE).build();
+
+        caseData = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName(APPLICANT_NAME)
+            .c100RebuildData(C100RebuildData.builder()
+                                 .paymentReferenceNumber(null).build())
+            .paymentServiceRequestReferenceNumber(PAYMENTSRREFERENCENUMBER)
+            .build();
+        caseData = caseData.toBuilder().build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(
+            Long.parseLong(TEST_CASE_ID)).data(stringObjectMap).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(
+            CaseData.builder().applicantCaseName(APPLICANT_NAME)
+                .id(Long.valueOf(TEST_CASE_ID)).build(),
+            CaseData.class
+        )).thenReturn(CaseData.builder().id(Long.parseLong(TEST_CASE_ID)).applicantCaseName(APPLICANT_NAME).build());
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest.getCaseId())).thenReturn(
+            caseDetails);
+        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        paymentServiceResponse = PaymentServiceResponse.builder().serviceRequestReference(PAYMENTSRREFERENCENUMBER).build();
+        when(paymentApi.createPaymentServiceRequest(authToken, serviceAuthToken, paymentServiceRequest)).thenReturn(
+            paymentServiceResponse);
+        when(paymentApi.createPaymentRequest(
+            paymentServiceResponse.getServiceRequestReference(),
+            authToken,
+            serviceAuthToken,
+            onlineCardPaymentRequest
+        )).thenReturn(paymentResponse);
+        caseData = caseData.builder()
+            .paymentServiceRequestReferenceNumber(null)
+            .c100RebuildData(C100RebuildData.builder().paymentReferenceNumber(PAYMENTREFERENCENUMBER).build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+
+        PaymentResponse paymentResponse = paymentRequestService.createPayment(
+            authToken,
+            serviceAuthToken,
+            createPaymentRequest
+        );
+
+        assertNotNull(paymentResponse);
+        createPaymentRequest.setHwfRefNumber("refer");
+        paymentResponse = paymentRequestService.createPayment(
+            authToken,
+            serviceAuthToken,
+            createPaymentRequest
+        );
+        assertNotNull(paymentResponse);
+
+    }
+
 
     @Test
     public void shouldPaymentRequestAgainIfPreviousPaymentFailed() throws Exception {
