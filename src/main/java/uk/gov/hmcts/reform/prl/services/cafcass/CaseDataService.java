@@ -53,7 +53,7 @@ public class CaseDataService {
         );
         CafCassResponse cafCassResponse = objectMapper.convertValue(searchResult,
                                                              CafCassResponse.class);
-        log.info("cafCassResponse111 ==> {}",cafCassResponse);
+        log.info("cafCassResponse11111 ==> {}",cafCassResponse);
         cafCassFilter.filter(cafCassResponse);
         log.info("cafCassResponse222 ==> {}",cafCassResponse);
         getHearingDetails(authorisation,cafCassResponse);
