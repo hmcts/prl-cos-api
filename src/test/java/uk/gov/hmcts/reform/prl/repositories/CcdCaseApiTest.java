@@ -5,7 +5,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CaseAccessApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -29,6 +33,15 @@ public class CcdCaseApiTest {
 
     @Mock
     CitizenCoreCaseDataService citizenCoreCaseDataService;
+
+    @Mock
+    IdamClient idamClient;
+
+    @Mock
+    CaseAccessApi caseAccessApi;
+
+    @Mock
+    AuthTokenGenerator authTokenGenerator;
 
 
     private static final String AUTH = "auth";
@@ -66,6 +79,15 @@ public class CcdCaseApiTest {
 
     @Test
     public void testGetCase() {
+
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId("dsd").build();
+        when(citizenCoreCaseDataService.getCase(AUTH, "12345")).thenReturn(caseDetails);
+        CaseDetails expectedResponse = ccdCaseApi.getCase(AUTH,"12345");
+        assertEquals(caseDetails.getCaseTypeId(),expectedResponse.getCaseTypeId());
+    }
+
+    @Test
+    public void testLinkCitizen() {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .amendOrderDynamicList(DynamicList.builder()
@@ -74,11 +96,17 @@ public class CcdCaseApiTest {
                                                                     .build()).build()).build())
             .build();
 
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId("dsd").build();
-        when(citizenCoreCaseDataService.getCase(AUTH, "12345")).thenReturn(caseDetails);
-        CaseDetails expectedResponse = ccdCaseApi.getCase(AUTH,"12345");
-        assertEquals(caseDetails.getCaseTypeId(),expectedResponse.getCaseTypeId());
+        UserDetails userDetails = UserDetails.builder()
+            .forename("solicitor@example.com")
+            .surname("Solicitor")
+            .id("testId")
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId("12345").build();
+        when(idamClient.getUserDetails(AUTH)).thenReturn(userDetails);
+        when(authTokenGenerator.generate()).thenReturn(AUTH);
+        when(citizenCoreCaseDataService.linkDefendant(AUTH,Long.valueOf("12345"),caseData,CaseEvent.LINK_CITIZEN)).thenReturn(caseDetails);
+        ccdCaseApi.linkCitizenToCase(AUTH,AUTH,"12345",caseData);
+        assertEquals(caseDetails.getCaseTypeId(),caseDetails.getCaseTypeId());
     }
-
 
 }
