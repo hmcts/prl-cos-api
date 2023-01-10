@@ -279,7 +279,7 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        String[] venueDetails = caseData.getSubmitCountyCourtSelection().getValue().getCode().split("-");
+        String[] venueDetails = caseData.getCourtList().getValue().getCode().split("-");
         String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
         caseDataUpdated.put(COURT_NAME_FIELD, courtName);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();

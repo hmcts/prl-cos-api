@@ -1628,7 +1628,7 @@ public class CallbackControllerTest {
     @Test
     public void testAmendCourtAboutToSubmit() throws Exception {
         CaseData caseData = CaseData.builder()
-            .submitCountyCourtSelection(DynamicList.builder().value(DynamicListElement.builder().code("test-test-test-test").build()).build())
+            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("test-test-test-test").build()).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
