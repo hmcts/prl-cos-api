@@ -207,28 +207,24 @@ public class CaseService {
         User user = User.builder().email(emailId)
             .idamId(userId).build();
         if (partyId != null) {
-            getPartyDetailsValue(caseData, partyId, isApplicant, user);
+            if (YesOrNo.Yes.equals(isApplicant)) {
+                for (Element<PartyDetails> partyDetails : caseData.getApplicants()) {
+                    if (partyId.equals(partyDetails.getId())) {
+                        partyDetails.getValue().setUser(user);
+                    }
+                }
+            } else {
+                for (Element<PartyDetails> partyDetails : caseData.getRespondents()) {
+                    if (partyId.equals(partyDetails.getId())) {
+                        partyDetails.getValue().setUser(user);
+                    }
+                }
+            }
         } else {
             if (YesOrNo.Yes.equals(isApplicant)) {
                 caseData.getApplicantsFL401().setUser(user);
             } else {
                 caseData.getRespondentsFL401().setUser(user);
-            }
-        }
-    }
-
-    private void getPartyDetailsValue(CaseData caseData, UUID partyId, YesOrNo isApplicant, User user) {
-        if (YesOrNo.Yes.equals(isApplicant)) {
-            for (Element<PartyDetails> partyDetails : caseData.getApplicants()) {
-                if (partyId.equals(partyDetails.getId())) {
-                    partyDetails.getValue().setUser(user);
-                }
-            }
-        } else {
-            for (Element<PartyDetails> partyDetails : caseData.getRespondents()) {
-                if (partyId.equals(partyDetails.getId())) {
-                    partyDetails.getValue().setUser(user);
-                }
             }
         }
     }
