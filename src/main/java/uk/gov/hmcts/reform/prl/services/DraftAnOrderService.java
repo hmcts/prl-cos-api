@@ -141,6 +141,34 @@ public class DraftAnOrderService {
             .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
             .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
             .appointedGuardianName(caseData.getAppointedGuardianName())
+            .fl402HearingCourtAddress(caseData.getManageOrders().getFl402HearingCourtAddress())
+            .fl402HearingCourtname(caseData.getManageOrders().getFl402HearingCourtname())
+            .manageOrdersFl402CourtName(caseData.getManageOrders().getManageOrdersFl402CourtName())
+            .manageOrdersFl402Applicant(caseData.getManageOrders().getManageOrdersFl402Applicant())
+            .manageOrdersFl402CaseNo(caseData.getManageOrders().getManageOrdersFl402CaseNo())
+            .manageOrdersFl402CourtAddress(caseData.getManageOrders().getManageOrdersFl402CourtAddress())
+            .manageOrdersFl402ApplicantRef(caseData.getManageOrders().getManageOrdersFl402ApplicantRef())
+            .dateOfHearingTime(caseData.getManageOrders().getDateOfHearingTime())
+            .dateOfHearingTimeEstimate(caseData.getManageOrders().getDateOfHearingTimeEstimate())
+            .manageOrdersDateOfhearing(caseData.getManageOrders().getManageOrdersDateOfhearing())
+            .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
+            .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
+            .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
+            .manageOrdersApplicant(caseData.getManageOrders().getManageOrdersApplicant())
+            .manageOrdersApplicantReference(caseData.getManageOrders().getManageOrdersApplicantReference())
+            .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
+            .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
+            .manageOrdersRespondentDob(caseData.getManageOrders().getManageOrdersRespondentDob())
+            .manageOrdersRespondentAddress(caseData.getManageOrders().getManageOrdersRespondentAddress())
+            .manageOrdersUnderTakingRepr(caseData.getManageOrders().getManageOrdersUnderTakingRepr())
+            .underTakingSolicitorCounsel(caseData.getManageOrders().getUnderTakingSolicitorCounsel())
+            .manageOrdersUnderTakingPerson(caseData.getManageOrders().getManageOrdersUnderTakingPerson())
+            .manageOrdersUnderTakingAddress(caseData.getManageOrders().getManageOrdersUnderTakingAddress())
+            .manageOrdersUnderTakingTerms(caseData.getManageOrders().getManageOrdersUnderTakingTerms())
+            .manageOrdersDateOfUnderTaking(caseData.getManageOrders().getManageOrdersDateOfUnderTaking())
+            .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
+            .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
+            .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
             .build();
     }
 
@@ -152,7 +180,6 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
-        log.info("caseTypeOfApplication {} ", caseTypeOfApplication);
         caseDataMap.put("caseTypeOfApplication", caseTypeOfApplication);
         return caseDataMap;
     }
@@ -365,6 +392,34 @@ public class DraftAnOrderService {
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
         caseDataMap.put("appointedGuardianName", selectedOrder.getAppointedGuardianName());
+        caseDataMap.put("manageOrdersFl402CourtName",selectedOrder.getManageOrdersFl402CourtName());
+        caseDataMap.put("manageOrdersFl402CourtAddress",selectedOrder.getManageOrdersFl402CourtAddress());
+        caseDataMap.put("manageOrdersFl402CaseNo",selectedOrder.getManageOrdersFl402CaseNo());
+        caseDataMap.put("manageOrdersFl402Applicant",selectedOrder.getManageOrdersFl402Applicant());
+        caseDataMap.put("manageOrdersFl402ApplicantRef",selectedOrder.getManageOrdersFl402ApplicantRef());
+        caseDataMap.put("fl402HearingCourtname",selectedOrder.getFl402HearingCourtname());
+        caseDataMap.put("fl402HearingCourtAddress",selectedOrder.getFl402HearingCourtAddress());
+        caseDataMap.put("manageOrdersDateOfhearing",selectedOrder.getManageOrdersDateOfhearing());
+        caseDataMap.put("dateOfHearingTime",selectedOrder.getDateOfHearingTime());
+        caseDataMap.put("dateOfHearingTimeEstimate",selectedOrder.getDateOfHearingTimeEstimate());
+        caseDataMap.put("manageOrdersCourtName", selectedOrder.getManageOrdersCourtName());
+        caseDataMap.put("manageOrdersCourtAddress", selectedOrder.getManageOrdersCourtAddress());
+        caseDataMap.put("manageOrdersCaseNo", selectedOrder.getManageOrdersCaseNo());
+        caseDataMap.put("manageOrdersApplicant", selectedOrder.getManageOrdersApplicant());
+        caseDataMap.put("manageOrdersApplicantReference", selectedOrder.getManageOrdersApplicantReference());
+        caseDataMap.put("manageOrdersRespondent", selectedOrder.getManageOrdersRespondent());
+        caseDataMap.put("manageOrdersRespondentReference", selectedOrder.getManageOrdersRespondentReference());
+        caseDataMap.put("manageOrdersRespondentDob", selectedOrder.getManageOrdersRespondentDob());
+        caseDataMap.put("manageOrdersRespondentAddress", selectedOrder.getManageOrdersRespondentAddress());
+        caseDataMap.put("manageOrdersUnderTakingRepr", selectedOrder.getManageOrdersUnderTakingRepr());
+        caseDataMap.put("underTakingSolicitorCounsel", selectedOrder.getUnderTakingSolicitorCounsel());
+        caseDataMap.put("manageOrdersUnderTakingPerson", selectedOrder.getManageOrdersUnderTakingPerson());
+        caseDataMap.put("manageOrdersUnderTakingAddress", selectedOrder.getManageOrdersUnderTakingAddress());
+        caseDataMap.put("manageOrdersUnderTakingTerms", selectedOrder.getManageOrdersUnderTakingTerms());
+        caseDataMap.put("manageOrdersDateOfUnderTaking", selectedOrder.getManageOrdersDateOfUnderTaking());
+        caseDataMap.put("underTakingDateExpiry", selectedOrder.getUnderTakingDateExpiry());
+        caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
+        caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
         return caseDataMap;
     }
 
@@ -458,6 +513,24 @@ public class DraftAnOrderService {
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
+            .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
+            .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
+            .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
+            .manageOrdersApplicant(caseData.getManageOrders().getManageOrdersApplicant())
+            .manageOrdersApplicantReference(caseData.getManageOrders().getManageOrdersApplicantReference())
+            .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
+            .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
+            .manageOrdersRespondentDob(caseData.getManageOrders().getManageOrdersRespondentDob())
+            .manageOrdersRespondentAddress(caseData.getManageOrders().getManageOrdersRespondentAddress())
+            .manageOrdersUnderTakingRepr(caseData.getManageOrders().getManageOrdersUnderTakingRepr())
+            .underTakingSolicitorCounsel(caseData.getManageOrders().getUnderTakingSolicitorCounsel())
+            . manageOrdersUnderTakingPerson(caseData.getManageOrders().getManageOrdersUnderTakingPerson())
+            .manageOrdersUnderTakingAddress(caseData.getManageOrders().getManageOrdersUnderTakingAddress())
+            .manageOrdersUnderTakingTerms(caseData.getManageOrders().getManageOrdersUnderTakingTerms())
+            .manageOrdersDateOfUnderTaking(caseData.getManageOrders().getManageOrdersDateOfUnderTaking())
+            .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
+            .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
+            .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
             .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .parentName(caseData.getManageOrders().getParentName())
             .dateOrderMade(caseData.getDateOrderMade())
@@ -465,6 +538,16 @@ public class DraftAnOrderService {
             .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
             .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
             .appointedGuardianName(caseData.getAppointedGuardianName())
+            .manageOrdersDateOfhearing(caseData.getManageOrders().getManageOrdersDateOfhearing())
+            .manageOrdersFl402CaseNo(caseData.getManageOrders().getManageOrdersFl402CaseNo())
+            .manageOrdersFl402ApplicantRef(caseData.getManageOrders().getManageOrdersFl402ApplicantRef())
+            .manageOrdersFl402Applicant(caseData.getManageOrders().getManageOrdersFl402Applicant())
+            .manageOrdersFl402CourtAddress(caseData.getManageOrders().getManageOrdersFl402CourtAddress())
+            .manageOrdersFl402CourtName(caseData.getManageOrders().getManageOrdersFl402CourtName())
+            .dateOfHearingTime(caseData.getManageOrders().getDateOfHearingTime())
+            .dateOfHearingTimeEstimate(caseData.getManageOrders().getDateOfHearingTimeEstimate())
+            .fl402HearingCourtname(caseData.getManageOrders().getFl402HearingCourtname())
+            .fl402HearingCourtAddress(caseData.getManageOrders().getFl402HearingCourtAddress())
             .build();
     }
 
@@ -481,22 +564,24 @@ public class DraftAnOrderService {
         //log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         if (!C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
-            fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
-                    PrlAppsConstants.FORMAT,
-                    caseData.getApplicantsFL401().getFirstName(),
-                    caseData.getApplicantsFL401().getLastName()
-                ))
-                .fl404bRespondentName(String.format(PrlAppsConstants.FORMAT,
-                                                    caseData.getRespondentsFL401().getFirstName(),
-                                                    caseData.getRespondentsFL401().getLastName()
-                )).build();
-            if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
-                fl404CustomFields = fl404CustomFields.toBuilder()
-                    .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
-            }
-            if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
-                fl404CustomFields = fl404CustomFields.toBuilder()
-                    .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+            if (fl404CustomFields != null) {
+                fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
+                        PrlAppsConstants.FORMAT,
+                        caseData.getApplicantsFL401().getFirstName(),
+                        caseData.getApplicantsFL401().getLastName()
+                    ))
+                    .fl404bRespondentName(String.format(PrlAppsConstants.FORMAT,
+                                                        caseData.getRespondentsFL401().getFirstName(),
+                                                        caseData.getRespondentsFL401().getLastName()
+                    )).build();
+                if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+                    fl404CustomFields = fl404CustomFields.toBuilder()
+                        .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+                }
+                if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+                    fl404CustomFields = fl404CustomFields.toBuilder()
+                        .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+                }
             }
             caseData = caseData.toBuilder()
                 .manageOrders(ManageOrders.builder()
@@ -508,6 +593,34 @@ public class DraftAnOrderService {
                                   .orderDirections(caseData.getManageOrders().getOrderDirections())
                                   .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
                                   .fl404CustomFields(fl404CustomFields)
+                                  .manageOrdersFl402CourtName(caseData.getManageOrders().getManageOrdersFl402CourtName())
+                                  .manageOrdersFl402CourtAddress(caseData.getManageOrders().getManageOrdersFl402CourtAddress())
+                                  .manageOrdersFl402CaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
+                                  .manageOrdersFl402Applicant(caseData.getManageOrders().getManageOrdersFl402Applicant())
+                                  .manageOrdersFl402ApplicantRef(caseData.getManageOrders().getManageOrdersFl402ApplicantRef())
+                                  .fl402HearingCourtname(caseData.getManageOrders().getFl402HearingCourtname())
+                                  .fl402HearingCourtAddress(caseData.getManageOrders().getFl402HearingCourtAddress())
+                                  .manageOrdersDateOfhearing(caseData.getManageOrders().getManageOrdersDateOfhearing())
+                                  .dateOfHearingTime(caseData.getManageOrders().getDateOfHearingTime())
+                                  .dateOfHearingTimeEstimate(caseData.getManageOrders().getDateOfHearingTimeEstimate())
+                                  .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
+                                  .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
+                                  .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
+                                  .manageOrdersApplicant(caseData.getManageOrders().getManageOrdersApplicant())
+                                  .manageOrdersApplicantReference(caseData.getManageOrders().getManageOrdersApplicantReference())
+                                  .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
+                                  .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
+                                  .manageOrdersRespondentDob(caseData.getManageOrders().getManageOrdersRespondentDob())
+                                  .manageOrdersRespondentAddress(caseData.getManageOrders().getManageOrdersRespondentAddress())
+                                  .manageOrdersUnderTakingRepr(caseData.getManageOrders().getManageOrdersUnderTakingRepr())
+                                  .underTakingSolicitorCounsel(caseData.getManageOrders().getUnderTakingSolicitorCounsel())
+                                  .manageOrdersUnderTakingPerson(caseData.getManageOrders().getManageOrdersUnderTakingPerson())
+                                  .manageOrdersUnderTakingAddress(caseData.getManageOrders().getManageOrdersUnderTakingAddress())
+                                  .manageOrdersUnderTakingTerms(caseData.getManageOrders().getManageOrdersUnderTakingTerms())
+                                  .manageOrdersDateOfUnderTaking(caseData.getManageOrders().getManageOrdersDateOfUnderTaking())
+                                  .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
+                                  .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
+                                  .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
                                   .build()).build();
         } else {
             caseData = caseData.toBuilder()

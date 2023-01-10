@@ -77,7 +77,7 @@ public class EditAndApproveDraftOrderController {
 
     }
 
-    @PostMapping(path = "judge-or-admin-edit-approve/about-to-submit", consumes = APPLICATION_JSON,
+    @PostMapping(path = "/judge-or-admin-edit-approve/about-to-submit", consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate draft order collection")
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
