@@ -96,14 +96,6 @@ public class DirectionOnIssue {
     @JsonProperty("dioMiamAttendingPerson")
     private final String dioMiamAttendingPerson;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
-    private final LocalDateTime dioDirectionsDraStartDateAndTime;
-    @JsonProperty("dioDirectionsDraHearing")
-    private final String dioDirectionsDraHearing;
-    private final DynamicList dioDirectionsDraCourtDynamicList;
-    @JsonProperty("dioDirectionsDraHearingByWayOf")
-    private final DioRemoteHearingEnum dioDirectionsDraHearingByWayOf;
-
     @JsonProperty("dioWithoutNoticeFirstHearingCheckList")
     private final List<DioWithoutNoticeFirstHearingCheckListEnum> dioWithoutNoticeFirstHearingCheckList;
     @JsonProperty("dioWithoutNoticeFirstHearingDetails")
