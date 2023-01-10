@@ -19,12 +19,6 @@ import uk.gov.hmcts.reform.prl.enums.CourtDetailsPilotEnum;
 import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
@@ -56,7 +50,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.GatekeeperEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
-import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
@@ -72,7 +65,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
@@ -244,28 +236,9 @@ public class CaseData implements MappableObject {
     /**
      * MIAM.
      */
-    private YesOrNo applicantAttendedMiam;
-    private YesOrNo claimingExemptionMiam;
-    private YesOrNo familyMediatorMiam;
-    private YesOrNo otherProceedingsMiam;
-    private String applicantConsentMiam;
-    private List<MiamExemptionsChecklistEnum> miamExemptionsChecklist;
-    private List<MiamDomesticViolenceChecklistEnum> miamDomesticViolenceChecklist;
-    private List<MiamUrgencyReasonChecklistEnum> miamUrgencyReasonChecklist;
-    private List<MiamChildProtectionConcernChecklistEnum> miamChildProtectionConcernList;
-    private MiamPreviousAttendanceChecklistEnum miamPreviousAttendanceChecklist;
-    private List<MiamPreviousAttendanceChecklistEnum> miamPreviousAttendanceChecklist1;
-    private MiamOtherGroundsChecklistEnum miamOtherGroundsChecklist;
-    private List<MiamOtherGroundsChecklistEnum> miamOtherGroundsChecklist1;
-    private final String mediatorRegistrationNumber;
-    private final String familyMediatorServiceName;
-    private final String soleTraderName;
-    //TODO: refactor to remove duplicated details screen
-    private Document miamCertificationDocumentUpload;
-    private final String mediatorRegistrationNumber1;
-    private final String familyMediatorServiceName1;
-    private final String soleTraderName1;
-    private final Document miamCertificationDocumentUpload1;
+    @JsonUnwrapped
+    @Builder.Default
+    private final MiamDetails miamDetails;
 
     /**
      * Allegations of harm.
@@ -289,17 +262,9 @@ public class CaseData implements MappableObject {
     /**
      * Attending the hearing.
      */
-    private YesOrNo isWelshNeeded;
-    @JsonAlias({"welshNeeds", "fl401WelshNeeds"})
-    private List<Element<WelshNeed>> welshNeeds;
-    private YesOrNo isInterpreterNeeded;
-    private List<Element<InterpreterNeed>> interpreterNeeds;
-    private YesOrNo isDisabilityPresent;
-    private String adjustmentsRequired;
-    private YesOrNo isSpecialArrangementsRequired;
-    private String specialArrangementsRequired;
-    private YesOrNo isIntermediaryNeeded;
-    private String reasonsForIntermediary;
+    @JsonUnwrapped
+    @Builder.Default
+    private final AttendHearing attendHearing;
 
     /**
      * International element.
@@ -552,6 +517,7 @@ public class CaseData implements MappableObject {
     private LocalDate approvalDate;
     private Document appointmentOfGuardian;
     private Document previewOrderDoc;
+    private Document previewOrderDocWelsh;
 
     private final ManageOrdersOptionsEnum manageOrdersOptions;
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
@@ -699,4 +665,8 @@ public class CaseData implements MappableObject {
     private String judgeDirectionsToAdmin;
     private YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     private String courtAdminNotes;
+
+    @JsonUnwrapped
+    @Builder.Default
+    private final ServeOrderData serveOrderData;
 }
