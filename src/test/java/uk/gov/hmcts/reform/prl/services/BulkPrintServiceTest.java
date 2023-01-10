@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
+
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +26,7 @@ import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertThrows;
 
 @RunWith(SpringRunner.class)
 public class BulkPrintServiceTest {
@@ -77,9 +79,9 @@ public class BulkPrintServiceTest {
 
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void senLetterServiceWithInValidInput() {
-        assertEquals(bulkPrintService.send("123", authToken, "abc", null), uuid);
+        assertThrows(NullPointerException.class, () -> bulkPrintService.send("123", authToken, "abc", null));
     }
 
 }

@@ -43,7 +43,7 @@ public class BundlingController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse createBundle(@RequestHeader("authorization") @Parameter(hidden = true)
                                                              String authorization,
                                                              @RequestBody CallbackRequest callbackRequest)
-        throws Exception {
+    {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         moveExistingCaseBundlesToHistoricalBundles(caseData);

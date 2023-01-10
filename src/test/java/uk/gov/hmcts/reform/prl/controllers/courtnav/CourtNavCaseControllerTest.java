@@ -26,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertThrows;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CourtNavCaseControllerTest {
@@ -99,7 +100,7 @@ public class CourtNavCaseControllerTest {
 
     }
 
-    @Test(expected = ResponseStatusException.class)
+    @Test
     public void shouldGetForbiddenWhenCalledWithInvalidToken() throws Exception {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
@@ -113,13 +114,10 @@ public class CourtNavCaseControllerTest {
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
-
-        ResponseEntity response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
-        assertEquals(403, response.getStatusCodeValue());
-
+        assertThrows(ResponseStatusException.class, () -> courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData));
     }
 
-    @Test(expected = ResponseStatusException.class)
+    @Test
     public void shouldGetForbiddenWhenCalledWithInvalidS2SToken() throws Exception {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
@@ -133,9 +131,7 @@ public class CourtNavCaseControllerTest {
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
-
-        ResponseEntity response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
-        assertEquals(403, response.getStatusCodeValue());
+        assertThrows(ResponseStatusException.class, () -> courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData));
 
     }
 
