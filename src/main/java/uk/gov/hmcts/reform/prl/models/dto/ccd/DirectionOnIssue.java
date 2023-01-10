@@ -32,4 +32,7 @@ public class DirectionOnIssue {
     private final List<DioCourtEnum> dioCourtList;
     @JsonProperty("dioOtherList")
     private final List<DioOtherEnum> dioOtherList;
+
+    @JsonProperty("dioRightToAskCourt")
+    private final String dioRightToAskCourt;
 }
