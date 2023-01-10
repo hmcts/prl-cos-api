@@ -395,7 +395,7 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "500", description = "Internal server error")})
     public ResponseEntity<byte[]> downloadDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                    @RequestHeader("ServiceAuthorization") String serviceAuthorization,
-                                   @PathVariable("documentId") String documentId) throws Exception {
+                                   @PathVariable("documentId") String documentId) throws IOException {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException("Invalid Client"));
         }
