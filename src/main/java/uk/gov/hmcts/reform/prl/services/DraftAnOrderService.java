@@ -8,6 +8,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
@@ -51,6 +55,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_EX740;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_QUALIFIED_LEGAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASE_REVIEW;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PARENT_WITHCARE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_RIGHT_TO_ASK;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_SAFEGUARDING_CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_SAFEGUARING_CAFCASS_CYMRU;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEEDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
@@ -759,4 +769,64 @@ public class DraftAnOrderService {
         List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
         return courtList;
     }
+
+    public static boolean checkDirectionOnIssueOptionsSelected(CaseData caseData) {
+        return !(caseData.getDirectionOnIssue().getDioPreamblesList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioHearingsAndNextStepsList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioCafcassOrCymruList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioLocalAuthorityList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioCourtList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioOtherList().isEmpty());
+    }
+
+    public void populateDirectionOnIssueFields(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+
+        if (!caseData.getDirectionOnIssue().getDioPreamblesList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioPreamblesList().contains(DioPreamblesEnum.rightToAskCourt)) {
+            caseDataUpdated.put("dioRightToAskCourt", DIO_RIGHT_TO_ASK);
+        }
+        if (!caseData.getDirectionOnIssue().getDioHearingsAndNextStepsList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioHearingsAndNextStepsList().contains(
+            DioHearingsAndNextStepsEnum.caseReviewAtSecondGateKeeping)) {
+            caseDataUpdated.put("dioCaseReviewAtSecondGateKeeping", DIO_CASE_REVIEW);
+        }
+        if (!caseData.getDirectionOnIssue().getDioHearingsAndNextStepsList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioHearingsAndNextStepsList().contains(
+            DioHearingsAndNextStepsEnum.updateContactDetails)) {
+            caseDataUpdated.put("dioUpdateContactDetails", DIO_UPDATE_CONTACT_DETAILS);
+        }
+        if (!caseData.getDirectionOnIssue().getDioCafcassOrCymruList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioCafcassOrCymruList().contains(
+            DioCafcassOrCymruEnum.cafcassSafeguarding)) {
+            caseDataUpdated.put("dioCafcassSafeguardingIssue", DIO_SAFEGUARDING_CAFCASS);
+        }
+        if (!caseData.getDirectionOnIssue().getDioCafcassOrCymruList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioCafcassOrCymruList().contains(
+            DioCafcassOrCymruEnum.cafcassCymruSafeguarding)) {
+            caseDataUpdated.put("dioCafcassCymruSafeguardingIssue", DIO_SAFEGUARING_CAFCASS_CYMRU);
+        }
+        if (!caseData.getDirectionOnIssue().getDioOtherList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioOtherList().contains(
+            DioOtherEnum.parentWithCare)) {
+            caseDataUpdated.put(
+                "dioParentWithCare", DIO_PARENT_WITHCARE);
+        }
+
+        List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
+        populateDioCourtDynamicList(courtList, caseDataUpdated);
+
+        log.info("Case data updated map {}", caseDataUpdated);
+    }
+
+    private void populateDioCourtDynamicList(List<DynamicListElement> courtList, Map<String, Object> caseDataUpdated) {
+        DynamicList courtDynamicList =  DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+            .build();
+        caseDataUpdated.put(
+            "dioFhdraCourtDynamicList", courtDynamicList);
+        caseDataUpdated.put(
+            "dioPermissionHearingCourtDynamicList", courtDynamicList);
+        caseDataUpdated.put(
+            "dioTransferApplicationCourtDynamicList", courtDynamicList);
+    }
+
 }
