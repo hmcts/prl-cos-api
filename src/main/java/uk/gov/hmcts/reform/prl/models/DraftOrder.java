@@ -45,7 +45,7 @@ public class DraftOrder {
     private final String justiceLegalAdviserFullName;
     @JsonProperty("magistrateLastName")
     private final List<Element<MagistrateLastName>> magistrateLastName;
-    private final LocalDate dateOrderMade;
+    private final String orderMadeOn;
     private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     private final String recitalsOrPreamble;
     @JsonProperty("orderDirections")
