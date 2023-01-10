@@ -322,9 +322,7 @@ public class CaseDocumentControllerTest {
             caseDetails);
         when(documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 2)).thenReturn(uploadedDocuments);
         //When
-        caseDocumentController
-            .generateCitizenStatementDocument(generateAndUploadDocumentRequest,authToken,s2sToken);
-
+        assertNotNull(caseDocumentController.generateCitizenStatementDocument(generateAndUploadDocumentRequest,authToken,s2sToken));
     }
 
     @Test
