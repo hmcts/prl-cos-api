@@ -87,7 +87,7 @@ public class ServiceOfApplicationEmailService {
         sendEmailToLocalAuthority(caseDetails, caseData);
     }
 
-    private void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) throws Exception {
+    private void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) {
         if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
             for (Element element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
                 String email = element.getValue().toString();
@@ -170,7 +170,7 @@ public class ServiceOfApplicationEmailService {
             .build();
     }
 
-    private EmailTemplateVars buildLocalAuthorityEmail(CaseDetails caseDetails) throws Exception {
+    private EmailTemplateVars buildLocalAuthorityEmail(CaseDetails caseDetails) {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         return LocalAuthorityEmail.builder()
