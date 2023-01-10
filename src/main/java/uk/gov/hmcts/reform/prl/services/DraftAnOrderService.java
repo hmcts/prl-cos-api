@@ -454,6 +454,16 @@ public class DraftAnOrderService {
             .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
             .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
             .appointedGuardianName(caseData.getAppointedGuardianName())
+            .manageOrdersDateOfhearing(caseData.getManageOrders().getManageOrdersDateOfhearing())
+            .manageOrdersFl402CaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
+            .manageOrdersFl402ApplicantRef(caseData.getManageOrders().getManageOrdersFl402ApplicantRef())
+            .manageOrdersFl402Applicant(caseData.getManageOrders().getManageOrdersFl402Applicant())
+            .manageOrdersFl402CourtAddress(caseData.getManageOrders().getManageOrdersFl402CourtAddress())
+            .manageOrdersFl402CourtName(caseData.getManageOrders().getManageOrdersCourtName())
+            .dateOfHearingTime(caseData.getManageOrders().getDateOfHearingTime())
+            .dateOfHearingTimeEstimate(caseData.getManageOrders().getDateOfHearingTimeEstimate())
+            .fl402HearingCourtname(caseData.getManageOrders().getFl402HearingCourtname())
+            .fl402HearingCourtAddress(caseData.getManageOrders().getFl402HearingCourtAddress())
             .build();
     }
 
