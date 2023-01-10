@@ -14,17 +14,18 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
-import uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.HashMap;
@@ -46,6 +47,10 @@ public class CitizenCallbackController extends AbstractCallbackController {
     private final ObjectMapper objectMapper;
 
     private final SystemUserService systemUserService;
+
+    private final ConfidentialityTabService confidentialityTabService;
+
+    private final CaseSummaryTabService caseSummaryTab;
 
     @Autowired
     private DocumentGenService documentGenService;
@@ -76,23 +81,6 @@ public class CitizenCallbackController extends AbstractCallbackController {
         publishEvent(new CaseDataChanged(caseData));
     }
 
-    @PostMapping(path = "/generate-citizen-final-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to refresh the tabs")
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse generateCitizenFinalDocumentOnCaseSubmission(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
-
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        // Generate draft documents and set to casedataupdated..
-        caseDataUpdated.putAll(documentGenService.generateDocumentsForCitizenSubmission(authorisation, caseData));
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
     @PostMapping(path = "/update-citizen-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to refresh the tabs")
     @SecurityRequirement(name = "Bearer Authentication")
@@ -102,6 +90,7 @@ public class CitizenCallbackController extends AbstractCallbackController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         allTabsService.updateAllTabsIncludingConfTab(caseData);
+        citizenEmailService.sendCitizenCaseSubmissionEmail(authorisation, String.valueOf(caseData.getId()));
     }
 
     @PostMapping(path = "/send-citizen-notifications", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

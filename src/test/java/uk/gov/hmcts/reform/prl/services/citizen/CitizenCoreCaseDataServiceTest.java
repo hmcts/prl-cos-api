@@ -18,15 +18,20 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -41,6 +46,10 @@ public class CitizenCoreCaseDataServiceTest {
     private AuthTokenGenerator authTokenGenerator;
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private CaseData caseDataMock;
+
     @InjectMocks
     CitizenCoreCaseDataService citizenCoreCaseDataService;
     private String bearerToken;
@@ -102,6 +111,150 @@ public class CitizenCoreCaseDataServiceTest {
         CaseDetails updatedDetails = citizenCoreCaseDataService.linkDefendant(bearerToken,12345L,caseData,CaseEvent.LINK_CITIZEN);
 
         Assert.assertEquals(caseDetails,updatedDetails);
+    }
+
+    @Test(expected = CoreCaseDataStoreException.class)
+    public void linkCitizenAccountThrowException() throws Exception {
+
+        bearerToken = "Bearer token";
+
+        citizenCoreCaseDataService.linkDefendant(bearerToken,12345L,caseDataMock,CaseEvent.LINK_CITIZEN);
+    }
+
+    @Test
+    public void citizenCoreCaseShouldBeUpdated() {
+
+        UserDetails userDetails  = UserDetails.builder()
+            .id("testUser").roles(Arrays.asList(CITIZEN_ROLE)).build();
+
+        bearerToken = "Bearer token";
+
+        StartEventResponse startEventResponse = StartEventResponse.builder()
+            .token(bearerToken).build();
+        CaseDataContent caseDataContent = caseDataContent(startEventResponse, new HashMap<String, Object>());
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(stringObjectMap).build();
+        when(caseDataMock.toMap(any())).thenReturn(stringObjectMap);
+        when(idamClient.getUserDetails(bearerToken)).thenReturn(userDetails);
+        String serviceAuth = "serviceAuth";
+        EventRequestData eventRequestData = eventRequest(CaseEvent.LINK_CITIZEN, "testUser");
+        when(authTokenGenerator.generate()).thenReturn(serviceAuth);
+        when(coreCaseDataApi.startEventForCitizen(bearerToken, serviceAuth,
+                                                     eventRequestData.getUserId(),
+                                                     eventRequestData.getJurisdictionId(),
+                                                     eventRequestData.getCaseTypeId(),
+                                                     "12345",
+                                                     eventRequestData.getEventId())).thenReturn(startEventResponse);
+        when(coreCaseDataApi.submitEventForCitizen(bearerToken,
+                                                      serviceAuth,
+                                                      eventRequestData.getUserId(),
+                                                      eventRequestData.getJurisdictionId(),
+                                                      eventRequestData.getCaseTypeId(),
+                                                      "12345",
+                                                      eventRequestData.isIgnoreWarning(),
+                                                      caseDataContent)).thenReturn(caseDetails);
+
+        CaseDetails updatedDetails = citizenCoreCaseDataService.updateCase(bearerToken,12345L,caseDataMock,CaseEvent.LINK_CITIZEN);
+
+        Assert.assertEquals(caseDetails,updatedDetails);
+    }
+
+    @Test (expected = CoreCaseDataStoreException.class)
+    public void updateCitizenCoreCaseShouldThrowException() {
+
+        bearerToken = "Bearer token";
+
+        citizenCoreCaseDataService.updateCase(bearerToken,12345L,caseDataMock,CaseEvent.LINK_CITIZEN);
+    }
+
+    @Test
+    public void citizenCoreCaseShouldBeCreatedForCitizen() {
+
+        UserDetails userDetails  = UserDetails.builder()
+            .id("testUser").roles(Arrays.asList(CITIZEN_ROLE)).build();
+
+        bearerToken = "Bearer token";
+
+        StartEventResponse startEventResponse = StartEventResponse.builder()
+            .token(bearerToken).build();
+        CaseDataContent caseDataContent = caseDataContent(startEventResponse, new HashMap<String, Object>());
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(stringObjectMap).build();
+        when(caseDataMock.toMap(any())).thenReturn(stringObjectMap);
+        when(idamClient.getUserDetails(bearerToken)).thenReturn(userDetails);
+        String serviceAuth = "serviceAuth";
+        EventRequestData eventRequestData = eventRequest(CaseEvent.CITIZEN_CASE_CREATE, "testUser");
+        when(authTokenGenerator.generate()).thenReturn(serviceAuth);
+        when(coreCaseDataApi.startForCitizen(bearerToken, serviceAuth,
+                                                  eventRequestData.getUserId(),
+                                                  eventRequestData.getJurisdictionId(),
+                                                  eventRequestData.getCaseTypeId(),
+                                                  eventRequestData.getEventId())).thenReturn(startEventResponse);
+        when(coreCaseDataApi.submitForCitizen(bearerToken,
+                                                   serviceAuth,
+                                                   eventRequestData.getUserId(),
+                                                   eventRequestData.getJurisdictionId(),
+                                                   eventRequestData.getCaseTypeId(),
+                                                   false,
+                                                   caseDataContent)).thenReturn(caseDetails);
+
+        CaseDetails createdCaseDetails = citizenCoreCaseDataService.createCase(bearerToken,caseDataMock);
+
+        Assert.assertEquals(caseDetails,createdCaseDetails);
+    }
+
+    @Test
+    public void citizenCoreCaseShouldBeCreatedForCaseworker() {
+
+        UserDetails userDetails  = UserDetails.builder()
+            .id("testUser").roles(emptyList()).build();
+
+        bearerToken = "Bearer token";
+
+        StartEventResponse startEventResponse = StartEventResponse.builder()
+            .token(bearerToken).build();
+        CaseDataContent caseDataContent = caseDataContent(startEventResponse, new HashMap<String, Object>());
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(stringObjectMap).build();
+        when(caseDataMock.toMap(any())).thenReturn(stringObjectMap);
+        when(idamClient.getUserDetails(bearerToken)).thenReturn(userDetails);
+        String serviceAuth = "serviceAuth";
+        EventRequestData eventRequestData = eventRequest(CaseEvent.CITIZEN_CASE_CREATE, "testUser");
+        when(authTokenGenerator.generate()).thenReturn(serviceAuth);
+        when(coreCaseDataApi.startForCaseworker(bearerToken, serviceAuth,
+                                             eventRequestData.getUserId(),
+                                             eventRequestData.getJurisdictionId(),
+                                             eventRequestData.getCaseTypeId(),
+                                             eventRequestData.getEventId())).thenReturn(startEventResponse);
+        when(coreCaseDataApi.submitForCaseworker(bearerToken,
+                                              serviceAuth,
+                                              eventRequestData.getUserId(),
+                                              eventRequestData.getJurisdictionId(),
+                                              eventRequestData.getCaseTypeId(),
+                                              true,
+                                              caseDataContent)).thenReturn(caseDetails);
+
+        CaseDetails createdCaseDetails = citizenCoreCaseDataService.createCase(bearerToken,caseDataMock);
+
+        Assert.assertEquals(caseDetails,createdCaseDetails);
+    }
+
+    @Test
+    public void shouldGetCitizenCoreCase() {
+
+        bearerToken = "Bearer token";
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(stringObjectMap).build();
+        when(caseDataMock.toMap(any())).thenReturn(stringObjectMap);
+        when(authTokenGenerator.generate()).thenReturn("serviceAuth");
+        when(coreCaseDataApi.getCase(bearerToken,
+                                              "serviceAuth",
+                                     "12345L")).thenReturn(caseDetails);
+
+        CaseDetails retrievedCaseDetails = citizenCoreCaseDataService.getCase(bearerToken,"12345L");
+
+        Assert.assertEquals(caseDetails,retrievedCaseDetails);
     }
 
     private EventRequestData eventRequest(CaseEvent caseEvent, String userId) {

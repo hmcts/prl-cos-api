@@ -117,7 +117,7 @@ public class FeesAndPaymentCitizenController {
         if (!isAuthorized(authorization, serviceAuthorization)) {
             throw (new RuntimeException(LOGGERMESSAGE));
         }
-        log.info("Payment Reference: {} for the Case id :{}", paymentReference,caseId);
+        log.info("Retrieving payment status for the Case id :{}", caseId);
         return paymentRequestService.fetchPaymentStatus(authorization,paymentReference);
 
 

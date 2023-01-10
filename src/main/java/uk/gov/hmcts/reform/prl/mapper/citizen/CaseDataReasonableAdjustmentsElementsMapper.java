@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
+package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper.COMMA_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.enums.PartyEnum.applicant;
 import static uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum.both;
 import static uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum.spoken;
@@ -45,6 +44,7 @@ import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.su
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.therapyAnimal;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.travellingCourtOther;
 import static uk.gov.hmcts.reform.prl.enums.citizen.SpecialArrangementEnum.noSafetyRequirements;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 
 public class CaseDataReasonableAdjustmentsElementsMapper {
 
