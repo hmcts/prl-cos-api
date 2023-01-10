@@ -388,8 +388,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, fl406WelshFile);
                 break;
             case standardDirectionsOrder:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE, "");
-                fieldsMap.put(PrlAppsConstants.FILE_NAME, "");
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
+                break;
+            case directionOnIssue:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
                 break;
             case blankOrderOrDirectionsWithdraw:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
