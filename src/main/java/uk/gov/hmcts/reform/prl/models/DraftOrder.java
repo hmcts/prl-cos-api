@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
@@ -67,6 +69,34 @@ public class DraftOrder {
      */
     @JsonProperty("cafcassOfficeDetails")
     private final String cafcassOfficeDetails;
+
+    /**
+     * N117.
+     */
+    private final String manageOrdersCourtName;
+    @JsonProperty("manageOrdersCourtAddress")
+    private final Address manageOrdersCourtAddress;
+    private final String manageOrdersCaseNo;
+    private final String manageOrdersApplicant;
+    private final String manageOrdersApplicantReference;
+    private final String manageOrdersRespondent;
+    private final String manageOrdersRespondentReference;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate manageOrdersRespondentDob;
+    @JsonProperty("manageOrdersRespondentAddress")
+    private final Address manageOrdersRespondentAddress;
+    private final YesOrNo manageOrdersUnderTakingRepr;
+    private final UnderTakingEnum underTakingSolicitorCounsel;
+    private final String manageOrdersUnderTakingPerson;
+    @JsonProperty("manageOrdersUnderTakingAddress")
+    private final Address manageOrdersUnderTakingAddress;
+    private final String manageOrdersUnderTakingTerms;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate manageOrdersDateOfUnderTaking;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate underTakingDateExpiry;
+    private final String underTakingExpiryTime;
+    private final YesOrNo underTakingFormSign;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
