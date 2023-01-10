@@ -89,8 +89,8 @@ public class ServiceOfApplicationEmailService {
 
     private void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) {
         if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
-            for (Element element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
-                String email = element.getValue().toString();
+            for (Element<String> element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
+                String email = element.getValue();
                 emailService.send(
                     email,
                     EmailTemplateNames.LOCAL_AUTHORITY,
