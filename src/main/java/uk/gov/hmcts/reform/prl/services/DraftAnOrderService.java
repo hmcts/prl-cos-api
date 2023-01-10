@@ -645,7 +645,8 @@ public class DraftAnOrderService {
     }
 
     public static boolean checkStandingOrderOptionsSelected(CaseData caseData) {
-        return !(caseData.getStandardDirectionOrder().getSdoPreamblesList().isEmpty()
+        return !(caseData.getStandardDirectionOrder() != null
+            && caseData.getStandardDirectionOrder().getSdoPreamblesList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoLocalAuthorityList().isEmpty()
