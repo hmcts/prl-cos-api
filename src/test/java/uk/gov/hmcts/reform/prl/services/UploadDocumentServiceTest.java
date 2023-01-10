@@ -65,6 +65,34 @@ public class UploadDocumentServiceTest {
     }
 
     @Test
+    public void uploadCitizenDocumentSuccess() {
+        byte[] pdf = new byte[]{1,2,3,4,5};
+        MultipartFile file = new InMemoryMultipartFile("files", FILE_NAME, CONTENT_TYPE, pdf);
+        Document document = testDocument();
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        when(authTokenGenerator.generate()).thenReturn("s2s");
+        when(caseDocumentClient.uploadDocuments(AUTH, "s2s", CASE_TYPE, JURISDICTION, newArrayList(file))).thenReturn(uploadResponse);
+        UploadedDocumentRequest uploadDocumentRequest = UploadedDocumentRequest
+            .builder()
+            .parentDocumentType("parentDocumentType")
+            .partyId("partyId")
+            .documentType("documentType")
+            .isApplicant("applicant")
+            .partyName("partyName")
+            .documentRequestedByCourt(YesOrNo.Yes)
+            .files(newArrayList(file))
+            .build();
+        UploadedDocuments uploadedDocuments = uploadDocumentService.uploadCitizenDocument(AUTH, uploadDocumentRequest);
+        assertNotNull(uploadedDocuments.getDocumentDetails());
+
+    }
+
+    @Test
+    public void uploadCitizenDocumentFailure() {
+        assertThrows(ResponseStatusException.class, () -> uploadDocumentService.uploadCitizenDocument(AUTH, null));
+    }
+
+    @Test
     public void uploadDocumentFailure() {
         byte[] pdf = new byte[]{1,2,3,4,5};
         MultipartFile file = new InMemoryMultipartFile("files", FILE_NAME, CONTENT_TYPE, pdf);
