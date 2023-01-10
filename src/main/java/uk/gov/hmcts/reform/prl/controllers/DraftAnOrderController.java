@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -74,7 +73,6 @@ public class DraftAnOrderController {
             .data(caseData.toBuilder()
                       .selectedOrder(caseData.getCreateSelectOrderOptions() != null
                                          ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
-                      .dateOrderMade(LocalDate.now())
                       .build().toMap(CcdObjectMapper.getObjectMapper())).build();
 
     }

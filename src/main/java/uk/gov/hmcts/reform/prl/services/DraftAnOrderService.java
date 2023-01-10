@@ -94,6 +94,7 @@ public class DraftAnOrderService {
                               .dateCreated(dateTime.now())
                               .status("Draft").build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
+            .dateOrderMade(caseData.getDateOrderMade())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
             .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
             .judgeOrMagistratesLastName(caseData.getJudgeOrMagistratesLastName())
@@ -376,6 +377,7 @@ public class DraftAnOrderService {
         log.info("order type " + selectedOrder.getOrderType());
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
+        caseDataMap.put("dateOrderMade", selectedOrder.getDateOrderMade());
         caseDataMap.put("wasTheOrderApprovedAtHearing", selectedOrder.getWasTheOrderApprovedAtHearing());
         caseDataMap.put("judgeOrMagistrateTitle", selectedOrder.getJudgeOrMagistrateTitle());
         caseDataMap.put("judgeOrMagistratesLastName", selectedOrder.getJudgeOrMagistratesLastName());
@@ -385,7 +387,11 @@ public class DraftAnOrderService {
         caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
         caseDataMap.put("furtherDirectionsIfRequired", selectedOrder.getFurtherDirectionsIfRequired());
-        log.info("Common fields map {}", caseDataMap);
+        caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
+        caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
+        caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
+        caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
+        log.info("Case typ of application {}", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
 
@@ -475,6 +481,7 @@ public class DraftAnOrderService {
             .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
             .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .parentName(caseData.getManageOrders().getParentName())
+            .dateOrderMade(caseData.getDateOrderMade())
             .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
             .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
             .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
@@ -547,6 +554,7 @@ public class DraftAnOrderService {
         } else {
             caseData = caseData.toBuilder()
                 .appointedGuardianName(caseData.getAppointedGuardianName())
+                .dateOrderMade(caseData.getDateOrderMade())
                 .manageOrders(ManageOrders.builder()
                                   .parentName(caseData.getManageOrders().getParentName())
                                   .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
@@ -558,6 +566,7 @@ public class DraftAnOrderService {
                                   .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
                                   .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                                   .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
+                                  .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
                                   .build()).build();
         }
         log.info("Case data after prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());

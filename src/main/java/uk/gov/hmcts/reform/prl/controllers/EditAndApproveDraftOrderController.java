@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -89,7 +90,9 @@ public class EditAndApproveDraftOrderController {
             caseData.getJudgeDirectionsToAdmin()
         );
 
-        if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")) {
+        if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
+            && WhatToDoWithOrderEnum.finalizeSaveToServeLater
+            .equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
             caseDataUpdated.putAll(draftAnOrderService.removeDraftOrderAndAddToFinalOrder(authorisation, caseData));
         } else {
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
@@ -141,8 +144,15 @@ public class EditAndApproveDraftOrderController {
             CaseData.class
         );
         log.info("Case data {}", caseData);
+        Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(caseData);
+        String orderStatus = (String) response.remove("status");
+        log.info("** Order status {}", orderStatus);
+        if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
+            && !("Judge reviewed".equalsIgnoreCase(orderStatus))) {
+            return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("Selected order is not reviewed by Judge.")).build();
+        }
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(draftAnOrderService.populateCommonDraftOrderFields(caseData)).build();
+            .data(response).build();
     }
     /*@PostMapping(path = "/populate-draft-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
