@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioNextStepsAllocationEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioRemoteHearingEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioUrgentHearingRefusedCheckListEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioWithoutNoticeFirstHearingCheckListEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
@@ -45,21 +47,28 @@ public class DirectionOnIssue {
 
     @JsonProperty("dioRightToAskCourt")
     private final String dioRightToAskCourt;
-
+    @JsonProperty("dioPartiesRaisedAbuseCollection")
     private final List<Element<PartyNameDA>> dioPartiesRaisedAbuseCollection;
-    @JsonProperty("dioNextStepsAfterSecondGK")
-    private final String dioNextStepsAfterSecondGK;
+    @JsonProperty("dioCaseReviewAtSecondGateKeeping")
+    private final String dioCaseReviewAtSecondGateKeeping;
     @JsonProperty("dioNextStepsAllocationTo")
     private final DioNextStepsAllocationEnum dioNextStepsAllocationTo;
+    @JsonProperty("dioApplicationIsReservedTo")
+    private final String dioApplicationIsReservedTo;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
-    private final LocalDateTime dioUrgentHearingDate;
-    @JsonProperty("dioUrgentHearingTimeEstimate")
-    private final String dioUrgentHearingTimeEstimate;
-    private final DynamicList dioUrgentHearingCourtDynamicList;
+    private final LocalDateTime dioPermissionHearingOn;
+    @JsonProperty("dioPermissionHearingTimeEstimate")
+    private final String dioPermissionHearingTimeEstimate;
+    @JsonProperty("dioPermissionHearingCourtDynamicList")
+    private final DynamicList dioPermissionHearingCourtDynamicList;
+    @JsonProperty("dioPermissionHearingBeforeAList")
+    private final DioBeforeAEnum dioPermissionHearingBeforeAList;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
+    private final LocalDateTime dioUrgentFirstHearingDate;
     @JsonProperty("dioHearingUrgentCheckList")
     private final List<DioHearingUrgentCheckListEnum> dioHearingUrgentCheckList;
-    @JsonProperty("dioHearingUrgentDetails")
-    private final String dioHearingUrgentDetails;
+    @JsonProperty("dioFirstHearingUrgencyDetails")
+    private final String dioFirstHearingUrgencyDetails;
     @JsonProperty("dioHearingUrgentCourtConsider")
     private final String dioHearingUrgentCourtConsider;
     @JsonProperty("dioHearingUrgentTimeShortened")
@@ -68,8 +77,10 @@ public class DirectionOnIssue {
     private final LocalDate dioHearingUrgentMustBeServedBy;
     @JsonProperty("dioHearingUrgentByWayOf")
     private final DioRemoteHearingEnum dioHearingUrgentByWayOf;
-    @JsonProperty("dioHearingNotNeeded")
-    private final String dioHearingNotNeeded;
+    @JsonProperty("dioUrgentHearingRefusedCheckList")
+    private final List<DioUrgentHearingRefusedCheckListEnum> dioUrgentHearingRefusedCheckList;
+    @JsonProperty("dioHearingUrgencyRefusedDetails")
+    private final String dioHearingUrgencyRefusedDetails;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private final LocalDateTime dioFhdraStartDateTime;
     private final DynamicList dioFhdraCourtDynamicList;
@@ -84,12 +95,6 @@ public class DirectionOnIssue {
 
     @JsonProperty("dioMiamAttendingPerson")
     private final String dioMiamAttendingPerson;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
-    private final LocalDateTime dioPermissionHearingOn;
-    @JsonProperty("dioPermissionHearingTimeEstimate")
-    private final String dioPermissionHearingTimeEstimate;
-    @JsonProperty("dioPermissionHearingBeforeAList")
-    private final DioBeforeAEnum dioPermissionHearingBeforeAList;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private final LocalDateTime dioDirectionsDraStartDateAndTime;
@@ -99,64 +104,11 @@ public class DirectionOnIssue {
     @JsonProperty("dioDirectionsDraHearingByWayOf")
     private final DioRemoteHearingEnum dioDirectionsDraHearingByWayOf;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
-    private final LocalDateTime dioSettlementConferenceDateTime;
-    @JsonProperty("dioSettlementConferenceTimeEstimate")
-    private final String dioSettlementConferenceTimeEstimate;
-    private final DynamicList dioSettlementConferenceCourtDynamicList;
-    @JsonProperty("dioSettlementConferenceByWayOf")
-    private final DioRemoteHearingEnum dioSettlementConferenceByWayOf;
-    @JsonProperty("dioJoiningInstructionsForRH")
-    private final String dioJoiningInstructionsForRH;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate dioAllegationsDeadlineDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate dioWrittenResponseDeadlineDate;
-    @JsonProperty("dioHearingMaximumPages")
-    private final String dioHearingMaximumPages;
-    @JsonProperty("dioUpdateContactDetails")
-    private final String dioUpdateContactDetails;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate dioCafcassFileAndServe;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate dioCafcassCymruFileAndServe;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate dioNewPartnersToCafcass;
-    @JsonProperty("dioNameOfCouncil")
-    private final String dioNameOfCouncil;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate dioCafcassCymruReportSentByDate;
-    @JsonProperty("dioLocalAuthorityName")
-    private final String dioLocalAuthorityName;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate dioLocalAuthorityReportSubmitByDate;
-    private final DynamicList dioTransferApplicationCourtDynamicList;
-    @JsonProperty("dioTransferApplicationSpecificReason")
-    private final String dioTransferApplicationSpecificReason;
-    private final DynamicList dioCrossExaminationCourtDynamicList;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
-    private final LocalDateTime dioCrossExaminationStartDateTime;
-    @JsonProperty("dioCrossExaminationCourtHavingHeard")
-    private final String dioCrossExaminationCourtHavingHeard;
-    @JsonProperty("dioCrossExaminationEx740")
-    private final String dioCrossExaminationEx740;
-    @JsonProperty("dioCrossExaminationQualifiedLegal")
-    private final String dioCrossExaminationQualifiedLegal;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate dioWitnessStatementsDeadlineDate;
-    @JsonProperty("dioWitnessStatementsMaximumPages")
-    private final String dioWitnessStatementsMaximumPages;
-    @JsonProperty("dioSpecifiedDocuments")
-    private final String dioSpecifiedDocuments;
-    private final DynamicList dioInstructionsFilingPartiesDynamicList;
-    @JsonProperty("dioSpipAttendance")
-    private final String dioSpipAttendance;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate dioHospitalRecordsDeadlineDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate dioLetterFromGpDeadlineDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate dioLetterFromSchoolDeadlineDate;
+    @JsonProperty("dioWithoutNoticeFirstHearingCheckList")
+    private final List<DioWithoutNoticeFirstHearingCheckListEnum> dioWithoutNoticeFirstHearingCheckList;
+    @JsonProperty("dioWithoutNoticeFirstHearingDetails")
+    private final String dioWithoutNoticeFirstHearingDetails;
+
     @JsonProperty("dioParentWithCare")
     private final String dioParentWithCare;
 }
