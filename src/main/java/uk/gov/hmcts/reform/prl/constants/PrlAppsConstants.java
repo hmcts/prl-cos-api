@@ -177,4 +177,6 @@ public class PrlAppsConstants {
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
+    public static final String ENGDOCGEN = "isEngDocGen";
+
 }
