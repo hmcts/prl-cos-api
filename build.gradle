@@ -599,3 +599,30 @@ pact {
     version = project.pactVersion
   }
 }
+
+task loadEnvSecrets() {
+  doLast {
+    if (!project.file('./.aat-env').exists()) {
+      new ByteArrayOutputStream().withStream { os ->
+        exec {
+          commandLine 'az', 'keyvault', 'secret', 'show', '--vault-name', 'prl-aat', '-o', 'tsv', '--query', 'value', '--name', 'prl-cos-cft-lib-local-config'
+          standardOutput = os
+        }
+        project.file('./.aat-env').write(new String(os.toString().replace('\n', '').decodeBase64(), java.nio.charset.StandardCharsets.UTF_8))
+      }
+    }
+  }
+}
+
+
+bootWithCCD {
+  dependsOn(loadEnvSecrets)
+  doFirst() {
+    project.file('./.aat-env').readLines().each() {
+      def index = it.indexOf("=")
+      def key = it.substring(0, index)
+      def value = it.substring(index + 1)
+      environment key, value
+    }
+  }
+}
