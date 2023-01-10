@@ -349,7 +349,7 @@ public class DraftAnOrderService {
         caseDataMap.put("manageOrdersFl402CaseNo",selectedOrder.getManageOrdersFl402CaseNo());
         caseDataMap.put("manageOrdersFl402Applicant",selectedOrder.getManageOrdersFl402Applicant());
         caseDataMap.put("manageOrdersFl402ApplicantRef",selectedOrder.getManageOrdersFl402ApplicantRef());
-        caseDataMap.put("fl402HearingCourtname",selectedOrder.getManageOrdersFl402CourtName());
+        caseDataMap.put("fl402HearingCourtname",selectedOrder.getFl402HearingCourtname());
         caseDataMap.put("fl402HearingCourtAddress",selectedOrder.getFl402HearingCourtAddress());
         caseDataMap.put("manageOrdersDateOfhearing",selectedOrder.getManageOrdersDateOfhearing());
         caseDataMap.put("dateOfHearingTime",selectedOrder.getDateOfHearingTime());
