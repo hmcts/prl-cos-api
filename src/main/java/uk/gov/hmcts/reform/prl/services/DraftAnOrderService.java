@@ -9,11 +9,18 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -24,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.PartiesListGenerator;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -41,7 +49,18 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_EX740;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_QUALIFIED_LEGAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEEDED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFE_GUARDING_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -57,6 +76,8 @@ public class DraftAnOrderService {
     private final ManageOrderService manageOrderService;
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
+    private final LocationRefDataService locationRefDataService;
+    private final PartiesListGenerator partiesListGenerator;
 
     private static final String NON_MOLESTATION_ORDER = "draftAnOrder/non-molestation-order.html";
     private static final String SPECIAL_GUARDIANSHIP_ORDER = "draftAnOrder/special-guardianship-c43.html";
@@ -571,5 +592,131 @@ public class DraftAnOrderService {
         }
         log.info("Case data after prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         return caseData;
+    }
+
+    public static boolean checkStandingOrderOptionsSelected(CaseData caseData) {
+        return !(caseData.getStandardDirectionOrder().getSdoPreamblesList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoLocalAuthorityList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty());
+    }
+
+    public void populateStandardDirectionOrderFields(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (!caseData.getStandardDirectionOrder().getSdoPreamblesList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoPreamblesList().contains(SdoPreamblesEnum.rightToAskCourt)) {
+            caseDataUpdated.put(
+                "sdoRightToAskCourt",
+                RIGHT_TO_ASK_COURT
+            );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
+            SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping)) {
+            caseDataUpdated.put(
+                "sdoNextStepsAfterSecondGK",
+                SAFE_GUARDING_LETTER
+            );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
+            SdoHearingsAndNextStepsEnum.hearingNotNeeded)) {
+            caseDataUpdated.put(
+                "sdoHearingNotNeeded",
+                HEARING_NOT_NEEDED
+            );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
+            SdoHearingsAndNextStepsEnum.hearingNotNeeded)) {
+            caseDataUpdated.put(
+                "sdoParticipationDirections",
+                PARTICIPATION_DIRECTIONS
+            );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
+            SdoHearingsAndNextStepsEnum.joiningInstructions)) {
+            caseDataUpdated.put(
+                "sdoJoiningInstructionsForRH",
+                JOINING_INSTRUCTIONS
+            );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
+            SdoHearingsAndNextStepsEnum.updateContactDetails)) {
+            caseDataUpdated.put(
+                "sdoUpdateContactDetails",
+                UPDATE_CONTACT_DETAILS
+            );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
+            SdoCourtEnum.crossExaminationEx740)) {
+            caseDataUpdated.put(
+                "sdoCrossExaminationEx740",
+                CROSS_EXAMINATION_EX740
+            );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
+            SdoCourtEnum.crossExaminationQualifiedLegal)) {
+            caseDataUpdated.put(
+                "sdoCrossExaminationQualifiedLegal",
+                CROSS_EXAMINATION_QUALIFIED_LEGAL
+            );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
+            SdoDocumentationAndEvidenceEnum.specifiedDocuments)) {
+            caseDataUpdated.put(
+                "sdoSpecifiedDocuments",
+                SPECIFIED_DOCUMENTS
+            );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
+            SdoDocumentationAndEvidenceEnum.spipAttendance)) {
+            caseDataUpdated.put(
+                "sdoSpipAttendance",
+                SPIP_ATTENDANCE
+            );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoOtherList().contains(
+            SdoOtherEnum.parentWithCare)) {
+            caseDataUpdated.put(
+                "sdoParentWithCare",
+                PARENT_WITHCARE
+            );
+        }
+        List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
+        populateCourtDynamicList(courtList, caseDataUpdated);
+        DynamicList partiesList = partiesListGenerator.buildPartiesList(caseData, courtList);
+        caseDataUpdated.put("sdoInstructionsFilingPartiesDynamicList", partiesList);
+    }
+
+    private void populateCourtDynamicList(List<DynamicListElement> courtList, Map<String, Object> caseDataUpdated) {
+        DynamicList courtDynamicList =  DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+            .build();
+        caseDataUpdated.put(
+            "sdoUrgentHearingCourtDynamicList", courtDynamicList);
+        caseDataUpdated.put(
+            "sdoFhdraCourtDynamicList", courtDynamicList);
+        caseDataUpdated.put(
+            "sdoDirectionsDraCourtDynamicList", courtDynamicList);
+        caseDataUpdated.put(
+            "sdoSettlementConferenceCourtDynamicList", courtDynamicList);
+        caseDataUpdated.put(
+            "sdoTransferApplicationCourtDynamicList", courtDynamicList);
+        caseDataUpdated.put(
+            "sdoCrossExaminationCourtDynamicList", courtDynamicList);
+    }
+
+    private List<DynamicListElement> getCourtDynamicList(String authorisation) {
+        List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
+        return courtList;
     }
 }
