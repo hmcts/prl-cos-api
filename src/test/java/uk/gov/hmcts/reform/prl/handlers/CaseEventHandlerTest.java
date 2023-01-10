@@ -12,11 +12,7 @@ import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
-import uk.gov.hmcts.reform.prl.services.RespondentSolicitorTaskListRenderer;
-import uk.gov.hmcts.reform.prl.services.TaskErrorService;
-import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
-import uk.gov.hmcts.reform.prl.services.TaskListService;
+import uk.gov.hmcts.reform.prl.services.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,11 +69,6 @@ public class CaseEventHandlerTest {
             .build();
         final CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
 
-        final List<Event> c100Events = List.of(
-            CASE_NAME,
-            MIAM
-        );
-
         List<EventValidationErrors> errors = new ArrayList<>();
 
         EventValidationErrors error1 = EventValidationErrors.builder()
@@ -106,8 +97,6 @@ public class CaseEventHandlerTest {
         final String c100renderedTaskList = "<h1>Case Name</h1><h2>Miam</h2>";
 
         final String respondentTaskList = "<h1>Case Name</h1><h2>Miam</h2>";
-
-        final List<EventValidationErrors> eventsErrors = Collections.emptyList();
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
         when(taskListService.getRespondentSolicitorTasks()).thenReturn(respondentTask);
