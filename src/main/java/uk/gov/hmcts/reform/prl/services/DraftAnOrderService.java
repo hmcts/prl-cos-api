@@ -131,6 +131,16 @@ public class DraftAnOrderService {
             .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
             .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
             .appointedGuardianName(caseData.getAppointedGuardianName())
+            .fl402HearingCourtAddress(caseData.getManageOrders().getFl402HearingCourtAddress())
+            .fl402HearingCourtname(caseData.getManageOrders().getFl402HearingCourtname())
+            .manageOrdersFl402CourtName(caseData.getManageOrders().getManageOrdersFl402CourtName())
+            .manageOrdersFl402Applicant(caseData.getManageOrders().getManageOrdersFl402Applicant())
+            .manageOrdersFl402CaseNo(caseData.getManageOrders().getManageOrdersFl402CaseNo())
+            .manageOrdersFl402CourtAddress(caseData.getManageOrders().getManageOrdersFl402CourtAddress())
+            .manageOrdersFl402ApplicantRef(caseData.getManageOrders().getManageOrdersFl402ApplicantRef())
+            .dateOfHearingTime(caseData.getManageOrders().getDateOfHearingTime())
+            .dateOfHearingTimeEstimate(caseData.getManageOrders().getDateOfHearingTimeEstimate())
+            .manageOrdersDateOfhearing(caseData.getManageOrders().getManageOrdersDateOfhearing())
             .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
             .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
             .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
@@ -371,6 +381,17 @@ public class DraftAnOrderService {
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
+        caseDataMap.put("appointedGuardianName", selectedOrder.getAppointedGuardianName());
+        caseDataMap.put("manageOrdersFl402CourtName",selectedOrder.getManageOrdersFl402CourtName());
+        caseDataMap.put("manageOrdersFl402CourtAddress",selectedOrder.getManageOrdersFl402CourtAddress());
+        caseDataMap.put("manageOrdersFl402CaseNo",selectedOrder.getManageOrdersFl402CaseNo());
+        caseDataMap.put("manageOrdersFl402Applicant",selectedOrder.getManageOrdersFl402Applicant());
+        caseDataMap.put("manageOrdersFl402ApplicantRef",selectedOrder.getManageOrdersFl402ApplicantRef());
+        caseDataMap.put("fl402HearingCourtname",selectedOrder.getFl402HearingCourtname());
+        caseDataMap.put("fl402HearingCourtAddress",selectedOrder.getFl402HearingCourtAddress());
+        caseDataMap.put("manageOrdersDateOfhearing",selectedOrder.getManageOrdersDateOfhearing());
+        caseDataMap.put("dateOfHearingTime",selectedOrder.getDateOfHearingTime());
+        caseDataMap.put("dateOfHearingTimeEstimate",selectedOrder.getDateOfHearingTimeEstimate());
         caseDataMap.put("manageOrdersCourtName", selectedOrder.getManageOrdersCourtName());
         caseDataMap.put("manageOrdersCourtAddress", selectedOrder.getManageOrdersCourtAddress());
         caseDataMap.put("manageOrdersCaseNo", selectedOrder.getManageOrdersCaseNo());
@@ -507,6 +528,16 @@ public class DraftAnOrderService {
             .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
             .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
             .appointedGuardianName(caseData.getAppointedGuardianName())
+            .manageOrdersDateOfhearing(caseData.getManageOrders().getManageOrdersDateOfhearing())
+            .manageOrdersFl402CaseNo(caseData.getManageOrders().getManageOrdersFl402CaseNo())
+            .manageOrdersFl402ApplicantRef(caseData.getManageOrders().getManageOrdersFl402ApplicantRef())
+            .manageOrdersFl402Applicant(caseData.getManageOrders().getManageOrdersFl402Applicant())
+            .manageOrdersFl402CourtAddress(caseData.getManageOrders().getManageOrdersFl402CourtAddress())
+            .manageOrdersFl402CourtName(caseData.getManageOrders().getManageOrdersFl402CourtName())
+            .dateOfHearingTime(caseData.getManageOrders().getDateOfHearingTime())
+            .dateOfHearingTimeEstimate(caseData.getManageOrders().getDateOfHearingTimeEstimate())
+            .fl402HearingCourtname(caseData.getManageOrders().getFl402HearingCourtname())
+            .fl402HearingCourtAddress(caseData.getManageOrders().getFl402HearingCourtAddress())
             .build();
     }
 
@@ -523,16 +554,15 @@ public class DraftAnOrderService {
         //log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         if (!C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
-            if (null != fl404CustomFields) {
+            if (fl404CustomFields != null) {
                 fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
                         PrlAppsConstants.FORMAT,
                         caseData.getApplicantsFL401().getFirstName(),
                         caseData.getApplicantsFL401().getLastName()
                     ))
-                    .fl404bRespondentName(String.format(
-                        PrlAppsConstants.FORMAT,
-                        caseData.getRespondentsFL401().getFirstName(),
-                        caseData.getRespondentsFL401().getLastName()
+                    .fl404bRespondentName(String.format(PrlAppsConstants.FORMAT,
+                                                        caseData.getRespondentsFL401().getFirstName(),
+                                                        caseData.getRespondentsFL401().getLastName()
                     )).build();
                 if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
                     fl404CustomFields = fl404CustomFields.toBuilder()
@@ -553,6 +583,16 @@ public class DraftAnOrderService {
                                   .orderDirections(caseData.getManageOrders().getOrderDirections())
                                   .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
                                   .fl404CustomFields(fl404CustomFields)
+                                  .manageOrdersFl402CourtName(caseData.getManageOrders().getManageOrdersFl402CourtName())
+                                  .manageOrdersFl402CourtAddress(caseData.getManageOrders().getManageOrdersFl402CourtAddress())
+                                  .manageOrdersFl402CaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
+                                  .manageOrdersFl402Applicant(caseData.getManageOrders().getManageOrdersFl402Applicant())
+                                  .manageOrdersFl402ApplicantRef(caseData.getManageOrders().getManageOrdersFl402ApplicantRef())
+                                  .fl402HearingCourtname(caseData.getManageOrders().getFl402HearingCourtname())
+                                  .fl402HearingCourtAddress(caseData.getManageOrders().getFl402HearingCourtAddress())
+                                  .manageOrdersDateOfhearing(caseData.getManageOrders().getManageOrdersDateOfhearing())
+                                  .dateOfHearingTime(caseData.getManageOrders().getDateOfHearingTime())
+                                  .dateOfHearingTimeEstimate(caseData.getManageOrders().getDateOfHearingTimeEstimate())
                                   .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
                                   .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
                                   .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())

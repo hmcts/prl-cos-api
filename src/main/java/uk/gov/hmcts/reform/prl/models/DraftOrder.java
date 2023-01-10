@@ -46,6 +46,7 @@ public class DraftOrder {
     private final String justiceLegalAdviserFullName;
     @JsonProperty("magistrateLastName")
     private final List<Element<MagistrateLastName>> magistrateLastName;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
     private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     private final String recitalsOrPreamble;
@@ -55,6 +56,17 @@ public class DraftOrder {
     private final String furtherDirectionsIfRequired;
     private final String parentName;
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
+    private final String manageOrdersFl402CourtName;
+    private final Address manageOrdersFl402CourtAddress;
+    private final String manageOrdersFl402CaseNo;
+    private final String manageOrdersFl402Applicant;
+    private final String manageOrdersFl402ApplicantRef;
+    private final String fl402HearingCourtname;
+    private final Address fl402HearingCourtAddress;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate manageOrdersDateOfhearing;
+    private final String dateOfHearingTime;
+    private final String dateOfHearingTimeEstimate;
 
     /**
      * C43.

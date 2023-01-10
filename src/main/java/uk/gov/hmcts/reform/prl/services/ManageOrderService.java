@@ -892,6 +892,11 @@ public class ManageOrderService {
                 caseData.getApplicantsFL401().getRepresentativeFirstName(),
                 caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
+            .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
+            .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+            .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
+            .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
+            .orderDirections(caseData.getManageOrders().getOrderDirections())
             .build();
         log.info("Court name after FL402 order set{}", orderData.getManageOrdersFl402CourtName());
 
