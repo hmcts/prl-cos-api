@@ -181,4 +181,8 @@ public class PrlAppsConstants {
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
+    public static final String APPLICANT_CASE_NAME = "applicantCaseName";
+
+    public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
+    public static final String ENGDOCGEN = "isEngDocGen";
 }
