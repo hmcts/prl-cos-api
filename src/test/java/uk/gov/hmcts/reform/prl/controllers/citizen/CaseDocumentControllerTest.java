@@ -373,8 +373,7 @@ public class CaseDocumentControllerTest {
             caseDetails);
         when(uploadService.uploadCitizenDocument(
             authToken,
-            uploadedDocumentRequest,
-            "1656350492135029"
+            uploadedDocumentRequest
         )).thenReturn(uploadedDocuments);
         StartEventResponse startEventResponse = StartEventResponse.builder().eventId("")
             .token("")
