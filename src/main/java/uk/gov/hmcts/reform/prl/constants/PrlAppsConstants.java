@@ -256,35 +256,51 @@ public class PrlAppsConstants {
         + "legal adviser will review the file and the safeguarding letter from Cafcass/ Cafcass Cymru and decide what "
         + "type of hearing/further directions are needed to deal with the issues in the case. A copy of the directions "
         + "will be sent to the parties following the case management review with details of the next hearing and any directions. ";
-    public static final String DIO_UPDATE_CONTACT_DETAILS = "The parties must, if their contact details have changed or are missing "
-        + "from the application, contact Cafcass or Cafcass Cymru quoting the case number at "
-        + "[CafcassCymruCAT@gov.wales / privatelawapplications@cafcass.gov.uk] The email must include telephone contact details "
-        + "and email address so that they may be contacted for safeguarding purposes. Alternatively if any party is managing their "
-        + "case using the online dashboard, they can update their contact details on the dashboard and do not have to "
-        + "also contact Cafcass or Cafcass Cymru.";
+    public static final String DIO_UPDATE_CONTACT_DETAILS = "The parties must, if their contact details have changed or "
+        + "are missing from the application, contact Cafcass or Cafcass Cymru quoting the case number at "
+        + "[CafcassCymruCAT@gov.wales / privatelawapplications@cafcass.gov.uk] The email must include telephone"
+        + " contact details and email address so that they may be contacted for safeguarding purposes.  "
+        + System.lineSeparator()
+        + "Alternatively if any party is managing their case using the online dashboard, they can update "
+        + "their contact details on the dashboard and do not have to also contact Cafcass or Cafcass Cymru.";
     public static final String DIO_SAFEGUARDING_CAFCASS = "The Court directs that Cafcass shall carry out safeguarding "
         + "checks in relation to the child(ren) and parties and file a safeguarding letter within "
-        + "[number of working days)/by(insert date or time period]  "
-        + "of receipt of this order. A copy of the letter shall also be served on the parties unless, in the opinion of the letter's author, "
-        + "this would create a risk of harm to a party or child. A copy of this order to be served on Cafcass The court has asked Cafcass "
-        + "to undertake some enquires to see if there are risk issues about a child that the court needs to consider when making any decisions. "
-        + "Cafcass will contact you by telephone to discuss your child's circumstances and talk about any such risk issues, "
-        + "before writing a short safeguarding letter to the court to provide further advice.  Cafcass can advise on risk "
-        + "issues only at this stage and so may not be able to discuss all aspects of your case, and they won't be able to talk to your "
-        + "child(ren) at this stage. More information about Cafcass and the work they do can be found on their website:\n"
+        + "[number of working days)/by(insert date or time period]  of receipt of this order.  "
+        + "A copy of the letter shall also be served on the parties unless, in the opinion of the "
+        + "letter's author, this would create a risk of harm to a party or child.\n"
+        + System.lineSeparator()
+        + "A copy of this order to be served on Cafcass\n"
+        + System.lineSeparator()
+        + "The court has asked Cafcass to undertake some enquires to see if there are risk issues "
+        + "about a child that the court needs to consider when making any decisions. Cafcass will "
+        + "contact you by telephone to discuss your child's circumstances and talk about any such risk issues, "
+        + "before writing a short safeguarding letter to the court to provide further advice.  "
+        + "Cafcass can advise on risk issues only at this stage and so may not be able to discuss all aspects of "
+        + "your case, and they won't be able to talk to your child(ren) at this stage.\n"
+        + System.lineSeparator()
+        + "More information about Cafcass and the work they do can be found on their website:\n"
+        + System.lineSeparator()
         + "www.cafcass.gov.uk";
-    public static final String DIO_SAFEGUARING_CAFCASS_CYMRU = "The Court directs that Cafcass Cymru shall carry out safeguarding checks "
-        + "in relation to the child(ren) and parties and file a safeguarding letter within [number working days})"
-        + "/by(insert date or time period] of receipt of this order.  A copy of the letter shall also be served on "
-        + "the parties unless, in the opinion of the letter's author, this would create a risk of harm to a party or "
-        + "child.A copy of this order to be served on Cafcass The court has asked Cafcass to undertake some enquires "
-        + "to see if there are risk issues about a child that the court needs to consider when making any decisions. "
-        + "Cafcass will contact you by telephone to discuss your child's circumstances and talk about any such risk issues, "
-        + "before writing a short safeguarding letter to the court to provide further advice.  Cafcass can advise on risk "
-        + "issues only at this stage and so may not be able to discuss all aspects of your case, and they won't be able to "
-        + "talk to your child(ren) at this stage. More information about Cafcass and the work they do can be found on their website:"
+    public static final String DIO_SAFEGUARING_CAFCASS_CYMRU = "The Court directs that Cafcass Cymru shall carry "
+        + "out safeguarding checks in relation to the child(ren) and parties and file a safeguarding letter within "
+        + "[number working days})/by(insert date or time period] of receipt of this order.  A copy of the letter "
+        + "shall also be served on the parties unless, in the opinion of the letter's author, this would create a "
+        + "risk of harm to a party or child.\n"
+        + System.lineSeparator()
+        + "A copy of this order to be served on Cafcass\n"
+        + System.lineSeparator()
+        + "The court has asked Cafcass to undertake some enquires to see if there are risk issues about a child "
+        + "that the court needs to consider when making any decisions. Cafcass will contact you by telephone to "
+        + "discuss your child's circumstances and talk about any such risk issues, before writing a short safeguarding "
+        + "letter to the court to provide further advice.  Cafcass can advise on risk issues only at this stage and so "
+        + "may not be able to discuss all aspects of your case, and they won't be able to talk to your child(ren) at this stage.\n"
+        + System.lineSeparator()
+        + "More information about Cafcass and the work they do can be found on their website:\n"
+        + System.lineSeparator()
         + "www.cafcass.gov.uk";
-    public static final String DIO_PARENT_WITHCARE = "The parent with care lives outside this Court’s area and may require "
-        + "proceedings to be transferred to their local Family Court to accommodate childcare responsibilities.\n"
+    public static final String DIO_PARENT_WITHCARE = " The parent with care lives outside this Court’s area and may "
+        + "require proceedings to be transferred to their local Family Court to accommodate childcare responsibilities.\n"
+        + System.lineSeparator()
         + "Any application for transfer should be made to the Court in writing within 5 working days of receipt of these directions.";
+
 }
