@@ -207,8 +207,6 @@ public class FL401SubmitApplicationController {
 
         try {
             solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
-            //caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
-
             caseData = caseData.toBuilder()
                 .isNotificationSent("Yes")
                 .build();
