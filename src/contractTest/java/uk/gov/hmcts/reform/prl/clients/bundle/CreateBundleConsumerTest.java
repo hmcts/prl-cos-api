@@ -19,6 +19,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.prl.clients.BundleApiClient;
 import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
+import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
@@ -32,7 +34,12 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1Details;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolderDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingData;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +68,13 @@ public class CreateBundleConsumerTest {
 
     @Pact(provider = "createBundleApi", consumer = "prl_cos")
     private RequestResponsePact generateCreateBundleResponse(PactDslWithProvider builder) throws JsonProcessingException {
+        List<BundlingRequestDocument> bundlingRequestDocuments = new ArrayList<>();
+        bundlingRequestDocuments.add(BundlingRequestDocument.builder().documentLink(Document.builder().build())
+            .documentFileName("otherDocs").documentGroup(BundlingDocGroupEnum.applicantPositionStatements).build());
+        BundleCreateRequest.builder().eventId("createBundle").jurisdictionId("JURISDICTIONID").caseTypeId("CASETYPEID").caseDetails(
+            BundlingCaseDetails.builder().caseData(BundlingCaseData.builder().id("CaseID").bundleConfiguration("BUNDLE_config.yaml")
+                    .data(BundlingData.builder().allOtherDocuments(ElementUtils.wrapElements(bundlingRequestDocuments)).build())
+                .build()).build());
         return builder
             .given("A request to create a bundle in Bundling api")
             .uponReceiving("a request to create a bundle in bundling api with valid authorization")
@@ -69,7 +83,10 @@ public class CreateBundleConsumerTest {
             .headers("Authorization", BEARER_TOKEN)
             .headers("Content-Type", "application/json")
             .path("/api/new-bundle")
-            .body(new ObjectMapper().writeValueAsString(BundleCreateRequest.builder().build()), "application/json")
+            .body(new ObjectMapper().writeValueAsString(BundleCreateRequest.builder().eventId("createBundle").jurisdictionId("JURISDICTIONID").caseTypeId("CASETYPEID").caseDetails(
+                BundlingCaseDetails.builder().caseData(BundlingCaseData.builder().id("CaseID").bundleConfiguration("BUNDLE_config.yaml")
+                    .data(BundlingData.builder().allOtherDocuments(ElementUtils.wrapElements(bundlingRequestDocuments)).build())
+                    .build()).build())), "application/json")
             .willRespondWith()
             .status(HttpStatus.SC_OK)
             .body(createBundleResponse())
