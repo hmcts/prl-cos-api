@@ -245,7 +245,7 @@ public class CaseService {
             .filter(x -> accessCode.equals(x.getAccessCode()))
             .collect(Collectors.toList());
 
-        if (matchingCaseInvite.size() > 0) {
+        if (!matchingCaseInvite.isEmpty()) {
             accessCodeStatus = "Valid";
             for (CaseInvite caseInvite : matchingCaseInvite) {
                 if ("Yes".equals(caseInvite.getHasLinked())) {
