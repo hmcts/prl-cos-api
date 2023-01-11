@@ -107,7 +107,7 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "200", description = "Document generated"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
-    public ResponseEntity generateCitizenStatementDocument(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
+    public ResponseEntity<Object> generateCitizenStatementDocument(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
                                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
         fileIndex = 0;
@@ -147,7 +147,7 @@ public class CaseDocumentController {
 
     }
 
-    private ResponseEntity getUploadedDocumentsList(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
+    private ResponseEntity<Object> getUploadedDocumentsList(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
                                                     @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                     @RequestHeader("serviceAuthorization") String s2sToken,
                                                     String caseId,
@@ -235,7 +235,7 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "401", description = "Provided Authroization token is missing or invalid"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    public ResponseEntity uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+    public ResponseEntity<Object> uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                          @RequestHeader("serviceAuthorization") String s2sToken,
                                                          @ModelAttribute UploadedDocumentRequest uploadedDocumentRequest) {
 
@@ -245,8 +245,7 @@ public class CaseDocumentController {
 
         UploadedDocuments uploadedDocuments = uploadService.uploadCitizenDocument(
             authorisation,
-            uploadedDocumentRequest,
-            caseId
+            uploadedDocumentRequest
         );
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         if (uploadedDocuments != null) {
@@ -350,7 +349,7 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "401", description = "Provided Authroization token is missing or invalid"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    public ResponseEntity<?> uploadCitizenDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+    public ResponseEntity<Object> uploadCitizenDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                    @RequestHeader("ServiceAuthorization") String serviceAuthorization,
                                                    @RequestParam("file") MultipartFile file) throws IOException {
 
@@ -368,7 +367,7 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
         @ApiResponse(responseCode = "404", description = "Document not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
-    public ResponseEntity<?> deleteDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+    public ResponseEntity<Object> deleteDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                             @RequestHeader("ServiceAuthorization") String serviceAuthorization,
                                             @PathVariable("documentId") String documentId) {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
