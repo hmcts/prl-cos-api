@@ -57,8 +57,7 @@ public class BundlingController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse createBundle(@RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
                                                              @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
                                                              String serviceAuthorization,
-                                                             @RequestBody CallbackRequest callbackRequest)
-        throws Exception {
+                                                             @RequestBody CallbackRequest callbackRequest) {
 
         //log.info("*** callRecieved to createBundle api in prl-cos-api : {}", callbackRequest.toString());
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
