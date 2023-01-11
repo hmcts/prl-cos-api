@@ -94,12 +94,13 @@ public class BundlingController extends AbstractCallbackController {
                             rootFolder.getValue().getFolders().stream().forEach(rootSubFolder -> {
                                 List<BundleNestedSubfolder1> bundleNestedSubfolder1AfterRemoval = new ArrayList<>();
                                 checkAndGetNonEmptyBundleNestedSubfolders(rootSubFolder,bundleNestedSubfolder1AfterRemoval);
-                                UpdateBundleSubFoldersWithNonEmptyNestedSubFolders(rootSubFolder,bundleSubfoldersAfterEmptyRemoval,bundleNestedSubfolder1AfterRemoval);
+                                updateBundleSubFoldersWithNonEmptyNestedSubFolders(rootSubFolder,
+                                    bundleSubfoldersAfterEmptyRemoval,bundleNestedSubfolder1AfterRemoval);
                             });
-                            UpdateBundleFoldersWithNonEmptySubfolders(rootFolder,foldersAfterEmptyRemoval,bundleSubfoldersAfterEmptyRemoval);
+                            updateBundleFoldersWithNonEmptySubfolders(rootFolder,foldersAfterEmptyRemoval,bundleSubfoldersAfterEmptyRemoval);
                         }
                     });
-                    UpdateBundleWithNonEmptyfolders(bundle,foldersAfterEmptyRemoval,caseBundlesPostEmptyfoldersRemoval);
+                    updateBundleWithNonEmptyfolders(bundle,foldersAfterEmptyRemoval,caseBundlesPostEmptyfoldersRemoval);
                 }
             });
 
@@ -107,14 +108,16 @@ public class BundlingController extends AbstractCallbackController {
         return caseBundlesPostEmptyfoldersRemoval;
     }
 
-    private void UpdateBundleWithNonEmptyfolders(Bundle bundle, List<BundleFolder> foldersAfterEmptyRemoval, List<Bundle> caseBundlesPostEmptyfoldersRemoval) {
+    private void updateBundleWithNonEmptyfolders(Bundle bundle, List<BundleFolder> foldersAfterEmptyRemoval,
+                                                 List<Bundle> caseBundlesPostEmptyfoldersRemoval) {
         if (!foldersAfterEmptyRemoval.isEmpty()) {
             bundle.getValue().setFolders(foldersAfterEmptyRemoval);
             caseBundlesPostEmptyfoldersRemoval.add(bundle);
         }
     }
 
-    private void UpdateBundleFoldersWithNonEmptySubfolders(BundleFolder rootFolder, List<BundleFolder> foldersAfterEmptyRemoval, List<BundleSubfolder> bundleSubfoldersAfterEmptyRemoval) {
+    private void updateBundleFoldersWithNonEmptySubfolders(BundleFolder rootFolder, List<BundleFolder> foldersAfterEmptyRemoval,
+                                                           List<BundleSubfolder> bundleSubfoldersAfterEmptyRemoval) {
         if (!bundleSubfoldersAfterEmptyRemoval.isEmpty()) {
             foldersAfterEmptyRemoval.add(BundleFolder.builder()
                 .value(BundleFolderDetails.builder().name(rootFolder.getValue().getName())
@@ -122,7 +125,9 @@ public class BundlingController extends AbstractCallbackController {
         }
     }
 
-    private void UpdateBundleSubFoldersWithNonEmptyNestedSubFolders(BundleSubfolder rootSubFolder, List<BundleSubfolder> bundleSubfoldersAfterEmptyRemoval, List<BundleNestedSubfolder1> bundleNestedSubfolder1AfterRemoval) {
+    private void updateBundleSubFoldersWithNonEmptyNestedSubFolders(BundleSubfolder rootSubFolder,
+                                                                    List<BundleSubfolder> bundleSubfoldersAfterEmptyRemoval,
+                                                                    List<BundleNestedSubfolder1> bundleNestedSubfolder1AfterRemoval) {
         if (!bundleNestedSubfolder1AfterRemoval.isEmpty()) {
             bundleSubfoldersAfterEmptyRemoval.add(BundleSubfolder.builder()
                 .value(BundleSubfolderDetails.builder().name(rootSubFolder.getValue().getName())
@@ -130,7 +135,8 @@ public class BundlingController extends AbstractCallbackController {
         }
     }
 
-    private void checkAndGetNonEmptyBundleNestedSubfolders(BundleSubfolder rootSubFolder, List<BundleNestedSubfolder1> bundleNestedSubfolder1AfterRemoval) {
+    private void checkAndGetNonEmptyBundleNestedSubfolders(BundleSubfolder rootSubFolder,
+                                                           List<BundleNestedSubfolder1> bundleNestedSubfolder1AfterRemoval) {
         if (null != rootSubFolder.getValue().getFolders()) {
             rootSubFolder.getValue().getFolders().stream().forEach(bundleNestedSubfolder1 -> {
                 List<BundleDocument> bundleDocumentsPostEmptyRemoval = new ArrayList<>();

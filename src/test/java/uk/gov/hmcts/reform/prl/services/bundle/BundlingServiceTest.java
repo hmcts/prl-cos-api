@@ -247,6 +247,11 @@ public class BundlingServiceTest {
 
     @Test
     public void testCreateBundleServiceWhenLanguagePreferenceWelshAsYes() throws Exception {
+        when(authTokenGenerator.generate()).thenReturn("authToken");
+        BundleCreateResponse bundleCreateResponse = BundleCreateResponse.builder().documentTaskId(123).build();
+        when(bundlingService.createBundleServiceRequest(c100CaseData,"eventId","authorization"))
+            .thenReturn(bundleCreateResponse);
         BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseDataOther,"eventId","authorization");
+        assertEquals(bundleCreateResponse.documentTaskId, expectedResponse.documentTaskId);
     }
 }
