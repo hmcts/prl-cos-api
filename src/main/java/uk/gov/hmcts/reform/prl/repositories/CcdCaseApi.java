@@ -44,7 +44,7 @@ public class CcdCaseApi {
         LOGGER.debug("Granting access to case {} for citizen {}", caseId, userDetails.getId());
         this.grantAccessToCase(userDetails.getId(), anonymousUserToken, caseId);
         this.linkCitizen(anonymousUserToken, caseId, caseData);
-        LOGGER.info("case is now linked " + caseId);
+        LOGGER.info("case is now linked {}", caseId);
     }
 
     private void grantAccessToCase(String citizenId, String anonymousUserToken, String caseId) {
