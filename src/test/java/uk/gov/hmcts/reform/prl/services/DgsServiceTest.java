@@ -100,5 +100,6 @@ public class DgsServiceTest {
     @Test
     public void testgenerateCitizenDocument() throws Exception {
         dgsService.generateCitizenDocument(" ", generateAndUploadDocumentRequest, " ");
+        assertEquals("test", generateAndUploadDocumentRequest.getValues().get("freeTextUploadStatements"));
     }
 }
