@@ -5,6 +5,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -18,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
@@ -25,6 +30,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
@@ -96,6 +102,29 @@ public class UploadDocumentServiceTest {
         assertThrows(RuntimeException.class, () -> uploadDocumentService.uploadDocument(pdf, FILE_NAME, CONTENT_TYPE, AUTH));
 
     }
+
+    @Test
+    public void testDownloadDocument() {
+        //Given
+        Resource expectedResource = new ClassPathResource("documents/document.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, OK);
+
+        when(authTokenGenerator.generate()).thenReturn("s2s");
+        UUID uuid = UUID.fromString("1accfb1e-2574-4084-b97e-1cd53fd14815");
+
+        when(caseDocumentClient.getDocumentBinary(
+            "bearerToken",
+            "s2s",
+            uuid
+        )).thenReturn(expectedResponse);
+
+        //When
+        ResponseEntity<?> response = uploadDocumentService.downloadDocument("bearerToken", "1accfb1e-2574-4084-b97e-1cd53fd14815");
+        //Then
+        assertEquals(OK, response.getStatusCode());
+    }
+
 
     public static Document testDocument() {
         Document.Link binaryLink = new Document.Link();
