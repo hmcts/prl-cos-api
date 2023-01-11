@@ -64,11 +64,7 @@ public class BundleCreateRequestMapper {
                     bundleConfigFileName))
                 .build())
             .caseTypeId(CASE_TYPE).jurisdictionId(JURISDICTION).eventId(eventId).build();
-        /*try {
-            log.info("*** createbundle request payload  : {}", new ObjectMapper().writeValueAsString(bundleCreateRequest));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }*/
+        log.info("*** create bundle request mapped for the case id  : {}", caseData.getId());
         return bundleCreateRequest;
     }
 
@@ -86,7 +82,7 @@ public class BundleCreateRequestMapper {
         if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
             List<CaseHearing> listedCaseHearings = hearingDetails.getCaseHearings().stream()
                 .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).collect(Collectors.toList());
-            if (null != listedCaseHearings && listedCaseHearings.size() > 0) {
+            if (null != listedCaseHearings && !listedCaseHearings.isEmpty()) {
                 HearingDaySchedule hearingDaySchedule = listedCaseHearings.get(0).getHearingDaySchedule().get(0);
                 return BundleHearingInfo.builder().hearingVenueAddress(hearingDaySchedule.getHearingVenueAddress())
                     .hearingDateAndTime(hearingDaySchedule.getHearingStartDateTime().toString())
@@ -101,21 +97,21 @@ public class BundleCreateRequestMapper {
         List<Element<BundlingRequestDocument>> allOtherDocuments = new ArrayList<>();
 
         List<Element<BundlingRequestDocument>> fl401SupportingDocs = mapFl401SupportingDocs(caseData.getFl401UploadSupportDocuments());
-        if (!ofNullable(fl401SupportingDocs).isEmpty()) {
+        if (null != fl401SupportingDocs && !fl401SupportingDocs.isEmpty()) {
             allOtherDocuments.addAll(fl401SupportingDocs);
         }
         List<Element<BundlingRequestDocument>> fl401WitnessDocs = mapFl401WitnessDocs(caseData.getFl401UploadWitnessDocuments());
-        if (!ofNullable(fl401WitnessDocs).isEmpty()) {
+        if (null != fl401WitnessDocs && !fl401WitnessDocs.isEmpty()) {
             allOtherDocuments.addAll(fl401WitnessDocs);
         }
         List<Element<BundlingRequestDocument>> citizenUploadedDocuments =
             mapBundlingDocsFromCitizenUploadedDocs(caseData.getCitizenUploadedDocumentList());
-        if (!ofNullable(citizenUploadedDocuments).isEmpty()) {
+        if (null != citizenUploadedDocuments && !citizenUploadedDocuments.isEmpty()) {
             allOtherDocuments.addAll(citizenUploadedDocuments);
         }
 
         List<Element<BundlingRequestDocument>> otherDocuments = mapOtherDocumentsFromCaseData(caseData.getOtherDocuments());
-        if (!ofNullable(otherDocuments).isEmpty()) {
+        if (null != otherDocuments && !otherDocuments.isEmpty()) {
             allOtherDocuments.addAll(otherDocuments);
         }
         return allOtherDocuments;
