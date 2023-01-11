@@ -113,7 +113,7 @@ public class CaseService {
         return null;
     }
 
-    public List<CaseData> retrieveCases(String authToken, String s2sToken, String role, String userId) {
+    public List<CaseData> retrieveCasesWith(String authToken, String s2sToken) {
         Map<String, String> searchCriteria = new HashMap<>();
 
         searchCriteria.put("sortDirection", "desc");
@@ -207,24 +207,28 @@ public class CaseService {
         User user = User.builder().email(emailId)
             .idamId(userId).build();
         if (partyId != null) {
-            if (YesOrNo.Yes.equals(isApplicant)) {
-                for (Element<PartyDetails> partyDetails : caseData.getApplicants()) {
-                    if (partyId.equals(partyDetails.getId())) {
-                        partyDetails.getValue().setUser(user);
-                    }
-                }
-            } else {
-                for (Element<PartyDetails> partyDetails : caseData.getRespondents()) {
-                    if (partyId.equals(partyDetails.getId())) {
-                        partyDetails.getValue().setUser(user);
-                    }
-                }
-            }
+            getValuesFromPartyDetails(caseData, partyId, isApplicant, user);
         } else {
             if (YesOrNo.Yes.equals(isApplicant)) {
                 caseData.getApplicantsFL401().setUser(user);
             } else {
                 caseData.getRespondentsFL401().setUser(user);
+            }
+        }
+    }
+
+    private void getValuesFromPartyDetails(CaseData caseData, UUID partyId, YesOrNo isApplicant, User user) {
+        if (YesOrNo.Yes.equals(isApplicant)) {
+            for (Element<PartyDetails> partyDetails : caseData.getApplicants()) {
+                if (partyId.equals(partyDetails.getId())) {
+                    partyDetails.getValue().setUser(user);
+                }
+            }
+        } else {
+            for (Element<PartyDetails> partyDetails : caseData.getRespondents()) {
+                if (partyId.equals(partyDetails.getId())) {
+                    partyDetails.getValue().setUser(user);
+                }
             }
         }
     }
