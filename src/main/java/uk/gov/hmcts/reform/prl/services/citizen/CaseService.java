@@ -113,7 +113,7 @@ public class CaseService {
         return null;
     }
 
-    public List<CaseData> retrieveCases(String authToken, String s2sToken, String role, String userId) {
+    public List<CaseData> retrieveCasesWith(String authToken, String s2sToken) {
         Map<String, String> searchCriteria = new HashMap<>();
 
         searchCriteria.put("sortDirection", "desc");
