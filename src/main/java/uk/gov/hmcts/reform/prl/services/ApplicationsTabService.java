@@ -807,7 +807,7 @@ public class ApplicationsTabService implements TabService {
                 List<String> reasonForOrderWithoutNoticeEnum = reason.getReasonForOrderWithoutGivingNotice() != null
                     ? reason.getReasonForOrderWithoutGivingNotice().stream()
                     .map(ReasonForOrderWithoutGivingNoticeEnum::getDisplayedValue)
-                    .collect(Collectors.toList()) : new ArrayList<String>();
+                    .collect(Collectors.toList()) : new ArrayList<>();
                 builder.reasonForOrderWithoutGivingNotice(String.join(", ",
                     reasonForOrderWithoutNoticeEnum)).futherDetails(reason.getFutherDetails());
             }
