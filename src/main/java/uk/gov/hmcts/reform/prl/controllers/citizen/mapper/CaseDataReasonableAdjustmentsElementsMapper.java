@@ -90,12 +90,12 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
 
     private static List<Element<InterpreterNeed>> buildInterpreterNeeds(List<String> languageList,
                                                                         String needInterpreterInCertainLanguageDetails) {
-        InterpreterNeed interpreterNeed = null;
         if (languageList.contains(NEED_INTERPRETER)) {
-            interpreterNeed = InterpreterNeed.builder()
+            InterpreterNeed interpreterNeed = InterpreterNeed.builder()
                     .party(List.of(applicant)).otherAssistance(needInterpreterInCertainLanguageDetails).build();
+            return List.of(Element.<InterpreterNeed>builder().value(interpreterNeed).build());
         }
-        return List.of(Element.<InterpreterNeed>builder().value(interpreterNeed).build());
+        return null;
     }
 
     private static YesOrNo buildInterpreterNeeded(List<String> languageList) {
