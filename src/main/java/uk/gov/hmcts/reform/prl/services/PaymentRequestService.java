@@ -93,7 +93,7 @@ public class PaymentRequestService {
     }
 
     public PaymentStatusResponse fetchPaymentStatus(String authorization,
-                                                    String paymentReference) throws Exception {
+                                                    String paymentReference) {
         return paymentApi
             .fetchPaymentStatus(authorization, authTokenGenerator.generate(),
                                 paymentReference
