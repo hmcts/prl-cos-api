@@ -84,7 +84,7 @@ public class BundleCreateRequestMapper {
                 .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).collect(Collectors.toList());
             if (null != listedCaseHearings && !listedCaseHearings.isEmpty()) {
                 HearingDaySchedule hearingDaySchedule = listedCaseHearings.get(0).getHearingDaySchedule().get(0);
-                return BundleHearingInfo.builder().hearingVenueAddress(hearingDaySchedule.getHearingVenueAddress())
+                return BundleHearingInfo.builder().hearingVenueAddress(getHearingVenueAddress(hearingDaySchedule))
                     .hearingDateAndTime(hearingDaySchedule.getHearingStartDateTime().toString())
                     .hearingJudgeName(hearingDaySchedule.getHearingJudgeName()).build();
             }
@@ -92,16 +92,21 @@ public class BundleCreateRequestMapper {
         return BundleHearingInfo.builder().build();
     }
 
+    private String getHearingVenueAddress(HearingDaySchedule hearingDaySchedule) {
+        return null != hearingDaySchedule.getHearingVenueName() ?
+            hearingDaySchedule.getHearingVenueName() + "\n" +  hearingDaySchedule.getHearingVenueAddress() : hearingDaySchedule.getHearingVenueAddress();
+    }
+
     private List<Element<BundlingRequestDocument>> mapAllOtherDocuments(CaseData caseData) {
 
         List<Element<BundlingRequestDocument>> allOtherDocuments = new ArrayList<>();
 
         List<Element<BundlingRequestDocument>> fl401SupportingDocs = mapFl401SupportingDocs(caseData.getFl401UploadSupportDocuments());
-        if (null != fl401SupportingDocs && !fl401SupportingDocs.isEmpty()) {
+        if (!fl401SupportingDocs.isEmpty()) {
             allOtherDocuments.addAll(fl401SupportingDocs);
         }
         List<Element<BundlingRequestDocument>> fl401WitnessDocs = mapFl401WitnessDocs(caseData.getFl401UploadWitnessDocuments());
-        if (null != fl401WitnessDocs && !fl401WitnessDocs.isEmpty()) {
+        if (!fl401WitnessDocs.isEmpty()) {
             allOtherDocuments.addAll(fl401WitnessDocs);
         }
         List<Element<BundlingRequestDocument>> citizenUploadedDocuments =
@@ -124,10 +129,9 @@ public class BundleCreateRequestMapper {
         if (existingfl401WitnessDocs.isEmpty()) {
             return fl401WitnessDocs;
         }
-        ElementUtils.unwrapElements(fl401UploadWitnessDocuments).forEach(witnessDocs -> {
+        ElementUtils.unwrapElements(fl401UploadWitnessDocuments).forEach(witnessDocs ->
             fl401WitnessDocs.add(ElementUtils.element(mapBundlingRequestDocument(witnessDocs,
-                BundlingDocGroupEnum.applicantWitnessStatements)));
-        });
+                BundlingDocGroupEnum.applicantWitnessStatements))));
         return fl401WitnessDocs;
     }
 
@@ -137,10 +141,9 @@ public class BundleCreateRequestMapper {
         if (existingfl401SupportingDocs.isEmpty()) {
             return fl401SupportingDocs;
         }
-        ElementUtils.unwrapElements(fl401UploadSupportDocuments).forEach(supportDocs -> {
+        ElementUtils.unwrapElements(fl401UploadSupportDocuments).forEach(supportDocs ->
             fl401SupportingDocs.add(ElementUtils.element(mapBundlingRequestDocument(supportDocs,
-                BundlingDocGroupEnum.applicantStatementSupportingEvidence)));
-        });
+                BundlingDocGroupEnum.applicantStatementSupportingEvidence))));
         return fl401SupportingDocs;
     }
 
@@ -163,7 +166,7 @@ public class BundleCreateRequestMapper {
         }
         List<BundlingRequestDocument> miamCertAndPreviousOrdersUploadedByCourtAdmin =
             mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences());
-        if (miamCertAndPreviousOrdersUploadedByCourtAdmin.size() > 0) {
+        if (!miamCertAndPreviousOrdersUploadedByCourtAdmin.isEmpty()) {
             applications.addAll(miamCertAndPreviousOrdersUploadedByCourtAdmin);
         }
         Document miamCertificateUpload = caseData.getMiamCertificationDocumentUpload();
@@ -175,7 +178,7 @@ public class BundleCreateRequestMapper {
             applications.add(mapBundlingRequestDocument(miamCertificateUpload1, BundlingDocGroupEnum.applicantMiamCertificate));
         }
         List<BundlingRequestDocument> citizenUploadedC7Documents = mapC7DocumentsFromCaseData(caseData.getCitizenResponseC7DocumentList());
-        if (citizenUploadedC7Documents.size() > 0) {
+        if (!citizenUploadedC7Documents.isEmpty()) {
             applications.addAll(citizenUploadedC7Documents);
         }
         return ElementUtils.wrapElements(applications);
@@ -187,10 +190,9 @@ public class BundleCreateRequestMapper {
         if (uploadedC7CitizenDocs.isEmpty()) {
             return applications;
         }
-        ElementUtils.unwrapElements(citizenResponseC7DocumentList).forEach(c7CitizenResponseDocument -> {
+        ElementUtils.unwrapElements(citizenResponseC7DocumentList).forEach(c7CitizenResponseDocument ->
             applications.add(mapBundlingRequestDocument(c7CitizenResponseDocument.getCitizenDocument(),
-                BundlingDocGroupEnum.c7Documents));
-        });
+                BundlingDocGroupEnum.c7Documents)));
         return applications;
     }
 

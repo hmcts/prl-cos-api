@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
@@ -161,6 +162,35 @@ public class BundleCreateRequestMapperTest {
     public void testBundleCreateRequestMapperForEmptyDetails() {
         List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
         hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().hearingJudgeId("123").hearingJudgeName("hearingJudgeName")
+            .hearingVenueId("venueId").hearingVenueAddress("venueAddress")
+            .hearingStartDateTime(LocalDateTime.now()).build());
+        List<CaseHearing> caseHearings = new ArrayList<>();
+        caseHearings.add(CaseHearing.caseHearingWith().hmcStatus(LISTED).hearingDaySchedule(hearingDaySchedules).build());
+
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .languagePreferenceWelsh(Yes)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.DECISION_OUTCOME)
+            .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
+            .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
+            .bundleInformation(BundlingInformation.builder().build())
+            .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
+            .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
+            .build();
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
+            Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
+        assertNotNull(bundleCreateRequest);
+    }
+
+    @Test
+    public void testBundleCreateRequestMapperForVenueAddressDetails() {
+        List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
+        hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().hearingJudgeId("123").hearingJudgeName("hearingJudgeName")
             .hearingVenueName("venueName").hearingVenueId("venueId").hearingVenueAddress("venueAddress")
             .hearingStartDateTime(LocalDateTime.now()).build());
         List<CaseHearing> caseHearings = new ArrayList<>();
@@ -184,6 +214,7 @@ public class BundleCreateRequestMapperTest {
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
             Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
         assertNotNull(bundleCreateRequest);
+        assertEquals("venueName"+"\n"+"venueAddress", bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
     }
 
 }

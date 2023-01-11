@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.bundle;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 
+@Slf4j
 @Service
 public class BundlingService {
     @Autowired
@@ -49,7 +51,13 @@ public class BundlingService {
 
     private BundleCreateResponse createBundle(String authorization, String serviceAuthorization,
                                               BundleCreateRequest bundleCreateRequest) {
-        return bundleApiClient.createBundleServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
+        BundleCreateResponse bundleCreateResponse = null;
+        try {
+            bundleCreateResponse = bundleApiClient.createBundleServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
+        } catch(Exception e) {
+            log.error(e.getMessage());
+        }
+        return bundleCreateResponse;
     }
 
     private String getBundleConfig(YesOrNo welshPreference) {
