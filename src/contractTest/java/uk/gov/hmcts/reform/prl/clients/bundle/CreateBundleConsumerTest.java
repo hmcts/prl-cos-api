@@ -68,7 +68,7 @@ public class CreateBundleConsumerTest {
             .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
             .headers("Authorization", BEARER_TOKEN)
             .headers("Content-Type", "application/json")
-            .path("/bundle/createBundle")
+            .path("/api/new-bundle")
             .body(new ObjectMapper().writeValueAsString(BundleCreateRequest.builder().build()), "application/json")
             .willRespondWith()
             .status(HttpStatus.SC_OK)
