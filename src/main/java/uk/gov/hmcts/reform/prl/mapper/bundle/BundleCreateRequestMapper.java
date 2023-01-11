@@ -93,8 +93,9 @@ public class BundleCreateRequestMapper {
     }
 
     private String getHearingVenueAddress(HearingDaySchedule hearingDaySchedule) {
-        return null != hearingDaySchedule.getHearingVenueName() ?
-            hearingDaySchedule.getHearingVenueName() + "\n" +  hearingDaySchedule.getHearingVenueAddress() : hearingDaySchedule.getHearingVenueAddress();
+        return null != hearingDaySchedule.getHearingVenueName()
+            ? hearingDaySchedule.getHearingVenueName() + "\n" +  hearingDaySchedule.getHearingVenueAddress()
+            : hearingDaySchedule.getHearingVenueAddress();
     }
 
     private List<Element<BundlingRequestDocument>> mapAllOtherDocuments(CaseData caseData) {

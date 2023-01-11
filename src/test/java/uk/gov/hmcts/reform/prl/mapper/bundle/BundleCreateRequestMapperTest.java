@@ -214,7 +214,8 @@ public class BundleCreateRequestMapperTest {
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
             Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
         assertNotNull(bundleCreateRequest);
-        assertEquals("venueName"+"\n"+"venueAddress", bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
+        assertEquals("venueName" + "\n" + "venueAddress",
+            bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
     }
 
 }
