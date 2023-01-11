@@ -1636,6 +1636,7 @@ public class CallbackControllerTest {
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("caseNameHmctsInternal"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
     }
+
     @Test
     public void testCaseNameHmctsInternalPresentForFL401Case() throws Exception {
 
