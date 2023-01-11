@@ -390,9 +390,7 @@ public class CallbackController {
         requireNonNull(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        log.info("CASE Data before update --------> {}", caseDataUpdated);
         caseDataUpdated = searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated);
-        log.info("CASE Data After update --------> {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

@@ -90,7 +90,6 @@ public class SearchCasesDataService {
             }
 
             caseDetails.put("applicants", applicantsWrapped);
-            log.info("caseDetails Applicants -> {}", applicants);
         }
     }
 
@@ -109,7 +108,6 @@ public class SearchCasesDataService {
                 respondent.setPartyLevelFlag(respondentFlag);
             }
             caseDetails.put("respondents", respondentsWrapped);
-            log.info("caseDetails respondents -> {}", respondents);
         }
     }
 
