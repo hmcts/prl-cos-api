@@ -373,7 +373,7 @@ public class ManageOrderService {
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
-    private Map<String, String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
+    public Map<String, String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
         Map<String, String> fieldsMap = new HashMap<>();
         switch (selectedOrder) {
             case blankOrderOrDirections:
@@ -398,8 +398,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, fl406WelshFile);
                 break;
             case standardDirectionsOrder:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE, "");
-                fieldsMap.put(PrlAppsConstants.FILE_NAME, "");
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
+                break;
+            case directionOnIssue:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
                 break;
             case blankOrderOrDirectionsWithdraw:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
@@ -451,6 +455,7 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c47aWelshFile);
                 break;
             case nonMolestation:
+                log.info("******** Inside non molestation case ********: ");
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404aDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404aFinalTemplate);
@@ -514,16 +519,25 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404bBlankFile);
                 break;
             default:
+                log.info("******** Inside default case ********: ");
                 break;
         }
+        log.info("selected order is ********: {}", selectedOrder);
+        log.info("fieldsMap is ********: {}", fieldsMap);
         return fieldsMap;
     }
 
     private String getSelectedOrderInfo(CaseData caseData) {
         StringBuilder selectedOrder = new StringBuilder();
-        selectedOrder.append(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
-                                 ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
-                                 : caseData.getChildArrangementOrders().getDisplayedValue());
+        log.info("*******caseData********{}", caseData);
+        if (caseData.getManageOrdersOptions() != null) {
+            selectedOrder.append(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
+                                     ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
+                                     : caseData.getChildArrangementOrders().getDisplayedValue());
+        } else {
+            selectedOrder.append(caseData.getCreateSelectOrderOptions() != null
+                                     ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
+        }
         selectedOrder.append("\n\n");
         return selectedOrder.toString();
     }
@@ -840,6 +854,8 @@ public class ManageOrderService {
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
 
+        } else {
+            caseDataUpdated.put("previewOrderDoc", null);
         }
         if (documentLanguage.isGenWelsh()) {
             caseDataUpdated.put("isWelshDocGen", Yes.toString());
@@ -854,6 +870,8 @@ public class ManageOrderService {
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
 
+        } else {
+            caseDataUpdated.put("previewOrderDocWelsh", null);
         }
         return caseDataUpdated;
     }
@@ -864,7 +882,7 @@ public class ManageOrderService {
 
         ManageOrders orderData = ManageOrders.builder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
-            .manageOrdersCourtName(caseData.getCourtName())
+            .manageOrdersCourtName(null != caseData.getCourtName() ? caseData.getCourtName() : null)
             .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
                                                  caseData.getApplicantsFL401().getLastName()
             ))
@@ -939,10 +957,20 @@ public class ManageOrderService {
             orderData = orderData.toBuilder()
                 .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
         }
-        return caseData.toBuilder().manageOrders(ManageOrders.builder()
-                                                     .fl404CustomFields(orderData)
-                                                     .build())
+        caseData = caseData.toBuilder()
+            .manageOrders(ManageOrders.builder()
+                              .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
+                              .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
+                              .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
+                              .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+                              .isOrderDrawnForCafcass(caseData.getManageOrders().getIsOrderDrawnForCafcass())
+                              .orderDirections(caseData.getManageOrders().getOrderDirections())
+                              .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
+                              .fl404CustomFields(orderData)
+                              .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
+        log.info("Case data ---->: {}", caseData);
+        return caseData;
     }
 
     public DynamicList getOrdersAsDynamicList(CaseData caseData) {
@@ -990,6 +1018,11 @@ public class ManageOrderService {
                 caseData.getApplicantsFL401().getRepresentativeFirstName(),
                 caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
+            .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
+            .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+            .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
+            .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
+            .orderDirections(caseData.getManageOrders().getOrderDirections())
             .build();
         log.info("Court name after FL402 order set{}", orderData.getManageOrdersFl402CourtName());
 
