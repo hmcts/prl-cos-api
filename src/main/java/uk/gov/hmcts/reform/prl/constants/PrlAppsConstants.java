@@ -307,7 +307,6 @@ public class PrlAppsConstants {
 
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
 
-    public static final String LISTED = "LISTED";
     public static final String CAFCASS_REPORTS = "Cafcass reports";
     public static final String EXPERT_REPORTS = "Expert reports";
     public static final String APPLICANT_STATMENT =
@@ -319,4 +318,12 @@ public class PrlAppsConstants {
     public static final String IS_WELSH_DOC_GEN = "isWelshDocGen";
 
     public static final String INVALID_CLIENT = "Invalid Client";
+
+    public static final String WAITING_TO_BE_LISTED = "WAITING_TO_BE_LISTED";
+    public static final String LISTED = "LISTED";
+    public static final String AWAITING_HEARING_DETAILS = "AWAITING_HEARING_DETAILS";
+    public static final String CANCELLED = "CANCELLED";
+    public static final String ADJOURNED = "ADJOURNED";
+    public static final String POSTPONED = "POSTPONED";
+    public static final String COMPLETED = "COMPLETED";
 }
