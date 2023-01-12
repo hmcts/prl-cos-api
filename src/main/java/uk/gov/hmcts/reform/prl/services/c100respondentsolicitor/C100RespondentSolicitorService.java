@@ -89,9 +89,9 @@ public class C100RespondentSolicitorService {
                 case ATTENDING_THE_COURT:
                     caseDataUpdated.put(
                         event.getCaseFieldName(),
-                        x.getValue().getResponse().getRespondentAttendingTheCourt()
+                        x.getValue().getResponse().getAttendToCourt()
                     );
-                    log.info("finding respondentAttendingToCourt = " + x.getValue().getResponse().getRespondentAttendingTheCourt());
+                    log.info("finding respondentAttendingToCourt = " + x.getValue().getResponse().getAttendToCourt());
                     break;
                 case MIAM:
                     String[] miamFields = event.getCaseFieldName().split(",");
@@ -194,7 +194,7 @@ public class C100RespondentSolicitorService {
                 break;
             case ATTENDING_THE_COURT:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .respondentAttendingTheCourt(caseData.getRespondentAttendingTheCourt())
+                    .attendToCourt(caseData.getRespondentAttendingTheCourt())
                     .build();
                 break;
             case MIAM:
