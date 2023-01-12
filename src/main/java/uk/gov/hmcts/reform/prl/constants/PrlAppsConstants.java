@@ -307,6 +307,13 @@ public class PrlAppsConstants {
 
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
 
+    public static final String LISTED = "LISTED";
+    public static final String CAFCASS_REPORTS = "Cafcass reports";
+    public static final String EXPERT_REPORTS = "Expert reports";
+    public static final String APPLICANT_STATMENT =
+        "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot";
+
+
     public static final String IS_ENG_DOC_GEN = "isEngDocGen";
 
     public static final String IS_WELSH_DOC_GEN = "isWelshDocGen";
