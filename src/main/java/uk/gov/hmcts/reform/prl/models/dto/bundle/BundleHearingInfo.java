@@ -5,14 +5,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
 
-import java.util.List;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Value
 @Builder(toBuilder = true)
-public class Data {
-    @JsonProperty("furtherEvidences")
-    public List<FurtherEvidence> furtherEvidences;
-    @JsonProperty("otherDocuments")
-    public List<OtherDocument> otherDocuments;
+public class BundleHearingInfo {
+    @JsonProperty("hearingVenueAddress")
+    private final String hearingVenueAddress;
+
+    @JsonProperty("hearingDateAndTime")
+    private final String hearingDateAndTime;
+
+    @JsonProperty("hearingJudgeName")
+    private final String hearingJudgeName;
 }
