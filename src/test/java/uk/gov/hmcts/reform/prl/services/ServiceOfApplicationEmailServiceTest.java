@@ -57,11 +57,12 @@ public class ServiceOfApplicationEmailServiceTest {
                                             .representativeFirstName("FirstName")
                                             .build())))
             .respondents(List.of(element(PartyDetails.builder()
-                                            .solicitorEmail("test@gmail.com")
-                                            .representativeLastName("LastName")
-                                            .representativeFirstName("FirstName")
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                            .build())))
+                                             .build())))
+
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
