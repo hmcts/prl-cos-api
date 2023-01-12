@@ -432,9 +432,9 @@ public class CallbackController {
 
 
         // Saving the logged-in Solicitor and Org details for the docs..
-        caseDataUpdated = getSolicitorDetails(authorisation, caseDataUpdated, caseData);
+        Map<String, Object> updatedCaseData = getSolicitorDetails(authorisation, caseDataUpdated, caseData);
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
 
     @PostMapping(path = "/fl401-add-case-number", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
