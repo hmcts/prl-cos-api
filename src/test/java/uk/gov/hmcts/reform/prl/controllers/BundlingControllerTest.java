@@ -123,7 +123,7 @@ public class BundlingControllerTest {
             .data(BundleData.builder().id("334").caseBundles(bundleRefreshList).build()).build();
         caseData = new HashMap<>();
         caseData.put("bundleInformation", bundleCreateResponse.getData().getCaseBundles());
-        caseDetails = CaseDetails.builder().data(caseData).state(State.CASE_HEARING.getValue())
+        caseDetails = CaseDetails.builder().data(caseData).state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue())
             .id(123488888L).createdDate(LocalDateTime.now()).lastModified(LocalDateTime.now()).build();
         List<FurtherEvidence> furtherEvidences = new ArrayList<>();
         furtherEvidences.add(FurtherEvidence.builder().typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.miamCertificate)
@@ -164,7 +164,7 @@ public class BundlingControllerTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .state(State.CASE_HEARING)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
             .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
             .otherDocuments(ElementUtils.wrapElements(otherDocuments))

@@ -141,7 +141,7 @@ public class BundleCreateRequestMapperTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .state(State.CASE_HEARING)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
             .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
             .otherDocuments(ElementUtils.wrapElements(otherDocuments))
