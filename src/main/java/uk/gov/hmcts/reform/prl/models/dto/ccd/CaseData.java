@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.CaseLinksElement;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
@@ -130,6 +132,11 @@ public class CaseData implements MappableObject {
      * Case Type Of Application.
      */
     private final String caseTypeOfApplication;
+
+    /**
+     * Case created by.
+     */
+    private CaseCreatedBy caseCreatedBy;
 
     /**
      * Case Type Of Application.
@@ -632,8 +639,6 @@ public class CaseData implements MappableObject {
     private String previewDraftAnOrder;
 
     private String citizenUploadedStatement;
-    @JsonProperty("paymentReferenceNumber")
-    private final String paymentReferenceNumber;
 
     /**
      * Respondent Solicitor.
@@ -680,13 +685,9 @@ public class CaseData implements MappableObject {
     private final YesNoDontKnow currentOrPastProceedingsForChildren;
     private final List<Element<ProceedingDetails>> respondentExistingProceedings;
     // C100 Rebuild
-    private String c100RebuildInternationalElements;
-    private String c100RebuildReasonableAdjustments;
-    private String c100RebuildTypeOfOrder;
-    private String c100RebuildHearingWithoutNotice;
-    private String c100RebuildHearingUrgency;
-    private String c100RebuildOtherProceedings;
-    private String c100RebuildReturnUrl;
+    @JsonUnwrapped
+    @Builder.Default
+    private final C100RebuildData c100RebuildData;
 
     /**
      * Bundle.
