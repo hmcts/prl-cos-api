@@ -174,8 +174,10 @@ public class BundlingControllerTest {
             .citizenResponseC7DocumentList(ElementUtils.wrapElements(citizenC7uploadedDocs))
             .citizenUploadedDocumentList(ElementUtils.wrapElements(uploadedDocuments))
             .bundleInformation(BundlingInformation.builder().bundleConfiguration("sample.yaml").historicalBundles(bundleList).build())
-            .miamDetails(MiamDetails.builder().miamCertificationDocumentUpload(Document.builder().documentFileName("maimCertDoc1").documentUrl("Url").build())
-                .miamCertificationDocumentUpload1(Document.builder().documentFileName("maimCertDoc2").documentUrl("Url").build()).build())
+            .miamDetails(MiamDetails.builder().miamCertificationDocumentUpload(Document.builder()
+                    .documentFileName("maimCertDoc1").documentUrl("Url").build())
+                .miamCertificationDocumentUpload1(Document.builder().documentFileName("maimCertDoc2")
+                    .documentUrl("Url").build()).build())
             .applicantName("ApplicantFirstNameAndLastName")
             .build();
     }
