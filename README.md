@@ -4,7 +4,7 @@
 
 ## Notes
 
-Update with master until 2.2
+Update with master until 3.0
 
 feature/noc-respondent-journey
 

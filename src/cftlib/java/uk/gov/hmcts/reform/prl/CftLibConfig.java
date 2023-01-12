@@ -28,7 +28,9 @@ public class CftLibConfig implements CFTLibConfigurer {
             "caseworker-caa",
             "caseworker-privatelaw-bulkscansystemupdate",
             "caseworker-privatelaw-bulkscan",
-            "pui-case-manager"
+            "pui-case-manager",
+            "caseworker-approver",
+            "caseworker-privatelaw-cafcass"
         );
 
         var def = Files.readAllBytes(Path.of("bin/ccd-config-PRL-local.xlsx"));

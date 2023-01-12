@@ -62,10 +62,10 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
+import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
@@ -158,7 +158,7 @@ public class CallbackControllerTest {
     AllTabServiceImpl allTabsService;
 
     @Mock
-    SearchCasesDataService searchCasesDataService;
+    UpdatePartyDetailsService updatePartyDetailsService;
 
     @Mock
     SendgridService sendgridService;
@@ -770,20 +770,19 @@ public class CallbackControllerTest {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Map<String, Object> caseDetailsUpdatedwithName = new HashMap<>();
         caseDetailsUpdatedwithName.put("applicantName", "test1 test22");
-
-        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-        when(searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated)).thenReturn(
-            caseDetailsUpdatedwithName);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(caseDataUpdated).build()).build();
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+        when(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest)).thenReturn(
+            caseDetailsUpdatedwithName);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            callbackController.updateApplicantAndChildNames(
+            callbackController.updatePartyDetails(
                 authToken,
                 callbackRequest
             );
-        Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
-        assertEquals("test1 test22", caseDetailsRespnse.get("applicantName"));
+        Map<String, Object> caseDetailsResponse = aboutToStartOrSubmitCallbackResponse.getData();
+        assertEquals("test1 test22", caseDetailsResponse.get("applicantName"));
     }
 
     @Test
@@ -940,7 +939,7 @@ public class CallbackControllerTest {
             .build();
         when(objectMapper.convertValue(json, CaseData.class)).thenReturn(caseData);
         when(c100JsonMapper.map(caseData)).thenReturn(JsonValue.EMPTY_JSON_OBJECT);
-        callbackController.resendNotificationtoRpa(authToken, callbackRequest);
+        callbackController.resendNotificationToRpa(authToken, callbackRequest);
         verify(sendgridService, times(1)).sendEmail(JsonValue.EMPTY_JSON_OBJECT);
     }
 

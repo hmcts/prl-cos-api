@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -18,18 +19,21 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.RESPONDENT;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
-public class SearchCasesDataService {
+public class UpdatePartyDetailsService {
+    private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
 
-    public Map<String, Object> updateApplicantAndChildNames(ObjectMapper objectMapper, Map<String, Object> caseDetails) {
+    public Map<String, Object> updateApplicantAndChildNames(CallbackRequest callbackRequest) {
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
 
-        CaseData caseData = objectMapper.convertValue(caseDetails, CaseData.class);
+        CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             PartyDetails fl401Applicant = caseData
@@ -38,14 +42,14 @@ public class SearchCasesDataService {
                 .getRespondentsFL401();
 
             if (Objects.nonNull(fl401Applicant)) {
-                caseDetails.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
+                updatedCaseData.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
             }
 
             if (Objects.nonNull(fl401respondent)) {
-                caseDetails.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
+                updatedCaseData.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
             }
-        } else {
-            caseDetails.putAll(noticeOfChangePartiesService.generate(caseData, RESPONDENT));
+        } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, RESPONDENT));
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
             if (!applicantsWrapped.isEmpty() && !applicantsWrapped.get().isEmpty()) {
                 List<PartyDetails> applicants = applicantsWrapped.get()
@@ -54,12 +58,11 @@ public class SearchCasesDataService {
                     .collect(Collectors.toList());
                 PartyDetails applicant1 = applicants.get(0);
                 if (Objects.nonNull(applicant1)) {
-                    caseDetails.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
+                    updatedCaseData.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
                 }
             }
         }
 
-        return caseDetails;
+        return updatedCaseData;
     }
-
 }
