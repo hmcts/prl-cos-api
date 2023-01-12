@@ -37,7 +37,7 @@ public class Response {
     private final CitizenInternationalElements citizenInternationalElements;
     // TODO: Need to recheck this one
     // private final AbilityToParticipate abilityToParticipate;
-    private final AttendToCourt respondentAttendingToCourt;
+    private final AttendToCourt respondentAttendingTheCourt;
 
     private final CitizenFlags citizenFlags;
     private final String safeToCallOption;
