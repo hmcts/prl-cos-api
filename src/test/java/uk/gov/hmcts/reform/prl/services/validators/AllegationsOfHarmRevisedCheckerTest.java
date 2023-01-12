@@ -382,17 +382,19 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
 
     @Test
-    public void whenCompleteBehaviourReturnTrue() {
+    public void whenCompleteChildAbuseBehaviourReturnTrue() {
 
-        DomesticAbuseBehaviours behaviour = DomesticAbuseBehaviours.builder()
+        ChildAbuseBehaviours behaviour = ChildAbuseBehaviours.builder()
             .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
             .newAbuseNatureDescription("Test")
             .newBehavioursStartDateAndLength("5 days")
             .newBehavioursApplicantSoughtHelp(Yes)
+            .allChildrenAreRisk(Yes)
+            .whichChildrenAreRisk("test")
             .newBehavioursApplicantHelpSoughtWho("Who from")
             .build();
 
-        assertTrue(allegationsOfHarmChecker.validateDomesticAbuseBehaviours(behaviour));
+        assertTrue(allegationsOfHarmChecker.validateChildAbuseBehaviours(behaviour));
     }
 
     @Test
