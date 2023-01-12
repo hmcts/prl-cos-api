@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_STATMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
@@ -83,10 +84,13 @@ public class BundleCreateRequestMapper {
             List<CaseHearing> listedCaseHearings = hearingDetails.getCaseHearings().stream()
                 .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).collect(Collectors.toList());
             if (null != listedCaseHearings && !listedCaseHearings.isEmpty()) {
-                HearingDaySchedule hearingDaySchedule = listedCaseHearings.get(0).getHearingDaySchedule().get(0);
-                return BundleHearingInfo.builder().hearingVenueAddress(getHearingVenueAddress(hearingDaySchedule))
-                    .hearingDateAndTime(hearingDaySchedule.getHearingStartDateTime().toString())
-                    .hearingJudgeName(hearingDaySchedule.getHearingJudgeName()).build();
+                List<HearingDaySchedule> hearingDaySchedules = listedCaseHearings.get(0).getHearingDaySchedule();
+                if (null != hearingDaySchedules && !hearingDaySchedules.isEmpty()) {
+                    return BundleHearingInfo.builder().hearingVenueAddress(getHearingVenueAddress(hearingDaySchedules.get(0)))
+                        .hearingDateAndTime(null != hearingDaySchedules.get(0).getHearingStartDateTime()
+                            ? hearingDaySchedules.get(0).getHearingStartDateTime().toString() : BLANK_STRING)
+                        .hearingJudgeName(hearingDaySchedules.get(0).getHearingJudgeName()).build();
+                }
             }
         }
         return BundleHearingInfo.builder().build();

@@ -1,15 +1,12 @@
 package uk.gov.hmcts.reform.prl.clients.bundle;
 
-import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,26 +18,14 @@ import uk.gov.hmcts.reform.prl.clients.BundleApiClient;
 import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
 import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleData;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDetails;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocument;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocumentDetails;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolder;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolderDetails;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1Details;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolder;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingData;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
-import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,8 +52,11 @@ public class CreateBundleConsumerTest {
     private static final String SERVICE_AUTHORIZATION_HEADER = "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
 
     private final BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder().build();
+
+    private final String validResponseBody = "bundle/ValidResponseBody.json";
+
     @Pact(provider = "createBundleApi", consumer = "prl_cos")
-    private RequestResponsePact generateCreateBundleResponse(PactDslWithProvider builder) throws JsonProcessingException {
+    private RequestResponsePact generateCreateBundleResponse(PactDslWithProvider builder) throws Exception {
         List<BundlingRequestDocument> bundlingRequestDocuments = new ArrayList<>();
         bundlingRequestDocuments.add(BundlingRequestDocument.builder().documentLink(Document.builder().build())
             .documentFileName("otherDocs").documentGroup(BundlingDocGroupEnum.applicantPositionStatements).build());
@@ -86,41 +74,10 @@ public class CreateBundleConsumerTest {
             .path("/api/new-bundle")
             .body(new ObjectMapper().writeValueAsString(bundleCreateRequest), "application/json")
             .willRespondWith()
-            .status(HttpStatus.SC_OK)
-            .body(createBundleResponse())
+            .status(200)
+            .body(ResourceLoader.loadJson(validResponseBody),"application/json")
+
             .toPact();
-    }
-
-    private PactDslJsonBody createBundleResponse() {
-        List<BundleDocument> bundleDocuments = new ArrayList<>();
-        bundleDocuments.add(BundleDocument.builder().value(
-            BundleDocumentDetails.builder().name("MiamCertificate").description("MiamCertificate").sortIndex(1)
-                .sourceDocument(DocumentLink.builder().build()).build()).build());
-        bundleDocuments.add(BundleDocument.builder().value(BundleDocumentDetails.builder().build()).build());
-
-        List<BundleNestedSubfolder1> bundleNestedSubfolders1 = new ArrayList<>();
-        bundleNestedSubfolders1.add(BundleNestedSubfolder1.builder()
-            .value(BundleNestedSubfolder1Details.builder().name("MiamCertificate").documents(bundleDocuments).build()).build());
-        List<BundleNestedSubfolder1> bundleNestedSubfolders2 = new ArrayList<>();
-        bundleNestedSubfolders2.add(BundleNestedSubfolder1.builder()
-            .value(BundleNestedSubfolder1Details.builder().build()).build());
-        List<BundleFolder> bundleFolders = new ArrayList<>();
-        List<BundleSubfolder> bundleSubfolders = new ArrayList<>();
-        bundleSubfolders.add(BundleSubfolder.builder()
-            .value(BundleSubfolderDetails.builder().name("Applicant documents").documents(bundleDocuments)
-                .folders(bundleNestedSubfolders1).build()).build());
-        bundleSubfolders.add(BundleSubfolder.builder()
-            .value(BundleSubfolderDetails.builder().documents(bundleDocuments)
-                .folders(bundleNestedSubfolders2).build()).build());
-        bundleFolders.add(BundleFolder.builder().value(BundleFolderDetails.builder().name("Applications and Orders")
-            .folders(bundleSubfolders).build()).build());
-        List<Bundle> bundleRefreshList = new ArrayList<>();
-        bundleRefreshList.add(Bundle.builder()
-            .value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().documentFilename("StitchedPDF").build())
-            .stitchStatus("DONE").folders(bundleFolders).build()).build());
-        return new PactDslJsonBody().equalTo("data",BundleData.builder().caseBundles(bundleRefreshList).build())
-            .stringType("documentTaskId", "documentTaskId");
-
     }
 
     @Test
@@ -130,8 +87,8 @@ public class CreateBundleConsumerTest {
             SERVICE_AUTHORIZATION_HEADER, BundleCreateRequest.builder().build()
         );
         assertNotNull(bundleCreateResponse);
-        assertEquals(1, bundleCreateResponse.getData().getCaseBundles().get(0).getValue().getFolders().size());
+        assertEquals(4, bundleCreateResponse.getData().getCaseBundles().get(0).getValue().getFolders().size());
         assertEquals("DONE", bundleCreateResponse.getData().getCaseBundles().get(0).getValue().getStitchStatus());
-        assertEquals("StitchedPDF", bundleCreateResponse.getData().getCaseBundles().get(0).getValue().getStitchedDocument().documentFilename);
+        assertEquals("StitchedPDF", bundleCreateResponse.getData().getCaseBundles().get(0).getValue().getStitchedDocument().getDocumentFilename());
     }
 }
