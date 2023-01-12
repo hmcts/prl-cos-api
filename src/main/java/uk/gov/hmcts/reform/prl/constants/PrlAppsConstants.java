@@ -307,7 +307,6 @@ public class PrlAppsConstants {
 
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
 
-    public static final String LISTED = "LISTED";
     public static final String CAFCASS_REPORTS = "Cafcass reports";
     public static final String EXPERT_REPORTS = "Expert reports";
     public static final String APPLICANT_STATMENT =
