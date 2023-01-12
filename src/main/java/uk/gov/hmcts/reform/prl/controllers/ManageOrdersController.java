@@ -226,7 +226,6 @@ public class ManageOrdersController {
                 caseData
             ));
         }
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
