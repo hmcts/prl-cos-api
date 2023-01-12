@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,9 @@ public class OrderDetails {
     private final String orderTypeId;
     private final Document orderDocument;
     private final OtherOrderDetails otherDetails;
+    private final ServeOrderDetails serveOrderDetails;
+    private final YesOrNo orderServed;
+
 
     @JsonIgnore
     public String getLabelForDynamicList() {
