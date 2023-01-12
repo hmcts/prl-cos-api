@@ -155,7 +155,7 @@ public class CaseControllerTest {
         List<CaseData> caseDataList1 = new ArrayList<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.retrieveCasesWith(authToken, servAuthToken)).thenReturn(caseDataList);
+        when(caseService.retrieveCases(authToken, servAuthToken)).thenReturn(caseDataList);
         caseDataList1 = caseController.retrieveCases(role, userId, authToken, servAuthToken);
         assertNotNull(caseDataList1);
 
@@ -238,7 +238,7 @@ public class CaseControllerTest {
         List<CitizenCaseData> citizenCaseDataList = new ArrayList<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.retrieveCasesWith(authToken, servAuthToken)).thenReturn(caseDataList);
+        when(caseService.retrieveCases(authToken, servAuthToken)).thenReturn(caseDataList);
         citizenCaseDataList = caseController.retrieveCitizenCases(authToken, servAuthToken);
         assertNotNull(citizenCaseDataList);
     }
