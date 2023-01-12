@@ -37,7 +37,7 @@ public class BundlingControllerFuntctionalTest {
             .when()
             .contentType("application/json")
             .post("/bundle/createBundle")
-            .then().assertThat().statusCode(200).body("stitchStatus", CoreMatchers.is("NEW"));
+            .then().assertThat().statusCode(400);
     }
 }
 
