@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
@@ -58,6 +59,7 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageOrderServiceTest {
@@ -184,6 +186,15 @@ public class ManageOrderServiceTest {
                                  .firstName("app")
                                  .lastName("testLast")
                                  .build())
+            .manageOrders(ManageOrders.builder()
+                              .recitalsOrPreamble("test")
+                              .isCaseWithdrawn(YesOrNo.Yes)
+                              .isTheOrderByConsent(YesOrNo.Yes)
+                              .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
+                              .isOrderDrawnForCafcass(YesOrNo.Yes)
+                              .orderDirections("test")
+                              .furtherDirectionsIfRequired("test")
+                              .build())
             .respondentsFL401(PartyDetails.builder()
                                   .firstName("resp")
                                   .lastName("testLast")
@@ -216,9 +227,21 @@ public class ManageOrderServiceTest {
 
     @Test
     public void whenFl402Order_thenPopulateCustomFields() {
+        ManageOrders expectedDetails = ManageOrders.builder()
+            .manageOrdersFl402CaseNo("12345674")
+            .manageOrdersFl402CourtName("Court name")
+            .manageOrdersFl402Applicant("app testLast")
+            .manageOrdersFl402ApplicantRef("test test1")
+            .orderDirections("order dir")
+            .furtherDirectionsIfRequired("fur dir")
+            .recitalsOrPreamble("reci")
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesClerk)
+            .isTheOrderByConsent(YesOrNo.Yes)
+            .build();
         CaseData caseData = CaseData.builder()
             .id(12345674L)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+            .manageOrders(expectedDetails)
             .courtName("Court name")
             .childArrangementOrders(ChildArrangementOrdersEnum.authorityC31)
             .applicantsFL401(PartyDetails.builder()
@@ -238,12 +261,7 @@ public class ManageOrderServiceTest {
                                   .build())
             .build();
 
-        ManageOrders expectedDetails = ManageOrders.builder()
-            .manageOrdersFl402CaseNo("12345674")
-            .manageOrdersFl402CourtName("Court name")
-            .manageOrdersFl402Applicant("app testLast")
-            .manageOrdersFl402ApplicantRef("test test1")
-            .build();
+
 
         CaseData updatedCaseData = manageOrderService.getFL402FormData(caseData);
 
@@ -1205,6 +1223,17 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testpopulateCustomOrderFieldsNoticeOfProceedings() {
+        ManageOrders expectedDetails = ManageOrders.builder()
+            .manageOrdersFl402CaseNo("12345674")
+            .manageOrdersFl402CourtName("Court name")
+            .manageOrdersFl402Applicant("app testLast")
+            .manageOrdersFl402ApplicantRef("test test1")
+            .orderDirections("order dir")
+            .furtherDirectionsIfRequired("fur dir")
+            .recitalsOrPreamble("reci")
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesClerk)
+            .isTheOrderByConsent(YesOrNo.Yes)
+            .build();
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("")
             .lastName("")
@@ -1214,6 +1243,7 @@ public class ManageOrderServiceTest {
         CaseData caseData = CaseData.builder()
             .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
+            .manageOrders(expectedDetails)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings).build();
         assertNotNull(manageOrderService.populateCustomOrderFields(caseData));
