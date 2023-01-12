@@ -8,6 +8,7 @@
         <notes><![CDATA[
       tomcat-embed-core-9.0.63.jar ]]></notes>
         <cve>CVE-2022-34305</cve>
+        <cve>CVE-2021-37533</cve>
     </suppress>
   <suppress>
     <notes>Temporary Suppression</notes>
@@ -19,6 +20,7 @@
     <cve>CVE-2021-4277</cve>
     <cve>CVE-2021-4235</cve>
     <cve>CVE-2022-3064</cve>
+      <cve>CVE-2022-45143</cve>
   </suppress>
     <suppress>
         <notes><![CDATA[
@@ -34,6 +36,11 @@
         <cve>CVE-2022-38749</cve>
         <cve>CVE-2022-38752</cve>
         <cve>CVE-2022-42252</cve>
+        <cve>CVE-2021-4277</cve>
+        <cve>CVE-2021-4235</cve>
+        <cve>CVE-2022-3064</cve>
+        <cve>CVE-2021-37533</cve>
+        <cve>CVE-2022-45143</cve>
     </suppress>
   <suppress>
     <notes><![CDATA[
@@ -49,6 +56,56 @@
     <notes><![CDATA[
       jackson-databind-2.13.3.jar ]]></notes>
     <cve>CVE-2022-38752</cve>
+    <cve>CVE-2021-4277</cve>
+    <cve>CVE-2021-4235</cve>
+    <cve>CVE-2022-3064</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      commons-beanutils-1.9.4.jar ]]></notes>
+    <cve>CVE-2021-37533</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      LatencyUtils-2.0.3.jar ]]></notes>
+    <cve>CVE-2021-4277</cve>
+    <cve>CVE-2021-4235</cve>
+    <cve>CVE-2022-3064</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      snakeyaml-1.32.jar ]]></notes>
+    <cve>CVE-2021-4235</cve>
+    <cve>CVE-2022-3064</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+    LatencyUtils-2.0.3.jar]]>
+    </notes>
+    <cve>CVE-2021-4277</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+    LatencyUtils-2.0.3.jar]]>
+    </notes>
+    <cve>CVE-2021-4235</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+    LatencyUtils-2.0.3.jar]]>
+    </notes>
+    <cve>CVE-2022-3064</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+    tomcat-embed-core-9.0.68.jar]]>
+    </notes>
+    <cve>CVE-2022-45143</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      commons-beanutils-1.9.4.jar ]]></notes>
+    <cve>CVE-2021-37533</cve>
   </suppress>
   <suppress>
     <packageUrl regex="true">^pkg:maven/.*/.*@.*$</packageUrl>
