@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -38,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingData;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
+import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
@@ -64,7 +66,7 @@ public class CreateBundleConsumerTest {
     private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
     private static final String SERVICE_AUTHORIZATION_HEADER = "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
 
-
+    private final BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder().build();
     @Pact(provider = "createBundleApi", consumer = "prl_cos")
     private RequestResponsePact generateCreateBundleResponse(PactDslWithProvider builder) throws JsonProcessingException {
         List<BundlingRequestDocument> bundlingRequestDocuments = new ArrayList<>();
@@ -82,6 +84,7 @@ public class CreateBundleConsumerTest {
             .headers("Authorization", BEARER_TOKEN)
             .headers("Content-Type", "application/json")
             .path("/api/new-bundle")
+            .body(new ObjectMapper().writeValueAsString(bundleCreateRequest), "application/json")
             .willRespondWith()
             .status(HttpStatus.SC_OK)
             .body(createBundleResponse())
