@@ -174,11 +174,11 @@ public class BundleCreateRequestMapper {
         if (!miamCertAndPreviousOrdersUploadedByCourtAdmin.isEmpty()) {
             applications.addAll(miamCertAndPreviousOrdersUploadedByCourtAdmin);
         }
-        Document miamCertificateUpload = caseData.getMiamCertificationDocumentUpload();
+        Document miamCertificateUpload = caseData.getMiamDetails().getMiamCertificationDocumentUpload();
         if (null != miamCertificateUpload) {
             applications.add(mapBundlingRequestDocument(miamCertificateUpload, BundlingDocGroupEnum.applicantMiamCertificate));
         }
-        Document miamCertificateUpload1 = caseData.getMiamCertificationDocumentUpload1();
+        Document miamCertificateUpload1 = caseData.getMiamDetails().getMiamCertificationDocumentUpload1();
         if (null != miamCertificateUpload1) {
             applications.add(mapBundlingRequestDocument(miamCertificateUpload1, BundlingDocGroupEnum.applicantMiamCertificate));
         }

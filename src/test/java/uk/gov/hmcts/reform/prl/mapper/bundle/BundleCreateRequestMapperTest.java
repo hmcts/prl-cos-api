@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -130,6 +131,9 @@ public class BundleCreateRequestMapperTest {
         fl401UploadSupportingDocuments.add(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("supportingDoc.pdf")
             .build());
 
+
+
+
         CaseData c100CaseData = CaseData.builder()
             .id(123456789123L)
             .languagePreferenceWelsh(No)
@@ -146,8 +150,8 @@ public class BundleCreateRequestMapperTest {
             .bundleInformation(BundlingInformation.builder().build())
             .citizenResponseC7DocumentList(ElementUtils.wrapElements(citizenC7uploadedDocs))
             .citizenUploadedDocumentList(ElementUtils.wrapElements(uploadedDocuments))
-            .miamCertificationDocumentUpload(Document.builder().documentFileName("maimCertDoc1").documentUrl("Url").build())
-            .miamCertificationDocumentUpload1(Document.builder().documentFileName("maimCertDoc2").documentUrl("Url").build())
+            .miamDetails(MiamDetails.builder().miamCertificationDocumentUpload(Document.builder().documentFileName("maimCertDoc1").documentUrl("Url").build())
+                .miamCertificationDocumentUpload1(Document.builder().documentFileName("maimCertDoc2").documentUrl("Url").build()).build())
             .applicantName("ApplicantFirstNameAndLastName")
             .fl401UploadWitnessDocuments(ElementUtils.wrapElements(fl401UploadWitnessDocuments))
             .fl401UploadSupportDocuments(ElementUtils.wrapElements(fl401UploadSupportingDocuments))
