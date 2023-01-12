@@ -6,12 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 
+import java.util.List;
+
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class RespondentInterpreterNeeds {
 
-    private final PartyEnum party;
+    private final List<PartyEnum> party;
     private final String relationName;
     private final String requiredLanguage;
     private final String respondentOtherAssistance;
