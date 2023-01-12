@@ -129,7 +129,7 @@ public class CaseServiceTest {
 
     @Test
     public void testRetrieveCases() {
-        assertNotNull(caseService.retrieveCasesWith("",""));
+        assertNotNull(caseService.retrieveCases("",""));
     }
 
     @Test
