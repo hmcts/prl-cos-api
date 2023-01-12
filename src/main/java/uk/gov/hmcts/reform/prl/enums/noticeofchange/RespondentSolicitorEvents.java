@@ -17,7 +17,7 @@ public enum RespondentSolicitorEvents {
         "Edit your contact details",
         "resSolConfirmEditContactDetails"
     ),
-    ATTENDING_THE_COURT("c100ResSolAttendingTheCourt", "Attending the court", "respondentAttendingToCourt"),
+    ATTENDING_THE_COURT("c100ResSolAttendingTheCourt", "Attending the court", "respondentAttendingTheCourt"),
     MIAM(
         "c100ResSolMiam",
         "MIAM",

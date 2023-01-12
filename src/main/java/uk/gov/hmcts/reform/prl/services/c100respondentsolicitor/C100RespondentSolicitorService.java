@@ -91,7 +91,7 @@ public class C100RespondentSolicitorService {
                         event.getCaseFieldName(),
                         x.getValue().getResponse().getAttendToCourt()
                     );
-                    log.info("finding respondentAttendingToCourt = " + x.getValue().getResponse().getAttendToCourt());
+                    log.info("finding respondentAttendingTheCourt = " + x.getValue().getResponse().getAttendToCourt());
                     break;
                 case MIAM:
                     String[] miamFields = event.getCaseFieldName().split(",");
