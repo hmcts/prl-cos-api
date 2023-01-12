@@ -83,11 +83,6 @@ public class CreateBundleConsumerTest {
             .headers("Authorization", BEARER_TOKEN)
             .headers("Content-Type", "application/json")
             .path("/api/new-bundle")
-            .body(new ObjectMapper().writeValueAsString(BundleCreateRequest.builder().eventId("createBundle").jurisdictionId("JURISDICTIONID")
-                .caseTypeId("CASETYPEID").caseDetails(
-                BundlingCaseDetails.builder().caseData(BundlingCaseData.builder().id("CaseID").bundleConfiguration("BUNDLE_config.yaml")
-                    .data(BundlingData.builder().allOtherDocuments(ElementUtils.wrapElements(bundlingRequestDocuments)).build())
-                    .build()).build())), "application/json")
             .willRespondWith()
             .status(HttpStatus.SC_OK)
             .body(createBundleResponse())
