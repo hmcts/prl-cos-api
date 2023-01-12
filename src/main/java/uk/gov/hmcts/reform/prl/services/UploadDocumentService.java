@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -45,45 +47,65 @@ public class UploadDocumentService {
                                                                      CASE_TYPE, JURISDICTION, newArrayList(file)
         );
 
-        Document document = response.getDocuments().stream()
+        return response.getDocuments().stream()
             .findFirst()
             .orElseThrow(() ->
                              new RuntimeException("Document upload failed due to empty result"));
 
-        return document;
     }
 
-    public UploadedDocuments uploadCitizenDocument(String authorisation, UploadedDocumentRequest uploadedDocumentRequest, String caseId) {
+    public UploadedDocuments uploadCitizenDocument(String authorisation, UploadedDocumentRequest uploadedDocumentRequest) {
+
+        UploadedDocuments uploadedDocuments = null;
+
+        if (uploadedDocumentRequest != null) {
+            uploadedDocuments = uploadedDocuments(uploadedDocumentRequest,authorisation);
+
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        return uploadedDocuments;
+    }
+
+
+    public void deleteDocument(String authorizationToken, String documentId) {
+        caseDocumentClient.deleteDocument(
+            authorizationToken,
+            authTokenGenerator.generate(),
+            UUID.fromString(documentId),
+            true
+        );
+    }
+
+    public UploadedDocuments uploadedDocuments(UploadedDocumentRequest uploadedDocumentRequest, String authorisation) {
 
         String parentDocumentType = "";
         String documentType = "";
         String partyName = "";
         String partyId = "";
-        LocalDate today = LocalDate.now();
-        String formattedDateCreated = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
         String isApplicant = "";
         YesOrNo documentRequest = null;
+        LocalDate today = LocalDate.now();
+        String formattedDateCreated = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
+        UploadedDocuments uploadedDocuments = null;
 
-        if (uploadedDocumentRequest != null) {
-            if (null != uploadedDocumentRequest.getParentDocumentType()) {
-                parentDocumentType = uploadedDocumentRequest.getParentDocumentType();
+        if (null != uploadedDocumentRequest.getParentDocumentType()) {
+            parentDocumentType = uploadedDocumentRequest.getParentDocumentType();
+        }
+        if (null != uploadedDocumentRequest.getPartyId()) {
+            partyId = uploadedDocumentRequest.getPartyId();
+        }
+        if (null != uploadedDocumentRequest.getDocumentType()) {
+            documentType = uploadedDocumentRequest.getDocumentType();
+            if (null != uploadedDocumentRequest.getPartyName()) {
+                partyName = uploadedDocumentRequest.getPartyName();
             }
-            if (null != uploadedDocumentRequest.getPartyId()) {
-                partyId = uploadedDocumentRequest.getPartyId();
-            }
-            if (null != uploadedDocumentRequest.getDocumentType()) {
-                documentType = uploadedDocumentRequest.getDocumentType();
-                if (null != uploadedDocumentRequest.getPartyName()) {
-                    partyName = uploadedDocumentRequest.getPartyName();
-                }
-            }
-            if (null != uploadedDocumentRequest.getIsApplicant()) {
-                isApplicant = uploadedDocumentRequest.getIsApplicant();
-            }
-            if (null != uploadedDocumentRequest.getDocumentRequestedByCourt()) {
-                documentRequest = uploadedDocumentRequest.getDocumentRequestedByCourt();
-            }
-
+        }
+        if (null != uploadedDocumentRequest.getIsApplicant()) {
+            isApplicant = uploadedDocumentRequest.getIsApplicant();
+        }
+        if (null != uploadedDocumentRequest.getDocumentRequestedByCourt()) {
+            documentRequest = uploadedDocumentRequest.getDocumentRequestedByCourt();
         }
         if (!uploadedDocumentRequest.getFiles().isEmpty()) {
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
@@ -93,7 +115,6 @@ public class UploadDocumentService {
                 JURISDICTION,
                 uploadedDocumentRequest.getFiles()
             );
-            UploadedDocuments uploadedDocuments = null;
 
             for (MultipartFile file : uploadedDocumentRequest.getFiles()) {
 
@@ -114,20 +135,16 @@ public class UploadDocumentService {
                                          .documentFileName(file.getOriginalFilename())
                                          .build()).build();
             }
-
-            return uploadedDocuments;
-
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+        return uploadedDocuments;
+
     }
 
-    public void deleteDocument(String authorizationToken, String documentId) {
-        caseDocumentClient.deleteDocument(
+    public ResponseEntity<Resource> downloadDocument(String authorizationToken, String documentId) {
+        return caseDocumentClient.getDocumentBinary(
             authorizationToken,
             authTokenGenerator.generate(),
-            UUID.fromString(documentId),
-            true
+            UUID.fromString(documentId)
         );
     }
 
