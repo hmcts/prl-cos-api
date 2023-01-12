@@ -12,14 +12,20 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ApplicantOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildSelectorEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.RespondentOccupationEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
@@ -193,4 +199,30 @@ public class ManageOrders {
     private final YesOrNo isOrderDrawnForCafcass;
     @JsonProperty("cafcassReports")
     private final List<CafcassReportsEnum> cafcassReports;
+
+    private DynamicList serveOrderDynamicList;
+    @JsonProperty("serveOrderAdditionalDocuments")
+    private final List<Element<Document>> serveOrderAdditionalDocuments;
+
+    private final YesOrNo serveToRespondentOptions;
+    private final ServingRespondentsEnum servingRespondentsOptionsCA;
+    private final YesOrNo cafcassServedOptions;
+    private final YesOrNo cafcassCymruServedOptions;
+    private final String cafcassCymruEmail;
+    @JsonProperty("serveOtherPartiesCA")
+    private final List<OtherOrganisationOptions> serveOtherPartiesCA;
+    private final DeliveryByEnum deliveryByOptionsCA;
+    @JsonProperty("emailInformationCA")
+    private final List<Element<EmailInformation>> emailInformationCA;
+    @JsonProperty("postalInformationCA")
+    private final List<Element<PostalInformation>> postalInformationCA;
+
+    private final ServingRespondentsEnum servingRespondentsOptionsDA;
+    private final List<ServeOtherPartiesOptions> serveOtherPartiesDA;
+    private final DeliveryByEnum deliveryByOptionsDA;
+    @JsonProperty("emailInformationDA")
+    private final List<Element<EmailInformation>> emailInformationDA;
+    @JsonProperty("postalInformationDA")
+    private final List<Element<PostalInformation>> postalInformationDA;
+
 }
