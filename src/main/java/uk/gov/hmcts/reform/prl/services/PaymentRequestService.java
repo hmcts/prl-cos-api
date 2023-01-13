@@ -153,37 +153,42 @@ public class PaymentRequestService {
             }
             return paymentResponse;
         } else {
-            if (null != createPaymentRequest.getHwfRefNumber()) {
-                log.info("resubmit/retry with help with fees for the case id: {}", caseId);
-                paymentResponse = PaymentResponse.builder()
-                    .serviceRequestReference(paymentServiceReferenceNumber)
-                    .build();
-                return paymentResponse;
-            }
+            return getPaymentResponse(authorization, createPaymentRequest, caseId, paymentServiceReferenceNumber, paymentReferenceNumber);
+        }
+    }
 
-            log.info("retry for card payments, checking payment status for the case id: {} ", caseId);
-            PaymentStatusResponse paymentStatus = fetchPaymentStatus(authorization, paymentReferenceNumber);
-            String status = (null != paymentStatus && null != paymentStatus.getStatus()) ? paymentStatus.getStatus() : null;
-            log.info("Payment Status : {} caseId: {} ", status, caseId);
-            if (PAYMENT_STATUS_SUCCESS.equalsIgnoreCase(status)) {
-                paymentResponse = PaymentResponse.builder()
-                    .paymentReference(paymentReferenceNumber)
-                    .serviceRequestReference(paymentServiceReferenceNumber)
-                    .paymentStatus(status)
-                    .build();
+    private PaymentResponse getPaymentResponse(String authorization, CreatePaymentRequest createPaymentRequest,
+                                               String caseId, String paymentServiceReferenceNumber, String paymentReferenceNumber) throws Exception {
+        if (null != createPaymentRequest.getHwfRefNumber()) {
+            log.info("resubmit/retry with help with fees for the case id: {}", caseId);
+            paymentResponse = PaymentResponse.builder()
+                .serviceRequestReference(paymentServiceReferenceNumber)
+                .build();
+            return paymentResponse;
+        }
 
-                log.info("Payment is already successful for the case id: {} ", caseId);
-                return paymentResponse;
-            } else {
-                log.info("Previous payment failed, creating new payment for the caseId: {}", caseId);
-                paymentResponse = createServicePayment(
+        log.info("retry for card payments, checking payment status for the case id: {} ", caseId);
+        PaymentStatusResponse paymentStatus = fetchPaymentStatus(authorization, paymentReferenceNumber);
+        String status = (null != paymentStatus && null != paymentStatus.getStatus()) ? paymentStatus.getStatus() : null;
+        log.info("Payment Status : {} caseId: {} ", status, caseId);
+        if (PAYMENT_STATUS_SUCCESS.equalsIgnoreCase(status)) {
+            paymentResponse = PaymentResponse.builder()
+                .paymentReference(paymentReferenceNumber)
+                .serviceRequestReference(paymentServiceReferenceNumber)
+                .paymentStatus(status)
+                .build();
+
+            log.info("Payment is already successful for the case id: {} ", caseId);
+            return paymentResponse;
+        } else {
+            log.info("Previous payment failed, creating new payment for the caseId: {}", caseId);
+            paymentResponse = createServicePayment(
                     paymentServiceReferenceNumber,
                     authorization,
-                    createPaymentRequest.getReturnUrl()
-                );
-                paymentResponse.setServiceRequestReference(paymentServiceReferenceNumber);
-                return paymentResponse;
-            }
+                createPaymentRequest.getReturnUrl()
+            );
+            paymentResponse.setServiceRequestReference(paymentServiceReferenceNumber);
+            return paymentResponse;
         }
     }
 
