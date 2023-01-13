@@ -76,7 +76,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                 if (domesticBehavioursWrapped.isPresent()
                     && !domesticBehavioursWrapped.get().isEmpty()) {
                     domesticBehavioursCompleted =  domesticBehavioursWrapped.get()
-                        .stream().anyMatch(behavioursElement -> validateDomesticAbuseBehaviours(behavioursElement.getValue()));
+                        .stream().allMatch(behavioursElement -> validateDomesticAbuseBehaviours(behavioursElement.getValue()));
                     if (!domesticBehavioursCompleted) {
                         return false;
                     }
@@ -89,7 +89,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                 if (childBehavioursWrapped.isPresent()
                     && !childBehavioursWrapped.get().isEmpty()) {
                     domesticBehavioursCompleted =  childBehavioursWrapped.get()
-                        .stream().anyMatch(behavioursElement -> validateChildAbuseBehaviours((behavioursElement.getValue())));
+                        .stream().allMatch(behavioursElement -> validateChildAbuseBehaviours((behavioursElement.getValue())));
                     if (!domesticBehavioursCompleted) {
                         return false;
                     }
