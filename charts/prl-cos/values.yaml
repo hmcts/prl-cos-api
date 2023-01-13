@@ -47,6 +47,6 @@ java:
         - rpa-notify-from-email
         - AppInsightsInstrumentationKey
         - southampton-court-email-address
+        - postcode-lookup-token
         - idam-solicitor-username
         - idam-solicitor-password
-        - postcode-lookup-token

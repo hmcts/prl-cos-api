@@ -43,7 +43,6 @@ public class CaseDataServiceTest {
     @InjectMocks
     private CaseDataService caseDataService;
 
-
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
