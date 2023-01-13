@@ -1,0 +1,8 @@
+{
+  "hwn_hearingPart1":"Yes",
+  "hwn_reasonsForApplicationWithoutNotice":"Give details of why you’re asking for a without notice hearing",
+  "hwn_doYouNeedAWithoutNoticeHearing":"No",
+  "hwn_doYouNeedAWithoutNoticeHearingDetails":"hearing without notice text 1",
+  "hwn_doYouRequireAHearingWithReducedNotice":"Yes",
+  "hwn_doYouRequireAHearingWithReducedNoticeDetails":"hearing without notice text 2"
+}
