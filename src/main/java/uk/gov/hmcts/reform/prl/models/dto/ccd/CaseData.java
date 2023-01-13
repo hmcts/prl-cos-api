@@ -32,9 +32,11 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.CaseLinksElement;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
@@ -47,6 +49,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
@@ -87,8 +90,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentC
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.MultiBundleConfig;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -426,6 +428,8 @@ public class CaseData implements MappableObject {
      * Issue and send to local court'.
      */
     private final List<Element<LocalCourtAdminEmail>> localCourtAdmin;
+    private final DynamicList courtList;
+    private final CaseManagementLocation caseManagementLocation;
 
     /**
      * This field contains Application Submitter solicitor email address.
@@ -536,6 +540,7 @@ public class CaseData implements MappableObject {
     private LocalDate approvalDate;
     private Document appointmentOfGuardian;
     private Document previewOrderDoc;
+    private Document previewOrderDocWelsh;
 
     private final ManageOrdersOptionsEnum manageOrdersOptions;
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
@@ -543,9 +548,13 @@ public class CaseData implements MappableObject {
     private final SelectTypeOfOrderEnum selectTypeOfOrder;
 
 
+    @JsonProperty("doesOrderClosesCase")
     private final YesOrNo doesOrderClosesCase;
+    @JsonProperty("wasTheOrderApprovedAtHearing")
     private final YesOrNo wasTheOrderApprovedAtHearing;
+    @JsonProperty("judgeOrMagistratesLastName")
     private final String judgeOrMagistratesLastName;
+    @JsonProperty("justiceLegalAdviserFullName")
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
@@ -563,6 +572,14 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final ManageOrders manageOrders;
+
+    @JsonUnwrapped
+    @Builder.Default
+    private final StandardDirectionOrder standardDirectionOrder;
+
+    @JsonUnwrapped
+    @Builder.Default
+    private final DirectionOnIssue directionOnIssue;
 
     @JsonUnwrapped
     @Builder.Default
@@ -639,6 +656,8 @@ public class CaseData implements MappableObject {
     private String previewDraftAnOrder;
 
     private String citizenUploadedStatement;
+    @JsonProperty("paymentReferenceNumber")
+    private final String paymentReferenceNumber;
 
     /**
      * Respondent Solicitor.
@@ -689,6 +708,10 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final C100RebuildData c100RebuildData;
 
+
+    private final List<Element<DraftOrder>> draftOrderCollection;
+    private Object draftOrdersDynamicList;
+
     /**
      * Bundle.
      */
@@ -715,5 +738,16 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final NoticeOfChangeAnswersData noticeOfChangeAnswersData = NoticeOfChangeAnswersData.builder().build();
+    @JsonProperty("bundleInformation")
+    private BundlingInformation bundleInformation;
+
+    private String judgeDirectionsToAdmin;
+    private YesNoNotRequiredEnum isTheOrderAboutAllChildren;
+    private String courtAdminNotes;
+
+    @JsonUnwrapped
+    @Builder.Default
+    private final ServeOrderData serveOrderData;
+
     private final List<CaseLinksElement<CaseLink>> caseLinks;
 }
