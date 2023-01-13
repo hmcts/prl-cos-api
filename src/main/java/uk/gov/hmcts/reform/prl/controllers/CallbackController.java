@@ -118,7 +118,6 @@ public class CallbackController {
     private final CourtFinderService courtLocatorService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
     private final LocationRefDataService locationRefDataService;
-    private final SearchCasesDataService searchCasesDataService;
 
     private final ConfidentialityTabService confidentialityTabService;
 
@@ -205,6 +204,7 @@ public class CallbackController {
     @PostMapping(path = "/pre-populate-court-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Generate document after submit application")
     public AboutToStartOrSubmitCallbackResponse prePopulateCourtDetails(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();

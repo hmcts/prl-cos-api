@@ -90,7 +90,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentC
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.MultiBundleConfig;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -720,20 +722,6 @@ public class CaseData implements MappableObject {
     private String bundleConfiguration;
     private List<MultiBundleConfig> multiBundleConfiguration;
 
-    private String c100RebuildMaim;
-    private String c100RebuildChildDetails;
-    private String c100RebuildApplicantDetails;
-    private String c100RebuildOtherChildrenDetails;
-    private String c100RebuildRespondentDetails;
-    private String c100RebuildOtherPersonsDetails;
-
-    private String c100RebuildSafetyConcerns;
-    private String c100RebuildScreeningQuestions;
-    private String c100RebuildHelpWithFeesDetails;
-    private String c100RebuildStatementOfTruth;
-    private String helpWithFeesReferenceNumber;
-    private String c100RebuildChildPostCode;
-    private String c100RebuildConsentOrderDetails;
     private DynamicList chooseRespondentDynamicList;
     @JsonUnwrapped
     @Builder.Default
