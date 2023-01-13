@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
@@ -670,4 +671,6 @@ public class CaseData implements MappableObject {
     private final ServeOrderData serveOrderData;
 
     private final List<CaseLinksElement<CaseLink>> caseLinks;
+
+    private Flags caseFlags;
 }
