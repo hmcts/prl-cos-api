@@ -217,13 +217,14 @@ public class CitizenCoreCaseDataService {
         if (userDetails.getRoles().contains(CITIZEN_ROLE)) {
             caseData.setCaseCreatedBy(CITIZEN);
         }
-        log.info("inside CitizenCoreCaseDataService createCase - caseData: "+ caseData +
-         "\n authorisation: "+authorisation+ 
-         "\n cosApis2sToken"+cosApis2sToken+
-         "\n userDetails"+userDetails+
-         "\n userDetails.getId()"+userDetails.getId()+
-         "\n eventRequestData"+eventRequestData+
-         "\n !userDetails.getRoles().contains(CITIZEN_ROLE)"+!userDetails.getRoles().contains(CITIZEN_ROLE));
+        log.info("inside CitizenCoreCaseDataService createCase - caseData: " + caseData
+             + "\n authorisation: " + authorisation
+             + "\n cosApis2sToken" + cosApis2sToken
+             + "\n userDetails" + userDetails
+             + "\n userDetails.getId()" + userDetails.getId()
+             + "\n eventRequestData" + eventRequestData
+             + "\n !userDetails.getRoles().contains(CITIZEN_ROLE)"
+             + !userDetails.getRoles().contains(CITIZEN_ROLE));
         StartEventResponse startEventResponse = startSubmitCreate(
             authorisation,
             cosApis2sToken,
@@ -262,14 +263,14 @@ public class CitizenCoreCaseDataService {
                 eventRequestData.getEventId()
             );
         } else {
-            log.info("inside startSubmitCreate else" +
-            "\n authorisation: "+authorisation+ 
-            "\n s2sToken"+s2sToken+
-            "\n userId"+userId+
-            "\n JURISDICTION"+JURISDICTION+
-            "\n CASE_TYPE"+CASE_TYPE+
-            "\n eventRequestData.getEventId()"+eventRequestData.getEventId());
-            log.info("core case data api invoked");        
+            log.info("inside startSubmitCreate else"
+                + "\n authorisation: " + authorisation
+                + "\n s2sToken" + s2sToken
+                + "\n userId" + userId
+                + "\n JURISDICTION" + JURISDICTION
+                 + "\n CASE_TYPE" + CASE_TYPE
+                 + "\n eventRequestData.getEventId()" + eventRequestData.getEventId());
+            log.info("core case data api invoked");
             return coreCaseDataApi.startForCitizen(
                 authorisation,
                 s2sToken,

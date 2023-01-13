@@ -174,7 +174,7 @@ public class CaseController {
         CaseDetails caseDetails = null;
 
         if (isAuthorized(authorisation, s2sToken)) {
-            log.info("inside authorized createCase - caseData: "+ caseData + " -authorisation: "+authorisation);
+            log.info("inside authorized createCase - caseData: " + caseData + " -authorisation: " + authorisation);
             caseDetails = caseService.createCase(caseData, authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
