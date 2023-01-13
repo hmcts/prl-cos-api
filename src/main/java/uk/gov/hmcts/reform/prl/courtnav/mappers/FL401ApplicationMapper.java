@@ -118,18 +118,7 @@ public class FL401ApplicationMapper {
                 .reasonForOrderWithoutGivingNotice(getReasonForWithOutOrderNotice(courtNavCaseData))
                 .futherDetails(courtNavCaseData.getFl401().getSituation().getOrdersAppliedWithoutNoticeReasonDetails())
                 .build()))
-            .bailDetails(RespondentBailConditionDetails.builder()
-                             .isRespondentAlreadyInBailCondition(courtNavCaseData
-                                                                     .getFl401()
-                                                                     .getSituation().isBailConditionsOnRespondent()
-                                                                     ? YesNoDontKnow.yes : YesNoDontKnow.no)
-                             .bailConditionEndDate(courtNavCaseData.getFl401().getSituation().isBailConditionsOnRespondent()
-                                                       ? LocalDate.parse(courtNavCaseData
-                                                                             .getFl401()
-                                                                             .getSituation()
-                                                                             .getBailConditionsEndDate()
-                                                                             .mergeDate()) : null)
-                             .build())
+            .bailDetails(getRespondentBailConditionDetails(courtNavCaseData))
             .anyOtherDtailsForWithoutNoticeOrder(OtherDetailsOfWithoutNoticeOrder.builder()
                                                      .otherDetails(courtNavCaseData.getFl401().getSituation().getAdditionalDetailsForCourt())
                                                      .build())
@@ -172,7 +161,8 @@ public class FL401ApplicationMapper {
                                                                                                           .getRelationshipWithRespondent()
                                                                                                           .getRelationshipStartDate()
                                                                                                           .mergeDate()))
-                                                    .relationshipDateComplexEndDate(getRelationShipEndDate(courtNavCaseData))
+                                                    .relationshipDateComplexEndDate(getRelationShipEndDate(
+                                                        courtNavCaseData))
                                                     .build())
                 .applicantRelationshipDate(LocalDate.parse(courtNavCaseData
                                                                .getFl401()
@@ -208,7 +198,7 @@ public class FL401ApplicationMapper {
                                   .build())
             .attendHearing(AttendHearing.builder()
                                .isInterpreterNeeded(Boolean.TRUE.equals(courtNavCaseData.getFl401().getGoingToCourt().getIsInterpreterRequired())
-                                                   ? YesOrNo.Yes : YesOrNo.No)
+                                                        ? YesOrNo.Yes : YesOrNo.No)
                                .interpreterNeeds(interpreterLanguageDetails(courtNavCaseData))
                                .isDisabilityPresent(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds() ? YesOrNo.Yes : YesOrNo.No)
                                .adjustmentsRequired(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds()
@@ -221,14 +211,7 @@ public class FL401ApplicationMapper {
                                    .map(SpecialMeasuresEnum::getDisplayedValue)
                                    .collect(Collectors.joining(","))) : null)
                                .build())
-
-            .fl401OtherProceedingDetails(FL401OtherProceedingDetails.builder()
-                                             .hasPrevOrOngoingOtherProceeding(courtNavCaseData.getFl401().getFamily().isAnyOngoingCourtProceedings()
-                                                                                  ? YesNoDontKnow.yes : YesNoDontKnow.no)
-                                             .fl401OtherProceedings(courtNavCaseData.getFl401().getFamily().isAnyOngoingCourtProceedings()
-                                                                        ? getOngoingProceedings(courtNavCaseData.getFl401()
-                                                                                                    .getFamily().getOngoingCourtProceedings()) : null)
-                                             .build())
+            .fl401OtherProceedingDetails(getFl401OtherProceedingDetails(courtNavCaseData))
             .build();
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
 
@@ -249,19 +232,58 @@ public class FL401ApplicationMapper {
 
     }
 
+    private RespondentBailConditionDetails getRespondentBailConditionDetails(CourtNavFl401 courtNavCaseData) {
+        return RespondentBailConditionDetails.builder()
+            .isRespondentAlreadyInBailCondition(courtNavCaseData
+                                                    .getFl401()
+                                                    .getSituation().isBailConditionsOnRespondent()
+                                                    ? YesNoDontKnow.yes : YesNoDontKnow.no)
+            .bailConditionEndDate(courtNavCaseData.getFl401().getSituation().isBailConditionsOnRespondent()
+                                      ? LocalDate.parse(courtNavCaseData
+                                                            .getFl401()
+                                                            .getSituation()
+                                                            .getBailConditionsEndDate()
+                                                            .mergeDate()) : null)
+            .build();
+    }
+
+    private FL401OtherProceedingDetails getFl401OtherProceedingDetails(CourtNavFl401 courtNavCaseData) {
+        return FL401OtherProceedingDetails.builder()
+            .hasPrevOrOngoingOtherProceeding(courtNavCaseData.getFl401().getFamily().isAnyOngoingCourtProceedings()
+                                                 ? YesNoDontKnow.yes : YesNoDontKnow.no)
+            .fl401OtherProceedings(courtNavCaseData.getFl401().getFamily().isAnyOngoingCourtProceedings()
+                                       ? getOngoingProceedings(courtNavCaseData.getFl401()
+                                                                   .getFamily().getOngoingCourtProceedings()) : null)
+            .build();
+    }
+
     private List<ApplicantStopFromRespondentDoingToChildEnum> getChildrenBehaviourList(CourtNavFl401 courtNavCaseData) {
 
-        return (null !=  courtNavCaseData.getFl401()
+        return (null != courtNavCaseData.getFl401()
             .getRespondentBehaviour().getStopBehaviourTowardsChildren())
             ? getBehaviourTowardsChildren(courtNavCaseData) : null;
     }
 
     private List<ApplicantStopFromRespondentDoingEnum> getApplicantBehaviourList(CourtNavFl401 courtNavCaseData) {
 
-        return (null !=  courtNavCaseData.getFl401()
+        return (null != courtNavCaseData.getFl401()
             .getRespondentBehaviour().getStopBehaviourTowardsApplicant())
             ? getBehaviourTowardsApplicant(courtNavCaseData) : null;
     }
+
+
+    private LocalDate getRelationShipCeremonyDate(CourtNavFl401 courtNavCaseData) {
+        LocalDate cermonyDate = null;
+
+        if (null != courtNavCaseData.getFl401().getRelationshipWithRespondent().getCeremonyDate()) {
+            cermonyDate = LocalDate.parse(courtNavCaseData
+                                              .getFl401()
+                                              .getRelationshipWithRespondent()
+                                              .getCeremonyDate().mergeDate());
+        }
+        return cermonyDate;
+    }
+
 
     private LocalDate getRelationShipEndDate(CourtNavFl401 courtNavCaseData) {
         LocalDate endDate = null;
@@ -392,7 +414,7 @@ public class FL401ApplicationMapper {
             .doAnyChildrenLiveAtAddress(getAnyChildrenLivedAtAddress(courtNavCaseData))
             .children(getChildrenDetails(courtNavCaseData)
                           ? mapHomeChildren(courtNavCaseData.getFl401()
-                                              .getTheHome()) : null)
+                                                .getTheHome()) : null)
             .isPropertyAdapted(courtNavCaseData.getFl401()
                                    .getTheHome().isPropertySpeciallyAdapted() ? YesOrNo.Yes : YesOrNo.No)
             .howIsThePropertyAdapted(courtNavCaseData.getFl401()
@@ -595,7 +617,7 @@ public class FL401ApplicationMapper {
             .lastName(respondent.getRespondentLastName())
             .previousName(respondent.getRespondentOtherNames())
             .dateOfBirth(null != respondent.getRespondentDateOfBirth()
-                        ? LocalDate.parse(respondent.getRespondentDateOfBirth().mergeDate()) : null)
+                             ? LocalDate.parse(respondent.getRespondentDateOfBirth().mergeDate()) : null)
             .isDateOfBirthKnown(YesOrNo.valueOf(null != respondent.getRespondentDateOfBirth() ? "Yes" : "No"))
             .email(respondent.getRespondentEmailAddress())
             .canYouProvideEmailAddress(YesOrNo.valueOf(null != respondent.getRespondentEmailAddress() ? "Yes" : "No"))
