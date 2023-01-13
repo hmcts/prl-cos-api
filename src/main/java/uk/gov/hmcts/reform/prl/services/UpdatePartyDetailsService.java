@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
@@ -74,8 +73,8 @@ public class UpdatePartyDetailsService {
             }
 
             // set applicant and respondent case flag
-            setApplicantFlag(caseData, caseDetails);
-            setRespondentFlag(caseData, caseDetails);
+            setApplicantFlag(caseData, updatedCaseData);
+            setRespondentFlag(caseData, updatedCaseData);
         }
 
         return updatedCaseData;

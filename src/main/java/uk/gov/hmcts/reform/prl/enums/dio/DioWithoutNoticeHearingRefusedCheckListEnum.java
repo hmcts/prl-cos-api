@@ -9,11 +9,11 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum DioUrgentHearingRefusedCheckListEnum {
+public enum DioWithoutNoticeHearingRefusedCheckListEnum {
 
     @JsonProperty("localAuthorivityInvolvedWithChildren")
-    localAuthorivityInvolvedWithChildren("localAuthorivityInvolvedWithChildren", "The Local Authority "
-        + "are currently involved with the child[ren] and family"),
+    localAuthorivityInvolvedWithChildren("localAuthorivityInvolvedWithChildren", "The Local Authority are "
+        + "currently involved with the child[ren] and family"),
     @JsonProperty("noEvidenceOfImmediateRisk")
     noEvidenceOfImmediateRisk("noEvidenceOfImmediateRisk", "There is no evidence of immediate "
         + "risk of harm to the child[ren]"),
@@ -26,9 +26,12 @@ public enum DioUrgentHearingRefusedCheckListEnum {
     @JsonProperty("noGenuineEmergency")
     noGenuineEmergency("noGenuineEmergency", "There is no evidence to suggest that the respondent "
         + "seeks to remove the child[ren] from the applicant's care and therefore there is no genuine emergency"),
+    @JsonProperty("noEvidenceForRespondentGiveNotice")
+    noEvidenceForRespondentGiveNotice("noEvidenceForRespondentGiveNotice", "There is no evidence to "
+        + "suggest that the respondent would seek to frustrate the process if they were given notice."),
     @JsonProperty("noEvidenceForRespondentToLeave")
-    noEvidenceForRespondentToLeave("noEvidenceForRespondentToLeave", "There is no evidence to suggest"
-        + " that the respondent may attempt to leave the jurisdiction with the child[ren] if the application is not heard urgently"),
+    noEvidenceForRespondentToLeave("noEvidenceForRespondentToLeave", "There is no evidence to suggest "
+        + "that the respondent may attempt to leave the jurisdiction with the child[ren] if the application is not heard urgently"),
     @JsonProperty("anotherReason")
     anotherReason("anotherReason", "Another reason that has not been listed");
 
@@ -41,8 +44,8 @@ public enum DioUrgentHearingRefusedCheckListEnum {
     }
 
     @JsonCreator
-    public static DioUrgentHearingRefusedCheckListEnum getValue(String key) {
-        return DioUrgentHearingRefusedCheckListEnum.valueOf(key);
+    public static DioWithoutNoticeHearingRefusedCheckListEnum getValue(String key) {
+        return DioWithoutNoticeHearingRefusedCheckListEnum.valueOf(key);
     }
 
 }
