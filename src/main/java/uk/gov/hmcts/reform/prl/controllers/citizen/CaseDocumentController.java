@@ -7,14 +7,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,6 +63,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_ID;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -354,7 +358,7 @@ public class CaseDocumentController {
                                                    @RequestParam("file") MultipartFile file) throws IOException {
 
         if (!isAuthorized(authorisation, serviceAuthorization)) {
-            throw (new RuntimeException("Invalid Client"));
+            throw (new RuntimeException(INVALID_CLIENT));
         }
         return ResponseEntity.ok(documentGenService.uploadDocument(authorisation, file));
     }
@@ -371,7 +375,7 @@ public class CaseDocumentController {
                                             @RequestHeader("ServiceAuthorization") String serviceAuthorization,
                                             @PathVariable("documentId") String documentId) {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
-            throw (new RuntimeException("Invalid Client"));
+            throw (new RuntimeException(INVALID_CLIENT));
         }
         return ResponseEntity.ok(documentGenService.deleteDocument(authorisation, documentId));
     }
@@ -379,6 +383,28 @@ public class CaseDocumentController {
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
         return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization));
+    }
+
+    @GetMapping("/{documentId}/download")
+    @Operation(description = "Download a Citizen document from client document api")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Downloaded document successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad Request while deleting the document"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "404", description = "Document not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")})
+    public ResponseEntity<byte[]> downloadDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                   @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+                                   @PathVariable("documentId") String documentId) throws IOException {
+        if (!isAuthorized(authorisation, serviceAuthorization)) {
+            throw (new RuntimeException("Invalid Client"));
+        }
+        Resource body = documentGenService.downloadDocument(authorisation, documentId).getBody();
+        if (body != null) {
+            return ResponseEntity.ok(IOUtils.toByteArray(body.getInputStream()));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
 
