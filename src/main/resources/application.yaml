@@ -432,3 +432,6 @@ ccd:
 fis_hearing:
   api:
     url: ${HEARING_API_BASEURL:http://fis-hmc-api-demo.service.core-compute-demo.internal}
+
+courts:
+  filter: ${COURT_IDS_TO_FILTER:}

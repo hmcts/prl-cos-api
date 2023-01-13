@@ -410,3 +410,6 @@ ccd:
     result-size: 100
     boost: 2.0
 
+
+courts:
+  filter: ${COURT_IDS_TO_FILTER:}

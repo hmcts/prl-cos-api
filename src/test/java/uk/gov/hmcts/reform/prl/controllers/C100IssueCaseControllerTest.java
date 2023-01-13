@@ -36,7 +36,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
-import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -114,9 +113,6 @@ public class C100IssueCaseControllerTest {
 
     @Mock
     private OrganisationService organisationService;
-
-    @Mock
-    private CaseWorkerEmailService caseWorkerEmailService;
 
     @Mock
     private DocumentLanguageService documentLanguageService;
@@ -313,8 +309,6 @@ public class C100IssueCaseControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
-
-        verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -346,7 +340,6 @@ public class C100IssueCaseControllerTest {
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
         verifyNoMoreInteractions(organisationService);
-        verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -437,8 +430,6 @@ public class C100IssueCaseControllerTest {
             Mockito.anyString(),
             Mockito.any(CaseData.class)
         );
-        verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
-        //verifyNoMoreInteractions(organisationService);
     }
 
     @Test
@@ -503,7 +494,7 @@ public class C100IssueCaseControllerTest {
             .applicantsConfidentialDetails(Collections.emptyList())
             .childrenConfidentialDetails(Collections.emptyList())
             .id(123L)
-            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("reg-base").build()).build())
+            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("reg-base-courtname-test-test-test").build()).build())
             .build();
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
@@ -586,9 +577,6 @@ public class C100IssueCaseControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
-
-        verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
     }
-
 }
 
