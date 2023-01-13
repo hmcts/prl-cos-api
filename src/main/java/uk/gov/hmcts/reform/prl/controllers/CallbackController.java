@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
@@ -283,10 +284,16 @@ public class CallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String[] venueDetails = caseData.getCourtList().getValue().getCode().split("-");
-        String baseLocation = Arrays.stream(venueDetails).toArray()[0].toString();
+        String baseLocationId = Arrays.stream(venueDetails).toArray()[0].toString();
+        String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
         String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
         caseDataUpdated.put(COURT_NAME_FIELD, courtName);
-        caseDataUpdated.put(COURT_ID_FIELD, baseLocation);
+        caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
+        String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
+        String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
+        caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
+            .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
+            .baseLocationName(baseLocationName).build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

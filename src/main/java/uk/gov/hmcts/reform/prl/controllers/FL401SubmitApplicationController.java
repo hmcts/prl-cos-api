@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -153,13 +154,19 @@ public class FL401SubmitApplicationController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         caseDataUpdated.put(COURT_NAME_FIELD, courtName);
-        String baseLocation = Arrays.stream(venueDetails).toArray()[0].toString();
+        String baseLocationId = Arrays.stream(venueDetails).toArray()[0].toString();
+        String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
         String postcode = Arrays.stream(venueDetails).toArray()[3].toString();
         String courtSlug = courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts().get(0).getCourtSlug();
         Court court = courtFinderApi.getCourtDetails(courtSlug);
-        caseDataUpdated.put(COURT_ID_FIELD, baseLocation);
+        caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
         String courtEmail = courtFinderService.getEmailAddress(court).get().getAddress();
         caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
+        String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
+        String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
+        caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
+            .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
+            .baseLocationName(baseLocationName).build());
 
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
         if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
