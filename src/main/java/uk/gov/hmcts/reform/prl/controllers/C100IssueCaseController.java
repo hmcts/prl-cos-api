@@ -57,11 +57,14 @@ public class C100IssueCaseController {
 
         if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
             String[] venueDetails = caseData.getCourtList().getValue().getCode().split("-");
-            String baseLocation = Arrays.stream(venueDetails).toArray()[0].toString();
-            String region = Arrays.stream(venueDetails).toArray()[1].toString();
+            String baseLocationId = Arrays.stream(venueDetails).toArray()[0].toString();
+            String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
             String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
+            String regionName = Arrays.stream(venueDetails).toArray()[3].toString();
+            String baseLocationName = Arrays.stream(venueDetails).toArray()[4].toString();
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-                .region(region).baseLocation(baseLocation).build());
+                .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
+                .baseLocationName(baseLocationName).build());
             caseData = caseData.toBuilder().issueDate(LocalDate.now()).courtName(courtName).build();
             log.info("******* CaseManagementLocation {}", caseDataUpdated.get("caseManagementLocation"));
         }
