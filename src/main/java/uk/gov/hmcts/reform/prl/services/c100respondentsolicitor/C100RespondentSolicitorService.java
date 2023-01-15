@@ -199,7 +199,7 @@ public class C100RespondentSolicitorService {
                 break;
             case MIAM:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .miam(caseData.getRespondentSolicitorMiam())
+                    .solicitorMiam(caseData.getRespondentSolicitorMiam())
                     .build();
                 break;
             case CURRENT_OR_PREVIOUS_PROCEEDINGS:
