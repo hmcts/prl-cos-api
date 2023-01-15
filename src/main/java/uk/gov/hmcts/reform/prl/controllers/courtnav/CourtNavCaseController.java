@@ -56,7 +56,7 @@ public class CourtNavCaseController {
         @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Object> createCase(
+    public ResponseEntity createCase(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @Valid @RequestBody CourtNavFl401 inputData
@@ -87,7 +87,7 @@ public class CourtNavCaseController {
         @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Object> uploadDocument(
+    public ResponseEntity uploadDocument(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @PathVariable("caseId") String caseId,

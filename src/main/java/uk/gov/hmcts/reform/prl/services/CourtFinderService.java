@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
@@ -114,8 +113,8 @@ public class CourtFinderService {
 
     public String getPostCode(OtherPersonWhoLivesWithChild otherPerson) {
         return ofNullable(otherPerson)
-            .map(OtherPersonWhoLivesWithChild::getAddress)
-            .map(Address::getPostCode)
+            .map(r -> r.getAddress())
+            .map(t -> t.getPostCode())
             .orElse("");
     }
 

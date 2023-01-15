@@ -112,7 +112,7 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (isAuthorized(authorisation, s2sToken)) {
-            return caseService.retrieveCases(authorisation, authTokenGenerator.generate());
+            return caseService.retrieveCases(authorisation, authTokenGenerator.generate(), role, userId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
