@@ -139,7 +139,8 @@ public class CaseService {
         return caseDetails
             .stream()
             .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
-            .collect(Collectors.toList());    }
+            .collect(Collectors.toList());
+    }
 
     private List<CaseData> searchCasesLinkedToCitizen(String authToken, String s2sToken,
                                                       Map<String, String> searchCriteria) {
@@ -218,7 +219,8 @@ public class CaseService {
                         partyDetails.getValue().setUser(user);
                     }
                 }
-            }        } else {
+            }
+        } else {
             if (YesOrNo.Yes.equals(isApplicant)) {
                 caseData.getApplicantsFL401().setUser(user);
             } else {

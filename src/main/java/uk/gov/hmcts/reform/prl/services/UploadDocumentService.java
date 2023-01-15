@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -83,9 +85,7 @@ public class UploadDocumentService {
             if (null != uploadedDocumentRequest.getDocumentRequestedByCourt()) {
                 documentRequest = uploadedDocumentRequest.getDocumentRequestedByCourt();
             }
-
         }
-
         if (!uploadedDocumentRequest.getFiles().isEmpty()) {
 
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
@@ -130,6 +130,14 @@ public class UploadDocumentService {
             authTokenGenerator.generate(),
             UUID.fromString(documentId),
             true
+        );
+    }
+
+    public ResponseEntity<Resource> downloadDocument(String authorizationToken, String documentId) {
+        return caseDocumentClient.getDocumentBinary(
+            authorizationToken,
+            authTokenGenerator.generate(),
+            UUID.fromString(documentId)
         );
     }
 

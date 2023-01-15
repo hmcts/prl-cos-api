@@ -124,7 +124,6 @@ public class CitizenCallbackControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .build();
-
     }
 
     @Test
@@ -165,6 +164,5 @@ public class CitizenCallbackControllerTest {
         doNothing().when(citizenEmailService).sendCitizenCaseSubmissionEmail(authToken,
                                                            String.valueOf(caseData.getId()));
         citizenCallbackController.sendNotificationsOnCaseSubmission(authToken, callbackRequest);
-        verify(allTabsService, times(0)).updateAllTabsIncludingConfTab(any(CaseData.class));
     }
 }

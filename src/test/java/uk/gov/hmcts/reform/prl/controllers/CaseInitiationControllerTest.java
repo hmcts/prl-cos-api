@@ -30,7 +30,6 @@ public class CaseInitiationControllerTest {
 
     private final String auth = "testAuth";
 
-
     @InjectMocks
     private CaseInitiationController caseInitiationController;
 

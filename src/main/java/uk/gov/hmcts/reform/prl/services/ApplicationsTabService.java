@@ -201,21 +201,22 @@ public class ApplicationsTabService implements TabService {
 
             for (OtherPersonWhoLivesWithChild otherPersonWhoLivesWithChild : otherPersonList) {
                 otherPersonLiving.add(Element.<OtherPersonWhoLivesWithChildDetails>builder()
-                                          .value(OtherPersonWhoLivesWithChildDetails.builder()
-                                                     .firstName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                                                                         .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL
-                                                                    : otherPersonWhoLivesWithChild.getFirstName())
-                                                     .lastName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                                                                        .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
-                                                                   otherPersonWhoLivesWithChild.getLastName())
-                                                     .relationshipToChildDetails((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                                                                                          .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
-                                                                                     otherPersonWhoLivesWithChild.getRelationshipToChildDetails())
-                                                     .isPersonIdentityConfidential(otherPersonWhoLivesWithChild.getIsPersonIdentityConfidential())
-                                                     .address((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                                                                       .getIsPersonIdentityConfidential())
-                                                                  ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
-                                                                  : otherPersonWhoLivesWithChild.getAddress()).build()).build());            }
+                      .value(OtherPersonWhoLivesWithChildDetails.builder()
+                                 .firstName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                         .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL
+                                                : otherPersonWhoLivesWithChild.getFirstName())
+                                 .lastName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                        .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
+                                               otherPersonWhoLivesWithChild.getLastName())
+                                 .relationshipToChildDetails((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                          .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
+                                                 otherPersonWhoLivesWithChild.getRelationshipToChildDetails())
+                                 .isPersonIdentityConfidential(otherPersonWhoLivesWithChild.getIsPersonIdentityConfidential())
+                                 .address((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                                                   .getIsPersonIdentityConfidential())
+                                              ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
+                                              : otherPersonWhoLivesWithChild.getAddress()).build()).build());
+            }
         }
         Optional<RelationshipsEnum> applicantsRelationshipToChild =
             ofNullable(child.getApplicantsRelationshipToChild());
