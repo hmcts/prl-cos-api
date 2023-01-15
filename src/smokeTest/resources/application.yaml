@@ -431,3 +431,6 @@ fis_hearing:
   api:
     url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
 
+
+courts:
+  filter: ${COURT_IDS_TO_FILTER:}

@@ -99,9 +99,7 @@ public class ManageOrderEmailService {
                 sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getEmail(),
                                  buildApplicantRespondentEmail(
                                      caseDetails, caseData.getApplicantsFL401().getFirstName()
-                                     + " " + caseData.getApplicantsFL401().getFirstName()));
-
-
+                                         + " " + caseData.getApplicantsFL401().getFirstName()));
             }
             if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
                 sendEmailToParty(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
@@ -109,7 +107,6 @@ public class ManageOrderEmailService {
                                      + " " + caseData.getRespondentsFL401().getFirstName()));
             }
         }
-
 
     }
 
