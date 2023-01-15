@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationa
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
 
 import java.util.List;
 
@@ -38,6 +39,7 @@ public class Response {
     // TODO: Need to recheck this one
     // private final AbilityToParticipate abilityToParticipate;
     private final AttendToCourt attendToCourt;
+    private final SolicitorMiam solicitorMiam;
 
     private final CitizenFlags citizenFlags;
     private final String safeToCallOption;
