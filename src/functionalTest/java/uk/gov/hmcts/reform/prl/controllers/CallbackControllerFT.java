@@ -258,7 +258,7 @@ public class CallbackControllerFT {
     public void givenC100Case_whenRpaResent_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
 
-        mockMvc.perform(post("/update-applicant-child-names")
+        mockMvc.perform(post("/update-party-details")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
