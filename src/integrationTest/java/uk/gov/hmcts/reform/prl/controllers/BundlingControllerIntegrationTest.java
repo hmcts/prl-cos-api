@@ -25,7 +25,7 @@ public class BundlingControllerIntegrationTest extends IntegrationTest {
 
     private final String bundleControllerEndpoint = "/bundle/createBundle";
 
-    private static final String VALID_REQUEST_BODY = "requests/bundle/CreateBundleRequest.json";
+    private static final String VALID_REQUEST_BODY = "requests/C100-case-data.json";
 
     @Test
     public void whenValidRequestFormat_Return200() throws Exception {

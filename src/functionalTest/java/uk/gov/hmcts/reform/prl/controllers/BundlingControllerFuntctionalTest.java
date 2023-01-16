@@ -22,7 +22,7 @@ public class BundlingControllerFuntctionalTest {
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
-    private static final String VALID_REQUEST_BODY = "requests/bundle/CreateBundleRequest.json";
+    private static final String VALID_REQUEST_BODY = "requests/bundle/C100-case-data.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
