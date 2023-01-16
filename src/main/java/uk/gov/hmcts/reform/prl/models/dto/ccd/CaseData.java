@@ -580,9 +580,6 @@ public class CaseData implements MappableObject {
 
     private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
 
-    @JsonProperty("childOption")
-    private final String childOption;
-
     @JsonProperty("childrenList")
     private final String childrenList;
     @JsonProperty("magistrateLastName")
