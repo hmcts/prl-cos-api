@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
@@ -160,8 +161,11 @@ public class FL401SubmitApplicationController {
         String courtSlug = courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts().get(0).getCourtSlug();
         Court court = courtFinderApi.getCourtDetails(courtSlug);
         caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
-        String courtEmail = courtFinderService.getEmailAddress(court).isPresent()
-            ? courtFinderService.getEmailAddress(court).get().getAddress() : null;
+        Optional<CourtEmailAddress> optionalCourtEmail = courtFinderService.getEmailAddress(court);
+        String courtEmail = null;
+        if(optionalCourtEmail.isPresent()) {
+            courtEmail = optionalCourtEmail.get().getAddress();
+        }
         caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
         String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
         String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
