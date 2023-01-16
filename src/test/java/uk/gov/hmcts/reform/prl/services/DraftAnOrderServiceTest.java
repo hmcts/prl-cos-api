@@ -13,6 +13,12 @@ import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioCourtEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioLocalAuthorityEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
@@ -37,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DirectionOnIssue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -56,8 +63,10 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_RIGHT_TO_ASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -267,6 +276,7 @@ public class DraftAnOrderServiceTest {
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
     }
 
+    @Test
     public void testRemoveDraftOrderAndAddToFinalOrderForRespondentSolicitor() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
@@ -406,6 +416,7 @@ public class DraftAnOrderServiceTest {
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
     }
 
+    @Test
     public void testUpdateDraftOrderCollection() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
@@ -431,6 +442,7 @@ public class DraftAnOrderServiceTest {
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).build())
             .respondents(List.of(respondents))
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
@@ -606,6 +618,132 @@ public class DraftAnOrderServiceTest {
         draftAnOrderService.populateStandardDirectionOrderFields("test-token", caseData, caseDataUpdated);
 
         assertEquals(RIGHT_TO_ASK_COURT, caseDataUpdated.get("sdoRightToAskCourt"));
+    }
+
+    @Test
+    public void testPopulateStandardDirectionOrderFieldsNoMatch() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.partyRaisedDomesticAbuse))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.miamAttendance
+            ))
+            .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        when(locationRefDataService.getCourtLocations("test-token")).thenReturn(new ArrayList<>());
+        when(partiesListGenerator.buildPartiesList(caseData, new ArrayList<>())).thenReturn(DynamicList.builder().build());
+
+        draftAnOrderService.populateStandardDirectionOrderFields("test-token", caseData, caseDataUpdated);
+
+        assertNull(caseDataUpdated.get("sdoRightToAskCourt"));
+    }
+
+    @Test
+    public void testCheckDirectionOnIssueOptionsSelected_No() {
+        DirectionOnIssue directionOnIssue = DirectionOnIssue.builder()
+            .dioCourtList(new ArrayList<>())
+            .dioCafcassOrCymruList(new ArrayList<>())
+            .dioOtherList(new ArrayList<>())
+            .dioPreamblesList(new ArrayList<>())
+            .dioHearingsAndNextStepsList(new ArrayList<>())
+            .dioLocalAuthorityList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .directionOnIssue(directionOnIssue)
+            .build();
+
+        assertFalse(draftAnOrderService.checkDirectionOnIssueOptionsSelected(caseData));
+    }
+
+    @Test
+    public void testCheckDirectionOnIssueOptionsSelected_Yes() {
+        DirectionOnIssue directionOnIssue = DirectionOnIssue.builder()
+            .dioCourtList(List.of(
+                DioCourtEnum.transferApplication))
+            .dioCafcassOrCymruList(List.of(DioCafcassOrCymruEnum.cafcassCymruSafeguarding,
+                                           DioCafcassOrCymruEnum.cafcassSafeguarding))
+            .dioOtherList(List.of(DioOtherEnum.parentWithCare))
+            .dioPreamblesList(List.of(DioPreamblesEnum.rightToAskCourt))
+            .dioHearingsAndNextStepsList(List.of(
+                DioHearingsAndNextStepsEnum.caseReviewAtSecondGateKeeping,
+                DioHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .dioLocalAuthorityList(List.of(DioLocalAuthorityEnum.localAuthorityLetter))
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .directionOnIssue(directionOnIssue)
+            .build();
+
+        assertTrue(draftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+    @Test
+    public void testPopulateDirectionOnIssueFields() {
+        DirectionOnIssue directionOnIssue = DirectionOnIssue.builder()
+            .dioCourtList(List.of(
+                DioCourtEnum.transferApplication))
+            .dioCafcassOrCymruList(List.of(DioCafcassOrCymruEnum.cafcassCymruSafeguarding,
+                                           DioCafcassOrCymruEnum.cafcassSafeguarding))
+            .dioOtherList(List.of(DioOtherEnum.parentWithCare))
+            .dioPreamblesList(List.of(DioPreamblesEnum.rightToAskCourt))
+            .dioHearingsAndNextStepsList(List.of(
+                DioHearingsAndNextStepsEnum.caseReviewAtSecondGateKeeping,
+                DioHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .dioLocalAuthorityList(List.of(DioLocalAuthorityEnum.localAuthorityLetter))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .directionOnIssue(directionOnIssue)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        when(locationRefDataService.getCourtLocations("test-token")).thenReturn(new ArrayList<>());
+        when(partiesListGenerator.buildPartiesList(caseData, new ArrayList<>())).thenReturn(DynamicList.builder().build());
+
+        draftAnOrderService.populateDirectionOnIssueFields("test-token", caseData, caseDataUpdated);
+
+        assertEquals(DIO_RIGHT_TO_ASK, caseDataUpdated.get("dioRightToAskCourt"));
+    }
+
+    @Test
+    public void testPopulateDirectionOnIssueFieldsNoMatch() {
+        DirectionOnIssue directionOnIssue = DirectionOnIssue.builder()
+            .dioCourtList(List.of(
+                DioCourtEnum.transferApplication))
+            .dioCafcassOrCymruList(new ArrayList<>())
+            .dioOtherList(List.of(DioOtherEnum.disclosureOfPapers))
+            .dioPreamblesList(List.of(DioPreamblesEnum.partyRaisedDomesticAbuse))
+            .dioHearingsAndNextStepsList(List.of(
+                DioHearingsAndNextStepsEnum.allocateNamedJudge
+            ))
+            .dioLocalAuthorityList(List.of(DioLocalAuthorityEnum.localAuthorityLetter))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .directionOnIssue(directionOnIssue)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        when(locationRefDataService.getCourtLocations("test-token")).thenReturn(new ArrayList<>());
+        when(partiesListGenerator.buildPartiesList(caseData, new ArrayList<>())).thenReturn(DynamicList.builder().build());
+
+        draftAnOrderService.populateDirectionOnIssueFields("test-token", caseData, caseDataUpdated);
+
+        assertNull(caseDataUpdated.get("dioRightToAskCourt"));
     }
 
 }
