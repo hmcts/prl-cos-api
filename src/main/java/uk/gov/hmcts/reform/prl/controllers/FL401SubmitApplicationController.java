@@ -146,16 +146,13 @@ public class FL401SubmitApplicationController {
 
         final LocalDate localDate = LocalDate.now();
 
-        String[] venueDetails = caseData.getSubmitCountyCourtSelection().getValue().getCode().split("-");
+        String baseLocationId = caseData.getSubmitCountyCourtSelection().getValue().getCode();
+        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,authorisation).split("-");
         String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
-
         caseData = caseData.toBuilder().issueDate(localDate).courtName(courtName).build();
         caseData = caseData.toBuilder().isCourtEmailFound("Yes").build();
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
         caseDataUpdated.put(COURT_NAME_FIELD, courtName);
-        String baseLocationId = Arrays.stream(venueDetails).toArray()[0].toString();
         String postcode = Arrays.stream(venueDetails).toArray()[3].toString();
         String courtSlug = courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts().get(0).getCourtSlug();
         Court court = courtFinderApi.getCourtDetails(courtSlug);

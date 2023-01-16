@@ -294,8 +294,8 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        String[] venueDetails = caseData.getCourtList().getValue().getCode().split("-");
-        String baseLocationId = Arrays.stream(venueDetails).toArray()[0].toString();
+        String baseLocationId = caseData.getCourtList().getValue().getCode();
+        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,authorisation).split("-");
         String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
         String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
         caseDataUpdated.put(COURT_NAME_FIELD, courtName);
