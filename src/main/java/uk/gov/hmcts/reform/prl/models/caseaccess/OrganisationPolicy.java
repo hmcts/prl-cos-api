@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.CaseRole;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 
 @Data
@@ -16,9 +17,25 @@ public class OrganisationPolicy {
     @JsonProperty("Organisation")
     private Organisation organisation;
 
+    @JsonProperty("OrgPolicyReference")
+    private String orgPolicyReference;
+
     @JsonProperty("OrgPolicyCaseAssignedRole")
     private String orgPolicyCaseAssignedRole;
 
-    @JsonProperty("OrgPolicyReference")
-    private String orgPolicyReference;
+    public static OrganisationPolicy organisationPolicy(String organisationId,
+                                                        String organisationName,
+                                                        CaseRole caseRole) {
+        if (organisationId == null) {
+            return null;
+        }
+
+        return OrganisationPolicy.builder()
+            .organisation(Organisation.builder()
+                              .organisationID(organisationId)
+                              .organisationName(organisationName)
+                              .build())
+            .orgPolicyCaseAssignedRole(caseRole.formattedName())
+            .build();
+    }
 }

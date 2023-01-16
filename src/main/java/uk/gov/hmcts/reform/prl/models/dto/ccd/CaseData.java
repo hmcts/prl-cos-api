@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
@@ -48,6 +49,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
@@ -73,15 +75,27 @@ import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.MultiBundleConfig;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
+import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
@@ -574,6 +588,8 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
 
+    private final Miam respondentSolicitorMiam;
+
     /**
      * Solicitor Details.
      */
@@ -646,6 +662,50 @@ public class CaseData implements MappableObject {
     @JsonProperty("paymentReferenceNumber")
     private final String paymentReferenceNumber;
 
+    /**
+     * Respondent Solicitor.
+     */
+
+    private Consent respondentConsentToApplication;
+
+    private KeepDetailsPrivate keepContactDetailsPrivate;
+    private KeepDetailsPrivate keepContactDetailsPrivateOther;
+    private String confidentialListDetails;
+
+    private final AttendToCourt respondentAttendingTheCourt;
+
+    /**
+     * Respondent solicitor's international element.
+     */
+    private final SolicitorInternationalElement internationalElementChild;
+    private final SolicitorInternationalElement internationalElementParent;
+    private final SolicitorInternationalElement internationalElementJurisdiction;
+    private final SolicitorInternationalElement internationalElementRequest;
+
+    /**
+     * Respondent solicitor's allegations of harm.
+     */
+    private final RespondentAllegationsOfHarm respondentAllegationsOfHarm;
+    private final List<Element<Behaviours>> respondentDomesticAbuseBehaviour;
+    private final List<Element<Behaviours>> respondentChildAbuseBehaviour;
+    private final RespondentChildAbduction respondentChildAbduction;
+    private final RespondentOtherConcerns respondentOtherConcerns;
+
+    /** Confirm or Edit your contact details. **/
+    private final CitizenDetails resSolConfirmEditContactDetails;
+
+    /**
+     * Respondent solicitor's Draft PDF response.
+     */
+    private final String viewC7PdflinkText;
+    private final String isEngC7DocGen;
+    private final Document draftC7ResponseDoc;
+
+    /**
+     * Respondent solicitor's Current or Past proceedings.
+     */
+    private final YesNoDontKnow currentOrPastProceedingsForChildren;
+    private final List<Element<ProceedingDetails>> respondentExistingProceedings;
     // C100 Rebuild
     @JsonUnwrapped
     @Builder.Default
@@ -658,6 +718,15 @@ public class CaseData implements MappableObject {
     /**
      * Bundle.
      */
+    private List<Bundle> caseBundles;
+    private List<Bundle> historicalBundles;
+    private String bundleConfiguration;
+    private List<MultiBundleConfig> multiBundleConfiguration;
+
+    private DynamicList chooseRespondentDynamicList;
+    @JsonUnwrapped
+    @Builder.Default
+    private final NoticeOfChangeAnswersData noticeOfChangeAnswersData = NoticeOfChangeAnswersData.builder().build();
     @JsonProperty("bundleInformation")
     private BundlingInformation bundleInformation;
 
@@ -670,4 +739,6 @@ public class CaseData implements MappableObject {
     private final ServeOrderData serveOrderData;
 
     private final List<CaseLinksElement<CaseLink>> caseLinks;
+
+    private Flags caseFlags;
 }

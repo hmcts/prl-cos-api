@@ -134,7 +134,7 @@ public class CourtNavCaseService {
                            .build())
                 .data(caseData).build();
 
-            CaseDetails caseDetails = coreCaseDataApi.submitEventForCaseWorker(
+            coreCaseDataApi.submitEventForCaseWorker(
                 authorisation,
                 authTokenGenerator.generate(),
                 idamClient.getUserInfo(authorisation).getUid(),
@@ -155,12 +155,11 @@ public class CourtNavCaseService {
 
     public CaseDetails checkIfCasePresent(String caseId, String authorisation) {
         try {
-            CaseDetails caseDetails = coreCaseDataApi.getCase(
+            return coreCaseDataApi.getCase(
                 authorisation,
                 authTokenGenerator.generate(),
                 caseId
             );
-            return caseDetails;
         } catch (Exception ex) {
             log.error("Error while getting the case {} {}", caseId, ex.getMessage());
         }

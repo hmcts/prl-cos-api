@@ -678,10 +678,6 @@ public class DraftAnOrderService {
                 "sdoHearingNotNeeded",
                 HEARING_NOT_NEEDED
             );
-        }
-        if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
-            SdoHearingsAndNextStepsEnum.hearingNotNeeded)) {
             caseDataUpdated.put(
                 "sdoParticipationDirections",
                 PARTICIPATION_DIRECTIONS
