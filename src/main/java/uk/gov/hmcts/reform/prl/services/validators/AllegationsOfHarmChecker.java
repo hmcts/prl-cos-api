@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum.other;
@@ -73,19 +72,15 @@ public class AllegationsOfHarmChecker implements EventChecker {
                 Optional<List<Element<Behaviours>>> behavioursWrapped = ofNullable(caseData.getAllegationOfHarm().getBehaviours());
                 if (behavioursWrapped.isPresent()
                     && !behavioursWrapped.get().isEmpty()) {
-                    List<Behaviours> behaviours = behavioursWrapped.get()
-                        .stream()
-                        .map(Element::getValue)
-                        .collect(Collectors.toList());
-
-                    for (Behaviours behaviour : behaviours) {
-                        behavioursCompleted = validateBehaviour(behaviour);
-                        if (!behavioursCompleted) {
-                            return false;
-                        }
+                    behavioursCompleted =  behavioursWrapped.get()
+                            .stream().allMatch(behavioursElement -> validateBehaviour(behavioursElement.getValue()));
+                    if (!behavioursCompleted) {
+                        return false;
                     }
                 }
             }
+
+
 
             Optional<YesOrNo> ordersNonMolestation = ofNullable(caseData.getAllegationOfHarm().getOrdersNonMolestation());
             Optional<YesOrNo> ordersOccupation = ofNullable(caseData.getAllegationOfHarm().getOrdersOccupation());

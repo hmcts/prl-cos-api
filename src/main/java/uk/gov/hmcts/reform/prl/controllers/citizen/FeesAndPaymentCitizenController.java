@@ -19,9 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
@@ -40,6 +37,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequestMapping("/fees-and-payment-apis")
 public class FeesAndPaymentCitizenController {
     private static final String SERVICE_AUTH = "ServiceAuthorization";
+    private static final String LOGGERMESSAGE = "Invalid Client";
 
     @Autowired
     private AuthorisationService authorisationService;
@@ -67,7 +65,7 @@ public class FeesAndPaymentCitizenController {
             if (isAuthorized(authorisation, serviceAuthorization)) {
                 feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
             } else {
-                throw (new RuntimeException("Invalid Client"));
+                throw (new RuntimeException(LOGGERMESSAGE));
             }
         } catch (Exception e) {
             return FeeResponseForCitizen.builder()
@@ -93,7 +91,7 @@ public class FeesAndPaymentCitizenController {
     ) throws Exception {
 
         if (!isAuthorized(authorization, serviceAuthorization)) {
-            throw (new RuntimeException("Invalid Client"));
+            throw (new RuntimeException(LOGGERMESSAGE));
         }
 
         return paymentRequestService.createPayment(authorization,serviceAuthorization,createPaymentRequest);
@@ -117,28 +115,15 @@ public class FeesAndPaymentCitizenController {
         @PathVariable String caseId
     ) throws Exception {
         if (!isAuthorized(authorization, serviceAuthorization)) {
-            throw (new RuntimeException("Invalid Client"));
+            throw (new RuntimeException(LOGGERMESSAGE));
         }
-        log.info("Payment Reference: {} for the Case id :{}", paymentReference,caseId);
+        log.info("Retrieving payment status for the Case id :{}", caseId);
         return paymentRequestService.fetchPaymentStatus(authorization,paymentReference);
 
 
 
     }
 
-    private CallbackRequest buildCallBackRequest(CreatePaymentRequest createPaymentRequest) {
-        return CallbackRequest
-                .builder()
-                .caseDetails(CaseDetails
-                        .builder()
-                        .caseId(createPaymentRequest.getCaseId())
-                                .caseData(CaseData
-                                .builder()
-                                .id(Long.parseLong(createPaymentRequest.getCaseId()))
-                                .applicantCaseName(createPaymentRequest.getApplicantCaseName())
-                                .build()).build())
-                .build();
-    }
 
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
         return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
