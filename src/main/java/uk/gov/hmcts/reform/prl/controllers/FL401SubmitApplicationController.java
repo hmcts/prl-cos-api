@@ -156,19 +156,19 @@ public class FL401SubmitApplicationController {
 
         caseDataUpdated.put(COURT_NAME_FIELD, courtName);
         String baseLocationId = Arrays.stream(venueDetails).toArray()[0].toString();
-        String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
         String postcode = Arrays.stream(venueDetails).toArray()[3].toString();
         String courtSlug = courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts().get(0).getCourtSlug();
         Court court = courtFinderApi.getCourtDetails(courtSlug);
         caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
         Optional<CourtEmailAddress> optionalCourtEmail = courtFinderService.getEmailAddress(court);
         String courtEmail = null;
-        if(optionalCourtEmail.isPresent()) {
+        if (optionalCourtEmail.isPresent()) {
             courtEmail = optionalCourtEmail.get().getAddress();
         }
         caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
         String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
         String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
+        String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
         caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
             .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
             .baseLocationName(baseLocationName).build());
