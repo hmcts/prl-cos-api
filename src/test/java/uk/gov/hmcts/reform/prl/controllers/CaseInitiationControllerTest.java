@@ -30,6 +30,7 @@ public class CaseInitiationControllerTest {
 
     private final String auth = "testAuth";
 
+
     @InjectMocks
     private CaseInitiationController caseInitiationController;
 
@@ -53,9 +54,6 @@ public class CaseInitiationControllerTest {
 
     @Mock
     AuthTokenGenerator authTokenGenerator;
-
-
-
 
     @Before
     public void setUp() {
@@ -84,8 +82,6 @@ public class CaseInitiationControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
-
-
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         doNothing().when(assignCaseAccessService).assignCaseAccess(String.valueOf(caseData.getId()),auth);

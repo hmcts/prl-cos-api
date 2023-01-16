@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
@@ -39,10 +40,13 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.CaseLinksElement;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
@@ -80,6 +84,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfiden
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.MultiBundleConfig;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -122,6 +128,11 @@ public class CaseData implements MappableObject {
      * Case Type Of Application.
      */
     private final String caseTypeOfApplication;
+
+    /**
+     * Case created by.
+     */
+    private CaseCreatedBy caseCreatedBy;
 
     /**
      * Case Type Of Application.
@@ -184,9 +195,9 @@ public class CaseData implements MappableObject {
     /**
      * Type of application.
      */
-    private final List<OrderTypeEnum> ordersApplyingFor;
-    private final ChildArrangementOrderTypeEnum typeOfChildArrangementsOrder;
-    private final String natureOfOrder;
+    private List<OrderTypeEnum> ordersApplyingFor;
+    private ChildArrangementOrderTypeEnum typeOfChildArrangementsOrder;
+    private String natureOfOrder;
     private final YesOrNo consentOrder;
     private final Document draftConsentOrderFile;
     private final PermissionRequiredEnum applicationPermissionRequired;
@@ -196,14 +207,14 @@ public class CaseData implements MappableObject {
     /**
      * Hearing urgency.
      */
-    private final YesOrNo isCaseUrgent;
-    private final String caseUrgencyTimeAndReason;
-    private final String effortsMadeWithRespondents;
-    private final YesOrNo doYouNeedAWithoutNoticeHearing;
-    private final String reasonsForApplicationWithoutNotice;
-    private final YesOrNo doYouRequireAHearingWithReducedNotice;
-    private final String setOutReasonsBelow;
-    private final YesOrNo areRespondentsAwareOfProceedings;
+    private YesOrNo isCaseUrgent;
+    private String caseUrgencyTimeAndReason;
+    private String effortsMadeWithRespondents;
+    private YesOrNo doYouNeedAWithoutNoticeHearing;
+    private String reasonsForApplicationWithoutNotice;
+    private YesOrNo doYouRequireAHearingWithReducedNotice;
+    private String setOutReasonsBelow;
+    private YesOrNo areRespondentsAwareOfProceedings;
 
     /**
      * Applicant details.
@@ -224,10 +235,10 @@ public class CaseData implements MappableObject {
     /**
      * Child details.
      */
-    private final List<Element<Child>> children;
-    private final YesNoDontKnow childrenKnownToLocalAuthority;
-    private final String childrenKnownToLocalAuthorityTextArea;
-    private final YesNoDontKnow childrenSubjectOfChildProtectionPlan;
+    private List<Element<Child>> children;
+    private YesNoDontKnow childrenKnownToLocalAuthority;
+    private String childrenKnownToLocalAuthorityTextArea;
+    private YesNoDontKnow childrenSubjectOfChildProtectionPlan;
 
     /**
      * Respondent details.
@@ -240,20 +251,24 @@ public class CaseData implements MappableObject {
     /**
      * MIAM.
      */
-    private final YesOrNo applicantAttendedMiam;
-    private final YesOrNo claimingExemptionMiam;
-    private final YesOrNo familyMediatorMiam;
-    private final List<MiamExemptionsChecklistEnum> miamExemptionsChecklist;
-    private final List<MiamDomesticViolenceChecklistEnum> miamDomesticViolenceChecklist;
-    private final List<MiamUrgencyReasonChecklistEnum> miamUrgencyReasonChecklist;
-    private final List<MiamChildProtectionConcernChecklistEnum> miamChildProtectionConcernList;
-    private final MiamPreviousAttendanceChecklistEnum miamPreviousAttendanceChecklist;
-    private final MiamOtherGroundsChecklistEnum miamOtherGroundsChecklist;
+    private YesOrNo applicantAttendedMiam;
+    private YesOrNo claimingExemptionMiam;
+    private YesOrNo familyMediatorMiam;
+    private YesOrNo otherProceedingsMiam;
+    private String applicantConsentMiam;
+    private List<MiamExemptionsChecklistEnum> miamExemptionsChecklist;
+    private List<MiamDomesticViolenceChecklistEnum> miamDomesticViolenceChecklist;
+    private List<MiamUrgencyReasonChecklistEnum> miamUrgencyReasonChecklist;
+    private List<MiamChildProtectionConcernChecklistEnum> miamChildProtectionConcernList;
+    private MiamPreviousAttendanceChecklistEnum miamPreviousAttendanceChecklist;
+    private List<MiamPreviousAttendanceChecklistEnum> miamPreviousAttendanceChecklist1;
+    private MiamOtherGroundsChecklistEnum miamOtherGroundsChecklist;
+    private List<MiamOtherGroundsChecklistEnum> miamOtherGroundsChecklist1;
     private final String mediatorRegistrationNumber;
     private final String familyMediatorServiceName;
     private final String soleTraderName;
     //TODO: refactor to remove duplicated details screen
-    private final Document miamCertificationDocumentUpload;
+    private Document miamCertificationDocumentUpload;
     private final String mediatorRegistrationNumber1;
     private final String familyMediatorServiceName1;
     private final String soleTraderName1;
@@ -281,27 +296,27 @@ public class CaseData implements MappableObject {
     /**
      * Attending the hearing.
      */
-    private final YesOrNo isWelshNeeded;
+    private YesOrNo isWelshNeeded;
     @JsonAlias({"welshNeeds", "fl401WelshNeeds"})
-    private final List<Element<WelshNeed>> welshNeeds;
-    private final YesOrNo isInterpreterNeeded;
-    private final List<Element<InterpreterNeed>> interpreterNeeds;
-    private final YesOrNo isDisabilityPresent;
-    private final String adjustmentsRequired;
-    private final YesOrNo isSpecialArrangementsRequired;
-    private final String specialArrangementsRequired;
-    private final YesOrNo isIntermediaryNeeded;
-    private final String reasonsForIntermediary;
+    private List<Element<WelshNeed>> welshNeeds;
+    private YesOrNo isInterpreterNeeded;
+    private List<Element<InterpreterNeed>> interpreterNeeds;
+    private YesOrNo isDisabilityPresent;
+    private String adjustmentsRequired;
+    private YesOrNo isSpecialArrangementsRequired;
+    private String specialArrangementsRequired;
+    private YesOrNo isIntermediaryNeeded;
+    private String reasonsForIntermediary;
 
     /**
      * International element.
      */
-    private final YesOrNo habitualResidentInOtherState;
-    private final String habitualResidentInOtherStateGiveReason;
-    private final YesOrNo jurisdictionIssue;
-    private final String jurisdictionIssueGiveReason;
-    private final YesOrNo requestToForeignAuthority;
-    private final String requestToForeignAuthorityGiveReason;
+    private YesOrNo habitualResidentInOtherState;
+    private String habitualResidentInOtherStateGiveReason;
+    private YesOrNo jurisdictionIssue;
+    private String jurisdictionIssueGiveReason;
+    private YesOrNo requestToForeignAuthority;
+    private String requestToForeignAuthorityGiveReason;
 
     /**
      * Litigation capacity.
@@ -338,20 +353,12 @@ public class CaseData implements MappableObject {
     private final Document draftOrderDocWelsh;
     @JsonProperty("c8Document")
     private final Document c8Document;
-    @JsonProperty("c8DraftDocument")
-    private final Document c8DraftDocument;
     @JsonProperty("c8WelshDocument")
     private final Document c8WelshDocument;
-    @JsonProperty("c8WelshDraftDocument")
-    private final Document c8WelshDraftDocument;
     @JsonProperty("c1ADocument")
     private final Document c1ADocument;
-    @JsonProperty("c1ADraftDocument")
-    private final Document c1ADraftDocument;
     @JsonProperty("c1AWelshDocument")
     private final Document c1AWelshDocument;
-    @JsonProperty("c1AWelshDraftDocument")
-    private final Document c1AWelshDraftDocument;
 
     @JsonProperty("isEngDocGen")
     private final String isEngDocGen;
@@ -385,7 +392,7 @@ public class CaseData implements MappableObject {
     private final List<Element<Correspondence>> correspondenceForTabDisplay;
     private final List<Element<OtherDocuments>> otherDocumentsForTabDisplay;
 
-    private final List<Element<UserInfo>> userInfo;
+    private List<Element<UserInfo>> userInfo;
 
     /**
      * Return Application.
@@ -526,7 +533,7 @@ public class CaseData implements MappableObject {
      * FL401 Statement Of truth and submit.
      */
     @JsonProperty("fl401StmtOfTruth")
-    private final StatementOfTruth fl401StmtOfTruth;
+    private StatementOfTruth fl401StmtOfTruth;
 
     @JsonProperty("viewPDFlinkLabelText")
     private String viewPdfLinkLabelText;
@@ -655,12 +662,16 @@ public class CaseData implements MappableObject {
     private String citizenUploadedStatement;
 
     // C100 Rebuild
-    private String c100RebuildConfidentiality;
-    private String c100RebuildInternationalElements;
-    private String c100RebuildReasonableAdjustments;
-    private String c100RebuildTypeOfOrder;
-    private String c100RebuildHearingWithoutNotice;
-    private String c100RebuildOtherProceedings;
-    private String c100RebuildReturnUrl;
+    @JsonUnwrapped
+    @Builder.Default
+    private final C100RebuildData c100RebuildData;
 
+    /**
+     * Bundle.
+     */
+    private List<Bundle> caseBundles;
+    private List<Bundle> historicalBundles;
+    private String bundleConfiguration;
+    private List<MultiBundleConfig> multiBundleConfiguration;
+    private final List<CaseLinksElement<CaseLink>> caseLinks;
 }

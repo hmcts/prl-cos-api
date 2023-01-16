@@ -2,6 +2,11 @@ java:
   applicationPort: 4044
   ingressHost: prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
   aadIdentityName: prl
+  autoscaling:
+    enabled: true
+    maxReplicas: 9
+    minReplicas: 6
+    targetCPUUtilizationPercentage: 80 # Default is 80% target CPU utilization
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
@@ -28,6 +33,7 @@ java:
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     ACA_SERVICE_API_BASEURL: http://aac-manage-case-assignment-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     CITIZEN_URL: https://privatelaw.{{ .Values.global.environment }}.platform.hmcts.net
+    BUNDLE_URL: http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
 
   keyVaults:
     prl:

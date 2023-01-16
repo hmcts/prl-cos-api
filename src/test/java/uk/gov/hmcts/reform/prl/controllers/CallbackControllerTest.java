@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
@@ -97,12 +98,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -173,7 +176,7 @@ public class CallbackControllerTest {
     private OrganisationService organisationService;
 
     @Mock
-    private  CourtFinderService courtLocatorService;
+    private CourtFinderService courtLocatorService;
 
     @Mock
     private CaseWorkerEmailService caseWorkerEmailService;
@@ -188,7 +191,7 @@ public class CallbackControllerTest {
     private LaunchDarklyClient launchDarklyClient;
 
     @Mock
-    private  ConfidentialityTabService confidentialityTabService;
+    private ConfidentialityTabService confidentialityTabService;
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -214,6 +217,7 @@ public class CallbackControllerTest {
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
             .surname("Solicitor")
+            .roles(ROLES)
             .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -254,6 +258,44 @@ public class CallbackControllerTest {
 
         verify(applicationConsiderationTimetableValidationWorkflow).run(callbackRequest);
         verifyNoMoreInteractions(applicationConsiderationTimetableValidationWorkflow);
+
+    }
+
+    @Test
+    public void testsendC100CaseWithDrawEmails() throws WorkflowException {
+        WithdrawApplication withdrawApplication = WithdrawApplication.builder()
+            .withDrawApplication(YesOrNo.Yes)
+            .withDrawApplicationReason("Test data")
+            .build();
+
+        PartyDetails applicant = PartyDetails.builder().solicitorEmail("test@gmail.com").build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+        CaseData caseData = CaseData.builder()
+            .localCourtAdmin(List.of(Element.<LocalCourtAdminEmail>builder()
+                                         .value(LocalCourtAdminEmail
+                                                    .builder().email("test@gmail.com")
+                                                    .build()).build()))
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .withDrawApplicationData(withdrawApplication)
+            .applicants(applicantList)
+            .build();
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                                                       .state(ISSUED_STATE)
+                                                       .data(stringObjectMap).build()).build();
+
+        callbackController.sendC100CaseWithDrawEmails(caseData, callbackRequest.getCaseDetails(),userDetails);
+        verify(solicitorEmailService, times(1))
+            .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
+        verify(caseWorkerEmailService, times(1))
+            .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(), "test@gmail.com");
+
 
     }
 
@@ -328,7 +370,8 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(c100DraftMap);
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+            c100DraftMap);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
@@ -346,7 +389,10 @@ public class CallbackControllerTest {
                              .build())
             .build();
 
-        AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(authToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(
+            authToken,
+            callbackRequest
+        );
 
         assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_FIELD));
         assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
@@ -411,7 +457,8 @@ public class CallbackControllerTest {
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(documentGenService.generateDraftDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(fl401DraftMap);
+        when(documentGenService.generateDraftDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+            fl401DraftMap);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -421,7 +468,10 @@ public class CallbackControllerTest {
                              .build())
             .build();
 
-        AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(authToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(
+            authToken,
+            callbackRequest
+        );
 
         assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_FIELD));
         assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
@@ -482,7 +532,8 @@ public class CallbackControllerTest {
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-        when(documentGenService.generateDraftDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(fl401DraftMap);
+        when(documentGenService.generateDraftDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+            fl401DraftMap);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
@@ -494,7 +545,10 @@ public class CallbackControllerTest {
                              .build())
             .build();
 
-        AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(authToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(
+            authToken,
+            callbackRequest
+        );
 
         assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_FIELD));
         assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
@@ -557,7 +611,8 @@ public class CallbackControllerTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(documentGenService.generateDraftDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(fl401DraftMap);
+        when(documentGenService.generateDraftDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+            fl401DraftMap);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -567,7 +622,10 @@ public class CallbackControllerTest {
                              .build())
             .build();
 
-        AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(authToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(
+            authToken,
+            callbackRequest
+        );
 
         assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_FIELD));
         assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
@@ -664,7 +722,7 @@ public class CallbackControllerTest {
         verify(solicitorEmailService, times(1))
             .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
         verify(caseWorkerEmailService, times(1))
-            .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(),"test@gmail.com");
+            .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(), "test@gmail.com");
     }
 
     @Test
@@ -711,16 +769,19 @@ public class CallbackControllerTest {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Map<String, Object> caseDetailsUpdatedwithName = new HashMap<>();
-        caseDetailsUpdatedwithName.put("applicantName","test1 test22");
+        caseDetailsUpdatedwithName.put("applicantName", "test1 test22");
 
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-        when(searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated)).thenReturn(caseDetailsUpdatedwithName);
+        when(searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated)).thenReturn(
+            caseDetailsUpdatedwithName);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(caseDataUpdated).build()).build();
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.updateApplicantAndChildNames(
-            authToken,
-            callbackRequest);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            callbackController.updateApplicantAndChildNames(
+                authToken,
+                callbackRequest
+            );
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
         assertEquals("test1 test22", caseDetailsRespnse.get("applicantName"));
     }
@@ -801,9 +862,9 @@ public class CallbackControllerTest {
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
-                    .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                                                       .data(stringObjectMap).build())
-                    .build();
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                             .data(stringObjectMap).build())
+            .build();
 
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
         verifyNoMoreInteractions(solicitorEmailService);
@@ -880,7 +941,7 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(json, CaseData.class)).thenReturn(caseData);
         when(c100JsonMapper.map(caseData)).thenReturn(JsonValue.EMPTY_JSON_OBJECT);
         callbackController.resendNotificationtoRpa(authToken, callbackRequest);
-        verify(sendgridService,times(1)).sendEmail(JsonValue.EMPTY_JSON_OBJECT);
+        verify(sendgridService, times(1)).sendEmail(JsonValue.EMPTY_JSON_OBJECT);
     }
 
     @Test
@@ -890,13 +951,14 @@ public class CallbackControllerTest {
         caseDetails.put("applicantOrRespondentCaseName", "test");
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
             .orgPolicyReference("jfljsd")
-                .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
-        caseDetails.put("applicantOrganisationPolicy",applicantOrganisationPolicy);
+            .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
+        caseDetails.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
-        CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd").applicantOrganisationPolicy(applicantOrganisationPolicy).build();
+        CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd").applicantOrganisationPolicy(
+            applicantOrganisationPolicy).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -924,7 +986,7 @@ public class CallbackControllerTest {
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
             .orgPolicyReference("jfljsd")
             .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
-        caseData.put("applicantOrganisationPolicy",applicantOrganisationPolicy);
+        caseData.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -974,8 +1036,8 @@ public class CallbackControllerTest {
         CaseData caseDataUpdated = CaseData.builder().id(123L)
             .applicantCaseName("abcd").applicantOrganisationPolicy(applicantOrganisationPolicy).build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseDataUpdated);
-        UserDetails userDetails = new UserDetails();
-        when(userService.getUserDetails(anyString())).thenReturn(userDetails);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(List.of(
+            CITIZEN_ROLE)).build());
         doNothing().when(ccdDataStoreService).removeCreatorRole(anyString(), anyString());
         when(authTokenGenerator.generate()).thenReturn("Generate");
         doNothing().when(assignCaseAccessClient)
@@ -1061,7 +1123,8 @@ public class CallbackControllerTest {
         Map<String, Object> data = new HashMap<>();
         data.put("applicantSolicitorEmailAddress", fl401Applicant.getSolicitorEmail());
 
-        String email = fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
+        String email = fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() :
+            userDetails.getEmail();
 
         CaseData caseData = CaseData.builder()
             .courtEmailAddress("test@gmail.com")
@@ -1085,7 +1148,7 @@ public class CallbackControllerTest {
         verify(solicitorEmailService, times(1))
             .sendWithDrawEmailToFl401SolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
         verify(caseWorkerEmailService, times(1))
-            .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(),"test@gmail.com");
+            .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(), "test@gmail.com");
     }
 
     @Test
@@ -1200,44 +1263,44 @@ public class CallbackControllerTest {
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
             .data(CaseData.builder()
-                .id(123L)
-                .c8Document(Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName("c100C8Template")
-                    .build())
-                .c1ADocument(Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName("c100C1aTemplate")
-                    .build())
-                .finalDocument(Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName("test")
-                    .build())
-                .c8WelshDocument(Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName("test")
-                    .build())
-                .c1AWelshDocument(Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName("test")
-                    .build())
-                .finalWelshDocument(Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName("test")
-                    .build())
-                .build())
+                      .id(123L)
+                      .c8Document(Document.builder()
+                                      .documentUrl(generatedDocumentInfo.getUrl())
+                                      .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                      .documentHash(generatedDocumentInfo.getHashToken())
+                                      .documentFileName("c100C8Template")
+                                      .build())
+                      .c1ADocument(Document.builder()
+                                       .documentUrl(generatedDocumentInfo.getUrl())
+                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                       .documentHash(generatedDocumentInfo.getHashToken())
+                                       .documentFileName("c100C1aTemplate")
+                                       .build())
+                      .finalDocument(Document.builder()
+                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                         .documentFileName("test")
+                                         .build())
+                      .c8WelshDocument(Document.builder()
+                                           .documentUrl(generatedDocumentInfo.getUrl())
+                                           .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                           .documentHash(generatedDocumentInfo.getHashToken())
+                                           .documentFileName("test")
+                                           .build())
+                      .c1AWelshDocument(Document.builder()
+                                            .documentUrl(generatedDocumentInfo.getUrl())
+                                            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                            .documentHash(generatedDocumentInfo.getHashToken())
+                                            .documentFileName("test")
+                                            .build())
+                      .finalWelshDocument(Document.builder()
+                                              .documentUrl(generatedDocumentInfo.getUrl())
+                                              .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                              .documentHash(generatedDocumentInfo.getHashToken())
+                                              .documentFileName("test")
+                                              .build())
+                      .build())
             .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
@@ -1245,7 +1308,7 @@ public class CallbackControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                .data(stringObjectMap).build()).build();
+                                                       .data(stringObjectMap).build()).build();
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
@@ -1262,15 +1325,17 @@ public class CallbackControllerTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             Map.of("c8Document", "document",
-                "c1ADocument", "document",
-                "c1AWelshDocument", "document",
-                "finalWelshDocument", "document")
+                   "c1ADocument", "document",
+                   "c1AWelshDocument", "document",
+                   "finalWelshDocument", "document"
+            )
         );
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.generateDocumentSubmitApplication(
-            authToken,
-            callbackRequest
-        );
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            callbackController.generateDocumentSubmitApplication(
+                authToken,
+                callbackRequest
+            );
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
@@ -1314,28 +1379,28 @@ public class CallbackControllerTest {
             .build();
         List<Element<ApplicantConfidentialityDetails>> applicants = List
             .of(Element.<ApplicantConfidentialityDetails>builder()
-                .value(ApplicantConfidentialityDetails.builder()
-                    .firstName("ABC 1")
-                    .lastName("XYZ 2")
-                    .email("abc1@xyz.com")
-                    .phoneNumber("09876543211")
-                    .address(address)
-                    .build()).build());
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 1")
+                               .lastName("XYZ 2")
+                               .email("abc1@xyz.com")
+                               .phoneNumber("09876543211")
+                               .address(address)
+                               .build()).build());
 
         List<Element<ChildConfidentialityDetails>> childConfidentialityDetails = List.of(
             Element.<ChildConfidentialityDetails>builder()
                 .value(ChildConfidentialityDetails
-                    .builder()
-                    .firstName("Test")
-                    .lastName("Name")
-                    .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
-                        OtherPersonConfidentialityDetails.builder()
-                            .firstName("Confidential First Name")
-                            .lastName("Confidential Last Name")
-                            .relationshipToChildDetails("test")
-                            .address(address)
-                            .build()).build()))
-                    .build()).build());
+                           .builder()
+                           .firstName("Test")
+                           .lastName("Name")
+                           .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
+                               OtherPersonConfidentialityDetails.builder()
+                                   .firstName("Confidential First Name")
+                                   .lastName("Confidential Last Name")
+                                   .relationshipToChildDetails("test")
+                                   .address(address)
+                                   .build()).build()))
+                           .build()).build());
         CaseData caseData = CaseData.builder()
             .children(listOfChildren)
             .applicants(applicantList)
@@ -1348,19 +1413,21 @@ public class CallbackControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                .data(stringObjectMap).build()).build();
+                                                       .data(stringObjectMap).build()).build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(confidentialityTabService.getConfidentialApplicantDetails(Mockito.any())).thenReturn(applicants);
-        when(confidentialityTabService.getChildrenConfidentialDetails(Mockito.any())).thenReturn(childConfidentialityDetails);
+        when(confidentialityTabService.getChildrenConfidentialDetails(Mockito.any())).thenReturn(
+            childConfidentialityDetails);
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.generateDocumentSubmitApplication(
-            authToken,
-            callbackRequest
-        );
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            callbackController.generateDocumentSubmitApplication(
+                authToken,
+                callbackRequest
+            );
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8WelshDocument"));
@@ -1393,28 +1460,28 @@ public class CallbackControllerTest {
 
         List<Element<ApplicantConfidentialityDetails>> applicants = List
             .of(Element.<ApplicantConfidentialityDetails>builder()
-                .value(ApplicantConfidentialityDetails.builder()
-                    .firstName("ABC 1")
-                    .lastName("XYZ 2")
-                    .email("abc1@xyz.com")
-                    .phoneNumber("09876543211")
-                    .address(address)
-                    .build()).build());
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 1")
+                               .lastName("XYZ 2")
+                               .email("abc1@xyz.com")
+                               .phoneNumber("09876543211")
+                               .address(address)
+                               .build()).build());
 
         List<Element<ChildConfidentialityDetails>> childConfidentialityDetails = List.of(
             Element.<ChildConfidentialityDetails>builder()
                 .value(ChildConfidentialityDetails
-                    .builder()
-                    .firstName("Test")
-                    .lastName("Name")
-                    .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
-                        OtherPersonConfidentialityDetails.builder()
-                            .firstName("Confidential First Name")
-                            .lastName("Confidential Last Name")
-                            .relationshipToChildDetails("test")
-                            .address(address)
-                            .build()).build()))
-                    .build()).build());
+                           .builder()
+                           .firstName("Test")
+                           .lastName("Name")
+                           .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
+                               OtherPersonConfidentialityDetails.builder()
+                                   .firstName("Confidential First Name")
+                                   .lastName("Confidential Last Name")
+                                   .relationshipToChildDetails("test")
+                                   .address(address)
+                                   .build()).build()))
+                           .build()).build());
 
         OtherPersonWhoLivesWithChild personWhoLivesWithChild = OtherPersonWhoLivesWithChild.builder()
             .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
@@ -1456,6 +1523,7 @@ public class CallbackControllerTest {
             .applicantsConfidentialDetails(Collections.emptyList())
             .childrenConfidentialDetails(Collections.emptyList())
             .id(123L)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .build();
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
@@ -1465,44 +1533,44 @@ public class CallbackControllerTest {
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
             .data(CaseData.builder()
-                .id(123L)
-                .c8Document(Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName("c100C8Template")
-                    .build())
-                .c1ADocument(Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName("c100C1aTemplate")
-                    .build())
-                .finalDocument(Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName("test")
-                    .build())
-                .c8WelshDocument(Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName("test")
-                    .build())
-                .c1AWelshDocument(Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName("test")
-                    .build())
-                .finalWelshDocument(Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName("test")
-                    .build())
-                .build())
+                      .id(123L)
+                      .c8Document(Document.builder()
+                                      .documentUrl(generatedDocumentInfo.getUrl())
+                                      .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                      .documentHash(generatedDocumentInfo.getHashToken())
+                                      .documentFileName("c100C8Template")
+                                      .build())
+                      .c1ADocument(Document.builder()
+                                       .documentUrl(generatedDocumentInfo.getUrl())
+                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                       .documentHash(generatedDocumentInfo.getHashToken())
+                                       .documentFileName("c100C1aTemplate")
+                                       .build())
+                      .finalDocument(Document.builder()
+                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                         .documentFileName("test")
+                                         .build())
+                      .c8WelshDocument(Document.builder()
+                                           .documentUrl(generatedDocumentInfo.getUrl())
+                                           .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                           .documentHash(generatedDocumentInfo.getHashToken())
+                                           .documentFileName("test")
+                                           .build())
+                      .c1AWelshDocument(Document.builder()
+                                            .documentUrl(generatedDocumentInfo.getUrl())
+                                            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                            .documentHash(generatedDocumentInfo.getHashToken())
+                                            .documentFileName("test")
+                                            .build())
+                      .finalWelshDocument(Document.builder()
+                                              .documentUrl(generatedDocumentInfo.getUrl())
+                                              .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                              .documentHash(generatedDocumentInfo.getHashToken())
+                                              .documentFileName("test")
+                                              .build())
+                      .build())
             .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
@@ -1510,7 +1578,7 @@ public class CallbackControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                .data(stringObjectMap).build()).build();
+                                                       .data(stringObjectMap).build()).build();
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
@@ -1526,17 +1594,20 @@ public class CallbackControllerTest {
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(confidentialityTabService.getConfidentialApplicantDetails(Mockito.any())).thenReturn(applicants);
-        when(confidentialityTabService.getChildrenConfidentialDetails(Mockito.any())).thenReturn(childConfidentialityDetails);
+        when(confidentialityTabService.getChildrenConfidentialDetails(Mockito.any())).thenReturn(
+            childConfidentialityDetails);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             Map.of("c1ADocument", "document",
-                "c1AWelshDocument", "document",
-                "finalWelshDocument", "document")
+                   "c1AWelshDocument", "document",
+                   "finalWelshDocument", "document"
+            )
         );
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.generateDocumentSubmitApplication(
-            authToken,
-            callbackRequest
-        );
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            callbackController.generateDocumentSubmitApplication(
+                authToken,
+                callbackRequest
+            );
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
@@ -1549,12 +1620,14 @@ public class CallbackControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                .data(stringObjectMap).build()).build();
+                                                       .data(stringObjectMap).build()).build();
         when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(Court.builder().build());
-        when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.of(CourtEmailAddress.builder()
-                .address("123@gamil.com").build()));
+        when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.of(
+            CourtEmailAddress.builder().address("123@gamil.com").build()));
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController.prePopulateCourtDetails(callbackRequest);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            callbackController.prePopulateCourtDetails(
+                callbackRequest);
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
 
     }
@@ -1566,11 +1639,69 @@ public class CallbackControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                .data(stringObjectMap).build()).build();
+                                                       .data(stringObjectMap).build()).build();
         when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(Court.builder().build());
         when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.empty());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController.prePopulateCourtDetails(callbackRequest);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            callbackController.prePopulateCourtDetails(
+                callbackRequest);
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
+    }
+
+    @Test
+    public void testCaseNameHmctsInternalPresentForC100Case() throws Exception {
+
+        Map<String, Object> caseDetails = new HashMap<>();
+        caseDetails.put("applicantCaseName", "test");
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+            .orgPolicyReference("jfljsd")
+            .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
+        caseDetails.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
+        when(organisationService.findUserOrganisation(Mockito.anyString()))
+            .thenReturn(Optional.of(org));
+        CaseData caseData = CaseData.builder().id(123L).applicantCaseName("testName").applicantOrganisationPolicy(
+            applicantOrganisationPolicy).caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDetails).build()).build();
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .aboutToSubmitCaseCreation(authToken, callbackRequest);
+        assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("caseNameHmctsInternal"));
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
+    }
+
+    @Test
+    public void testCaseNameHmctsInternalPresentForFL401Case() throws Exception {
+
+        Map<String, Object> caseDetails = new HashMap<>();
+        caseDetails.put("applicantOrRespondentCaseName", "test");
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+            .orgPolicyReference("jfljsd")
+            .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
+        caseDetails.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
+        when(organisationService.findUserOrganisation(Mockito.anyString()))
+            .thenReturn(Optional.of(org));
+        CaseData caseData = CaseData.builder().id(123L).applicantCaseName("testName").applicantOrganisationPolicy(
+            applicantOrganisationPolicy).caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDetails).build()).build();
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .aboutToSubmitCaseCreation(authToken, callbackRequest);
+        assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("caseNameHmctsInternal"));
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantOrRespondentCaseName"));
     }
 }
