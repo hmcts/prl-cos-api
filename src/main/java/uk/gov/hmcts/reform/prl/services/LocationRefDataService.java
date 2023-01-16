@@ -48,7 +48,7 @@ public class LocationRefDataService {
             : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> {
-                if (courtList.length == 0) {
+                if (courtList.length == 1) {
                     return true;
                 }
                 return Arrays.asList(courtList).contains(location.getCourtEpimmsId());
