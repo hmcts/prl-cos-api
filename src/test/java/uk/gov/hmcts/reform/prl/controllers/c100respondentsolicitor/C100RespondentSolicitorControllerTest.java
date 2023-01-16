@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -79,6 +81,59 @@ public class C100RespondentSolicitorControllerTest {
     }
 
     @Test
+    public void testHandleActiveRespondentSelection() throws Exception{
+        PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(String.valueOf(0)).build();
+        DynamicList chooseRespondent = DynamicList.builder().value(dynamicListElement).build();
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+
+        CaseData caseData = CaseData.builder()
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .id(123L)
+            .chooseRespondentDynamicList(chooseRespondent)
+            .respondents(respondentList)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(respondentSolicitorService.updateActiveRespondentSelectionBySolicitor(Mockito.any(CallbackRequest.class), Mockito.anyString())).thenReturn(c7DraftMap);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleActiveRespondentSelection(
+            authToken,
+            callbackRequest
+        );
+
+        assertNotNull(response.getData());
+
+    }
+    @Test
     public void testKeepDetailsPrivateAsYes(){
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -101,7 +156,7 @@ public class C100RespondentSolicitorControllerTest {
     }
 
     @Test
-    public void generateAndStoreC7DraftDocument() throws Exception {
+    public void testGenerateAndStoreC7DraftDocument() throws Exception {
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .gender(Gender.male)
