@@ -58,7 +58,7 @@ def versions = [
   springSecurityRsa            : '1.0.9.RELEASE',
   springBoot                   : '2.7.0',
   springCloud                  : '3.1.1',
-  tomcat                       : '9.0.68',
+  tomcat                       : '9.0.69',
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.7.3',
   pdfbox                       : '2.0.24'
@@ -540,8 +540,6 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/*',
   '**uk/gov/hmcts/reform/prl/Application.*',
-  '**uk/gov/hmcts/reform/prl/controllers/citizen/CaseController.java',
-  '**uk/gov/hmcts/reform/prl/controllers/citizen/CitizenCallbackController.java'
 ]
 
 sonarqube {

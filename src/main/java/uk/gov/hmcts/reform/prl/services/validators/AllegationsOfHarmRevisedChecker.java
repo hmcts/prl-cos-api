@@ -106,7 +106,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         return isFinished;
     }
 
-    public boolean validateDomesticAbuse(CaseData caseData){
+    public boolean validateDomesticAbuse(CaseData caseData) {
         boolean domesticBehavioursCompleted = true;
         if (ofNullable(caseData.getAllegationOfHarmRevised().getChildAbuseBehaviours()).isPresent()) {
             Optional<List<Element<ChildAbuseBehaviours>>> childBehavioursWrapped =
@@ -118,10 +118,10 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
             }
         }
-    return domesticBehavioursCompleted;
+        return domesticBehavioursCompleted;
     }
 
-    public boolean validateChildAbuse(CaseData caseData){
+    public boolean validateChildAbuse(CaseData caseData) {
         boolean childBehavioursCompleted = true;
         if (ofNullable(caseData.getAllegationOfHarmRevised().getChildAbuseBehaviours()).isPresent()) {
             Optional<List<Element<ChildAbuseBehaviours>>> childBehavioursWrapped =
