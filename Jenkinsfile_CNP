@@ -45,7 +45,8 @@ def secrets = [
       secret('prl-citizen-frontend-idam-client-secret', 'CITIZEN_IDAM_CLIENT_SECRET'),
       secret("cafcass-svc-username", "CAFCASS_USERNAME"),
       secret("cafcass-svc-password", "CAFCASS_PASSWORD"),
-      secret("postcode-lookup-token", "POST_CODE_LOOKUP_TOKEN")
+      secret("postcode-lookup-token", "POST_CODE_LOOKUP_TOKEN"),
+      secret('filtered-court-ids', 'COURT_IDS_TO_FILTER')
    ]
 ]
 

@@ -201,21 +201,21 @@ public class ApplicationsTabService implements TabService {
 
             for (OtherPersonWhoLivesWithChild otherPersonWhoLivesWithChild : otherPersonList) {
                 otherPersonLiving.add(Element.<OtherPersonWhoLivesWithChildDetails>builder()
-                        .value(OtherPersonWhoLivesWithChildDetails.builder()
-                                .firstName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                        .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL
-                                        : otherPersonWhoLivesWithChild.getFirstName())
-                                .lastName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                      .value(OtherPersonWhoLivesWithChildDetails.builder()
+                                 .firstName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                         .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL
+                                                : otherPersonWhoLivesWithChild.getFirstName())
+                                 .lastName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
                                         .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
-                                        otherPersonWhoLivesWithChild.getLastName())
-                                .relationshipToChildDetails((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                        .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
-                                        otherPersonWhoLivesWithChild.getRelationshipToChildDetails())
-                                .isPersonIdentityConfidential(otherPersonWhoLivesWithChild.getIsPersonIdentityConfidential())
-                                .address((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                        .getIsPersonIdentityConfidential())
-                                        ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
-                                        : otherPersonWhoLivesWithChild.getAddress()).build()).build());
+                                               otherPersonWhoLivesWithChild.getLastName())
+                                 .relationshipToChildDetails((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                          .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
+                                                 otherPersonWhoLivesWithChild.getRelationshipToChildDetails())
+                                 .isPersonIdentityConfidential(otherPersonWhoLivesWithChild.getIsPersonIdentityConfidential())
+                                 .address((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                                                   .getIsPersonIdentityConfidential())
+                                              ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
+                                              : otherPersonWhoLivesWithChild.getAddress()).build()).build());
             }
         }
         Optional<RelationshipsEnum> applicantsRelationshipToChild =
@@ -238,10 +238,10 @@ public class ApplicationsTabService implements TabService {
             .personWhoLivesWithChild(otherPersonLiving)
             .childLiveWith(childLivesWith.isEmpty() ? null : child.getChildLiveWith().stream()
                 .map(LiveWithEnum::getDisplayedValue).collect(
-                Collectors.joining(", ")))
+                    Collectors.joining(", ")))
             .orderAppliedFor(orderAppliedFor.isEmpty() ? null : child.getOrderAppliedFor().stream()
                 .map(OrderTypeEnum::getDisplayedValue).collect(
-                Collectors.joining(", ")))
+                    Collectors.joining(", ")))
             .parentalResponsibilityDetails(child.getParentalResponsibilityDetails())
             .build();
     }

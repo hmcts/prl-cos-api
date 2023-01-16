@@ -159,7 +159,7 @@ public class ConfidentialityTabService {
         List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
         if (typeOfApplicationOrders.isPresent() && ofNullable(typeOfApplicationOrders.get().getOrderType()).isPresent()
-                        && !typeOfApplicationOrders.get().getOrderType().isEmpty()) {
+            && !typeOfApplicationOrders.get().getOrderType().isEmpty()) {
             if (typeOfApplicationOrders.get().getOrderType().contains(occupationOrder)
                 && ofNullable(caseData.getHome()).isPresent() && ofNullable(caseData.getHome().getChildren()).isPresent()) {
                 List<ChildrenLiveAtAddress> children = unwrapElements(caseData.getHome().getChildren());

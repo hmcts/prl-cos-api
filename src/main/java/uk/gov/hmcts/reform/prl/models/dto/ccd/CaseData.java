@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityStatementDisclaimerEnum;
-import uk.gov.hmcts.reform.prl.enums.CourtDetailsPilotEnum;
 import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -581,9 +580,6 @@ public class CaseData implements MappableObject {
 
     private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
 
-    @JsonProperty("childOption")
-    private final String childOption;
-
     @JsonProperty("childrenList")
     private final String childrenList;
     @JsonProperty("magistrateLastName")
@@ -609,7 +605,7 @@ public class CaseData implements MappableObject {
     /**
      * FL401 Court details for Pilot.
      */
-    private final CourtDetailsPilotEnum submitCountyCourtSelection;
+    private final DynamicList submitCountyCourtSelection;
 
     public CaseData setDateSubmittedDate() {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
