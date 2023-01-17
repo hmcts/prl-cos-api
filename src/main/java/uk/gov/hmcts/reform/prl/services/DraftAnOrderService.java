@@ -89,9 +89,8 @@ public class DraftAnOrderService {
     private final LocationRefDataService locationRefDataService;
     private final PartiesListGenerator partiesListGenerator;
 
-    private static final String NON_MOLESTATION_ORDER = "draftAnOrder/non-molestation-order.html";
-    private static final String SPECIAL_GUARDIANSHIP_ORDER = "draftAnOrder/special-guardianship-c43.html";
-    private static final String BLANK_ORDER_C21 = "draftAnOrder/blank-order-c21.html";
+    private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
+
 
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
@@ -107,7 +106,7 @@ public class DraftAnOrderService {
             m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        return Map.of("draftOrderCollection", draftOrderList
+        return Map.of(DRAFT_ORDER_COLLECTION, draftOrderList
         );
     }
 
@@ -186,8 +185,7 @@ public class DraftAnOrderService {
 
     public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData) {
         Map<String, Object> updatedCaseData = new HashMap<>();
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        draftOrderCollection = caseData.getDraftOrderCollection();
+        List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if (draftOrder.getOrderDocument().getDocumentFileName()
@@ -206,7 +204,7 @@ public class DraftAnOrderService {
             m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        updatedCaseData.put("draftOrderCollection", draftOrderCollection);
+        updatedCaseData.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
         return updatedCaseData;
 
     }
@@ -280,7 +278,7 @@ public class DraftAnOrderService {
     }
 
     private Document getGeneratedDocument(GeneratedDocumentInfo generatedDocumentInfo,
-                                          Boolean isWelsh, Map<String, String> fieldMap) {
+                                          boolean isWelsh, Map<String, String> fieldMap) {
         if (generatedDocumentInfo != null) {
             return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -457,8 +455,7 @@ public class DraftAnOrderService {
             .filter(element -> element.getId().equals(orderId))
             .map(Element::getValue)
             .findFirst()
-            .orElseThrow(() -> new UnsupportedOperationException(String.format(
-                "Could not find order")));
+            .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
     }
 
 
@@ -466,8 +463,7 @@ public class DraftAnOrderService {
 
         log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
         log.info(" ************ casedata {}", caseData);
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        draftOrderCollection = caseData.getDraftOrderCollection();
+        List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if (draftOrder.getOrderDocument().getDocumentFileName()
@@ -486,7 +482,7 @@ public class DraftAnOrderService {
             m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        return Map.of("draftOrderCollection", draftOrderCollection
+        return Map.of(DRAFT_ORDER_COLLECTION, draftOrderCollection
         );
     }
 
@@ -559,9 +555,6 @@ public class DraftAnOrderService {
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
         log.info("Case Type of application from case data before :::{}", caseData.getCaseTypeOfApplication());
-
-        log.info("Case data {}", caseData);
-        //log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         if (!C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
             if (fl404CustomFields != null) {
