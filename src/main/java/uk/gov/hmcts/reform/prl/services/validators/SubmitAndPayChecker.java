@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -90,5 +91,10 @@ public class SubmitAndPayChecker implements EventChecker {
             }
         }
         return true;
+    }
+
+    @Override
+    public TaskState getDefaultTaskState() {
+        return TaskState.NOT_STARTED;
     }
 }

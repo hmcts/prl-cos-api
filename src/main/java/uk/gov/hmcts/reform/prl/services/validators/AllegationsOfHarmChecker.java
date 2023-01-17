@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
@@ -440,5 +441,9 @@ public class AllegationsOfHarmChecker implements EventChecker {
 
     }
 
+    @Override
+    public TaskState getDefaultTaskState() {
+        return TaskState.NOT_STARTED;
+    }
 
 }
