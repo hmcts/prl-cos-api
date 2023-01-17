@@ -18,6 +18,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -55,9 +58,16 @@ public class C100RespondentSolicitorService {
             caseDataUpdated,
             CaseData.class
         );
-        findActiveRespondent(caseData, authorisation)
-            .ifPresentOrElse(x -> retrieveExistingResponseForSolicitor(callbackRequest, caseDataUpdated, x), ()
-                -> errorList.add("You must select a respondent to represent through 'Respond to application' event"));
+        Optional<Element<PartyDetails>> getActiveRespondent = findActiveRespondent(caseData, authorisation);
+        getActiveRespondent.ifPresentOrElse(x -> retrieveExistingResponseForSolicitor(callbackRequest, caseDataUpdated, x), ()
+            -> errorList.add("You must select a respondent to represent through 'Respond to application' event"));
+
+        String activeRespondentName = getActiveRespondent.isPresent()
+            ? (getActiveRespondent.get().getValue().getFirstName() + " "
+            + getActiveRespondent.get().getValue().getLastName()) : null;
+
+        log.info("Active Respondent name: {}", activeRespondentName);
+        caseDataUpdated.put("respondentNameForResponse", activeRespondentName);
         return caseDataUpdated;
     }
 
@@ -96,10 +106,11 @@ public class C100RespondentSolicitorService {
                 case MIAM:
                     String[] miamFields = event.getCaseFieldName().split(",");
                     log.info("MIAM fields, :::{}", (Object) miamFields);
-                    caseDataUpdated.put(miamFields[0], x.getValue().getResponse().getMiam());
-                    caseDataUpdated.put(miamFields[1], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
+                    caseDataUpdated.put(miamFields[0], x.getValue().getResponse().getMiam().getAttendedMiam());
+                    caseDataUpdated.put(miamFields[1], x.getValue().getResponse().getMiam().getWillingToAttendMiam());
+                    caseDataUpdated.put(miamFields[2], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
                     caseDataUpdated.put(
-                        miamFields[2],
+                        miamFields[3],
                         miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder()
                     );
                     break;
@@ -115,8 +126,54 @@ public class C100RespondentSolicitorService {
                     );
                     break;
                 case ALLEGATION_OF_HARM:
+                    String[] allegationsOfHarmFields = event.getCaseFieldName().split(",");
+                    caseDataUpdated.put(
+                        allegationsOfHarmFields[0],
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentAllegationsOfHarm()
+                    );
+                    caseDataUpdated.put(
+                        allegationsOfHarmFields[1],
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentDomesticAbuseBehaviour()
+                    );
+                    caseDataUpdated.put(
+                        allegationsOfHarmFields[2],
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentChildAbuseBehaviour()
+                    );
+                    caseDataUpdated.put(
+                        allegationsOfHarmFields[3],
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentChildAbduction()
+                    );
+                    caseDataUpdated.put(
+                        allegationsOfHarmFields[4],
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentOtherConcerns()
+                    );
+                    break;
                 case INTERNATIONAL_ELEMENT:
+                    String[] internationalElementFields = event.getCaseFieldName().split(",");
+                    caseDataUpdated.put(
+                        internationalElementFields[0],
+                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementChild()
+                    );
+                    caseDataUpdated.put(
+                        internationalElementFields[1],
+                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementParent()
+                    );
+                    caseDataUpdated.put(
+                        internationalElementFields[2],
+                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementJurisdiction()
+                    );
+                    caseDataUpdated.put(
+                        internationalElementFields[3],
+                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementRequest()
+                    );
+                    break;
                 case ABILITY_TO_PARTICIPATE:
+                    String[] abilityToParticipateFields = event.getCaseFieldName().split(",");
+                    caseDataUpdated.put(
+                        abilityToParticipateFields[0],
+                        x.getValue().getResponse().getAbilityToParticipate()
+                    );
+                    break;
                 case VIEW_DRAFT_RESPONSE:
                 case SUBMIT:
                 default:
@@ -199,7 +256,14 @@ public class C100RespondentSolicitorService {
                 break;
             case MIAM:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .solicitorMiam(caseData.getRespondentSolicitorMiam())
+                    .miam(Miam.builder()
+                              .attendedMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam())
+                              .willingToAttendMiam(caseData.getRespondentSolicitorWillingnessToAttendMiam().getWillingToAttendMiam())
+                              .reasonNotAttendingMiam(caseData.getRespondentSolicitorWillingnessToAttendMiam()
+                                                          .getWillingToAttendMiam().equals(YesOrNo.No)
+                                                          ? caseData.getRespondentSolicitorWillingnessToAttendMiam()
+                                  .getReasonNotAttendingMiam() : null)
+                              .build())
                     .build();
                 break;
             case CURRENT_OR_PREVIOUS_PROCEEDINGS:
@@ -209,10 +273,34 @@ public class C100RespondentSolicitorService {
                     .build();
                 break;
             case ALLEGATION_OF_HARM:
+                buildResponseForRespondent = buildResponseForRespondent.toBuilder()
+                    .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData.builder()
+                                                         .respondentAllegationsOfHarm(caseData.getRespondentAllegationsOfHarm())
+                                                         .respondentDomesticAbuseBehaviour(caseData.getRespondentDomesticAbuseBehaviour())
+                                                         .respondentChildAbuseBehaviour(caseData.getRespondentChildAbuseBehaviour())
+                                                         .respondentChildAbduction(caseData.getRespondentChildAbduction())
+                                                         .respondentOtherConcerns(caseData.getRespondentOtherConcerns())
+                                                         .build())
+                    .build();
+                break;
             case INTERNATIONAL_ELEMENT:
+                buildResponseForRespondent = buildResponseForRespondent.toBuilder()
+                    .resSolInternationalElements(ResSolInternationalElements.builder()
+                                                     .internationalElementChild(caseData.getInternationalElementChild())
+                                                     .internationalElementParent(caseData.getInternationalElementParent())
+                                                     .internationalElementJurisdiction(caseData.getInternationalElementJurisdiction())
+                                                     .internationalElementRequest(caseData.getInternationalElementRequest())
+                                                     .build())
+                    .build();
+                break;
             case ABILITY_TO_PARTICIPATE:
+                buildResponseForRespondent = buildResponseForRespondent.toBuilder()
+                    .abilityToParticipate(caseData.getAbilityToParticipateInProceedings())
+                    .build();
+                break;
             case VIEW_DRAFT_RESPONSE:
             case SUBMIT:
+
             default:
                 break;
         }
