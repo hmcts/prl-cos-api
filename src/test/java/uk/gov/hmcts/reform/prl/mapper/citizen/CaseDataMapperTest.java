@@ -127,7 +127,7 @@ public class CaseDataMapperTest {
 
         //Then
         assertNotNull(updatedCaseData);
-        assertThat(updatedCaseData.getMiamExemptionsChecklist()).isEmpty();
+        assertThat(updatedCaseData.getMiamDetails().getMiamExemptionsChecklist()).isEmpty();
     }
 
     @Test

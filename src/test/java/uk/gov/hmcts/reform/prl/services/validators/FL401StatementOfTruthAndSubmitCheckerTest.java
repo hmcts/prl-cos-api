@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
@@ -349,11 +350,13 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
             .respondentRelationOptions(respondentRelationOptionsInfo)
             .respondentBehaviourData(respondentBehaviour)
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.no)
-            .isWelshNeeded(No)
-            .isInterpreterNeeded(No)
-            .isDisabilityPresent(No)
-            .isSpecialArrangementsRequired(No)
-            .isIntermediaryNeeded(No)
+            .attendHearing(AttendHearing.builder()
+                               .isWelshNeeded(No)
+                               .isInterpreterNeeded(No)
+                               .isDisabilityPresent(No)
+                               .isSpecialArrangementsRequired(No)
+                               .isIntermediaryNeeded(No)
+                               .build())
             .welshLanguageRequirement(No)
             .build();
 

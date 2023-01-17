@@ -21,3 +21,5 @@ src/main/resources/application.yaml
 *.ipr
 
 .DS_Store
+/.aat-env
+/bin/ccd-config-PRL-local.xlsx
