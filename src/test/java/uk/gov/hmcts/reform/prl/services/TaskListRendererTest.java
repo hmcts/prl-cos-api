@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
+import uk.gov.hmcts.reform.prl.services.validators.EventsChecker;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -56,15 +57,17 @@ import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.FINISHED;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.IN_PROGRESS;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
 
+
 public class TaskListRendererTest {
     private TypeOfApplicationOrders orders;
     private LinkToCA linkToCA;
+    private EventsChecker eventsChecker;
 
 
     private final TaskListRenderer taskListRenderer = new TaskListRenderer(
         new TaskListRenderElements(
             "NO IMAGE URL IN THIS BRANCH"
-        )
+        ),eventsChecker
     );
 
     private final List<Task> tasks = List.of(

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.List;
 
@@ -28,6 +29,11 @@ public enum Event {
     VIEW_PDF_DOCUMENT("viewPdfDocument", "View PDF application"),
     SUBMIT_AND_PAY("submitAndPay", "Submit and pay"),
     SUBMIT("submit", "Submit"),
+    OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION("otherChildrenNotPartOfTheApplication","Other children not part of the application"),
+    CHILDREN_AND_APPLICANTS("childrenAndApplicants","Children and applicants"),
+    CHILDREN_AND_RESPONDENTS("childrenAndRespondents","Children and respondents"),
+    CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION("childrenAndOtherPeopleInThisApplication","Children and other people in this application"),
+
     // FL401 Events
     FL401_CASE_NAME("fl401CaseName", "Case name"),
     RESPONDENT_BEHAVIOUR("respondentBehaviour", "Respondent's behaviour"),
@@ -41,26 +47,13 @@ public enum Event {
     FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings"),
     FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents");
 
+
+
     private final String id;
     private final String name;
 
-    public static List<Event> getEventOrder(String caseType) {
-        List<Event> c100 = List.of(
-            CASE_NAME,
-            TYPE_OF_APPLICATION,
-            HEARING_URGENCY,
-            APPLICANT_DETAILS,
-            CHILD_DETAILS,
-            RESPONDENT_DETAILS,
-            MIAM,
-            ALLEGATIONS_OF_HARM,
-            OTHER_PEOPLE_IN_THE_CASE,
-            OTHER_PROCEEDINGS,
-            ATTENDING_THE_HEARING,
-            INTERNATIONAL_ELEMENT,
-            LITIGATION_CAPACITY,
-            WELSH_LANGUAGE_REQUIREMENTS
-        );
+    public static List<Event> getEventOrder(CaseData caseData) {
+        List<Event> c100 = getC100Events(caseData);
         List<Event> fl401 = List.of(
             FL401_CASE_NAME,
             FL401_TYPE_OF_APPLICATION,
@@ -76,7 +69,48 @@ public enum Event {
             INTERNATIONAL_ELEMENT,
             WELSH_LANGUAGE_REQUIREMENTS
         );
-        return caseType.equalsIgnoreCase(C100_CASE_TYPE) ? c100 : fl401;
+        return C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? c100 : fl401;
+    }
+
+    private static List<Event> getC100Events(CaseData caseData) {
+        if ("v2".equalsIgnoreCase(caseData.getTaskListVersion())) {
+            return List.of(
+                    CASE_NAME,
+                    TYPE_OF_APPLICATION,
+                    HEARING_URGENCY,
+                    CHILD_DETAILS,
+                    APPLICANT_DETAILS,
+                    RESPONDENT_DETAILS,
+                    OTHER_PEOPLE_IN_THE_CASE,
+                    OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
+                    CHILDREN_AND_APPLICANTS,
+                    CHILDREN_AND_RESPONDENTS,
+                    CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION,
+                    ALLEGATIONS_OF_HARM,
+                    MIAM,
+                    OTHER_PROCEEDINGS,
+                    ATTENDING_THE_HEARING,
+                    INTERNATIONAL_ELEMENT,
+                    LITIGATION_CAPACITY,
+                    WELSH_LANGUAGE_REQUIREMENTS
+            );
+        }
+        return  List.of(
+            CASE_NAME,
+            TYPE_OF_APPLICATION,
+            HEARING_URGENCY,
+            APPLICANT_DETAILS,
+            CHILD_DETAILS,
+            RESPONDENT_DETAILS,
+            MIAM,
+            ALLEGATIONS_OF_HARM,
+            OTHER_PEOPLE_IN_THE_CASE,
+            OTHER_PROCEEDINGS,
+            ATTENDING_THE_HEARING,
+            INTERNATIONAL_ELEMENT,
+            LITIGATION_CAPACITY,
+            WELSH_LANGUAGE_REQUIREMENTS
+        );
     }
 
 }

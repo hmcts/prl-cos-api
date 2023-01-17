@@ -85,6 +85,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
@@ -373,7 +374,7 @@ public class CallbackController {
                 log.info("Case is updated as WithdrawRequestSent");
                 sendWithdrawEmails(caseData, userDetails, caseDetails);
             } else {
-                if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                     solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
                     // Refreshing the page in the same event. Hence no external event call needed.
                     // Getting the tab fields and add it to the casedetails..
@@ -389,7 +390,7 @@ public class CallbackController {
     }
 
     private void sendWithdrawEmails(CaseData caseData, UserDetails userDetails, CaseDetails caseDetails) {
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
         } else {
             solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
@@ -492,6 +493,9 @@ public class CallbackController {
         }
         if (caseDataUpdated.get("caseTypeOfApplication") != null) {
             caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
+            if (C100_CASE_TYPE.equals(caseDataUpdated.get("caseTypeOfApplication"))) {
+                caseDataUpdated.put("taskListVersion", "v2");
+            }
         }
 
         // Saving the logged-in Solicitor and Org details for the docs..
