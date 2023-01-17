@@ -494,7 +494,7 @@ public class C100IssueCaseControllerTest {
             .applicantsConfidentialDetails(Collections.emptyList())
             .childrenConfidentialDetails(Collections.emptyList())
             .id(123L)
-            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("reg-base-courtname-test-test-test").build()).build())
+            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("reg").build()).build())
             .build();
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))

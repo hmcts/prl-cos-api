@@ -66,7 +66,6 @@ public class C100IssueCaseController {
                 .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
             caseData = caseData.toBuilder().issueDate(LocalDate.now()).courtName(courtName).build();
-            log.info("******* CaseManagementLocation {}", caseDataUpdated.get("caseManagementLocation"));
         }
 
         // Generate All Docs and set to casedataupdated.
