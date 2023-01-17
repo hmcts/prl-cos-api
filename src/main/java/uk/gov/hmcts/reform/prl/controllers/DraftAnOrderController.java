@@ -106,7 +106,6 @@ public class DraftAnOrderController {
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         }
-        log.info("Case data updated map {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
@@ -135,7 +134,6 @@ public class DraftAnOrderController {
                 .errors(errorList)
                 .build();
         }
-        log.info("Case data updated map {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
@@ -164,7 +162,6 @@ public class DraftAnOrderController {
                 .errors(errorList)
                 .build();
         }
-        log.info("Case data updated map {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }

@@ -763,8 +763,7 @@ public class DraftAnOrderService {
     }
 
     private List<DynamicListElement> getCourtDynamicList(String authorisation) {
-        List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
-        return courtList;
+        return locationRefDataService.getCourtLocations(authorisation);
     }
 
     public static boolean checkDirectionOnIssueOptionsSelected(CaseData caseData) {
