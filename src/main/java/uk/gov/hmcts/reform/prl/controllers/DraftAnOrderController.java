@@ -37,7 +37,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RestController
 @RequiredArgsConstructor
 public class DraftAnOrderController {
-    public static final String CASE_DATA_UPDATED_MAP = "Case data updated map {}";
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -107,7 +106,6 @@ public class DraftAnOrderController {
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         }
-        log.info(CASE_DATA_UPDATED_MAP, caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
@@ -136,7 +134,6 @@ public class DraftAnOrderController {
                 .errors(errorList)
                 .build();
         }
-        log.info(CASE_DATA_UPDATED_MAP, caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
@@ -165,7 +162,6 @@ public class DraftAnOrderController {
                 .errors(errorList)
                 .build();
         }
-        log.info(CASE_DATA_UPDATED_MAP, caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
