@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -33,6 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.SUBMIT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -49,6 +51,9 @@ public class C100RespondentSolicitorService {
     private RespondentSolicitorMiamService miamService;
 
     @Autowired
+    private ResponseSubmitChecker responseSubmitChecker;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
@@ -59,15 +64,31 @@ public class C100RespondentSolicitorService {
             CaseData.class
         );
         Optional<Element<PartyDetails>> getActiveRespondent = findActiveRespondent(caseData, authorisation);
-        getActiveRespondent.ifPresentOrElse(x -> retrieveExistingResponseForSolicitor(callbackRequest, caseDataUpdated, x), ()
-            -> errorList.add("You must select a respondent to represent through 'Respond to application' event"));
 
-        String activeRespondentName = getActiveRespondent.isPresent()
-            ? (getActiveRespondent.get().getValue().getFirstName() + " "
-            + getActiveRespondent.get().getValue().getLastName()) : null;
+        log.info("Event name:::{}", callbackRequest.getEventId());
+        boolean mandatoryFinished = false;
 
-        log.info("Active Respondent name: {}", activeRespondentName);
-        caseDataUpdated.put("respondentNameForResponse", activeRespondentName);
+        if (callbackRequest.getEventId().equalsIgnoreCase(SUBMIT.getEventId())) {
+            mandatoryFinished = responseSubmitChecker.hasMandatoryCompleted(caseData, getActiveRespondent);
+            if (!mandatoryFinished) {
+                errorList.add(
+                    "Response submission is not allowed for this case unless you finish all the mandatory information");
+            }
+        } else {
+            getActiveRespondent.ifPresentOrElse(x -> retrieveExistingResponseForSolicitor(
+                callbackRequest,
+                caseDataUpdated,
+                x), () -> errorList.add(
+                "You must select a respondent to represent through 'Respond to application' event"));
+
+            String activeRespondentName = getActiveRespondent.isPresent()
+                ? (getActiveRespondent.get().getValue().getFirstName() + " "
+                + getActiveRespondent.get().getValue().getLastName()) : null;
+
+            log.info("Active Respondent name: {}", activeRespondentName);
+            caseDataUpdated.put("respondentNameForResponse", activeRespondentName);
+
+        }
         return caseDataUpdated;
     }
 
