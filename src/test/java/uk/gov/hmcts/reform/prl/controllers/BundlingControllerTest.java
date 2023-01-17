@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -85,8 +86,6 @@ public class BundlingControllerTest {
     public static final String authToken = "Bearer TestAuthToken";
     private CaseData c100CaseData;
 
-    private CaseData caseDataUpdated;
-
     @Before
     public void setUp() {
         List<BundleDocument> bundleDocuments = new ArrayList<>();
@@ -122,9 +121,10 @@ public class BundlingControllerTest {
         bundleCreateRefreshResponse = BundleCreateResponse.builder()
             .data(BundleData.builder().id("334").caseBundles(bundleRefreshList).build()).build();
         caseData = new HashMap<>();
-        caseData.put("bundleInformation", bundleCreateResponse.getData().getCaseBundles());
+        //caseData.put("bundleInformation", bundleCreateResponse.getData().getCaseBundles());
         caseDetails = CaseDetails.builder().data(caseData).state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue())
             .id(123488888L).createdDate(LocalDateTime.now()).lastModified(LocalDateTime.now()).build();
+
         List<FurtherEvidence> furtherEvidences = new ArrayList<>();
         furtherEvidences.add(FurtherEvidence.builder().typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.miamCertificate)
             .documentFurtherEvidence(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("Sample1.pdf").build())
@@ -187,7 +187,7 @@ public class BundlingControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
         when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString())).thenReturn(bundleCreateResponse);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
-        response = bundlingController.createBundle(authToken, "serviceAuth", callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = bundlingController.createBundle(authToken, "serviceAuth", callbackRequest);
         BundlingInformation bundleInformation = (BundlingInformation) response.getData().get("bundleInformation");
         List<Bundle> responseCaseBundles = bundleInformation.getCaseBundles();
         assertEquals("MiamCertificate",
@@ -195,4 +195,50 @@ public class BundlingControllerTest {
                 .getValue().getFolders().get(0).getValue().getFolders().get(0).getValue().getDocuments().get(0).getValue().getName());
     }
 
+    @Test
+    public void testCreateBundleWhenBundleApiResponseIsNull() throws Exception {
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString())).thenReturn(null);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
+        AboutToStartOrSubmitCallbackResponse response = bundlingController.createBundle(authToken, "serviceAuth", callbackRequest);
+        Assert.assertNull(response.getData().get("bundleInformation"));
+    }
+
+    @Test
+    public void testCreateBundleWhenBundleDataInResponseisNull() throws Exception {
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString()))
+            .thenReturn(BundleCreateResponse.builder().build());
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
+        response = bundlingController.createBundle(authToken, "serviceAuth", callbackRequest);
+        Assert.assertNull(response.getData().get("bundleInformation"));
+    }
+
+    @Test
+    public void testCreateBundleWhenCaseBundlesInResponseisNull() throws Exception {
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString()))
+            .thenReturn(BundleCreateResponse.builder().data(BundleData.builder()
+            .build()).build());
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
+        response = bundlingController.createBundle(authToken, "serviceAuth", callbackRequest);
+        Assert.assertNull(response.getData().get("bundleInformation"));
+    }
+
+    @Test
+    public void testCreateBundleWhenStitchStatusIsFailed() throws Exception {
+        List<Bundle> bundleList = new ArrayList<>();
+        bundleList.add(Bundle.builder().value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().build())
+            .stitchStatus("Failed").build()).build());
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(c100CaseData);
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class), anyString(), anyString()))
+            .thenReturn(BundleCreateResponse.builder().data(BundleData.builder()
+            .caseBundles(bundleList).build()).build());
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
+        AboutToStartOrSubmitCallbackResponse response = bundlingController.createBundle(authToken, "serviceAuth", callbackRequest);
+        BundlingInformation bundleInformation = (BundlingInformation) response.getData().get("bundleInformation");
+        List<Bundle> responseCaseBundles = bundleInformation.getCaseBundles();
+        assertEquals("Failed",
+            responseCaseBundles.get(0).getValue().getStitchStatus());
+    }
 }
