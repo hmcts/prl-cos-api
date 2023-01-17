@@ -421,7 +421,7 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse updatePartyDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
-    ) throws IOException {
+    ) {
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest))
