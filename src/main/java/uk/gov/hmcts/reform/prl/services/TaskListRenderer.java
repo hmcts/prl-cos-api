@@ -4,13 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskSection;
+import uk.gov.hmcts.reform.prl.services.validators.EventsChecker;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +31,9 @@ import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
@@ -41,6 +47,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
@@ -70,6 +77,8 @@ public class TaskListRenderer {
 
     private final TaskListRenderElements taskListRenderElements;
 
+    private final EventsChecker eventsChecker;
+
 
     public String render(List<Task> allTasks, List<EventValidationErrors> tasksErrors, boolean isC100CaseType, CaseData caseData) {
         final List<String> lines = new LinkedList<>();
@@ -77,7 +86,7 @@ public class TaskListRenderer {
         lines.add("<div class='width-50'>");
 
         (isC100CaseType ? groupInSections(allTasks, caseData) : groupInSectionsForFL401(allTasks, caseData))
-            .forEach(section -> lines.addAll(renderSection(section)));
+            .forEach(section -> lines.addAll(renderSection(section,caseData)));
 
         lines.add("</div>");
 
@@ -88,6 +97,87 @@ public class TaskListRenderer {
 
     private List<TaskSection> groupInSections(List<Task> allTasks, CaseData caseData) {
         final Map<Event, Task> tasks = allTasks.stream().collect(toMap(Task::getEvent, identity()));
+
+        if ("v2".equalsIgnoreCase(caseData.getTaskListVersion())) {
+            final TaskSection applicationDetails = newSection("Add application details")
+                    .withTask(tasks.get(CASE_NAME))
+                    .withTask(tasks.get(TYPE_OF_APPLICATION))
+                    .withTask(tasks.get(HEARING_URGENCY));
+
+            final TaskSection peopleInTheCase = newSection("Add people to the case")
+                    .withInfo("if children live with another party in the case (other than the applicant or respondent) you can add these details to "
+                            + "'Other people in the case.' if you do complete this section, you must keep it up to date.")
+                    .withTask(tasks.get(CHILD_DETAILS))
+                    .withTask(tasks.get(APPLICANT_DETAILS))
+                    .withTask(tasks.get(RESPONDENT_DETAILS))
+                    .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE))
+                    .withTask(tasks.get(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION));
+
+            final TaskSection relationships = newSection("Relationships")
+                    .withTask(tasks.get(CHILDREN_AND_APPLICANTS))
+                    .withTask(tasks.get(CHILDREN_AND_RESPONDENTS))
+                    .withTask(tasks.get(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION))
+                    .withErrors(List.of(EventValidationErrors
+                            .builder()
+                            .event(CHILD_DETAILS)
+                            .errors(Collections.singletonList(EventErrorsEnum.CHILD_DETAILS_ERROR.getError()))
+                            .build(),EventValidationErrors
+                            .builder()
+                            .event(APPLICANT_DETAILS)
+                            .errors(Collections.singletonList(EventErrorsEnum.APPLICANTS_DETAILS_ERROR.getError()))
+                            .build(),EventValidationErrors
+                            .builder()
+                            .event(RESPONDENT_DETAILS)
+                            .errors(Collections.singletonList(EventErrorsEnum.RESPONDENT_DETAILS_ERROR.getError()))
+                            .build(),EventValidationErrors
+                            .builder()
+                            .event(OTHER_PEOPLE_IN_THE_CASE)
+                            .errors(Collections.singletonList(EventErrorsEnum.OTHER_PEOPLE_ERROR.getError()))
+                            .build()));
+
+            final TaskSection requiredDetails = newSection("Add required details")
+                    .withTask(tasks.get(ALLEGATIONS_OF_HARM));
+
+            final TaskSection miamDetails = newSection("MIAM details")
+                    .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
+                    .withTask(tasks.get(MIAM));
+
+            final TaskSection additionalInformation = newSection("Add additional information")
+                    .withInfo("Only complete if relevant")
+                    .withTask(tasks.get(OTHER_PROCEEDINGS))
+                    .withTask(tasks.get(ATTENDING_THE_HEARING))
+                    .withTask(tasks.get(INTERNATIONAL_ELEMENT))
+                    .withTask(tasks.get(LITIGATION_CAPACITY))
+                    .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
+
+            final TaskSection pdfApplication = newSection("View PDF application")
+                    .withTask(tasks.get(VIEW_PDF_DOCUMENT));
+
+            final TaskSection submit;
+
+            if (caseData.getState().equals(AWAITING_RESUBMISSION_TO_HMCTS)) {
+                submit = newSection("Submit")
+                        .withTask(tasks.get(SUBMIT));
+            } else {
+                submit = newSection("Submit and pay")
+                        .withTask(tasks.get(SUBMIT_AND_PAY));
+            }
+
+            return Stream.of(applicationDetails,
+                            peopleInTheCase,
+                            relationships,
+                            requiredDetails,
+                            miamDetails,
+                            additionalInformation,
+                            pdfApplication,
+                            submit)
+                    .filter(TaskSection::hasAnyTask)
+                    .collect(toList());
+
+        }
+
+
+
         final TaskSection applicationDetails = newSection("Add application details")
             .withTask(tasks.get(CASE_NAME))
             .withTask(tasks.get(TYPE_OF_APPLICATION))
@@ -138,7 +228,7 @@ public class TaskListRenderer {
             .collect(toList());
     }
 
-    private List<String> renderSection(TaskSection sec) {
+    private List<String> renderSection(TaskSection sec, CaseData caseData) {
         final List<String> section = new LinkedList<>();
 
         section.add(NEW_LINE);
@@ -152,7 +242,10 @@ public class TaskListRenderer {
             section.addAll(renderTask(task));
             section.add(HORIZONTAL_LINE);
         });
-
+        if (sec.getErrors() != null) {
+            section.addAll(renderSectionErrors(sec.getErrors().stream().filter(eachError -> !eventsChecker.isFinished(eachError.getEvent(), caseData))
+                    .collect(toList())));
+        }
         return section;
     }
 
@@ -180,6 +273,10 @@ public class TaskListRenderer {
             case MANDATORY_COMPLETED:
                 lines.add(taskListRenderElements.renderLink(task)
                               + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added"));
+                break;
+            case CANNOT_START_YET:
+                lines.add(taskListRenderElements.renderLink(task)
+                        + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
                 break;
             case FINISHED:
                 if (task.getEvent().equals(SUBMIT_AND_PAY) || task.getEvent().equals(FL401_SOT_AND_SUBMIT)
@@ -210,6 +307,19 @@ public class TaskListRenderer {
             .collect(toList());
 
         return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
+    }
+
+    private List<String> renderSectionErrors(List<EventValidationErrors> taskErrors) {
+        if (isEmpty(taskErrors)) {
+            return emptyList();
+        }
+        final List<String> errors = taskErrors.stream()
+                .flatMap(task -> task.getErrors()
+                        .stream()
+                        .map(error -> format("%s to %s", error, taskListRenderElements.renderLink(task.getEvent()))))
+                .collect(toList());
+
+        return taskListRenderElements.renderCollapsible("Why can't I enter relationship details?", errors);
     }
 
 

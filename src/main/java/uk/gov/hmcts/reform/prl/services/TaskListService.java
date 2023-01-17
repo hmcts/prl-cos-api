@@ -25,6 +25,9 @@ import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
@@ -38,6 +41,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
@@ -92,15 +96,42 @@ public class TaskListService {
         if (eventsChecker.isStarted(event, caseData)) {
             return TaskState.IN_PROGRESS;
         }
-        return TaskState.NOT_STARTED;
+        return eventsChecker.getDefaultState(event);
     }
 
     private List<Event> getEvents(CaseData caseData) {
         return caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)
-            ? getFL401Events(caseData) : getC100Events();
+            ? getFL401Events(caseData) : getC100Events(caseData);
     }
 
-    public List<Event> getC100Events() {
+    public List<Event> getC100Events(CaseData caseData) {
+
+        if ("v2".equalsIgnoreCase(caseData.getTaskListVersion())) {
+            return new ArrayList<>(List.of(
+                    CASE_NAME,
+                    TYPE_OF_APPLICATION,
+                    HEARING_URGENCY,
+                    CHILD_DETAILS,
+                    APPLICANT_DETAILS,
+                    RESPONDENT_DETAILS,
+                    OTHER_PEOPLE_IN_THE_CASE,
+                    OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
+                    CHILDREN_AND_APPLICANTS,
+                    CHILDREN_AND_RESPONDENTS,
+                    CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION,
+                    ALLEGATIONS_OF_HARM,
+                    MIAM,
+                    OTHER_PROCEEDINGS,
+                    ATTENDING_THE_HEARING,
+                    INTERNATIONAL_ELEMENT,
+                    LITIGATION_CAPACITY,
+                    WELSH_LANGUAGE_REQUIREMENTS,
+                    VIEW_PDF_DOCUMENT,
+                    SUBMIT_AND_PAY,
+                    SUBMIT
+            ));
+        }
+
         return new ArrayList<>(List.of(
             CASE_NAME,
             TYPE_OF_APPLICATION,

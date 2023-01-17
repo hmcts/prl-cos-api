@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -14,6 +15,9 @@ import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
@@ -27,6 +31,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
@@ -121,6 +126,18 @@ public class EventsChecker {
     @Autowired
     private FL401ResubmitChecker fl401ResubmitChecker;
 
+    @Autowired
+    private ChildrenAndApplicantsChecker childrenAndApplicantsChecker;
+
+    @Autowired
+    private OtherChildrenNotPartOfTheApplicationChecker otherChildrenNotPartOfTheApplicationChecker;
+
+    @Autowired
+    private ChildrenAndRespondentsChecker childrenAndRespondentsChecker;
+
+    @Autowired
+    private ChildrenAndOtherPeopleInThisApplicationChecker childrenAndOtherPeopleInThisApplicationChecker;
+
     private Map<Event, EventChecker> eventStatus = new EnumMap<>(Event.class);
 
     @PostConstruct
@@ -142,6 +159,11 @@ public class EventsChecker {
         eventStatus.put(VIEW_PDF_DOCUMENT, pdfChecker);
         eventStatus.put(SUBMIT_AND_PAY, submitAndPayChecker);
         eventStatus.put(SUBMIT, submitChecker);
+
+        eventStatus.put(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION, otherChildrenNotPartOfTheApplicationChecker);
+        eventStatus.put(CHILDREN_AND_APPLICANTS, childrenAndApplicantsChecker);
+        eventStatus.put(CHILDREN_AND_RESPONDENTS, childrenAndRespondentsChecker);
+        eventStatus.put(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION, childrenAndOtherPeopleInThisApplicationChecker);
 
         eventStatus.put(FL401_CASE_NAME, caseNameChecker);
         eventStatus.put(FL401_HOME, homeChecker);
@@ -167,6 +189,10 @@ public class EventsChecker {
 
     public boolean hasMandatoryCompleted(Event event, CaseData caseData) {
         return eventStatus.get(event).hasMandatoryCompleted(caseData);
+    }
+
+    public TaskState getDefaultState(Event event) {
+        return eventStatus.get(event).getDefaultTaskState();
     }
 
     public Map<Event, EventChecker> getEventStatus() {
