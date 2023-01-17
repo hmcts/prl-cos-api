@@ -187,6 +187,8 @@ public class FL401SubmitApplicationControllerTest {
                             .build());
         when(courtFinderApi.getCourtDetails(Mockito.anyString())).thenReturn(horshamCourt);
         when(courtFinderService.getEmailAddress(horshamCourt)).thenReturn(Optional.of(courtEmailAddress));
+        when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
+            .thenReturn("test-test-test-test-test-test");
     }
 
     @Test
