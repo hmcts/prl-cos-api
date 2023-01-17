@@ -103,7 +103,9 @@ public class DraftAnOrderController {
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
         }
-        caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
+        if (caseData != null) {
+            caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
+        }
         log.info("Case data updated map {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
