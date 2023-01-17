@@ -4,16 +4,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
+import uk.gov.hmcts.reform.prl.services.TaskErrorService;
+
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION_ERROR;
 
 @Service
-public class FL401ResubmitChecker implements EventChecker {
+public class OtherChildrenNotPartOfTheApplicationChecker implements EventChecker {
 
     @Autowired
-    FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
+    TaskErrorService taskErrorService;
 
     @Override
     public boolean isFinished(CaseData caseData) {
-        return fl401StatementOfTruthAndSubmitChecker.isFinished(caseData);
+        taskErrorService.addEventError(
+                OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
+                OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION_ERROR,
+                OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION_ERROR.getError()
+        );
+        return false;
     }
 
     @Override

@@ -51,6 +51,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
@@ -118,6 +120,8 @@ public class CaseData implements MappableObject {
     private final long id;
 
     private final State state;
+
+    private final String taskListVersion;
 
     @JsonIgnore
     private final LocalDateTime createdDate;
@@ -198,6 +202,15 @@ public class CaseData implements MappableObject {
     private final YesOrNo isExistingProceedings;
     private final String childrenInProceeding;
     private final List<Element<Child>> otherChildren;
+
+
+    private List<Element<ChildrenAndApplicantRelation>> buffChildAndApplicantRelations;
+
+    private List<Element<ChildrenAndApplicantRelation>> childAndApplicantRelations;
+
+    private List<Element<ChildrenAndRespondentRelation>> buffChildAndRespondentRelations;
+
+    private List<Element<ChildrenAndRespondentRelation>> childAndRespondentRelations;
 
 
     /**
