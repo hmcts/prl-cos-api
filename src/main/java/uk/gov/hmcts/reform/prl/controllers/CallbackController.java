@@ -85,7 +85,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
@@ -95,6 +97,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -261,11 +264,7 @@ public class CallbackController {
                             .collect(
                                 Collectors.toList())))
             .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(
-                caseData.getChildren()
-                    .stream()
-                    .map(Element::getValue)
-                    .collect(
-                        Collectors.toList()))).state(
+                caseData)).state(
                 State.SUBMITTED_NOT_PAID)
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
             .build();
@@ -373,7 +372,7 @@ public class CallbackController {
                 log.info("Case is updated as WithdrawRequestSent");
                 sendWithdrawEmails(caseData, userDetails, caseDetails);
             } else {
-                if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                     solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
                     // Refreshing the page in the same event. Hence no external event call needed.
                     // Getting the tab fields and add it to the casedetails..
@@ -389,7 +388,7 @@ public class CallbackController {
     }
 
     private void sendWithdrawEmails(CaseData caseData, UserDetails userDetails, CaseDetails caseDetails) {
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
         } else {
             solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
@@ -490,8 +489,11 @@ public class CallbackController {
             //Added for Case linking
             caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME));
         }
-        if (caseDataUpdated.get("caseTypeOfApplication") != null) {
-            caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
+        if (caseDataUpdated.get(CASE_TYPE_OF_APPLICATION) != null) {
+            caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
+            if (C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
+                caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
+            }
         }
 
         // Saving the logged-in Solicitor and Org details for the docs..

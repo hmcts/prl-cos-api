@@ -20,6 +20,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -126,10 +127,13 @@ public class OtherPeopleInTheCaseCheckerTest {
                          .addressLine1("add1")
                          .postCode("postcode")
                          .build())
+            .isAddressConfidential(YesOrNo.Yes)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("email@email.com")
+            .isEmailAddressConfidential(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("02086656656")
+            .isPhoneNumberConfidential(YesOrNo.Yes)
             .otherPersonRelationshipToChildren(List.of(element(personRelationshipToChild)))
             .build();
 
@@ -273,9 +277,12 @@ public class OtherPeopleInTheCaseCheckerTest {
                          .addressLine1("add1")
                          .postCode("postcode")
                          .build())
+            .isAddressConfidential(YesOrNo.Yes)
             .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
             .email("email@email.com")
             .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
             .phoneNumber("02086656656")
             .otherPersonRelationshipToChildren(List.of(element(personRelationshipToChild)))
             .build();
@@ -288,7 +295,10 @@ public class OtherPeopleInTheCaseCheckerTest {
 
     }
 
-
+    @Test
+    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+        assertNotNull(otherPeopleInTheCaseChecker.getDefaultTaskState(CaseData.builder().build()));
+    }
 
 
 }

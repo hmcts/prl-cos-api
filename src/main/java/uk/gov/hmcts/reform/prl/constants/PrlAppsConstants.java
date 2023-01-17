@@ -328,4 +328,12 @@ public class PrlAppsConstants {
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
+
+    public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+    public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case";
+    public static final String ONLY_COMPLETE_IF_RELEVANT = "Only complete if relevant";
+    public static final String  ADD_APPLICATION_DETAILS = "Add application details";
+    public static final String  ADD_ADDITIONAL_INFORMATION = "Add additional information";
+
+    public static final String  TASK_LIST_VERSION_V2 = "v2";
 }
