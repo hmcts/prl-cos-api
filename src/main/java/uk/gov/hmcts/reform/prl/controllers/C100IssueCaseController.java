@@ -63,8 +63,8 @@ public class C100IssueCaseController {
             String[] venueDetails = key.split("-");
             String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
             String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
-            String regionName = Arrays.stream(venueDetails).toArray()[3].toString();
-            String baseLocationName = Arrays.stream(venueDetails).toArray()[4].toString();
+            String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
+            String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
                 .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
