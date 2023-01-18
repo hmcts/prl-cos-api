@@ -80,6 +80,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
@@ -88,8 +89,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCou
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
@@ -588,7 +589,6 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
 
-    private final SolicitorMiam respondentSolicitorMiam;
 
     /**
      * Solicitor Details.
@@ -666,7 +666,11 @@ public class CaseData implements MappableObject {
      * Respondent Solicitor.
      */
 
+    private String respondentNameForResponse;
     private Consent respondentConsentToApplication;
+
+    private final Miam respondentSolicitorHaveYouAttendedMiam;
+    private final Miam respondentSolicitorWillingnessToAttendMiam;
 
     private KeepDetailsPrivate keepContactDetailsPrivate;
     private KeepDetailsPrivate keepContactDetailsPrivateOther;
@@ -706,6 +710,12 @@ public class CaseData implements MappableObject {
      */
     private final YesNoDontKnow currentOrPastProceedingsForChildren;
     private final List<Element<ProceedingDetails>> respondentExistingProceedings;
+
+    /**
+     * Respondent solicitor's Ability to participate proceedings.
+     */
+    private final SolicitorAbilityToParticipateInProceedings abilityToParticipateInProceedings;
+
     // C100 Rebuild
     @JsonUnwrapped
     @Builder.Default
