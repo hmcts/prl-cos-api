@@ -656,6 +656,62 @@ public class DraftAnOrderService {
                 RIGHT_TO_ASK_COURT
             );
         }
+        populateHearingAndNextStepsText(caseData, caseDataUpdated);
+        populateCourtText(caseData, caseDataUpdated);
+        populateDocumentAndEvidenceText(caseData, caseDataUpdated);
+        if (!caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoOtherList().contains(
+            SdoOtherEnum.parentWithCare)) {
+            caseDataUpdated.put(
+                "sdoParentWithCare",
+                PARENT_WITHCARE
+            );
+        }
+        List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
+        populateCourtDynamicList(courtList, caseDataUpdated);
+        DynamicList partiesList = partiesListGenerator.buildPartiesList(caseData, courtList);
+        caseDataUpdated.put("sdoInstructionsFilingPartiesDynamicList", partiesList);
+    }
+
+    private static void populateDocumentAndEvidenceText(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
+            SdoDocumentationAndEvidenceEnum.specifiedDocuments)) {
+            caseDataUpdated.put(
+                "sdoSpecifiedDocuments",
+                SPECIFIED_DOCUMENTS
+            );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
+            SdoDocumentationAndEvidenceEnum.spipAttendance)) {
+            caseDataUpdated.put(
+                "sdoSpipAttendance",
+                SPIP_ATTENDANCE
+            );
+        }
+    }
+
+    private static void populateCourtText(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
+            SdoCourtEnum.crossExaminationEx740)) {
+            caseDataUpdated.put(
+                "sdoCrossExaminationEx740",
+                CROSS_EXAMINATION_EX740
+            );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
+            SdoCourtEnum.crossExaminationQualifiedLegal)) {
+            caseDataUpdated.put(
+                "sdoCrossExaminationQualifiedLegal",
+                CROSS_EXAMINATION_QUALIFIED_LEGAL
+            );
+        }
+    }
+
+    private static void populateHearingAndNextStepsText(CaseData caseData, Map<String, Object> caseDataUpdated) {
         if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
             SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping)) {
@@ -692,50 +748,6 @@ public class DraftAnOrderService {
                 UPDATE_CONTACT_DETAILS
             );
         }
-        if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
-            SdoCourtEnum.crossExaminationEx740)) {
-            caseDataUpdated.put(
-                "sdoCrossExaminationEx740",
-                CROSS_EXAMINATION_EX740
-            );
-        }
-        if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
-            SdoCourtEnum.crossExaminationQualifiedLegal)) {
-            caseDataUpdated.put(
-                "sdoCrossExaminationQualifiedLegal",
-                CROSS_EXAMINATION_QUALIFIED_LEGAL
-            );
-        }
-        if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
-            SdoDocumentationAndEvidenceEnum.specifiedDocuments)) {
-            caseDataUpdated.put(
-                "sdoSpecifiedDocuments",
-                SPECIFIED_DOCUMENTS
-            );
-        }
-        if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
-            SdoDocumentationAndEvidenceEnum.spipAttendance)) {
-            caseDataUpdated.put(
-                "sdoSpipAttendance",
-                SPIP_ATTENDANCE
-            );
-        }
-        if (!caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoOtherList().contains(
-            SdoOtherEnum.parentWithCare)) {
-            caseDataUpdated.put(
-                "sdoParentWithCare",
-                PARENT_WITHCARE
-            );
-        }
-        List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
-        populateCourtDynamicList(courtList, caseDataUpdated);
-        DynamicList partiesList = partiesListGenerator.buildPartiesList(caseData, courtList);
-        caseDataUpdated.put("sdoInstructionsFilingPartiesDynamicList", partiesList);
     }
 
     private void populateCourtDynamicList(List<DynamicListElement> courtList, Map<String, Object> caseDataUpdated) {
