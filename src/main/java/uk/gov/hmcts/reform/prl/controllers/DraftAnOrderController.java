@@ -106,7 +106,6 @@ public class DraftAnOrderController {
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         }
-        log.info("Case data updated map {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
@@ -125,7 +124,7 @@ public class DraftAnOrderController {
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (draftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
+        if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
             draftAnOrderService.populateStandardDirectionOrderFields(authorisation, caseData, caseDataUpdated);
         } else {
             List<String> errorList = new ArrayList<>();
@@ -135,7 +134,6 @@ public class DraftAnOrderController {
                 .errors(errorList)
                 .build();
         }
-        log.info("Case data updated map {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
@@ -154,7 +152,7 @@ public class DraftAnOrderController {
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (draftAnOrderService.checkDirectionOnIssueOptionsSelected(caseData)) {
+        if (DraftAnOrderService.checkDirectionOnIssueOptionsSelected(caseData)) {
             draftAnOrderService.populateDirectionOnIssueFields(authorisation, caseData, caseDataUpdated);
         } else {
             List<String> errorList = new ArrayList<>();
@@ -164,7 +162,6 @@ public class DraftAnOrderController {
                 .errors(errorList)
                 .build();
         }
-        log.info("Case data updated map {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }

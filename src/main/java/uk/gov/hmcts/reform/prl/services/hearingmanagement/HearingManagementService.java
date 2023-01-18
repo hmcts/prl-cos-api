@@ -94,14 +94,16 @@ public class HearingManagementService {
         switch (hmcStatus) {
             case LISTED:
                 CaseDetails listedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                            DECISION_OUTCOME, HEARING_STATE_CHANGE_SUCCESS, caseData);
+                                                            DECISION_OUTCOME, HEARING_STATE_CHANGE_SUCCESS
+                );
                 updateTabsAfterStateChange(listedCaseDetails.getData(), listedCaseDetails.getId());
                 sendHearingDetailsEmail(caseData, hearingRequest);
                 break;
 
             case CANCELLED:
                 CaseDetails cancelledCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                               PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE, caseData);
+                                                               PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE
+                );
                 updateTabsAfterStateChange(cancelledCaseDetails.getData(), cancelledCaseDetails.getId());
                 sendHearingCancelledEmail(caseData);
                 break;
@@ -110,7 +112,8 @@ public class HearingManagementService {
             case POSTPONED:
             case ADJOURNED:
                 CaseDetails completedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                               PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE, caseData);
+                                                               PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE
+                );
                 updateTabsAfterStateChange(completedCaseDetails.getData(), completedCaseDetails.getId());
                 sendHearingChangeDetailsEmail(caseData);
                 break;
@@ -120,7 +123,7 @@ public class HearingManagementService {
     }
 
     private CaseDetails createEvent(HearingRequest hearingRequest, String userToken,
-                                    String systemUpdateUserId, State state, String eventId, CaseData caseData) {
+                                    String systemUpdateUserId, State state, String eventId) {
 
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             userToken,

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,8 +66,24 @@ public class LocationRefDataServiceTest {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
+                                                     .region("test").siteName("test")
+                                                     .courtEpimmsId("2")
                                                      .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
                             .build());
+        List<DynamicListElement> courtLocations = locationRefDataService.getCourtLocations("test");
+        assertFalse(courtLocations.isEmpty());
+    }
+
+    @Test
+    public void testgetCourtDetailsWithNoData() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
+                                                     .region("test").siteName("test")
+                                                     .courtEpimmsId("2")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .build());
+        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "");
         List<DynamicListElement> courtLocations = locationRefDataService.getCourtLocations("test");
         assertFalse(courtLocations.isEmpty());
     }
