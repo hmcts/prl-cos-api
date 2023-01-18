@@ -131,7 +131,6 @@ public class C100RespondentSolicitorControllerTest {
         );
 
         assertNotNull(response.getData());
-
     }
     @Test
     public void testKeepDetailsPrivateAsYes(){
