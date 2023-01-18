@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.AttendingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.CourtComfortEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.CourtHearingEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.DocsSupportEnum;
@@ -36,4 +37,15 @@ public class ReasonableAdjustmentsSupport {
     private final String travellingOtherDetails;
     private final YesOrNo unableForCourtProceedings;
     private final String courtProceedingProvideDetails;
+    private final List<AttendingToCourtEnum> attendingToCourt;
+    private final String hearingDetails;
+    private final String signLanguageDetails;
+    private final String lightingDetails;
+    private final String supportWorkerDetails;
+    private final String familyProviderDetails;
+    private final String therapyDetails;
+    private final String docsDetails;
+    private final String largePrintDetails;
+    private final String parkingDetails;
+    private final String differentChairDetails;
 }
