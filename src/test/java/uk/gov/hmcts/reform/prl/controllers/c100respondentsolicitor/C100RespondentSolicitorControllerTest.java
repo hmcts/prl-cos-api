@@ -28,7 +28,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Collections;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -127,11 +132,14 @@ public class C100RespondentSolicitorControllerTest {
     }
 
     @Test
-    public void testHandleAboutToStart(){
+    public void testHandleAboutToStart() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(respondentSolicitorService.populateAboutToStartCaseData(Mockito.any(CallbackRequest.class), Mockito.anyString(), Mockito.anyList())).thenReturn(c7DraftMap);
+        when(respondentSolicitorService
+                 .populateAboutToStartCaseData(Mockito
+                                                   .any(CallbackRequest.class), Mockito.anyString(), Mockito.anyList()))
+            .thenReturn(c7DraftMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -150,7 +158,7 @@ public class C100RespondentSolicitorControllerTest {
         assertNotNull(response.getData());
     }
     @Test
-    public void testHandleAboutToSubmit() throws Exception{
+    public void testHandleAboutToSubmit() throws Exception {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -174,7 +182,7 @@ public class C100RespondentSolicitorControllerTest {
     }
 
     @Test
-    public void testPopulateSolicitorRespondentList() throws Exception{
+    public void testPopulateSolicitorRespondentList() throws Exception {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -198,7 +206,7 @@ public class C100RespondentSolicitorControllerTest {
     }
 
     @Test
-    public void testHandleActiveRespondentSelection() throws Exception{
+    public void testHandleActiveRespondentSelection() throws Exception {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -221,7 +229,7 @@ public class C100RespondentSolicitorControllerTest {
         assertNotNull(response.getData());
     }
     @Test
-    public void testKeepDetailsPrivateAsYes(){
+    public void testKeepDetailsPrivateAsYes() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
