@@ -55,6 +55,7 @@ public class C100RespondentSolicitorControllerTest {
 
     public static final String authToken = "Bearer TestAuthToken";
     private static final Map<String, Object> c7DraftMap = new HashMap<>();
+
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -121,6 +122,7 @@ public class C100RespondentSolicitorControllerTest {
             .respondents(respondentList)
             .build();
     }
+
     @Test
     public void testHandleAboutToStart() {
 
@@ -148,6 +150,7 @@ public class C100RespondentSolicitorControllerTest {
 
         assertNotNull(response.getData());
     }
+
     @Test
     public void testHandleAboutToSubmit() throws Exception {
 
@@ -174,6 +177,7 @@ public class C100RespondentSolicitorControllerTest {
 
         assertNotNull(response.getData());
     }
+
     @Test
     public void testPopulateSolicitorRespondentList() throws Exception {
 
@@ -200,6 +204,7 @@ public class C100RespondentSolicitorControllerTest {
 
         assertNotNull(response.getData());
     }
+
     @Test
     public void testHandleActiveRespondentSelection() throws Exception {
 
@@ -226,6 +231,7 @@ public class C100RespondentSolicitorControllerTest {
 
         assertNotNull(response.getData());
     }
+
     @Test
     public void testKeepDetailsPrivateAsYes() {
 
@@ -246,6 +252,7 @@ public class C100RespondentSolicitorControllerTest {
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
+
     @Test
     public void testGenerateAndStoreC7DraftDocument() throws Exception {
 
