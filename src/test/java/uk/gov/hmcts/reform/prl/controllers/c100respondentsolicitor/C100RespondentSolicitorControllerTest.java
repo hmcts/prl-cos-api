@@ -129,6 +129,25 @@ public class C100RespondentSolicitorControllerTest {
     @Test
     public void testPopulateSolicitorRespondentList() throws Exception{
 
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(respondentSolicitorService.populateSolicitorRespondentList(Mockito.any(CallbackRequest.class), Mockito.anyString())).thenReturn(c7DraftMap);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.populateSolicitorRespondentList(
+            authToken,
+            callbackRequest
+        );
+
+        assertNotNull(response.getData());
     }
 
     @Test
