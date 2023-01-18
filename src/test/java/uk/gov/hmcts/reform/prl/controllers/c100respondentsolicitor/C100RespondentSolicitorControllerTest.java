@@ -68,20 +68,22 @@ public class C100RespondentSolicitorControllerTest {
         confidentialityListEnums.add(ConfidentialityListEnum.email);
         confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
 
-        caseData = CaseData.builder()
-            .courtName("testcourt")
-            .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
-            .languageRequirementApplicationNeedWelsh(Yes)
-            .keepContactDetailsPrivateOther(KeepDetailsPrivate.builder()
-                                                .confidentiality(Yes)
-                                                .confidentialityList(confidentialityListEnums)
-                                                .build())
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
-    }
 
-    @Test
-    public void testHandleActiveRespondentSelection() throws Exception{
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
         PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .gender(Gender.male)
@@ -101,16 +103,36 @@ public class C100RespondentSolicitorControllerTest {
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
 
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
+            .courtName("testcourt")
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
-            .id(123L)
-            .chooseRespondentDynamicList(chooseRespondent)
-            .respondents(respondentList)
+            .draftC7ResponseDoc(Document.builder()
+                                    .documentUrl(generatedDocumentInfo.getUrl())
+                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                    .documentHash(generatedDocumentInfo.getHashToken())
+                                    .documentFileName("c7DraftFilename.pdf")
+                                    .build())
+            .keepContactDetailsPrivateOther(KeepDetailsPrivate.builder()
+                                                .confidentiality(Yes)
+                                                .confidentialityList(confidentialityListEnums)
+                                                .build())
+            .applicants(applicantList)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .chooseRespondentDynamicList(chooseRespondent)
+            .respondents(respondentList)
             .build();
+    }
+
+    @Test
+    public void testPopulateSolicitorRespondentList() throws Exception{
+
+    }
+
+    @Test
+    public void testHandleActiveRespondentSelection() throws Exception{
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -156,36 +178,6 @@ public class C100RespondentSolicitorControllerTest {
 
     @Test
     public void testGenerateAndStoreC7DraftDocument() throws Exception {
-        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
-            .representativeLastName("Xyz")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .phoneNumber("1234567890")
-            .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
-            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-
-        CaseData caseData = CaseData.builder()
-            .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
-            .languageRequirementApplicationNeedWelsh(Yes)
-            .draftC7ResponseDoc(Document.builder()
-                                    .documentUrl(generatedDocumentInfo.getUrl())
-                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                    .documentHash(generatedDocumentInfo.getHashToken())
-                                    .documentFileName("c7DraftFilename.pdf")
-                                    .build())
-            .id(123L)
-            .applicants(applicantList)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
