@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -123,6 +124,9 @@ public class C100IssueCaseControllerTest {
     @Mock
     LaunchDarklyClient launchDarklyClient;
 
+    @Mock
+    LocationRefDataService locationRefDataService;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     private static final Map<String, Object> c100DraftMap = new HashMap<>();
@@ -161,6 +165,8 @@ public class C100IssueCaseControllerTest {
         fl401DocsMap.put(PrlAppsConstants.DOCUMENT_FIELD_FINAL, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_C8_WELSH, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
+        when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn("test-test-test-test-test-test");
     }
 
     @Test
@@ -494,7 +500,7 @@ public class C100IssueCaseControllerTest {
             .applicantsConfidentialDetails(Collections.emptyList())
             .childrenConfidentialDetails(Collections.emptyList())
             .id(123L)
-            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("reg-base-courtname").build()).build())
+            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("reg-base-courtname-test-test-test").build()).build())
             .build();
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
