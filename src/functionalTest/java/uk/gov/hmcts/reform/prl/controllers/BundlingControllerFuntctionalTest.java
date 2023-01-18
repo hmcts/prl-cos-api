@@ -6,10 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 @Slf4j
 @SpringBootTest
@@ -17,7 +19,10 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 @ContextConfiguration
 public class BundlingControllerFuntctionalTest {
     private final String userToken = "Bearer testToken";
-    private static final String VALID_REQUEST_BODY = "requests/bundle/CreateBundleRequest.json";
+
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+    private static final String VALID_REQUEST_BODY = "requests/bundle/C100-case-data.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -32,11 +37,12 @@ public class BundlingControllerFuntctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header("Authorization",userToken)
+            .header("ServiceAuthorization",serviceAuthenticationGenerator.generate())
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/bundle/createBundle")
-            .then().assertThat().statusCode(400);
+            .then().assertThat().statusCode(200);
     }
 }
 
