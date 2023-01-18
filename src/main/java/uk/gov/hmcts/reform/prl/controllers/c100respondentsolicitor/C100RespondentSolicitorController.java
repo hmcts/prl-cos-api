@@ -159,15 +159,12 @@ public class C100RespondentSolicitorController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        List<String> errorList = new ArrayList<>();
-        log.info("validateTheResponseBeforeSubmit: Callback for Respondent Solicitor - validate response");
+        log.info("handleActiveRespondentSelection: Callback for Respondent Solicitor - handle select respondent");
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(respondentSolicitorService.validateActiveRespondentResponse(
+            .data(respondentSolicitorService.updateActiveRespondentSelectionBySolicitor(
                 callbackRequest,
-                authorisation,
-                errorList))
-            .errors(errorList)
-            .build();
+                authorisation
+            )).build();
     }
 }
