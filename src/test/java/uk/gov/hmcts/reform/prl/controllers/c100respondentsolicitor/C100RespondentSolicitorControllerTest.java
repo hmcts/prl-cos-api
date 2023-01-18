@@ -28,12 +28,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -140,6 +139,7 @@ public class C100RespondentSolicitorControllerTest {
                  .populateAboutToStartCaseData(Mockito
                                                    .any(CallbackRequest.class), Mockito.anyString(), Mockito.anyList()))
             .thenReturn(c7DraftMap);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -165,6 +165,7 @@ public class C100RespondentSolicitorControllerTest {
         when(respondentSolicitorService
                  .populateAboutToSubmitCaseData(Mockito.any(CallbackRequest.class), Mockito.anyString(), Mockito.anyList()))
             .thenReturn(c7DraftMap);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -191,6 +192,7 @@ public class C100RespondentSolicitorControllerTest {
         when(respondentSolicitorService
                  .populateSolicitorRespondentList(Mockito.any(CallbackRequest.class), Mockito.anyString()))
             .thenReturn(c7DraftMap);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -217,6 +219,7 @@ public class C100RespondentSolicitorControllerTest {
         when(respondentSolicitorService
                  .updateActiveRespondentSelectionBySolicitor(Mockito.any(CallbackRequest.class), Mockito.anyString()))
             .thenReturn(c7DraftMap);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
