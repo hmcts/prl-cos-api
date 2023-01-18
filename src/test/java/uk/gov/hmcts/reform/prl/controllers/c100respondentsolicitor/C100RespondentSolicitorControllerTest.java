@@ -162,7 +162,9 @@ public class C100RespondentSolicitorControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(respondentSolicitorService.populateAboutToSubmitCaseData(Mockito.any(CallbackRequest.class), Mockito.anyString(), Mockito.anyList())).thenReturn(c7DraftMap);
+        when(respondentSolicitorService
+                 .populateAboutToSubmitCaseData(Mockito.any(CallbackRequest.class), Mockito.anyString(), Mockito.anyList()))
+            .thenReturn(c7DraftMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -186,7 +188,9 @@ public class C100RespondentSolicitorControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(respondentSolicitorService.populateSolicitorRespondentList(Mockito.any(CallbackRequest.class), Mockito.anyString())).thenReturn(c7DraftMap);
+        when(respondentSolicitorService
+                 .populateSolicitorRespondentList(Mockito.any(CallbackRequest.class), Mockito.anyString()))
+            .thenReturn(c7DraftMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -210,7 +214,9 @@ public class C100RespondentSolicitorControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(respondentSolicitorService.updateActiveRespondentSelectionBySolicitor(Mockito.any(CallbackRequest.class), Mockito.anyString())).thenReturn(c7DraftMap);
+        when(respondentSolicitorService
+                 .updateActiveRespondentSelectionBySolicitor(Mockito.any(CallbackRequest.class), Mockito.anyString()))
+            .thenReturn(c7DraftMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
