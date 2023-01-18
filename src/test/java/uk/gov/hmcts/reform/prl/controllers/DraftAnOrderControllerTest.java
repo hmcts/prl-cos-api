@@ -73,8 +73,7 @@ public class DraftAnOrderControllerTest {
     @Test
     public void testResetFields() {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
-        Assert.assertTrue(draftAnOrderController.resetFields(callbackRequest).getData().size() == 0);
-
+        Assert.assertEquals(0, draftAnOrderController.resetFields(callbackRequest).getData().size());
     }
 
     @Test
