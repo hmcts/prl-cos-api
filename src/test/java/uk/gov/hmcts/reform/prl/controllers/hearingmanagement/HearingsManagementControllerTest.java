@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementServi
 
 import java.time.LocalDate;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -72,7 +73,7 @@ public class HearingsManagementControllerTest {
 
     }
 
-    @Test (expected = HearingManagementValidationException.class)
+    @Test
     public void shouldReturnErrorIfInvalidAuthTokenIsProvided() throws Exception {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
@@ -81,8 +82,9 @@ public class HearingsManagementControllerTest {
             .build();
         when(authorisationService.authoriseService(any())).thenReturn(false);
         doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest);
-        hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest);
-        assertTrue(true);
-
+        assertThrows(
+            HearingManagementValidationException.class,
+            () -> hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest)
+        );
     }
 }

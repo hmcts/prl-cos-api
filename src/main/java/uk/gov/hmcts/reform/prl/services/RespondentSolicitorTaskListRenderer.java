@@ -3,13 +3,18 @@ package uk.gov.hmcts.reform.prl.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
@@ -32,7 +37,7 @@ public class RespondentSolicitorTaskListRenderer {
     private final TaskListRenderElements taskListRenderElements;
 
 
-    public String render(List<RespondentTask> allTasks) {
+    public String render(List<RespondentTask> allTasks, CaseData caseData) {
         final List<String> lines = new LinkedList<>();
         lines.add(
             "<div class='width-50'>><h3>Respond to the application</h3><p>This online response combines forms C7 and C8."
@@ -41,7 +46,7 @@ public class RespondentSolicitorTaskListRenderer {
 
         lines.add("<div class='width-50'>");
 
-        (groupInSections(allTasks))
+        (groupInSections(allTasks, caseData))
             .forEach(section -> lines.addAll(renderSection(section)));
 
         lines.add("</div>");
@@ -49,47 +54,66 @@ public class RespondentSolicitorTaskListRenderer {
         return String.join("\n\n", lines);
     }
 
-    private List<RespondentTaskSection> groupInSections(List<RespondentTask> allTasks) {
+    private List<RespondentTaskSection> groupInSections(List<RespondentTask> allTasks, CaseData caseData) {
         final Map<RespondentSolicitorEvents, RespondentTask> tasks = allTasks.stream().collect(toMap(
             RespondentTask::getEvent,
             identity()
         ));
-        final RespondentTaskSection consent = newSection("1. Consent to the Application")
-            .withTask(tasks.get(RespondentSolicitorEvents.CONSENT));
+        Optional<Element<PartyDetails>> c7ResponseSubmitted = Optional.empty();
+        c7ResponseSubmitted = caseData.getRespondents()
+                .stream()
+                .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getC7ResponseSubmitted()))
+                .findFirst();
 
-        final RespondentTaskSection yourDetails = newSection("2. Your details")
-            .withTask(tasks.get(RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE))
-            .withTask(tasks.get(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS))
-            .withTask(tasks.get(RespondentSolicitorEvents.ATTENDING_THE_COURT));
+        if (c7ResponseSubmitted.isPresent()) {
 
-        final RespondentTaskSection applicationDetails = newSection("3. Application details")
-            .withTask(tasks.get(RespondentSolicitorEvents.MIAM))
-            .withTask(tasks.get(RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS));
+            final RespondentTaskSection consent = newSection("1. Consent to the Application")
+                .withTask(tasks.get(RespondentSolicitorEvents.CONSENT));
 
-        final RespondentTaskSection safetyConcerns = newSection("4. Safety Concerns")
-            .withTask(tasks.get(RespondentSolicitorEvents.ALLEGATION_OF_HARM));
+            final RespondentTaskSection yourDetails = newSection("2. Your details")
+                .withTask(tasks.get(RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE))
+                .withTask(tasks.get(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS))
+                .withTask(tasks.get(RespondentSolicitorEvents.ATTENDING_THE_COURT));
 
-        final RespondentTaskSection additionalInformation = newSection("5. Additional information")
-            .withTask(tasks.get(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT))
-            .withTask(tasks.get(RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE));
+            final RespondentTaskSection applicationDetails = newSection("3. Application details")
+                .withTask(tasks.get(RespondentSolicitorEvents.MIAM))
+                .withTask(tasks.get(RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS));
 
-        final RespondentTaskSection viewResponse = newSection("6. View PDF response")
-            .withTask(tasks.get(RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE));
+            final RespondentTaskSection safetyConcerns = newSection("4. Safety Concerns")
+                .withTask(tasks.get(RespondentSolicitorEvents.ALLEGATION_OF_HARM));
 
-        final RespondentTaskSection submit = newSection("7. Submit")
-            .withTask(tasks.get(RespondentSolicitorEvents.SUBMIT));
+            final RespondentTaskSection additionalInformation = newSection("5. Additional information")
+                .withTask(tasks.get(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT))
+                .withTask(tasks.get(RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE));
 
-        return Stream.of(
-            consent,
-            yourDetails,
-            applicationDetails,
-            safetyConcerns,
-            additionalInformation,
-            viewResponse,
-            submit
-        )
-            .filter(RespondentTaskSection::hasAnyTask)
-            .collect(toList());
+            final RespondentTaskSection viewResponse = newSection("6. View PDF response")
+                .withTask(tasks.get(RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE));
+
+            final RespondentTaskSection submit = newSection("7. Submit")
+                .withTask(tasks.get(RespondentSolicitorEvents.SUBMIT));
+
+            return Stream.of(
+                    consent,
+                    yourDetails,
+                    applicationDetails,
+                    safetyConcerns,
+                    additionalInformation,
+                    viewResponse,
+                    submit
+                )
+                .filter(RespondentTaskSection::hasAnyTask)
+                .collect(toList());
+        } else {
+            final RespondentTaskSection note = newSection(" ")
+                .withTask(tasks.get(String.format(
+                    "<div class='width-50'>><h3>Respond to the application</h3><p>you have submitted your response."
+                        + " You need to choose respondent using 'Respond to application' event</p><div>")));
+
+            return Stream.of(note)
+                .filter(RespondentTaskSection::hasAnyTask)
+                .collect(toList());
+        }
+
     }
 
     private List<String> renderSection(RespondentTaskSection sec) {
