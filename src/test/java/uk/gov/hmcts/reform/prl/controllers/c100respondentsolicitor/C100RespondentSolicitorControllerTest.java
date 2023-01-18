@@ -41,28 +41,20 @@ import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 public class C100RespondentSolicitorControllerTest {
-
     @InjectMocks
     private C100RespondentSolicitorController c100RespondentSolicitorController;
-
     @Mock
     C100RespondentSolicitorService respondentSolicitorService;
-
     @Mock
     private ObjectMapper objectMapper;
-
     private CaseData caseData;
-
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
-
     @Mock
     private DocumentGenService documentGenService;
 
     public static final String authToken = "Bearer TestAuthToken";
     private static final Map<String, Object> c7DraftMap = new HashMap<>();
-
-
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -129,7 +121,6 @@ public class C100RespondentSolicitorControllerTest {
             .respondents(respondentList)
             .build();
     }
-
     @Test
     public void testHandleAboutToStart() {
 
@@ -183,7 +174,6 @@ public class C100RespondentSolicitorControllerTest {
 
         assertNotNull(response.getData());
     }
-
     @Test
     public void testPopulateSolicitorRespondentList() throws Exception {
 
@@ -210,7 +200,6 @@ public class C100RespondentSolicitorControllerTest {
 
         assertNotNull(response.getData());
     }
-
     @Test
     public void testHandleActiveRespondentSelection() throws Exception {
 
@@ -256,9 +245,7 @@ public class C100RespondentSolicitorControllerTest {
             .generateConfidentialityDynamicSelectionDisplay(callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
-
     }
-
     @Test
     public void testGenerateAndStoreC7DraftDocument() throws Exception {
 
@@ -284,7 +271,6 @@ public class C100RespondentSolicitorControllerTest {
 
         assertTrue(response.getData().containsKey("draftC7ResponseDoc"));
     }
-
 }
 
 
