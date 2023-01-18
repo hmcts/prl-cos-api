@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.citizen;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationa
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 
 import java.util.List;
 
@@ -31,18 +34,27 @@ public class Response {
     private final Miam miam;
     //Applicable only for C100 citizen respondent
     private final CurrentOrPreviousProceedings currentOrPreviousProceedings;
+
+    // TODO: Add safety Concerns here
+    private final CitizenInternationalElements citizenInternationalElements;
+    private final CitizenFlags citizenFlags;
+    private final String safeToCallOption;
+
     //Applicable only for C100 solicitor respondent
     private final YesNoDontKnow currentOrPastProceedingsForChildren;
     private final List<Element<ProceedingDetails>> respondentExistingProceedings;
-    // TODO: Add safety Concerns here
-    private final CitizenInternationalElements citizenInternationalElements;
-    // TODO: Need to recheck this one
-    // private final AbilityToParticipate abilityToParticipate;
+    @JsonUnwrapped
+    @Builder.Default
+    private final SolicitorAbilityToParticipateInProceedings abilityToParticipate;
     private final AttendToCourt attendToCourt;
-    private final SolicitorMiam solicitorMiam;
 
-    private final CitizenFlags citizenFlags;
-    private final String safeToCallOption;
+    @JsonUnwrapped
+    @Builder.Default
+    private final RespondentAllegationsOfHarmData respondentAllegationsOfHarmData;
+
+    @JsonUnwrapped
+    @Builder.Default
+    private final ResSolInternationalElements resSolInternationalElements;
 
     private final YesOrNo activeRespondent;
     private final YesOrNo c7ResponseSubmitted;
