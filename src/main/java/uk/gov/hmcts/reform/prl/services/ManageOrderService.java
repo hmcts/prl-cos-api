@@ -641,7 +641,7 @@ public class ManageOrderService {
     }
 
 
-    private String getAllRecipients(CaseData caseData) {
+    public String getAllRecipients(CaseData caseData) {
         StringBuilder recipientsList = new StringBuilder();
         Optional<List<OrderRecipientsEnum>> appResRecipientList = ofNullable(caseData.getOrderRecipients());
         if (appResRecipientList.isPresent() && caseData.getOrderRecipients().contains(applicantOrApplicantSolicitor)) {
