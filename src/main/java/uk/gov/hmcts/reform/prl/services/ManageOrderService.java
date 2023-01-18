@@ -63,6 +63,22 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class ManageOrderService {
 
+    public static final String CAFCASS_SERVED = "cafcassServed";
+    public static final String SERVE_ON_RESPONDENT = "serveOnRespondent";
+    public static final String OTHER_PARTIES_SERVED = "otherPartiesServed";
+    public static final String SERVING_RESPONDENTS_OPTIONS = "servingRespondentsOptions";
+    @Value("${document.templates.common.prl_c21_draft_template}")
+    protected String sdoDraftTemplate;
+
+    @Value("${document.templates.common.prl_c21_draft_filename}")
+    protected String sdoDraftFile;
+
+    @Value("${document.templates.common.prl_c21_draft_template}")
+    protected String doiDraftTemplate;
+
+    @Value("${document.templates.common.prl_c21_draft_filename}")
+    protected String doiDraftFile;
+
     @Value("${document.templates.common.prl_c21_draft_template}")
     protected String c21TDraftTemplate;
 
@@ -398,12 +414,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, fl406WelshFile);
                 break;
             case standardDirectionsOrder:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
-                fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, sdoDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, sdoDraftFile);
                 break;
             case directionOnIssue:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
-                fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, doiDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, doiDraftFile);
                 break;
             case blankOrderOrDirectionsWithdraw:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
@@ -704,87 +720,116 @@ public class ManageOrderService {
                 .findFirst()
                 .ifPresent(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                        YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
-                        ServingRespondentsEnum servingRespondentsOptions = null;
-                        if (serveOnRespondent.equals(Yes)) {
-                            servingRespondentsOptions = caseData.getManageOrders()
-                                .getServingRespondentsOptionsCA();
-                        }
-                        YesOrNo otherPartiesServed = No;
-                        List<Element<PostalInformation>> postalInformation = null;
-                        List<Element<EmailInformation>> emailInformation = null;
-                        if (!caseData.getManageOrders().getServeOtherPartiesCA().isEmpty()) {
-                            otherPartiesServed = Yes;
-                            if (caseData.getManageOrders().getEmailInformationCA() != null) {
-                                emailInformation = caseData.getManageOrders().getEmailInformationCA();
-                            }
-                            if (caseData.getManageOrders().getPostalInformationCA() != null) {
-                                postalInformation = caseData.getManageOrders().getPostalInformationCA();
-                            }
-                        }
-                        YesOrNo cafcassServedOptions;
-                        String cafCassEmail = null;
-                        if (caseData.getManageOrders().getCafcassServedOptions() != null) {
-                            cafcassServedOptions = caseData.getManageOrders().getCafcassServedOptions();
-                        } else if (caseData.getManageOrders().getCafcassCymruServedOptions() != null) {
-                            cafcassServedOptions = caseData.getManageOrders().getCafcassCymruServedOptions();
-                            if (No.equals(caseData.getManageOrders().getCafcassCymruServedOptions())) {
-                                cafCassEmail = caseData.getManageOrders().getCafcassCymruEmail();
-                            }
-                        } else {
-                            cafcassServedOptions = No;
-                        }
-
-                        updateServedOrderDetails(
-                            cafcassServedOptions,
-                            cafCassEmail,
-                            orders,
-                            order,
-                            serveOnRespondent,
-                            servingRespondentsOptions,
-                            otherPartiesServed,
-                            postalInformation,
-                            emailInformation,
-                            caseData.getManageOrders().getServeOrderAdditionalDocuments()
-                        );
+                        servedC100Order(caseData, orders, order);
                     } else {
-                        ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
-                            .getServingRespondentsOptionsDA();
-                        YesOrNo otherPartiesServed = No;
-                        List<Element<PostalInformation>> postalInformation = null;
-                        List<Element<EmailInformation>> emailInformation = null;
-                        if (!caseData.getManageOrders().getServeOtherPartiesDA().isEmpty()) {
-                            otherPartiesServed = Yes;
-                            if (caseData.getManageOrders().getEmailInformationDA() != null) {
-                                emailInformation = caseData.getManageOrders().getEmailInformationDA();
-                            }
-                            if (caseData.getManageOrders().getPostalInformationDA() != null) {
-                                postalInformation = caseData.getManageOrders().getPostalInformationDA();
-                            }
-                        }
-                        updateServedOrderDetails(
-                            null,
-                            null,
-                            orders,
-                            order,
-                            null,
-                            servingRespondentsOptions,
-                            otherPartiesServed,
-                            postalInformation,
-                            emailInformation,
-                            caseData.getManageOrders().getServeOrderAdditionalDocuments()
-                        );
+                        servedFL401Order(caseData, orders, order);
                     }
                 });
             return Map.of("orderCollection", orders);
         }
     }
 
-    private static void updateServedOrderDetails(YesOrNo cafcassServed, String cafCassEmail, List<Element<OrderDetails>> orders,
-                                                 Element<OrderDetails> order, YesOrNo serveOnRespondent,
-                                                 ServingRespondentsEnum servingRespondentsOptions,
-                                                 YesOrNo otherPartiesServed, List<Element<PostalInformation>> postalInformation,
+    private static void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
+        ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
+            .getServingRespondentsOptionsDA();
+        YesOrNo otherPartiesServed = No;
+        List<Element<PostalInformation>> postalInformation = null;
+        List<Element<EmailInformation>> emailInformation = null;
+        if (!caseData.getManageOrders().getServeOtherPartiesDA().isEmpty()) {
+            otherPartiesServed = Yes;
+            if (caseData.getManageOrders().getEmailInformationDA() != null) {
+                emailInformation = caseData.getManageOrders().getEmailInformationDA();
+            }
+            if (caseData.getManageOrders().getPostalInformationDA() != null) {
+                postalInformation = caseData.getManageOrders().getPostalInformationDA();
+            }
+        }
+        Map<String, Object> servedOrderDetails = new HashMap<>();
+        servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
+        servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
+
+        updateServedOrderDetails(
+            servedOrderDetails,
+            null,
+            orders,
+            order,
+            postalInformation,
+            emailInformation,
+            caseData.getManageOrders().getServeOrderAdditionalDocuments()
+        );
+    }
+
+    private static void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
+        YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
+        ServingRespondentsEnum servingRespondentsOptions = null;
+        if (serveOnRespondent.equals(Yes)) {
+            servingRespondentsOptions = caseData.getManageOrders()
+                .getServingRespondentsOptionsCA();
+        }
+        YesOrNo otherPartiesServed = No;
+        List<Element<PostalInformation>> postalInformation = null;
+        List<Element<EmailInformation>> emailInformation = null;
+        if (!caseData.getManageOrders().getServeOtherPartiesCA().isEmpty()) {
+            otherPartiesServed = Yes;
+            if (caseData.getManageOrders().getEmailInformationCA() != null) {
+                emailInformation = caseData.getManageOrders().getEmailInformationCA();
+            }
+            if (caseData.getManageOrders().getPostalInformationCA() != null) {
+                postalInformation = caseData.getManageOrders().getPostalInformationCA();
+            }
+        }
+        YesOrNo cafcassServedOptions;
+        String cafCassEmail = null;
+        if (caseData.getManageOrders().getCafcassServedOptions() != null) {
+            cafcassServedOptions = caseData.getManageOrders().getCafcassServedOptions();
+        } else if (caseData.getManageOrders().getCafcassCymruServedOptions() != null) {
+            cafcassServedOptions = caseData.getManageOrders().getCafcassCymruServedOptions();
+            if (No.equals(caseData.getManageOrders().getCafcassCymruServedOptions())) {
+                cafCassEmail = caseData.getManageOrders().getCafcassCymruEmail();
+            }
+        } else {
+            cafcassServedOptions = No;
+        }
+
+        Map<String, Object> servedOrderDetails = new HashMap<>();
+        servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
+        servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent);
+        servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
+        servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
+
+        updateServedOrderDetails(
+            servedOrderDetails,
+            cafCassEmail,
+            orders,
+            order,
+            postalInformation,
+            emailInformation,
+            caseData.getManageOrders().getServeOrderAdditionalDocuments()
+        );
+    }
+
+    private static void updateServedOrderDetails(Map<String, Object> servedOrderDetails, String cafCassEmail, List<Element<OrderDetails>> orders,
+                                                 Element<OrderDetails> order, List<Element<PostalInformation>> postalInformation,
                                                  List<Element<EmailInformation>> emailInformation, List<Element<Document>> additionalDocuments) {
+
+        YesOrNo cafcassServed = null;
+        YesOrNo serveOnRespondent = null;
+        YesOrNo otherPartiesServed = null;
+        ServingRespondentsEnum servingRespondentsOptions = null;
+
+        if (servedOrderDetails.containsKey(CAFCASS_SERVED)) {
+            cafcassServed = (YesOrNo) servedOrderDetails.get(CAFCASS_SERVED);
+        }
+        if (servedOrderDetails.containsKey(SERVE_ON_RESPONDENT)) {
+            serveOnRespondent = (YesOrNo) servedOrderDetails.get(SERVE_ON_RESPONDENT);
+        }
+        if (servedOrderDetails.containsKey(OTHER_PARTIES_SERVED)) {
+            otherPartiesServed = (YesOrNo) servedOrderDetails.get(OTHER_PARTIES_SERVED);
+        }
+        if (servedOrderDetails.containsKey(SERVING_RESPONDENTS_OPTIONS)) {
+            servingRespondentsOptions = (ServingRespondentsEnum) servedOrderDetails.get(SERVING_RESPONDENTS_OPTIONS);
+        }
+
         ServeOrderDetails serveOrderDetails = ServeOrderDetails.builder().serveOnRespondent(serveOnRespondent)
             .servingRespondent(servingRespondentsOptions)
             .cafcassServed(cafcassServed)
