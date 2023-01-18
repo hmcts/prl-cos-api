@@ -21,14 +21,17 @@ public enum RespondentSolicitorEvents {
     MIAM(
         "c100ResSolMiam",
         "MIAM",
-        "respondentSolicitorWillingnessToAttendMiam,whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder"
+        "respondentSolicitorHaveYouAttendedMiam,respondentSolicitorWillingnessToAttendMiam,"
+            + "whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder"
     ),
     CURRENT_OR_PREVIOUS_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "Current or past proceedings",
                                     "currentOrPastProceedingsForChildren,respondentExistingProceedings"
     ),
-    ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "Allegations of harm", ""),
-    INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", ""),
-    ABILITY_TO_PARTICIPATE("c100ResSolAbilityToParticipate", "Ability to participate", ""),
+    ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "Allegations of harm", "respondentAllegationsOfHarm,"
+        + "respondentDomesticAbuseBehaviour, respondentChildAbuseBehaviour, respondentChildAbduction, respondentOtherConcerns"),
+    INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", "internationalElementChild, "
+        + "internationalElementParent, internationalElementJurisdiction, internationalElementRequest"),
+    ABILITY_TO_PARTICIPATE("c100ResSolAbilityToParticipate", "Ability to participate", "abilityToParticipateInProceedings"),
     VIEW_DRAFT_RESPONSE("c100ResSolViewResponseDraftDocument", "View a draft of your response", ""),
     SUBMIT("c100ResSolSubmit", "Submit", "");
 
