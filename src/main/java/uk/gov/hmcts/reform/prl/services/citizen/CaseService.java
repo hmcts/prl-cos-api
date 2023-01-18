@@ -179,7 +179,7 @@ public class CaseService {
                 }
             }
             log.info("Before processUserDetailsForCase() :::: caseData {}", caseData);
-            log.info("Before processUserDetailsForCase() :::: userId {}", caseData);
+            log.info("Before processUserDetailsForCase() :::: userId {}", userId);
             log.info("Before processUserDetailsForCase() :::: emailId {}", emailId);
             log.info("Before processUserDetailsForCase() :::: partyId {}", partyId);
             log.info("Before processUserDetailsForCase() :::: isApplicant {}", isApplicant);
