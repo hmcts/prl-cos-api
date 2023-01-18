@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingData;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -154,6 +155,7 @@ public class BundleCreateRequestMapper {
 
     private List<Element<BundlingRequestDocument>> mapApplicationsFromCaseData(CaseData caseData) {
         List<BundlingRequestDocument> applications = new ArrayList<>();
+
         if (YesOrNo.Yes.equals(caseData.getLanguagePreferenceWelsh())) {
             if (null != caseData.getFinalWelshDocument()) {
                 applications.add(mapBundlingRequestDocument(caseData.getFinalWelshDocument(), BundlingDocGroupEnum.applicantApplication));
@@ -174,21 +176,25 @@ public class BundleCreateRequestMapper {
         if (!miamCertAndPreviousOrdersUploadedByCourtAdmin.isEmpty()) {
             applications.addAll(miamCertAndPreviousOrdersUploadedByCourtAdmin);
         }
-        if (null != caseData.getMiamDetails()) {
-            Document miamCertificateUpload = caseData.getMiamDetails().getMiamCertificationDocumentUpload();
-            if (null != miamCertificateUpload) {
-                applications.add(mapBundlingRequestDocument(miamCertificateUpload, BundlingDocGroupEnum.applicantMiamCertificate));
-            }
-            Document miamCertificateUpload1 = caseData.getMiamDetails().getMiamCertificationDocumentUpload1();
-            if (null != miamCertificateUpload1) {
-                applications.add(mapBundlingRequestDocument(miamCertificateUpload1, BundlingDocGroupEnum.applicantMiamCertificate));
-            }
-        }
+        mapMiamDetails(caseData.getMiamDetails(),applications);
         List<BundlingRequestDocument> citizenUploadedC7Documents = mapC7DocumentsFromCaseData(caseData.getCitizenResponseC7DocumentList());
         if (!citizenUploadedC7Documents.isEmpty()) {
             applications.addAll(citizenUploadedC7Documents);
         }
         return ElementUtils.wrapElements(applications);
+    }
+
+    private void mapMiamDetails(MiamDetails miamDetails, List<BundlingRequestDocument> applications) {
+        if (null != miamDetails) {
+            Document miamCertificateUpload = miamDetails.getMiamCertificationDocumentUpload();
+            if (null != miamCertificateUpload) {
+                applications.add(mapBundlingRequestDocument(miamCertificateUpload, BundlingDocGroupEnum.applicantMiamCertificate));
+            }
+            Document miamCertificateUpload1 = miamDetails.getMiamCertificationDocumentUpload1();
+            if (null != miamCertificateUpload1) {
+                applications.add(mapBundlingRequestDocument(miamCertificateUpload1, BundlingDocGroupEnum.applicantMiamCertificate));
+            }
+        }
     }
 
     private List<BundlingRequestDocument> mapC7DocumentsFromCaseData(List<Element<ResponseDocuments>> citizenResponseC7DocumentList) {
