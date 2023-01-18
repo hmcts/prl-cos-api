@@ -59,13 +59,13 @@ public class RespondentSolicitorTaskListRenderer {
             RespondentTask::getEvent,
             identity()
         ));
-        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
-        activeRespondent = caseData.getRespondents()
+        Optional<Element<PartyDetails>> c7ResponseSubmitted = Optional.empty();
+        c7ResponseSubmitted = caseData.getRespondents()
                 .stream()
-                .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
+                .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getC7ResponseSubmitted()))
                 .findFirst();
 
-        if (activeRespondent.isPresent()) {
+        if (c7ResponseSubmitted.isPresent()) {
 
             final RespondentTaskSection consent = newSection("1. Consent to the Application")
                 .withTask(tasks.get(RespondentSolicitorEvents.CONSENT));
@@ -106,8 +106,8 @@ public class RespondentSolicitorTaskListRenderer {
         } else {
             final RespondentTaskSection note = newSection(" ")
                 .withTask(tasks.get(String.format(
-                    "<div class='width-50'>><h3>Respond to the application</h3><p>To proceed with submitting the"
-                        + " response you need to choose respondent using 'Respond to application' event</p><div>")));
+                    "<div class='width-50'>><h3>Respond to the application</h3><p>you have submitted your response."
+                        + " You need to choose respondent using 'Respond to application' event</p><div>")));
 
             return Stream.of(note)
                 .filter(RespondentTaskSection::hasAnyTask)
