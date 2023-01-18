@@ -95,10 +95,11 @@ public class CaseService {
 
             Court closestChildArrangementsCourt = buildCourt(caseData);
 
-            CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData.toBuilder()
-                                                                               .userInfo(wrapElements(userInfo))
-                                                                               .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
-                                                                               .build());
+            CaseData updatedCaseData = caseDataMapper
+                .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
+                                          .courtName((closestChildArrangementsCourt != null)
+                                                         ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
+                                          .build());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
