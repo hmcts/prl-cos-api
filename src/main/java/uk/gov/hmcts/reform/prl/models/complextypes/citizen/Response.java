@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Cons
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.safetyconcerns.SafetyConcerns;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
@@ -39,6 +41,8 @@ public class Response {
     private final CitizenInternationalElements citizenInternationalElements;
     private final CitizenFlags citizenFlags;
     private final String safeToCallOption;
+    private final SafetyConcerns safetyConcerns;
+    private final ReasonableAdjustmentsSupport supportYouNeed;
 
     //Applicable only for C100 solicitor respondent
     private final YesNoDontKnow currentOrPastProceedingsForChildren;
