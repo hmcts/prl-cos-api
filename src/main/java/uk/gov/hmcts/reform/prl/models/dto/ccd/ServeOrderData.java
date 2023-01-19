@@ -7,11 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
-import uk.gov.hmcts.reform.prl.enums.serveorder.DeliveryByEnum;
-import uk.gov.hmcts.reform.prl.enums.serveorder.OtherOrganisationOptions;
-import uk.gov.hmcts.reform.prl.enums.serveorder.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
 import java.util.List;
