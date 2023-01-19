@@ -7,12 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
@@ -25,7 +23,6 @@ import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -44,13 +41,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_EX740;
@@ -65,14 +58,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFE_GUARDING_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -273,7 +263,7 @@ public class DraftAnOrderService {
                                            PrlAppsConstants.D_MMMM_YYYY,
                                            Locale.UK
                                        )))
-                                   .orderRecipients(getAllRecipients(caseData)).build()).build());
+                                   .orderRecipients(manageOrderService.getAllRecipients(caseData)).build()).build());
 
     }
 
@@ -287,68 +277,6 @@ public class DraftAnOrderService {
                                           : fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build();
         }
         return null;
-    }
-
-    private String getAllRecipients(CaseData caseData) {
-        StringBuilder recipientsList = new StringBuilder();
-        Optional<List<OrderRecipientsEnum>> appResRecipientList = ofNullable(caseData.getOrderRecipients());
-        if (appResRecipientList.isPresent() && caseData.getOrderRecipients().contains(applicantOrApplicantSolicitor)) {
-            recipientsList.append(getApplicantSolicitorDetails(caseData));
-            recipientsList.append('\n');
-        }
-        if (appResRecipientList.isPresent()
-            && caseData.getOrderRecipients().contains(respondentOrRespondentSolicitor)) {
-            recipientsList.append(getRespondentSolicitorDetails(caseData));
-            recipientsList.append('\n');
-        }
-        return recipientsList.toString();
-    }
-
-
-    private String getApplicantSolicitorDetails(CaseData caseData) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            List<PartyDetails> applicants = caseData
-                .getApplicants()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-
-            List<String> applicantSolicitorNames = applicants.stream()
-                .map(party -> Objects.nonNull(party.getSolicitorOrg().getOrganisationName())
-                    ? party.getSolicitorOrg().getOrganisationName() + APPLICANT_SOLICITOR
-                    : APPLICANT_SOLICITOR)
-                .collect(Collectors.toList());
-            return String.join("\n", applicantSolicitorNames);
-        } else {
-            PartyDetails applicantFl401 = caseData.getApplicantsFL401();
-            return applicantFl401.getRepresentativeLastName();
-        }
-    }
-
-    private String getRespondentSolicitorDetails(CaseData caseData) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            List<PartyDetails> respondents = caseData
-                .getRespondents()
-                .stream()
-                .map(Element::getValue)
-                .filter(r -> YesNoDontKnow.yes.equals(r.getDoTheyHaveLegalRepresentation()))
-                .collect(Collectors.toList());
-            if (respondents.isEmpty()) {
-                return "";
-            }
-            List<String> respondentSolicitorNames = respondents.stream()
-                .map(party -> party.getSolicitorOrg().getOrganisationName() + RESPONDENT_SOLICITOR)
-                .collect(Collectors.toList());
-            return String.join("\n", respondentSolicitorNames);
-        } else {
-            PartyDetails respondentFl401 = caseData.getRespondentsFL401();
-            if (YesNoDontKnow.yes.equals(respondentFl401.getDoTheyHaveLegalRepresentation())) {
-                return respondentFl401.getRepresentativeFirstName()
-                    + " "
-                    + respondentFl401.getRepresentativeLastName();
-            }
-            return "";
-        }
     }
 
     public CaseData populateCustomFields(CaseData caseData) {
