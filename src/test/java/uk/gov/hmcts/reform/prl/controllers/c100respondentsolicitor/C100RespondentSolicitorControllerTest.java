@@ -283,9 +283,9 @@ public class C100RespondentSolicitorControllerTest {
     public void validateActiveRespondentResponseBeforeSubmitTest() throws Exception {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(respondentSolicitorService.
-                 updateActiveRespondentSelectionBySolicitor(Mockito.any(CallbackRequest.class), Mockito.anyString())).
-            thenReturn(c7DraftMap);
+        when(respondentSolicitorService
+                 .updateActiveRespondentSelectionBySolicitor(Mockito.any(CallbackRequest.class), Mockito.anyString()))
+            .thenReturn(c7DraftMap);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
@@ -302,7 +302,7 @@ public class C100RespondentSolicitorControllerTest {
             callbackRequest
         );
 
-       assertNotNull(response);
+        assertNotNull(response);
     }
 }
 
