@@ -182,9 +182,24 @@ public class CafCassCaseData {
 
     private String courtName;
 
+
+    @Setter(AccessLevel.NONE)
+    @JsonProperty("otherPeopleInTheCaseTable")
     private List<Element<OtherPersonInTheCase>> otherPeopleInTheCaseTable;
 
+    public void setOtherPeopleInTheCaseTable(List<Element<OtherPersonInTheCase>> otherPeopleInTheCaseTable) {
+        if (otherPeopleInTheCaseTable != null && otherPeopleInTheCaseTable.size() == 1) {
+            if (!StringUtils.hasText(otherPeopleInTheCaseTable.get(0).getValue().getFirstName())) {
+                otherPeopleInTheCaseTable = null;
+            }
+        }
+
+        this.otherPeopleInTheCaseTable = otherPeopleInTheCaseTable;
+    }
+
+
     public void setOrdersNonMolestationDocument(CafCassDocument ordersNonMolestationDocument) throws MalformedURLException {
+
         if (ordersNonMolestationDocument != null
             && StringUtils.hasText(ordersNonMolestationDocument.getDocumentUrl())) {
             URL url = new URL(ordersNonMolestationDocument.getDocumentUrl());
@@ -216,5 +231,5 @@ public class CafCassCaseData {
     private Hearings hearingData;
 
     @Setter(AccessLevel.NONE)
-    private List<Element<CaseOrder>> orderCollection;
+        private List<Element<CaseOrder>> orderCollection;
 }
