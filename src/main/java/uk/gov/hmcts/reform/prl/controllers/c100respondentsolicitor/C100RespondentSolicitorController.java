@@ -148,4 +148,23 @@ public class C100RespondentSolicitorController {
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+    @PostMapping(path = "/response-submit-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback for Respondent Solicitor - submit active respondent selection")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse validateActiveRespondentResponseBeforeSubmit(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+
+        log.info("handleActiveRespondentSelection: Callback for Respondent Solicitor - handle select respondent");
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(respondentSolicitorService.updateActiveRespondentSelectionBySolicitor(
+                callbackRequest,
+                authorisation
+            )).build();
+    }
 }

@@ -65,30 +65,19 @@ public class C100RespondentSolicitorService {
         );
         Optional<Element<PartyDetails>> getActiveRespondent = findActiveRespondent(caseData, authorisation);
 
-        log.info("Event name:::{}", callbackRequest.getEventId());
-        boolean mandatoryFinished = false;
+        getActiveRespondent.ifPresentOrElse(x -> retrieveExistingResponseForSolicitor(
+            callbackRequest,
+            caseDataUpdated,
+            x), () -> errorList.add(
+            "You must select a respondent to represent through 'Respond to application' event"));
 
-        if (callbackRequest.getEventId().equalsIgnoreCase(SUBMIT.getEventId())) {
-            mandatoryFinished = responseSubmitChecker.hasMandatoryCompleted(caseData, getActiveRespondent);
-            if (!mandatoryFinished) {
-                errorList.add(
-                    "Response submission is not allowed for this case unless you finish all the mandatory information");
-            }
-        } else {
-            getActiveRespondent.ifPresentOrElse(x -> retrieveExistingResponseForSolicitor(
-                callbackRequest,
-                caseDataUpdated,
-                x), () -> errorList.add(
-                "You must select a respondent to represent through 'Respond to application' event"));
+        String activeRespondentName = getActiveRespondent.isPresent()
+            ? (getActiveRespondent.get().getValue().getFirstName() + " "
+            + getActiveRespondent.get().getValue().getLastName()) : null;
 
-            String activeRespondentName = getActiveRespondent.isPresent()
-                ? (getActiveRespondent.get().getValue().getFirstName() + " "
-                + getActiveRespondent.get().getValue().getLastName()) : null;
+        log.info("Active Respondent name: {}", activeRespondentName);
+        caseDataUpdated.put("respondentNameForResponse", activeRespondentName);
 
-            log.info("Active Respondent name: {}", activeRespondentName);
-            caseDataUpdated.put("respondentNameForResponse", activeRespondentName);
-
-        }
         return caseDataUpdated;
     }
 
@@ -416,7 +405,11 @@ public class C100RespondentSolicitorService {
                 PartyDetails amended = party.getValue().toBuilder()
                     .response(party.getValue().getResponse().toBuilder().activeRespondent(YesOrNo.Yes).build())
                     .build();
-
+                if (callbackRequest.getEventId().equalsIgnoreCase(SUBMIT.getEventId())) {
+                    amended = party.getValue().toBuilder()
+                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(YesOrNo.Yes).build())
+                        .build();
+                }
                 respondents.set(respondents.indexOf(party), element(party.getId(), amended));
                 log.info("updateRespondents:: party found. after update " + party);
             });
@@ -459,5 +452,28 @@ public class C100RespondentSolicitorService {
         Map<String, Object> keepDetailsPrivateList = new HashMap<>();
         keepDetailsPrivateList.put("confidentialListDetails", selectedList);
         return keepDetailsPrivateList;
+    }
+
+    public Map<String, Object> validateActiveRespondentResponse(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = objectMapper.convertValue(
+            caseDataUpdated,
+            CaseData.class
+        );
+        Optional<Element<PartyDetails>> getActiveRespondent = findActiveRespondent(caseData, authorisation);
+
+        log.info("Event name:::{}", callbackRequest.getEventId());
+        boolean mandatoryFinished = false;
+
+        if (callbackRequest.getEventId().equalsIgnoreCase(SUBMIT.getEventId())) {
+            mandatoryFinished = responseSubmitChecker.hasMandatoryCompleted(caseData, getActiveRespondent);
+            if (!mandatoryFinished) {
+                errorList.add(
+                    "Response submission is not allowed for this case unless you finish all the mandatory information");
+            }
+        }
+
+        return caseDataUpdated;
     }
 }
