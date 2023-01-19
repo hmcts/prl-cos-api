@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RespondentAllegationsOfHarmData {
 
+    private final YesOrNo allegationsOfHarmYesNo;
     private final RespondentAllegationsOfHarm respondentAllegationsOfHarm;
     private final List<Element<Behaviours>> respondentDomesticAbuseBehaviour;
     private final List<Element<Behaviours>> respondentChildAbuseBehaviour;

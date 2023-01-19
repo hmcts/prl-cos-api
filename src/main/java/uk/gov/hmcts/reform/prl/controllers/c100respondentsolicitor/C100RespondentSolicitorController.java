@@ -149,22 +149,47 @@ public class C100RespondentSolicitorController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/response-submit-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for Respondent Solicitor - submit active respondent selection")
+    @PostMapping(path = "/about-to-start-response-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback for Respondent Solicitor - validate response events before submit")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse validateActiveRespondentResponseBeforeSubmit(
+    public AboutToStartOrSubmitCallbackResponse validateActiveRespondentResponseBeforeStart(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        log.info("handleActiveRespondentSelection: Callback for Respondent Solicitor - handle select respondent");
+        List<String> errorList = new ArrayList<>();
+        log.info("validateTheResponseBeforeSubmit: Callback for Respondent Solicitor - validate response");
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(respondentSolicitorService.updateActiveRespondentSelectionBySolicitor(
+            .data(respondentSolicitorService.validateActiveRespondentResponse(
                 callbackRequest,
-                authorisation
-            )).build();
+                authorisation,
+                errorList))
+            .errors(errorList)
+            .build();
+    }
+
+    @PostMapping(path = "/submit-c7-response", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback for Respondent Solicitor - update c7 response after submission")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse updateC7ResponseSubmit(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+
+        List<String> errorList = new ArrayList<>();
+        log.info("validateTheResponseBeforeSubmit: Callback for Respondent Solicitor - validate response");
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(respondentSolicitorService.submitC7ResponseForActiveRespondent(
+                callbackRequest,
+                authorisation,
+                errorList))
+            .errors(errorList)
+            .build();
     }
 }

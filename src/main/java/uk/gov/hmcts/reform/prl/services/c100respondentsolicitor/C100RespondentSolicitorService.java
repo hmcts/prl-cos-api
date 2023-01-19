@@ -285,6 +285,7 @@ public class C100RespondentSolicitorService {
             case ALLEGATION_OF_HARM:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData.builder()
+                                                         .allegationsOfHarmYesNo(caseData.getAllegationsOfHarmYesNo())
                                                          .respondentAllegationsOfHarm(caseData.getRespondentAllegationsOfHarm())
                                                          .respondentDomesticAbuseBehaviour(caseData.getRespondentDomesticAbuseBehaviour())
                                                          .respondentChildAbuseBehaviour(caseData.getRespondentChildAbuseBehaviour())
@@ -466,14 +467,41 @@ public class C100RespondentSolicitorService {
         log.info("Event name:::{}", callbackRequest.getEventId());
         boolean mandatoryFinished = false;
 
-        if (callbackRequest.getEventId().equalsIgnoreCase(SUBMIT.getEventId())) {
-            mandatoryFinished = responseSubmitChecker.hasMandatoryCompleted(caseData, getActiveRespondent);
-            if (!mandatoryFinished) {
-                errorList.add(
-                    "Response submission is not allowed for this case unless you finish all the mandatory information");
-            }
+        mandatoryFinished = responseSubmitChecker.hasMandatoryCompleted(caseData, getActiveRespondent);
+        if (!mandatoryFinished) {
+            errorList.add(
+                "Response submission is not allowed for this case unless you finish all the mandatory information");
         }
 
         return caseDataUpdated;
+    }
+
+    public Map<String, Object> submitC7ResponseForActiveRespondent(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = objectMapper.convertValue(
+            updatedCaseData,
+            CaseData.class
+        );
+        log.info("updateRespondents:: caseData" + caseData);
+
+        UUID selectedRespondentId = caseData.getChooseRespondentDynamicList().getValueCodeAsUuid();
+        log.info("updateRespondents:: selectedRespondentId" + selectedRespondentId);
+        List<Element<PartyDetails>> respondents = caseData.getRespondents();
+
+        respondents.stream()
+            .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
+            .findFirst()
+            .ifPresent(party -> {
+                log.info("updateRespondents:: party found. before update " + party);
+                PartyDetails amended = party.getValue().toBuilder()
+                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(YesOrNo.Yes).build())
+                        .build();
+
+                respondents.set(respondents.indexOf(party), element(party.getId(), amended));
+                log.info("updateRespondents:: party found. after update " + party);
+            });
+
+        updatedCaseData.put(RESPONDENTS, respondents);
+        return updatedCaseData;
     }
 }
