@@ -21,8 +21,6 @@ public enum HelpCommunicationEnum {
     needspeakinghelp("needspeakinghelp","Need to be close to who is speaking"),
     @JsonProperty("lipspeaker")
     lipspeaker("lipspeaker","Lip speaker"),
-    @JsonProperty("lipspeakerhint")
-    lipspeakerhint("lipspeakerhint","hearing person who has been trained to be easily lip read"),
     @JsonProperty("signlanguage")
     signlanguage("signlanguage","British Sign Language interpreter"),
     @JsonProperty("speechreporter")
@@ -38,7 +36,7 @@ public enum HelpCommunicationEnum {
     @JsonProperty("other")
     other("other","Other"),
     @JsonProperty("nosupport")
-    nosupport("nosupport","No, I do not need any extra support at this time");
+    nosupport("nosupport","No, I do not need any support at this time");
 
     private final String id;
     private final String displayedValue;
