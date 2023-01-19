@@ -28,13 +28,4 @@ public class ServeOrderData {
     private final YesOrNo orderEndsInvolvementOfCafcassOrCymru;
     private final YesOrNo doYouWantToServeOrder;
     private final WhatToDoWithOrderEnum whatDoWithOrder;
-    private final List<Document> serveOrderAdditionalDocuments;
-    private final YesOrNo serveToRespondentOptions;
-    private final List<ServingRespondentsEnum> servingRespondentsOptionsCA;
-    private final YesOrNo cafcassServedOptions;
-    private final YesOrNo cafcassCymruServedOptions;
-    private final String cafcassCymruEmail;
-    private final OtherOrganisationOptions serveOtherPartiesCA;
-    private final DeliveryByEnum deliveryByOptionsCA;
-
 }
