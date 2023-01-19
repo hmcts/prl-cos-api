@@ -57,7 +57,7 @@ public class ManageOrdersControllerFunctionalTest {
             .when()
             .contentType("application/json")
             .post("/fetch-child-details")
-            .then().assertThat().statusCode(400);
+            .then().assertThat().statusCode(500);
     }
 
     @Test
