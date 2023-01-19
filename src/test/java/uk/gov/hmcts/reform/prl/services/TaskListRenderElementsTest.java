@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Test;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 
 import java.util.ArrayList;
@@ -9,6 +11,7 @@ import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TaskListRenderElementsTest {
@@ -91,5 +94,15 @@ public class TaskListRenderElementsTest {
         List<String> actual = underTest.renderNestedCollapsible("Header", emptyList());
 
         assertTrue(actual.containsAll(expected));
+    }
+
+    @Test
+    public void testRenderRespondentSolicitorLink() {
+        RespondentTask respondentTask = RespondentTask.builder()
+            .event(RespondentSolicitorEvents.START_RESPONSE)
+            .build();
+        String actual = underTest.renderRespondentSolicitorLink(respondentTask);
+
+        assertEquals("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolStartingResponse/c100ResSolStartingResponse1'>Respond to the application</a>", actual);
     }
 }
