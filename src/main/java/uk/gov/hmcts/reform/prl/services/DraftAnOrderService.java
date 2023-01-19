@@ -89,9 +89,8 @@ public class DraftAnOrderService {
     private final LocationRefDataService locationRefDataService;
     private final PartiesListGenerator partiesListGenerator;
 
-    private static final String NON_MOLESTATION_ORDER = "draftAnOrder/non-molestation-order.html";
-    private static final String SPECIAL_GUARDIANSHIP_ORDER = "draftAnOrder/special-guardianship-c43.html";
-    private static final String BLANK_ORDER_C21 = "draftAnOrder/blank-order-c21.html";
+    private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
+
 
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
@@ -107,7 +106,7 @@ public class DraftAnOrderService {
             m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        return Map.of("draftOrderCollection", draftOrderList
+        return Map.of(DRAFT_ORDER_COLLECTION, draftOrderList
         );
     }
 
@@ -186,8 +185,7 @@ public class DraftAnOrderService {
 
     public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData) {
         Map<String, Object> updatedCaseData = new HashMap<>();
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        draftOrderCollection = caseData.getDraftOrderCollection();
+        List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if (draftOrder.getOrderDocument().getDocumentFileName()
@@ -206,7 +204,7 @@ public class DraftAnOrderService {
             m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        updatedCaseData.put("draftOrderCollection", draftOrderCollection);
+        updatedCaseData.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
         return updatedCaseData;
 
     }
@@ -280,7 +278,7 @@ public class DraftAnOrderService {
     }
 
     private Document getGeneratedDocument(GeneratedDocumentInfo generatedDocumentInfo,
-                                          Boolean isWelsh, Map<String, String> fieldMap) {
+                                          boolean isWelsh, Map<String, String> fieldMap) {
         if (generatedDocumentInfo != null) {
             return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -457,8 +455,7 @@ public class DraftAnOrderService {
             .filter(element -> element.getId().equals(orderId))
             .map(Element::getValue)
             .findFirst()
-            .orElseThrow(() -> new UnsupportedOperationException(String.format(
-                "Could not find order")));
+            .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
     }
 
 
@@ -466,8 +463,7 @@ public class DraftAnOrderService {
 
         log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
         log.info(" ************ casedata {}", caseData);
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        draftOrderCollection = caseData.getDraftOrderCollection();
+        List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if (draftOrder.getOrderDocument().getDocumentFileName()
@@ -486,7 +482,7 @@ public class DraftAnOrderService {
             m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        return Map.of("draftOrderCollection", draftOrderCollection
+        return Map.of(DRAFT_ORDER_COLLECTION, draftOrderCollection
         );
     }
 
@@ -559,9 +555,6 @@ public class DraftAnOrderService {
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
         log.info("Case Type of application from case data before :::{}", caseData.getCaseTypeOfApplication());
-
-        log.info("Case data {}", caseData);
-        //log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         if (!C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
             if (fl404CustomFields != null) {
@@ -663,6 +656,62 @@ public class DraftAnOrderService {
                 RIGHT_TO_ASK_COURT
             );
         }
+        populateHearingAndNextStepsText(caseData, caseDataUpdated);
+        populateCourtText(caseData, caseDataUpdated);
+        populateDocumentAndEvidenceText(caseData, caseDataUpdated);
+        if (!caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoOtherList().contains(
+            SdoOtherEnum.parentWithCare)) {
+            caseDataUpdated.put(
+                "sdoParentWithCare",
+                PARENT_WITHCARE
+            );
+        }
+        List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
+        populateCourtDynamicList(courtList, caseDataUpdated);
+        DynamicList partiesList = partiesListGenerator.buildPartiesList(caseData, courtList);
+        caseDataUpdated.put("sdoInstructionsFilingPartiesDynamicList", partiesList);
+    }
+
+    private static void populateDocumentAndEvidenceText(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
+            SdoDocumentationAndEvidenceEnum.specifiedDocuments)) {
+            caseDataUpdated.put(
+                "sdoSpecifiedDocuments",
+                SPECIFIED_DOCUMENTS
+            );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
+            SdoDocumentationAndEvidenceEnum.spipAttendance)) {
+            caseDataUpdated.put(
+                "sdoSpipAttendance",
+                SPIP_ATTENDANCE
+            );
+        }
+    }
+
+    private static void populateCourtText(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
+            SdoCourtEnum.crossExaminationEx740)) {
+            caseDataUpdated.put(
+                "sdoCrossExaminationEx740",
+                CROSS_EXAMINATION_EX740
+            );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
+            SdoCourtEnum.crossExaminationQualifiedLegal)) {
+            caseDataUpdated.put(
+                "sdoCrossExaminationQualifiedLegal",
+                CROSS_EXAMINATION_QUALIFIED_LEGAL
+            );
+        }
+    }
+
+    private static void populateHearingAndNextStepsText(CaseData caseData, Map<String, Object> caseDataUpdated) {
         if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
             SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping)) {
@@ -699,50 +748,6 @@ public class DraftAnOrderService {
                 UPDATE_CONTACT_DETAILS
             );
         }
-        if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
-            SdoCourtEnum.crossExaminationEx740)) {
-            caseDataUpdated.put(
-                "sdoCrossExaminationEx740",
-                CROSS_EXAMINATION_EX740
-            );
-        }
-        if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
-            SdoCourtEnum.crossExaminationQualifiedLegal)) {
-            caseDataUpdated.put(
-                "sdoCrossExaminationQualifiedLegal",
-                CROSS_EXAMINATION_QUALIFIED_LEGAL
-            );
-        }
-        if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
-            SdoDocumentationAndEvidenceEnum.specifiedDocuments)) {
-            caseDataUpdated.put(
-                "sdoSpecifiedDocuments",
-                SPECIFIED_DOCUMENTS
-            );
-        }
-        if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
-            SdoDocumentationAndEvidenceEnum.spipAttendance)) {
-            caseDataUpdated.put(
-                "sdoSpipAttendance",
-                SPIP_ATTENDANCE
-            );
-        }
-        if (!caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoOtherList().contains(
-            SdoOtherEnum.parentWithCare)) {
-            caseDataUpdated.put(
-                "sdoParentWithCare",
-                PARENT_WITHCARE
-            );
-        }
-        List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
-        populateCourtDynamicList(courtList, caseDataUpdated);
-        DynamicList partiesList = partiesListGenerator.buildPartiesList(caseData, courtList);
-        caseDataUpdated.put("sdoInstructionsFilingPartiesDynamicList", partiesList);
     }
 
     private void populateCourtDynamicList(List<DynamicListElement> courtList, Map<String, Object> caseDataUpdated) {
@@ -763,8 +768,7 @@ public class DraftAnOrderService {
     }
 
     private List<DynamicListElement> getCourtDynamicList(String authorisation) {
-        List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
-        return courtList;
+        return locationRefDataService.getCourtLocations(authorisation);
     }
 
     public static boolean checkDirectionOnIssueOptionsSelected(CaseData caseData) {
