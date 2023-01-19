@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -844,13 +845,22 @@ public class ManageOrderService {
             .orderDocument(order.getValue().getOrderDocument())
             .orderType(order.getValue().getOrderType())
             .typeOfOrder(order.getValue().getTypeOfOrder())
-            .otherDetails(order.getValue().getOtherDetails())
+            .otherDetails(updateOtherOrderDetails(order.getValue().getOtherDetails()))
             .dateCreated(order.getValue().getDateCreated())
             .orderTypeId(order.getValue().getOrderTypeId())
             .serveOrderDetails(serveOrderDetails)
-            .orderServed(Yes)
             .build();
         orders.set(orders.indexOf(order), element(order.getId(), amended));
+    }
+
+    private static OtherOrderDetails updateOtherOrderDetails(OtherOrderDetails otherDetails) {
+        return OtherOrderDetails.builder()
+            .createdBy(otherDetails.getCreatedBy())
+            .orderCreatedDate(otherDetails.getOrderCreatedDate())
+            .orderAmendedDate(otherDetails.getOrderAmendedDate())
+            .orderMadeDate(otherDetails.getOrderMadeDate())
+            .orderRecipients(otherDetails.getOrderRecipients())
+            .orderServedDate(LocalDate.now()).build();
     }
 
     public void updateCaseDataWithAppointedGuardianNames(uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails,

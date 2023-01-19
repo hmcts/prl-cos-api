@@ -36,9 +36,5 @@ public class ServeOrderData {
     private final String cafcassCymruEmail;
     private final OtherOrganisationOptions serveOtherPartiesCA;
     private final DeliveryByEnum deliveryByOptionsCA;
-    private final PostalInformation postalInformationCA;
-    private final PostalInformation postalInformationDA;
-    private final EmailInformation emailInformationCA;
-    private final EmailInformation emailInformationDA;
 
 }
