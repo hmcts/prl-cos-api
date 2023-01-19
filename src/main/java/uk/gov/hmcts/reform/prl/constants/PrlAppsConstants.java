@@ -326,4 +326,6 @@ public class PrlAppsConstants {
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
+
+    public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
 }

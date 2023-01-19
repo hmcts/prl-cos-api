@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
@@ -43,7 +44,7 @@ public class CaseInitiationController extends AbstractCallbackController {
                                 @RequestBody CallbackRequest callbackRequest) {
 
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        final CaseData caseData = getCaseData(caseDetails);
+        final CaseData caseData = getCaseData(caseDetails).toBuilder().isNewCaseCreatedFlagForChildDetails(YesOrNo.Yes).build();
 
         assignCaseAccessService.assignCaseAccess(caseDetails.getId().toString(),authorisation);
 

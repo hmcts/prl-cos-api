@@ -5,7 +5,13 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -18,6 +24,8 @@ public class C100JsonMapperTest {
     CombinedMapper combinedMapper;
     @Mock
     ChildrenMapper childrenMapper;
+    @Mock
+    ChildDetailsRevisedMapper childDetailsRevisedMapper;
     @Mock
     MiamMapper miamMapper;
     @Mock
@@ -53,4 +61,17 @@ public class C100JsonMapperTest {
         //when(objectMapper.convertValue(partyDetails, Applicant.class)).thenReturn(applicant);
         assertNotNull(c100JsonMapper.map(caseData));
     }
+
+    @Test
+    public void testC100JsonMapperWithChildDetailsRevised() {
+        ChildDetailsRevised child = ChildDetailsRevised.builder().build();
+        Element<ChildDetailsRevised> wrappedChildren = Element.<ChildDetailsRevised>builder().value(child).build();
+        List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
+        CaseData caseData = CaseData.builder().courtId("CourtId").id(213123).feeAmount("312312")
+            .isNewCaseCreatedFlagForChildDetails(YesOrNo.Yes)
+            .newChildDetails(listOfChildren)
+            .familymanCaseNumber("123123").dateSubmitted("2019/1/2").build();
+        assertNotNull(c100JsonMapper.map(caseData));
+    }
+
 }

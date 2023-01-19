@@ -52,6 +52,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
@@ -133,6 +134,7 @@ public class CaseData implements MappableObject {
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;
 
+    private final YesOrNo  isNewCaseCreatedFlagForChildDetails;
     /**
      * Case Type Of Application.
      */
@@ -242,9 +244,15 @@ public class CaseData implements MappableObject {
     private final String caseNote;
 
     /**
+     * Child Details Revised.
+     */
+    private List<Element<ChildDetailsRevised>> newChildDetails;
+
+    /**
      * Child details.
      */
     private List<Element<Child>> children;
+
     private YesNoDontKnow childrenKnownToLocalAuthority;
     private String childrenKnownToLocalAuthorityTextArea;
     private YesNoDontKnow childrenSubjectOfChildProtectionPlan;

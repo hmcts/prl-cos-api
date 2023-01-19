@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
@@ -95,5 +96,42 @@ public class CaseInitiationControllerTest {
         verify(eventService).publishEvent(caseDataChanged);
 
     }
+
+    @Test
+    public void testHandleSubmittedWithChildDetaildRevised() {
+
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("applicantCaseName", "testCaseName");
+        String userID = "12345";
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(caseDataMap)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .isNewCaseCreatedFlagForChildDetails(YesOrNo.Yes)
+            .applicantCaseName("testCaseName")
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        doNothing().when(assignCaseAccessService).assignCaseAccess(String.valueOf(caseData.getId()),auth);
+
+        caseInitiationController.handleSubmitted(auth,callbackRequest);
+        CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
+        eventService.publishEvent(caseDataChanged);
+
+        applicationsTabService.updateTab(caseData);
+        verify(applicationsTabService).updateTab(caseData);
+        verify(eventService).publishEvent(caseDataChanged);
+
+    }
+
 }
 

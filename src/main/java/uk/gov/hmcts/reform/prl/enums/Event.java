@@ -16,6 +16,7 @@ public enum Event {
     HEARING_URGENCY("hearingUrgency",  "Hearing urgency"),
     APPLICANT_DETAILS("applicantsDetails", "Applicant details"),
     CHILD_DETAILS("childDetails", "Child details"),
+    CHILD_DETAILS_REVISED("childDetailsRevised", "Child details"),
     RESPONDENT_DETAILS("respondentsDetails", "Respondent details"),
     MIAM("miam", "MIAM"),
     ALLEGATIONS_OF_HARM("allegationsOfHarm", "Allegations of harm"),

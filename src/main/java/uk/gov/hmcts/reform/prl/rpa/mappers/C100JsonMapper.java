@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.rpa.mappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.EventsData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
@@ -23,6 +24,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_EVENT_SEQ
 public class C100JsonMapper {
 
     private final ChildrenMapper childrenMapper;
+
+    private final ChildDetailsRevisedMapper childDetailsRevisedMapper;
     private final TypeOfApplicationMapper typeOfApplicantionMapper;
     private final HearingUrgencyMapper hearingUrgencyMapper;
     private final MiamMapper miamMapper;
@@ -39,7 +42,8 @@ public class C100JsonMapper {
             .add("solicitor", combinedMapper.map(caseData))
             .add("header", getHeader(caseData.getCourtId(), caseData.getCourtName(), caseData.getId()))
             .add("id", caseData.getId())
-            .add("children", childrenMapper.map(caseData.getChildren()))
+            .add("children", YesOrNo.Yes.equals(caseData.getIsNewCaseCreatedFlagForChildDetails())
+                ? childDetailsRevisedMapper.map(caseData.getNewChildDetails()) : childrenMapper.map(caseData.getChildren()))
             .add("applicants", combinedMapper.getApplicantArray())
             .add("respondents", combinedMapper.getRespondentArray())
             .add("typeOfApplication", typeOfApplicantionMapper.map(caseData))

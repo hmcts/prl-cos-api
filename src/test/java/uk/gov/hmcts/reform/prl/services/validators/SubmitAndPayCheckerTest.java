@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
@@ -59,6 +60,9 @@ public class SubmitAndPayCheckerTest {
     ChildChecker childChecker;
 
     @Mock
+    ChildDetailsRevisedChecker childDetailsRevisedChecker;
+
+    @Mock
     RespondentsChecker respondentsChecker;
 
     @Mock
@@ -90,12 +94,18 @@ public class SubmitAndPayCheckerTest {
     private Organisation organisation;
     private PartyDetails applicant;
     private Child child;
+
+    private ChildDetailsRevised childDetailsRevised;
     private PartyDetails respondents;
 
     private Element<PartyDetails> wrappedApplicant;
     private List<Element<PartyDetails>> applicantList;
     private Element<Child> wrappedChildren;
+
+    private Element<ChildDetailsRevised> wrappedChildren1;
     private List<Element<Child>> listOfChildren;
+
+    private List<Element<ChildDetailsRevised>> listOfChildren1;
     private Element<PartyDetails> wrappedRespondents;
     private List<Element<PartyDetails>> respondentsList;
 
@@ -147,6 +157,15 @@ public class SubmitAndPayCheckerTest {
             .parentalResponsibilityDetails("test")
             .build();
 
+        childDetailsRevised = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .dateOfBirth(LocalDate.of(2000, 12, 22))
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+
         respondents = PartyDetails.builder()
             .firstName("TestingName")
             .lastName("TestLastName")
@@ -165,6 +184,9 @@ public class SubmitAndPayCheckerTest {
 
         wrappedChildren = Element.<Child>builder().value(child).build();
         listOfChildren = Collections.singletonList(wrappedChildren);
+
+        wrappedChildren1 = Element.<ChildDetailsRevised>builder().value(childDetailsRevised).build();
+        listOfChildren1 = Collections.singletonList(wrappedChildren1);
 
         wrappedRespondents = Element.<PartyDetails>builder().value(respondents).build();
         respondentsList = Collections.singletonList(wrappedRespondents);
@@ -370,6 +392,92 @@ public class SubmitAndPayCheckerTest {
 
         assertTrue(submitAndPayChecker.isFinished(caseData));
     }
+
+    @Test
+    public void whenAllCaseDataPresentThenIsFinshedReturnTrueWithChildDetailsRevised() {
+
+        caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("testing")
+            .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
+            .natureOfOrder("Test")
+            .consentOrder(Yes)
+            .applicationPermissionRequired(noNotRequired)
+            .applicationDetails("Test details")
+            .isCaseUrgent(Yes)
+            .doYouNeedAWithoutNoticeHearing(Yes)
+            .caseUrgencyTimeAndReason("reason")
+            .effortsMadeWithRespondents("efforts")
+            .reasonsForApplicationWithoutNotice("test")
+            .setOutReasonsBelow("test")
+            .areRespondentsAwareOfProceedings(No)
+            .doYouRequireAHearingWithReducedNotice(No)
+            .applicants(applicantList)
+            .isNewCaseCreatedFlagForChildDetails(Yes)
+            .newChildDetails(listOfChildren1)
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            .childrenKnownToLocalAuthorityTextArea("TestString")
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)
+            .respondents(respondentsList)
+            .miamDetails(MiamDetails.builder()
+                             .applicantAttendedMiam(Yes)
+                             .mediatorRegistrationNumber("123456")
+                             .familyMediatorServiceName("Test Name")
+                             .soleTraderName("Trade Sole")
+                             .miamCertificationDocumentUpload(Document.builder().build())
+                             .build())
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(No).build())
+
+            .build();
+
+        when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(caseNameChecker.isFinished(caseData)).thenReturn(true);
+        when(applicationTypeChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(applicationTypeChecker.isFinished(caseData)).thenReturn(true);
+        when(hearingUrgencyChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(hearingUrgencyChecker.isFinished(caseData)).thenReturn(true);
+        when(applicantsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(applicantsChecker.isFinished(caseData)).thenReturn(true);
+        when(childDetailsRevisedChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(childDetailsRevisedChecker.isFinished(caseData)).thenReturn(true);
+        when(respondentsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(respondentsChecker.isFinished(caseData)).thenReturn(true);
+        when(miamChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(miamChecker.isFinished(caseData)).thenReturn(true);
+        when(allegationsOfHarmChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(allegationsOfHarmChecker.isFinished(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseChecker.isFinished(caseData)).thenReturn(true);
+        when(otherProceedingsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(otherProceedingsChecker.isFinished(caseData)).thenReturn(true);
+        when(attendingTheHearingChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(attendingTheHearingChecker.isFinished(caseData)).thenReturn(true);
+        when(internationalElementChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(internationalElementChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(litigationCapacityChecker.isFinished(caseData)).thenReturn(true);
+        when(welshLanguageRequirementsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(welshLanguageRequirementsChecker.isFinished(caseData)).thenReturn(true);
+
+
+        when(eventsChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
+        when(eventsChecker.getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
+        when(eventsChecker.getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
+        when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
+        when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
+        when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
+        when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
+        when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
+        when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
+        when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
+        when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);
+        when(eventsChecker.getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
+        when(eventsChecker.getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
+
+        assertTrue(submitAndPayChecker.isFinished(caseData));
+    }
+
 
     @Test
     public void whenNoCaseDataPresentThenHasMandatoryCompletedReturnFalse() {

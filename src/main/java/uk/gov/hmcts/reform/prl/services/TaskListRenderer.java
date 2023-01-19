@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -29,6 +30,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
@@ -93,11 +95,18 @@ public class TaskListRenderer {
             .withTask(tasks.get(TYPE_OF_APPLICATION))
             .withTask(tasks.get(HEARING_URGENCY));
 
-        final TaskSection peopleInTheCase = newSection("Add people to the case")
-            .withTask(tasks.get(APPLICANT_DETAILS))
-            .withTask(tasks.get(CHILD_DETAILS))
-            .withTask(tasks.get(RESPONDENT_DETAILS));
-
+        TaskSection peopleInTheCase = null;
+        if (YesOrNo.Yes.equals(caseData.getIsNewCaseCreatedFlagForChildDetails())) {
+            peopleInTheCase = newSection("Add people to the case")
+                .withTask(tasks.get(APPLICANT_DETAILS))
+                .withTask(tasks.get(CHILD_DETAILS_REVISED))
+                .withTask(tasks.get(RESPONDENT_DETAILS));
+        } else {
+            peopleInTheCase = newSection("Add people to the case")
+                .withTask(tasks.get(APPLICANT_DETAILS))
+                .withTask(tasks.get(CHILD_DETAILS))
+                .withTask(tasks.get(RESPONDENT_DETAILS));
+        }
         final TaskSection requiredDetails = newSection("Add required details")
             .withTask(tasks.get(ALLEGATIONS_OF_HARM));
 

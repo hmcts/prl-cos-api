@@ -56,7 +56,9 @@ public class TaskListController extends AbstractCallbackController {
                                                                 @Parameter(hidden = true) String authorisation) {
 
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        log.debug("callbackRequest  :{} ",callbackRequest);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.debug("caseData  :{} ",caseData);
         publishEvent(new CaseDataChanged(caseData));
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
