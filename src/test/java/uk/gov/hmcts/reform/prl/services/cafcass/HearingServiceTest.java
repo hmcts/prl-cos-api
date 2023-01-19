@@ -47,7 +47,6 @@ public class HearingServiceTest {
 
         hearings = new Hearings();
         hearings.setCaseRef("caseReference");
-        hearings.setHmctsServiceCode("Authorization");
         hearings.setCaseHearings(caseHearings);
     }
 

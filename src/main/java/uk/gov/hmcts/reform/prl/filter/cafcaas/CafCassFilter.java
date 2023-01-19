@@ -68,12 +68,7 @@ public class CafCassFilter {
     }
 
     private boolean hasApplicantValidPostcode(CafCassCaseData cafCassCaseData) {
-        for (Element<ApplicantDetails> applicantDetails: cafCassCaseData.getApplicants()) {
-            if (isAddressValid(applicantDetails)) {
-                return true;
-            }
-        }
-        return false;
+        return true;
     }
 
     private boolean isAddressValid(Element<ApplicantDetails> applicationDetails) {

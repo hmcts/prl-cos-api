@@ -23,4 +23,7 @@ public class OrderDocument {
     public String documentFilename;
     public String documentUrl;
 
+    private String documentId;
+
+
 }
