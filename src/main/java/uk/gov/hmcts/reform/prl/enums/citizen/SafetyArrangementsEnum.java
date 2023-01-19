@@ -19,16 +19,18 @@ public enum SafetyArrangementsEnum {
     separateexitentry("separateexitentry","Separate exits and entrances"),
     @JsonProperty("screens")
     screens("screens","Screens so you and the other people in the case cannot see each other"),
-    @JsonProperty("toilet")
-    toilet("toilet","Separate toilets"),
+    @JsonProperty("separatetoilets")
+    separatetoilets("separatetoilets","Separate toilets"),
     @JsonProperty("advancedview")
     advancedview("advancedview","Advanced viewing of the court"),
+    @JsonProperty("visitToCourt")
+    visitToCourt("visitToCourt", "Visit to court before the hearing"),
     @JsonProperty("videolinks")
     videolinks("videolinks","Video links"),
     @JsonProperty("other")
     other("other","Other"),
-    @JsonProperty("nosupport")
-    nosupport("nosupport","No, I do not need any extra support at this time");
+    @JsonProperty("noSafetyrequirements")
+    noSafetyrequirements("noSafetyrequirements","No, I do not need any extra support at this time");
 
 
     private final String id;

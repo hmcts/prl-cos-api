@@ -23,8 +23,6 @@ public enum ReasonableAdjustmentsEnum {
     hearingcomfort("hearingcomfort","I need something to feel comfortable during a hearing"),
     @JsonProperty("travellinghelp")
     travellinghelp("travellinghelp","I need help travelling to, or moving around court buildings"),
-    @JsonProperty("unabletotakecourtproceedings")
-    unabletotakecourtproceedings("unabletotakecourtproceedings","Is there a reason you are unable to take part in the court proceedings?"),
     @JsonProperty("nosupport")
     nosupport("nosupport","No, I do not need any extra support at this time");
 

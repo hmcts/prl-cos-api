@@ -22,7 +22,7 @@ public enum CourtComfortEnum {
     @JsonProperty("other")
     other("other","Other"),
     @JsonProperty("nosupport")
-    nosupport("nosupport", "No, I do not need any extra support at this time");
+    nosupport("nosupport", "No, I do not need any support at this time");
 
     private final String id;
     private final String displayedValue;

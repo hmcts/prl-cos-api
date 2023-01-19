@@ -24,7 +24,7 @@ public enum DocsSupportEnum {
     @JsonProperty("docsaudio")
     docsaudio("docsaudio","Audio translation of documents"),
     @JsonProperty("readoutdocs")
-    readoutdocs("readoutdocs","Documents read out to me"),
+    docsReadOut("readoutdocs","Documents read out to me"),
     @JsonProperty("emailInfo")
     emailInfo("emailInfo","Information emailed to me"),
     @JsonProperty("other")

@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyoun
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.AttendingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.CourtComfortEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.CourtHearingEnum;
@@ -35,8 +34,6 @@ public class ReasonableAdjustmentsSupport {
     private final String safetyArrangementsDetails;
     private final List<TravellingToCourtEnum> travellingToCourt;
     private final String travellingOtherDetails;
-    private final YesOrNo unableForCourtProceedings;
-    private final String courtProceedingProvideDetails;
     private final List<AttendingToCourtEnum> attendingToCourt;
     private final String hearingDetails;
     private final String signLanguageDetails;
