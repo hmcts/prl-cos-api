@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -66,11 +64,6 @@ public class BundlingController extends AbstractCallbackController {
         log.info("*** Creating Bundle for the case id : {}", caseData.getId());
         BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(caseData,
             callbackRequest.getEventId(), authorization);
-        try {
-            log.info("*** Bundle response from api : {}", new ObjectMapper().writeValueAsString(bundleCreateResponse));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
         if (null != bundleCreateResponse && null != bundleCreateResponse.getData() && null != bundleCreateResponse.getData().getCaseBundles()) {
             caseDataUpdated.put("bundleInformation",
                 BundlingInformation.builder().caseBundles(removeEmptyFolders(bundleCreateResponse.getData().getCaseBundles()))
@@ -82,12 +75,6 @@ public class BundlingController extends AbstractCallbackController {
                         && null != bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime()
                         ? bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime() : "")
                     .build());
-            try {
-                log.info("*** Bundle information post emptyfolders removal from api : {}",
-                    new ObjectMapper().writeValueAsString(caseDataUpdated.get("bundleInformation")));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
             log.info("*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}", caseData.getId());
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
