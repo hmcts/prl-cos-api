@@ -1,10 +1,18 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Test;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.services.RespondentSolicitorTaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderElements;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
@@ -22,8 +30,6 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEv
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE;
 
 public class RespondentSolicitorTaskListRendererTest {
-
-
     private final RespondentSolicitorTaskListRenderer taskListRenderer = new RespondentSolicitorTaskListRenderer(
         new TaskListRenderElements(
             "NO IMAGE URL IN THIS BRANCH"
@@ -48,7 +54,22 @@ public class RespondentSolicitorTaskListRendererTest {
     @Test
     public void renderTaskListTest() {
 
-        String taskList =taskListRenderer.render(tasks);
+        Response response = Response.builder().c7ResponseSubmitted(YesOrNo.Yes).build();
+
+        PartyDetails respondent = PartyDetails.builder().response(response).build();
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .respondents(respondentList)
+            .build();
+
+
+
+        String taskList = taskListRenderer.render(tasks, caseData);
 
         assertNotNull(taskList);
     }
