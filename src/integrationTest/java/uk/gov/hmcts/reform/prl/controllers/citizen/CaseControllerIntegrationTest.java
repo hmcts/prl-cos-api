@@ -35,6 +35,14 @@ public class CaseControllerIntegrationTest {
 
     private final String updateCaseEndpoint = "1234567/{eventId}/update-case";
 
+    private final String retrieveCaseEndpoint = "/citizen/solicitor/retrieve-cases/12345";
+
+    private final String retrieveCitizenCasesEndpoint = "/cases";
+
+    private final String linkCitizenToCaseEndpoint = "/citizen/link";
+
+    private final String validateAccessCodeEndpoint = "/validate-access-code";
+
     private final String validBody = "controller/valid-casedata-input.json";
 
     @Autowired
@@ -59,9 +67,10 @@ public class CaseControllerIntegrationTest {
         assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
     }
 
+
     @Test
     public void testGetCaseEndpoint() throws Exception {
-        HttpGet httpGet = new HttpGet(serviceUrl + updateCaseEndpoint);
+        HttpGet httpGet = new HttpGet(serviceUrl + getCaseEndpoint);
         httpGet.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpGet.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
         httpGet.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
@@ -74,7 +83,7 @@ public class CaseControllerIntegrationTest {
     @Test
     public void testUpdateCaseEndpoint() throws Exception {
         String requestBody = ResourceLoader.loadJson(validBody);
-        HttpPost httpPost = new HttpPost(serviceUrl + createCaseEndpoint);
+        HttpPost httpPost = new HttpPost(serviceUrl + updateCaseEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
@@ -83,4 +92,54 @@ public class CaseControllerIntegrationTest {
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
     }
+
+    @Test
+    public void testRetrieveCaseEndpoint() throws Exception {
+        HttpGet httpGet = new HttpGet(serviceUrl + retrieveCaseEndpoint);
+        httpGet.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpGet.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
+        httpGet.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpGet);
+        assertEquals(
+            HttpStatus.SC_NOT_FOUND,
+            httpResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testRetrieveCitizenCasesEndpoint() throws Exception {
+        HttpGet httpGet = new HttpGet(serviceUrl + retrieveCitizenCasesEndpoint);
+        httpGet.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpGet.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
+        httpGet.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpGet);
+        assertEquals(
+            HttpStatus.SC_NOT_FOUND,
+            httpResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testLinkCitizenToCaseEndpoint() throws Exception {
+        String requestBody = ResourceLoader.loadJson(validBody);
+        HttpPost httpPost = new HttpPost(serviceUrl + linkCitizenToCaseEndpoint);
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
+        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testValidateAccessCodeEndpoint() throws Exception {
+        HttpGet httpGet = new HttpGet(serviceUrl + validateAccessCodeEndpoint);
+        httpGet.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpGet.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
+        httpGet.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpGet);
+        assertEquals(
+            HttpStatus.SC_NOT_FOUND,
+            httpResponse.getStatusLine().getStatusCode());
+    }
+
 }
