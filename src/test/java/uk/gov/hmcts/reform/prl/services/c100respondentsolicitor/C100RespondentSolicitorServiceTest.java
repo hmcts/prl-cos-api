@@ -196,5 +196,26 @@ public class C100RespondentSolicitorServiceTest {
         assertNotNull(response);
 
     }
+    @Test
+    public void submitC7ResponseForActiveRespondentTest() {
+
+        List<String> errorList = new ArrayList<>();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
+            callbackRequest, authToken, errorList
+        );
+
+        assertNotNull(response);
+    }
 
 }
