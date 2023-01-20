@@ -23,7 +23,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @ContextConfiguration
 public class C100IssueCaseControllerFunctionalTest {
 
-    private final String userToken = "Bearer testToken";
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
