@@ -57,7 +57,7 @@ public class C100IssueCaseController {
             sendgridService.sendEmail(c100JsonMapper.map(caseData));
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        DynamicList courtList = ((DynamicList)(caseData.getCourtList()));
+        DynamicList courtList = caseData.getCourtList();
         if (null != caseData.getCourtList() && null != courtList.getValue()) {
             String baseLocationId = courtList.getValue().getCode();
             String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation)
