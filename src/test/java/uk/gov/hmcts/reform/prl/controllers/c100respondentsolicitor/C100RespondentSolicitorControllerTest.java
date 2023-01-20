@@ -297,7 +297,35 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
-        AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.validateActiveRespondentResponseBeforeSubmit(
+        AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.validateActiveRespondentResponseBeforeStart(
+            authToken,
+            callbackRequest
+        );
+
+        assertNotNull(response);
+    }
+
+    @Test
+    public void updateC7ResponseSubmitTest() throws Exception {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(respondentSolicitorService
+                 .submitC7ResponseForActiveRespondent(Mockito.any(CallbackRequest.class), Mockito
+                     .anyString(),Mockito.anyList()))
+            .thenReturn(c7DraftMap);
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.updateC7ResponseSubmit(
             authToken,
             callbackRequest
         );
