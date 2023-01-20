@@ -196,6 +196,7 @@ public class C100RespondentSolicitorServiceTest {
         assertNotNull(response);
 
     }
+
     @Test
     public void submitC7ResponseForActiveRespondentTest() {
 
