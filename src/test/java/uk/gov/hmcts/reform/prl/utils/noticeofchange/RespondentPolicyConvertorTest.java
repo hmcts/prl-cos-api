@@ -23,7 +23,7 @@ public class RespondentPolicyConvertorTest {
     }
 
     @Test
-    public void generatePolicyTest(){
+    public void generatePolicyTest() {
 
         SolicitorRole solicitorRole = SolicitorRole.SOLICITORA;
 
