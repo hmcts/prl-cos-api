@@ -600,7 +600,7 @@ public class CaseData implements MappableObject {
     /**
      * FL401 Court details for Pilot.
      */
-    private final Object submitCountyCourtSelection;
+    private final DynamicList submitCountyCourtSelection;
 
     public CaseData setDateSubmittedDate() {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
