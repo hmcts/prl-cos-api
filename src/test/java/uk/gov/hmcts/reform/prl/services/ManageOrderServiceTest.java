@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
@@ -1289,6 +1290,8 @@ public class ManageOrderServiceTest {
                                                                                                              .builder()
                                                                                                              .build())
                                                                                           .dateCreated(dateTime.now())
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
                                                                                           .build()).build();
         List<Element<OrderDetails>> orderList = new ArrayList<>();
         orderList.add(orders);
@@ -1338,6 +1341,8 @@ public class ManageOrderServiceTest {
                                                                                                              .builder()
                                                                                                              .build())
                                                                                           .dateCreated(dateTime.now())
+                                                                                          .otherDetails(
+                                                                                          OtherOrderDetails.builder().build())
                                                                                           .build()).build();
         List<Element<OrderDetails>> orderList = new ArrayList<>();
         orderList.add(orders);
