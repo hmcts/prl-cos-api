@@ -222,6 +222,7 @@ public class CaseEventHandlerTest {
             .solicitorEmail("test@test.com")
             .response(Response.builder()
                           .c7ResponseSubmitted(YesOrNo.Yes)
+                          .activeRespondent(YesOrNo.Yes)
                           .build())
             .build();
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
