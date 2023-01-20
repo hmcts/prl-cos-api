@@ -624,6 +624,7 @@ public class DraftAnOrderService {
                 }
             }
             caseData = caseData.toBuilder()
+                .standardDirectionOrder(caseData.getStandardDirectionOrder())
                 .manageOrders(ManageOrders.builder()
                                   .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
                                   .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
@@ -666,6 +667,7 @@ public class DraftAnOrderService {
             caseData = caseData.toBuilder()
                 .appointedGuardianName(caseData.getAppointedGuardianName())
                 .dateOrderMade(caseData.getDateOrderMade())
+                .standardDirectionOrder(caseData.getStandardDirectionOrder())
                 .manageOrders(ManageOrders.builder()
                                   .parentName(caseData.getManageOrders().getParentName())
                                   .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())

@@ -90,6 +90,8 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("CaseData before ====> {}", caseData);
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
 
@@ -104,6 +106,7 @@ public class DraftAnOrderController {
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
         }
         if (caseData != null) {
+            log.info("CaseData after ====> {}", caseData);
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         }
         return AboutToStartOrSubmitCallbackResponse.builder()
