@@ -861,10 +861,7 @@ public class ManageOrderService {
             .orderAmendedDate(otherDetails.getOrderAmendedDate())
             .orderMadeDate(otherDetails.getOrderMadeDate())
             .orderRecipients(otherDetails.getOrderRecipients())
-            .orderServedDate(LocalDate.now().format(DateTimeFormatter.ofPattern(
-                PrlAppsConstants.D_MMMM_YYYY,
-                Locale.UK
-            ))).build();
+            .orderServedDate(LocalDate.now()).build();
     }
 
     public void updateCaseDataWithAppointedGuardianNames(uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails,

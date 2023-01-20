@@ -278,11 +278,7 @@ public class DraftAnOrderService {
                                            Locale.UK
                                        )))
                                    .orderServedDate(YesOrNo.Yes.equals(caseData.getServeOrderData()
-                                                                           .getDoYouWantToServeOrder()) ? LocalDate.now()
-                                       .format(DateTimeFormatter.ofPattern(
-                                       PrlAppsConstants.D_MMMM_YYYY,
-                                       Locale.UK
-                                   )) : null)
+                                                                           .getDoYouWantToServeOrder()) ? LocalDate.now() : null)
                                    .orderRecipients(manageOrderService.getAllRecipients(caseData)).build())
                            .serveOrderDetails(serveOrderDetails).build());
 
