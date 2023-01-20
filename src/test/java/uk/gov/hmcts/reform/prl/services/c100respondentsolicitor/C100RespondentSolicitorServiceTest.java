@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
