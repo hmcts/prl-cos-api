@@ -430,7 +430,7 @@ public class CaseData implements MappableObject {
      * Issue and send to local court'.
      */
     private final List<Element<LocalCourtAdminEmail>> localCourtAdmin;
-    private final DynamicList courtList;
+    private final Object courtList;
     private final CaseManagementLocation caseManagementLocation;
 
     /**

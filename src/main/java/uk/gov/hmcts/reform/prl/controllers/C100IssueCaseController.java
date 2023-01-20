@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
@@ -56,9 +57,9 @@ public class C100IssueCaseController {
             sendgridService.sendEmail(c100JsonMapper.map(caseData));
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
-            String baseLocationId = caseData.getCourtList().getValue().getCode();
+        DynamicList courtList = ((DynamicList)(caseData.getCourtList()));
+        if (null != caseData.getCourtList() && null != courtList.getValue()) {
+            String baseLocationId = courtList.getValue().getCode();
             String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation)
                 .split("-");
             String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
