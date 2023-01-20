@@ -89,7 +89,7 @@ public class CaseEventHandler {
         if (null != caseData.getRespondents()) {
             activeRespondent = caseData.getRespondents()
                 .stream()
-                .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getC7ResponseSubmitted()))
+                .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
                 .findFirst();
             if (activeRespondent.isPresent()) {
                 final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks();
