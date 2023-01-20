@@ -332,10 +332,10 @@ public class DraftAnOrderService {
             .emailInformation(emailInformation)
             .additionalDocuments(caseData.getManageOrders().getServeOrderAdditionalDocuments())
             .doYouWantToServeOrder(serveOrderData.getDoYouWantToServeOrder())
-            .cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
+            //.cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
             .whatDoWithOrder(serveOrderData.getWhatDoWithOrder())
             .cafcassOrCymruNeedToProvideReport(serveOrderData.getCafcassOrCymruNeedToProvideReport())
-            .whenReportsMustBeFiled(serveOrderData.getWhenReportsMustBeFiled())
+            .whenReportsMustBeFiled(getReportFiledDate(serveOrderData))
             .orderEndsInvolvementOfCafcassOrCymru(serveOrderData.getOrderEndsInvolvementOfCafcassOrCymru())
             .build();
     }
@@ -382,12 +382,24 @@ public class DraftAnOrderService {
             .emailInformation(emailInformation)
             .additionalDocuments(caseData.getManageOrders().getServeOrderAdditionalDocuments())
             .doYouWantToServeOrder(serveOrderData.getDoYouWantToServeOrder())
-            .cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
+            //.cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
             .whatDoWithOrder(serveOrderData.getWhatDoWithOrder())
             .cafcassOrCymruNeedToProvideReport(serveOrderData.getCafcassOrCymruNeedToProvideReport())
-            .whenReportsMustBeFiled(serveOrderData.getWhenReportsMustBeFiled())
+            .whenReportsMustBeFiled(getReportFiledDate(serveOrderData))
             .orderEndsInvolvementOfCafcassOrCymru(serveOrderData.getOrderEndsInvolvementOfCafcassOrCymru())
             .build();
+    }
+
+    private String getReportFiledDate(ServeOrderData serveOrderData) {
+        if (serveOrderData.getWhenReportsMustBeFiled() != null) {
+            return serveOrderData.getWhenReportsMustBeFiled().format(DateTimeFormatter.ofPattern(
+                PrlAppsConstants.D_MMMM_YYYY,
+                Locale.UK
+            ));
+        } else {
+            return null;
+        }
+
     }
 
     private Document getGeneratedDocument(GeneratedDocumentInfo generatedDocumentInfo,
