@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -860,7 +861,10 @@ public class ManageOrderService {
             .orderAmendedDate(otherDetails.getOrderAmendedDate())
             .orderMadeDate(otherDetails.getOrderMadeDate())
             .orderRecipients(otherDetails.getOrderRecipients())
-            //.orderServedDate(LocalDate.now())
+            .orderServedDate(LocalDate.now().format(DateTimeFormatter.ofPattern(
+                PrlAppsConstants.D_MMMM_YYYY,
+                Locale.UK
+            )))
             .build();
     }
 
