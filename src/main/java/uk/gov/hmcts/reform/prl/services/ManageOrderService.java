@@ -850,6 +850,7 @@ public class ManageOrderService {
             .orderTypeId(order.getValue().getOrderTypeId())
             .serveOrderDetails(serveOrderDetails)
             .build();
+        log.info("amaneded order {}" + amended);
         orders.set(orders.indexOf(order), element(order.getId(), amended));
     }
 
