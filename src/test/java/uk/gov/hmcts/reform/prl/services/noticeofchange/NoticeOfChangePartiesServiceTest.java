@@ -29,7 +29,7 @@ public class NoticeOfChangePartiesServiceTest {
     SolicitorRole role;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         MockitoAnnotations.openMocks(this);
 
         PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
@@ -55,7 +55,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void generate(){
+    public void generate() {
 
         Map<String, Object> test = noticeOfChangePartiesService.generate(caseData, role.getRepresenting());
 
@@ -64,7 +64,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void generateWithStrategy(){
+    public void generateWithStrategy() {
 
         NoticeOfChangePartiesService
             .NoticeOfChangeAnswersPopulationStrategy strategy = NoticeOfChangePartiesService
