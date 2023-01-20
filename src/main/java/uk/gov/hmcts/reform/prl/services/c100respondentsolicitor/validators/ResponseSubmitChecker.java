@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -11,8 +12,10 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
+@Slf4j
 @SuppressWarnings("ALL")
 @Service
 public class ResponseSubmitChecker {
@@ -43,6 +47,7 @@ public class ResponseSubmitChecker {
 
     private boolean checkConsentManadatoryCompleted(Optional<Element<PartyDetails>> activeRespondentResponse) {
         Optional<Consent> consent = ofNullable(activeRespondentResponse.get().getValue().getResponse().getConsent());
+        boolean mandatoryInfo = false;
 
         if (consent.isPresent()) {
             List<Optional<?>> fields = new ArrayList<>();
@@ -54,8 +59,10 @@ public class ResponseSubmitChecker {
             fields.add(ofNullable(consent.get().getPermissionFromCourt().equals(YesOrNo.Yes)
                                       ? null != consent.get().getCourtOrderDetails() : null));
 
-            return fields.stream().noneMatch(Optional::isEmpty)
+            mandatoryInfo = fields.stream().noneMatch(Optional::isEmpty)
                 && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+            log.info("Consent manadatory info:: {}", mandatoryInfo);
+            return mandatoryInfo;
         }
         return false;
     }
@@ -211,6 +218,56 @@ public class ResponseSubmitChecker {
                 fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentOtherConcerns().getChildSpendingUnsupervisedTime()));
             }
 
+            return fields.stream().noneMatch(Optional::isEmpty)
+                && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+        }
+        return false;
+    }
+
+    private boolean checkAbilityToParticipateMandatoryCompleted(Optional<Element<PartyDetails>> activeRespondentResponse) {
+        Optional<SolicitorAbilityToParticipateInProceedings> abilityToParticipate = ofNullable(activeRespondentResponse
+                                                                          .get()
+                                                                          .getValue()
+                                                                          .getResponse()
+                                                                          .getAbilityToParticipate());
+        if (abilityToParticipate.isPresent()) {
+            List<Optional<?>> fields = new ArrayList<>();
+            fields.add(ofNullable(abilityToParticipate.get().getFactorsAffectingAbilityToParticipate()));
+
+            fields.add(ofNullable(abilityToParticipate.get().getFactorsAffectingAbilityToParticipate()
+                                      .equals(YesNoDontKnow.yes) ? null != abilityToParticipate.get()
+                .getProvideDetailsForFactorsAffectingAbilityToParticipate() : null));
+
+            return fields.stream().noneMatch(Optional::isEmpty)
+                && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+        }
+        return false;
+    }
+
+    private boolean checkInternationalElementMandatoryCompleted(Optional<Element<PartyDetails>> activeRespondentResponse) {
+        Optional<ResSolInternationalElements> internationalElements = ofNullable(activeRespondentResponse
+                                                                                                   .get()
+                                                                                                   .getValue()
+                                                                                                   .getResponse()
+                                                                                                   .getResSolInternationalElements());
+        if (internationalElements.isPresent()) {
+            List<Optional<?>> fields = new ArrayList<>();
+            fields.add(ofNullable(internationalElements.get().getInternationalElementChild().getReasonForChild()));
+            fields.add(ofNullable(internationalElements.get().getInternationalElementChild()
+                                      .getReasonForChild().equals(YesOrNo.Yes) ? null != internationalElements.get()
+                .getInternationalElementChild().getReasonForChildDetails() : null));
+            fields.add(ofNullable(internationalElements.get().getInternationalElementParent()));
+            fields.add(ofNullable(internationalElements.get().getInternationalElementParent()
+                                      .getReasonForParent().equals(YesOrNo.Yes) ? null != internationalElements.get()
+                .getInternationalElementParent().getReasonForParentDetails() : null));
+            fields.add(ofNullable(internationalElements.get().getInternationalElementJurisdiction()));
+            fields.add(ofNullable(internationalElements.get().getInternationalElementJurisdiction()
+                                      .getReasonForJurisdiction().equals(YesOrNo.Yes) ? null != internationalElements.get()
+                .getInternationalElementJurisdiction().getReasonForJurisdictionDetails() : null));
+            fields.add(ofNullable(internationalElements.get().getInternationalElementRequest()));
+            fields.add(ofNullable(internationalElements.get().getInternationalElementRequest()
+                                      .getRequestToAuthority().equals(YesOrNo.Yes) ? null != internationalElements.get()
+                .getInternationalElementRequest().getRequestToAuthorityDetails() : null));
 
             return fields.stream().noneMatch(Optional::isEmpty)
                 && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));

@@ -37,8 +37,13 @@ public class TaskListRenderElements {
     }
 
     public String renderRespondentSolicitorLink(RespondentSolicitorEvents respondentSolicitorEvents) {
-        return format("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/%s/%s1'>%s</a>",
-                      respondentSolicitorEvents.getEventId(), respondentSolicitorEvents.getEventId(), respondentSolicitorEvents.getEventName());
+        String renderLink = " ";
+        if (null != respondentSolicitorEvents.getEventId() || null != respondentSolicitorEvents.getEventName()) {
+            renderLink = format("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/%s/%s1'>%s</a>",
+                                respondentSolicitorEvents.getEventId(), respondentSolicitorEvents.getEventId(),
+                                respondentSolicitorEvents.getEventName());
+        }
+        return renderLink;
     }
 
     public String renderImage(String imageName, String title) {
