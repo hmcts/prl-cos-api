@@ -90,7 +90,13 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("CaseData before ====> {}", callbackRequest);
+        if (callbackRequest.getCaseDetailsBefore() != null) {
+            CaseData caseDataBefore = objectMapper.convertValue(
+                callbackRequest.getCaseDetailsBefore().getData(),
+                CaseData.class
+            );
+            log.info("CaseData before ====> {}", caseDataBefore);
+        }
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
