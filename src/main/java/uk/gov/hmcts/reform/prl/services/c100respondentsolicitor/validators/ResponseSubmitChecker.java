@@ -2,18 +2,23 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -30,14 +35,15 @@ public class ResponseSubmitChecker {
         Optional<Consent> consent = null;
 
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) && activeRespondentResponse.isPresent()) {
-            consent = ofNullable(activeRespondentResponse.get().getValue().getResponse().getConsent());
-            mandatoryFinished = checkConsentManadatoryCompleted(consent);
+            mandatoryFinished = checkConsentManadatoryCompleted(activeRespondentResponse);
         }
 
         return mandatoryFinished;
     }
 
-    private boolean checkConsentManadatoryCompleted(Optional<Consent> consent) {
+    private boolean checkConsentManadatoryCompleted(Optional<Element<PartyDetails>> activeRespondentResponse) {
+        Optional<Consent> consent = ofNullable(activeRespondentResponse.get().getValue().getResponse().getConsent());
+
         if (consent.isPresent()) {
             List<Optional<?>> fields = new ArrayList<>();
             fields.add(ofNullable(consent.get().getConsentToTheApplication()));
@@ -54,7 +60,9 @@ public class ResponseSubmitChecker {
         return false;
     }
 
-    private boolean checkKeepDetailsPrivateManadatoryCompleted(Optional<KeepDetailsPrivate> keepDetailsPrivate) {
+    private boolean checkKeepDetailsPrivateManadatoryCompleted(Optional<Element<PartyDetails>> activeRespondentResponse) {
+        Optional<KeepDetailsPrivate> keepDetailsPrivate = ofNullable(activeRespondentResponse.get().getValue().getResponse().getKeepDetailsPrivate());
+
         if (keepDetailsPrivate.isPresent()) {
             List<Optional<?>> fields = new ArrayList<>();
             fields.add(ofNullable(keepDetailsPrivate.get().getOtherPeopleKnowYourContactDetails()));
@@ -68,7 +76,8 @@ public class ResponseSubmitChecker {
         return false;
     }
 
-    private boolean checkContactDetailsManadatoryCompleted(Optional<CitizenDetails> citizenDetails) {
+    private boolean checkContactDetailsManadatoryCompleted(Optional<Element<PartyDetails>> activeRespondentResponse) {
+        Optional<CitizenDetails> citizenDetails = ofNullable(activeRespondentResponse.get().getValue().getResponse().getCitizenDetails());
         if (citizenDetails.isPresent()) {
             List<Optional<?>> fields = new ArrayList<>();
             fields.add(ofNullable(citizenDetails.get().getFirstName()));
@@ -88,19 +97,37 @@ public class ResponseSubmitChecker {
         return false;
     }
 
-    private boolean checkAttendToCourtManadatoryCompleted(Optional<AttendToCourt> attendToCourt) {
+    private boolean checkAttendToCourtManadatoryCompleted(Optional<Element<PartyDetails>> activeRespondentResponse) {
+        Optional<AttendToCourt> attendToCourt = ofNullable(activeRespondentResponse.get().getValue().getResponse().getAttendToCourt());
         if (attendToCourt.isPresent()) {
             List<Optional<?>> fields = new ArrayList<>();
             fields.add(ofNullable(attendToCourt.get().getRespondentWelshNeeds()));
             fields.add(ofNullable(attendToCourt.get().getRespondentWelshNeeds().equals(YesOrNo.Yes)
                                       ? null != attendToCourt.get().getRespondentWelshNeedsList() : null));
             fields.add(ofNullable(attendToCourt.get().getIsRespondentNeededInterpreter()));
-            fields.add(ofNullable(attendToCourt.get().getIsRespondentNeededInterpreter().equals(YesOrNo.Yes)
-                                      ? null != attendToCourt.get().getRespondentInterpreterNeeds() : null));
-            fields.add(ofNullable(attendToCourt.get().getIsRespondentNeededInterpreter().equals(YesOrNo.Yes)
-                                      ? null != attendToCourt.get().getRespondentInterpreterNeeds() : null));
-            fields.add(ofNullable(attendToCourt.get().getIsRespondentNeededInterpreter()));
-            fields.add(ofNullable(attendToCourt.get().getRespondentWelshNeeds()));
+
+            Optional<List<Element<RespondentInterpreterNeeds>>> respondentInterpreterNeeds = ofNullable(attendToCourt
+                                                                                                            .get()
+                                                                                                            .getRespondentInterpreterNeeds());
+
+            List<RespondentInterpreterNeeds> interpreterNeedsList = respondentInterpreterNeeds.get()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            for (RespondentInterpreterNeeds interpreterNeed : interpreterNeedsList) {
+                fields.add(ofNullable(interpreterNeed.getRelationName()));
+                fields.add(ofNullable(interpreterNeed.getParty()));
+            }
+            fields.add(ofNullable(attendToCourt.get().getRespondentSpecialArrangements()));
+            fields.add(ofNullable(attendToCourt.get().getRespondentSpecialArrangements().equals(YesOrNo.Yes)
+                                      ? null != attendToCourt.get().getRespondentSpecialArrangementDetails() : null));
+            fields.add(ofNullable(attendToCourt.get().getHaveAnyDisability()));
+            fields.add(ofNullable(attendToCourt.get().getHaveAnyDisability().equals(YesOrNo.Yes)
+                                      ? null != attendToCourt.get().getDisabilityNeeds() : null));
+            fields.add(ofNullable(attendToCourt.get().getRespondentIntermediaryNeeds()));
+            fields.add(ofNullable(attendToCourt.get().getRespondentIntermediaryNeeds().equals(YesOrNo.Yes)
+                                      ? null != attendToCourt.get().getRespondentIntermediaryNeedDetails() : null));
+
 
 
             return fields.stream().noneMatch(Optional::isEmpty)
@@ -108,4 +135,87 @@ public class ResponseSubmitChecker {
         }
         return false;
     }
+
+    private boolean checkMiamManadatoryCompleted(Optional<Element<PartyDetails>> activeRespondentResponse) {
+        Optional<Miam> miam = ofNullable(activeRespondentResponse.get().getValue().getResponse().getMiam());
+        if (miam.isPresent()) {
+            List<Optional<?>> fields = new ArrayList<>();
+            fields.add(ofNullable(miam.get().getAttendedMiam()));
+            fields.add(ofNullable(miam.get().getAttendedMiam().equals(YesOrNo.No)
+                                      ? null != miam.get().getWillingToAttendMiam() : null));
+            fields.add(ofNullable(miam.get().getWillingToAttendMiam().equals(YesOrNo.No)
+                                      ? null != miam.get().getWillingToAttendMiam() : null));
+
+            return fields.stream().noneMatch(Optional::isEmpty)
+                && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+        }
+        return false;
+    }
+
+    private boolean checkCurrentOrPastProceedingsCompleted(Optional<Element<PartyDetails>> activeRespondentResponse) {
+        Optional<YesNoDontKnow> currentOrPastProceedings = ofNullable(activeRespondentResponse
+                                                                          .get()
+                                                                          .getValue()
+                                                                          .getResponse()
+                                                                          .getCurrentOrPastProceedingsForChildren());
+        if (currentOrPastProceedings.isPresent()) {
+            List<Optional<?>> fields = new ArrayList<>();
+            fields.add(ofNullable(currentOrPastProceedings.equals(YesNoDontKnow.yes)
+                                      ? ofNullable(activeRespondentResponse.get().getValue()
+                                                       .getResponse().getRespondentExistingProceedings()) : null));
+
+            return fields.stream().noneMatch(Optional::isEmpty)
+                && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+        }
+        return false;
+    }
+
+    private boolean checkAllegationsOfHarmManadatoryCompleted(Optional<Element<PartyDetails>> activeRespondentResponse) {
+        Optional<RespondentAllegationsOfHarmData> respondentAllegationsOfHarmData = ofNullable(activeRespondentResponse
+                                                                                                   .get()
+                                                                                                   .getValue()
+                                                                                                   .getResponse()
+                                                                                                   .getRespondentAllegationsOfHarmData());
+        if (respondentAllegationsOfHarmData.isPresent()) {
+            List<Optional<?>> fields = new ArrayList<>();
+            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getAllegationsOfHarmYesNo()));
+            if (respondentAllegationsOfHarmData.get().getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarm().getRespondentDrugOrAlcoholAbuse()));
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarm()
+                                          .getRespondentDrugOrAlcoholAbuse().equals(YesOrNo.Yes)
+                                          ? null != respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarm()
+                    .getRespondentDrugOrAlcoholAbuseDetails() : null));
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarm().getRespondentOtherSafetyConcerns()));
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarm()
+                                          .getRespondentOtherSafetyConcerns().equals(YesOrNo.Yes)
+                                          ? null != respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarm()
+                    .getRespondentOtherSafetyConcernsDetails() : null));
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarm().getRespondentNonMolestationOrder()));
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarm().getRespondentOccupationOrder()));
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarm().getRespondentForcedMarriageOrder()));
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarm().getRespondentOtherInjunctiveOrder()));
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarm().getRespondentRestrainingOrder()));
+                if (respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarm().getRespondentDomesticAbuse().equals(YesOrNo.Yes)) {
+                    fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentDomesticAbuseBehaviour()));
+                }
+                if (respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarm().getRespondentChildAbuse().equals(YesOrNo.Yes)) {
+                    fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentChildAbuseBehaviour()));
+                }
+                if (respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarm().getRespondentChildAbduction().equals(YesOrNo.Yes)) {
+                    fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentChildAbduction()));
+                }
+
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentOtherConcerns().getChildHavingOtherFormOfContact()));
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentOtherConcerns().getChildSpendingSupervisedTime()));
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentOtherConcerns().getOrdersRespondentWantFromCourt()));
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentOtherConcerns().getChildSpendingUnsupervisedTime()));
+            }
+
+
+            return fields.stream().noneMatch(Optional::isEmpty)
+                && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+        }
+        return false;
+    }
+
 }

@@ -2,11 +2,14 @@ package uk.gov.hmcts.reform.prl.enums.citizen;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @Getter
 @RequiredArgsConstructor
+@JsonSerialize(using = CustomEnumSerializer.class)
 public enum SpecialArrangementEnum {
     separateWaitingRoom("Separate waiting room"),
     separateExitEntrance("Separate exits and entrances"),
