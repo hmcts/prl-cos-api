@@ -11,7 +11,7 @@ public enum PassportPossessionEnum {
 
     mother("mother", "Mother"),
     father("father", "Father"),
-    otherPerson("other-person", "Other");
+    otherPerson("otherPerson", "Other");
 
     private final String id;
     private final String displayedValue;
