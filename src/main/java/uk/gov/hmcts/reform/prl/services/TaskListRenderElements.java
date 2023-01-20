@@ -33,7 +33,12 @@ public class TaskListRenderElements {
     }
 
     public String renderRespondentSolicitorLink(RespondentTask respondentTask) {
-        return renderRespondentSolicitorLink(respondentTask.getEvent());
+        String renderLink = " ";
+        if (null != respondentTask.getEvent()) {
+            renderLink = renderRespondentSolicitorLink(respondentTask.getEvent());
+        }
+
+        return renderLink;
     }
 
     public String renderRespondentSolicitorLink(RespondentSolicitorEvents respondentSolicitorEvents) {
