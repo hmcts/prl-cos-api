@@ -100,6 +100,8 @@ public class EditAndApproveDraftOrderController {
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
         }
         log.info("*** before returning {} ***", caseDataUpdated);
+        caseDataUpdated.remove("submitCountyCourtSelection");
+        caseDataUpdated.remove("draftOrdersDynamicList");
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
