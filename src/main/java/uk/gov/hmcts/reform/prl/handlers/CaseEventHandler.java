@@ -6,8 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
@@ -19,6 +22,7 @@ import uk.gov.hmcts.reform.prl.services.TaskListService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -80,12 +84,22 @@ public class CaseEventHandler {
     }
 
     public String getRespondentTaskList(CaseData caseData) {
-        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks();
-        log.info("tasks found: " + tasks.size());
+        String respondentTaskList = " ";
+        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
+        if (null != caseData.getRespondents()) {
+            activeRespondent = caseData.getRespondents()
+                .stream()
+                .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getC7ResponseSubmitted()))
+                .findFirst();
+            if (activeRespondent.isPresent()) {
+                final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks();
+                log.info("tasks found: " + tasks.size());
 
-        return respondentSolicitorTaskListRenderer
-            .render(tasks, caseData);
-
+                respondentTaskList = respondentSolicitorTaskListRenderer
+                    .render(tasks, caseData);
+            }
+        }
+        return respondentTaskList;
     }
 }
 
