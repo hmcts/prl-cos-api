@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,8 +63,6 @@ public class CourtNavCaseControllerFunctionalTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-
-    @Ignore
     @Test
     public void givenCourtNavCaseCreationData_then200Response() throws Exception {
 
@@ -87,7 +84,6 @@ public class CourtNavCaseControllerFunctionalTest {
     }
 
 
-    @Ignore
     @Test
     public void givenNoCaseDataInRequestBody_then400Response() throws Exception {
         String randomServerPort = "4044";
@@ -108,7 +104,6 @@ public class CourtNavCaseControllerFunctionalTest {
 
     }
 
-    @Ignore
     @Test
     public void givenValidDocumentData_then200Response() {
         request
