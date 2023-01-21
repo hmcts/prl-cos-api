@@ -128,7 +128,7 @@ public class RespondentSolicitorTaskListRenderer {
             .findFirst();
         log.info("Active respodent is present::? {}", activeRespondent.get().getValue().getResponse().getActiveRespondent());
 
-        if (!activeRespondent.isEmpty()
+        if (activeRespondent.isPresent()
             && activeRespondent.get().getValue().getResponse().getActiveRespondent().equals(YesOrNo.Yes)) {
             log.info("--------Entering if loop.... ");
             lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask));
