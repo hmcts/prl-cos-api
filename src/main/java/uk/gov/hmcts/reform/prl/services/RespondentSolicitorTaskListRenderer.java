@@ -15,8 +15,7 @@ import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
@@ -121,25 +120,26 @@ public class RespondentSolicitorTaskListRenderer {
 
     private List<String> renderRespondentTask(RespondentTask respondentTask, CaseData caseData) {
         final List<String> lines = new LinkedList<>();
-        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
-
-        activeRespondent = caseData.getRespondents()
+        List<PartyDetails> respondents = caseData
+            .getRespondents()
             .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
+            .map(Element::getValue)
+            .collect(Collectors.toList());
 
-        YesOrNo activeResp = activeRespondent.map(partyDetailsElement -> partyDetailsElement.getValue().getResponse().getActiveRespondent()).orElse(
-            null);
-        log.info("Active respodent is present::? {}", activeResp);
-
-        if (Objects.equals(activeResp, YesOrNo.Yes)) {
-            log.info("--------Entering if loop.... ");
-            lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask));
-            respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
-        } else {
-            log.info("--------Entering else loop.... ");
-            lines.add(taskListRenderElements.renderRespondentSolicitorDisabledLink(respondentTask));
-            respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
+        List<YesOrNo> activeRespondents = respondents.stream()
+            .map(element -> element.getResponse().getActiveRespondent())
+            .collect(Collectors.toList());
+        for (YesOrNo activeResp : activeRespondents) {
+            log.info("Active respodent is present::? {}", activeResp);
+            if (activeResp.equals(YesOrNo.Yes)) {
+                log.info("--------Entering if loop.... ");
+                lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask));
+                respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
+            } else {
+                log.info("--------Entering else loop.... ");
+                lines.add(taskListRenderElements.renderRespondentSolicitorDisabledLink(respondentTask));
+                respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
+            }
         }
         return lines;
     }
