@@ -455,15 +455,13 @@ public class C100RespondentSolicitorService {
         return keepDetailsPrivateList;
     }
 
-    public Map<String, Object> validateActiveRespondentResponse(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
+    public Map<String, Object> validateActiveRespondentResponse(CallbackRequest callbackRequest, List<String> errorList) {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             caseDataUpdated,
             CaseData.class
         );
-        Optional<Element<PartyDetails>> getActiveRespondent = findActiveRespondent(caseData, authorisation);
-
         log.info("Event name:::{}", callbackRequest.getEventId());
         boolean mandatoryFinished = false;
 
@@ -472,7 +470,7 @@ public class C100RespondentSolicitorService {
             errorList.add(
                 "Response submission is not allowed for this case unless you finish all the mandatory information");
         }
-
+        //Todo final C7 Document generation
         return caseDataUpdated;
     }
 
