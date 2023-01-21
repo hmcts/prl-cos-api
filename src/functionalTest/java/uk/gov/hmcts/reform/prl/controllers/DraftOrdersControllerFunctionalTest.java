@@ -30,8 +30,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 public class DraftOrdersControllerFunctionalTest {
-
-    private final String userToken = "Bearer testToken";
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
