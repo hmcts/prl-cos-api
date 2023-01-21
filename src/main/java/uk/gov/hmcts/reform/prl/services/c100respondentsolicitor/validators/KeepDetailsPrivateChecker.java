@@ -1,17 +1,10 @@
-package uk.gov.hmcts.reform.prl.services.validators;
+package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 @Service
-public class CaseNameChecker implements EventChecker {
-
-    @Override
-    public boolean isFinished(CaseData caseData) {
-
-        String caseName = caseData.getApplicantCaseName();
-        return caseName != null;
-    }
+public class KeepDetailsPrivateChecker implements RespondentEventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
