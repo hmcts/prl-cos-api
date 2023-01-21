@@ -131,7 +131,7 @@ public class RespondentSolicitorTaskListRenderer {
             .collect(Collectors.toList());
         for (YesOrNo activeResp : activeRespondents) {
             log.info("Active respodent is present::? {}", activeResp);
-            if (null !=activeResp && activeResp.equals(YesOrNo.Yes)) {
+            if (null != activeResp && activeResp.equals(YesOrNo.Yes)) {
                 log.info("--------Entering if loop.... ");
                 lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask));
                 respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
