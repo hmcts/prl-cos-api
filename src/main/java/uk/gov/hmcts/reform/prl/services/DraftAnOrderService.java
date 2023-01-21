@@ -290,10 +290,6 @@ public class DraftAnOrderService {
 
     private ServeOrderDetails getServeOrderDetailsFromCaseData(CaseData caseData) {
 
-        YesOrNo cafcassServed = null;
-        YesOrNo serveOnRespondent = null;
-        YesOrNo otherPartiesServed = null;
-        ServingRespondentsEnum servingRespondentsOptions = null;
         ServeOrderDetails serveOrderDetails = null;
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             serveOrderDetails = getServeOrderDetailsForC100Order(caseData);
@@ -308,28 +304,28 @@ public class DraftAnOrderService {
         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
         YesOrNo cafcassServed = null;
         String cafCassEmail = null;
-        ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
+        ServingRespondentsEnum servingRespondentsOptionsDA = caseData.getManageOrders()
             .getServingRespondentsOptionsDA();
-        YesOrNo otherPartiesServed = No;
-        List<Element<PostalInformation>> postalInformation = null;
-        List<Element<EmailInformation>> emailInformation = null;
+        YesOrNo otherPartiesSYesOrNo = No;
+        List<Element<PostalInformation>> postalInformationElements = null;
+        List<Element<EmailInformation>> emailInformationElements = null;
         if (!caseData.getManageOrders().getServeOtherPartiesDA().isEmpty()) {
-            otherPartiesServed = Yes;
+            otherPartiesSYesOrNo = Yes;
             if (caseData.getManageOrders().getEmailInformationDA() != null) {
-                emailInformation = caseData.getManageOrders().getEmailInformationDA();
+                emailInformationElements = caseData.getManageOrders().getEmailInformationDA();
             }
             if (caseData.getManageOrders().getPostalInformationDA() != null) {
-                postalInformation = caseData.getManageOrders().getPostalInformationDA();
+                postalInformationElements = caseData.getManageOrders().getPostalInformationDA();
             }
         }
         ServeOrderData serveOrderData = caseData.getServeOrderData();
         return ServeOrderDetails.builder().serveOnRespondent(serveOnRespondent)
-            .servingRespondent(servingRespondentsOptions)
+            .servingRespondent(servingRespondentsOptionsDA)
             .cafcassServed(cafcassServed)
             .cafcassEmail(cafCassEmail)
-            .otherPartiesServed(otherPartiesServed)
-            .postalInformation(postalInformation)
-            .emailInformation(emailInformation)
+            .otherPartiesServed(otherPartiesSYesOrNo)
+            .postalInformation(postalInformationElements)
+            .emailInformation(emailInformationElements)
             .additionalDocuments(caseData.getManageOrders().getServeOrderAdditionalDocuments())
             .doYouWantToServeOrder(serveOrderData.getDoYouWantToServeOrder())
             //.cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
@@ -341,45 +337,45 @@ public class DraftAnOrderService {
     }
 
     private ServeOrderDetails getServeOrderDetailsForC100Order(CaseData caseData) {
-        YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
+        YesOrNo serveOnRespondenYesOrNo = caseData.getManageOrders().getServeToRespondentOptions();
 
-        ServingRespondentsEnum servingRespondentsOptions = null;
-        if (serveOnRespondent.equals(Yes)) {
-            servingRespondentsOptions = caseData.getManageOrders()
+        ServingRespondentsEnum servingRespondents = null;
+        if (serveOnRespondenYesOrNo.equals(Yes)) {
+            servingRespondents = caseData.getManageOrders()
                 .getServingRespondentsOptionsCA();
         }
-        YesOrNo otherPartiesServed = No;
-        List<Element<PostalInformation>> postalInformation = null;
-        List<Element<EmailInformation>> emailInformation = null;
+        YesOrNo otherPartiesServedYesOrNo = No;
+        List<Element<PostalInformation>> postalInformationElements = null;
+        List<Element<EmailInformation>> emailInformationElements = null;
         if (!caseData.getManageOrders().getServeOtherPartiesCA().isEmpty()) {
-            otherPartiesServed = Yes;
+            otherPartiesServedYesOrNo = Yes;
             if (caseData.getManageOrders().getEmailInformationCA() != null) {
-                emailInformation = caseData.getManageOrders().getEmailInformationCA();
+                emailInformationElements = caseData.getManageOrders().getEmailInformationCA();
             }
             if (caseData.getManageOrders().getPostalInformationCA() != null) {
-                postalInformation = caseData.getManageOrders().getPostalInformationCA();
+                postalInformationElements = caseData.getManageOrders().getPostalInformationCA();
             }
         }
-        YesOrNo cafcassServedOptions;
-        String cafCassEmail = null;
+        YesOrNo cafcassServedOptionsYesOrNo;
+        String cafCassEmailAddress = null;
         if (caseData.getManageOrders().getCafcassServedOptions() != null) {
-            cafcassServedOptions = caseData.getManageOrders().getCafcassServedOptions();
+            cafcassServedOptionsYesOrNo = caseData.getManageOrders().getCafcassServedOptions();
         } else if (caseData.getManageOrders().getCafcassCymruServedOptions() != null) {
-            cafcassServedOptions = caseData.getManageOrders().getCafcassCymruServedOptions();
+            cafcassServedOptionsYesOrNo = caseData.getManageOrders().getCafcassCymruServedOptions();
             if (No.equals(caseData.getManageOrders().getCafcassCymruServedOptions())) {
-                cafCassEmail = caseData.getManageOrders().getCafcassCymruEmail();
+                cafCassEmailAddress = caseData.getManageOrders().getCafcassCymruEmail();
             }
         } else {
-            cafcassServedOptions = No;
+            cafcassServedOptionsYesOrNo = No;
         }
         ServeOrderData serveOrderData  = caseData.getServeOrderData();
-        return ServeOrderDetails.builder().serveOnRespondent(serveOnRespondent)
-            .servingRespondent(servingRespondentsOptions)
-            .cafcassServed(cafcassServedOptions)
-            .cafcassEmail(cafCassEmail)
-            .otherPartiesServed(otherPartiesServed)
-            .postalInformation(postalInformation)
-            .emailInformation(emailInformation)
+        return ServeOrderDetails.builder().serveOnRespondent(serveOnRespondenYesOrNo)
+            .servingRespondent(servingRespondents)
+            .cafcassServed(cafcassServedOptionsYesOrNo)
+            .cafcassEmail(cafCassEmailAddress)
+            .otherPartiesServed(otherPartiesServedYesOrNo)
+            .postalInformation(postalInformationElements)
+            .emailInformation(emailInformationElements)
             .additionalDocuments(caseData.getManageOrders().getServeOrderAdditionalDocuments())
             .doYouWantToServeOrder(serveOrderData.getDoYouWantToServeOrder())
             //.cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
