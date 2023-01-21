@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection;
 
@@ -32,7 +33,7 @@ public class RespondentSolicitorTaskListRenderer {
     private final TaskListRenderElements taskListRenderElements;
 
 
-    public String render(List<RespondentTask> allTasks) {
+    public String render(List<RespondentTask> allTasks, CaseData caseData) {
         final List<String> lines = new LinkedList<>();
         lines.add(
             "<div class='width-50'>><h3>Respond to the application</h3><p>This online response combines forms C7 and C8."
@@ -42,7 +43,7 @@ public class RespondentSolicitorTaskListRenderer {
         lines.add("<div class='width-50'>");
 
         (groupInSections(allTasks))
-            .forEach(section -> lines.addAll(renderSection(section)));
+            .forEach(section -> lines.addAll(renderSection(section, caseData)));
 
         lines.add("</div>");
 
@@ -92,7 +93,7 @@ public class RespondentSolicitorTaskListRenderer {
             .collect(toList());
     }
 
-    private List<String> renderSection(RespondentTaskSection sec) {
+    private List<String> renderSection(RespondentTaskSection sec, CaseData caseData) {
         final List<String> section = new LinkedList<>();
 
         section.add(NEW_LINE);
