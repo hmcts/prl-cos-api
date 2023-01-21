@@ -467,7 +467,7 @@ public class C100RespondentSolicitorService {
         log.info("Event name:::{}", callbackRequest.getEventId());
         boolean mandatoryFinished = false;
 
-        mandatoryFinished = responseSubmitChecker.hasMandatoryCompleted(caseData, getActiveRespondent);
+        mandatoryFinished = responseSubmitChecker.hasMandatoryCompleted(caseData);
         if (!mandatoryFinished) {
             errorList.add(
                 "Response submission is not allowed for this case unless you finish all the mandatory information");

@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
@@ -19,30 +21,45 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAb
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.CONSENT;
 
 @Slf4j
 @SuppressWarnings("ALL")
 @Service
-public class ResponseSubmitChecker {
+public class ResponseSubmitChecker implements RespondentEventChecker {
 
     @Autowired
-    private ConsentToApplicationChecker consentToApplicationChecker;
+    @Lazy
+    RespondentEventsChecker respondentEventsChecker;
 
-    public boolean hasMandatoryCompleted(CaseData caseData, Optional<Element<PartyDetails>> activeRespondentResponse) {
-        boolean mandatoryFinished = false;
-        Optional<Consent> consent = null;
+    @Override
+    public boolean isStarted(CaseData caseData) {
+        return false;
+    }
 
-        if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) && activeRespondentResponse.isPresent()) {
-            mandatoryFinished = checkConsentManadatoryCompleted(activeRespondentResponse);
+    @Override
+    public boolean hasMandatoryCompleted(CaseData caseData) {
+
+        EnumMap<RespondentSolicitorEvents, RespondentEventChecker> mandatoryEvents = new EnumMap<>(RespondentSolicitorEvents.class);
+
+        mandatoryEvents.put(CONSENT, respondentEventsChecker.getConsentToApplicationChecker());
+
+        boolean mandatoryFinished;
+
+        for (Map.Entry<RespondentSolicitorEvents, RespondentEventChecker> e : mandatoryEvents.entrySet()) {
+            mandatoryFinished = e.getValue().hasMandatoryCompleted(caseData);
+            if (!mandatoryFinished) {
+                return false;
+            }
         }
-
-        return mandatoryFinished;
+        return true;
     }
 
     private boolean checkConsentManadatoryCompleted(Optional<Element<PartyDetails>> activeRespondentResponse) {
