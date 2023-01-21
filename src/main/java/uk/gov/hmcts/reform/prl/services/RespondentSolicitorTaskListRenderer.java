@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -22,6 +23,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection.newSection;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentSolicitorTaskListRenderer {
@@ -124,10 +126,15 @@ public class RespondentSolicitorTaskListRenderer {
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
-        if (activeRespondent.isPresent() && activeRespondent.get().getValue().getResponse().getActiveRespondent().equals(YesOrNo.Yes)) {
+        log.info("Active respodent is present::? {}", activeRespondent.get().getValue().getResponse().getActiveRespondent());
+
+        if (!activeRespondent.isEmpty()
+            && activeRespondent.get().getValue().getResponse().getActiveRespondent().equals(YesOrNo.Yes)) {
+            log.info("--------Entering if loop.... ");
             lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask));
             respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
         } else {
+            log.info("--------Entering else loop.... ");
             lines.add(taskListRenderElements.renderRespondentSolicitorDisabledLink(respondentTask));
             respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
         }
