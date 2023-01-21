@@ -3,7 +3,10 @@ package uk.gov.hmcts.reform.prl.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection;
@@ -11,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
@@ -96,6 +100,7 @@ public class RespondentSolicitorTaskListRenderer {
     private List<String> renderSection(RespondentTaskSection sec, CaseData caseData) {
         final List<String> section = new LinkedList<>();
 
+
         section.add(NEW_LINE);
         section.add(taskListRenderElements.renderHeader(sec.getName()));
 
@@ -104,19 +109,29 @@ public class RespondentSolicitorTaskListRenderer {
 
         section.add(HORIZONTAL_LINE);
         sec.getRespondentTasks().forEach(task -> {
-            section.addAll(renderRespondentTask(task));
+            section.addAll(renderRespondentTask(task, caseData));
             section.add(HORIZONTAL_LINE);
         });
 
         return section;
     }
 
-    private List<String> renderRespondentTask(RespondentTask respondentTask) {
+    private List<String> renderRespondentTask(RespondentTask respondentTask, CaseData caseData) {
         final List<String> lines = new LinkedList<>();
+        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
 
-        lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask));
+        activeRespondent = caseData.getRespondents()
+            .stream()
+            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
+            .findFirst();
+        if(activeRespondent.get().getValue().getResponse().getActiveRespondent().equals(YesOrNo.Yes)) {
 
-        respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
+            lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask));
+            respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
+        } else {
+            lines.add(taskListRenderElements.renderRespondentSolicitorDisabledLink(respondentTask));
+            respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
+        }
         return lines;
     }
 }
