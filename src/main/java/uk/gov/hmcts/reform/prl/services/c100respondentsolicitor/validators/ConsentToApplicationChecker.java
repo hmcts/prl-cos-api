@@ -32,7 +32,6 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
                                .getResponse()
                                .getConsent()
         );
-
     }
 
     @Override
@@ -45,16 +44,15 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
         log.info("finding activeRespondent " + activeRespondent);
-
+        log.info("finding consent details:: {} " + activeRespondent.get()
+            .getValue().getResponse().getConsent().getConsentToTheApplication());
         Optional<Consent> consent = Optional.ofNullable(activeRespondent.get()
                                                             .getValue().getResponse().getConsent());
-
         if (!consent.isEmpty()) {
             if (checkConsentManadatoryCompleted(consent)) {
                 mandatoryInfo = true;
             }
         }
-
         return mandatoryInfo;
     }
 
@@ -62,14 +60,17 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
 
         List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(consent.get().getConsentToTheApplication()));
-        fields.add(ofNullable(consent.get().getConsentToTheApplication().equals(YesOrNo.No)
-                                  ? null != consent.get().getNoConsentReason() : null));
+        if (consent.get().getConsentToTheApplication().equals(YesOrNo.No)) {
+            fields.add(ofNullable(consent.get().getNoConsentReason()));
+        }
         fields.add(ofNullable(consent.get().getApplicationReceivedDate()));
         fields.add(ofNullable(consent.get().getPermissionFromCourt()));
-        fields.add(ofNullable(consent.get().getPermissionFromCourt().equals(YesOrNo.Yes)
-                                  ? null != consent.get().getCourtOrderDetails() : null));
-
-        return fields.stream().noneMatch(Optional::isEmpty)
+        if (consent.get().getPermissionFromCourt().equals(YesOrNo.Yes)) {
+            fields.add(ofNullable(consent.get().getCourtOrderDetails()));
+        }
+        boolean test = fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+        log.info("Consent to application result:: {}", test);
+        return test;
     }
 }
