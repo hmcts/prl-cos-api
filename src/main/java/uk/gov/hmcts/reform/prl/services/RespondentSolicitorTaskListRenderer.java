@@ -124,7 +124,7 @@ public class RespondentSolicitorTaskListRenderer {
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
-        if (activeRespondent.get().getValue().getResponse().getActiveRespondent().equals(YesOrNo.Yes)) {
+        if (activeRespondent.isPresent() && activeRespondent.get().getValue().getResponse().getActiveRespondent().equals(YesOrNo.Yes)) {
             lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask));
             respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
         } else {
