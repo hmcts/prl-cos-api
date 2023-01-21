@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -126,10 +127,12 @@ public class RespondentSolicitorTaskListRenderer {
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
-        log.info("Active respodent is present::? {}", activeRespondent.get().getValue().getResponse().getActiveRespondent());
 
-        if (activeRespondent.isPresent()
-            && activeRespondent.get().getValue().getResponse().getActiveRespondent().equals(YesOrNo.Yes)) {
+        YesOrNo activeResp = activeRespondent.map(partyDetailsElement -> partyDetailsElement.getValue().getResponse().getActiveRespondent()).orElse(
+            null);
+        log.info("Active respodent is present::? {}", activeResp);
+
+        if (Objects.equals(activeResp, YesOrNo.Yes)) {
             log.info("--------Entering if loop.... ");
             lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask));
             respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
