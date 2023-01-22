@@ -48,7 +48,7 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
                                                             .getValue()
                                                             .getResponse()
                                                             .getConsent());
-        if (consent.isPresent()) {
+        if (!consent.isEmpty()) {
             if (checkConsentMandatoryCompleted(consent)) {
                 mandatoryInfo = true;
             }
