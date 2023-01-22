@@ -59,13 +59,15 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
     private boolean checkConsentMandatoryCompleted(Optional<Consent> consent) {
 
         List<Optional<?>> fields = new ArrayList<>();
-        fields.add(ofNullable(consent.get().getConsentToTheApplication()));
-        if (consent.get().getConsentToTheApplication().equals(YesOrNo.No)) {
+        Optional<YesOrNo> getConsentToApplication = ofNullable(consent.get().getConsentToTheApplication());
+        fields.add(getConsentToApplication);
+        if (getConsentToApplication.isPresent() && getConsentToApplication.equals(YesOrNo.No)) {
             fields.add(ofNullable(consent.get().getNoConsentReason()));
         }
         fields.add(ofNullable(consent.get().getApplicationReceivedDate()));
-        fields.add(ofNullable(consent.get().getPermissionFromCourt()));
-        if (consent.get().getPermissionFromCourt().equals(YesOrNo.Yes)) {
+        Optional<YesOrNo> getPermission = ofNullable(consent.get().getPermissionFromCourt());
+        fields.add(getPermission);
+        if (getPermission.isPresent() && getPermission.equals(YesOrNo.Yes)) {
             fields.add(ofNullable(consent.get().getCourtOrderDetails()));
         }
         boolean test = fields.stream().noneMatch(Optional::isEmpty)
