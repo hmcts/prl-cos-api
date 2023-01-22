@@ -62,44 +62,6 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
         return true;
     }
 
-    private boolean checkConsentManadatoryCompleted(Optional<Element<PartyDetails>> activeRespondentResponse) {
-        Optional<Consent> consent = ofNullable(activeRespondentResponse.get().getValue().getResponse().getConsent());
-        boolean mandatoryInfo = false;
-
-        if (consent.isPresent()) {
-            List<Optional<?>> fields = new ArrayList<>();
-            fields.add(ofNullable(consent.get().getConsentToTheApplication()));
-            fields.add(ofNullable(consent.get().getConsentToTheApplication().equals(YesOrNo.No)
-                                      ? null != consent.get().getNoConsentReason() : null));
-            fields.add(ofNullable(consent.get().getApplicationReceivedDate()));
-            fields.add(ofNullable(consent.get().getPermissionFromCourt()));
-            fields.add(ofNullable(consent.get().getPermissionFromCourt().equals(YesOrNo.Yes)
-                                      ? null != consent.get().getCourtOrderDetails() : null));
-
-            mandatoryInfo = fields.stream().noneMatch(Optional::isEmpty)
-                && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
-            log.info("Consent manadatory info:: {}", mandatoryInfo);
-            return mandatoryInfo;
-        }
-        return false;
-    }
-
-    private boolean checkKeepDetailsPrivateManadatoryCompleted(Optional<Element<PartyDetails>> activeRespondentResponse) {
-        Optional<KeepDetailsPrivate> keepDetailsPrivate = ofNullable(activeRespondentResponse.get().getValue().getResponse().getKeepDetailsPrivate());
-
-        if (keepDetailsPrivate.isPresent()) {
-            List<Optional<?>> fields = new ArrayList<>();
-            fields.add(ofNullable(keepDetailsPrivate.get().getOtherPeopleKnowYourContactDetails()));
-            fields.add(ofNullable(keepDetailsPrivate.get().getConfidentiality()));
-            fields.add(ofNullable(keepDetailsPrivate.get().getConfidentiality().equals(YesOrNo.Yes)
-                                      ? null != keepDetailsPrivate.get().getConfidentialityList() : null));
-
-            return fields.stream().noneMatch(Optional::isEmpty)
-                && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
-        }
-        return false;
-    }
-
     private boolean checkContactDetailsManadatoryCompleted(Optional<Element<PartyDetails>> activeRespondentResponse) {
         Optional<CitizenDetails> citizenDetails = ofNullable(activeRespondentResponse.get().getValue().getResponse().getCitizenDetails());
         if (citizenDetails.isPresent()) {

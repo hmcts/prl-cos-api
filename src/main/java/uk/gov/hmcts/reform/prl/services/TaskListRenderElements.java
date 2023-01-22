@@ -41,10 +41,6 @@ public class TaskListRenderElements {
                       respondentSolicitorEvents.getEventId(), respondentSolicitorEvents.getEventId(), respondentSolicitorEvents.getEventName());
     }
 
-    public String renderRespondentSolicitorDisabledLink(RespondentTask event) {
-        return format("<a>%s</a>", event.getEvent().getEventName());
-    }
-
     public String renderImage(String imageName, String title) {
         return format("<img align='right' height='25px' src='%s%s' title='%s'/>", imagesBaseUrl, imageName, title);
     }
