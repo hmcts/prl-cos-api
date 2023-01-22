@@ -1,21 +1,15 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
@@ -23,7 +17,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection.newSection;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentSolicitorTaskListRenderer {
@@ -39,7 +32,7 @@ public class RespondentSolicitorTaskListRenderer {
     private final TaskListRenderElements taskListRenderElements;
 
 
-    public String render(List<RespondentTask> allTasks, CaseData caseData) {
+    public String render(List<RespondentTask> allTasks) {
         final List<String> lines = new LinkedList<>();
         lines.add(
             "<div class='width-50'>><h3>Respond to the application</h3><p>This online response combines forms C7 and C8."
@@ -49,7 +42,7 @@ public class RespondentSolicitorTaskListRenderer {
         lines.add("<div class='width-50'>");
 
         (groupInSections(allTasks))
-            .forEach(section -> lines.addAll(renderSection(section, caseData)));
+            .forEach(section -> lines.addAll(renderSection(section)));
 
         lines.add("</div>");
 
@@ -99,9 +92,8 @@ public class RespondentSolicitorTaskListRenderer {
             .collect(toList());
     }
 
-    private List<String> renderSection(RespondentTaskSection sec, CaseData caseData) {
+    private List<String> renderSection(RespondentTaskSection sec) {
         final List<String> section = new LinkedList<>();
-
 
         section.add(NEW_LINE);
         section.add(taskListRenderElements.renderHeader(sec.getName()));
@@ -111,36 +103,19 @@ public class RespondentSolicitorTaskListRenderer {
 
         section.add(HORIZONTAL_LINE);
         sec.getRespondentTasks().forEach(task -> {
-            section.addAll(renderRespondentTask(task, caseData));
+            section.addAll(renderRespondentTask(task));
             section.add(HORIZONTAL_LINE);
         });
 
         return section;
     }
 
-    private List<String> renderRespondentTask(RespondentTask respondentTask, CaseData caseData) {
+    private List<String> renderRespondentTask(RespondentTask respondentTask) {
         final List<String> lines = new LinkedList<>();
-        List<PartyDetails> respondents = caseData
-            .getRespondents()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
 
-        List<YesOrNo> activeRespondents = respondents.stream()
-            .map(element -> element.getResponse().getActiveRespondent())
-            .collect(Collectors.toList());
-        for (YesOrNo activeResp : activeRespondents) {
-            log.info("Active respodent is present::? {}", activeResp);
-            if (null != activeResp && activeResp.equals(YesOrNo.Yes)) {
-                log.info("--------Entering if loop.... ");
-                lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask));
-                respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
-            } else {
-                log.info("--------Entering else loop.... ");
-                lines.add(taskListRenderElements.renderRespondentSolicitorDisabledLink(respondentTask));
-                respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
-            }
-        }
+        lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask));
+
+        respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
         return lines;
     }
 }

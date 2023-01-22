@@ -41,7 +41,7 @@ public class CaseEventHandler {
         final CaseData caseData = event.getCaseData();
 
         final String taskList = getUpdatedTaskList(caseData);
-        final String respondentTaskList = getRespondentTaskList(caseData);
+        final String respondentTaskList = getRespondentTaskList();
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
@@ -79,12 +79,12 @@ public class CaseEventHandler {
 
     }
 
-    public String getRespondentTaskList(CaseData caseData) {
+    public String getRespondentTaskList() {
         final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks();
         log.info("tasks found: " + tasks.size());
 
         return respondentSolicitorTaskListRenderer
-            .render(tasks, caseData);
+            .render(tasks);
 
     }
 }
