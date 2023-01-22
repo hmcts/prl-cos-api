@@ -60,16 +60,7 @@ public class C100RespondentSolicitorService {
     private ResponseSubmitChecker responseSubmitChecker;
 
     @Autowired
-    private CoreCaseDataService coreCaseDataService;
-
-    @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private TaskListService taskListService;
-
-    @Autowired
-    private RespondentSolicitorTaskListRenderer respondentSolicitorTaskListRenderer;
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
         log.info("Inside prePopulateAboutToStartCaseData");
@@ -92,26 +83,6 @@ public class C100RespondentSolicitorService {
 
         log.info("Active Respondent name: {}", activeRespondentName);
         caseDataUpdated.put("respondentNameForResponse", activeRespondentName);
-
-        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks();
-        log.info("tasks found: " + tasks.size());
-
-        final String respondentTaskList = respondentSolicitorTaskListRenderer
-            .render(tasks, caseData);
-
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            "internal-update-task-list",
-            Map.of(
-                "respondentTaskList",
-                respondentTaskList,
-                "id",
-                String.valueOf(caseData.getId())
-            )
-        );
-
         return caseDataUpdated;
     }
 
