@@ -44,13 +44,11 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
 
-        Optional<Consent> consent = activeRespondent.map(
-            partyDetailsElement -> Optional.ofNullable(partyDetailsElement
-                                                           .getValue()
-                                                           .getResponse()
-                                                           .getConsent()))
-            .orElse(null);
-        if (consent.isPresent() && null != consent) {
+        Optional<Consent> consent = Optional.ofNullable(activeRespondent.get()
+                                                            .getValue()
+                                                            .getResponse()
+                                                            .getConsent());
+        if (consent.isPresent()) {
             if (checkConsentMandatoryCompleted(consent)) {
                 mandatoryInfo = true;
             }
