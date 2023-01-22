@@ -6,7 +6,6 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
-public class RespondentContactDetailsChecker implements RespondentEventChecker{
+public class RespondentContactDetailsChecker implements RespondentEventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
         Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
