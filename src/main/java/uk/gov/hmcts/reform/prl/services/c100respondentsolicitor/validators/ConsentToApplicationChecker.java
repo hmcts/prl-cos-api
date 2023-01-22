@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -44,9 +45,13 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
 
-        Optional<Consent> consent = Optional.ofNullable(activeRespondent.get()
-                                                            .getValue().getResponse().getConsent());
-        if (consent.isPresent()) {
+        Optional<Consent> consent = activeRespondent.map(
+            partyDetailsElement -> Optional.ofNullable(partyDetailsElement
+                                                           .getValue()
+                                                           .getResponse()
+                                                           .getConsent()))
+            .orElse(null);
+        if (Objects.requireNonNull(consent).isPresent()) {
             if (checkConsentMandatoryCompleted(consent)) {
                 mandatoryInfo = true;
             }

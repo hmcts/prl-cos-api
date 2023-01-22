@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -42,9 +43,13 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
 
-        Optional<CitizenDetails> citizenDetails = Optional.ofNullable(activeRespondent.get()
-                                                                                  .getValue().getResponse().getCitizenDetails());
-        if (citizenDetails.isPresent()) {
+        Optional<CitizenDetails> citizenDetails = activeRespondent.map(
+            partyDetailsElement -> Optional.ofNullable(partyDetailsElement
+                                                           .getValue()
+                                                           .getResponse()
+                                                           .getCitizenDetails()))
+            .orElse(null);
+        if (Objects.requireNonNull(citizenDetails).isPresent()) {
             if (checkContactDetailsMandatoryCompleted(citizenDetails)) {
                 mandatoryInfo = true;
             }

@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -42,9 +43,13 @@ public class KeepDetailsPrivateChecker implements RespondentEventChecker {
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
 
-        Optional<KeepDetailsPrivate> keepDetailsPrivate = Optional.ofNullable(activeRespondent.get()
-                                                            .getValue().getResponse().getKeepDetailsPrivate());
-        if (keepDetailsPrivate.isPresent()) {
+        Optional<KeepDetailsPrivate> keepDetailsPrivate = activeRespondent.map(
+            partyDetailsElement -> Optional.ofNullable(partyDetailsElement
+                                                            .getValue()
+                                                           .getResponse()
+                                                           .getKeepDetailsPrivate()))
+            .orElse(null);
+        if (Objects.requireNonNull(keepDetailsPrivate).isPresent()) {
             if (checkKeepDetailsPrivateMandatoryCompleted(keepDetailsPrivate)) {
                 mandatoryInfo = true;
             }
