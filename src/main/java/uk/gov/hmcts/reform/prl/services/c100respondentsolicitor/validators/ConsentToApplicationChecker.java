@@ -51,7 +51,7 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
                                                            .getResponse()
                                                            .getConsent()))
             .orElse(null);
-        if (Objects.requireNonNull(consent).isPresent()) {
+        if (consent.isPresent() && null != consent) {
             if (checkConsentMandatoryCompleted(consent)) {
                 mandatoryInfo = true;
             }
