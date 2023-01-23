@@ -73,6 +73,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -609,5 +610,24 @@ public class CallbackController {
         caseDataUpdated.put("applicantsList", applicantsListGenerator.buildApplicantsList(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/pre-populate-legalAdvisor-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to retrieve legal advisor details")
+    public AboutToStartOrSubmitCallbackResponse prePopulateLegalAdvisorDetails(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
+
+        List<String> dummyValue = new ArrayList<>();
+        dummyValue.add("test1");
+        dummyValue.add("test2");
+        dummyValue.add("test3");
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        caseDataUpdated.put("LegalAdvisorList", dummyValue);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+
     }
 }
