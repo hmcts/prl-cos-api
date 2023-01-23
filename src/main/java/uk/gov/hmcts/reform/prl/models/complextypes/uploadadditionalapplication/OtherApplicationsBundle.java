@@ -31,5 +31,4 @@ public class OtherApplicationsBundle {
     @JsonProperty("supportingEvidenceBundle")
     private final List<Element<SupportingEvidenceBundle>> supportingEvidenceBundle;
 
-
 }
