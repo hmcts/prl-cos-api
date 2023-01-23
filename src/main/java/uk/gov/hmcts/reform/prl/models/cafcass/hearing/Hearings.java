@@ -14,7 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Hearings {
-    private String hmctsServiceCode;
 
     private String caseRef;
 
