@@ -730,4 +730,9 @@ public class CaseData implements MappableObject {
     private final List<CaseLinksElement<CaseLink>> caseLinks;
 
     private Flags caseFlags;
+
+
+    @JsonUnwrapped
+    @Builder.Default
+    private final UplaodAdditionalApplicationData uplaodAdditionalApplicationData;
 }
