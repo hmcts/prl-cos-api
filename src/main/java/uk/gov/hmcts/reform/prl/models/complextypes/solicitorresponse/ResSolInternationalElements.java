@@ -8,8 +8,8 @@ import lombok.Data;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class ResSolInternationalElements {
-    private final SolicitorInternationalElement internationalElementChild;
-    private final SolicitorInternationalElement internationalElementParent;
-    private final SolicitorInternationalElement internationalElementJurisdiction;
-    private final SolicitorInternationalElement internationalElementRequest;
+    private final SolicitorInternationalElement internationalElementChildInfo;
+    private final SolicitorInternationalElement internationalElementParentInfo;
+    private final SolicitorInternationalElement internationalElementJurisdictionInfo;
+    private final SolicitorInternationalElement internationalElementRequestInfo;
 }

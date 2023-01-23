@@ -57,28 +57,29 @@ public class InternationalElementsChecker implements RespondentEventChecker {
     private boolean checkInternationalElementMandatoryCompleted(Optional<ResSolInternationalElements> internationalElements) {
 
         List<Optional<?>> fields = new ArrayList<>();
-        Optional<YesOrNo> reasonForChild = ofNullable(internationalElements.get().getInternationalElementChild().getReasonForChild());
+        Optional<YesOrNo> reasonForChild = ofNullable(internationalElements.get().getInternationalElementChildInfo().getReasonForChild());
         fields.add(reasonForChild);
         if (reasonForChild.isPresent() && reasonForChild.equals(YesNoDontKnow.yes)) {
-            fields.add(ofNullable(internationalElements.get().getInternationalElementChild().getReasonForChildDetails()));
+            fields.add(ofNullable(internationalElements.get().getInternationalElementChildInfo().getReasonForChildDetails()));
         }
 
-        Optional<YesOrNo> reasonForParent = ofNullable(internationalElements.get().getInternationalElementChild().getReasonForParent());
+        Optional<YesOrNo> reasonForParent = ofNullable(internationalElements.get().getInternationalElementChildInfo().getReasonForParent());
         fields.add(reasonForParent);
         if (reasonForParent.isPresent() && reasonForParent.equals(YesNoDontKnow.yes)) {
-            fields.add(ofNullable(internationalElements.get().getInternationalElementParent().getReasonForParentDetails()));
+            fields.add(ofNullable(internationalElements.get().getInternationalElementParentInfo().getReasonForParentDetails()));
         }
 
-        Optional<YesOrNo> reasonForJurisdiction = ofNullable(internationalElements.get().getInternationalElementChild().getReasonForJurisdiction());
+        Optional<YesOrNo> reasonForJurisdiction = ofNullable(internationalElements.get()
+                                                                 .getInternationalElementChildInfo().getReasonForJurisdiction());
         fields.add(reasonForJurisdiction);
         if (reasonForJurisdiction.isPresent() && reasonForJurisdiction.equals(YesNoDontKnow.yes)) {
-            fields.add(ofNullable(internationalElements.get().getInternationalElementParent().getReasonForJurisdictionDetails()));
+            fields.add(ofNullable(internationalElements.get().getInternationalElementParentInfo().getReasonForJurisdictionDetails()));
         }
 
-        Optional<YesOrNo> requestToAuthority = ofNullable(internationalElements.get().getInternationalElementChild().getRequestToAuthority());
+        Optional<YesOrNo> requestToAuthority = ofNullable(internationalElements.get().getInternationalElementChildInfo().getRequestToAuthority());
         fields.add(requestToAuthority);
         if (requestToAuthority.isPresent() && requestToAuthority.equals(YesNoDontKnow.yes)) {
-            fields.add(ofNullable(internationalElements.get().getInternationalElementParent().getRequestToAuthorityDetails()));
+            fields.add(ofNullable(internationalElements.get().getInternationalElementParentInfo().getRequestToAuthorityDetails()));
         }
 
         return fields.stream().noneMatch(Optional::isEmpty)
