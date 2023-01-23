@@ -16,7 +16,7 @@ public class RespondentAllegationsOfHarm {
 
     private final YesOrNo respondentDomesticAbuse;
     private final YesOrNo respondentChildAbuse;
-    private final YesOrNo respondentChildAbduction;
+    private final YesOrNo isRespondentChildAbduction;
     private final YesOrNo respondentDrugOrAlcoholAbuse;
     private final String respondentDrugOrAlcoholAbuseDetails;
     private final YesOrNo respondentOtherSafetyConcerns;
