@@ -106,6 +106,30 @@ public class CaseControllerFunctionalTest {
     }
 
     @Test
+    public void testRetrieveCitizenCases() {
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .when()
+            .contentType("application/json")
+            .get("/cases")
+            .then()
+            .assertThat().statusCode(200);
+    }
+
+    @Test
+    public void testGetCase() {
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .when()
+            .contentType("application/json")
+            .get("/12345678")
+            .then()
+            .assertThat().statusCode(200);
+    }
+
+    @Test
     public void testLinkCitizenToCase() throws Exception {
         String requestBody = ResourceLoader.loadJson(LINK_CITIZEN_REQUEST_BODY);
         when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
