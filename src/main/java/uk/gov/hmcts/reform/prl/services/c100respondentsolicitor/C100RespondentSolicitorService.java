@@ -17,10 +17,10 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
@@ -117,9 +117,8 @@ public class C100RespondentSolicitorService {
                 case MIAM:
                     String[] miamFields = event.getCaseFieldName().split(",");
                     log.info("MIAM fields, :::{}", (Object) miamFields);
-                    caseDataUpdated.put(miamFields[0], x.getValue().getResponse().getMiam().getAttendedMiam());
-                    caseDataUpdated.put(miamFields[1], x.getValue().getResponse().getMiam().getWillingToAttendMiam());
-                    caseDataUpdated.put(miamFields[1], x.getValue().getResponse().getMiam().getReasonNotAttendingMiam());
+                    caseDataUpdated.put(miamFields[0], x.getValue().getResponse().getSolicitorMiam().getRespSolHaveYouAttendedMiam());
+                    caseDataUpdated.put(miamFields[1], x.getValue().getResponse().getSolicitorMiam().getRespSolWillingnessToAttendMiam());
                     caseDataUpdated.put(miamFields[2], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
                     caseDataUpdated.put(
                         miamFields[3],
@@ -270,10 +269,9 @@ public class C100RespondentSolicitorService {
                 break;
             case MIAM:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .miam(Miam.builder()
-                              .attendedMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam())
-                              .willingToAttendMiam(caseData.getRespondentSolicitorWillingnessToAttendMiam().getWillingToAttendMiam())
-                              .reasonNotAttendingMiam(caseData.getRespondentSolicitorWillingnessToAttendMiam().getReasonNotAttendingMiam())
+                    .solicitorMiam(SolicitorMiam.builder()
+                                       .respSolHaveYouAttendedMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam())
+                                       .respSolWillingnessToAttendMiam(caseData.getRespondentSolicitorWillingnessToAttendMiam())
                               .build())
                     .build();
                 break;
