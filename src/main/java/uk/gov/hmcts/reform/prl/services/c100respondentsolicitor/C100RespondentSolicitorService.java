@@ -138,42 +138,46 @@ public class C100RespondentSolicitorService {
                     String[] allegationsOfHarmFields = event.getCaseFieldName().split(",");
                     caseDataUpdated.put(
                         allegationsOfHarmFields[0],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentAllegationsOfHarm()
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo()
                     );
                     caseDataUpdated.put(
                         allegationsOfHarmFields[1],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentDomesticAbuseBehaviour()
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAllegationsOfHarmInfo()
                     );
                     caseDataUpdated.put(
                         allegationsOfHarmFields[2],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentChildAbuseBehaviour()
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespDomesticAbuseInfo()
                     );
                     caseDataUpdated.put(
                         allegationsOfHarmFields[3],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentChildAbduction()
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespChildAbuseInfo()
                     );
                     caseDataUpdated.put(
                         allegationsOfHarmFields[4],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentOtherConcerns()
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespChildAbductionInfo()
+                    );
+                    caseDataUpdated.put(
+                        allegationsOfHarmFields[5],
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespOtherConcernsInfo()
                     );
                     break;
                 case INTERNATIONAL_ELEMENT:
                     String[] internationalElementFields = event.getCaseFieldName().split(",");
                     caseDataUpdated.put(
                         internationalElementFields[0],
-                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementChild()
+                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementChildInfo()
                     );
                     caseDataUpdated.put(
                         internationalElementFields[1],
-                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementParent()
+                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementParentInfo()
                     );
                     caseDataUpdated.put(
                         internationalElementFields[2],
-                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementJurisdiction()
+                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementJurisdictionInfo()
                     );
                     caseDataUpdated.put(
                         internationalElementFields[3],
-                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementRequest()
+                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementRequestInfo()
                     );
                     break;
                 case ABILITY_TO_PARTICIPATE:
@@ -284,22 +288,22 @@ public class C100RespondentSolicitorService {
             case ALLEGATION_OF_HARM:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData.builder()
-                                                         .allegationsOfHarmYesNo(caseData.getAllegationsOfHarmYesNo())
-                                                         .respondentAllegationsOfHarm(caseData.getRespondentAllegationsOfHarm())
-                                                         .respondentDomesticAbuseBehaviour(caseData.getRespondentDomesticAbuseBehaviour())
-                                                         .respondentChildAbuseBehaviour(caseData.getRespondentChildAbuseBehaviour())
-                                                         .respondentChildAbduction(caseData.getRespondentChildAbduction())
-                                                         .respondentOtherConcerns(caseData.getRespondentOtherConcerns())
+                                                         .respAohYesOrNo(caseData.getRespondentAohYesNo())
+                                                         .respAllegationsOfHarmInfo(caseData.getRespondentAllegationsOfHarm())
+                                                         .respDomesticAbuseInfo(caseData.getRespondentDomesticAbuseBehaviour())
+                                                         .respChildAbuseInfo(caseData.getRespondentChildAbuseBehaviour())
+                                                         .respChildAbductionInfo(caseData.getRespondentChildAbduction())
+                                                         .respOtherConcernsInfo(caseData.getRespondentOtherConcerns())
                                                          .build())
                     .build();
                 break;
             case INTERNATIONAL_ELEMENT:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .resSolInternationalElements(ResSolInternationalElements.builder()
-                                                     .internationalElementChild(caseData.getInternationalElementChild())
-                                                     .internationalElementParent(caseData.getInternationalElementParent())
-                                                     .internationalElementJurisdiction(caseData.getInternationalElementJurisdiction())
-                                                     .internationalElementRequest(caseData.getInternationalElementRequest())
+                                                     .internationalElementChildInfo(caseData.getInternationalElementChild())
+                                                     .internationalElementParentInfo(caseData.getInternationalElementParent())
+                                                     .internationalElementJurisdictionInfo(caseData.getInternationalElementJurisdiction())
+                                                     .internationalElementRequestInfo(caseData.getInternationalElementRequest())
                                                      .build())
                     .build();
                 break;
@@ -354,7 +358,16 @@ public class C100RespondentSolicitorService {
         for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
             log.info("caseUser is = " + caseUser);
             SolicitorRole.from(caseUser.getCaseRole()).ifPresent(
-                x -> solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex())));
+                x -> {
+                    Element<PartyDetails> respondent;
+                    respondent = caseData.getRespondents().get(x.getIndex());
+                    if (respondent.getValue().getResponse() != null
+                        && !(YesOrNo.Yes.equals(respondent.getValue().getResponse().getC7ResponseSubmitted()))) {
+                        solicitorRepresentedParties.add(respondent);
+                    } else if (respondent.getValue().getResponse() == null) {
+                        solicitorRepresentedParties.add(respondent);
+                    }
+                });
         }
         log.info("finding solicitorRepresentedParties Party " + solicitorRepresentedParties);
         return solicitorRepresentedParties;

@@ -14,10 +14,10 @@ import java.util.List;
 @AllArgsConstructor
 public class RespondentAllegationsOfHarmData {
 
-    private final YesOrNo allegationsOfHarmYesNo;
-    private final RespondentAllegationsOfHarm respondentAllegationsOfHarm;
-    private final List<Element<Behaviours>> respondentDomesticAbuseBehaviour;
-    private final List<Element<Behaviours>> respondentChildAbuseBehaviour;
-    private final RespondentChildAbduction respondentChildAbduction;
-    private final RespondentOtherConcerns respondentOtherConcerns;
+    private final YesOrNo respAohYesOrNo;
+    private final RespondentAllegationsOfHarm respAllegationsOfHarmInfo;
+    private final List<Element<Behaviours>> respDomesticAbuseInfo;
+    private final List<Element<Behaviours>> respChildAbuseInfo;
+    private final RespondentChildAbduction respChildAbductionInfo;
+    private final RespondentOtherConcerns respOtherConcernsInfo;
 }

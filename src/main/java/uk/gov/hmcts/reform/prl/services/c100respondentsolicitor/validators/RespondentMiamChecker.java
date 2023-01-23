@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -56,13 +55,15 @@ public class RespondentMiamChecker implements RespondentEventChecker {
 
     private boolean checkMiamManadatoryCompleted(Optional<Miam> miam) {
         List<Optional<?>> fields = new ArrayList<>();
-        fields.add(ofNullable(miam.get().getAttendedMiam()));
-        Optional<YesOrNo> willingToAttendMiam = ofNullable(miam.get().getWillingToAttendMiam());
-        fields.add(willingToAttendMiam);
-        if (willingToAttendMiam.isPresent() && willingToAttendMiam.equals(YesNoDontKnow.yes)) {
-            fields.add(ofNullable(miam.get().getReasonNotAttendingMiam()));
+        Optional<YesOrNo> attendMiam = ofNullable(miam.get().getAttendedMiam());
+        fields.add(attendMiam);
+        if (attendMiam.isPresent() && attendMiam.equals(YesOrNo.No)) {
+            Optional<YesOrNo> willingToAttendMiam = ofNullable(miam.get().getWillingToAttendMiam());
+            fields.add(willingToAttendMiam);
+            if (willingToAttendMiam.isPresent() && willingToAttendMiam.equals(YesOrNo.No)) {
+                fields.add(ofNullable(miam.get().getReasonNotAttendingMiam()));
+            }
         }
-
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 

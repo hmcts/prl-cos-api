@@ -668,6 +668,8 @@ public class CaseData implements MappableObject {
 
     private final Miam respondentSolicitorHaveYouAttendedMiam;
     private final Miam respondentSolicitorWillingnessToAttendMiam;
+    private final String whatIsMiamPlaceHolder;
+    private final String helpMiamCostsExemptionsPlaceHolder;
 
     private KeepDetailsPrivate keepContactDetailsPrivate;
     private KeepDetailsPrivate keepContactDetailsPrivateOther;
@@ -686,7 +688,7 @@ public class CaseData implements MappableObject {
     /**
      * Respondent solicitor's allegations of harm.
      */
-    private final YesOrNo allegationsOfHarmYesNo;
+    private final YesOrNo respondentAohYesNo;
     private final RespondentAllegationsOfHarm respondentAllegationsOfHarm;
     private final List<Element<Behaviours>> respondentDomesticAbuseBehaviour;
     private final List<Element<Behaviours>> respondentChildAbuseBehaviour;
