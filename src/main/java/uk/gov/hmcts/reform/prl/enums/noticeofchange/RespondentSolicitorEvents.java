@@ -28,10 +28,10 @@ public enum RespondentSolicitorEvents {
                                     "currentOrPastProceedingsForChildren,respondentExistingProceedings"
     ),
     ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "Allegations of harm", "respondentAohYesNo,"
-        + "respondentAllegationsOfHarm,respondentDomesticAbuseBehaviour, respondentChildAbuseBehaviour, "
-        + "respondentChildAbduction, respondentOtherConcerns"),
-    INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", "internationalElementChild, "
-        + "internationalElementParent, internationalElementJurisdiction, internationalElementRequest"),
+        + "respondentAllegationsOfHarm,respondentDomesticAbuseBehaviour,respondentChildAbuseBehaviour,"
+        + "respondentChildAbduction,respondentOtherConcerns"),
+    INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", "internationalElementChild,"
+        + "internationalElementParent,internationalElementJurisdiction,internationalElementRequest"),
     ABILITY_TO_PARTICIPATE("c100ResSolAbilityToParticipate", "Ability to participate", "abilityToParticipateInProceedings"),
     VIEW_DRAFT_RESPONSE("c100ResSolViewResponseDraftDocument", "View a draft of your response", ""),
     SUBMIT("c100ResSolSubmit", "Submit", "");
