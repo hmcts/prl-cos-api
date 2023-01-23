@@ -863,6 +863,7 @@ public class ApplicationsTabService implements TabService {
     }
 
     public Map<String, Object> getFl401RespondentTable(CaseData caseData) {
+        log.info("*** FL401 Respondent Details to update table *** {}",caseData.getRespondentsFL401());
         if (caseData.getRespondentsFL401() == null) {
             return Collections.emptyMap();
         }
