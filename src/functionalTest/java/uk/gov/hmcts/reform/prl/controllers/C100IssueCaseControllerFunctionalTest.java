@@ -1,23 +1,19 @@
-package uk.gov.hmcts.reform.prl.controllers.citizen;
+package uk.gov.hmcts.reform.prl.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.FeeService;
-import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
+import uk.gov.hmcts.reform.prl.ResourceLoader;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -25,19 +21,16 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class FeesAndPaymentControllerFunctionalTest {
+public class C100IssueCaseControllerFunctionalTest {
 
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
-    @Mock
-    protected AuthorisationService authorisationService;
-    @MockBean
-    private FeeService feeService;
-    @MockBean
-    private PaymentRequestService paymentRequestService;
 
-    private static final String CREATE_PAYMENT_INPUT = "requests/create-payment-input.json";
+
+
+
+    private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
 
 
     @Before
@@ -45,18 +38,16 @@ public class FeesAndPaymentControllerFunctionalTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-
-    /*
-    These test cases will be enabled once we have merged and integrated with Fee and Pay on Demo environment.
-     */
     @Test
-    public void givenRequestBody_whenGetC100ApplicationFees_then200Response() throws Exception {
-        mockMvc.perform(get("/fees-and-payment-apis/getC100ApplicationFees")
+    public void givenRequestBody_whenIssue_and_send_to_local_court_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        mockMvc.perform(post("/issue-and-send-to-local-court")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
-                            .header("ServiceAuthorization", "auth")
+                            .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
     }
+
 }

@@ -16,6 +16,6 @@ public class OtherOrderDetails {
     private final String orderAmendedDate;
     private final String orderMadeDate;
     private final String orderRecipients;
-
+    private final String orderServedDate;
 
 }

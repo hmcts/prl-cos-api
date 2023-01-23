@@ -1,10 +1,9 @@
-package uk.gov.hmcts.reform.prl.controllers.citizen;
+package uk.gov.hmcts.reform.prl.controllers.hearingmanagement;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -13,11 +12,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.FeeService;
-import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
+import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -25,19 +26,13 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class FeesAndPaymentControllerFunctionalTest {
+public class HearingManagementControllerFunctionalTest {
 
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
-    @Mock
-    protected AuthorisationService authorisationService;
-    @MockBean
-    private FeeService feeService;
-    @MockBean
-    private PaymentRequestService paymentRequestService;
 
-    private static final String CREATE_PAYMENT_INPUT = "requests/create-payment-input.json";
+    private static final String VALID_HEARING_MANAGEMENT_REQUEST_BODY = "requests/hearing-management-controller.json";
 
 
     @Before
@@ -45,18 +40,23 @@ public class FeesAndPaymentControllerFunctionalTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
+    @MockBean
+    private HearingManagementService hearingManagementService;
 
-    /*
-    These test cases will be enabled once we have merged and integrated with Fee and Pay on Demo environment.
-     */
+    @MockBean
+    private AuthorisationService authorisationService;
+
     @Test
-    public void givenRequestBody_whenGetC100ApplicationFees_then200Response() throws Exception {
-        mockMvc.perform(get("/fees-and-payment-apis/getC100ApplicationFees")
+    public void givenRequestBody_whenHearing_management_state_update_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_HEARING_MANAGEMENT_REQUEST_BODY);
+        when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
+        mockMvc.perform(put("/hearing-management-state-update")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
-                            .header("ServiceAuthorization", "auth")
+                            .header("serviceAuthorization", "auth")
+                            .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
     }
+
 }
