@@ -625,7 +625,7 @@ public class CallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        caseDataUpdated.put("LegalAdvisorList", dummyValue);
+        caseDataUpdated.put("legalAdvisorList", dummyValue);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 

@@ -730,4 +730,8 @@ public class CaseData implements MappableObject {
     private final List<CaseLinksElement<CaseLink>> caseLinks;
 
     private Flags caseFlags;
+
+    private final List<String> legalAdvisorList;
+
+
 }
