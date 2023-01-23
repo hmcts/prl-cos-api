@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -14,6 +15,7 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
+@Slf4j
 @Service
 public class RespondentMiamChecker implements RespondentEventChecker {
     @Override
@@ -46,7 +48,9 @@ public class RespondentMiamChecker implements RespondentEventChecker {
                                                       .getResponse()
                                                       .getSolicitorMiam());
         if (!miam.isEmpty()) {
+            log.info("before checking miam mandatory info if loop...");
             if (checkMiamManadatoryCompleted(miam)) {
+                log.info("inside checking miam mandatory info if loop...");
                 mandatoryInfo = true;
             }
         }
@@ -55,17 +59,20 @@ public class RespondentMiamChecker implements RespondentEventChecker {
 
     private boolean checkMiamManadatoryCompleted(Optional<SolicitorMiam> miam) {
         List<Optional<?>> fields = new ArrayList<>();
-        Optional<YesOrNo> attendMiam = ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam());
-        fields.add(attendMiam);
-        if (attendMiam.isPresent() && attendMiam.equals(YesOrNo.No)) {
-            Optional<YesOrNo> willingToAttendMiam = ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam());
-            fields.add(willingToAttendMiam);
-            if (willingToAttendMiam.isPresent() && willingToAttendMiam.equals(YesOrNo.No)) {
-                fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getReasonNotAttendingMiam()));
+        if(miam.isPresent()) {
+            log.info("entering miam checker if loop...");
+            Optional<YesOrNo> attendMiam = ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam());
+            fields.add(attendMiam);
+            if (attendMiam.isPresent() && attendMiam.equals(YesOrNo.No)) {
+                Optional<YesOrNo> willingToAttendMiam = ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam());
+                fields.add(willingToAttendMiam);
+                if (willingToAttendMiam.isPresent() && willingToAttendMiam.equals(YesOrNo.No)) {
+                    fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getReasonNotAttendingMiam()));
+                }
             }
+            return fields.stream().noneMatch(Optional::isEmpty)
+                && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
         }
-        return fields.stream().noneMatch(Optional::isEmpty)
-            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
-
+        return false;
     }
 }
