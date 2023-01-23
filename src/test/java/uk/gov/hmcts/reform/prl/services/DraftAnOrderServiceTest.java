@@ -882,6 +882,7 @@ public class DraftAnOrderServiceTest {
     public void testRemoveDraftOrderAndAddToFinalOrderDaForApplicantSolicitor() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .dateCreated(LocalDateTime.now())
                               .createdBy("test")
@@ -890,6 +891,7 @@ public class DraftAnOrderServiceTest {
 
         DraftOrder draftOrder1 = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abd.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .dateCreated(LocalDateTime.now())
                               .createdBy("test")
@@ -898,6 +900,7 @@ public class DraftAnOrderServiceTest {
 
         DraftOrder draftOrder2 = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abd.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .dateCreated(LocalDateTime.now())
                               .createdBy("test")
@@ -939,7 +942,7 @@ public class DraftAnOrderServiceTest {
             caseData
         );
 
-        assertEquals(3, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
+        assertEquals(2, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
     }
 
     @Test
