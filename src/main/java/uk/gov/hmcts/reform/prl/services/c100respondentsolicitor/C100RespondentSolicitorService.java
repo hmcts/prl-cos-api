@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
@@ -240,11 +241,11 @@ public class C100RespondentSolicitorService {
                 break;
             case KEEP_DETAILS_PRIVATE:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .keepDetailsPrivate(buildResponseForRespondent.getKeepDetailsPrivate().toBuilder()
+                    .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                                            .otherPeopleKnowYourContactDetails(caseData.getKeepContactDetailsPrivate()
+                                                                                   .getOtherPeopleKnowYourContactDetails())
                                             .confidentiality(caseData.getKeepContactDetailsPrivateOther().getConfidentiality())
                                             .confidentialityList(caseData.getKeepContactDetailsPrivateOther().getConfidentialityList())
-                                            .otherPeopleKnowYourContactDetails(
-                                                caseData.getKeepContactDetailsPrivate().getOtherPeopleKnowYourContactDetails())
                                             .build())
                     .build();
                 break;
