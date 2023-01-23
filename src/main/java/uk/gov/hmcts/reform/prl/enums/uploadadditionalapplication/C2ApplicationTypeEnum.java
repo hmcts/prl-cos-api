@@ -9,9 +9,17 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum DocumentAcknowledge {
-    @JsonProperty("ACK_RELATED_TO_CASE")
-    ACK_RELATED_TO_CASE("ACK_RELATED_TO_CASE", "Yes");
+public enum C2ApplicationTypeEnum {
+    @JsonProperty("applicationWithNotice")
+    applicationWithNotice(
+        "applicationWithNotice",
+        "Application with notice. The other party will be notified about this application, even if there is no hearing"
+    ),
+    @JsonProperty("applicationWithoutNotice")
+    applicationWithoutNotice(
+        "applicationWithoutNotice",
+        "Application by consent or without notice. No notice will be sent to the other party, even if there is a hearing"
+    );
 
 
     private final String id;
@@ -23,7 +31,8 @@ public enum DocumentAcknowledge {
     }
 
     @JsonCreator
-    public static DocumentAcknowledge getValue(String key) {
-        return DocumentAcknowledge.valueOf(key);
+    public static C2ApplicationTypeEnum getValue(String key) {
+        return C2ApplicationTypeEnum.valueOf(key);
     }
 }
+

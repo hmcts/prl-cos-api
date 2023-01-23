@@ -734,5 +734,5 @@ public class CaseData implements MappableObject {
 
     @JsonUnwrapped
     @Builder.Default
-    private final UplaodAdditionalApplicationData uplaodAdditionalApplicationData;
+    private final UploadAdditionalApplicationData uplaodAdditionalApplicationData;
 }

@@ -13,9 +13,9 @@ public enum ParentalResponsibilityType {
 
     @JsonProperty("PR_BY_FATHER")
     PR_BY_FATHER("PR_BY_FATHER", "Parental responsibility by the father"),
-
     @JsonProperty("PR_BY_SECOND_FEMALE_PARENT")
     PR_BY_SECOND_FEMALE_PARENT("PR_BY_SECOND_FEMALE_PARENT", "Parental responsibility by second female parent");
+
 
     private final String id;
     private final String displayedValue;
@@ -26,8 +26,7 @@ public enum ParentalResponsibilityType {
     }
 
     @JsonCreator
-    public static ParentalResponsibilityType getValue(String key) {
-        return ParentalResponsibilityType.valueOf(key);
+    public static AdditionalApplicationTypeEnum getValue(String key) {
+        return AdditionalApplicationTypeEnum.valueOf(key);
     }
-
 }

@@ -7,11 +7,14 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
+
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum DocumentAcknowledge {
-    @JsonProperty("ACK_RELATED_TO_CASE")
-    ACK_RELATED_TO_CASE("ACK_RELATED_TO_CASE", "Yes");
+public enum ConfidentialDocument {
+
+
+    @JsonProperty("CONFIDENTIAL")
+    CONFIDENTIAL("CONFIDENTIAL", "Yes - restrict to this group");
 
 
     private final String id;
@@ -23,7 +26,8 @@ public enum DocumentAcknowledge {
     }
 
     @JsonCreator
-    public static DocumentAcknowledge getValue(String key) {
-        return DocumentAcknowledge.valueOf(key);
+    public static ConfidentialDocument getValue(String key) {
+        return ConfidentialDocument.valueOf(key);
     }
+
 }
