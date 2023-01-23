@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
+import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +79,12 @@ public class C100RespondentSolicitorService {
 
         log.info("Active Respondent name: {}", activeRespondentName);
         caseDataUpdated.put("respondentNameForResponse", activeRespondentName);
+        Behaviours behaviours = Behaviours.builder()
+            .behavioursNature("test behaviour")
+            .build();
+        Element<Behaviours> behavioursElement = element(behaviours);
+        List<Element<Behaviours>> behavioursList = Collections.singletonList(behavioursElement);
+        caseDataUpdated.put("respondentChildAbuseBehaviour", behavioursList);
         return caseDataUpdated;
     }
 
