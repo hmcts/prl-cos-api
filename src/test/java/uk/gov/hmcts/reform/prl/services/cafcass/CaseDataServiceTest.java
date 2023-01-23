@@ -55,7 +55,6 @@ public class CaseDataServiceTest {
 
         Hearings hearings = new Hearings();
         hearings.setCaseRef("234567890");
-        hearings.setHmctsServiceCode("hmcts");
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
         SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
