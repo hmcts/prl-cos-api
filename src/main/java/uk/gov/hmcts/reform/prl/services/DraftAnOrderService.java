@@ -478,7 +478,6 @@ public class DraftAnOrderService {
         caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
         caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
         log.info("Selected order type is ********   from    populateDraftOrderCustomField",selectedOrder.getOrderType());
-        caseDataMap.put("createSelectOrderOptions", selectedOrder.getOrderType());
         return caseDataMap;
     }
 
@@ -502,7 +501,6 @@ public class DraftAnOrderService {
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
         caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
-        caseDataMap.put("orderfromdraftorder", selectedOrder.getOrderType());
         log.info("Selected order type is ********   from    populateCommonDraftOrderFields",selectedOrder.getOrderType());
         log.info("Case typ of application {}", caseData.getCaseTypeOfApplication());
         return caseDataMap;
