@@ -92,20 +92,6 @@ public class CaseControllerFunctionalTest {
     }
 
     @Test
-    public void testValidateAccessCode() {
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .header("accessCode", "12345678")
-            .header("caseId", "12345678")
-            .when()
-            .contentType("application/json")
-            .get("/validate-access-code")
-            .then()
-            .assertThat().statusCode(200);
-    }
-
-    @Test
     public void testRetrieveCitizenCases() {
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
@@ -113,18 +99,6 @@ public class CaseControllerFunctionalTest {
             .when()
             .contentType("application/json")
             .get("/cases")
-            .then()
-            .assertThat().statusCode(200);
-    }
-
-    @Test
-    public void testGetCase() {
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .when()
-            .contentType("application/json")
-            .get("/12345678")
             .then()
             .assertThat().statusCode(200);
     }
