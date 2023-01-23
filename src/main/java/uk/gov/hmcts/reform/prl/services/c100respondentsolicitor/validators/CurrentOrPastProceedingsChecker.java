@@ -5,7 +5,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
+import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
@@ -16,8 +16,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
-public class KeepDetailsPrivateChecker implements RespondentEventChecker {
-
+public class CurrentOrPastProceedingsChecker implements RespondentEventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
         Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
@@ -29,43 +28,33 @@ public class KeepDetailsPrivateChecker implements RespondentEventChecker {
                                .get()
                                .getValue()
                                .getResponse()
-                               .getKeepDetailsPrivate()
+                               .getCurrentOrPastProceedingsForChildren()
         );
     }
 
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
-        boolean mandatoryInfo = false;
-
+        List<Optional<?>> fields = new ArrayList<>();
         Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
         activeRespondent = caseData.getRespondents()
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
 
-        Optional<KeepDetailsPrivate> keepDetailsPrivate = Optional.ofNullable(activeRespondent.get()
-                                                            .getValue()
-                                                            .getResponse()
-                                                            .getKeepDetailsPrivate());
-        if (!keepDetailsPrivate.isEmpty()) {
-            if (checkKeepDetailsPrivateMandatoryCompleted(keepDetailsPrivate)) {
-                mandatoryInfo = true;
-            }
-        }
-        return mandatoryInfo;
-    }
+        Optional<YesNoDontKnow> currentOrPastProceedingsForChildren = Optional.ofNullable(activeRespondent.get()
+                                                      .getValue()
+                                                      .getResponse()
+                                                      .getCurrentOrPastProceedingsForChildren());
+        fields.add(ofNullable(currentOrPastProceedingsForChildren));
+        if (currentOrPastProceedingsForChildren.isPresent() && currentOrPastProceedingsForChildren.equals(YesOrNo.Yes)) {
 
-    private boolean checkKeepDetailsPrivateMandatoryCompleted(Optional<KeepDetailsPrivate> keepDetailsPrivate) {
-
-        List<Optional<?>> fields = new ArrayList<>();
-        fields.add(ofNullable(keepDetailsPrivate.get().getOtherPeopleKnowYourContactDetails()));
-        Optional<YesOrNo> confidentiality = ofNullable(keepDetailsPrivate.get().getConfidentiality());
-        fields.add(confidentiality);
-        if (confidentiality.isPresent() && confidentiality.equals(YesNoDontKnow.yes)) {
-            fields.add(ofNullable(keepDetailsPrivate.get().getConfidentialityList()));
+            Optional<List<Element<ProceedingDetails>>> existingProceedings = ofNullable(activeRespondent.get().getValue()
+                                                                                         .getResponse().getRespondentExistingProceedings());
+            fields.add(ofNullable(existingProceedings));
         }
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
-
     }
+
+
 }
