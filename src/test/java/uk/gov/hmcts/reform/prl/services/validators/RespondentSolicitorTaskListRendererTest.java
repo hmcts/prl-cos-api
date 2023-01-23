@@ -1,18 +1,10 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Test;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.services.RespondentSolicitorTaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderElements;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
@@ -54,22 +46,7 @@ public class RespondentSolicitorTaskListRendererTest {
     @Test
     public void renderTaskListTest() {
 
-        Response response = Response.builder().c7ResponseSubmitted(YesOrNo.Yes).build();
-
-        PartyDetails respondent = PartyDetails.builder().response(response).build();
-
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
-
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .respondents(respondentList)
-            .build();
-
-
-
-        String taskList = taskListRenderer.render(tasks, caseData);
+        String taskList = taskListRenderer.render(tasks);
 
         assertNotNull(taskList);
     }

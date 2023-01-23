@@ -190,7 +190,7 @@ public class C100RespondentSolicitorServiceTest {
             .build();
 
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
-            callbackRequest, authToken, errorList
+            callbackRequest, errorList
         );
 
         assertNotNull(response);
