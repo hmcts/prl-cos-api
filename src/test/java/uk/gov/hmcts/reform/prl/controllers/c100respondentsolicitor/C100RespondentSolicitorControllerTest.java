@@ -3,10 +3,11 @@ package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -34,31 +35,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class C100RespondentSolicitorControllerTest {
     @InjectMocks
     private C100RespondentSolicitorController c100RespondentSolicitorController;
-    @Mock
-    C100RespondentSolicitorService respondentSolicitorService;
-    @Mock
-    private ObjectMapper objectMapper;
     private CaseData caseData;
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
+
     @Mock
-    private DocumentGenService documentGenService;
+    DocumentGenService documentGenService;
+
+    @Mock
+    ObjectMapper objectMapper;
+
+    @Mock
+    C100RespondentSolicitorService respondentSolicitorService;
 
     public static final String authToken = "Bearer TestAuthToken";
-    private static final Map<String, Object> c7DraftMap = new HashMap<>();
+
+    Map<String, Object> c7DraftMap = new HashMap<>();
 
     @Before
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
 
         List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
 
@@ -126,14 +130,9 @@ public class C100RespondentSolicitorControllerTest {
     @Test
     public void testHandleAboutToStart() {
 
+        List<String> errorList = new ArrayList<>();
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(respondentSolicitorService
-                 .populateAboutToStartCaseData(Mockito
-                                                   .any(CallbackRequest.class), Mockito.anyString(), Mockito.anyList()))
-            .thenReturn(c7DraftMap);
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -142,25 +141,23 @@ public class C100RespondentSolicitorControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+
+        when(respondentSolicitorService.populateAboutToStartCaseData(callbackRequest, authToken, errorList)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleAboutToStart(
             authToken,
             callbackRequest
         );
 
-        assertNotNull(response.getData());
+        assertTrue(response.getData().containsKey("state"));
     }
 
     @Test
     public void testHandleAboutToSubmit() throws Exception {
 
+        List<String> errorList = new ArrayList<>();
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(respondentSolicitorService
-                 .populateAboutToSubmitCaseData(Mockito.any(CallbackRequest.class), Mockito.anyString(), Mockito.anyList()))
-            .thenReturn(c7DraftMap);
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -170,12 +167,14 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
+        when(respondentSolicitorService.populateAboutToSubmitCaseData(callbackRequest, authToken, errorList)).thenReturn(stringObjectMap);
+
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleAboutToSubmit(
             authToken,
             callbackRequest
         );
 
-        assertNotNull(response.getData());
+        assertTrue(response.getData().containsKey("state"));
     }
 
     @Test
@@ -183,12 +182,6 @@ public class C100RespondentSolicitorControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(respondentSolicitorService
-                 .populateSolicitorRespondentList(Mockito.any(CallbackRequest.class), Mockito.anyString()))
-            .thenReturn(c7DraftMap);
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -197,12 +190,14 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
+        when(respondentSolicitorService.populateSolicitorRespondentList(callbackRequest, authToken)).thenReturn(stringObjectMap);
+
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.populateSolicitorRespondentList(
             authToken,
             callbackRequest
         );
 
-        assertNotNull(response.getData());
+        assertTrue(response.getData().containsKey("state"));;
     }
 
     @Test
@@ -210,12 +205,6 @@ public class C100RespondentSolicitorControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(respondentSolicitorService
-                 .updateActiveRespondentSelectionBySolicitor(Mockito.any(CallbackRequest.class), Mockito.anyString()))
-            .thenReturn(c7DraftMap);
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -224,19 +213,20 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
+        when(respondentSolicitorService.updateActiveRespondentSelectionBySolicitor(callbackRequest, authToken)).thenReturn(stringObjectMap);
+
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleActiveRespondentSelection(
             authToken,
             callbackRequest
         );
 
-        assertNotNull(response.getData());
+        assertTrue(response.getData().containsKey("state"));
     }
 
     @Test
     public void testKeepDetailsPrivateAsYes() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
@@ -247,10 +237,12 @@ public class C100RespondentSolicitorControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = c100RespondentSolicitorController
+        when(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest)).thenReturn(stringObjectMap);
+
+        AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController
             .generateConfidentialityDynamicSelectionDisplay(callbackRequest);
 
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        assertTrue(response.getData().containsKey("state"));
     }
 
     @Test
@@ -281,13 +273,10 @@ public class C100RespondentSolicitorControllerTest {
 
     @Test
     public void validateActiveRespondentResponseBeforeSubmitTest() throws Exception {
+
+        List<String> errorList = new ArrayList<>();
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(respondentSolicitorService
-                 .updateActiveRespondentSelectionBySolicitor(Mockito.any(CallbackRequest.class), Mockito.anyString()))
-            .thenReturn(c7DraftMap);
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -296,26 +285,23 @@ public class C100RespondentSolicitorControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+
+        when(respondentSolicitorService.validateActiveRespondentResponse(callbackRequest, errorList)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.validateActiveRespondentResponseBeforeStart(
             authToken,
             callbackRequest
         );
 
-        assertNotNull(response);
+        assertTrue(response.getData().containsKey("state"));
     }
 
     @Test
     public void updateC7ResponseSubmitTest() throws Exception {
 
+        List<String> errorList = new ArrayList<>();
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(respondentSolicitorService
-                 .submitC7ResponseForActiveRespondent(Mockito.any(CallbackRequest.class), Mockito
-                     .anyString(),Mockito.anyList()))
-            .thenReturn(c7DraftMap);
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -325,12 +311,14 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
+        when(respondentSolicitorService.submitC7ResponseForActiveRespondent(callbackRequest, authToken, errorList)).thenReturn(stringObjectMap);
+
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.updateC7ResponseSubmit(
             authToken,
             callbackRequest
         );
 
-        assertNotNull(response);
+        assertTrue(response.getData().containsKey("state"));
     }
 }
 
