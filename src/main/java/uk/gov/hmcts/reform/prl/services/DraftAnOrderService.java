@@ -527,16 +527,18 @@ public class DraftAnOrderService {
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
-            if (draftOrder.getOrderDocument().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())
-                || draftOrder.getOrderDocumentWelsh().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName())) {
-                log.info("matching draftorder {}", draftOrder);
-                draftOrderCollection.set(
-                    draftOrderCollection.indexOf(e),
-                    element(getUpdatedDraftOrder(draftOrder, caseData))
-                );
-                break;
+            if (caseData.getPreviewOrderDoc() != null || caseData.getPreviewOrderDocWelsh() != null) {
+                if ((caseData.getPreviewOrderDoc() != null && draftOrder.getOrderDocument().getDocumentFileName()
+                    .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName()))
+                    || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
+                    .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName()))) {
+                    log.info("matching draftorder {}", draftOrder);
+                    draftOrderCollection.set(
+                        draftOrderCollection.indexOf(e),
+                        element(getUpdatedDraftOrder(draftOrder, caseData))
+                    );
+                    break;
+                }
             }
         }
         draftOrderCollection.sort(Comparator.comparing(
