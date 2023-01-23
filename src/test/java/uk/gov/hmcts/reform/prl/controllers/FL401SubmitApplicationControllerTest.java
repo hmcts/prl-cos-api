@@ -280,7 +280,7 @@ public class FL401SubmitApplicationControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
-        CallbackResponse callbackResponseTest = fl401SubmitApplicationController.fl401SubmitApplicationValidation(
+        AboutToStartOrSubmitCallbackResponse callbackResponseTest = fl401SubmitApplicationController.fl401SubmitApplicationValidation(
             authToken,
             callbackRequest
         );
