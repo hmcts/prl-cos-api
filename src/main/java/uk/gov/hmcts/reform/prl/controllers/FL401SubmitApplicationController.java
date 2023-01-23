@@ -199,8 +199,6 @@ public class FL401SubmitApplicationController {
         caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
 
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
-        log.info("**** About to submit fl401 **** {}", caseDataUpdated);
-
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
