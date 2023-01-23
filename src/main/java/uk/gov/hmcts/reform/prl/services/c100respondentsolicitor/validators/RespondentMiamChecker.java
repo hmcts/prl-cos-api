@@ -59,20 +59,18 @@ public class RespondentMiamChecker implements RespondentEventChecker {
 
     private boolean checkMiamManadatoryCompleted(Optional<SolicitorMiam> miam) {
         List<Optional<?>> fields = new ArrayList<>();
-        if (miam.isPresent()) {
-            log.info("entering miam checker if loop...");
-            fields.add(ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam()));
-            Optional<YesOrNo> attendMiam = ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam());
-            if (attendMiam.isPresent() && attendMiam.equals(YesOrNo.No)) {
-                Optional<YesOrNo> willingToAttendMiam = ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam());
-                fields.add(willingToAttendMiam);
-                if (willingToAttendMiam.isPresent() && willingToAttendMiam.equals(YesOrNo.No)) {
-                    fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getReasonNotAttendingMiam()));
-                }
+        log.info("entering miam checker if loop...");
+        fields.add(ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam()));
+        Optional<YesOrNo> attendMiam = ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam());
+        if (attendMiam.isPresent() && attendMiam.equals(YesOrNo.No)) {
+            Optional<YesOrNo> willingToAttendMiam = ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam());
+            fields.add(willingToAttendMiam);
+            if (willingToAttendMiam.isPresent() && willingToAttendMiam.equals(YesOrNo.No)) {
+                fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getReasonNotAttendingMiam()));
             }
-            return fields.stream().noneMatch(Optional::isEmpty)
-                && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
         }
-        return false;
+        return fields.stream().noneMatch(Optional::isEmpty)
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+
     }
 }
