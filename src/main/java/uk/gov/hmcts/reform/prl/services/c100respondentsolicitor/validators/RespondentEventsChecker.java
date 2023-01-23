@@ -14,7 +14,6 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEv
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.CONSENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.MIAM;
 
@@ -58,7 +57,6 @@ public class RespondentEventsChecker {
         eventStatus.put(ABILITY_TO_PARTICIPATE, abilityToParticipateChecker);
         eventStatus.put(ATTENDING_THE_COURT, attendToCourtChecker);
         eventStatus.put(MIAM, respondentMiamChecker);
-        eventStatus.put(INTERNATIONAL_ELEMENT, internationalElementsChecker);
         eventStatus.put(CURRENT_OR_PREVIOUS_PROCEEDINGS, currentOrPastProceedingsChecker);
 
     }
