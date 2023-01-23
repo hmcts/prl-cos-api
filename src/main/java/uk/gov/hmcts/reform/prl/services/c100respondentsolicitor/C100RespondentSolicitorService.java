@@ -288,7 +288,7 @@ public class C100RespondentSolicitorService {
             case ALLEGATION_OF_HARM:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData.builder()
-                                                         .respAohYesOrNo(caseData.getAllegationsOfHarmYesNo())
+                                                         .respAohYesOrNo(caseData.getRespondentAohYesNo())
                                                          .respAllegationsOfHarmInfo(caseData.getRespondentAllegationsOfHarm())
                                                          .respDomesticAbuseInfo(caseData.getRespondentDomesticAbuseBehaviour())
                                                          .respChildAbuseInfo(caseData.getRespondentChildAbuseBehaviour())
