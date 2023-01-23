@@ -77,7 +77,6 @@ public class C100RespondentSolicitorService {
 
         log.info("Active Respondent name: {}", activeRespondentName);
         caseDataUpdated.put("respondentNameForResponse", activeRespondentName);
-
         return caseDataUpdated;
     }
 
@@ -455,24 +454,22 @@ public class C100RespondentSolicitorService {
         return keepDetailsPrivateList;
     }
 
-    public Map<String, Object> validateActiveRespondentResponse(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
+    public Map<String, Object> validateActiveRespondentResponse(CallbackRequest callbackRequest, List<String> errorList) {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             caseDataUpdated,
             CaseData.class
         );
-        Optional<Element<PartyDetails>> getActiveRespondent = findActiveRespondent(caseData, authorisation);
-
         log.info("Event name:::{}", callbackRequest.getEventId());
         boolean mandatoryFinished = false;
 
-        mandatoryFinished = responseSubmitChecker.hasMandatoryCompleted(caseData, getActiveRespondent);
+        mandatoryFinished = responseSubmitChecker.hasMandatoryCompleted(caseData);
         if (!mandatoryFinished) {
             errorList.add(
                 "Response submission is not allowed for this case unless you finish all the mandatory information");
         }
-
+        //Todo final C7 Document generation
         return caseDataUpdated;
     }
 

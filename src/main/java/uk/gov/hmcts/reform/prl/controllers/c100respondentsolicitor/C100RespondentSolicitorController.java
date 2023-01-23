@@ -165,7 +165,6 @@ public class C100RespondentSolicitorController {
             .builder()
             .data(respondentSolicitorService.validateActiveRespondentResponse(
                 callbackRequest,
-                authorisation,
                 errorList))
             .errors(errorList)
             .build();

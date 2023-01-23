@@ -55,7 +55,12 @@ public class CitizenCoreCaseDataService {
         CaseEvent caseEvent
     ) {
         try {
+            log.info("User token {}", anonymousUserToken);
             UserDetails userDetails = idamClient.getUserDetails(anonymousUserToken);
+
+            log.info("User id {}", userDetails.getId());
+            log.info("User roles {}", userDetails.getRoles());
+            log.info("case event {}", caseEvent);
             EventRequestData eventRequestData = eventRequest(caseEvent, userDetails.getId());
 
             StartEventResponse startEventResponse = startUpdate(
@@ -64,7 +69,8 @@ public class CitizenCoreCaseDataService {
                 caseId,
                 true
             );
-
+            log.info("after Start event response {}", startEventResponse);
+            log.info("after Start event response caseData{}", caseData);
             CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
             return submitUpdate(
                 anonymousUserToken,

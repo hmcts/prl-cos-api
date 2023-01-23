@@ -91,9 +91,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentO
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.MultiBundleConfig;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -724,14 +722,6 @@ public class CaseData implements MappableObject {
 
     private final List<Element<DraftOrder>> draftOrderCollection;
     private Object draftOrdersDynamicList;
-
-    /**
-     * Bundle.
-     */
-    private List<Bundle> caseBundles;
-    private List<Bundle> historicalBundles;
-    private String bundleConfiguration;
-    private List<MultiBundleConfig> multiBundleConfiguration;
 
     private DynamicList chooseRespondentDynamicList;
     @JsonUnwrapped
