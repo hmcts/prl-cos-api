@@ -686,7 +686,7 @@ public class CaseData implements MappableObject {
     /**
      * Respondent solicitor's allegations of harm.
      */
-    private final YesOrNo allegationsOfHarmYesNo;
+    private final YesOrNo respondentAohYesNo;
     private final RespondentAllegationsOfHarm respondentAllegationsOfHarm;
     private final List<Element<Behaviours>> respondentDomesticAbuseBehaviour;
     private final List<Element<Behaviours>> respondentChildAbuseBehaviour;
