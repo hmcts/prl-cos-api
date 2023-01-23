@@ -358,7 +358,16 @@ public class C100RespondentSolicitorService {
         for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
             log.info("caseUser is = " + caseUser);
             SolicitorRole.from(caseUser.getCaseRole()).ifPresent(
-                x -> solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex())));
+                x -> {
+                    Element<PartyDetails> respondent;
+                    respondent = caseData.getRespondents().get(x.getIndex());
+                    if (respondent.getValue().getResponse() != null
+                        && !(YesOrNo.Yes.equals(respondent.getValue().getResponse().getC7ResponseSubmitted()))) {
+                        solicitorRepresentedParties.add(respondent);
+                    } else if (respondent.getValue().getResponse() == null) {
+                        solicitorRepresentedParties.add(respondent);
+                    }
+                });
         }
         log.info("finding solicitorRepresentedParties Party " + solicitorRepresentedParties);
         return solicitorRepresentedParties;
