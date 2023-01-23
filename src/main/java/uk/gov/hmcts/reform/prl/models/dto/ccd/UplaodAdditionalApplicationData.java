@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 
 import java.util.List;
 
@@ -15,4 +16,6 @@ import java.util.List;
 public class UplaodAdditionalApplicationData {
 
     private final List<AdditionalApplicationTypeEnum> additionalApplicationsApplyingFor;
+
+    private final OtherApplicationsBundle temporaryOtherApplicationsBundle;
 }
