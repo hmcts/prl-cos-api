@@ -498,13 +498,26 @@ public class C100RespondentSolicitorService {
             .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
             .findFirst()
             .ifPresent(party -> {
-                log.info("updateRespondents:: party found. before update " + party);
+                log.info("updateC7ResponseRespondents:: party found. before update " + party);
                 PartyDetails amended = party.getValue().toBuilder()
                         .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(YesOrNo.Yes).build())
                         .build();
 
                 respondents.set(respondents.indexOf(party), element(party.getId(), amended));
-                log.info("updateRespondents:: party found. after update " + party);
+                log.info("updateC7ResponseRespondents:: party found. after update " + party);
+            });
+
+        respondents.stream()
+            .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
+            .findFirst()
+            .ifPresent(party -> {
+                log.info("updateActiveRespondents:: party found. before update " + party);
+                PartyDetails amended = party.getValue().toBuilder()
+                    .response(party.getValue().getResponse().toBuilder().activeRespondent(YesOrNo.No).build())
+                    .build();
+
+                respondents.set(respondents.indexOf(party), element(party.getId(), amended));
+                log.info("updateactiveRespondents:: party found. after update " + party);
             });
 
         updatedCaseData.put(RESPONDENTS, respondents);
