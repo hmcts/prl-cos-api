@@ -52,12 +52,12 @@ public class HearingService {
                 Collectors.toList());
 
             // if we find any hearing after filteration, change hmc status to null as it's not required in response.
-            if(hearings !=null && !hearings.isEmpty()) {
+            if (hearings != null && !hearings.isEmpty()) {
                 hearings.forEach(caseHearing -> caseHearing.setHmcStatus(null));
                 hearingDetails.setCaseHearings(hearings);
                 log.debug("Hearings filtered based on Listed hearing");
             } else {
-                hearingDetails= null;
+                hearingDetails = null;
             }
         }
     }

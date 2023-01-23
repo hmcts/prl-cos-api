@@ -71,16 +71,16 @@ public class HearingServiceTest {
     }
 
     @Test
-    @DisplayName("test case for HearingService.")
-    public void getHearingsTestSuccess_HearingData() {
+    @DisplayName("test case for HearingService with Status LISTED.")
+    public void getHearingsTestSuccessHearingDataListed() {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
-        final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234")).
-            hmcStatus("LISTED").hearingType("ABA5-APL").hearingDaySchedule(
+        final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
+                .hmcStatus("LISTED").hearingType("ABA5-APL").hearingDaySchedule(
                 List.of(
-                    HearingDaySchedule.hearingDayScheduleWith().hearingVenueName("BRENTFORD COUNTY COURT AND FAMILY COURT").
-                        hearingStartDateTime(LocalDateTime.parse("2023-01-24T13:00:00")).hearingEndDateTime(LocalDateTime.parse(
+                    HearingDaySchedule.hearingDayScheduleWith().hearingVenueName("BRENTFORD COUNTY COURT AND FAMILY COURT")
+                            .hearingStartDateTime(LocalDateTime.parse("2023-01-24T13:00:00")).hearingEndDateTime(LocalDateTime.parse(
                             "2023-01-24T16:00:00")).build())).build();
 
         caseHearings.add(caseHearing);
@@ -96,6 +96,33 @@ public class HearingServiceTest {
             hearingService.getHearings(authToken, caseReferenceNumber);
 
         Assert.assertNotNull(response);
+    }
+
+    @Test
+    @DisplayName("test case for HearingService with Status LISTED.")
+    public void getHearingsTestSuccessHearingDataNotListed() {
+
+        final List<CaseHearing> caseHearings = new ArrayList();
+
+        final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
+                .hmcStatus("LISTED").hearingType("ABA5-APL").hearingDaySchedule(
+                List.of(
+                    HearingDaySchedule.hearingDayScheduleWith().hearingVenueName("BRENTFORD COUNTY COURT AND FAMILY COURT")
+                            .hearingStartDateTime(LocalDateTime.parse("2023-01-24T13:00:00")).hearingEndDateTime(LocalDateTime.parse(
+                            "2023-01-24T16:00:00")).build())).build();
+
+        caseHearings.add(caseHearing);
+
+        hearings = new Hearings();
+        hearings.setCaseRef("caseReference");
+        hearings.setCaseHearings(caseHearings);
+
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(hearingApiClient.getHearingDetails(authToken, authTokenGenerator.generate(),caseReferenceNumber)).thenReturn(hearings);
+        Hearings response =
+            hearingService.getHearings(authToken, caseReferenceNumber);
+
+        Assert.assertNull(response);
     }
 
 
