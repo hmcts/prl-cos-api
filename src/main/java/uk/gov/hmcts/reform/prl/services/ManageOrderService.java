@@ -899,7 +899,7 @@ public class ManageOrderService {
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         GeneratedDocumentInfo generatedDocumentInfo = null;
-        log.info("**** we debug  ", caseData.getCreateSelectOrderOptions());
+        log.info("**** we debug  {}", caseData.getCreateSelectOrderOptions());
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
