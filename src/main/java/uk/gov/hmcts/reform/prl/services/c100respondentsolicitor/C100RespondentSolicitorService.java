@@ -16,11 +16,11 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
@@ -94,10 +94,10 @@ public class C100RespondentSolicitorService {
                 case KEEP_DETAILS_PRIVATE:
                     String[] keepDetailsPrivateFields = event.getCaseFieldName().split(",");
                     log.info("Keep details private fields, :::{}", (Object) keepDetailsPrivateFields);
-                    caseDataUpdated.put(keepDetailsPrivateFields[0], x.getValue().getResponse().getKeepDetailsPrivate()
-                        .getOtherPeopleKnowYourContactDetails());
-                    caseDataUpdated.put(keepDetailsPrivateFields[1], x.getValue().getResponse().getKeepDetailsPrivate().getConfidentiality());
-                    caseDataUpdated.put(keepDetailsPrivateFields[1], x.getValue().getResponse().getKeepDetailsPrivate().getConfidentialityList());
+                    caseDataUpdated.put(keepDetailsPrivateFields[0], x.getValue().getResponse()
+                        .getSolicitorKeepDetailsPriate().getRespKeepDetailsPrivate());
+                    caseDataUpdated.put(keepDetailsPrivateFields[1], x.getValue().getResponse()
+                        .getSolicitorKeepDetailsPriate().getRespKeepDetailsPrivateConfidentiality());
                     log.info("finding respondentKeepDetailsPrivate = " + x.getValue().getResponse().getKeepDetailsPrivate());
                     break;
                 case CONFIRM_EDIT_CONTACT_DETAILS:
@@ -241,12 +241,11 @@ public class C100RespondentSolicitorService {
                 break;
             case KEEP_DETAILS_PRIVATE:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .keepDetailsPrivate(KeepDetailsPrivate.builder()
-                                            .otherPeopleKnowYourContactDetails(caseData.getKeepContactDetailsPrivate()
-                                                                                   .getOtherPeopleKnowYourContactDetails())
-                                            .confidentiality(caseData.getKeepContactDetailsPrivateOther().getConfidentiality())
-                                            .confidentialityList(caseData.getKeepContactDetailsPrivateOther().getConfidentialityList())
-                                            .build())
+                    .solicitorKeepDetailsPriate(SolicitorKeepDetailsPrivate.builder()
+                                                    .respKeepDetailsPrivate(caseData.getKeepContactDetailsPrivate())
+                                                    .respKeepDetailsPrivateConfidentiality(caseData.getKeepContactDetailsPrivateOther())
+                                                    .build())
+
                     .build();
                 break;
             case CONFIRM_EDIT_CONTACT_DETAILS:
