@@ -59,7 +59,7 @@ public class RespondentMiamChecker implements RespondentEventChecker {
 
     private boolean checkMiamManadatoryCompleted(Optional<SolicitorMiam> miam) {
         List<Optional<?>> fields = new ArrayList<>();
-        if(miam.isPresent()) {
+        if (miam.isPresent()) {
             log.info("entering miam checker if loop...");
             Optional<YesOrNo> attendMiam = ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam());
             fields.add(attendMiam);
