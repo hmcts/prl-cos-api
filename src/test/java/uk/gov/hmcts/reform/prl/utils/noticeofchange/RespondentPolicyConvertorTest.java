@@ -32,7 +32,7 @@ public class RespondentPolicyConvertorTest {
             .solicitorOrg(organisation)
             .build();
 
-        Element<PartyDetails>wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         Optional<Element<PartyDetails>> optionalRespondentElement = Optional.of(wrappedRespondents);
 
         OrganisationPolicy organisationPolicy = respondentPolicyConverter
