@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -61,7 +60,7 @@ public class KeepDetailsPrivateChecker implements RespondentEventChecker {
         fields.add(ofNullable(keepDetailsPrivate.get().getOtherPeopleKnowYourContactDetails()));
         Optional<YesOrNo> confidentiality = ofNullable(keepDetailsPrivate.get().getConfidentiality());
         fields.add(confidentiality);
-        if (confidentiality.isPresent() && confidentiality.equals(YesNoDontKnow.yes)) {
+        if (confidentiality.isPresent() && confidentiality.equals(YesOrNo.Yes)) {
             fields.add(ofNullable(keepDetailsPrivate.get().getConfidentialityList()));
         }
         return fields.stream().noneMatch(Optional::isEmpty)
