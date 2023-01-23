@@ -894,7 +894,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String,?> getDraftOrderInfo(String authorisation, CaseData caseData)  throws Exception {
-        DraftOrder draftOrder = getCurrentOrderDetails(caseData);
+        DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
         return  getDraftOrderData(authorisation, caseData, draftOrder);
     }
 
@@ -902,7 +902,7 @@ public class DraftAnOrderService {
         {
             Map<String, Object> caseDataUpdated = new HashMap<>();
             GeneratedDocumentInfo generatedDocumentInfo = null;
-            log.info("**** we debug  {}", caseData.getCreateSelectOrderOptions());
+            log.info("****  getDraftOrderData  {}", draftOrder.getOrderType());
             Map<String, String> fieldsMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {

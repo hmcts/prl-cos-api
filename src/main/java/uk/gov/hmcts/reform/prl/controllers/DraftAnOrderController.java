@@ -185,6 +185,7 @@ public class DraftAnOrderController {
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
         }
+        log.info("Event Id  {} ", callbackRequest.getEventId());
         if ("editAndApproveAnOrder".equalsIgnoreCase(callbackRequest.getEventId())
             || "adminEditAndApproveAnOrder".equalsIgnoreCase(callbackRequest.getEventId())) {
             caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
