@@ -187,10 +187,10 @@ public class DraftAnOrderService {
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
-            if ((draftOrder.getOrderDocument() != null && draftOrder.getOrderDocument().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName()))
-                || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName()))) {
+            if (draftOrder.getOrderDocument().getDocumentFileName()
+                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())
+                || draftOrder.getOrderDocumentWelsh().getDocumentFileName()
+                .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName())) {
                 updatedCaseData.put("orderCollection", getFinalOrderCollection(authorisation, caseData, draftOrder));
                 draftOrderCollection.remove(
                     draftOrderCollection.indexOf(e)
@@ -527,18 +527,15 @@ public class DraftAnOrderService {
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
-            if (caseData.getPreviewOrderDoc() != null || caseData.getPreviewOrderDocWelsh() != null) {
-                if ((caseData.getPreviewOrderDoc() != null && draftOrder.getOrderDocument().getDocumentFileName()
-                    .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName()))
-                    || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
-                    .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName()))) {
-                    log.info("matching draftorder {}", draftOrder);
-                    draftOrderCollection.set(
-                        draftOrderCollection.indexOf(e),
+            if (draftOrder.getOrderDocument().getDocumentFileName()
+                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())
+                || draftOrder.getOrderDocumentWelsh().getDocumentFileName()
+                .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName())) {
+                log.info("matching draftorder {}", draftOrder);
+                draftOrderCollection.set(draftOrderCollection.indexOf(e),
                         element(getUpdatedDraftOrder(draftOrder, caseData))
-                    );
-                    break;
-                }
+                );
+                break;
             }
         }
         draftOrderCollection.sort(Comparator.comparing(
@@ -920,8 +917,6 @@ public class DraftAnOrderService {
                     .documentHash(generatedDocumentInfo.getHashToken())
                     .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
 
-            } else {
-                caseDataUpdated.put("previewOrderDoc", null);
             }
             if (documentLanguage.isGenWelsh()) {
                 caseDataUpdated.put("isWelshDocGen", Yes.toString());
@@ -936,8 +931,6 @@ public class DraftAnOrderService {
                     .documentHash(generatedDocumentInfo.getHashToken())
                     .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
 
-            } else {
-                caseDataUpdated.put("previewOrderDocWelsh", null);
             }
             return caseDataUpdated;
         }
