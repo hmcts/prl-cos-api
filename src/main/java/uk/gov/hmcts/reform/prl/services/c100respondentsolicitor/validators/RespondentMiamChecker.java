@@ -61,8 +61,8 @@ public class RespondentMiamChecker implements RespondentEventChecker {
         List<Optional<?>> fields = new ArrayList<>();
         if (miam.isPresent()) {
             log.info("entering miam checker if loop...");
+            fields.add(ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam()));
             Optional<YesOrNo> attendMiam = ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam());
-            fields.add(attendMiam);
             if (attendMiam.isPresent() && attendMiam.equals(YesOrNo.No)) {
                 Optional<YesOrNo> willingToAttendMiam = ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam());
                 fields.add(willingToAttendMiam);
