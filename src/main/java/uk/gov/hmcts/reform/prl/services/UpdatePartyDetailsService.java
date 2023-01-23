@@ -56,7 +56,7 @@ public class UpdatePartyDetailsService {
 
             if (Objects.nonNull(fl401respondent)) {
                 updatedCaseData.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
-                setFL401ApplicantFlag(updatedCaseData, fl401Applicant);
+                setFL401RespondentFlag(updatedCaseData, fl401Applicant);
             }
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, RESPONDENT));

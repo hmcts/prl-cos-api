@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -91,8 +92,9 @@ public class EditAndApproveDraftOrderController {
         );
 
         if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
-            && WhatToDoWithOrderEnum.finalizeSaveToServeLater
-            .equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
+            && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
+            .equals(caseData.getServeOrderData().getWhatDoWithOrder())
+            || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
             caseDataUpdated.putAll(draftAnOrderService.removeDraftOrderAndAddToFinalOrder(authorisation, caseData));
         } else {
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));

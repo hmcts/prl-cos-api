@@ -10,7 +10,6 @@ public class CaseNameChecker implements EventChecker {
     public boolean isFinished(CaseData caseData) {
 
         String caseName = caseData.getApplicantCaseName();
-
         return caseName != null;
     }
 
