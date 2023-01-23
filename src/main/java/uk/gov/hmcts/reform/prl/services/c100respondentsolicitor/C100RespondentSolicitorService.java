@@ -138,27 +138,27 @@ public class C100RespondentSolicitorService {
                     String[] allegationsOfHarmFields = event.getCaseFieldName().split(",");
                     caseDataUpdated.put(
                         allegationsOfHarmFields[0],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentAohYesOrNo()
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo()
                     );
                     caseDataUpdated.put(
                         allegationsOfHarmFields[1],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentAllegationsOfHarmInfo()
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAllegationsOfHarmInfo()
                     );
                     caseDataUpdated.put(
                         allegationsOfHarmFields[2],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentDomesticAbuseBehaviourInfo()
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespDomesticAbuseInfo()
                     );
                     caseDataUpdated.put(
                         allegationsOfHarmFields[3],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentChildAbuseBehaviourInfo()
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespChildAbuseInfo()
                     );
                     caseDataUpdated.put(
                         allegationsOfHarmFields[4],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentChildAbductionInfo()
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespChildAbductionInfo()
                     );
                     caseDataUpdated.put(
                         allegationsOfHarmFields[5],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespondentOtherConcernsInfo()
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespOtherConcernsInfo()
                     );
                     break;
                 case INTERNATIONAL_ELEMENT:
@@ -288,12 +288,12 @@ public class C100RespondentSolicitorService {
             case ALLEGATION_OF_HARM:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData.builder()
-                                                         .respondentAohYesOrNo(caseData.getAllegationsOfHarmYesNo())
-                                                         .respondentAllegationsOfHarmInfo(caseData.getRespondentAllegationsOfHarm())
-                                                         .respondentDomesticAbuseBehaviourInfo(caseData.getRespondentDomesticAbuseBehaviour())
-                                                         .respondentChildAbuseBehaviourInfo(caseData.getRespondentChildAbuseBehaviour())
-                                                         .respondentChildAbductionInfo(caseData.getRespondentChildAbduction())
-                                                         .respondentOtherConcernsInfo(caseData.getRespondentOtherConcerns())
+                                                         .respAohYesOrNo(caseData.getAllegationsOfHarmYesNo())
+                                                         .respAllegationsOfHarmInfo(caseData.getRespondentAllegationsOfHarm())
+                                                         .respDomesticAbuseInfo(caseData.getRespondentDomesticAbuseBehaviour())
+                                                         .respChildAbuseInfo(caseData.getRespondentChildAbuseBehaviour())
+                                                         .respChildAbductionInfo(caseData.getRespondentChildAbduction())
+                                                         .respOtherConcernsInfo(caseData.getRespondentOtherConcerns())
                                                          .build())
                     .build();
                 break;

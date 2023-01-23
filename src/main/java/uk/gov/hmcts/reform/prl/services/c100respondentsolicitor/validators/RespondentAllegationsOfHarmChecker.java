@@ -59,40 +59,40 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
     private boolean checkAllegationsOfHarmManadatoryCompleted(Optional<RespondentAllegationsOfHarmData> respondentAllegationsOfHarmData) {
 
         List<Optional<?>> fields = new ArrayList<>();
-        Optional<YesOrNo> respondentAohYesOrNo = ofNullable(respondentAllegationsOfHarmData.get().getRespondentAohYesOrNo());
+        Optional<YesOrNo> respondentAohYesOrNo = ofNullable(respondentAllegationsOfHarmData.get().getRespAohYesOrNo());
         fields.add(respondentAohYesOrNo);
         if (respondentAohYesOrNo.isPresent() && respondentAohYesOrNo.equals(YesOrNo.Yes)) {
             Optional<YesOrNo> drugOrAlcoholAbuse = ofNullable(respondentAllegationsOfHarmData
                                                                   .get()
-                                                                  .getRespondentAllegationsOfHarmInfo()
+                                                                  .getRespAllegationsOfHarmInfo()
                                                                   .getRespondentDrugOrAlcoholAbuse());
 
             fields.add(drugOrAlcoholAbuse);
             if (drugOrAlcoholAbuse.isPresent() && drugOrAlcoholAbuse.equals(YesOrNo.Yes)) {
-                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarmInfo()
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespAllegationsOfHarmInfo()
                     .getRespondentDrugOrAlcoholAbuseDetails()));
             }
             Optional<YesOrNo> otherSafetyConcerns = ofNullable(respondentAllegationsOfHarmData
                                                                    .get()
-                                                                   .getRespondentAllegationsOfHarmInfo()
+                                                                   .getRespAllegationsOfHarmInfo()
                                                                    .getRespondentOtherSafetyConcerns());
             fields.add(otherSafetyConcerns);
             if (otherSafetyConcerns.isPresent() && otherSafetyConcerns.equals(YesOrNo.Yes)) {
-                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarmInfo()
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespAllegationsOfHarmInfo()
                                           .getRespondentOtherSafetyConcernsDetails()));
             }
 
-            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarmInfo().getRespondentNonMolestationOrder()));
-            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarmInfo().getRespondentOccupationOrder()));
-            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarmInfo().getRespondentForcedMarriageOrder()));
-            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarmInfo().getRespondentOtherInjunctiveOrder()));
-            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentAllegationsOfHarmInfo().getRespondentRestrainingOrder()));
+            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrder()));
+            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespAllegationsOfHarmInfo().getRespondentOccupationOrder()));
+            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespAllegationsOfHarmInfo().getRespondentForcedMarriageOrder()));
+            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveOrder()));
+            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespAllegationsOfHarmInfo().getRespondentRestrainingOrder()));
             Optional<YesOrNo> respondentDomesticAbuse = ofNullable(respondentAllegationsOfHarmData.get()
-                                                                       .getRespondentAllegationsOfHarmInfo().getRespondentDomesticAbuse());
+                                                                       .getRespAllegationsOfHarmInfo().getRespondentDomesticAbuse());
             fields.add(respondentDomesticAbuse);
             if (respondentDomesticAbuse.isPresent() && respondentDomesticAbuse.equals(YesOrNo.Yes)) {
                 List<Behaviours> domesticAbuseBehaviour = respondentAllegationsOfHarmData.get()
-                    .getRespondentDomesticAbuseBehaviourInfo()
+                    .getRespDomesticAbuseInfo()
                     .stream()
                     .map(Element::getValue)
                     .collect(Collectors.toList());
@@ -105,11 +105,11 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                 }
             }
             Optional<YesOrNo> respondentChildAbuse = ofNullable(respondentAllegationsOfHarmData.get()
-                                                                    .getRespondentAllegationsOfHarmInfo().getRespondentChildAbuse());
+                                                                    .getRespAllegationsOfHarmInfo().getRespondentChildAbuse());
             fields.add(respondentChildAbuse);
             if (respondentChildAbuse.isPresent() && respondentChildAbuse.equals(YesOrNo.Yes)) {
                 List<Behaviours> childAbuseBehaviour = respondentAllegationsOfHarmData.get()
-                    .getRespondentChildAbuseBehaviourInfo()
+                    .getRespChildAbuseInfo()
                     .stream()
                     .map(Element::getValue)
                     .collect(Collectors.toList());
@@ -123,56 +123,56 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
             }
             Optional<YesOrNo> respondentChildAbduction = ofNullable(respondentAllegationsOfHarmData
                                                                         .get()
-                                                                        .getRespondentAllegationsOfHarmInfo()
+                                                                        .getRespAllegationsOfHarmInfo()
                                                                         .getRespondentChildAbduction());
             fields.add(respondentChildAbduction);
             if (respondentChildAbduction.isPresent() && respondentChildAbduction.equals(YesOrNo.Yes)) {
-                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentChildAbductionInfo().getReasonForChildAbductionBelief()));
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespChildAbductionInfo().getReasonForChildAbductionBelief()));
                 Optional<YesOrNo> previousThreats = ofNullable(respondentAllegationsOfHarmData
                                                                    .get()
-                                                                   .getRespondentChildAbductionInfo()
+                                                                   .getRespChildAbductionInfo()
                                                                    .getPreviousThreatsForChildAbduction());
                 fields.add(previousThreats);
                 if (previousThreats.isPresent() && previousThreats.equals(YesOrNo.Yes)) {
-                    fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentChildAbductionInfo()
+                    fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespChildAbductionInfo()
                                               .getPreviousThreatsForChildAbductionDetails()));
                 }
-                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentChildAbductionInfo().getWhereIsChild()));
-                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentChildAbductionInfo().getHasPassportOfficeNotified()));
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespChildAbductionInfo().getWhereIsChild()));
+                fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespChildAbductionInfo().getHasPassportOfficeNotified()));
                 Optional<YesOrNo> orgInvolvedInPreviousAbduction = ofNullable(respondentAllegationsOfHarmData
                                                                                   .get()
-                                                                                  .getRespondentChildAbductionInfo()
+                                                                                  .getRespChildAbductionInfo()
                                                                                   .getAnyOrgInvolvedInPreviousAbduction());
                 fields.add(orgInvolvedInPreviousAbduction);
                 if (orgInvolvedInPreviousAbduction.isPresent() && orgInvolvedInPreviousAbduction.equals(YesOrNo.Yes)) {
                     fields.add(ofNullable(respondentAllegationsOfHarmData
                                               .get()
-                                              .getRespondentChildAbductionInfo()
+                                              .getRespChildAbductionInfo()
                                               .getAnyOrgInvolvedInPreviousAbductionDetails()));
                 }
                 Optional<YesOrNo> childHasPassport = ofNullable(respondentAllegationsOfHarmData
-                                                                    .get().getRespondentChildAbductionInfo().getChildrenHavePassport());
+                                                                    .get().getRespChildAbductionInfo().getChildrenHavePassport());
                 fields.add(childHasPassport);
                 if (childHasPassport.isPresent() && childHasPassport.equals(YesOrNo.Yes)) {
-                    fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentChildAbductionInfo()
+                    fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespChildAbductionInfo()
                                               .getChildrenHaveMoreThanOnePassport()));
                     List<WhomConsistPassportList> whoConsistPassportList = respondentAllegationsOfHarmData
-                        .get().getRespondentChildAbductionInfo().getWhoHasChildPassport();
+                        .get().getRespChildAbductionInfo().getWhoHasChildPassport();
                     fields.add(ofNullable(whoConsistPassportList));
                     for (WhomConsistPassportList whomConsistPassport : whoConsistPassportList) {
                         if (whomConsistPassport.equals(WhomConsistPassportList.otherPeople)) {
                             fields.add(ofNullable(respondentAllegationsOfHarmData.get()
-                                                      .getRespondentChildAbductionInfo().getWhoHasChildPassportOther()));
+                                                      .getRespChildAbductionInfo().getWhoHasChildPassportOther()));
 
                         }
                     }
                 }
             }
 
-            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentOtherConcernsInfo().getChildHavingOtherFormOfContact()));
-            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentOtherConcernsInfo().getChildSpendingSupervisedTime()));
-            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentOtherConcernsInfo().getOrdersRespondentWantFromCourt()));
-            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespondentOtherConcernsInfo().getChildSpendingUnsupervisedTime()));
+            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespOtherConcernsInfo().getChildHavingOtherFormOfContact()));
+            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespOtherConcernsInfo().getChildSpendingSupervisedTime()));
+            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespOtherConcernsInfo().getOrdersRespondentWantFromCourt()));
+            fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespOtherConcernsInfo().getChildSpendingUnsupervisedTime()));
         }
 
         return fields.stream().noneMatch(Optional::isEmpty)
