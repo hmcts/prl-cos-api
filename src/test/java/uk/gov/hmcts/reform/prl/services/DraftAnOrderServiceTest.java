@@ -939,7 +939,7 @@ public class DraftAnOrderServiceTest {
             caseData
         );
 
-        assertEquals(2, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
+        assertEquals(3, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
     }
 
     @Test
