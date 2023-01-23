@@ -149,14 +149,14 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-demo.service.core-compute-demo.internal
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:W7supXKMJgcEWKBS}
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
     url: https://idam-api.demo.platform.hmcts.net
   client:
     id: prl-cos-api
     baseUrl: https://idam-api.demo.platform.hmcts.net
     redirect_uri: https://manage-case.demo.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:W7supXKMJgcEWKBS}
+    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
     clientId: xuiwebapp
     authorize:
       context-path: /oauth2/authorize
