@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.noticeofchange;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -43,6 +43,8 @@ public class NoticeOfChangePartiesServiceTest {
     NoticeOfChangePartiesConverter partiesConverter;
 
     Optional<Element<PartyDetails>> optionalParty;
+
+    Element<PartyDetails> wrappedRespondents;
 
     NoticeOfChangeParties noticeOfChangeParties = NoticeOfChangeParties.builder().build();
 
@@ -64,7 +66,7 @@ public class NoticeOfChangePartiesServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         optionalParty = Optional.of(wrappedRespondents);
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
 
@@ -77,21 +79,6 @@ public class NoticeOfChangePartiesServiceTest {
     @Test
     public void testGenerate() {
 
-        PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
-            .representativeLastName("Xyz")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .phoneNumber("1234567890")
-            .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
-            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .build();
-
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-
         when(policyConverter.generate(role, optionalParty))
             .thenReturn(organisationPolicy);
 
@@ -100,7 +87,7 @@ public class NoticeOfChangePartiesServiceTest {
 
         Map<String, Object> test = noticeOfChangePartiesService.generate(caseData, role.getRepresenting());
 
-        Assert.assertNotNull(test);
+        assertTrue(test.containsKey("respondent0Policy"));
 
     }
 
@@ -113,7 +100,7 @@ public class NoticeOfChangePartiesServiceTest {
 
         Map<String, Object> test = noticeOfChangePartiesService.generate(caseData, role.getRepresenting(), strategy);
 
-        Assert.assertNotNull(test);
+        assertTrue(test.containsKey("respondent0Policy"));
 
     }
 }
