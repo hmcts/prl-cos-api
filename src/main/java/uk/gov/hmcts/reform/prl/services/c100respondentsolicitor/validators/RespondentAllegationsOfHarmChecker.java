@@ -124,7 +124,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
             Optional<YesOrNo> respondentChildAbduction = ofNullable(respondentAllegationsOfHarmData
                                                                         .get()
                                                                         .getRespAllegationsOfHarmInfo()
-                                                                        .getRespondentChildAbduction());
+                                                                        .getIsRespondentChildAbduction());
             fields.add(respondentChildAbduction);
             if (respondentChildAbduction.isPresent() && respondentChildAbduction.equals(YesOrNo.Yes)) {
                 fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespChildAbductionInfo().getReasonForChildAbductionBelief()));
