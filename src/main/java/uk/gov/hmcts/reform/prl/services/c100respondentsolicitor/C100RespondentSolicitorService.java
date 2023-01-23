@@ -48,13 +48,13 @@ public class C100RespondentSolicitorService {
     private final CcdDataStoreService ccdDataStoreService;
 
     @Autowired
-    private RespondentSolicitorMiamService miamService;
+    private final RespondentSolicitorMiamService miamService;
 
     @Autowired
-    private ResponseSubmitChecker responseSubmitChecker;
+    private final ResponseSubmitChecker responseSubmitChecker;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
         log.info("Inside prePopulateAboutToStartCaseData");

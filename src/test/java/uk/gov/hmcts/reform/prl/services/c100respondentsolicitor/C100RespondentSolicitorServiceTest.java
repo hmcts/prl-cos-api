@@ -3,8 +3,10 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -12,32 +14,49 @@ import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
+import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class C100RespondentSolicitorServiceTest {
 
-    @Mock
+    @InjectMocks
     C100RespondentSolicitorService respondentSolicitorService;
 
     CaseData caseData;
+
+    @Mock
+    ObjectMapper objectMapper;
+
+    @Mock
+    CcdDataStoreService ccdDataStoreService;
+
+    @Mock
+    ResponseSubmitChecker responseSubmitChecker;
+
+    FindUserCaseRolesResponse findUserCaseRolesResponse;
+
+    boolean mandatoryFinished = false;
 
     public static final String authToken = "Bearer TestAuthToken";
 
     @Before
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
 
         List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
 
@@ -60,10 +79,11 @@ public class C100RespondentSolicitorServiceTest {
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
 
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code(String.valueOf(0)).build();
+        DynamicListElement dynamicListElement = DynamicListElement
+            .builder().code("1afdfa01-8280-4e2c-b810-ab7cf741988a").build();
         DynamicList chooseRespondent = DynamicList.builder().value(dynamicListElement).build();
 
-        caseData = CaseData.builder().respondents(respondentList)
+        caseData = CaseData.builder().respondents(respondentList).id(1)
             .chooseRespondentDynamicList(chooseRespondent)
             .keepContactDetailsPrivateOther(KeepDetailsPrivate.builder()
                                            .confidentiality(Yes)
@@ -75,8 +95,14 @@ public class C100RespondentSolicitorServiceTest {
     @Test
     public void populateAboutToStartCaseDataTest() {
 
-        List<String> errorList = new ArrayList<>();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
+                                                   authToken)).thenReturn(findUserCaseRolesResponse);
+
+        List<String> errorList = new ArrayList<>();
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -90,15 +116,17 @@ public class C100RespondentSolicitorServiceTest {
             callbackRequest, authToken, errorList
         );
 
-        assertNotNull(response);
+        assertTrue(response.containsKey("respondents"));
     }
 
     @Test
     public void populateAboutToSubmitCaseDataTest() {
 
-        List<String> errorList = new ArrayList<>();
-
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        List<String> errorList = new ArrayList<>();
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -112,13 +140,15 @@ public class C100RespondentSolicitorServiceTest {
             callbackRequest, authToken, errorList
         );
 
-        assertNotNull(response);
+        assertTrue(response.containsKey("respondents"));
     }
 
     @Test
     public void populateSolicitorRespondentListTest() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -132,13 +162,16 @@ public class C100RespondentSolicitorServiceTest {
             callbackRequest, authToken
         );
 
-        assertNotNull(response);
+        assertTrue(response.containsKey("chooseRespondentDynamicList"));
 
     }
 
     @Test
     public void updateActiveRespondentSelectionBySolicitor() {
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -152,12 +185,15 @@ public class C100RespondentSolicitorServiceTest {
             callbackRequest, authToken
         );
 
-        assertNotNull(response);
+        assertTrue(response.containsKey("respondents"));
     }
 
     @Test
     public void generateConfidentialityDynamicSelectionDisplayTest() {
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -171,7 +207,7 @@ public class C100RespondentSolicitorServiceTest {
             callbackRequest
         );
 
-        assertNotNull(response);
+        assertTrue(response.containsKey("confidentialListDetails"));
     }
 
     @Test
@@ -180,6 +216,10 @@ public class C100RespondentSolicitorServiceTest {
         List<String> errorList = new ArrayList<>();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        when(responseSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(mandatoryFinished);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -193,7 +233,7 @@ public class C100RespondentSolicitorServiceTest {
             callbackRequest, errorList
         );
 
-        assertNotNull(response);
+        assertTrue(response.containsKey("respondents"));
 
     }
 
@@ -203,6 +243,8 @@ public class C100RespondentSolicitorServiceTest {
         List<String> errorList = new ArrayList<>();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -216,7 +258,7 @@ public class C100RespondentSolicitorServiceTest {
             callbackRequest, authToken, errorList
         );
 
-        assertNotNull(response);
+        assertTrue(response.containsKey("respondents"));
     }
 
 }
