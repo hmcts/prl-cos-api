@@ -10,12 +10,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.ATTENDING_THE_COURT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.CONSENT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.*;
 
 @Getter
 @Service
@@ -58,6 +53,9 @@ public class RespondentEventsChecker {
         eventStatus.put(ATTENDING_THE_COURT, attendToCourtChecker);
         eventStatus.put(MIAM, respondentMiamChecker);
         eventStatus.put(CURRENT_OR_PREVIOUS_PROCEEDINGS, currentOrPastProceedingsChecker);
+        eventStatus.put(ALLEGATION_OF_HARM, respondentAllegationsOfHarmChecker);
+        eventStatus.put(INTERNATIONAL_ELEMENT, getInternationalElementsChecker());
+        eventStatus.put(CONFIRM_EDIT_CONTACT_DETAILS, respondentContactDetailsChecker);
 
     }
 
