@@ -13,32 +13,27 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class DraftOrdersControllerFunctionalTest {
+public class EditAndApproveDraftOrderControllerFunctionalTest {
+
+    private final String userToken = "Bearer testToken";
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
     @MockBean
-    private ManageOrderService manageOrderService;
+    private DraftAnOrderService draftAnOrderService;
 
 
 
-    private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
     private static final String VALID_DRAFT_ORDER_REQUEST_BODY = "requests/draft-order-sdo-with-options-request.json";
 
 
@@ -48,9 +43,9 @@ public class DraftOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenReset_fields_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        mockMvc.perform(post("/reset-fields")
+    public void givenRequestBody_whenPopulate_draft_order_dropdown_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
+        mockMvc.perform(post("/populate-draft-order-dropdown")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
@@ -60,9 +55,9 @@ public class DraftOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenSelected_order_then200Response() throws Exception {
+    public void givenRequestBody_whenJudge_admin_populate_draft_order_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/selected-order")
+        mockMvc.perform(post("/judge-or-admin-populate-draft-order")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
@@ -72,13 +67,9 @@ public class DraftOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenPopulate_draft_order_fields_then200Response() throws Exception {
+    public void givenRequestBody_whenJudge_or_admin_edit_approve_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .build();
-        when(manageOrderService.populateCustomOrderFields(caseData)).thenReturn(caseData);
-        mockMvc.perform(post("/populate-draft-order-fields")
+        mockMvc.perform(post("/judge-or-admin-edit-approve/about-to-submit")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
@@ -88,9 +79,9 @@ public class DraftOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenPopulate_standard_direction_order_fields() throws Exception {
+    public void givenRequestBody_whenJudge_or_admin_populate_draft_order_custom_fields_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/populate-standard-direction-order-fields")
+        mockMvc.perform(post("/judge-or-admin-populate-draft-order-custom-fields")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
@@ -100,27 +91,9 @@ public class DraftOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenAbout_to_submit() throws Exception {
+    public void givenRequestBody_whenJudge_or_admin_populate_draft_order_common_fields_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/about-to-submit")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn();
-    }
-
-    @Test
-    public void givenRequestBody_whenGenerate_doc() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        when(manageOrderService.getCaseData("test", caseData)).thenReturn(caseDataMap);
-
-        mockMvc.perform(post("/generate-doc")
+        mockMvc.perform(post("/judge-or-admin-populate-draft-order-common-fields")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
