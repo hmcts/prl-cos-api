@@ -53,7 +53,7 @@ public class CaseControllerFunctionalTest {
 
     private static final String CASE_DATA_INPUT = "requests/create-case-valid-casedata-input.json";
 
-    private static final String UPDATE_CASE_REQUEST_BODY = "requests/update-case.json";
+    private static final String LINK_CITIZEN_REQUEST_BODY = "requests/link-citizen-case.json";
 
     private final String targetInstance =
             StringUtils.defaultIfBlank(
@@ -92,8 +92,22 @@ public class CaseControllerFunctionalTest {
     }
 
     @Test
+    public void testValidateAccessCode() {
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .header("accessCode", "12345678")
+            .header("caseId", "12345678")
+            .when()
+            .contentType("application/json")
+            .get("/validate-access-code")
+            .then()
+            .assertThat().statusCode(200);
+    }
+
+    @Test
     public void testLinkCitizenToCase() throws Exception {
-        String requestBody = ResourceLoader.loadJson(UPDATE_CASE_REQUEST_BODY);
+        String requestBody = ResourceLoader.loadJson(LINK_CITIZEN_REQUEST_BODY);
         when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
 
         mockMvc.perform(post("/citizen/link")
