@@ -103,6 +103,10 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RestController
 @RequiredArgsConstructor
 public class CallbackController {
+    public static final String C100_DEFAULT_BASE_LOCATION_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
+    public static final String C100_DEFAULT_BASE_LOCATION_ID = "283922";
+    public static final String C100_DEFAULT_REGION_NAME = "Midlands";
+    public static final String C100_DEFAULT_REGION_ID = "2";
     private final CaseEventService caseEventService;
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
@@ -277,6 +281,12 @@ public class CallbackController {
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
             caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
         }
+        
+        //Assign default court to all c100 cases for work allocation.
+        caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
+            .regionId(C100_DEFAULT_REGION_ID)
+            .baseLocationId(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
+            .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

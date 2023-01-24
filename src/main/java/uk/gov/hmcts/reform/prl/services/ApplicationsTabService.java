@@ -868,8 +868,8 @@ public class ApplicationsTabService implements TabService {
         }
         PartyDetails currentRespondent = caseData.getRespondentsFL401();
         currentRespondent = maskFl401ConfidentialDetails(currentRespondent);
-        FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
 
+        FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
         return toMap(a);
     }
 

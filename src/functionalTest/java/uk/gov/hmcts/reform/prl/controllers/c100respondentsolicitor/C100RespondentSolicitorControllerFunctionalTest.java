@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers;
+package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -13,33 +13,29 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class DraftOrdersControllerFunctionalTest {
+public class C100RespondentSolicitorControllerFunctionalTest {
+
+    private final String userToken = "Bearer testToken";
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
     @MockBean
-    private ManageOrderService manageOrderService;
-
-
+    private C100RespondentSolicitorService respondentSolicitorService;
+    @MockBean
+    private DocumentGenService documentGenService;
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
-    private static final String VALID_DRAFT_ORDER_REQUEST_BODY = "requests/draft-order-sdo-with-options-request.json";
 
 
     @Before
@@ -48,9 +44,9 @@ public class DraftOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenReset_fields_then200Response() throws Exception {
+    public void givenRequestBody_whenRespondent_solicitor_about_to_start_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        mockMvc.perform(post("/reset-fields")
+        mockMvc.perform(post("/respondent-solicitor/about-to-start")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
@@ -60,9 +56,9 @@ public class DraftOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenSelected_order_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/selected-order")
+    public void givenRequestBody_whenRespondent_solicitor_about_to_submit_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        mockMvc.perform(post("/respondent-solicitor/about-to-submit")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
@@ -72,13 +68,9 @@ public class DraftOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenPopulate_draft_order_fields_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .build();
-        when(manageOrderService.populateCustomOrderFields(caseData)).thenReturn(caseData);
-        mockMvc.perform(post("/populate-draft-order-fields")
+    public void givenRequestBody_whenPopulate_solicitor_respondent_list_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        mockMvc.perform(post("/respondent-solicitor/populate-solicitor-respondent-list")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
@@ -88,9 +80,9 @@ public class DraftOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenPopulate_standard_direction_order_fields() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/populate-standard-direction-order-fields")
+    public void givenRequestBody_whenRespondent_selection_about_to_submit_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        mockMvc.perform(post("/respondent-solicitor/respondent-selection-about-to-submit")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
@@ -100,9 +92,9 @@ public class DraftOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenAbout_to_submit() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        mockMvc.perform(post("/about-to-submit")
+    public void givenRequestBody_whenKeep_details_private_list_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        mockMvc.perform(post("/respondent-solicitor/keep-details-private-list")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
@@ -112,15 +104,9 @@ public class DraftOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenGenerate_doc() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        when(manageOrderService.getCaseData("test", caseData)).thenReturn(caseDataMap);
-
-        mockMvc.perform(post("/generate-doc")
+    public void givenRequestBody_whenGenerate_c7response_draft_document_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        mockMvc.perform(post("/respondent-solicitor/generate-c7response-draft-document")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
@@ -128,4 +114,5 @@ public class DraftOrdersControllerFunctionalTest {
             .andExpect(status().isOk())
             .andReturn();
     }
+
 }
