@@ -6,6 +6,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DocumentAcknowledge;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,5 +21,8 @@ public class SupportingEvidenceBundle {
     private final Document document;
     @JsonProperty("documentAcknowledge")
     private final List<DocumentAcknowledge> documentAcknowledge;
+
+    private LocalDateTime dateTimeUploaded;
+    private String uploadedBy;
 
 }

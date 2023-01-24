@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models;
+package uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,10 +10,8 @@ import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrd
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DocumentAcknowledge;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ParentalResponsibilityType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Supplement;
-import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
-import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.UploadApplicationDraftOrder;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
@@ -34,5 +32,7 @@ public class C2DocumentBundle {
     private final List<Element<Supplement>> supplementsBundle;
     private final List<Element<UploadApplicationDraftOrder>> additionalDraftOrdersBundle;
     private final List<Element<SupportingEvidenceBundle>> supportingEvidenceBundle;
+    private final String uploadedDateTime;
+    private final String author;
 
 }
