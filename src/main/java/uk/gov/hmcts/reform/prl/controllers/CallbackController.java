@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -617,15 +618,21 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse prePopulateLegalAdvisorDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
+        try {
+            log.info("*** request recieved to get the legalAdvisor details : {}", new ObjectMapper().writeValueAsString(callbackRequest));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
-        List<String> dummyValue = new ArrayList<>();
-        dummyValue.add("test1");
-        dummyValue.add("test2");
-        dummyValue.add("test3");
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().code("test1").label("test1").build());
+        dynamicListElements.add(DynamicListElement.builder().code("test2").label("test2").build());
+        dynamicListElements.add(DynamicListElement.builder().code("test3").label("test3").build());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        caseDataUpdated.put("legalAdvisorList", dummyValue);
+        caseDataUpdated.put("legalAdvisorList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(dynamicListElements)
+            .build());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 

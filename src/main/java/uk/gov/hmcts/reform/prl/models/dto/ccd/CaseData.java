@@ -731,7 +731,7 @@ public class CaseData implements MappableObject {
 
     private Flags caseFlags;
 
-    private final List<String> legalAdvisorList;
+    private final DynamicList legalAdvisorList;
 
 
 }
