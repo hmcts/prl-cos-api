@@ -720,6 +720,7 @@ public class CaseData implements MappableObject {
     private BundlingInformation bundleInformation;
 
     private String judgeDirectionsToAdmin;
+    private YesOrNo doYouWantToEditTheOrder;
     private YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     private String courtAdminNotes;
 

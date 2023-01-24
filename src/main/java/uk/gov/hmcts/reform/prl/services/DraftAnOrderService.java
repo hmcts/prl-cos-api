@@ -111,7 +111,6 @@ public class DraftAnOrderService {
 
     private DraftOrder getCurrentOrderDetails(CaseData caseData) {
         log.info(" Getting current order details from case data {}", caseData);
-        DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
@@ -550,13 +549,21 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData) {
-        DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
+        Document orderDocumentEng;
+        Document orderDocumentWelsh;
+        if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+            orderDocumentEng = caseData.getPreviewOrderDoc();
+            orderDocumentWelsh = caseData.getPreviewOrderDocWelsh();
+        } else {
+            orderDocumentEng = draftOrder.getOrderDocument();
+            orderDocumentWelsh = draftOrder.getOrderDocumentWelsh();
+        }
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
             .typeOfOrder(draftOrder.getOrderType() != null
                              ? draftOrder.getOrderType().getDisplayedValue() : null)
             .orderTypeId(draftOrder.getOrderType().getDisplayedValue())
-            .orderDocument(caseData.getPreviewOrderDoc())
-            .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
+            .orderDocument(orderDocumentEng)
+            .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
