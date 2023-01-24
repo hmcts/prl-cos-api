@@ -21,35 +21,31 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
-        activeRespondent = caseData.getRespondents()
+        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
-        return anyNonEmpty(activeRespondent
-                               .get()
-                               .getValue()
-                               .getResponse()
-                               .getConsent()
-        );
+        return activeRespondent.filter(partyDetailsElement -> anyNonEmpty(partyDetailsElement
+                                                                              .getValue()
+                                                                              .getResponse()
+                                                                              .getConsent()
+        )).isPresent();
     }
 
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
         boolean mandatoryInfo = false;
-
-        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
-        activeRespondent = caseData.getRespondents()
+        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
 
-        Optional<Consent> consent = Optional.ofNullable(activeRespondent.get()
-                                                            .getValue()
-                                                            .getResponse()
-                                                            .getConsent());
-        if (!consent.isEmpty()) {
-            if (checkConsentMandatoryCompleted(consent)) {
+        if (activeRespondent.isPresent()) {
+            Optional<Consent> consent = Optional.ofNullable(activeRespondent.get()
+                                                                .getValue()
+                                                                .getResponse()
+                                                                .getConsent());
+            if (!consent.isEmpty() && checkConsentMandatoryCompleted(consent)) {
                 mandatoryInfo = true;
             }
         }
@@ -59,16 +55,18 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
     private boolean checkConsentMandatoryCompleted(Optional<Consent> consent) {
 
         List<Optional<?>> fields = new ArrayList<>();
-        Optional<YesOrNo> getConsentToApplication = ofNullable(consent.get().getConsentToTheApplication());
-        fields.add(getConsentToApplication);
-        if (getConsentToApplication.isPresent() && getConsentToApplication.equals(Optional.of((YesOrNo.No)))) {
-            fields.add(ofNullable(consent.get().getNoConsentReason()));
-        }
-        fields.add(ofNullable(consent.get().getApplicationReceivedDate()));
-        Optional<YesOrNo> getPermission = ofNullable(consent.get().getPermissionFromCourt());
-        fields.add(getPermission);
-        if (getPermission.isPresent() && getPermission.equals(Optional.of((YesOrNo.Yes)))) {
-            fields.add(ofNullable(consent.get().getCourtOrderDetails()));
+        if (consent.isPresent()) {
+            Optional<YesOrNo> getConsentToApplication = ofNullable(consent.get().getConsentToTheApplication());
+            fields.add(getConsentToApplication);
+            if (getConsentToApplication.isPresent() && getConsentToApplication.equals(Optional.of((YesOrNo.No)))) {
+                fields.add(ofNullable(consent.get().getNoConsentReason()));
+            }
+            fields.add(ofNullable(consent.get().getApplicationReceivedDate()));
+            Optional<YesOrNo> getPermission = ofNullable(consent.get().getPermissionFromCourt());
+            fields.add(getPermission);
+            if (getPermission.isPresent() && getPermission.equals(Optional.of((YesOrNo.Yes)))) {
+                fields.add(ofNullable(consent.get().getCourtOrderDetails()));
+            }
         }
         boolean test = fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
