@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -618,11 +617,7 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse prePopulateLegalAdvisorDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-        try {
-            log.info("*** request recieved to get the legalAdvisor details : {}", new ObjectMapper().writeValueAsString(callbackRequest));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        log.info("*** request recieved to get the legalAdvisor details : {}", callbackRequest.toString());
 
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         dynamicListElements.add(DynamicListElement.builder().code("test1").label("test1").build());
