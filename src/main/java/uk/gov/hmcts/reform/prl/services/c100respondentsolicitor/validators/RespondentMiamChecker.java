@@ -25,12 +25,11 @@ public class RespondentMiamChecker implements RespondentEventChecker {
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
-        return anyNonEmpty(activeRespondent
-                               .get()
-                               .getValue()
-                               .getResponse()
-                               .getSolicitorMiam()
-        );
+        return activeRespondent.filter(partyDetailsElement -> anyNonEmpty(partyDetailsElement
+                                                                              .getValue()
+                                                                              .getResponse()
+                                                                              .getSolicitorMiam()
+        )).isPresent();
     }
 
     @Override
@@ -43,15 +42,17 @@ public class RespondentMiamChecker implements RespondentEventChecker {
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
 
-        Optional<SolicitorMiam> miam = Optional.ofNullable(activeRespondent.get()
-                                                      .getValue()
-                                                      .getResponse()
-                                                      .getSolicitorMiam());
-        if (!miam.isEmpty()) {
-            log.info("before checking miam mandatory info if loop...");
-            if (checkMiamManadatoryCompleted(miam)) {
-                log.info("inside checking miam mandatory info if loop...");
-                mandatoryInfo = true;
+        if (activeRespondent.isPresent()) {
+            Optional<SolicitorMiam> miam = Optional.ofNullable(activeRespondent.get()
+                                                                   .getValue()
+                                                                   .getResponse()
+                                                                   .getSolicitorMiam());
+            if (!miam.isEmpty()) {
+                log.info("before checking miam mandatory info if loop...");
+                if (checkMiamManadatoryCompleted(miam)) {
+                    log.info("inside checking miam mandatory info if loop...");
+                    mandatoryInfo = true;
+                }
             }
         }
         return mandatoryInfo;
@@ -60,13 +61,15 @@ public class RespondentMiamChecker implements RespondentEventChecker {
     private boolean checkMiamManadatoryCompleted(Optional<SolicitorMiam> miam) {
         List<Optional<?>> fields = new ArrayList<>();
         log.info("entering miam checker if loop...");
-        fields.add(ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam()));
-        YesOrNo attendMiam = miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam();
-        if (attendMiam.equals(YesOrNo.No)) {
-            fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam()));
-            YesOrNo willingToAttendMiam = miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam();
-            if (willingToAttendMiam.equals(YesOrNo.No)) {
-                fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getReasonNotAttendingMiam()));
+        if (miam.isPresent()) {
+            fields.add(ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam()));
+            YesOrNo attendMiam = miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam();
+            if (attendMiam.equals(YesOrNo.No)) {
+                fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam()));
+                YesOrNo willingToAttendMiam = miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam();
+                if (willingToAttendMiam.equals(YesOrNo.No)) {
+                    fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getReasonNotAttendingMiam()));
+                }
             }
         }
         return fields.stream().noneMatch(Optional::isEmpty)

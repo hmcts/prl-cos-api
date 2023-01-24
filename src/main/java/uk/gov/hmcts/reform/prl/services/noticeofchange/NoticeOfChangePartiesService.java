@@ -35,7 +35,7 @@ public class NoticeOfChangePartiesService {
         Map<String, Object> data = new HashMap<>();
 
         List<Element<PartyDetails>> elements = representing.getTarget().apply(caseData);
-        int numElements = elements != null ? elements.size() : 0;
+        int numElements = null != elements ? elements.size() : 0;
 
         List<SolicitorRole> solicitorRoles = SolicitorRole.values(representing);
         for (int i = 0; i < solicitorRoles.size(); i++) {
