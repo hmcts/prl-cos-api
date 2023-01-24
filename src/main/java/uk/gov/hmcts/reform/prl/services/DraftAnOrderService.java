@@ -116,8 +116,8 @@ public class DraftAnOrderService {
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
             .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
-            .orderDocument(language.isGenEng() ? caseData.getPreviewOrderDoc() : null)
-            .orderDocumentWelsh(language.isGenWelsh() ? caseData.getPreviewOrderDocWelsh() : null)
+            .orderDocument(caseData.getPreviewOrderDoc())
+            .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
@@ -552,8 +552,8 @@ public class DraftAnOrderService {
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
             .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
-            .orderDocument(language.isGenEng() ? caseData.getPreviewOrderDoc() : null)
-            .orderDocumentWelsh(language.isGenWelsh() ? caseData.getPreviewOrderDocWelsh() : null)
+            .orderDocument(caseData.getPreviewOrderDoc())
+            .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
