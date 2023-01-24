@@ -61,14 +61,14 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
         List<Optional<?>> fields = new ArrayList<>();
         Optional<YesOrNo> respondentAohYesOrNo = ofNullable(respondentAllegationsOfHarmData.get().getRespAohYesOrNo());
         fields.add(respondentAohYesOrNo);
-        if (respondentAohYesOrNo.isPresent() && respondentAohYesOrNo.equals(YesOrNo.Yes)) {
+        if (respondentAohYesOrNo.isPresent() && respondentAohYesOrNo.equals(Optional.of((YesOrNo.Yes)))) {
             Optional<YesOrNo> drugOrAlcoholAbuse = ofNullable(respondentAllegationsOfHarmData
                                                                   .get()
                                                                   .getRespAllegationsOfHarmInfo()
                                                                   .getRespondentDrugOrAlcoholAbuse());
 
             fields.add(drugOrAlcoholAbuse);
-            if (drugOrAlcoholAbuse.isPresent() && drugOrAlcoholAbuse.equals(YesOrNo.Yes)) {
+            if (drugOrAlcoholAbuse.isPresent() && drugOrAlcoholAbuse.equals(Optional.of((YesOrNo.Yes)))) {
                 fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespAllegationsOfHarmInfo()
                     .getRespondentDrugOrAlcoholAbuseDetails()));
             }
@@ -77,7 +77,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                                                                    .getRespAllegationsOfHarmInfo()
                                                                    .getRespondentOtherSafetyConcerns());
             fields.add(otherSafetyConcerns);
-            if (otherSafetyConcerns.isPresent() && otherSafetyConcerns.equals(YesOrNo.Yes)) {
+            if (otherSafetyConcerns.isPresent() && otherSafetyConcerns.equals(Optional.of((YesOrNo.Yes)))) {
                 fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespAllegationsOfHarmInfo()
                                           .getRespondentOtherSafetyConcernsDetails()));
             }
@@ -90,7 +90,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
             Optional<YesOrNo> respondentDomesticAbuse = ofNullable(respondentAllegationsOfHarmData.get()
                                                                        .getRespAllegationsOfHarmInfo().getRespondentDomesticAbuse());
             fields.add(respondentDomesticAbuse);
-            if (respondentDomesticAbuse.isPresent() && respondentDomesticAbuse.equals(YesOrNo.Yes)) {
+            if (respondentDomesticAbuse.isPresent() && respondentDomesticAbuse.equals(Optional.of((YesOrNo.Yes)))) {
                 List<Behaviours> domesticAbuseBehaviour = respondentAllegationsOfHarmData.get()
                     .getRespDomesticAbuseInfo()
                     .stream()
@@ -107,7 +107,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
             Optional<YesOrNo> respondentChildAbuse = ofNullable(respondentAllegationsOfHarmData.get()
                                                                     .getRespAllegationsOfHarmInfo().getRespondentChildAbuse());
             fields.add(respondentChildAbuse);
-            if (respondentChildAbuse.isPresent() && respondentChildAbuse.equals(YesOrNo.Yes)) {
+            if (respondentChildAbuse.isPresent() && respondentChildAbuse.equals(Optional.of((YesOrNo.Yes)))) {
                 List<Behaviours> childAbuseBehaviour = respondentAllegationsOfHarmData.get()
                     .getRespChildAbuseInfo()
                     .stream()
@@ -126,14 +126,14 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                                                                         .getRespAllegationsOfHarmInfo()
                                                                         .getIsRespondentChildAbduction());
             fields.add(respondentChildAbduction);
-            if (respondentChildAbduction.isPresent() && respondentChildAbduction.equals(YesOrNo.Yes)) {
+            if (respondentChildAbduction.isPresent() && respondentChildAbduction.equals(Optional.of((YesOrNo.Yes)))) {
                 fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespChildAbductionInfo().getReasonForChildAbductionBelief()));
                 Optional<YesOrNo> previousThreats = ofNullable(respondentAllegationsOfHarmData
                                                                    .get()
                                                                    .getRespChildAbductionInfo()
                                                                    .getPreviousThreatsForChildAbduction());
                 fields.add(previousThreats);
-                if (previousThreats.isPresent() && previousThreats.equals(YesOrNo.Yes)) {
+                if (previousThreats.isPresent() && previousThreats.equals(Optional.of((YesOrNo.Yes)))) {
                     fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespChildAbductionInfo()
                                               .getPreviousThreatsForChildAbductionDetails()));
                 }
@@ -144,7 +144,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                                                                                   .getRespChildAbductionInfo()
                                                                                   .getAnyOrgInvolvedInPreviousAbduction());
                 fields.add(orgInvolvedInPreviousAbduction);
-                if (orgInvolvedInPreviousAbduction.isPresent() && orgInvolvedInPreviousAbduction.equals(YesOrNo.Yes)) {
+                if (orgInvolvedInPreviousAbduction.isPresent() && orgInvolvedInPreviousAbduction.equals(Optional.of(YesOrNo.Yes))) {
                     fields.add(ofNullable(respondentAllegationsOfHarmData
                                               .get()
                                               .getRespChildAbductionInfo()
@@ -153,7 +153,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                 Optional<YesOrNo> childHasPassport = ofNullable(respondentAllegationsOfHarmData
                                                                     .get().getRespChildAbductionInfo().getChildrenHavePassport());
                 fields.add(childHasPassport);
-                if (childHasPassport.isPresent() && childHasPassport.equals(YesOrNo.Yes)) {
+                if (childHasPassport.isPresent() && childHasPassport.equals(Optional.of((YesOrNo.Yes)))) {
                     fields.add(ofNullable(respondentAllegationsOfHarmData.get().getRespChildAbductionInfo()
                                               .getChildrenHaveMoreThanOnePassport()));
                     List<WhomConsistPassportList> whoConsistPassportList = respondentAllegationsOfHarmData
