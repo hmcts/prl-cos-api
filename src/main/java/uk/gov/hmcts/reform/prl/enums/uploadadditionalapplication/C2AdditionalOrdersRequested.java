@@ -26,9 +26,9 @@ public enum C2AdditionalOrdersRequested {
         "TERMINATION_OF_APPOINTMENT_OF_GUARDIAN",
             "Termination of appointment of a guardian"
     ),
-    @JsonProperty("applicationWithoutNotice")
-    applicationWithoutNotice(
-        "applicationWithoutNotice",
+    @JsonProperty("PARENTAL_RESPONSIBILITY")
+    PARENTAL_RESPONSIBILITY(
+        "PARENTAL_RESPONSIBILITY",
             "Parental responsibility"
     ),
     @JsonProperty("REQUESTING_ADJOURNMENT")
