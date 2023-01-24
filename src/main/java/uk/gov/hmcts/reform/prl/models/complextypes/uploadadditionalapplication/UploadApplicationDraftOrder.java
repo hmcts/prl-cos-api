@@ -10,8 +10,8 @@ import java.util.List;
 @Data
 @Builder(toBuilder = true)
 public class UploadApplicationDraftOrder {
-   private final String title;
-   private final Document document;
-   private final List<DocumentAcknowledge> documentAcknowledge;
+    private final String title;
+    private final Document document;
+    private final List<DocumentAcknowledge> documentAcknowledge;
 
 }

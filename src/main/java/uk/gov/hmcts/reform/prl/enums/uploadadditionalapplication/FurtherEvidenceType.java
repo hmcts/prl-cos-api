@@ -11,7 +11,10 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum FurtherEvidenceType {
     @JsonProperty("APPLICANT_STATEMENT")
-    APPLICANT_STATEMENT("APPLICANT_STATEMENT", "Applicant statement - for example witness, social work, initial or position statements, or police disclosure documents"),
+    APPLICANT_STATEMENT(
+        "APPLICANT_STATEMENT",
+        "Applicant statement - for example witness, social work, initial or position statements, or police disclosure documents"
+    ),
     @JsonProperty("GUARDIAN_REPORTS")
     GUARDIAN_REPORTS("GUARDIAN_REPORTS", "Child's guardian reports"),
     @JsonProperty("EXPERT_REPORTS")
