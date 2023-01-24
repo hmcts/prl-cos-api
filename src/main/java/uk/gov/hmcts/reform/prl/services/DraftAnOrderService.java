@@ -189,8 +189,8 @@ public class DraftAnOrderService {
             DraftOrder draftOrder = e.getValue();
             if (draftOrder.getOrderDocument().getDocumentFileName()
                 .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())
-                || draftOrder.getOrderDocumentWelsh().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName())) {
+                || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
+                .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName()))) {
                 updatedCaseData.put("orderCollection", getFinalOrderCollection(authorisation, caseData, draftOrder));
                 draftOrderCollection.remove(
                     draftOrderCollection.indexOf(e)
@@ -554,7 +554,7 @@ public class DraftAnOrderService {
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
-            .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
+            .orderTypeId(draftOrder.getOrderType().getDisplayedValue())
             .orderDocument(caseData.getPreviewOrderDoc())
             .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
