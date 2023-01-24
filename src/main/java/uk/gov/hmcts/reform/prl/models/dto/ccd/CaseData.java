@@ -88,6 +88,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCou
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -586,7 +587,6 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
 
-    private final Miam respondentSolicitorMiam;
 
     /**
      * Solicitor Details.
@@ -664,7 +664,13 @@ public class CaseData implements MappableObject {
      * Respondent Solicitor.
      */
 
+    private String respondentNameForResponse;
     private Consent respondentConsentToApplication;
+
+    private final Miam respondentSolicitorHaveYouAttendedMiam;
+    private final Miam respondentSolicitorWillingnessToAttendMiam;
+    private final String whatIsMiamPlaceHolder;
+    private final String helpMiamCostsExemptionsPlaceHolder;
 
     private KeepDetailsPrivate keepContactDetailsPrivate;
     private KeepDetailsPrivate keepContactDetailsPrivateOther;
@@ -683,6 +689,7 @@ public class CaseData implements MappableObject {
     /**
      * Respondent solicitor's allegations of harm.
      */
+    private final YesOrNo respondentAohYesNo;
     private final RespondentAllegationsOfHarm respondentAllegationsOfHarm;
     private final List<Element<Behaviours>> respondentDomesticAbuseBehaviour;
     private final List<Element<Behaviours>> respondentChildAbuseBehaviour;
@@ -704,6 +711,12 @@ public class CaseData implements MappableObject {
      */
     private final YesNoDontKnow currentOrPastProceedingsForChildren;
     private final List<Element<ProceedingDetails>> respondentExistingProceedings;
+
+    /**
+     * Respondent solicitor's Ability to participate proceedings.
+     */
+    private final SolicitorAbilityToParticipateInProceedings abilityToParticipateInProceedings;
+
     // C100 Rebuild
     @JsonUnwrapped
     @Builder.Default
