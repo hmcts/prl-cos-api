@@ -26,7 +26,7 @@ public enum ParentalResponsibilityType {
     }
 
     @JsonCreator
-    public static AdditionalApplicationTypeEnum getValue(String key) {
-        return AdditionalApplicationTypeEnum.valueOf(key);
+    public static ParentalResponsibilityType getValue(String key) {
+        return ParentalResponsibilityType.valueOf(key);
     }
 }
