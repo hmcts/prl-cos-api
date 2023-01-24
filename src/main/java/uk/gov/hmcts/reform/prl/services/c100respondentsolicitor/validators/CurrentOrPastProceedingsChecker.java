@@ -5,7 +5,6 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
@@ -41,16 +40,19 @@ public class CurrentOrPastProceedingsChecker implements RespondentEventChecker {
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
 
-        Optional<YesNoDontKnow> currentOrPastProceedingsForChildren = Optional.ofNullable(activeRespondent.get()
+        fields.add(ofNullable(activeRespondent.get()
+                                  .getValue()
+                                  .getResponse()
+                                  .getCurrentOrPastProceedingsForChildren()));
+
+        YesNoDontKnow currentOrPastProceedingsForChildren = activeRespondent.get()
                                                       .getValue()
                                                       .getResponse()
-                                                      .getCurrentOrPastProceedingsForChildren());
-        fields.add(ofNullable(currentOrPastProceedingsForChildren));
-        if (currentOrPastProceedingsForChildren.isPresent() && currentOrPastProceedingsForChildren.equals(YesOrNo.Yes)) {
+                                                      .getCurrentOrPastProceedingsForChildren();
 
-            Optional<List<Element<ProceedingDetails>>> existingProceedings = ofNullable(activeRespondent.get().getValue()
-                                                                                         .getResponse().getRespondentExistingProceedings());
-            fields.add(ofNullable(existingProceedings));
+        if (currentOrPastProceedingsForChildren.equals(YesNoDontKnow.yes)) {
+            fields.add(ofNullable(activeRespondent.get().getValue()
+                                      .getResponse().getRespondentExistingProceedings()));
         }
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));

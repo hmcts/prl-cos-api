@@ -29,7 +29,7 @@ public class RespondentMiamChecker implements RespondentEventChecker {
                                .get()
                                .getValue()
                                .getResponse()
-                               .getMiam()
+                               .getSolicitorMiam()
         );
     }
 
@@ -61,11 +61,11 @@ public class RespondentMiamChecker implements RespondentEventChecker {
         List<Optional<?>> fields = new ArrayList<>();
         log.info("entering miam checker if loop...");
         fields.add(ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam()));
-        Optional<YesOrNo> attendMiam = ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam());
-        if (attendMiam.isPresent() && attendMiam.equals(YesOrNo.No)) {
-            Optional<YesOrNo> willingToAttendMiam = ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam());
-            fields.add(willingToAttendMiam);
-            if (willingToAttendMiam.isPresent() && willingToAttendMiam.equals(YesOrNo.No)) {
+        YesOrNo attendMiam = miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam();
+        if (attendMiam.equals(YesOrNo.No)) {
+            fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam()));
+            YesOrNo willingToAttendMiam = miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam();
+            if (willingToAttendMiam.equals(YesOrNo.No)) {
                 fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getReasonNotAttendingMiam()));
             }
         }
