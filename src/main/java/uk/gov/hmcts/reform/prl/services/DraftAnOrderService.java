@@ -187,8 +187,8 @@ public class DraftAnOrderService {
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
-            if (draftOrder.getOrderDocument().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())
+            if ((draftOrder.getOrderDocument() != null && draftOrder.getOrderDocument().getDocumentFileName()
+                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName()))
                 || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
                 .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName()))) {
                 updatedCaseData.put("orderCollection", getFinalOrderCollection(authorisation, caseData, draftOrder));
@@ -530,8 +530,8 @@ public class DraftAnOrderService {
             log.info("Draft order file name {} ", draftOrder.getOrderDocument().getDocumentFileName());
             log.info("getPreviewOrderDoc order file name {} ", caseData.getPreviewOrderDoc());
             log.info("getPreviewOrderDoc order file name {} ", caseData.getPreviewOrderDoc().getDocumentFileName());
-            if (draftOrder.getOrderDocument().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())
+            if ((draftOrder.getOrderDocument() != null && draftOrder.getOrderDocument().getDocumentFileName()
+                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName()))
                 || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
                 .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName()))) {
                 log.info("matching draftorder {}", draftOrder);
@@ -895,12 +895,12 @@ public class DraftAnOrderService {
             "dioTransferApplicationCourtDynamicList", courtDynamicList);
     }
 
-    public Map<String,?> getDraftOrderInfo(String authorisation, CaseData caseData)  throws Exception {
+    public Map<String,Object> getDraftOrderInfo(String authorisation, CaseData caseData)  throws Exception {
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
         return  getDraftOrderData(authorisation, caseData, draftOrder);
     }
 
-    private Map<String,?> getDraftOrderData(String authorisation, CaseData caseData, DraftOrder draftOrder) throws Exception {
+    private Map<String,Object> getDraftOrderData(String authorisation, CaseData caseData, DraftOrder draftOrder) throws Exception {
         {
             Map<String, Object> caseDataUpdated = new HashMap<>();
             GeneratedDocumentInfo generatedDocumentInfo = null;
