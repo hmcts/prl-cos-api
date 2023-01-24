@@ -73,7 +73,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -610,26 +609,5 @@ public class CallbackController {
         caseDataUpdated.put("applicantsList", applicantsListGenerator.buildApplicantsList(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    @PostMapping(path = "/pre-populate-legalAdvisor-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to retrieve legal advisor details")
-    public AboutToStartOrSubmitCallbackResponse prePopulateLegalAdvisorDetails(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-        log.info("*** request recieved to get the legalAdvisor details : {}", callbackRequest.toString());
-
-        List<DynamicListElement> dynamicListElements = new ArrayList<>();
-        dynamicListElements.add(DynamicListElement.builder().code("test1").label("test1").build());
-        dynamicListElements.add(DynamicListElement.builder().code("test2").label("test2").build());
-        dynamicListElements.add(DynamicListElement.builder().code("test3").label("test3").build());
-
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        caseDataUpdated.put("legalAdvisorList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(dynamicListElements)
-            .build());
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-
     }
 }
