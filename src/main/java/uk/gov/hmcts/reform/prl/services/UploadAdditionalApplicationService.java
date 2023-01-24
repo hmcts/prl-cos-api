@@ -33,7 +33,7 @@ public class UploadAdditionalApplicationService {
         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements = new ArrayList<>();
         if (caseData.getUploadAdditionalApplicationData() != null) {
             String author = userDetails.getEmail();
-            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss aa",
+            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss a",
                                                                                             Locale.UK
             ));
             C2DocumentBundle c2DocumentBundle = null;
