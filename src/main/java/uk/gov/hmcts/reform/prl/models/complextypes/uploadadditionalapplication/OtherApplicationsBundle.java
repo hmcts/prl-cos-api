@@ -16,6 +16,8 @@ import java.util.List;
 @Builder
 @Data
 public class OtherApplicationsBundle {
+    @JsonProperty("applicantName")
+    private final String applicantName;
     @JsonProperty("applicationType")
     private final OtherApplicationType applicationType;
     @JsonProperty("parentalResponsibilityType")
