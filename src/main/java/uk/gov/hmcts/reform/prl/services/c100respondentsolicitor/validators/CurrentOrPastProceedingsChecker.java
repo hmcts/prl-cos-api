@@ -18,41 +18,39 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 public class CurrentOrPastProceedingsChecker implements RespondentEventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
-        activeRespondent = caseData.getRespondents()
+        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
-        return anyNonEmpty(activeRespondent
-                               .get()
-                               .getValue()
-                               .getResponse()
-                               .getCurrentOrPastProceedingsForChildren()
-        );
+        return activeRespondent.filter(partyDetailsElement -> anyNonEmpty(partyDetailsElement
+                                                                              .getValue()
+                                                                              .getResponse()
+                                                                              .getCurrentOrPastProceedingsForChildren()
+        )).isPresent();
     }
 
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
         List<Optional<?>> fields = new ArrayList<>();
-        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
-        activeRespondent = caseData.getRespondents()
+        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
+        if (activeRespondent.isPresent()) {
+            fields.add(ofNullable(activeRespondent.get()
+                                      .getValue()
+                                      .getResponse()
+                                      .getCurrentOrPastProceedingsForChildren()));
 
-        fields.add(ofNullable(activeRespondent.get()
-                                  .getValue()
-                                  .getResponse()
-                                  .getCurrentOrPastProceedingsForChildren()));
+            YesNoDontKnow currentOrPastProceedingsForChildren = activeRespondent.get()
+                .getValue()
+                .getResponse()
+                .getCurrentOrPastProceedingsForChildren();
 
-        YesNoDontKnow currentOrPastProceedingsForChildren = activeRespondent.get()
-                                                      .getValue()
-                                                      .getResponse()
-                                                      .getCurrentOrPastProceedingsForChildren();
-
-        if (currentOrPastProceedingsForChildren.equals(YesNoDontKnow.yes)) {
-            fields.add(ofNullable(activeRespondent.get().getValue()
-                                      .getResponse().getRespondentExistingProceedings()));
+            if (currentOrPastProceedingsForChildren.equals(YesNoDontKnow.yes)) {
+                fields.add(ofNullable(activeRespondent.get().getValue()
+                                          .getResponse().getRespondentExistingProceedings()));
+            }
         }
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
