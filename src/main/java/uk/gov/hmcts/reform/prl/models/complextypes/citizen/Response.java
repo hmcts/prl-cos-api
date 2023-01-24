@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCou
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
 
 import java.util.List;
 
@@ -45,6 +47,14 @@ public class Response {
     private final ReasonableAdjustmentsSupport supportYouNeed;
 
     //Applicable only for C100 solicitor respondent
+    @JsonUnwrapped
+    @Builder.Default
+    private final SolicitorKeepDetailsPrivate solicitorKeepDetailsPriate;
+
+    @JsonUnwrapped
+    @Builder.Default
+    private final SolicitorMiam solicitorMiam;
+
     private final YesNoDontKnow currentOrPastProceedingsForChildren;
     private final List<Element<ProceedingDetails>> respondentExistingProceedings;
     @JsonUnwrapped

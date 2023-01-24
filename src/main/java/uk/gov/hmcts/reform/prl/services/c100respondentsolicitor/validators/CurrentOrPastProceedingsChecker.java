@@ -56,5 +56,4 @@ public class CurrentOrPastProceedingsChecker implements RespondentEventChecker {
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
     }
 
-
 }
