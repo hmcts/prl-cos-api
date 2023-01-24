@@ -527,6 +527,9 @@ public class DraftAnOrderService {
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
+            log.info("Draft order file name {} ", draftOrder.getOrderDocument().getDocumentFileName());
+            log.info("getPreviewOrderDoc order file name {} ", caseData.getPreviewOrderDoc());
+            log.info("getPreviewOrderDoc order file name {} ", caseData.getPreviewOrderDoc().getDocumentFileName());
             if (draftOrder.getOrderDocument().getDocumentFileName()
                 .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())
                 || draftOrder.getOrderDocumentWelsh().getDocumentFileName()
@@ -901,7 +904,6 @@ public class DraftAnOrderService {
         {
             Map<String, Object> caseDataUpdated = new HashMap<>();
             GeneratedDocumentInfo generatedDocumentInfo = null;
-            log.info("****  getDraftOrderData  {}", draftOrder.getOrderType());
             Map<String, String> fieldsMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {

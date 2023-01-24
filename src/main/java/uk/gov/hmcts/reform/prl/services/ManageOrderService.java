@@ -899,7 +899,6 @@ public class ManageOrderService {
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         GeneratedDocumentInfo generatedDocumentInfo = null;
-        log.info("**** we debug  {}", caseData.getCreateSelectOrderOptions());
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
@@ -939,7 +938,13 @@ public class ManageOrderService {
 
         ManageOrders orderData = ManageOrders.builder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
+            .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
+            .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
+            .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+            .isOrderDrawnForCafcass(caseData.getManageOrders().getIsOrderDrawnForCafcass())
+            .orderDirections(caseData.getManageOrders().getOrderDirections())
+            .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .manageOrdersCourtName(null != caseData.getCourtName() ? caseData.getCourtName() : null)
             .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
                                                  caseData.getApplicantsFL401().getLastName()
