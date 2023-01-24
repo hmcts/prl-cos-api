@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.bundle;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -32,7 +31,6 @@ public class BundlingService {
     ObjectMapper objectMapper;
 
     @Autowired
-    @Qualifier("hearingService")
     HearingService hearingService;
 
     @Autowired

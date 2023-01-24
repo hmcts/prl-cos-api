@@ -4,7 +4,7 @@ package uk.gov.hmcts.reform.prl.services.hearings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Qualifier("hearingService")
+@Component("hearingService")
 public class HearingService {
 
     private Hearings hearingDetails;
