@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
+
 @RunWith(MockitoJUnitRunner.class)
 public class UploadDocumentServiceTest {
 
@@ -61,9 +62,7 @@ public class UploadDocumentServiceTest {
         when(caseDocumentClient.uploadDocuments(AUTH, "s2s", CASE_TYPE, JURISDICTION, newArrayList(file))).thenReturn(uploadResponse);
         assertThrows(RuntimeException.class, () -> uploadDocumentService.uploadDocument(pdf, FILE_NAME, CONTENT_TYPE, AUTH));
 
-
     }
-
 
     public static Document testDocument() {
         Document.Link binaryLink = new Document.Link();

@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNav;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -81,7 +82,11 @@ public class CourtNavCaseServiceTest {
 
     @Before
     public void setup() {
-        caseData = CaseData.builder().id(1234567891234567L).applicantCaseName("xyz").build();
+        caseData = CaseData.builder().id(1234567891234567L).applicantCaseName("xyz")
+            .courtnav(CourtNav.builder()
+                          .numberOfAttachments("1")
+                          .build())
+            .build();
         when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(randomUserId).build());
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any())

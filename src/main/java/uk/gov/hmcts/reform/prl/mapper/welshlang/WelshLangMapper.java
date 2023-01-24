@@ -161,9 +161,9 @@ public class WelshLangMapper {
         /**
          *  Type of Application - What order(s) are you applying for?.
          */
-        welshMap.put(OrderTypeEnum.childArrangementsOrder.getDisplayedValue(), "Gorchymyn Trefniadau Plant");
-        welshMap.put(OrderTypeEnum.prohibitedStepsOrder.getDisplayedValue(), "Gorchymyn Camau Gwaharddedig");
-        welshMap.put(OrderTypeEnum.specificIssueOrder.getDisplayedValue(), "Gorchymyn Materion Penodol");
+        welshMap.put(OrderTypeEnum.childArrangementsOrder.getDisplayedValue(), "Trefniadau Plant");
+        welshMap.put(OrderTypeEnum.prohibitedStepsOrder.getDisplayedValue(), "Camau Gwaharddedig");
+        welshMap.put(OrderTypeEnum.specificIssueOrder.getDisplayedValue(), "Materion Penodol");
 
         /**
          *  Type of Application - Type of child arrangements order.
@@ -667,6 +667,13 @@ public class WelshLangMapper {
          */
         welshMap.put(FL401OrderTypeEnum.nonMolestationOrder.getDisplayedValue(), "Gorchymyn rhag molestu");
         welshMap.put(FL401OrderTypeEnum.occupationOrder.getDisplayedValue(), "Gorchymyn anheddu");
+
+        /**
+         *  Type of Application - What order(s) are you applying for?.
+         */
+        welshMap.put(OrderTypeEnum.childArrangementsOrder.getDisplayedValue(), "Trefniadau Plant");
+        welshMap.put(OrderTypeEnum.prohibitedStepsOrder.getDisplayedValue(), "Camau Gwaharddedig");
+        welshMap.put(OrderTypeEnum.specificIssueOrder.getDisplayedValue(), "Materion Penodol");
 
         /**
          * Without notice order. reasonForOrderWithoutGivingNotice.

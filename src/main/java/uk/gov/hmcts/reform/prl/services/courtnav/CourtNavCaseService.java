@@ -43,8 +43,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class CourtNavCaseService {
 
     public static final String COURTNAV_DOCUMENT_UPLOAD_EVENT_ID = "courtnav-document-upload";
-    public static final String[] ALLOWED_FILE_TYPES = {"pdf", "jpeg", "jpg", "doc", "docx", "bmp", "png", "tiff", "txt", "tif"};
-    public static final String[] ALLOWED_TYPE_OF_DOCS = {"WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET"};
+    protected static final String[] ALLOWED_FILE_TYPES = {"pdf", "jpeg", "jpg", "doc", "docx", "bmp", "png", "tiff", "txt", "tif"};
+    protected static final String[] ALLOWED_TYPE_OF_DOCS = {"WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET"};
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
@@ -94,10 +94,10 @@ public class CourtNavCaseService {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             }
             CaseData tempCaseData = CaseUtils.getCaseData(tempCaseDetails, objectMapper);
-            if (tempCaseData.getNumberOfAttachments() != null && tempCaseData.getCourtNavUploadedDocs() != null
-                && Integer.valueOf(tempCaseData.getNumberOfAttachments())
+            if (tempCaseData.getCourtnav().getNumberOfAttachments() != null && tempCaseData.getCourtNavUploadedDocs() != null
+                && Integer.parseInt(tempCaseData.getCourtnav().getNumberOfAttachments())
                 <= tempCaseData.getCourtNavUploadedDocs().size()) {
-                log.error("Number of attachments size is reached {}", tempCaseData.getNumberOfAttachments());
+                log.error("Number of attachments size is reached {}", tempCaseData.getCourtnav().getNumberOfAttachments());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
             }
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
@@ -134,7 +134,7 @@ public class CourtNavCaseService {
                            .build())
                 .data(caseData).build();
 
-            CaseDetails caseDetails = coreCaseDataApi.submitEventForCaseWorker(
+            coreCaseDataApi.submitEventForCaseWorker(
                 authorisation,
                 authTokenGenerator.generate(),
                 idamClient.getUserInfo(authorisation).getUid(),
@@ -155,12 +155,11 @@ public class CourtNavCaseService {
 
     public CaseDetails checkIfCasePresent(String caseId, String authorisation) {
         try {
-            CaseDetails caseDetails = coreCaseDataApi.getCase(
+            return coreCaseDataApi.getCase(
                 authorisation,
                 authTokenGenerator.generate(),
                 caseId
             );
-            return caseDetails;
         } catch (Exception ex) {
             log.error("Error while getting the case {} {}", caseId, ex.getMessage());
         }

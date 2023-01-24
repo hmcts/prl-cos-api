@@ -36,7 +36,7 @@ public class CafCassFilter {
             caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
             caseStateList = caseStateList.stream().map(String::trim).collect(Collectors.toList());
             filterCaseByApplicationCaseType(cafCassResponse);
-            filterCasesByApplicationValidPostcode(cafCassResponse);
+            //filterCasesByApplicationValidPostcode(cafCassResponse);
             cafCassResponse.setTotal(cafCassResponse.getCases().size());
         } else {
             log.error(CAFCAAS_CASE_TYPE_OF_APPLICATION_LIST_NOT_CONFIGURED);
@@ -56,6 +56,7 @@ public class CafCassFilter {
     }
 
     private void filterCasesByApplicationValidPostcode(CafCassResponse cafCassResponse) {
+
         List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases()
             .stream().filter(cafCassCaseDetail -> {
                 if (!ObjectUtils.isEmpty(cafCassCaseDetail.getCaseData().getApplicants())) {
