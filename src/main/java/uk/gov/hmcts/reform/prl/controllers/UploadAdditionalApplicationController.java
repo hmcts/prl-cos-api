@@ -72,7 +72,7 @@ public class UploadAdditionalApplicationController {
             Comparator.reverseOrder()
         ));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("additionalApplicationCollection", additionalApplicationElements);
+        caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
         log.info("caseDataUpdated =====> " + caseDataUpdated.get("additionalApplicationCollection"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
