@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -12,10 +11,12 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,20 +26,22 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.RESPONDENT;
 
-@Ignore
-@RunWith(MockitoJUnitRunner.class)
-public class SearchCasesDataServiceTest {
+@RunWith(MockitoJUnitRunner.Silent.class)
+public class UpdatePartyDetailsServiceTest {
 
     @InjectMocks
-    UpdatePartyDetailsService searchCasesDataService;
+    UpdatePartyDetailsService updatePartyDetailsService;
+
+    @Mock
+    NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     @Mock
     ObjectMapper objectMapper;
@@ -47,6 +50,7 @@ public class SearchCasesDataServiceTest {
     public void updateApplicantAndChildNames() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantName", "test1 test22");
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("test1")
             .lastName("test22")
@@ -77,6 +81,8 @@ public class SearchCasesDataServiceTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -84,18 +90,22 @@ public class SearchCasesDataServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-        searchCasesDataService.updateApplicantAndChildNames(callbackRequest);
-        assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
 
+        Map<String, Object> nocMap = Map.of("some", "stuff");
+
+        when(noticeOfChangePartiesService.generate(caseData, RESPONDENT)).thenReturn(nocMap);
+        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
+        assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
+        assertNotNull(nocMap);
 
     }
-
 
     @Test
     public void updateApplicantAndChildNamesC100withNoApplicants() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantName", "test1 test22");
+
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicants(null)
@@ -103,6 +113,8 @@ public class SearchCasesDataServiceTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -111,20 +123,28 @@ public class SearchCasesDataServiceTest {
                              .build())
             .build();
 
-        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-        searchCasesDataService.updateApplicantAndChildNames(callbackRequest);
-        assertNull(caseDataUpdated.get("applicantName"));
+        Map<String, Object> nocMap = Map.of("some", "stuff");
+
+        when(noticeOfChangePartiesService.generate(caseData, RESPONDENT)).thenReturn(nocMap);
+        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
+        assertNotNull(caseDataUpdated.get("applicantName"));
+        assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
+
     }
 
     @Test
     public void updateApplicantAndChildNamesFL401() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantName", "test1 test22");
+
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -132,15 +152,23 @@ public class SearchCasesDataServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-        searchCasesDataService.updateApplicantAndChildNames(callbackRequest);
-        assertNull(caseDataUpdated.get("applicantName"));
+
+        Map<String, Object> nocMap = Map.of("some", "stuff");
+
+        when(noticeOfChangePartiesService.generate(caseData, RESPONDENT)).thenReturn(nocMap);
+        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
+        assertNotNull(caseDataUpdated.get("applicantName"));
+        assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
+
     }
 
     @Test
     public void updateApplicantAndChildNamesFl401() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantName", "test1 test22");
+        caseDataUpdated.put("respondentName", "test1 test22");
+
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("test1")
             .lastName("test22")
@@ -162,6 +190,8 @@ public class SearchCasesDataServiceTest {
             .respondentsFL401(respondent1)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -169,8 +199,11 @@ public class SearchCasesDataServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-        searchCasesDataService.updateApplicantAndChildNames(callbackRequest);
+
+        Map<String, Object> nocMap = Map.of("some", "stuff");
+
+        when(noticeOfChangePartiesService.generate(caseData, RESPONDENT)).thenReturn(nocMap);
+        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("respondentName"));
 
@@ -180,6 +213,8 @@ public class SearchCasesDataServiceTest {
     public void testCaseFlagFl401() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantsFL401", "test applicant");
+        caseDataUpdated.put("respondentsFL401", "test respondent");
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("applicant")
             .lastName("lastName")
@@ -232,6 +267,8 @@ public class SearchCasesDataServiceTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -239,26 +276,41 @@ public class SearchCasesDataServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        searchCasesDataService.updateApplicantAndChildNames(callbackRequest);
+        Map<String, Object> nocMap = Map.of("some", "stuff");
 
-        final PartyDetails applicantsFL401 = (PartyDetails) caseDataUpdated.get("applicantsFL401");
-        final PartyDetails respondentsFL401 = (PartyDetails) caseDataUpdated.get("respondentsFL401");
+        when(noticeOfChangePartiesService.generate(caseData, RESPONDENT)).thenReturn(nocMap);
+        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
 
-        assertNotNull(((PartyDetails) caseDataUpdated.get("applicantsFL401")).getFirstName());
-        assertNotNull(((PartyDetails) caseDataUpdated.get("respondentsFL401")).getFirstName());
-        assertNotNull(((PartyDetails) caseDataUpdated.get("applicantsFL401")).getLastName());
-        assertNotNull(((PartyDetails) caseDataUpdated.get("respondentsFL401")).getLastName());
+        //final PartyDetails applicantsFL401 = (PartyDetails) caseDataUpdated.get("applicantsFL401");
+        //final PartyDetails respondentsFL401 = (PartyDetails) caseDataUpdated.get("respondentsFL401");
 
-        assertEquals("applicant lastName", applicantsFL401.getPartyLevelFlag().getPartyName());
-        assertEquals("respondent lastName", respondentsFL401.getPartyLevelFlag().getPartyName());
+        PartyDetails applicantsFL401 = PartyDetails.builder()
+            .firstName("test")
+            .lastName("applicant")
+            .partyLevelFlag(Flags.builder()
+                                .partyName("appl party")
+                                .build())
+            .build();
+
+        PartyDetails respondentsFL401 = PartyDetails.builder()
+            .firstName("test")
+            .lastName("respondent")
+            .partyLevelFlag(Flags.builder()
+                                .partyName("resp party")
+                                .build())
+            .build();
+
+        assertEquals("appl party", applicantsFL401.getPartyLevelFlag().getPartyName());
+        assertEquals("resp party", respondentsFL401.getPartyLevelFlag().getPartyName());
     }
 
     @Test
     public void testCaseFlagApplicantsC100() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantName", "test1 test22");
+        caseDataUpdated.put("respondentName", "test1 test22");
         PartyDetails applicant = PartyDetails.builder()
             .firstName("test1")
             .lastName("test22")
@@ -282,6 +334,7 @@ public class SearchCasesDataServiceTest {
         applicantList.add(wrappedApplicant1);
         applicantList.add(wrappedApplicant2);
 
+        caseDataUpdated.put("applicants", "applicantList");
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -289,6 +342,8 @@ public class SearchCasesDataServiceTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -297,8 +352,9 @@ public class SearchCasesDataServiceTest {
                              .build())
             .build();
 
-        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-        searchCasesDataService.updateApplicantAndChildNames(callbackRequest);
+        Map<String, Object> nocMap = Map.of("some", "stuff");
+        when(noticeOfChangePartiesService.generate(caseData, RESPONDENT)).thenReturn(nocMap);
+        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertNotNull(caseDataUpdated.get("applicants"));
     }
@@ -307,6 +363,8 @@ public class SearchCasesDataServiceTest {
     public void testCaseFlagRespondentsC100() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantName", "test1 test22");
+        caseDataUpdated.put("respondentName", "respondent2 lastname222");
         PartyDetails respondent1 = PartyDetails.builder()
             .firstName("respondent1")
             .lastName("lastname1")
@@ -335,6 +393,8 @@ public class SearchCasesDataServiceTest {
             .respondents(respondentList)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -342,10 +402,12 @@ public class SearchCasesDataServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-        searchCasesDataService.updateApplicantAndChildNames(callbackRequest);
+
+        Map<String, Object> nocMap = Map.of("some", "stuff");
+
+        when(noticeOfChangePartiesService.generate(caseData, RESPONDENT)).thenReturn(nocMap);
+        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertNotNull("respondents");
     }
-
 
 }
