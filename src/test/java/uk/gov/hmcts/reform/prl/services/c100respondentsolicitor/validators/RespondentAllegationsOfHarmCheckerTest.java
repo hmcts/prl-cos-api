@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -20,7 +21,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     CaseData caseData;
 
     @Before
-    public void setUp(){
+    public void setUp() {
 
         PartyDetails respondent = PartyDetails.builder().build();
 
@@ -28,5 +29,10 @@ public class RespondentAllegationsOfHarmCheckerTest {
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
 
         caseData = CaseData.builder().respondents(respondentList).build();
+    }
+
+    @Test
+    public void testcase() {
+
     }
 }

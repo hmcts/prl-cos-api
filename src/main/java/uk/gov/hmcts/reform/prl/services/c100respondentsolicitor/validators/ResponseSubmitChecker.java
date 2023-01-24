@@ -39,7 +39,6 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
 
         mandatoryEvents.put(CONSENT, respondentEventsChecker.getConsentToApplicationChecker());
         mandatoryEvents.put(KEEP_DETAILS_PRIVATE, respondentEventsChecker.getKeepDetailsPrivateChecker());
-        //mandatoryEvents.put(MIAM, respondentEventsChecker.getRespondentMiamChecker());
         mandatoryEvents.put(ABILITY_TO_PARTICIPATE, respondentEventsChecker.getAbilityToParticipateChecker());
         mandatoryEvents.put(ATTENDING_THE_COURT, respondentEventsChecker.getAttendToCourtChecker());
         mandatoryEvents.put(CURRENT_OR_PREVIOUS_PROCEEDINGS, respondentEventsChecker.getCurrentOrPastProceedingsChecker());
