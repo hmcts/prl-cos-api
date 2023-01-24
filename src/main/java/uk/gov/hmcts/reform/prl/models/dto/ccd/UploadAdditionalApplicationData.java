@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTy
 import uk.gov.hmcts.reform.prl.models.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
-import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.UploadAdditionalApplicationBundle;
 
 import java.util.List;
 
@@ -26,5 +25,5 @@ public class UploadAdditionalApplicationData {
     private final OtherApplicationsBundle temporaryOtherApplicationsBundle;
 
     //ccd-config not added for below
-    private final UploadAdditionalApplicationBundle uploadAdditionalApplicationBundle;
+    //private final UploadAdditionalApplicationBundle uploadAdditionalApplicationBundle;
 }
