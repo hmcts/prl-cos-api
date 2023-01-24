@@ -57,6 +57,7 @@ public class BundlingService {
             bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(
                 caseData, eventId, hearingDetails,
                 getBundleConfig(null != caseData.getLanguagePreferenceWelsh() ? caseData.getLanguagePreferenceWelsh() : YesOrNo.No)));
+
     }
 
     private BundleCreateResponse createBundle(String authorization, String serviceAuthorization,

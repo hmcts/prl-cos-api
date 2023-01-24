@@ -33,5 +33,4 @@ public class HearingService {
         return hearingDetails;
     }
 
-
 }
