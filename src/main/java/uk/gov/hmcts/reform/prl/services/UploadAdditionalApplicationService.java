@@ -53,8 +53,8 @@ public class UploadAdditionalApplicationService {
                 author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
                 otherApplicationsBundle).build();
 
-            if (caseData.getAdditionalApplicationList() != null && !caseData.getAdditionalApplicationList().isEmpty()) {
-                additionalApplicationElements = caseData.getAdditionalApplicationList();
+            if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
+                additionalApplicationElements = caseData.getAdditionalApplicationsBundle();
             }
             additionalApplicationElements.add(element(additionalApplicationsBundle));
         }
