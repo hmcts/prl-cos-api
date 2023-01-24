@@ -45,11 +45,9 @@ public class KeepDetailsPrivateCheckerTest {
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
                                                   .build())
-                          .solicitorKeepDetailsPriate
-                              (SolicitorKeepDetailsPrivate
+                          .solicitorKeepDetailsPriate(SolicitorKeepDetailsPrivate
                                    .builder()
-                                   .respKeepDetailsPrivateConfidentiality
-                                       (KeepDetailsPrivate
+                                   .respKeepDetailsPrivateConfidentiality(KeepDetailsPrivate
                                             .builder()
                                             .confidentiality(Yes)
                                             .confidentialityList(confidentialityListEnums)
