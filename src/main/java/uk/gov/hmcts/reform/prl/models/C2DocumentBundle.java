@@ -32,7 +32,7 @@ public class C2DocumentBundle {
     private final DynamicList hearingList;
     private final UrgencyTimeFrameType urgencyTimeFrameType;
     private final List<Element<Supplement>> supplementsBundle;
-    private final List<Element<UploadApplicationDraftOrder>> uploadApplicationDraftOrdersBundle;
+    private final List<Element<UploadApplicationDraftOrder>> additionalDraftOrdersBundle;
     private final List<Element<SupportingEvidenceBundle>> supportingEvidenceBundle;
 
 }
