@@ -30,5 +30,7 @@ public class OtherApplicationsBundle {
     private final List<Element<Supplement>> supplementsBundle;
     @JsonProperty("supportingEvidenceBundle")
     private final List<Element<SupportingEvidenceBundle>> supportingEvidenceBundle;
+    private final String uploadedDateTime;
+    private final String author;
 
 }
