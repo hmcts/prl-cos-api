@@ -75,13 +75,33 @@ public class UploadAdditionalApplicationController {
         log.info("caseDataUpdated map ====>" + caseDataUpdated);
         caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
 
-        if (caseDataUpdated.containsKey("uploadAdditionalApplicationData")) {
-            caseDataUpdated.remove("uploadAdditionalApplicationData");
-            log.info("Remove uploadAdditionalApplicationData");
-        }
+        cleanUpUploadAdditionalApplicationData(caseDataUpdated);
 
         log.info("caseDataUpdated =====> " + caseDataUpdated.get("additionalApplicationsBundle"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private static void cleanUpUploadAdditionalApplicationData(Map<String, Object> caseDataUpdated) {
+        if (caseDataUpdated.containsKey("temporaryOtherApplicationsBundle")) {
+            caseDataUpdated.remove("temporaryOtherApplicationsBundle");
+            log.info("Remove temporaryOtherApplicationsBundle");
+        }
+        if (caseDataUpdated.containsKey("temporaryC2Document")) {
+            caseDataUpdated.remove("temporaryC2Document");
+            log.info("Remove temporaryC2Document");
+        }
+        if (caseDataUpdated.containsKey("additionalApplicantsList")) {
+            caseDataUpdated.remove("additionalApplicantsList");
+            log.info("Remove additionalApplicantsList");
+        }
+        if (caseDataUpdated.containsKey("typeOfC2Application")) {
+            caseDataUpdated.remove("typeOfC2Application");
+            log.info("Remove typeOfC2Application");
+        }
+        if (caseDataUpdated.containsKey("additionalApplicationsApplyingFor")) {
+            caseDataUpdated.remove("additionalApplicationsApplyingFor");
+            log.info("Remove additionalApplicationsApplyingFor");
+        }
     }
 
 
