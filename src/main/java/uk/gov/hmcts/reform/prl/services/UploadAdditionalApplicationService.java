@@ -58,7 +58,6 @@ public class UploadAdditionalApplicationService {
             }
             additionalApplicationElements.add(element(additionalApplicationsBundle));
         }
-        log.info("AdditionalApplicationElements ====>" + additionalApplicationElements);
         return additionalApplicationElements;
     }
 
