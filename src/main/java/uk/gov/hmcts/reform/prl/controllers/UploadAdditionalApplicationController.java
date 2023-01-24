@@ -34,12 +34,17 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequiredArgsConstructor
 public class UploadAdditionalApplicationController {
 
+    public static final String TEMPORARY_OTHER_APPLICATIONS_BUNDLE = "temporaryOtherApplicationsBundle";
+    public static final String TEMPORARY_C_2_DOCUMENT = "temporaryC2Document";
+    public static final String ADDITIONAL_APPLICANTS_LIST = "additionalApplicantsList";
+    public static final String TYPE_OF_C_2_APPLICATION = "typeOfC2Application";
+    public static final String ADDITIONAL_APPLICATIONS_APPLYING_FOR = "additionalApplicationsApplyingFor";
     private final ApplicantsListGenerator applicantsListGenerator;
 
     private final ObjectMapper objectMapper;
 
     @Autowired
-    private UploadAdditionalApplicationService uploadAdditionalApplicationService;
+    private final UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
 
     @PostMapping(path = "/pre-populate-applicants", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -47,7 +52,7 @@ public class UploadAdditionalApplicationController {
     public AboutToStartOrSubmitCallbackResponse prePopulateApplicants(@RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("additionalApplicantsList", applicantsListGenerator.buildApplicantsList(caseData));
+        caseDataUpdated.put(ADDITIONAL_APPLICANTS_LIST, applicantsListGenerator.buildApplicantsList(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -61,46 +66,38 @@ public class UploadAdditionalApplicationController {
                                                                                         @Parameter(hidden = true) String authorisation,
                                                                                         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("CaseData =====> " + caseData.getUploadAdditionalApplicationData());
         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements =
             uploadAdditionalApplicationService.getAdditionalApplicationElements(
-            authorisation,
-            caseData
-        );
+                authorisation,
+                caseData
+            );
         additionalApplicationElements.sort(Comparator.comparing(
             m -> m.getValue().getUploadedDateTime(),
             Comparator.reverseOrder()
         ));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("caseDataUpdated map ====>" + caseDataUpdated);
         caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
 
         cleanUpUploadAdditionalApplicationData(caseDataUpdated);
 
-        log.info("caseDataUpdated =====> " + caseDataUpdated.get("additionalApplicationsBundle"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     private static void cleanUpUploadAdditionalApplicationData(Map<String, Object> caseDataUpdated) {
-        if (caseDataUpdated.containsKey("temporaryOtherApplicationsBundle")) {
-            caseDataUpdated.remove("temporaryOtherApplicationsBundle");
-            log.info("Remove temporaryOtherApplicationsBundle");
+        if (caseDataUpdated.containsKey(TEMPORARY_OTHER_APPLICATIONS_BUNDLE)) {
+            caseDataUpdated.remove(TEMPORARY_OTHER_APPLICATIONS_BUNDLE);
         }
-        if (caseDataUpdated.containsKey("temporaryC2Document")) {
-            caseDataUpdated.remove("temporaryC2Document");
-            log.info("Remove temporaryC2Document");
+        if (caseDataUpdated.containsKey(TEMPORARY_C_2_DOCUMENT)) {
+            caseDataUpdated.remove(TEMPORARY_C_2_DOCUMENT);
         }
-        if (caseDataUpdated.containsKey("additionalApplicantsList")) {
-            caseDataUpdated.remove("additionalApplicantsList");
-            log.info("Remove additionalApplicantsList");
+        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICANTS_LIST)) {
+            caseDataUpdated.remove(ADDITIONAL_APPLICANTS_LIST);
         }
-        if (caseDataUpdated.containsKey("typeOfC2Application")) {
-            caseDataUpdated.remove("typeOfC2Application");
-            log.info("Remove typeOfC2Application");
+        if (caseDataUpdated.containsKey(TYPE_OF_C_2_APPLICATION)) {
+            caseDataUpdated.remove(TYPE_OF_C_2_APPLICATION);
         }
-        if (caseDataUpdated.containsKey("additionalApplicationsApplyingFor")) {
-            caseDataUpdated.remove("additionalApplicationsApplyingFor");
-            log.info("Remove additionalApplicationsApplyingFor");
+        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICATIONS_APPLYING_FOR)) {
+            caseDataUpdated.remove(ADDITIONAL_APPLICATIONS_APPLYING_FOR);
         }
     }
 
