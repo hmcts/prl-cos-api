@@ -532,8 +532,8 @@ public class DraftAnOrderService {
             log.info("getPreviewOrderDoc order file name {} ", caseData.getPreviewOrderDoc().getDocumentFileName());
             if (draftOrder.getOrderDocument().getDocumentFileName()
                 .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())
-                || draftOrder.getOrderDocumentWelsh().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName())) {
+                || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
+                .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName()))) {
                 log.info("matching draftorder {}", draftOrder);
                 draftOrderCollection.set(draftOrderCollection.indexOf(e),
                         element(getUpdatedDraftOrder(draftOrder, caseData))
