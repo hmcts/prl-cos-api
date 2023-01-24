@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -45,13 +44,13 @@ public class InternationalElementsCheckerTest {
                                                                                                .build())
                                                            .internationalElementChildInfo(SolicitorInternationalElement
                                                                                               .builder()
-                                                                                              .reasonForChild(No)
+                                                                                              .reasonForChild(Yes)
                                                                                               .reasonForChildDetails("Test")
-                                                                                              .reasonForParent(No)
+                                                                                              .reasonForParent(Yes)
                                                                                               .reasonForParentDetails("Test")
-                                                                                              .reasonForJurisdiction(No)
+                                                                                              .reasonForJurisdiction(Yes)
                                                                                               .reasonForJurisdictionDetails("Test")
-                                                                                              .requestToAuthority(No)
+                                                                                              .requestToAuthority(Yes)
                                                                                               .requestToAuthorityDetails("Test")
                                                                                               .build())
                                                            .build())
