@@ -41,22 +41,25 @@ public class NoticeOfChangePartiesService {
         for (int i = 0; i < solicitorRoles.size(); i++) {
             SolicitorRole solicitorRole = solicitorRoles.get(i);
 
-            Optional<Element<PartyDetails>> solicitorContainer = i < numElements
-                ? Optional.of(elements.get(i))
-                : Optional.empty();
+            if (null != elements) {
+                Optional<Element<PartyDetails>> solicitorContainer = i < numElements
+                    ? Optional.of(elements.get(i))
+                    : Optional.empty();
 
-            OrganisationPolicy organisationPolicy = policyConverter.generate(
-                solicitorRole, solicitorContainer
-            );
+                OrganisationPolicy organisationPolicy = policyConverter.generate(
+                    solicitorRole, solicitorContainer
+                );
 
-            data.put(String.format(representing.getPolicyFieldTemplate(), i), organisationPolicy);
+                data.put(String.format(representing.getPolicyFieldTemplate(), i), organisationPolicy);
 
-            Optional<NoticeOfChangeParties> possibleAnswer = populateAnswer(
-                strategy, solicitorContainer
-            );
+                Optional<NoticeOfChangeParties> possibleAnswer = populateAnswer(
+                    strategy, solicitorContainer
+                );
 
-            if (possibleAnswer.isPresent()) {
-                data.put(String.format(representing.getNocAnswersTemplate(), i), possibleAnswer.get());
+                if (possibleAnswer.isPresent()) {
+                    data.put(String.format(representing.getNocAnswersTemplate(), i), possibleAnswer.get());
+                }
+
             }
         }
 
