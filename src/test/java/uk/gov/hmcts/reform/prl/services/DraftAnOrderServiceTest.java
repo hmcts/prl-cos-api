@@ -477,6 +477,7 @@ public class DraftAnOrderServiceTest {
     public void testUpdateDraftOrderCollection() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+            .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .dateCreated(LocalDateTime.now())
                               .createdBy("test")
