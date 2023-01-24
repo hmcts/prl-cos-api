@@ -60,12 +60,12 @@ public class AttendToCourtChecker implements RespondentEventChecker {
         List<Optional<?>> fields = new ArrayList<>();
         Optional<YesOrNo> respondentWelshNeeds = ofNullable(attendToCourt.get().getRespondentWelshNeeds());
         fields.add(respondentWelshNeeds);
-        if (respondentWelshNeeds.isPresent() && respondentWelshNeeds.equals(YesOrNo.Yes)) {
+        if (respondentWelshNeeds.isPresent() && respondentWelshNeeds.equals(Optional.of((YesOrNo.Yes)))) {
             fields.add(ofNullable(attendToCourt.get().getRespondentWelshNeedsList()));
         }
         Optional<YesOrNo> isRespondentNeededInterpreter = ofNullable(attendToCourt.get().getIsRespondentNeededInterpreter());
         fields.add(isRespondentNeededInterpreter);
-        if (isRespondentNeededInterpreter.isPresent() && isRespondentNeededInterpreter.equals(YesOrNo.Yes)) {
+        if (isRespondentNeededInterpreter.isPresent() && isRespondentNeededInterpreter.equals(Optional.of((YesOrNo.Yes)))) {
             List<RespondentInterpreterNeeds> respondentInterpreterNeeds = attendToCourt.get()
                 .getRespondentInterpreterNeeds()
                 .stream()
@@ -80,17 +80,17 @@ public class AttendToCourtChecker implements RespondentEventChecker {
         }
         Optional<YesOrNo> haveAnyDisability = ofNullable(attendToCourt.get().getHaveAnyDisability());
         fields.add(haveAnyDisability);
-        if (haveAnyDisability.isPresent() && haveAnyDisability.equals(YesOrNo.Yes)) {
+        if (haveAnyDisability.isPresent() && haveAnyDisability.equals(Optional.of((YesOrNo.Yes)))) {
             fields.add(ofNullable(attendToCourt.get().getDisabilityNeeds()));
         }
         Optional<YesOrNo> respondentSpecialArrangements = ofNullable(attendToCourt.get().getRespondentSpecialArrangements());
         fields.add(respondentSpecialArrangements);
-        if (respondentSpecialArrangements.isPresent() && respondentSpecialArrangements.equals(YesOrNo.Yes)) {
+        if (respondentSpecialArrangements.isPresent() && respondentSpecialArrangements.equals(Optional.of((YesOrNo.Yes)))) {
             fields.add(ofNullable(attendToCourt.get().getRespondentSpecialArrangementDetails()));
         }
         Optional<YesOrNo> respondentIntermediaryNeeds = ofNullable(attendToCourt.get().getRespondentIntermediaryNeeds());
         fields.add(respondentIntermediaryNeeds);
-        if (respondentIntermediaryNeeds.isPresent() && respondentIntermediaryNeeds.equals(YesOrNo.Yes)) {
+        if (respondentIntermediaryNeeds.isPresent() && respondentIntermediaryNeeds.equals(Optional.of((YesOrNo.Yes)))) {
             fields.add(ofNullable(attendToCourt.get().getRespondentIntermediaryNeedDetails()));
         }
 
