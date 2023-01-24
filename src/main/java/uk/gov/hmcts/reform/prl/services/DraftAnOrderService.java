@@ -185,12 +185,13 @@ public class DraftAnOrderService {
     public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData) {
         Map<String, Object> updatedCaseData = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if ((draftOrder.getOrderDocument() != null && draftOrder.getOrderDocument().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName()))
+                .equalsIgnoreCase(selectedOrder.getOrderDocument().getDocumentFileName()))
                 || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName()))) {
+                .equalsIgnoreCase(selectedOrder.getOrderDocumentWelsh().getDocumentFileName()))) {
                 updatedCaseData.put("orderCollection", getFinalOrderCollection(authorisation, caseData, draftOrder));
                 draftOrderCollection.remove(
                     draftOrderCollection.indexOf(e)
@@ -525,15 +526,14 @@ public class DraftAnOrderService {
         log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
         log.info(" ************ casedata {}", caseData);
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        log.info(" ************ Selected Order ***  {}", selectedOrder);
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
-            log.info("Draft order file name {} ", draftOrder.getOrderDocument().getDocumentFileName());
-            log.info("getPreviewOrderDoc order file name {} ", caseData.getPreviewOrderDoc());
-            log.info("getPreviewOrderDoc order file name {} ", caseData.getPreviewOrderDoc().getDocumentFileName());
             if ((draftOrder.getOrderDocument() != null && draftOrder.getOrderDocument().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName()))
+                .equalsIgnoreCase(selectedOrder.getOrderDocument().getDocumentFileName()))
                 || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName()))) {
+                .equalsIgnoreCase(selectedOrder.getOrderDocumentWelsh().getDocumentFileName()))) {
                 log.info("matching draftorder {}", draftOrder);
                 draftOrderCollection.set(draftOrderCollection.indexOf(e),
                         element(getUpdatedDraftOrder(draftOrder, caseData))
