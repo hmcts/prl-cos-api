@@ -61,7 +61,7 @@ public class KeepDetailsPrivateChecker implements RespondentEventChecker {
         fields.add(ofNullable(keepDetailsPrivate.get().getOtherPeopleKnowYourContactDetails()));
         Optional<YesOrNo> confidentiality = ofNullable(keepDetailsPrivate.get().getConfidentiality());
         fields.add(confidentiality);
-        if (confidentiality.isPresent() && confidentiality.equals(YesNoDontKnow.yes)) {
+        if (confidentiality.isPresent() && confidentiality.equals(Optional.of(YesOrNo.Yes))) {
             fields.add(ofNullable(keepDetailsPrivate.get().getConfidentialityList()));
         }
         return fields.stream().noneMatch(Optional::isEmpty)
