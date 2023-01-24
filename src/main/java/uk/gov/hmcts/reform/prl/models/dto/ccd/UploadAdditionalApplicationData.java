@@ -20,7 +20,7 @@ public class UploadAdditionalApplicationData {
 
     private final List<AdditionalApplicationTypeEnum> additionalApplicationsApplyingFor;
     private final C2ApplicationTypeEnum typeOfC2Application;
-    private final DynamicList applicantsList;
+    private final DynamicList additionalApplicantsList;
     private final C2DocumentBundle temporaryC2Document;
     private final OtherApplicationsBundle temporaryOtherApplicationsBundle;
 

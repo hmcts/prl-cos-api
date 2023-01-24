@@ -23,6 +23,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class C2DocumentBundle {
 
+    private final String applicantName;
     private final Document document;
     private final List<DocumentAcknowledge> documentAcknowledge;
     private final List<C2AdditionalOrdersRequested> c2AdditionalOrdersRequested;
