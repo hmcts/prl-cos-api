@@ -939,6 +939,7 @@ public class ManageOrderService {
 
         ManageOrders orderData = ManageOrders.builder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
+            .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .manageOrdersCourtName(null != caseData.getCourtName() ? caseData.getCourtName() : null)
             .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
                                                  caseData.getApplicantsFL401().getLastName()
