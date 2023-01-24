@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
@@ -43,10 +44,24 @@ public class KeepDetailsPrivateCheckerTest {
                           .activeRespondent(Yes)
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
-                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
-                                                  .confidentiality(Yes)
-                                                  .confidentialityList(confidentialityListEnums)
                                                   .build())
+                          .solicitorKeepDetailsPriate
+                              (SolicitorKeepDetailsPrivate
+                                   .builder()
+                                   .respKeepDetailsPrivateConfidentiality
+                                       (KeepDetailsPrivate
+                                            .builder()
+                                            .confidentiality(Yes)
+                                            .confidentialityList(confidentialityListEnums)
+                                            .build())
+                                   .respKeepDetailsPrivate(KeepDetailsPrivate
+                                                               .builder()
+                                                               .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                               .confidentiality(Yes)
+                                                               .confidentialityList(confidentialityListEnums)
+                                                               .build())
+                                                          .build())
+
                           .build())
             .build();
 

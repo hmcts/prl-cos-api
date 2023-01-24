@@ -62,7 +62,8 @@ public class KeepDetailsPrivateChecker implements RespondentEventChecker {
                                                            .getRespKeepDetailsPrivateConfidentiality().getConfidentiality());
         fields.add(confidentiality);
         if (confidentiality.isPresent() && confidentiality.equals(Optional.of(YesOrNo.Yes))) {
-            fields.add(ofNullable(keepDetailsPrivate.get().getConfidentialityList()));
+            fields.add(ofNullable(keepDetailsPrivate.get()
+                                      .getRespKeepDetailsPrivateConfidentiality().getConfidentialityList()));
         }
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
