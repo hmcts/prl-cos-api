@@ -281,7 +281,7 @@ public class CallbackController {
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
             caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
         }
-        
+
         //Assign default court to all c100 cases for work allocation.
         caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
             .regionId(C100_DEFAULT_REGION_ID)
@@ -610,14 +610,4 @@ public class CallbackController {
 
     }
 
-    @PostMapping(path = "/pre-populate-applicants", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to Generate applicants")
-    public AboutToStartOrSubmitCallbackResponse prePopulateApplicants(
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("applicantsList", applicantsListGenerator.buildApplicantsList(caseData));
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
 }
