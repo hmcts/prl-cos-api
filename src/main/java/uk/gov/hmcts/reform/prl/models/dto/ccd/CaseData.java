@@ -90,6 +90,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentC
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
@@ -743,4 +744,10 @@ public class CaseData implements MappableObject {
     private final List<CaseLinksElement<CaseLink>> caseLinks;
 
     private Flags caseFlags;
+
+
+    @JsonUnwrapped
+    @Builder.Default
+    private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
+    private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
 }
