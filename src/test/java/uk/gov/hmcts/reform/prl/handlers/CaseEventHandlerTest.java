@@ -109,7 +109,7 @@ public class CaseEventHandlerTest {
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
         when(taskListService.getRespondentSolicitorTasks()).thenReturn(respondentTask);
         when(taskListRenderer.render(c100Tasks, errors, true, caseData)).thenReturn(c100renderedTaskList);
-        when(respondentSolicitorTaskListRenderer.render(respondentTask, caseData)).thenReturn(respondentTaskList);
+        when(respondentSolicitorTaskListRenderer.render(respondentTask)).thenReturn(respondentTaskList);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
@@ -182,7 +182,7 @@ public class CaseEventHandlerTest {
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(fl401Tasks);
         when(taskListService.getRespondentSolicitorTasks()).thenReturn(respondentTask);
         when(taskListRenderer.render(fl401Tasks, eventsErrors, false, caseData)).thenReturn(fl410renderedTaskList);
-        when(respondentSolicitorTaskListRenderer.render(respondentTask,caseData)).thenReturn(respondentTaskList);
+        when(respondentSolicitorTaskListRenderer.render(respondentTask)).thenReturn(respondentTaskList);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
@@ -267,7 +267,7 @@ public class CaseEventHandlerTest {
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
         when(taskListService.getRespondentSolicitorTasks()).thenReturn(respondentTask);
         when(taskListRenderer.render(c100Tasks, errors, true, caseData)).thenReturn(c100renderedTaskList);
-        when(respondentSolicitorTaskListRenderer.render(respondentTask, caseData)).thenReturn(respondentTaskList);
+        when(respondentSolicitorTaskListRenderer.render(respondentTask)).thenReturn(respondentTaskList);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
