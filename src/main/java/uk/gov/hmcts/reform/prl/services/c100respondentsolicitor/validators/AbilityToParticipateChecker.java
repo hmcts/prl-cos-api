@@ -19,36 +19,36 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 public class AbilityToParticipateChecker implements RespondentEventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
-        activeRespondent = caseData.getRespondents()
+        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
-        return anyNonEmpty(activeRespondent
-                               .get()
-                               .getValue()
-                               .getResponse()
-                               .getAbilityToParticipate()
-        );
+        return activeRespondent.filter(partyDetailsElement -> anyNonEmpty(partyDetailsElement
+                                                                              .getValue()
+                                                                              .getResponse()
+                                                                              .getAbilityToParticipate()
+        )).isPresent();
     }
 
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
         boolean mandatoryInfo = false;
 
-        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
-        activeRespondent = caseData.getRespondents()
+        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
 
-        Optional<SolicitorAbilityToParticipateInProceedings> abilityToParticipate = Optional.ofNullable(activeRespondent.get()
-                                                            .getValue()
-                                                            .getResponse()
-                                                                                                            .getAbilityToParticipate());
-        if (!abilityToParticipate.isEmpty()) {
-            if (checkAbilityToParticipateMandatoryCompleted(abilityToParticipate)) {
-                mandatoryInfo = true;
+        if (activeRespondent.isPresent()) {
+            Optional<SolicitorAbilityToParticipateInProceedings> abilityToParticipate = Optional.ofNullable(
+                activeRespondent.get()
+                    .getValue()
+                    .getResponse()
+                    .getAbilityToParticipate());
+            if (!abilityToParticipate.isEmpty()) {
+                if (checkAbilityToParticipateMandatoryCompleted(abilityToParticipate)) {
+                    mandatoryInfo = true;
+                }
             }
         }
         return mandatoryInfo;
@@ -57,10 +57,14 @@ public class AbilityToParticipateChecker implements RespondentEventChecker {
     private boolean checkAbilityToParticipateMandatoryCompleted(Optional<SolicitorAbilityToParticipateInProceedings> abilityToParticipate) {
 
         List<Optional<?>> fields = new ArrayList<>();
-        Optional<YesNoDontKnow> abilityToParticipateYesOrNo = ofNullable(abilityToParticipate.get().getFactorsAffectingAbilityToParticipate());
-        fields.add(abilityToParticipateYesOrNo);
-        if (abilityToParticipateYesOrNo.isPresent() && abilityToParticipateYesOrNo.equals(Optional.of(YesNoDontKnow.yes))) {
-            fields.add(ofNullable(abilityToParticipate.get().getProvideDetailsForFactorsAffectingAbilityToParticipate()));
+        if (abilityToParticipate.isPresent()) {
+            fields.add(ofNullable(abilityToParticipate.get().getFactorsAffectingAbilityToParticipate()));
+
+            Optional<YesNoDontKnow> abilityToParticipateYesOrNo = ofNullable(abilityToParticipate.get().getFactorsAffectingAbilityToParticipate());
+            fields.add(abilityToParticipateYesOrNo);
+            if (abilityToParticipateYesOrNo.isPresent() && abilityToParticipateYesOrNo.equals(Optional.of(YesNoDontKnow.yes))) {
+                fields.add(ofNullable(abilityToParticipate.get().getProvideDetailsForFactorsAffectingAbilityToParticipate()));
+            }
         }
 
         return fields.stream().noneMatch(Optional::isEmpty)

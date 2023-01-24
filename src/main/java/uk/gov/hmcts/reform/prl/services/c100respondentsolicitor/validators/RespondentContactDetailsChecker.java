@@ -19,36 +19,34 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 public class RespondentContactDetailsChecker implements RespondentEventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
-        activeRespondent = caseData.getRespondents()
+        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
-        return anyNonEmpty(activeRespondent
-                               .get()
-                               .getValue()
-                               .getResponse()
-                               .getCitizenDetails()
-        );
+        return activeRespondent.filter(partyDetailsElement -> anyNonEmpty(partyDetailsElement
+                                                                              .getValue()
+                                                                              .getResponse()
+                                                                              .getCitizenDetails()
+        )).isPresent();
     }
 
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
         boolean mandatoryInfo = false;
-
-        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
-        activeRespondent = caseData.getRespondents()
+        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
 
-        Optional<CitizenDetails> citizenDetails = Optional.ofNullable(activeRespondent.get()
-                                                                                  .getValue()
-                                                                                  .getResponse()
-                                                                                  .getCitizenDetails());
-        if (!citizenDetails.isEmpty()) {
-            if (checkContactDetailsMandatoryCompleted(citizenDetails)) {
-                mandatoryInfo = true;
+        if (activeRespondent.isPresent()) {
+            Optional<CitizenDetails> citizenDetails = Optional.ofNullable(activeRespondent.get()
+                                                                              .getValue()
+                                                                              .getResponse()
+                                                                              .getCitizenDetails());
+            if (!citizenDetails.isEmpty()) {
+                if (checkContactDetailsMandatoryCompleted(citizenDetails)) {
+                    mandatoryInfo = true;
+                }
             }
         }
         return mandatoryInfo;
@@ -56,21 +54,23 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
 
     private boolean checkContactDetailsMandatoryCompleted(Optional<CitizenDetails> citizenDetails) {
         List<Optional<?>> fields = new ArrayList<>();
-        fields.add(ofNullable(citizenDetails.get().getFirstName()));
-        fields.add(ofNullable(citizenDetails.get().getLastName()));
-        fields.add(ofNullable(citizenDetails.get().getDateOfBirth()));
-        Optional<Address> address = ofNullable(citizenDetails.get().getAddress());
-        fields.add(address);
-        if (address.isPresent() && !verifyAddressCompleted(address.get())) {
-            return false;
+        if (citizenDetails.isPresent()) {
+            fields.add(ofNullable(citizenDetails.get().getFirstName()));
+            fields.add(ofNullable(citizenDetails.get().getLastName()));
+            fields.add(ofNullable(citizenDetails.get().getDateOfBirth()));
+            Optional<Address> address = ofNullable(citizenDetails.get().getAddress());
+            fields.add(address);
+            if (address.isPresent() && !verifyAddressCompleted(address.get())) {
+                return false;
+            }
+            fields.add(ofNullable(citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years()));
+            if (citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years()
+                .equals(YesOrNo.No)) {
+                fields.add(ofNullable(citizenDetails.get().getAddressHistory().getPreviousAddressHistory()));
+            }
+            fields.add(ofNullable(citizenDetails.get().getContact().getPhoneNumber()));
+            fields.add(ofNullable(citizenDetails.get().getContact().getEmail()));
         }
-        fields.add(ofNullable(citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years()));
-        if (citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years()
-                                  .equals(YesOrNo.No)) {
-            fields.add(ofNullable(citizenDetails.get().getAddressHistory().getPreviousAddressHistory()));
-        }
-        fields.add(ofNullable(citizenDetails.get().getContact().getPhoneNumber()));
-        fields.add(ofNullable(citizenDetails.get().getContact().getEmail()));
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 
