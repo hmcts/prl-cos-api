@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
@@ -43,10 +42,10 @@ public class KeepDetailsPrivateChecker implements RespondentEventChecker {
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
             .findFirst();
 
-        Optional<KeepDetailsPrivate> keepDetailsPrivate = Optional.ofNullable(activeRespondent.get()
+        Optional<SolicitorKeepDetailsPrivate> keepDetailsPrivate = Optional.ofNullable(activeRespondent.get()
                                                             .getValue()
                                                             .getResponse()
-                                                            .getKeepDetailsPrivate());
+                                                            .getSolicitorKeepDetailsPriate());
         if (!keepDetailsPrivate.isEmpty()) {
             if (checkKeepDetailsPrivateMandatoryCompleted(keepDetailsPrivate)) {
                 mandatoryInfo = true;
@@ -55,11 +54,12 @@ public class KeepDetailsPrivateChecker implements RespondentEventChecker {
         return mandatoryInfo;
     }
 
-    private boolean checkKeepDetailsPrivateMandatoryCompleted(Optional<KeepDetailsPrivate> keepDetailsPrivate) {
+    private boolean checkKeepDetailsPrivateMandatoryCompleted(Optional<SolicitorKeepDetailsPrivate> keepDetailsPrivate) {
 
         List<Optional<?>> fields = new ArrayList<>();
-        fields.add(ofNullable(keepDetailsPrivate.get().getOtherPeopleKnowYourContactDetails()));
-        Optional<YesOrNo> confidentiality = ofNullable(keepDetailsPrivate.get().getConfidentiality());
+        fields.add(ofNullable(keepDetailsPrivate.get().getRespKeepDetailsPrivate().getOtherPeopleKnowYourContactDetails()));
+        Optional<YesOrNo> confidentiality = ofNullable(keepDetailsPrivate.get()
+                                                           .getRespKeepDetailsPrivateConfidentiality().getConfidentiality());
         fields.add(confidentiality);
         if (confidentiality.isPresent() && confidentiality.equals(Optional.of(YesOrNo.Yes))) {
             fields.add(ofNullable(keepDetailsPrivate.get().getConfidentialityList()));

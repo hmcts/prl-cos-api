@@ -58,13 +58,11 @@ public class AttendToCourtChecker implements RespondentEventChecker {
     private boolean checkAttendToCourtManadatoryCompleted(Optional<AttendToCourt> attendToCourt) {
 
         List<Optional<?>> fields = new ArrayList<>();
-        fields.add(ofNullable(attendToCourt.get().getRespondentWelshNeeds()));
         Optional<YesOrNo> respondentWelshNeeds = ofNullable(attendToCourt.get().getRespondentWelshNeeds());
         fields.add(respondentWelshNeeds);
         if (respondentWelshNeeds.isPresent() && respondentWelshNeeds.equals(YesOrNo.Yes)) {
             fields.add(ofNullable(attendToCourt.get().getRespondentWelshNeedsList()));
         }
-        fields.add(ofNullable(attendToCourt.get().getIsRespondentNeededInterpreter()));
         Optional<YesOrNo> isRespondentNeededInterpreter = ofNullable(attendToCourt.get().getIsRespondentNeededInterpreter());
         fields.add(isRespondentNeededInterpreter);
         if (isRespondentNeededInterpreter.isPresent() && isRespondentNeededInterpreter.equals(YesOrNo.Yes)) {

@@ -16,11 +16,11 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
@@ -92,10 +92,12 @@ public class C100RespondentSolicitorService {
                     log.info("finding respondentConsentToApplication = " + x.getValue().getResponse().getConsent());
                     break;
                 case KEEP_DETAILS_PRIVATE:
-                    caseDataUpdated.put(
-                        event.getCaseFieldName(),
-                        x.getValue().getResponse().getKeepDetailsPrivate()
-                    );
+                    String[] keepDetailsPrivateFields = event.getCaseFieldName().split(",");
+                    log.info("Keep details private fields, :::{}", (Object) keepDetailsPrivateFields);
+                    caseDataUpdated.put(keepDetailsPrivateFields[0], x.getValue().getResponse()
+                        .getSolicitorKeepDetailsPriate().getRespKeepDetailsPrivate());
+                    caseDataUpdated.put(keepDetailsPrivateFields[1], x.getValue().getResponse()
+                        .getSolicitorKeepDetailsPriate().getRespKeepDetailsPrivateConfidentiality());
                     log.info("finding respondentKeepDetailsPrivate = " + x.getValue().getResponse().getKeepDetailsPrivate());
                     break;
                 case CONFIRM_EDIT_CONTACT_DETAILS:
@@ -115,8 +117,8 @@ public class C100RespondentSolicitorService {
                 case MIAM:
                     String[] miamFields = event.getCaseFieldName().split(",");
                     log.info("MIAM fields, :::{}", (Object) miamFields);
-                    caseDataUpdated.put(miamFields[0], x.getValue().getResponse().getMiam().getAttendedMiam());
-                    caseDataUpdated.put(miamFields[1], x.getValue().getResponse().getMiam().getWillingToAttendMiam());
+                    caseDataUpdated.put(miamFields[0], x.getValue().getResponse().getSolicitorMiam().getRespSolHaveYouAttendedMiam());
+                    caseDataUpdated.put(miamFields[1], x.getValue().getResponse().getSolicitorMiam().getRespSolWillingnessToAttendMiam());
                     caseDataUpdated.put(miamFields[2], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
                     caseDataUpdated.put(
                         miamFields[3],
@@ -237,14 +239,12 @@ public class C100RespondentSolicitorService {
                                  .build()).build();
                 break;
             case KEEP_DETAILS_PRIVATE:
-                KeepDetailsPrivate respondentKeepDetailsPrivate = caseData.getKeepContactDetailsPrivate();
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .keepDetailsPrivate(buildResponseForRespondent.getKeepDetailsPrivate().toBuilder()
-                                            .confidentiality(respondentKeepDetailsPrivate.getConfidentiality())
-                                            .confidentialityList(respondentKeepDetailsPrivate.getConfidentialityList())
-                                            .otherPeopleKnowYourContactDetails(
-                                                respondentKeepDetailsPrivate.getOtherPeopleKnowYourContactDetails())
-                                            .build())
+                    .solicitorKeepDetailsPriate(SolicitorKeepDetailsPrivate.builder()
+                                                    .respKeepDetailsPrivate(caseData.getKeepContactDetailsPrivate())
+                                                    .respKeepDetailsPrivateConfidentiality(caseData.getKeepContactDetailsPrivateOther())
+                                                    .build())
+
                     .build();
                 break;
             case CONFIRM_EDIT_CONTACT_DETAILS:
@@ -269,13 +269,9 @@ public class C100RespondentSolicitorService {
                 break;
             case MIAM:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .miam(Miam.builder()
-                              .attendedMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam())
-                              .willingToAttendMiam(caseData.getRespondentSolicitorWillingnessToAttendMiam().getWillingToAttendMiam())
-                              .reasonNotAttendingMiam(caseData.getRespondentSolicitorWillingnessToAttendMiam()
-                                                          .getWillingToAttendMiam().equals(YesOrNo.No)
-                                                          ? caseData.getRespondentSolicitorWillingnessToAttendMiam()
-                                  .getReasonNotAttendingMiam() : null)
+                    .solicitorMiam(SolicitorMiam.builder()
+                                       .respSolHaveYouAttendedMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam())
+                                       .respSolWillingnessToAttendMiam(caseData.getRespondentSolicitorWillingnessToAttendMiam())
                               .build())
                     .build();
                 break;
@@ -502,13 +498,26 @@ public class C100RespondentSolicitorService {
             .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
             .findFirst()
             .ifPresent(party -> {
-                log.info("updateRespondents:: party found. before update " + party);
+                log.info("updateC7ResponseRespondents:: party found. before update " + party);
                 PartyDetails amended = party.getValue().toBuilder()
                         .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(YesOrNo.Yes).build())
                         .build();
 
                 respondents.set(respondents.indexOf(party), element(party.getId(), amended));
-                log.info("updateRespondents:: party found. after update " + party);
+                log.info("updateC7ResponseRespondents:: party found. after update " + party);
+            });
+
+        respondents.stream()
+            .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
+            .findFirst()
+            .ifPresent(party -> {
+                log.info("updateActiveRespondents:: party found. before update " + party);
+                PartyDetails amended = party.getValue().toBuilder()
+                    .response(party.getValue().getResponse().toBuilder().activeRespondent(YesOrNo.No).build())
+                    .build();
+
+                respondents.set(respondents.indexOf(party), element(party.getId(), amended));
+                log.info("updateactiveRespondents:: party found. after update " + party);
             });
 
         updatedCaseData.put(RESPONDENTS, respondents);
