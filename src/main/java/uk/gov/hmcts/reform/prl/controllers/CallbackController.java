@@ -495,6 +495,7 @@ public class CallbackController {
             caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
             if (C100_CASE_TYPE.equals(caseDataUpdated.get("caseTypeOfApplication"))) {
                 caseDataUpdated.put("taskListVersion", "v2");
+                caseDataUpdated.put("childDetailsVersion", "v2");
             }
         }
 

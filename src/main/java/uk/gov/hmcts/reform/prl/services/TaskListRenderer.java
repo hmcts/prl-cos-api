@@ -35,6 +35,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
@@ -107,7 +108,7 @@ public class TaskListRenderer {
             final TaskSection peopleInTheCase = newSection("Add people to the case")
                     .withInfo("if children live with another party in the case (other than the applicant or respondent) you can add these details to "
                             + "'Other people in the case.' if you do complete this section, you must keep it up to date.")
-                    .withTask(tasks.get(CHILD_DETAILS))
+                    .withTask(tasks.get(CHILD_DETAILS_REVISED))
                     .withTask(tasks.get(APPLICANT_DETAILS))
                     .withTask(tasks.get(RESPONDENT_DETAILS))
                     .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE))
@@ -119,7 +120,7 @@ public class TaskListRenderer {
                     .withTask(tasks.get(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION))
                     .withErrors(List.of(EventValidationErrors
                             .builder()
-                            .event(CHILD_DETAILS)
+                            .event(CHILD_DETAILS_REVISED)
                             .errors(Collections.singletonList(EventErrorsEnum.CHILD_DETAILS_ERROR.getError()))
                             .build(),EventValidationErrors
                             .builder()
