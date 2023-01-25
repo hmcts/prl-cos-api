@@ -54,8 +54,6 @@ public class CaseApplicationResponseControllerFunctionalTest {
     @MockBean
     private DocumentGenService documentGenService;
 
-    private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
-
 
     @Before
     public void setUp() {
