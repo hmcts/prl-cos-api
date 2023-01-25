@@ -119,9 +119,9 @@ public class EditAndApproveDraftOrderController {
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
-
-        if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType())
-            || CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw.equals(selectedOrder.getOrderType()))
+        log.info("inside populateJudgeOrAdminDraftOrderCustomFields " + selectedOrder.getOrderType());
+        if (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType())
+            || CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw.equals(selectedOrder.getOrderType())
         ) {
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
             caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
