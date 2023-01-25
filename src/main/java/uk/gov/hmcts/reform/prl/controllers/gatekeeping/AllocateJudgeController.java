@@ -61,15 +61,15 @@ public class AllocateJudgeController extends AbstractCallbackController {
         @ApiResponse(responseCode = "200", description = "Allocated Judge Successfully ."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
 
-    public AboutToStartOrSubmitCallbackResponse createBundle(@RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
+    public AboutToStartOrSubmitCallbackResponse allocateJudge(@RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
                                                              @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
                                                              String serviceAuthorization,
                                                              @RequestBody CallbackRequest callbackRequest) {
-        log.info("*** request recieved to get the legalAdvisor details : {}", callbackRequest.toString());
+        log.info("*** request recieved to get the allocate Judge details : {}", callbackRequest.toString());
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("*** allocate judge details for the case id : {}", caseData.getId());
-        //caseDataUpdated.put(,);
+        caseDataUpdated.get("");
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
