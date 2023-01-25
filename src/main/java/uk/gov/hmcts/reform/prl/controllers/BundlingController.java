@@ -101,6 +101,8 @@ public class BundlingController extends AbstractCallbackController {
                         }
                     });
                     updateBundleWithNonEmptyfolders(bundle,foldersAfterEmptyRemoval,caseBundlesPostEmptyfoldersRemoval);
+                } else {
+                    caseBundlesPostEmptyfoldersRemoval.add(bundle);
                 }
             });
 

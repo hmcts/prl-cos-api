@@ -41,8 +41,8 @@ public enum DioUrgentHearingRefusedCheckListEnum {
     }
 
     @JsonCreator
-    public static DioRemoteHearingEnum getValue(String key) {
-        return DioRemoteHearingEnum.valueOf(key);
+    public static DioUrgentHearingRefusedCheckListEnum getValue(String key) {
+        return DioUrgentHearingRefusedCheckListEnum.valueOf(key);
     }
 
 }
