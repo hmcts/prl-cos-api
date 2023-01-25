@@ -21,7 +21,7 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
                 AllocatedJudge.builder().courtName(CommonUtils.getValue(caseData.getCourtName()))
                     .emailAddress((isLastNameAndEmailAvailable) ? judgeOrLegalAdvisorDetails[1] : "").judgeTitle(" ")
                     .lastName((isLastNameAndEmailAvailable) ? judgeOrLegalAdvisorDetails[0] : "")
-                    .tierOfJudiciary(getTierOfJudiciary(allocatedJudge)).build()).build();
+                    .tierOfJudiciaryType(getTierOfJudiciary(allocatedJudge)).build()).build();
         }
 
         return CaseSummary.builder().allocatedJudgeDetails(
