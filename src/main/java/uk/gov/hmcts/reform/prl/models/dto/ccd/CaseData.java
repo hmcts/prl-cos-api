@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
@@ -62,6 +63,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -253,6 +255,20 @@ public class CaseData implements MappableObject {
     //private final CaseNoteDetails caseNoteDetails;
     private final String subject;
     private final String caseNote;
+
+
+    /**
+     * Child Details Revised.
+     */
+    private List<Element<ChildDetailsRevised>> newChildDetails;
+
+
+    /**
+     * Children are not in the case but related to this case.
+     */
+    private List<Element<OtherChildrenNotInTheCase>> childrenNotInTheCase;
+
+    private YesOrNo childrenNotPartInTheCaseYesNo;
 
     /**
      * Child details.

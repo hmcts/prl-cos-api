@@ -19,6 +19,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
@@ -62,6 +63,9 @@ public class EventsChecker {
 
     @Autowired
     private ChildChecker childChecker;
+
+    @Autowired
+    private ChildDetailsRevisedChecker childDetailsRevisedChecker;
 
     @Autowired
     private RespondentsChecker respondentsChecker;
@@ -147,6 +151,7 @@ public class EventsChecker {
         eventStatus.put(HEARING_URGENCY, hearingUrgencyChecker);
         eventStatus.put(APPLICANT_DETAILS, applicantsChecker);
         eventStatus.put(CHILD_DETAILS, childChecker);
+        eventStatus.put(CHILD_DETAILS_REVISED, childDetailsRevisedChecker);
         eventStatus.put(RESPONDENT_DETAILS, respondentsChecker);
         eventStatus.put(MIAM, miamChecker);
         eventStatus.put(ALLEGATIONS_OF_HARM, allegationsOfHarmChecker);

@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
@@ -111,7 +112,7 @@ public class TaskListService {
                     CASE_NAME,
                     TYPE_OF_APPLICATION,
                     HEARING_URGENCY,
-                    CHILD_DETAILS,
+                    CHILD_DETAILS_REVISED,
                     APPLICANT_DETAILS,
                     RESPONDENT_DETAILS,
                     OTHER_PEOPLE_IN_THE_CASE,
