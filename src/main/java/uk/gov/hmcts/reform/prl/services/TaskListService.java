@@ -40,6 +40,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_IN_NOT_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
@@ -112,6 +113,7 @@ public class TaskListService {
             MIAM,
             ALLEGATIONS_OF_HARM,
             OTHER_PEOPLE_IN_THE_CASE,
+            OTHER_CHILDREN_IN_NOT_THE_CASE,
             OTHER_PROCEEDINGS,
             ATTENDING_THE_HEARING,
             INTERNATIONAL_ELEMENT,

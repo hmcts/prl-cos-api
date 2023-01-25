@@ -36,6 +36,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_IN_NOT_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
@@ -75,6 +76,7 @@ public class TaskListServiceTest {
             Task.builder().event(MIAM).state(NOT_STARTED).build(),
             Task.builder().event(ALLEGATIONS_OF_HARM).state(NOT_STARTED).build(),
             Task.builder().event(OTHER_PEOPLE_IN_THE_CASE).state(NOT_STARTED).build(),
+            Task.builder().event(OTHER_CHILDREN_IN_NOT_THE_CASE).state(NOT_STARTED).build(),
             Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
             Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
             Task.builder().event(INTERNATIONAL_ELEMENT).state(NOT_STARTED).build(),
@@ -105,6 +107,7 @@ public class TaskListServiceTest {
             Task.builder().event(MIAM).state(NOT_STARTED).build(),
             Task.builder().event(ALLEGATIONS_OF_HARM).state(NOT_STARTED).build(),
             Task.builder().event(OTHER_PEOPLE_IN_THE_CASE).state(NOT_STARTED).build(),
+            Task.builder().event(OTHER_CHILDREN_IN_NOT_THE_CASE).state(NOT_STARTED).build(),
             Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
             Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
             Task.builder().event(INTERNATIONAL_ELEMENT).state(NOT_STARTED).build(),

@@ -75,6 +75,8 @@ public class SubmitAndPayCheckerTest {
     OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
 
     @Mock
+    OtherChildrenNotInTheCaseChecker otherChildrenNotInTheCaseChecker;
+    @Mock
     OtherProceedingsChecker otherProceedingsChecker;
 
     @Mock
@@ -384,6 +386,7 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
         when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
         when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
+        when(eventsChecker.getOtherChildrenNotInTheCaseChecker()).thenReturn(otherChildrenNotInTheCaseChecker);
         when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
         when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
         when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);
@@ -469,6 +472,7 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
         when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
         when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
+        when(eventsChecker.getOtherChildrenNotInTheCaseChecker()).thenReturn(otherChildrenNotInTheCaseChecker);
         when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
         when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
         when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);
@@ -606,6 +610,7 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
         when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
         when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
+        when(eventsChecker.getOtherChildrenNotInTheCaseChecker()).thenReturn(otherChildrenNotInTheCaseChecker);
         when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
         when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
         when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);

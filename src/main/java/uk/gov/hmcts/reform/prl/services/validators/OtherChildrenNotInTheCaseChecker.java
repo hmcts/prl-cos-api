@@ -1,0 +1,117 @@
+package uk.gov.hmcts.reform.prl.services.validators;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.TaskErrorService;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_IN_NOT_THE_CASE;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILD_DETAILS_REVISED_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.OTHER_CHILDREN_IN_NOT_THE_CASE_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.Gender.other;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+
+@Slf4j
+@Service
+public class OtherChildrenNotInTheCaseChecker implements EventChecker {
+
+    @Autowired
+    TaskErrorService taskErrorService;
+
+    @Override
+    public boolean isFinished(CaseData caseData) {
+
+        if (!validateFields(caseData)) {
+            taskErrorService.addEventError(OTHER_CHILDREN_IN_NOT_THE_CASE,
+                                           OTHER_CHILDREN_IN_NOT_THE_CASE_ERROR, OTHER_CHILDREN_IN_NOT_THE_CASE_ERROR.getError());
+            return false;
+        }
+
+        taskErrorService.removeError(CHILD_DETAILS_REVISED_ERROR);
+
+        return true;
+    }
+
+    public boolean validateOtherChildrenNotInTheCase(CaseData caseData) {
+        Optional<List<Element<OtherChildrenNotInTheCase>>> childrenWrapped = ofNullable(caseData.getChildrenNotInTheCase());
+
+        if (!childrenWrapped.isEmpty() && !childrenWrapped.get().isEmpty()) {
+            List<OtherChildrenNotInTheCase> children = childrenWrapped.get()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            for (OtherChildrenNotInTheCase c : children) {
+                log.debug("validateOtherChildrenNotInTheCase - validateMandatoryFieldsCompleted :{} ",validateMandatoryFieldsCompleted(c));
+                if (!(validateMandatoryFieldsCompleted(c))) {
+                    taskErrorService.addEventError(OTHER_CHILDREN_IN_NOT_THE_CASE,
+                                                   OTHER_CHILDREN_IN_NOT_THE_CASE_ERROR, OTHER_CHILDREN_IN_NOT_THE_CASE_ERROR.getError());
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean validateFields(CaseData caseData) {
+        boolean isFinished;
+        Optional<YesOrNo> childrenNotPartInTheCaseYesNo = ofNullable(caseData.getChildrenNotPartInTheCaseYesNo());
+        if (childrenNotPartInTheCaseYesNo.isPresent() && childrenNotPartInTheCaseYesNo.get().equals(Yes)) {
+            return validateOtherChildrenNotInTheCase(caseData);
+        } else {
+            isFinished = childrenNotPartInTheCaseYesNo.isPresent();
+        }
+        return isFinished;
+    }
+
+    @Override
+    public boolean isStarted(CaseData caseData) {
+
+        Optional<YesOrNo> childrenNotPartInTheCaseYesNo = ofNullable(caseData.getChildrenNotPartInTheCaseYesNo());
+
+        return childrenNotPartInTheCaseYesNo.isPresent() && childrenNotPartInTheCaseYesNo.get().equals(Yes);
+    }
+
+    @Override
+    public boolean hasMandatoryCompleted(CaseData caseData) {
+        return false;
+    }
+
+    private boolean validateMandatoryFieldsCompleted(OtherChildrenNotInTheCase child) {
+
+        List<Optional<?>> fields = new ArrayList<>();
+        fields.add(ofNullable(child.getFirstName()));
+        fields.add(ofNullable(child.getLastName()));
+        fields.add(ofNullable(child.getDateOfBirth()));
+        Optional<Gender> gender = ofNullable(child.getGender());
+        fields.add(gender);
+        if (gender.isPresent() && gender.get().equals(other)) {
+            fields.add(ofNullable(child.getOtherGender()));
+        }
+        return fields.stream().noneMatch(Optional::isEmpty)
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+
+    }
+
+    private boolean validateAnyFieldStarted(OtherChildrenNotInTheCase c) {
+
+        List<Optional<?>> fields = new ArrayList<>();
+        fields.add(ofNullable(c.getFirstName()));
+        fields.add(ofNullable(c.getLastName()));
+        fields.add(ofNullable(c.getDateOfBirth()));
+        fields.add(ofNullable(c.getGender()));
+        fields.add(ofNullable(c.getOtherGender()));
+        return  fields.stream().anyMatch(Optional::isPresent);
+    }
+
+}

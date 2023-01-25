@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_IN_NOT_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
@@ -74,6 +75,8 @@ public class EventsChecker {
     @Autowired
     private AllegationsOfHarmChecker allegationsOfHarmChecker;
 
+    @Autowired
+    private OtherChildrenNotInTheCaseChecker otherChildrenNotInTheCaseChecker;
     @Autowired
     private OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
 
@@ -139,6 +142,7 @@ public class EventsChecker {
         eventStatus.put(MIAM, miamChecker);
         eventStatus.put(ALLEGATIONS_OF_HARM, allegationsOfHarmChecker);
         eventStatus.put(OTHER_PEOPLE_IN_THE_CASE, otherPeopleInTheCaseChecker);
+        eventStatus.put(OTHER_CHILDREN_IN_NOT_THE_CASE, otherChildrenNotInTheCaseChecker);
         eventStatus.put(OTHER_PROCEEDINGS, otherProceedingsChecker);
         eventStatus.put(ATTENDING_THE_HEARING, attendingTheHearingChecker);
         eventStatus.put(INTERNATIONAL_ELEMENT, internationalElementChecker);

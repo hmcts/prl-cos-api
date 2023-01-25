@@ -21,6 +21,8 @@ public enum Event {
     MIAM("miam", "MIAM"),
     ALLEGATIONS_OF_HARM("allegationsOfHarm", "Allegations of harm"),
     OTHER_PEOPLE_IN_THE_CASE("otherPeopleInTheCase", "Other people in the case"),
+
+    OTHER_CHILDREN_IN_NOT_THE_CASE("childrenNotInTheCase", "Other children not in the case"),
     OTHER_PROCEEDINGS("otherProceedings", "Other proceedings"),
     ATTENDING_THE_HEARING("attendingTheHearing", "Attending the hearing"),
     INTERNATIONAL_ELEMENT("internationalElement", "International element"),

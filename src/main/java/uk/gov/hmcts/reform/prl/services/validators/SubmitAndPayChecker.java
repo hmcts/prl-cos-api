@@ -20,6 +20,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_IN_NOT_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
@@ -78,6 +79,7 @@ public class SubmitAndPayChecker implements EventChecker {
         EnumMap<Event, EventChecker> optionalEvents = new EnumMap<>(Event.class);
 
         optionalEvents.put(OTHER_PEOPLE_IN_THE_CASE, eventsChecker.getOtherPeopleInTheCaseChecker());
+        optionalEvents.put(OTHER_CHILDREN_IN_NOT_THE_CASE, eventsChecker.getOtherChildrenNotInTheCaseChecker());
         optionalEvents.put(OTHER_PROCEEDINGS, eventsChecker.getOtherProceedingsChecker());
         optionalEvents.put(ATTENDING_THE_HEARING, eventsChecker.getAttendingTheHearingChecker());
         optionalEvents.put(INTERNATIONAL_ELEMENT, eventsChecker.getInternationalElementChecker());

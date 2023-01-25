@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum EventErrorsEnum {
 
     CHILD_DETAILS_ERROR("Add child details"),
-
+    OTHER_CHILDREN_IN_NOT_THE_CASE_ERROR("Other children not in the case"),
     CHILD_DETAILS_REVISED_ERROR("Add child details"),
     APPLICANTS_DETAILS_ERROR("Add applicant details"),
     TYPE_OF_APPLICATION_ERROR("Add details about the type of application"),
