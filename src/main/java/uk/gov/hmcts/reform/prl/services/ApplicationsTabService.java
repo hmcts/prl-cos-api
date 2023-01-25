@@ -863,14 +863,13 @@ public class ApplicationsTabService implements TabService {
     }
 
     public Map<String, Object> getFl401RespondentTable(CaseData caseData) {
-        log.info("*** FL401 Respondent Details to update table *** {}",caseData.getRespondentsFL401());
         if (caseData.getRespondentsFL401() == null) {
             return Collections.emptyMap();
         }
         PartyDetails currentRespondent = caseData.getRespondentsFL401();
         currentRespondent = maskFl401ConfidentialDetails(currentRespondent);
-        FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
 
+        FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
         return toMap(a);
     }
 
