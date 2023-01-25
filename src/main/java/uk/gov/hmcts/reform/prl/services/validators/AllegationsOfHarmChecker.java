@@ -73,7 +73,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
                 if (behavioursWrapped.isPresent()
                     && !behavioursWrapped.get().isEmpty()) {
                     behavioursCompleted =  behavioursWrapped.get()
-                            .stream().anyMatch(behavioursElement -> validateBehaviour(behavioursElement.getValue()));
+                            .stream().allMatch(behavioursElement -> validateBehaviour(behavioursElement.getValue()));
                     if (!behavioursCompleted) {
                         return false;
                     }

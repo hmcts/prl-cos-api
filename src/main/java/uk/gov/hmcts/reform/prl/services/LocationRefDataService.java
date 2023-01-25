@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.util.Strings.concat;
@@ -47,14 +48,32 @@ public class LocationRefDataService {
             ? new ArrayList<>()
             : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
-            .filter(location -> Arrays.stream(courtList).anyMatch(location.getCourtEpimmsId()::equals))
+            .filter(location -> {
+                if (courtList.length == 1) {
+                    return true;
+                }
+                return Arrays.asList(courtList).contains(location.getCourtEpimmsId());
+            })
             .map(this::getDisplayEntry).collect(Collectors.toList()));
     }
 
     private DynamicListElement getDisplayEntry(CourtVenue location) {
         String value = concat(concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
                               location.getPostcode());
-        String key = location.getCourtEpimmsId() + "-" + location.getRegionId() + "-" + location.getCourtName();
+        String key = location.getCourtEpimmsId();
         return DynamicListElement.builder().code(key).label(value).build();
+    }
+
+    public String getCourtDetailsFromEpimmsId(String baseLocationId, String authToken) {
+        CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(authToken,
+                                                                                authTokenGenerator.generate(),
+                                                                                SERVICE_ID);
+        Optional<CourtVenue> courtVenue = courtDetails.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
+            .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
+            .filter(location -> baseLocationId.equalsIgnoreCase(location.getCourtEpimmsId()))
+            .findFirst();
+        return courtVenue.map(venue -> venue.getCourtEpimmsId() + "-" + venue.getRegionId()
+            + "-" + venue.getCourtName() + "-" + venue.getPostcode() + "-" + venue.getRegion()
+            + "-" + venue.getSiteName()).orElse("");
     }
 }

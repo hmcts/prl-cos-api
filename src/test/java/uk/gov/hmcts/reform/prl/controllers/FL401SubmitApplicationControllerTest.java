@@ -14,8 +14,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.CourtDetailsPilotEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -29,13 +29,17 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -45,6 +49,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -125,12 +130,19 @@ public class FL401SubmitApplicationControllerTest {
     @Mock
     private DocumentGenService documentGenService;
 
+    @Mock
+    private LocationRefDataService locationRefDataService;
+
+    @Mock
+    private CourtFinderApi courtFinderApi;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     private TypeOfApplicationOrders orders;
     private LinkToCA linkToCA;
 
     private static final Map<String, Object> fl401DocsMap = new HashMap<>();
+    private DynamicList dynamicList;
 
     @Before
     public void setUp() {
@@ -157,6 +169,26 @@ public class FL401SubmitApplicationControllerTest {
         fl401DocsMap.put(PrlAppsConstants.DOCUMENT_FIELD_FINAL, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_C8_WELSH, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
+        Court horshamCourt = Court.builder()
+            .courtName("Horsham County Court and Family Court")
+            .courtSlug("horsham-county-court-and-family-court")
+            .courtEmailAddresses(Collections.singletonList(courtEmailAddress))
+            .countyLocationCode(333)
+            .dxNumber(Collections.singletonList("The Law Courts"))
+            .inPerson(true)
+            .accessScheme(true)
+            .address(Collections.singletonList(CourtAddress.builder().build()))
+            .build();
+        dynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code("reg-base-courtname-postcode-regname-basename").build()).build();
+        when(courtFinderApi.findClosestDomesticAbuseCourtByPostCode(Mockito.anyString()))
+            .thenReturn(ServiceArea.builder()
+                            .courts(Collections.singletonList(horshamCourt))
+                            .build());
+        when(courtFinderApi.getCourtDetails(Mockito.anyString())).thenReturn(horshamCourt);
+        when(courtFinderService.getEmailAddress(horshamCourt)).thenReturn(Optional.of(courtEmailAddress));
+        when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
+            .thenReturn("test-test-test-test-test-test");
     }
 
     @Test
@@ -178,7 +210,7 @@ public class FL401SubmitApplicationControllerTest {
             .dateSubmitted(String.valueOf("22-02-2022"))
             .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(YesOrNo.Yes)
-            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
+            .submitCountyCourtSelection(dynamicList)
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -248,7 +280,7 @@ public class FL401SubmitApplicationControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
-        CallbackResponse callbackResponseTest = fl401SubmitApplicationController.fl401SubmitApplicationValidation(
+        AboutToStartOrSubmitCallbackResponse callbackResponseTest = fl401SubmitApplicationController.fl401SubmitApplicationValidation(
             authToken,
             callbackRequest
         );
@@ -291,7 +323,7 @@ public class FL401SubmitApplicationControllerTest {
             .applicantsFL401(applicant)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
-            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
+            .submitCountyCourtSelection(dynamicList)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -411,7 +443,7 @@ public class FL401SubmitApplicationControllerTest {
                                .build())
             .applicantsFL401(applicant)
             .home(homefull)
-            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
+            .submitCountyCourtSelection(dynamicList)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
@@ -539,7 +571,7 @@ public class FL401SubmitApplicationControllerTest {
                                .build())
             .applicantsFL401(applicant)
             .home(homefull)
-            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
+            .submitCountyCourtSelection(dynamicList)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
@@ -660,7 +692,7 @@ public class FL401SubmitApplicationControllerTest {
                                .build())
             .applicantsFL401(applicant)
             .home(homefull)
-            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
+            .submitCountyCourtSelection(dynamicList)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
@@ -773,7 +805,7 @@ public class FL401SubmitApplicationControllerTest {
                                .build())
             .applicantsFL401(applicant)
             .home(null)
-            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
+            .submitCountyCourtSelection(dynamicList)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
@@ -876,7 +908,7 @@ public class FL401SubmitApplicationControllerTest {
                                .build())
             .applicantsFL401(applicant)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
-            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
+            .submitCountyCourtSelection(dynamicList)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -981,7 +1013,7 @@ public class FL401SubmitApplicationControllerTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(YesOrNo.Yes)
-            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
+            .submitCountyCourtSelection(dynamicList)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -1084,7 +1116,7 @@ public class FL401SubmitApplicationControllerTest {
             .applicantsFL401(applicant)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
-            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
+            .submitCountyCourtSelection(dynamicList)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -1163,7 +1195,7 @@ public class FL401SubmitApplicationControllerTest {
             .applicantsFL401(fl401Applicant)
             .courtEmailAddress("localcourt@test.com")
             .isNotificationSent("Yes")
-            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
+            .submitCountyCourtSelection(dynamicList)
             .build();
 
         LocalDate issueDate = LocalDate.now();
@@ -1181,7 +1213,7 @@ public class FL401SubmitApplicationControllerTest {
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         fl401SubmitApplicationController.fl401SendApplicationNotification(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(1))
+        verify(caseWorkerEmailService, times(0))
             .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
         verify(solicitorEmailService, times(1)).sendEmailToFl401Solicitor(
             callbackRequest.getCaseDetails(),
@@ -1219,7 +1251,7 @@ public class FL401SubmitApplicationControllerTest {
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         fl401SubmitApplicationController.fl401SendApplicationNotification(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(1))
+        verify(caseWorkerEmailService, times(0))
             .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
         verify(solicitorEmailService, times(1)).sendEmailToFl401Solicitor(
             callbackRequest.getCaseDetails(),
