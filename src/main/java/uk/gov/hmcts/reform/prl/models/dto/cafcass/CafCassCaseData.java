@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Builder(toBuilder = true)
 public class CafCassCaseData {
     @Setter(AccessLevel.NONE)
@@ -188,10 +188,12 @@ public class CafCassCaseData {
     private List<Element<OtherPersonInTheCase>> otherPeopleInTheCaseTable;
 
     public void setOtherPeopleInTheCaseTable(List<Element<OtherPersonInTheCase>> otherPeopleInTheCaseTable) {
-        if (otherPeopleInTheCaseTable != null && otherPeopleInTheCaseTable.size() == 1) {
-            if (!StringUtils.hasText(otherPeopleInTheCaseTable.get(0).getValue().getFirstName())) {
-                otherPeopleInTheCaseTable = null;
-            }
+        if (otherPeopleInTheCaseTable != null && !otherPeopleInTheCaseTable.isEmpty()) {
+            final List<Element<OtherPersonInTheCase>> otherPeopleInTheCaseTableNonNull = otherPeopleInTheCaseTable.stream()
+                .filter(
+                    otherPersonInTheCaseElement -> otherPersonInTheCaseElement.getValue() != null)
+                .collect(Collectors.toList());
+            otherPeopleInTheCaseTable = otherPeopleInTheCaseTableNonNull;
         }
 
         this.otherPeopleInTheCaseTable = otherPeopleInTheCaseTable;
