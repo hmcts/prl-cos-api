@@ -88,19 +88,20 @@ public class CaseService {
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)) {
             UserDetails userDetails = idamClient.getUserDetails(authToken);
             UserInfo userInfo = UserInfo
-                    .builder()
-                    .idamId(userDetails.getId())
-                    .firstName(userDetails.getForename())
-                    .lastName(userDetails.getSurname().orElse(null))
-                    .emailAddress(userDetails.getEmail())
-                    .build();
+                .builder()
+                .idamId(userDetails.getId())
+                .firstName(userDetails.getForename())
+                .lastName(userDetails.getSurname().orElse(null))
+                .emailAddress(userDetails.getEmail())
+                .build();
 
             Court closestChildArrangementsCourt = buildCourt(caseData);
 
-            CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData.toBuilder()
-                    .userInfo(wrapElements(userInfo))
-                    .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
-                    .build());
+            CaseData updatedCaseData = caseDataMapper
+                .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
+                                          .courtName((closestChildArrangementsCourt != null)
+                                                         ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
+                                          .build());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
@@ -125,7 +126,7 @@ public class CaseService {
     }
 
     private List<CaseData> searchCasesLinkedToUser(String authToken, String s2sToken,
-                                                      Map<String, String> searchCriteria) {
+                                                   Map<String, String> searchCriteria) {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
         List<CaseDetails> caseDetails = new ArrayList<>();
@@ -162,7 +163,11 @@ public class CaseService {
             coreCaseDataApi.getCase(anonymousUserToken, s2sToken, caseId).getData(),
             CaseData.class
         );
-
+        log.info("caseId {}", caseId);
+        log.info("userId {}", userId);
+        log.info("emailId {}", emailId);
+        log.info("accesscode {}", accessCode);
+        log.info("Before checking the accesscode caseata {}", caseData);
         if ("Valid".equalsIgnoreCase(findAccessCodeStatus(accessCode, caseData))) {
             UUID partyId = null;
             YesOrNo isApplicant = YesOrNo.Yes;
@@ -175,7 +180,15 @@ public class CaseService {
                     invite.getValue().setInvitedUserId(userId);
                 }
             }
+            log.info("Before processUserDetailsForCase() :::: caseData {}", caseData);
+            log.info("Before processUserDetailsForCase() :::: userId {}", userId);
+            log.info("Before processUserDetailsForCase() :::: emailId {}", emailId);
+            log.info("Before processUserDetailsForCase() :::: partyId {}", partyId);
+            log.info("Before processUserDetailsForCase() :::: isApplicant {}", isApplicant);
+
             processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant);
+
+            log.info("After processUserDetailsForCase() :::: caseData {}", caseData);
 
             caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData);
         }

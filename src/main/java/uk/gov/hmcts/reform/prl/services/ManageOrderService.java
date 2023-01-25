@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -844,13 +845,27 @@ public class ManageOrderService {
             .orderDocument(order.getValue().getOrderDocument())
             .orderType(order.getValue().getOrderType())
             .typeOfOrder(order.getValue().getTypeOfOrder())
-            .otherDetails(order.getValue().getOtherDetails())
+            .otherDetails(updateOtherOrderDetails(order.getValue().getOtherDetails()))
             .dateCreated(order.getValue().getDateCreated())
             .orderTypeId(order.getValue().getOrderTypeId())
             .serveOrderDetails(serveOrderDetails)
-            .orderServed(Yes)
             .build();
+        log.info("amaneded order {}" + amended);
         orders.set(orders.indexOf(order), element(order.getId(), amended));
+    }
+
+    private static OtherOrderDetails updateOtherOrderDetails(OtherOrderDetails otherDetails) {
+        return OtherOrderDetails.builder()
+            .createdBy(otherDetails.getCreatedBy())
+            .orderCreatedDate(otherDetails.getOrderCreatedDate())
+            .orderAmendedDate(otherDetails.getOrderAmendedDate())
+            .orderMadeDate(otherDetails.getOrderMadeDate())
+            .orderRecipients(otherDetails.getOrderRecipients())
+            .orderServedDate(LocalDate.now().format(DateTimeFormatter.ofPattern(
+                PrlAppsConstants.D_MMMM_YYYY,
+                Locale.UK
+            )))
+            .build();
     }
 
     public void updateCaseDataWithAppointedGuardianNames(uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails,
@@ -899,8 +914,6 @@ public class ManageOrderService {
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
 
-        } else {
-            caseDataUpdated.put("previewOrderDoc", null);
         }
         if (documentLanguage.isGenWelsh()) {
             caseDataUpdated.put("isWelshDocGen", Yes.toString());
@@ -915,8 +928,6 @@ public class ManageOrderService {
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
 
-        } else {
-            caseDataUpdated.put("previewOrderDocWelsh", null);
         }
         return caseDataUpdated;
     }
@@ -927,6 +938,13 @@ public class ManageOrderService {
 
         ManageOrders orderData = ManageOrders.builder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
+            .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
+            .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
+            .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
+            .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+            .isOrderDrawnForCafcass(caseData.getManageOrders().getIsOrderDrawnForCafcass())
+            .orderDirections(caseData.getManageOrders().getOrderDirections())
+            .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .manageOrdersCourtName(null != caseData.getCourtName() ? caseData.getCourtName() : null)
             .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
                                                  caseData.getApplicantsFL401().getLastName()
