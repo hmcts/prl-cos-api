@@ -538,15 +538,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/*',
   '**uk/gov/hmcts/reform/prl/Application.*',
-  '**uk/gov/hmcts/reform/prl/controllers/c100respondentsolicitor/C100RespondentSolicitorController.java',
-  '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/C100RespondentSolicitorService.java',
-  '**/uk/gov/hmcts/reform/prl/services/RespondentSolicitorTaskListRenderer.java',
-  '**/uk/gov/hmcts/reform/prl/utils/noticeofchange/RespondentPolicyConverter.java',
-  '**/uk/gov/hmcts/reform/prl/services/noticeofchange/NoticeOfChangePartiesService.java',
-  '**/uk/gov/hmcts/reform/prl/utils/noticeofchange/NoticeOfChangePartiesConverter.java',
-  '**/uk/gov/hmcts/reform/prl/services/caseaccess/CcdDataStoreService.java',
-  '**/uk/gov/hmcts/reform/prl/services/document/DocumentGenService.java',
-  '**/uk/gov/hmcts/reform/prl/services/UpdatePartyDetailsService.java'
+  '**/uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/*',
+  '**/uk/gov/hmcts/reform/prl/services/document/DocumentGenService.java'
 ]
 
 sonarqube {
