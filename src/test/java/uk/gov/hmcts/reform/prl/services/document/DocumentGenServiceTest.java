@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.document;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -33,6 +34,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
@@ -43,6 +46,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DeleteDocumentService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
@@ -50,8 +54,11 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -85,10 +92,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REQUEST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENG_DOC_GEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_DOCUMENT_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -1392,6 +1403,76 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
+    }
+
+    @Ignore
+    @Test
+    public void testGenerateCitizenDocument() throws Exception {
+        Map<String, String> documentValues = new HashMap<>();
+        documentValues.put("caseId", "1664294549087405");
+        documentValues.put("freeTextUploadStatements", "testing document gen");
+        documentValues.put("parentDocumentType","Witness statements and evidence");
+        documentValues.put("documentType", "Your position statements");
+        documentValues.put("partyName", "Sonali Citizen");
+        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
+        documentValues.put("documentRequestedByCourt", "No");
+        documentValues.put("isApplicant", "Yes");
+
+        GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
+            .values(documentValues)
+            .build();
+
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseDataNotIssued);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseDataNotIssued);
+
+        String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
+        String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
+
+        LocalDate today = LocalDate.now();
+        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
+
+        UploadedDocuments uploadedDocuments = UploadedDocuments.builder()
+            .parentDocumentType(generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE))
+            .documentType(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE))
+            .partyName(partyName)
+            .isApplicant("Yes")
+            .uploadedBy("0c09b130-2eba-4ca8-a910-1f001bac01e6")
+            .dateCreated(LocalDate.now())
+            .documentRequestedByCourt(YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST)))
+            .documentDetails(DocumentDetails.builder()
+                                 .documentName(documentType.replace("Your", partyName + "'s"))
+                                 .documentUploadedDate(formattedCurrentDate)
+                                 .build())
+            .citizenDocument(Document.builder()
+                                   .documentUrl(generatedDocumentInfo.getUrl())
+                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                   .documentHash(generatedDocumentInfo.getHashToken())
+                                   .documentFileName("test-position-stmt.docx")
+                                   .build())
+            .build();
+
+        documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
+        verify(dgsService, times(2)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verifyNoMoreInteractions(dgsService);
+
     }
 }
 
