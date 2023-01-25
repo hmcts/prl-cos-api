@@ -573,7 +573,7 @@ public class WelshLangMapper {
         welshMap.put(ProceedingsEnum.ongoing.getDisplayedValue(), "achosion sy’n mynd ymlaen ar hyn o bryd");
         welshMap.put(ProceedingsEnum.previous.getDisplayedValue(), "achosion blaenorol");
         welshMap.put(TypeOfOrderEnum.emergencyProtectionOrder.getDisplayedValue(), "Gorchymyn Diogelu Brys");
-        welshMap.put(TypeOfOrderEnum.superviosionOrder.getDisplayedValue(), "Gorchymyn Goruchwylio");
+        welshMap.put(TypeOfOrderEnum.supervisionOrder.getDisplayedValue(), "Gorchymyn Goruchwylio");
         welshMap.put(TypeOfOrderEnum.careOrder.getDisplayedValue(), "Gorchymyn Gofal");
         welshMap.put(TypeOfOrderEnum.childAbduction.getDisplayedValue(), "Herwgydio plentyn");
         welshMap.put(TypeOfOrderEnum.familyLaw1996Part4.getDisplayedValue(), "Deddf Cyfraith Teulu 1996 Rhan 4");
