@@ -115,6 +115,13 @@ public class DraftAnOrderServiceTest {
     @Mock
     private PartiesListGenerator partiesListGenerator;
 
+    private final String authToken = "Bearer testAuthtoken";
+    private final String serviceAuthToken = "serviceTestAuthtoken";
+
+    private CaseData caseData;
+    private List<Element<Child>> listOfChildren;
+    private List<Element<MagistrateLastName>> magistrateElementList;
+    private List<Element<DraftOrder>> draftOrderList;
 
     @Before
     public void setup() {
@@ -126,6 +133,123 @@ public class DraftAnOrderServiceTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        listOfChildren = Collections.singletonList(wrappedChildren);
+
+        MagistrateLastName magistrateLastName = MagistrateLastName.builder()
+            .lastName("Magistrate last")
+            .build();
+
+        Element<MagistrateLastName> magistrateLastNameElement = Element.<MagistrateLastName>builder().value(magistrateLastName).build();
+        magistrateElementList = Collections.singletonList(magistrateLastNameElement);
+
+        List<OrderTypeEnum> orderType = new ArrayList<>();
+        orderType.add(OrderTypeEnum.childArrangementsOrder);
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+        LocalDateTime now = LocalDateTime.now();
+        System.out.println(dtf.format(now));
+
+        DraftOrder draftOrder = DraftOrder.builder()
+            .typeOfOrder(SelectTypeOfOrderEnum.interim.getDisplayedValue())
+            .orderTypeId(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue())
+            .orderDocument(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("DraftFilename.pdf")
+                               .build())
+            .orderDocumentWelsh(Document.builder()
+                                    .documentUrl(generatedDocumentInfo.getUrl())
+                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                    .documentHash(generatedDocumentInfo.getHashToken())
+                                    .documentFileName("DraftWelshFilename.pdf")
+                                    .build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .createdBy("test title")
+                              .dateCreated(LocalDateTime.parse(dtf.format(now)))
+                              .status("Draft").build())
+            .isTheOrderByConsent(YesOrNo.Yes)
+            .wasTheOrderApprovedAtHearing(YesOrNo.Yes)
+            .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
+            .judgeOrMagistratesLastName("judge last")
+            .justiceLegalAdviserFullName("Judge full")
+            .magistrateLastName(magistrateElementList)
+            .recitalsOrPreamble("test preamble")
+            .isTheOrderAboutAllChildren(YesNoNotRequiredEnum.yes)
+            .orderDirections("test order")
+            .furtherDirectionsIfRequired("test further order")
+            .childArrangementsOrdersToIssue(orderType)
+            .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
+            .build();
+
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder()
+            .id(UUID.randomUUID())
+            .value(draftOrder)
+            .build();
+        draftOrderList = Collections.singletonList(draftOrderElement);
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .children(listOfChildren)
+            .childArrangementOrders(ChildArrangementOrdersEnum.blankOrderOrDirections)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
+            .selectedOrder("test order")
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.general)
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("DraftFilename.pdf")
+                                 .build())
+            .previewOrderDocWelsh(Document.builder()
+                                      .documentUrl(generatedDocumentInfo.getUrl())
+                                      .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                      .documentHash(generatedDocumentInfo.getHashToken())
+                                      .documentFileName("draftWelshSolicitorFilename")
+                                      .build())
+            .manageOrders(ManageOrders.builder()
+                              .isTheOrderByConsent(YesOrNo.Yes)
+                              .recitalsOrPreamble("test recitals")
+                              .orderDirections("test orders")
+                              .furtherDirectionsIfRequired("test further directions")
+                              .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
+                              .childArrangementsOrdersToIssue(orderType)
+                              .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
+                              .build())
+            .judgeOrMagistratesLastName("judge last")
+            .justiceLegalAdviserFullName("Judge full")
+            .magistrateLastName(magistrateElementList)
+            .isTheOrderAboutAllChildren(YesNoNotRequiredEnum.yes)
+            .wasTheOrderApprovedAtHearing(YesOrNo.No)
+            .draftOrderCollection(draftOrderList)
+            .build();
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+    }
+
+    @Test
+    public void testToGetDraftOrderDynamicList() {
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(draftOrderList, caseData.getCaseTypeOfApplication());
+
+        assertNotNull(stringObjectMap.get("draftOrdersDynamicList"));
+        assertNotNull(stringObjectMap.get("caseTypeOfApplication"));
     }
 
     @Test
