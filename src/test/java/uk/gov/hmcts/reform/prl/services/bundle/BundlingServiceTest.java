@@ -87,6 +87,8 @@ public class BundlingServiceTest {
 
     CaseData c100CaseData;
     CaseData c100CaseDataOther;
+
+    CaseData c100CaseData2;
     AllegationOfHarm allegationOfHarmYes;
     Map<String, Object> caseDataMap;
 
@@ -233,6 +235,26 @@ public class BundlingServiceTest {
             .bundleInformation(BundlingInformation.builder().caseBundles(bundleList).build())
             //.home(homefull)
             .build();
+
+        c100CaseData2 = CaseData.builder()
+            .id(123456789123L)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .allegationOfHarm(allegationOfHarmYes)
+            .applicants(listOfApplicants)
+            .state(State.DECISION_OUTCOME)
+            //.allegationsOfHarmYesNo(No)
+            .applicantsConfidentialDetails(applicantConfidentialList)
+            .childrenConfidentialDetails(childConfidentialList)
+            .otherDocuments(ElementUtils.wrapElements(otherDocuments))
+            .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
+            .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
+            .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
+            .bundleInformation(BundlingInformation.builder().caseBundles(bundleList).build())
+            //.home(homefull)
+            .build();
     }
 
     @Test
@@ -250,6 +272,16 @@ public class BundlingServiceTest {
         when(authTokenGenerator.generate()).thenReturn("authToken");
         BundleCreateResponse bundleCreateResponse = BundleCreateResponse.builder().documentTaskId(123).build();
         when(bundlingService.createBundleServiceRequest(c100CaseData,"eventId","authorization"))
+            .thenReturn(bundleCreateResponse);
+        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseDataOther,"eventId","authorization");
+        assertEquals(bundleCreateResponse.documentTaskId, expectedResponse.documentTaskId);
+    }
+
+    @Test
+    public void testCreateBundleServiceWhenLanguagePreferenceWelshNotSet() throws Exception {
+        when(authTokenGenerator.generate()).thenReturn("authToken");
+        BundleCreateResponse bundleCreateResponse = BundleCreateResponse.builder().documentTaskId(123).build();
+        when(bundlingService.createBundleServiceRequest(c100CaseData2,"eventId","authorization"))
             .thenReturn(bundleCreateResponse);
         BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseDataOther,"eventId","authorization");
         assertEquals(bundleCreateResponse.documentTaskId, expectedResponse.documentTaskId);

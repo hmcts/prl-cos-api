@@ -14,6 +14,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioCourtEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioLocalAuthorityEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
@@ -24,10 +30,12 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DirectionOnIssue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -73,8 +81,7 @@ public class DraftAnOrderControllerTest {
     @Test
     public void testResetFields() {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
-        Assert.assertTrue(draftAnOrderController.resetFields(callbackRequest).getData().size() == 0);
-
+        Assert.assertEquals(0, draftAnOrderController.resetFields(callbackRequest).getData().size());
     }
 
     @Test
@@ -262,9 +269,18 @@ public class DraftAnOrderControllerTest {
 
     }
 
+    @Test
     public void testPopulateSdoFieldsWithNoOptionSelected() throws Exception {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoPreamblesList(new ArrayList<>())
+            .sdoHearingsAndNextStepsList(new ArrayList<>())
+            .sdoCafcassOrCymruList(new ArrayList<>())
+            .sdoLocalAuthorityList(new ArrayList<>())
+            .sdoCourtList(new ArrayList<>())
+            .sdoDocumentationAndEvidenceList(new ArrayList<>())
+            .sdoOtherList(new ArrayList<>())
             .build();
+
         CaseData caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
@@ -287,6 +303,75 @@ public class DraftAnOrderControllerTest {
         Assert.assertEquals(
             "Please select at least one options from below",
             draftAnOrderController.populateSdoFields("test token", callbackRequest).getErrors().get(0)
+        );
+
+    }
+
+    @Test
+    public void testPopulateDioFields() throws Exception {
+        DirectionOnIssue directionOnIssue = DirectionOnIssue.builder()
+            .dioPreamblesList(List.of(DioPreamblesEnum.rightToAskCourt))
+            .dioHearingsAndNextStepsList(List.of(DioHearingsAndNextStepsEnum.allocateNamedJudge))
+            .dioCafcassOrCymruList(List.of(DioCafcassOrCymruEnum.cafcassCymruSafeguarding))
+            .dioLocalAuthorityList(List.of(DioLocalAuthorityEnum.localAuthorityLetter))
+            .dioCourtList(List.of(DioCourtEnum.transferApplication))
+            .dioOtherList(List.of(DioOtherEnum.parentWithCare))
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .directionOnIssue(directionOnIssue)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .caseTypeOfApplication("fl401")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateDioFields("test token", callbackRequest).getData());
+
+    }
+
+    @Test
+    public void testPopulateDioFieldsWithNoOptionSelected() throws Exception {
+        DirectionOnIssue directionOnIssue = DirectionOnIssue.builder()
+            .dioPreamblesList(new ArrayList<>())
+            .dioHearingsAndNextStepsList(new ArrayList<>())
+            .dioCafcassOrCymruList(new ArrayList<>())
+            .dioLocalAuthorityList(new ArrayList<>())
+            .dioCourtList(new ArrayList<>())
+            .dioOtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .directionOnIssue(directionOnIssue)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .caseTypeOfApplication("fl401")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Assert.assertEquals(
+            "Please select at least one options from below",
+            draftAnOrderController.populateDioFields("test token", callbackRequest).getErrors().get(0)
         );
 
     }

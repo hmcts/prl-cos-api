@@ -94,14 +94,16 @@ public class HearingManagementService {
         switch (hmcStatus) {
             case LISTED:
                 CaseDetails listedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                            DECISION_OUTCOME, HEARING_STATE_CHANGE_SUCCESS, caseData);
+                                                            DECISION_OUTCOME, HEARING_STATE_CHANGE_SUCCESS
+                );
                 updateTabsAfterStateChange(listedCaseDetails.getData(), listedCaseDetails.getId());
                 sendHearingDetailsEmail(caseData, hearingRequest);
                 break;
 
             case CANCELLED:
                 CaseDetails cancelledCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                               PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE, caseData);
+                                                               PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE
+                );
                 updateTabsAfterStateChange(cancelledCaseDetails.getData(), cancelledCaseDetails.getId());
                 sendHearingCancelledEmail(caseData);
                 break;
@@ -110,7 +112,8 @@ public class HearingManagementService {
             case POSTPONED:
             case ADJOURNED:
                 CaseDetails completedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                               PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE, caseData);
+                                                               PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE
+                );
                 updateTabsAfterStateChange(completedCaseDetails.getData(), completedCaseDetails.getId());
                 sendHearingChangeDetailsEmail(caseData);
                 break;
@@ -120,7 +123,7 @@ public class HearingManagementService {
     }
 
     private CaseDetails createEvent(HearingRequest hearingRequest, String userToken,
-                                    String systemUpdateUserId, State state, String eventId, CaseData caseData) {
+                                    String systemUpdateUserId, State state, String eventId) {
 
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             userToken,
@@ -164,80 +167,88 @@ public class HearingManagementService {
     private void sendHearingChangeDetailsEmail(CaseData caseData) {
 
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            List<PartyDetails> applicants = caseData
-                .getApplicants()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-
-            List<String> applicantsEmailList = applicants.stream()
-                .map(PartyDetails::getEmail)
-                .collect(Collectors.toList());
-
-            if (!applicantsEmailList.isEmpty() && !applicantsEmailList.contains(null)) {
-                for (String email : applicantsEmailList) {
-                    Optional<String> partyName = applicants.stream()
-                        .filter(applicantEmail -> applicantEmail.getEmail().equals(email))
-                        .map(element -> element.getFirstName() + " " + element.getLastName())
-                        .findFirst();
-                    emailService.send(
-                        email,
-                        EmailTemplateNames.HEARING_CHANGES,
-                        buildApplicantOrRespondentEmail(caseData, String.valueOf(partyName)),
-                        LanguagePreference.english
-                    );
-                }
-            }
-
-            List<PartyDetails> respondents = caseData
-                .getRespondents()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-
-            List<String> respondentsEmailList = respondents.stream()
-                .filter(respondent -> null != respondent.getEmail()
-                    && YesOrNo.Yes.equals(respondent.getCanYouProvideEmailAddress()))
-                .map(PartyDetails::getEmail)
-                .collect(Collectors.toList());
-
-            if (!respondentsEmailList.isEmpty() && !respondentsEmailList.contains(null)) {
-                for (String email : respondentsEmailList) {
-                    Optional<String> partyName = respondents.stream()
-                        .filter(p -> p.getEmail().equals(email))
-                        .map(element -> element.getFirstName() + " " + element.getLastName())
-                        .findAny();
-                    emailService.send(
-                        email,
-                        EmailTemplateNames.HEARING_CHANGES,
-                        buildApplicantOrRespondentEmail(caseData, partyName.orElse(null)),
-                        LanguagePreference.english
-                    );
-                }
-            }
+            sendHearingChangeDetailsEmailForCA(caseData);
 
         } else {
-            PartyDetails fl401Applicant = caseData
-                .getApplicantsFL401();
-            String applicantName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
-            PartyDetails fl401Respondent = caseData
-                .getRespondentsFL401();
-            String respondentName = fl401Respondent.getFirstName() + " " + fl401Respondent.getLastName();
+            sendHearingChangeDetailsEmailForDA(caseData);
+        }
+    }
 
-            if (null != fl401Applicant.getEmail()) {
+    private void sendHearingChangeDetailsEmailForDA(CaseData caseData) {
+        PartyDetails fl401Applicant = caseData
+            .getApplicantsFL401();
+        String applicantName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
+        PartyDetails fl401Respondent = caseData
+            .getRespondentsFL401();
+        String respondentName = fl401Respondent.getFirstName() + " " + fl401Respondent.getLastName();
+
+        if (null != fl401Applicant.getEmail()) {
+            emailService.send(
+                fl401Applicant.getEmail(),
+                EmailTemplateNames.HEARING_CHANGES,
+                buildApplicantOrRespondentEmail(caseData, applicantName),
+                LanguagePreference.english
+            );
+        }
+
+        if (null != fl401Respondent.getEmail()) {
+            emailService.send(
+                fl401Respondent.getEmail(),
+                EmailTemplateNames.HEARING_CHANGES,
+                buildApplicantOrRespondentEmail(caseData, respondentName),
+                LanguagePreference.english
+            );
+        }
+    }
+
+    private void sendHearingChangeDetailsEmailForCA(CaseData caseData) {
+        List<PartyDetails> applicants = caseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> applicantsEmailList = applicants.stream()
+            .map(PartyDetails::getEmail)
+            .collect(Collectors.toList());
+
+        if (!applicantsEmailList.isEmpty() && !applicantsEmailList.contains(null)) {
+            for (String email : applicantsEmailList) {
+                Optional<String> partyName = applicants.stream()
+                    .filter(applicantEmail -> applicantEmail.getEmail().equals(email))
+                    .map(element -> element.getFirstName() + " " + element.getLastName())
+                    .findFirst();
                 emailService.send(
-                    fl401Applicant.getEmail(),
+                    email,
                     EmailTemplateNames.HEARING_CHANGES,
-                    buildApplicantOrRespondentEmail(caseData, applicantName),
+                    buildApplicantOrRespondentEmail(caseData, String.valueOf(partyName)),
                     LanguagePreference.english
                 );
             }
+        }
 
-            if (null != fl401Respondent.getEmail()) {
+        List<PartyDetails> respondents = caseData
+            .getRespondents()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> respondentsEmailList = respondents.stream()
+            .filter(respondent -> null != respondent.getEmail()
+                && YesOrNo.Yes.equals(respondent.getCanYouProvideEmailAddress()))
+            .map(PartyDetails::getEmail)
+            .collect(Collectors.toList());
+
+        if (!respondentsEmailList.isEmpty() && !respondentsEmailList.contains(null)) {
+            for (String email : respondentsEmailList) {
+                Optional<String> partyName = respondents.stream()
+                    .filter(p -> p.getEmail().equals(email))
+                    .map(element -> element.getFirstName() + " " + element.getLastName())
+                    .findAny();
                 emailService.send(
-                    fl401Respondent.getEmail(),
+                    email,
                     EmailTemplateNames.HEARING_CHANGES,
-                    buildApplicantOrRespondentEmail(caseData, respondentName),
+                    buildApplicantOrRespondentEmail(caseData, partyName.orElse(null)),
                     LanguagePreference.english
                 );
             }
@@ -247,81 +258,89 @@ public class HearingManagementService {
     private void sendHearingCancelledEmail(CaseData caseData) {
 
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            List<PartyDetails> applicants = caseData
-                .getApplicants()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-
-            List<String> applicantsEmailList = applicants.stream()
-                .map(PartyDetails::getEmail)
-                .collect(Collectors.toList());
-
-            if (!applicantsEmailList.isEmpty() && !applicantsEmailList.contains(null)) {
-                for (String email : applicantsEmailList) {
-                    Optional<String> partyName = applicants.stream()
-                        .filter(p -> p.getEmail().equals(email))
-                        .map(element -> element.getFirstName() + " " + element.getLastName())
-                        .findAny();
-                    emailService.send(
-                        email,
-                        EmailTemplateNames.HEARING_CANCELLED,
-                        buildApplicantOrRespondentEmail(caseData, partyName.orElse(null)),
-                        LanguagePreference.english
-                    );
-                }
-            }
-
-            List<PartyDetails> respondents = caseData
-                .getRespondents()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-
-            List<String> respondentsEmailList = respondents.stream()
-                .filter(respondent -> null != respondent.getEmail()
-                    && YesOrNo.Yes.equals(respondent.getCanYouProvideEmailAddress()))
-                .map(PartyDetails::getEmail)
-                .collect(Collectors.toList());
-
-            if (!respondentsEmailList.isEmpty() && !respondentsEmailList.contains(null)) {
-                for (String email : respondentsEmailList) {
-                    Optional<String> partyName = respondents.stream()
-                        .filter(p -> p.getEmail().equals(email))
-                        .map(element -> element.getFirstName() + " " + element.getLastName())
-                        .findAny();
-                    emailService.send(
-                        email,
-                        EmailTemplateNames.HEARING_CANCELLED,
-                        buildApplicantOrRespondentEmail(caseData, partyName.orElse(null)),
-                        LanguagePreference.english
-                    );
-                }
-            }
+            sendHearingCancelledEmailForCA(caseData);
 
         } else {
-            PartyDetails fl401Applicant = caseData
-                .getApplicantsFL401();
-            String applicantName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
-            PartyDetails fl401Respondent = caseData
-                .getRespondentsFL401();
-            String respondentName = fl401Respondent.getFirstName() + " " + fl401Respondent.getLastName();
+            sendHearingCancelledEmailForDA(caseData);
+        }
+    }
 
-            if (null != fl401Applicant.getEmail()) {
+    private void sendHearingCancelledEmailForDA(CaseData caseData) {
+        PartyDetails fl401Applicant = caseData
+            .getApplicantsFL401();
+        String applicantName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
+        PartyDetails fl401Respondent = caseData
+            .getRespondentsFL401();
+        String respondentName = fl401Respondent.getFirstName() + " " + fl401Respondent.getLastName();
 
+        if (null != fl401Applicant.getEmail()) {
+
+            emailService.send(
+                fl401Applicant.getEmail(),
+                EmailTemplateNames.HEARING_CANCELLED,
+                buildApplicantOrRespondentEmail(caseData, applicantName),
+                LanguagePreference.english
+            );
+        }
+
+        if (null != fl401Respondent.getEmail()) {
+            emailService.send(
+                fl401Respondent.getEmail(),
+                EmailTemplateNames.HEARING_CANCELLED,
+                buildApplicantOrRespondentEmail(caseData, respondentName),
+                LanguagePreference.english
+            );
+        }
+    }
+
+    private void sendHearingCancelledEmailForCA(CaseData caseData) {
+        List<PartyDetails> applicants = caseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> applicantsEmailList = applicants.stream()
+            .map(PartyDetails::getEmail)
+            .collect(Collectors.toList());
+
+        if (!applicantsEmailList.isEmpty() && !applicantsEmailList.contains(null)) {
+            for (String email : applicantsEmailList) {
+                Optional<String> partyName = applicants.stream()
+                    .filter(p -> p.getEmail().equals(email))
+                    .map(element -> element.getFirstName() + " " + element.getLastName())
+                    .findAny();
                 emailService.send(
-                    fl401Applicant.getEmail(),
+                    email,
                     EmailTemplateNames.HEARING_CANCELLED,
-                    buildApplicantOrRespondentEmail(caseData, applicantName),
+                    buildApplicantOrRespondentEmail(caseData, partyName.orElse(null)),
                     LanguagePreference.english
                 );
             }
+        }
 
-            if (null != fl401Respondent.getEmail()) {
+        List<PartyDetails> respondents = caseData
+            .getRespondents()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> respondentsEmailList = respondents.stream()
+            .filter(respondent -> null != respondent.getEmail()
+                && YesOrNo.Yes.equals(respondent.getCanYouProvideEmailAddress()))
+            .map(PartyDetails::getEmail)
+            .collect(Collectors.toList());
+
+        if (!respondentsEmailList.isEmpty() && !respondentsEmailList.contains(null)) {
+            for (String email : respondentsEmailList) {
+                Optional<String> partyName = respondents.stream()
+                    .filter(p -> p.getEmail().equals(email))
+                    .map(element -> element.getFirstName() + " " + element.getLastName())
+                    .findAny();
                 emailService.send(
-                    fl401Respondent.getEmail(),
+                    email,
                     EmailTemplateNames.HEARING_CANCELLED,
-                    buildApplicantOrRespondentEmail(caseData, respondentName),
+                    buildApplicantOrRespondentEmail(caseData, partyName.orElse(null)),
                     LanguagePreference.english
                 );
             }
@@ -329,128 +348,143 @@ public class HearingManagementService {
     }
 
     private void sendHearingDetailsEmail(CaseData caseData, HearingRequest hearingRequest) {
-
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            List<PartyDetails> applicants = caseData
-                .getApplicants()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
+            sendHearingDetailsEmailForCA(caseData, hearingRequest);
+        } else {
+            sendHearingDetailsEmailForDA(caseData, hearingRequest);
+        }
+    }
 
-            List<String> applicantsEmailList = applicants.stream()
-                .map(PartyDetails::getEmail)
-                .collect(Collectors.toList());
+    private void sendHearingDetailsEmailForDA(CaseData caseData, HearingRequest hearingRequest) {
+        PartyDetails fl401Applicant = caseData
+            .getApplicantsFL401();
+        String applicantName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
+        PartyDetails fl401Respondent = caseData
+            .getRespondentsFL401();
+        String respondentName = fl401Respondent.getFirstName() + " " + fl401Respondent.getLastName();
+        String applicantSolicitorName = fl401Applicant.getRepresentativeFirstName() + " "
+            + fl401Applicant.getRepresentativeLastName();
 
-            if (!applicantsEmailList.isEmpty() && !applicantsEmailList.contains(null)) {
-                for (String email : applicantsEmailList) {
-                    Optional<String> partyName = applicants.stream()
-                        .filter(p -> p.getEmail().equals(email))
-                        .map(element -> element.getFirstName() + " " + element.getLastName())
-                        .findAny();
-                    emailService.send(
-                        email,
-                        EmailTemplateNames.HEARING_DETAILS,
-                        buildApplicantOrRespondentEmail(caseData, partyName.orElse(null)),
-                        LanguagePreference.english
-                    );
-                }
-            }
-            List<PartyDetails> respondents = caseData
-                .getRespondents()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
+        if (null != fl401Applicant.getEmail()) {
+            emailService.send(
+                fl401Applicant.getEmail(),
+                EmailTemplateNames.HEARING_DETAILS,
+                buildApplicantOrRespondentEmail(caseData, applicantName),
+                LanguagePreference.english
+            );
+        }
 
-            List<String> respondentsEmailList = respondents.stream()
-                .filter(respondent -> null != respondent.getEmail()
-                    && YesOrNo.Yes.equals(respondent.getCanYouProvideEmailAddress()))
-                .map(PartyDetails::getEmail)
-                .collect(Collectors.toList());
+        if (null != fl401Respondent.getEmail()) {
+            emailService.send(
+                fl401Respondent.getEmail(),
+                EmailTemplateNames.HEARING_DETAILS,
+                buildApplicantOrRespondentEmail(caseData, respondentName),
+                LanguagePreference.english
+            );
+        }
+        if (null != fl401Applicant.getSolicitorEmail()) {
+            emailService.send(
+                fl401Applicant.getSolicitorEmail(),
+                EmailTemplateNames.APPLICANT_SOLICITOR_HEARING_DETAILS,
+                buildApplicantOrRespondentSolicitorHearingEmail(caseData, hearingRequest, applicantSolicitorName),
+                LanguagePreference.english
+            );
+        }
+    }
 
-            if (!respondentsEmailList.isEmpty() && !respondentsEmailList.contains(null)) {
-                for (String email : respondentsEmailList) {
-                    Optional<String> partyName = respondents.stream()
-                        .filter(p -> p.getEmail().equals(email))
-                        .map(element -> element.getFirstName() + " " + element.getLastName())
-                        .findAny();
-                    emailService.send(
-                        email,
-                        EmailTemplateNames.HEARING_DETAILS,
-                        buildApplicantOrRespondentEmail(caseData, partyName.orElse(null)),
-                        LanguagePreference.english
-                    );
-                }
-            }
+    private void sendHearingDetailsEmailForCA(CaseData caseData, HearingRequest hearingRequest) {
+        List<PartyDetails> applicants = caseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
 
-            List<String> applicantSolicitorsEmailList = applicants.stream()
-                .map(PartyDetails::getSolicitorEmail)
-                .collect(Collectors.toList());
+        List<String> applicantsEmailList = applicants.stream()
+            .map(PartyDetails::getEmail)
+            .collect(Collectors.toList());
 
-            for (String applicantSolicitorEmail: applicantSolicitorsEmailList) {
-                Optional<String> solicitorName = applicants.stream()
-                    .filter(p -> p.getSolicitorEmail().equals(applicantSolicitorEmail))
-                    .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+        if (!applicantsEmailList.isEmpty() && !applicantsEmailList.contains(null)) {
+            for (String email : applicantsEmailList) {
+                Optional<String> partyName = applicants.stream()
+                    .filter(p -> p.getEmail().equals(email))
+                    .map(element -> element.getFirstName() + " " + element.getLastName())
                     .findAny();
                 emailService.send(
-                    applicantSolicitorEmail,
-                    EmailTemplateNames.APPLICANT_SOLICITOR_HEARING_DETAILS,
-                    buildApplicantOrRespondentSolicitorHearingEmail(caseData, hearingRequest, solicitorName.orElse(null)),
-                    LanguagePreference.english
-                );
-            }
-
-            List<String> respondentSolicitorsEmailList = respondents.stream()
-                .map(PartyDetails::getSolicitorEmail)
-                .collect(Collectors.toList());
-
-            if (!respondentSolicitorsEmailList.isEmpty() && !respondentSolicitorsEmailList.contains(null)) {
-                for (String respondentSolicitorEmail : respondentSolicitorsEmailList) {
-                    Optional<String> solicitorName = respondents.stream()
-                        .filter(p -> p.getSolicitorEmail().equals(respondentSolicitorEmail))
-                        .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
-                        .findAny();
-                    respondentSolicitorsEmailList.forEach(email -> emailService.send(
-                        email,
-                        EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
-                        buildApplicantOrRespondentSolicitorHearingEmail(caseData, hearingRequest, solicitorName.orElse(null)),
-                        LanguagePreference.english
-                    ));
-                }
-            }
-        } else {
-            PartyDetails fl401Applicant = caseData
-                .getApplicantsFL401();
-            String applicantName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
-            PartyDetails fl401Respondent = caseData
-                .getRespondentsFL401();
-            String respondentName = fl401Respondent.getFirstName() + " " + fl401Respondent.getLastName();
-            String applicantSolicitorName = fl401Applicant.getRepresentativeFirstName() + " "
-                + fl401Applicant.getRepresentativeLastName();
-
-            if (null != fl401Applicant.getEmail()) {
-                emailService.send(
-                    fl401Applicant.getEmail(),
+                    email,
                     EmailTemplateNames.HEARING_DETAILS,
-                    buildApplicantOrRespondentEmail(caseData, applicantName),
+                    buildApplicantOrRespondentEmail(caseData, partyName.orElse(null)),
                     LanguagePreference.english
                 );
             }
+        }
+        List<PartyDetails> respondents = caseData
+            .getRespondents()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
 
-            if (null != fl401Respondent.getEmail()) {
+        List<String> respondentsEmailList = respondents.stream()
+            .filter(respondent -> null != respondent.getEmail()
+                && YesOrNo.Yes.equals(respondent.getCanYouProvideEmailAddress()))
+            .map(PartyDetails::getEmail)
+            .collect(Collectors.toList());
+
+        if (!respondentsEmailList.isEmpty() && !respondentsEmailList.contains(null)) {
+            for (String email : respondentsEmailList) {
+                Optional<String> partyName = respondents.stream()
+                    .filter(p -> p.getEmail().equals(email))
+                    .map(element -> element.getFirstName() + " " + element.getLastName())
+                    .findAny();
                 emailService.send(
-                    fl401Respondent.getEmail(),
+                    email,
                     EmailTemplateNames.HEARING_DETAILS,
-                    buildApplicantOrRespondentEmail(caseData, respondentName),
+                    buildApplicantOrRespondentEmail(caseData, partyName.orElse(null)),
                     LanguagePreference.english
                 );
             }
-            if (null != fl401Applicant.getSolicitorEmail()) {
-                emailService.send(
-                    fl401Applicant.getSolicitorEmail(),
-                    EmailTemplateNames.APPLICANT_SOLICITOR_HEARING_DETAILS,
-                    buildApplicantOrRespondentSolicitorHearingEmail(caseData, hearingRequest, applicantSolicitorName),
+        }
+        sendHearingDetailsEmailForCaSolicitor(caseData, hearingRequest, applicants, respondents);
+    }
+
+    private void sendHearingDetailsEmailForCaSolicitor(CaseData caseData, HearingRequest hearingRequest,
+                                                       List<PartyDetails> applicants, List<PartyDetails> respondents) {
+        List<String> applicantSolicitorsEmailList = applicants.stream()
+            .map(PartyDetails::getSolicitorEmail)
+            .collect(Collectors.toList());
+
+        for (String applicantSolicitorEmail : applicantSolicitorsEmailList) {
+            Optional<String> solicitorName = applicants.stream()
+                .filter(p -> p.getSolicitorEmail().equals(applicantSolicitorEmail))
+                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+                .findAny();
+            emailService.send(
+                applicantSolicitorEmail,
+                EmailTemplateNames.APPLICANT_SOLICITOR_HEARING_DETAILS,
+                buildApplicantOrRespondentSolicitorHearingEmail(caseData, hearingRequest, solicitorName.orElse(null)),
+                LanguagePreference.english
+            );
+        }
+
+        List<String> respondentSolicitorsEmailList = respondents.stream()
+            .map(PartyDetails::getSolicitorEmail)
+            .collect(Collectors.toList());
+
+        if (!respondentSolicitorsEmailList.isEmpty() && !respondentSolicitorsEmailList.contains(null)) {
+            for (String respondentSolicitorEmail : respondentSolicitorsEmailList) {
+                Optional<String> solicitorName = respondents.stream()
+                    .filter(p -> p.getSolicitorEmail().equals(respondentSolicitorEmail))
+                    .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+                    .findAny();
+                respondentSolicitorsEmailList.forEach(email -> emailService.send(
+                    email,
+                    EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
+                    buildApplicantOrRespondentSolicitorHearingEmail(
+                        caseData,
+                        hearingRequest,
+                        solicitorName.orElse(null)
+                    ),
                     LanguagePreference.english
-                );
+                ));
             }
         }
     }
