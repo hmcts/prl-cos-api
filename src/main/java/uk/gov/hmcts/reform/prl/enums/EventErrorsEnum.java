@@ -25,6 +25,7 @@ public enum EventErrorsEnum {
     CHILDREN_AND_RESPONDENTS_ERROR("Add people to the case details to"),
     CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION_ERROR("Add people to the case details to"),
 
+    CHILD_DETAILS_REVISED_ERROR("Add child details"),
     //FL401 ERRORS
     WITHOUT_NOTICE_ORDER_ERROR("Ensure all relevant information has been added"),
     RELATIONSHIP_TO_RESPONDENT_ERROR("Ensure you have added all relevant information"),

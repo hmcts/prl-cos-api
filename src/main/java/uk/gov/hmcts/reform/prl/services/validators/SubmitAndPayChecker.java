@@ -16,10 +16,12 @@ import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
@@ -56,6 +58,7 @@ public class SubmitAndPayChecker implements EventChecker {
         mandatoryEvents.put(HEARING_URGENCY, eventsChecker.getHearingUrgencyChecker());
         mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.getApplicantsChecker());
         mandatoryEvents.put(CHILD_DETAILS, eventsChecker.getChildChecker());
+        mandatoryEvents.put(CHILD_DETAILS_REVISED, eventsChecker.getChildDetailsRevisedChecker());
         mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.getRespondentsChecker());
         if (YesOrNo.No.equals(caseData.getConsentOrder()) || caseData.getConsentOrder() == null) {
             mandatoryEvents.put(MIAM, eventsChecker.getMiamChecker());
@@ -72,7 +75,7 @@ public class SubmitAndPayChecker implements EventChecker {
         }
 
         EnumMap<Event, EventChecker> optionalEvents = new EnumMap<>(Event.class);
-
+        optionalEvents.put(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION, eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker());
         optionalEvents.put(OTHER_PEOPLE_IN_THE_CASE, eventsChecker.getOtherPeopleInTheCaseChecker());
         optionalEvents.put(OTHER_PROCEEDINGS, eventsChecker.getOtherProceedingsChecker());
         optionalEvents.put(ATTENDING_THE_HEARING, eventsChecker.getAttendingTheHearingChecker());

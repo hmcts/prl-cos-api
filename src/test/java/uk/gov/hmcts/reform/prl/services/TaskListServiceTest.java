@@ -31,6 +31,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
@@ -373,7 +374,7 @@ public class TaskListServiceTest {
                 Task.builder().event(CASE_NAME).build(),
                 Task.builder().event(TYPE_OF_APPLICATION).build(),
                 Task.builder().event(HEARING_URGENCY).build(),
-                Task.builder().event(CHILD_DETAILS).build(),
+                Task.builder().event(CHILD_DETAILS_REVISED).build(),
                 Task.builder().event(APPLICANT_DETAILS).build(),
                 Task.builder().event(RESPONDENT_DETAILS).build(),
                 Task.builder().event(OTHER_PEOPLE_IN_THE_CASE).build(),
