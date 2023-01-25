@@ -6,11 +6,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,20 +22,25 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.RESPONDENT;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
-public class SearchCasesDataService {
+public class UpdatePartyDetailsService {
+    private final ObjectMapper objectMapper;
+    private final NoticeOfChangePartiesService noticeOfChangePartiesService;
 
-    public Map<String, Object> updateApplicantAndChildNames(ObjectMapper objectMapper, Map<String, Object> caseDetails) {
+    public Map<String, Object> updateApplicantAndChildNames(CallbackRequest callbackRequest) {
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
 
-        CaseData caseData = objectMapper.convertValue(caseDetails, CaseData.class);
+        CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         final Flags caseFlags = Flags.builder().build();
 
-        caseDetails.put("caseFlags", caseFlags);
+        updatedCaseData.put("caseFlags", caseFlags);
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             PartyDetails fl401Applicant = caseData
@@ -42,35 +49,35 @@ public class SearchCasesDataService {
                 .getRespondentsFL401();
 
             if (Objects.nonNull(fl401Applicant)) {
-                caseDetails.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
+                updatedCaseData.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
+                setFL401ApplicantFlag(updatedCaseData, fl401Applicant);
 
-                setFL401ApplicantFlag(caseDetails, fl401Applicant);
             }
 
             if (Objects.nonNull(fl401respondent)) {
-                caseDetails.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
-                setFL401RespondentFlag(caseDetails,fl401respondent);
+                updatedCaseData.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
+                setFL401RespondentFlag(updatedCaseData, fl401respondent);
             }
-        } else {
+        } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, RESPONDENT));
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
-            if (!applicantsWrapped.isEmpty() && !applicantsWrapped.get().isEmpty()) {
+            if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
                 List<PartyDetails> applicants = applicantsWrapped.get()
                     .stream()
                     .map(Element::getValue)
                     .collect(Collectors.toList());
                 PartyDetails applicant1 = applicants.get(0);
                 if (Objects.nonNull(applicant1)) {
-                    caseDetails.put("applicantName", applicant1.getFirstName() + " " + applicant1.getLastName());
+                    updatedCaseData.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
                 }
-
             }
 
             // set applicant and respondent case flag
-            setApplicantFlag(caseData, caseDetails);
-            setRespondentFlag(caseData, caseDetails);
+            setApplicantFlag(caseData, updatedCaseData);
+            setRespondentFlag(caseData, updatedCaseData);
         }
 
-        return caseDetails;
+        return updatedCaseData;
     }
 
     private void setApplicantFlag(CaseData caseData, Map<String, Object> caseDetails) {
@@ -128,5 +135,4 @@ public class SearchCasesDataService {
 
         caseDetails.put("respondentsFL401", fl401respondent);
     }
-
 }

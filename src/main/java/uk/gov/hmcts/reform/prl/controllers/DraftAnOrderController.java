@@ -90,6 +90,7 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
 
@@ -103,8 +104,9 @@ public class DraftAnOrderController {
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
         }
-        caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
-        log.info("Case data updated map {}", caseDataUpdated);
+        if (caseData != null) {
+            caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
+        }
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
@@ -117,13 +119,13 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse populateSdoFields(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
-    ) throws Exception {
+    ) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (draftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
+        if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
             draftAnOrderService.populateStandardDirectionOrderFields(authorisation, caseData, caseDataUpdated);
         } else {
             List<String> errorList = new ArrayList<>();
@@ -133,7 +135,6 @@ public class DraftAnOrderController {
                 .errors(errorList)
                 .build();
         }
-        log.info("Case data updated map {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
@@ -146,13 +147,13 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse populateDioFields(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
-    ) throws Exception {
+    ) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (draftAnOrderService.checkDirectionOnIssueOptionsSelected(caseData)) {
+        if (DraftAnOrderService.checkDirectionOnIssueOptionsSelected(caseData)) {
             draftAnOrderService.populateDirectionOnIssueFields(authorisation, caseData, caseDataUpdated);
         } else {
             List<String> errorList = new ArrayList<>();
@@ -162,7 +163,6 @@ public class DraftAnOrderController {
                 .errors(errorList)
                 .build();
         }
-        log.info("Case data updated map {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
@@ -185,7 +185,14 @@ public class DraftAnOrderController {
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
         }
-        caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
+        log.info("Event Id  {} ", callbackRequest.getEventId());
+        if ("editAndApproveAnOrder".equalsIgnoreCase(callbackRequest.getEventId())
+            || "adminEditAndApproveAnOrder".equalsIgnoreCase(callbackRequest.getEventId())) {
+            caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
+        } else {
+            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
+        }
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

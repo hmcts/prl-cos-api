@@ -34,7 +34,7 @@ public class OrderDetails {
     private final String judgeNotes;
     private final String adminNotes;
     private final ServeOrderDetails serveOrderDetails;
-    private final YesOrNo orderServed;
+
 
     @JsonIgnore
     public String getLabelForDynamicList() {

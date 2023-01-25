@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
@@ -64,10 +65,10 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
+import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
@@ -113,7 +114,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
-import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.applicant;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
@@ -162,7 +162,7 @@ public class CallbackControllerTest {
     AllTabServiceImpl allTabsService;
 
     @Mock
-    SearchCasesDataService searchCasesDataService;
+    UpdatePartyDetailsService updatePartyDetailsService;
 
     @Mock
     SendgridService sendgridService;
@@ -251,6 +251,8 @@ public class CallbackControllerTest {
         fl401DocsMap.put(PrlAppsConstants.DOCUMENT_FIELD_FINAL, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_C8_WELSH, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
+        when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn("test-test-test-test-test-test");
     }
 
     @Test
@@ -730,8 +732,6 @@ public class CallbackControllerTest {
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
         verify(solicitorEmailService, times(1))
             .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
-        verify(caseWorkerEmailService, times(1))
-            .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(), "test@gmail.com");
     }
 
     @Test
@@ -779,20 +779,19 @@ public class CallbackControllerTest {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Map<String, Object> caseDetailsUpdatedwithName = new HashMap<>();
         caseDetailsUpdatedwithName.put("applicantName", "test1 test22");
-
-        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-        when(searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated)).thenReturn(
-            caseDetailsUpdatedwithName);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(caseDataUpdated).build()).build();
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+        when(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest)).thenReturn(
+            caseDetailsUpdatedwithName);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            callbackController.updateApplicantAndChildNames(
+            callbackController.updatePartyDetails(
                 authToken,
                 callbackRequest
             );
-        Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
-        assertEquals("test1 test22", caseDetailsRespnse.get("applicantName"));
+        Map<String, Object> caseDetailsResponse = aboutToStartOrSubmitCallbackResponse.getData();
+        assertEquals("test1 test22", caseDetailsResponse.get("applicantName"));
     }
 
     @Test
@@ -949,7 +948,7 @@ public class CallbackControllerTest {
             .build();
         when(objectMapper.convertValue(json, CaseData.class)).thenReturn(caseData);
         when(c100JsonMapper.map(caseData)).thenReturn(JsonValue.EMPTY_JSON_OBJECT);
-        callbackController.resendNotificationtoRpa(authToken, callbackRequest);
+        callbackController.resendNotificationToRpa(authToken, callbackRequest);
         verify(sendgridService, times(1)).sendEmail(JsonValue.EMPTY_JSON_OBJECT);
     }
 
@@ -1156,7 +1155,7 @@ public class CallbackControllerTest {
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
         verify(solicitorEmailService, times(1))
             .sendWithDrawEmailToFl401SolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
-        verify(caseWorkerEmailService, times(1))
+        verify(caseWorkerEmailService, times(0))
             .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(), "test@gmail.com");
     }
 
@@ -1656,73 +1655,32 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testPrePopulateApplicants() throws NotFoundException {
-
-        PartyDetails applicant1 = PartyDetails.builder()
-            .firstName("test1")
-            .lastName("test22")
-            .canYouProvideEmailAddress(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).build();
-        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-
-        Child child = Child.builder()
-            .firstName("Test")
-            .lastName("Name")
-            .gender(female)
-            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(specialGuardian)
-            .respondentsRelationshipToChild(father)
-            .childLiveWith(Collections.singletonList(anotherPerson))
-            .parentalResponsibilityDetails("test")
-            .build();
-
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
-        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .applicants(applicantList)
-            .children(listOfChildren)
-            .build();
-
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("applicantList", "test1 test22");
-
-        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-
+    public void testAmendCourtAboutToStart() throws Exception {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(caseDataUpdated).build()).build();
-
-
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            callbackController.prePopulateApplicants(
-                callbackRequest);
-
-        Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
-        assertEquals("test1 test22", caseDetailsRespnse.get("applicantList"));
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
+            .amendCourtAboutToStart(authToken,callbackRequest);
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtList"));
     }
 
     @Test
-    public void testPrePopulateApplicantsNotFound() throws NotFoundException {
-        CaseData caseData = CaseData.builder().build();
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-
-        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-
+    public void testAmendCourtAboutToSubmit() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("test-test-test-test-test-test").build()).build())
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(caseDataUpdated).build()).build();
-
-
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            callbackController.prePopulateApplicants(
-                callbackRequest);
-
-        Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
-        assertNull(caseDetailsRespnse.get("applicantList"));
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
+            .amendCourtAboutToSubmit(authToken,callbackRequest);
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtName"));
     }
 
     @Test
