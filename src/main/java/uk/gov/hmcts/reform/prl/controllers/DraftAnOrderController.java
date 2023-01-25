@@ -185,7 +185,14 @@ public class DraftAnOrderController {
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
         }
-        caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
+        log.info("Event Id  {} ", callbackRequest.getEventId());
+        if ("editAndApproveAnOrder".equalsIgnoreCase(callbackRequest.getEventId())
+            || "adminEditAndApproveAnOrder".equalsIgnoreCase(callbackRequest.getEventId())) {
+            caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
+        } else {
+            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
+        }
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
