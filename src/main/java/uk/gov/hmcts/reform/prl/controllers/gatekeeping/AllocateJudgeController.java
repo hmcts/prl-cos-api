@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.NotFoundException;
@@ -80,7 +79,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
         log.info("*** request recieved to get the allocate Judge details : {}", callbackRequest.toString());
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         log.info("*** allocate judge details for the case id : {}", caseData.getId());
-        log.info("*** ********allocate judge details for the case id : {}", caseData.getAllocatedJudge());
+        log.info("*** ********allocate judge details for the case id before mapping : {}", caseData.getAllocatedJudge());
         //log.info("*** ********allocate judge details for the case id : {}", caseData.getJudgesList().getValueLabel());
         //log.info("*** ********allocate judge details for the case id : {}", caseData.getLegalAdvisorList().getValueLabel());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -101,15 +100,11 @@ public class AllocateJudgeController extends AbstractCallbackController {
             if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
                 if (null != caseDataUpdated.get("judgesList")) {
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
-                    Map judgeDetails = (LinkedHashMap)caseDataUpdated.get("judgesList");
-                    log.info("*** ********allocate judge details after populating for the case id : {}",
-                        judgeDetails.containsKey("value") ? ((DynamicListElement)judgeDetails.get("value")).getLabel()
-                            : "Keys: " + judgeDetails.keySet());
-                    //allocatedJudgeBuilder.judgesList(judgeDetails.get("value"));
+                    allocatedJudgeBuilder.judgesList((DynamicList) caseDataUpdated.get("judgesList"));
                 }
                 if (null != caseDataUpdated.get("legalAdvisorList")) {
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.LEGAL_ADVISER));
-                    //allocatedJudgeBuilder.legalAdviserDetails(((DynamicList) caseDataUpdated.get("legalAdvisorList")).getValueLabel());
+                    allocatedJudgeBuilder.legalAdvisorList(((DynamicList) caseDataUpdated.get("legalAdvisorList")));
                 }
             }
         }
