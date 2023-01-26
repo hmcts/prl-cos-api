@@ -95,22 +95,26 @@ public class ManageOrderEmailService {
                 }
             }
         } else {
-            if (!StringUtils.isEmpty(caseData.getApplicantsFL401().getEmail())) {
-                sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getEmail(),
-                                 buildApplicantRespondentEmail(
-                                     caseDetails, caseData.getApplicantsFL401().getFirstName()
-                                     + " " + caseData.getApplicantsFL401().getFirstName()));
-
-
-            }
-            if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
-                sendEmailToParty(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
-                                 buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
-                                     + " " + caseData.getRespondentsFL401().getFirstName()));
-            }
+            sendEmailForFlCaseType(caseDetails, caseData, isFinalOrder);
         }
 
 
+    }
+
+    private void sendEmailForFlCaseType(CaseDetails caseDetails, CaseData caseData, SelectTypeOfOrderEnum isFinalOrder) {
+        if (!StringUtils.isEmpty(caseData.getApplicantsFL401().getEmail())) {
+            sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getEmail(),
+                             buildApplicantRespondentEmail(
+                                 caseDetails, caseData.getApplicantsFL401().getFirstName()
+                                 + " " + caseData.getApplicantsFL401().getFirstName()));
+
+
+        }
+        if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
+            sendEmailToParty(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
+                             buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
+                                 + " " + caseData.getRespondentsFL401().getFirstName()));
+        }
     }
 
     public void sendFinalOrderIssuedNotification(CaseDetails caseDetails) {
@@ -248,14 +252,6 @@ public class ManageOrderEmailService {
     private List<PartyDetails> getApplicants(CaseData caseData) {
         return caseData
             .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-    }
-
-    private List<PartyDetails> getRespondents(CaseData caseData) {
-        return caseData
-            .getRespondents()
             .stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
