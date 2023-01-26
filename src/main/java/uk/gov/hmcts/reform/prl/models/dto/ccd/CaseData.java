@@ -754,6 +754,7 @@ public class CaseData implements MappableObject {
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
 
     private final DynamicList legalAdvisorList;
+    private final DynamicList judgesList;
 
     @JsonUnwrapped
     @Builder.Default
