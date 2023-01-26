@@ -58,9 +58,9 @@ public class AllocateJudgeController extends AbstractCallbackController {
         dynamicListElements.add(DynamicListElement.builder().code("test3(test3@xxx.com)").label("test3(test3@xxx.com)").build());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("judgesList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(dynamicListElements)
+        caseDataUpdated.put("judgeList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(dynamicListElements)
             .build());
-        caseDataUpdated.put("legalAdvisorList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(dynamicListElements)
+        caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(dynamicListElements)
             .build());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -80,8 +80,8 @@ public class AllocateJudgeController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         log.info("*** allocate judge details for the case id : {}", caseData.getId());
         log.info("*** ********allocate judge details for the case id before mapping : {}", caseData.getAllocatedJudge());
-        //log.info("*** ********allocate judge details for the case id : {}", caseData.getJudgesList().getValueLabel());
-        //log.info("*** ********allocate judge details for the case id : {}", caseData.getLegalAdvisorList().getValueLabel());
+        //log.info("*** ********allocate judge details for the case id : {}", caseData.getjudgeList().getValueLabel());
+        //log.info("*** ********allocate judge details for the case id : {}", caseData.getlegalAdviserList().getValueLabel());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         AllocatedJudge allocatedJudge = mapAllocatedJudge(caseDataUpdated);
         caseData = caseData.toBuilder().allocatedJudge(caseData.getAllocatedJudge()).build();
@@ -98,13 +98,13 @@ public class AllocateJudgeController extends AbstractCallbackController {
             allocatedJudgeBuilder.tierOfJudiciary(TierOfJudiciaryEnum.valueOf(String.valueOf(caseDataUpdated.get("tierOfJudiciary"))));
         } else {
             if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
-                if (null != caseDataUpdated.get("judgesList")) {
+                if (null != caseDataUpdated.get("judgeList")) {
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
-                    allocatedJudgeBuilder.judgesList((DynamicList) caseDataUpdated.get("judgesList"));
+                    allocatedJudgeBuilder.judgeList((DynamicList) caseDataUpdated.get("judgeList"));
                 }
-                if (null != caseDataUpdated.get("legalAdvisorList")) {
+                if (null != caseDataUpdated.get("legalAdviserList")) {
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.LEGAL_ADVISER));
-                    allocatedJudgeBuilder.legalAdvisorList(((DynamicList) caseDataUpdated.get("legalAdvisorList")));
+                    allocatedJudgeBuilder.legalAdviserList(((DynamicList) caseDataUpdated.get("legalAdviserList")));
                 }
             }
         }
