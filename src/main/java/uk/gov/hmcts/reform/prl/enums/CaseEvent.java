@@ -14,7 +14,8 @@ public enum CaseEvent {
     CONSENT_TO_APPLICATION("consentToTheApplication"),
     EVENT_INTERNATIONAL_ELEMENT("citizenInternationalElement"),
     LEGAL_REPRESENTATION("legalRepresentation"),
-    REVIEW_AND_SUBMIT("reviewAndSubmit");
+    REVIEW_AND_SUBMIT("reviewAndSubmit"),
+    CITIZEN_CASE_SUBMIT_WITH_HWF("citizen-case-submit-with-hwf");
 
     private final String value;
 
