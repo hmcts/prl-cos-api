@@ -57,17 +57,55 @@ public class ServiceOfApplicationEmailServiceTest {
                                             .representativeFirstName("FirstName")
                                             .build())))
             .respondents(List.of(element(PartyDetails.builder()
-                                            .solicitorEmail("test@gmail.com")
-                                            .representativeLastName("LastName")
-                                            .representativeFirstName("FirstName")
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                            .build())))
+                                             .build())))
+
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         serviceOfApplicationEmailService.sendEmailC100(caseDetails);
         verify(emailService,times(2)).send(Mockito.anyString(),
+                                           Mockito.any(),
+                                           Mockito.any(),Mockito.any());
+    }
+
+    @Test
+    public void testC100EmailNotificationForMultipleApplicants() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder()
+                                            .solicitorEmail("test@gmail.com")
+                                            .representativeLastName("LastName")
+                                            .representativeFirstName("FirstName")
+                                            .build()),
+                                element(PartyDetails.builder()
+                                            .solicitorEmail("test@gmail.com")
+                                            .representativeLastName("LastName1")
+                                            .representativeFirstName("FirstName1")
+                                            .build())))
+            .respondents(List.of(element(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build()),
+                                 element(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName1")
+                                             .representativeFirstName("FirstName1")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build())))
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+        serviceOfApplicationEmailService.sendEmailC100(caseDetails);
+        verify(emailService,times(3)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(),Mockito.any());
     }

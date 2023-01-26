@@ -6,11 +6,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.services.validators.EventsChecker;
 
@@ -18,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
@@ -46,6 +50,9 @@ import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
+import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.FINISHED;
+import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.IN_PROGRESS;
+import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.MANDATORY_COMPLETED;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -219,6 +226,128 @@ public class TaskListServiceTest {
 
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
+        assertThat(expectedTasks).isEqualTo(actualTasks);
+    }
+
+    @Test
+    public void getTasksShouldReturnListOfTasksForCaseNameEventFinished() {
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicantName("test")
+            .build();
+
+        List<Task> expectedTasks = List.of(
+            Task.builder().event(CASE_NAME).state(FINISHED).state(FINISHED).build(),
+            Task.builder().event(TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
+            Task.builder().event(HEARING_URGENCY).state(NOT_STARTED).build(),
+            Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(CHILD_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(MIAM).state(NOT_STARTED).build(),
+            Task.builder().event(ALLEGATIONS_OF_HARM).state(NOT_STARTED).build(),
+            Task.builder().event(OTHER_PEOPLE_IN_THE_CASE).state(NOT_STARTED).build(),
+            Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
+            Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
+            Task.builder().event(INTERNATIONAL_ELEMENT).state(NOT_STARTED).build(),
+            Task.builder().event(LITIGATION_CAPACITY).state(NOT_STARTED).build(),
+            Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
+            Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
+            Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build(),
+            Task.builder().event(SUBMIT).state(NOT_STARTED).build());
+        Event event = CASE_NAME;
+        when(eventsChecker.isFinished(event, caseData)).thenReturn(true);
+        List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
+
+        assertThat(expectedTasks).isEqualTo(actualTasks);
+    }
+
+    @Test
+    public void getTasksShouldReturnListOfTasksForTypeOfAppEventInProgress() {
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .consentOrder(YesOrNo.Yes)
+            .build();
+
+        List<Task> expectedTasks = List.of(
+            Task.builder().event(CASE_NAME).state(NOT_STARTED).state(NOT_STARTED).build(),
+            Task.builder().event(TYPE_OF_APPLICATION).state(IN_PROGRESS).build(),
+            Task.builder().event(HEARING_URGENCY).state(NOT_STARTED).build(),
+            Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(CHILD_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(MIAM).state(NOT_STARTED).build(),
+            Task.builder().event(ALLEGATIONS_OF_HARM).state(NOT_STARTED).build(),
+            Task.builder().event(OTHER_PEOPLE_IN_THE_CASE).state(NOT_STARTED).build(),
+            Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
+            Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
+            Task.builder().event(INTERNATIONAL_ELEMENT).state(NOT_STARTED).build(),
+            Task.builder().event(LITIGATION_CAPACITY).state(NOT_STARTED).build(),
+            Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
+            Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
+            Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build(),
+            Task.builder().event(SUBMIT).state(NOT_STARTED).build());
+
+        Event event = TYPE_OF_APPLICATION;
+        when(eventsChecker.isStarted(event, caseData)).thenReturn(true);
+        List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
+
+        assertThat(expectedTasks).isEqualTo(actualTasks);
+    }
+
+    @Test
+    public void getTasksShouldReturnListOfTasksForTypeOfAppEventMandatoryCompleted() {
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .consentOrder(YesOrNo.Yes)
+            .build();
+
+        List<Task> expectedTasks = List.of(
+            Task.builder().event(CASE_NAME).state(NOT_STARTED).state(NOT_STARTED).build(),
+            Task.builder().event(TYPE_OF_APPLICATION).state(MANDATORY_COMPLETED).build(),
+            Task.builder().event(HEARING_URGENCY).state(NOT_STARTED).build(),
+            Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(CHILD_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(MIAM).state(NOT_STARTED).build(),
+            Task.builder().event(ALLEGATIONS_OF_HARM).state(NOT_STARTED).build(),
+            Task.builder().event(OTHER_PEOPLE_IN_THE_CASE).state(NOT_STARTED).build(),
+            Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
+            Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
+            Task.builder().event(INTERNATIONAL_ELEMENT).state(NOT_STARTED).build(),
+            Task.builder().event(LITIGATION_CAPACITY).state(NOT_STARTED).build(),
+            Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
+            Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
+            Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build(),
+            Task.builder().event(SUBMIT).state(NOT_STARTED).build());
+
+        Event event = TYPE_OF_APPLICATION;
+        when(eventsChecker.hasMandatoryCompleted(event, caseData)).thenReturn(true);
+        List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
+
+        assertThat(expectedTasks).isEqualTo(actualTasks);
+    }
+
+    @Test
+    public void testgetRespondentsEvents() {
+
+        List<RespondentTask> actualTasks = taskListService.getRespondentSolicitorTasks();
+
+        List<RespondentTask> expectedTasks = List.of(
+            RespondentTask.builder().event(RespondentSolicitorEvents.CONSENT).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.ATTENDING_THE_COURT).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.MIAM).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.ALLEGATION_OF_HARM).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.SUBMIT).build()
+        );
         assertThat(expectedTasks).isEqualTo(actualTasks);
     }
 }

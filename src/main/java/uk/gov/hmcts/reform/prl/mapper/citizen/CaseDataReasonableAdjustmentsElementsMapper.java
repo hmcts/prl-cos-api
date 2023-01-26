@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildReasonableAdjustmentsElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
@@ -74,18 +75,21 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                 .collect(Collectors.toList()) : Collections.emptyList();
 
         caseDataBuilder
-                .isWelshNeeded(buildIsWelshNeeded(languageList))
-                .welshNeeds(buildWelshNeeds(languageList))
-                .isInterpreterNeeded(buildInterpreterNeeded(languageList))
-                .interpreterNeeds(buildInterpreterNeeds(languageList, c100RebuildReasonableAdjustmentsElements
-                        .getNeedInterpreterInCertainLanguageDetails()))
-                .isIntermediaryNeeded(communicationHelps.contains(intermediary.name()) ? YesOrNo.Yes : YesOrNo.No)
-                .isSpecialArrangementsRequired(buildSpecialArrangementRequired(specialArrangementList))
-                .specialArrangementsRequired(buildSpecialArrangementList(specialArrangementList,
-                        c100RebuildReasonableAdjustmentsElements.getSpecialArrangementsOtherSubField()))
-                .isDisabilityPresent(buildIsDisabilityPresent(disabilityRequirementsList))
-                .adjustmentsRequired(buildAdjustmentRequired(disabilityRequirementsList,
-                        c100RebuildReasonableAdjustmentsElements));
+            .attendHearing(AttendHearing.builder()
+                               .isWelshNeeded(buildIsWelshNeeded(languageList))
+                               .welshNeeds(buildWelshNeeds(languageList))
+                               .isInterpreterNeeded(buildInterpreterNeeded(languageList))
+                               .interpreterNeeds(buildInterpreterNeeds(languageList, c100RebuildReasonableAdjustmentsElements
+                                   .getNeedInterpreterInCertainLanguageDetails()))
+                               .isIntermediaryNeeded(communicationHelps.contains(intermediary.name()) ? YesOrNo.Yes : YesOrNo.No)
+                               .isSpecialArrangementsRequired(buildSpecialArrangementRequired(specialArrangementList))
+                               .specialArrangementsRequired(buildSpecialArrangementList(specialArrangementList,
+                                                                                        c100RebuildReasonableAdjustmentsElements
+                                                                                            .getSpecialArrangementsOtherSubField()))
+                               .isDisabilityPresent(buildIsDisabilityPresent(disabilityRequirementsList))
+                               .adjustmentsRequired(buildAdjustmentRequired(disabilityRequirementsList,
+                                                                            c100RebuildReasonableAdjustmentsElements))
+                               .build());
     }
 
     private static List<Element<InterpreterNeed>> buildInterpreterNeeds(List<String> languageList,

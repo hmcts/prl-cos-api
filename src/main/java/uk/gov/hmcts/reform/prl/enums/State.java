@@ -23,11 +23,10 @@ public enum State {
     CASE_ISSUE("CASE_ISSUE", "Case Issued"),
     CASE_WITHDRAWN("CASE_WITHDRAWN", "Withdrawn"),
     GATEKEEPING("GATE_KEEPING", "Gatekeeping"),
-    PREPARE_FOR_HEARING_CONDUCT_HEARING("PREPARE_FOR_HEARING_CONDUCT_HEARING", "Hearing"),
-    DECISION_OUTCOME("DECISION_OUTCOME"),
-    ALL_FINAL_ORDERS_ISSUED("ALL_FINAL_ORDERS_ISSUED"),
-    CASE_HEARING("CASE_HEARING","Prepare for hearing"),
-    DELETED("DELETED", "Deleted");
+    ALL_FINAL_ORDERS_ISSUED("ALL_FINAL_ORDERS_ISSUED", "Closed"),
+    PREPARE_FOR_HEARING_CONDUCT_HEARING("PREPARE_FOR_HEARING_CONDUCT_HEARING","Prepare for hearing"),
+    DELETED("DELETED", "Deleted"),
+    DECISION_OUTCOME("DECISION_OUTCOME","Hearing outcome");
     private final String value;
     private final String label;
 

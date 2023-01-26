@@ -20,7 +20,7 @@ spring:
   application:
     name: Prl cos api
   main:
-      allow-bean-definition-overriding: true
+    allow-bean-definition-overriding: true
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
 #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
@@ -202,6 +202,11 @@ courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
+locationfinder:
+  api:
+    url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
+    endpoint: /refdata/location/court-venues/services
+
 launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
 
@@ -371,6 +376,12 @@ bundle:
   api:
     url: ${BUNDLE_URL:}
   english:
-    config: ${BUNDLE_ENGLISH_CONFIG:sample-config.yaml}
+    config: ${BUNDLE_ENGLISH_CONFIG:prl-bundle-config.yaml}
   welsh:
-    config: ${BUNDLE_WELSH_CONFIG:sample-config.yaml}
+    config: ${BUNDLE_WELSH_CONFIG:prl-bundle-config.yaml}
+fis_hearing:
+  api:
+    url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
+
+courts:
+  filter: ${COURT_IDS_TO_FILTER:}
