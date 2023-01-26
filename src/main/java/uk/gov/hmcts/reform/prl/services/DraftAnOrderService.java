@@ -111,13 +111,12 @@ public class DraftAnOrderService {
 
     private DraftOrder getCurrentOrderDetails(CaseData caseData) {
         log.info(" Getting current order details from case data {}", caseData);
-        DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
             .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
-            .orderDocument(language.isGenEng() ? caseData.getPreviewOrderDoc() : null)
-            .orderDocumentWelsh(language.isGenWelsh() ? caseData.getPreviewOrderDocWelsh() : null)
+            .orderDocument(caseData.getPreviewOrderDoc())
+            .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
@@ -185,12 +184,13 @@ public class DraftAnOrderService {
     public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData) {
         Map<String, Object> updatedCaseData = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
-            if (draftOrder.getOrderDocument().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())
-                || draftOrder.getOrderDocument().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName())) {
+            if ((draftOrder.getOrderDocument() != null && draftOrder.getOrderDocument().getDocumentFileName()
+                .equalsIgnoreCase(selectedOrder.getOrderDocument().getDocumentFileName()))
+                || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
+                .equalsIgnoreCase(selectedOrder.getOrderDocumentWelsh().getDocumentFileName()))) {
                 updatedCaseData.put("orderCollection", getFinalOrderCollection(authorisation, caseData, draftOrder));
                 draftOrderCollection.remove(
                     draftOrderCollection.indexOf(e)
@@ -258,8 +258,8 @@ public class DraftAnOrderService {
 
         return element(OrderDetails.builder()
                            .orderType(draftOrder.getOrderTypeId())
-                           .typeOfOrder(caseData.getSelectTypeOfOrder() != null
-                                            ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
+                           .typeOfOrder(draftOrder.getOrderType() != null
+                                            ? draftOrder.getOrderType().getDisplayedValue() : null)
                            .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
                            .orderDocument(getGeneratedDocument(generatedDocumentInfo,false,fieldMap))
                            .orderDocumentWelsh(getGeneratedDocument(generatedDocumentInfoWelsh,documentLanguage.isGenWelsh(),fieldMap))
@@ -477,6 +477,7 @@ public class DraftAnOrderService {
         caseDataMap.put("underTakingDateExpiry", selectedOrder.getUnderTakingDateExpiry());
         caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
         caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
+        log.info("Selected order type is ********   from    populateDraftOrderCustomField",selectedOrder.getOrderType());
         return caseDataMap;
     }
 
@@ -500,6 +501,7 @@ public class DraftAnOrderService {
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
         caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
+        log.info("Selected order type is ********   from    populateCommonDraftOrderFields",selectedOrder.getOrderType());
         log.info("Case typ of application {}", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
@@ -523,16 +525,17 @@ public class DraftAnOrderService {
         log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
         log.info(" ************ casedata {}", caseData);
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        log.info(" ************ Selected Order ***  {}", selectedOrder);
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
-            if (draftOrder.getOrderDocument().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())
-                || draftOrder.getOrderDocumentWelsh().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName())) {
+            if ((draftOrder.getOrderDocument() != null && draftOrder.getOrderDocument().getDocumentFileName()
+                .equalsIgnoreCase(selectedOrder.getOrderDocument().getDocumentFileName()))
+                || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
+                .equalsIgnoreCase(selectedOrder.getOrderDocumentWelsh().getDocumentFileName()))) {
                 log.info("matching draftorder {}", draftOrder);
-                draftOrderCollection.set(
-                    draftOrderCollection.indexOf(e),
-                    element(getUpdatedDraftOrder(draftOrder, caseData))
+                draftOrderCollection.set(draftOrderCollection.indexOf(e),
+                        element(getUpdatedDraftOrder(draftOrder, caseData))
                 );
                 break;
             }
@@ -546,13 +549,21 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData) {
-        DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
+        Document orderDocumentEng;
+        Document orderDocumentWelsh;
+        if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+            orderDocumentEng = caseData.getPreviewOrderDoc();
+            orderDocumentWelsh = caseData.getPreviewOrderDocWelsh();
+        } else {
+            orderDocumentEng = draftOrder.getOrderDocument();
+            orderDocumentWelsh = draftOrder.getOrderDocumentWelsh();
+        }
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
-            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
-                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
-            .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
-            .orderDocument(language.isGenEng() ? caseData.getPreviewOrderDoc() : null)
-            .orderDocumentWelsh(language.isGenWelsh() ? caseData.getPreviewOrderDocWelsh() : null)
+            .typeOfOrder(draftOrder.getOrderType() != null
+                             ? draftOrder.getOrderType().getDisplayedValue() : null)
+            .orderTypeId(draftOrder.getOrderType().getDisplayedValue())
+            .orderDocument(orderDocumentEng)
+            .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
@@ -891,4 +902,47 @@ public class DraftAnOrderService {
             "dioTransferApplicationCourtDynamicList", courtDynamicList);
     }
 
+    public Map<String,Object> getDraftOrderInfo(String authorisation, CaseData caseData)  throws Exception {
+        DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
+        return  getDraftOrderData(authorisation, caseData, draftOrder);
+    }
+
+    private Map<String,Object> getDraftOrderData(String authorisation, CaseData caseData, DraftOrder draftOrder) throws Exception {
+        {
+            Map<String, Object> caseDataUpdated = new HashMap<>();
+            GeneratedDocumentInfo generatedDocumentInfo = null;
+            Map<String, String> fieldsMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            if (documentLanguage.isGenEng()) {
+                caseDataUpdated.put("isEngDocGen", Yes.toString());
+                generatedDocumentInfo = dgsService.generateDocument(
+                    authorisation,
+                    CaseDetails.builder().caseData(caseData).build(),
+                    fieldsMap.get(PrlAppsConstants.TEMPLATE)
+                );
+                caseDataUpdated.put("previewOrderDoc", Document.builder()
+                    .documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedDocumentInfo.getHashToken())
+                    .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+
+            }
+            if (documentLanguage.isGenWelsh()) {
+                caseDataUpdated.put("isWelshDocGen", Yes.toString());
+                generatedDocumentInfo = dgsService.generateWelshDocument(
+                    authorisation,
+                    CaseDetails.builder().caseData(caseData).build(),
+                    fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
+                );
+                caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
+                    .documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedDocumentInfo.getHashToken())
+                    .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
+
+            }
+            return caseDataUpdated;
+        }
+
+    }
 }

@@ -69,7 +69,6 @@ public class CitizenCoreCaseDataService {
                 caseId,
                 true
             );
-
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
             Iterables.removeIf(caseDataMap.values(), Objects::isNull);
             log.info("after Start event response {}", startEventResponse);
