@@ -756,6 +756,7 @@ public class CaseData implements MappableObject {
     private final DynamicList legalAdvisorList;
     private final DynamicList judgesList;
 
-    @JsonProperty("allocatedJudge")
+    @JsonUnwrapped
+    @Builder.Default
     private AllocatedJudge allocatedJudge;
 }
