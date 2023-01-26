@@ -407,19 +407,21 @@ public class ApplicationsTabService implements TabService {
     }
 
     public Map<String, Object> getMiamExemptionsTable(CaseData caseData) {
-        Optional<List<MiamExemptionsChecklistEnum>> miamExemptionsCheck = ofNullable(caseData.getMiamExemptionsChecklist());
+        Optional<List<MiamExemptionsChecklistEnum>> miamExemptionsCheck = ofNullable(caseData.getMiamDetails().getMiamExemptionsChecklist());
         String reasonsForMiamExemption;
         if (miamExemptionsCheck.isPresent()) {
-            reasonsForMiamExemption = caseData.getMiamExemptionsChecklist()
+            reasonsForMiamExemption = caseData.getMiamDetails().getMiamExemptionsChecklist()
                 .stream().map(MiamExemptionsChecklistEnum::getDisplayedValue).collect(Collectors.joining(", "));
         } else {
             reasonsForMiamExemption = "";
         }
 
         String domesticViolenceEvidence;
-        Optional<List<MiamDomesticViolenceChecklistEnum>> domesticViolenceCheck = ofNullable(caseData.getMiamDomesticViolenceChecklist());
+        Optional<List<MiamDomesticViolenceChecklistEnum>> domesticViolenceCheck
+            = ofNullable(caseData.getMiamDetails()
+                             .getMiamDomesticViolenceChecklist());
         if (domesticViolenceCheck.isPresent()) {
-            domesticViolenceEvidence = caseData.getMiamDomesticViolenceChecklist()
+            domesticViolenceEvidence = caseData.getMiamDetails().getMiamDomesticViolenceChecklist()
                 .stream().map(MiamDomesticViolenceChecklistEnum::getDisplayedValue)
                 .collect(Collectors.joining("\n"));
         } else {
@@ -427,9 +429,11 @@ public class ApplicationsTabService implements TabService {
         }
 
         String urgencyEvidence;
-        Optional<List<MiamUrgencyReasonChecklistEnum>> urgencyCheck = ofNullable(caseData.getMiamUrgencyReasonChecklist());
+        Optional<List<MiamUrgencyReasonChecklistEnum>> urgencyCheck =
+            ofNullable(caseData.getMiamDetails()
+                           .getMiamUrgencyReasonChecklist());
         if (urgencyCheck.isPresent()) {
-            urgencyEvidence = caseData.getMiamUrgencyReasonChecklist()
+            urgencyEvidence = caseData.getMiamDetails().getMiamUrgencyReasonChecklist()
                 .stream().map(MiamUrgencyReasonChecklistEnum::getDisplayedValue)
                 .collect(Collectors.joining("\n"));
         } else {
@@ -437,26 +441,26 @@ public class ApplicationsTabService implements TabService {
         }
 
         String previousAttendenceEvidence;
-        Optional<MiamPreviousAttendanceChecklistEnum> prevCheck = ofNullable(caseData.getMiamPreviousAttendanceChecklist());
+        Optional<MiamPreviousAttendanceChecklistEnum> prevCheck = ofNullable(caseData.getMiamDetails().getMiamPreviousAttendanceChecklist());
         if (prevCheck.isPresent()) {
-            previousAttendenceEvidence = caseData.getMiamPreviousAttendanceChecklist().getDisplayedValue();
+            previousAttendenceEvidence = caseData.getMiamDetails().getMiamPreviousAttendanceChecklist().getDisplayedValue();
         } else {
             previousAttendenceEvidence = "";
         }
 
         String otherGroundsEvidence;
-        Optional<MiamOtherGroundsChecklistEnum> othCheck = ofNullable(caseData.getMiamOtherGroundsChecklist());
+        Optional<MiamOtherGroundsChecklistEnum> othCheck = ofNullable(caseData.getMiamDetails().getMiamOtherGroundsChecklist());
         if (othCheck.isPresent()) {
-            otherGroundsEvidence = caseData.getMiamOtherGroundsChecklist().getDisplayedValue();
+            otherGroundsEvidence = caseData.getMiamDetails().getMiamOtherGroundsChecklist().getDisplayedValue();
         } else {
             otherGroundsEvidence = "";
         }
 
         String childEvidence;
         Optional<List<MiamChildProtectionConcernChecklistEnum>> childCheck = ofNullable(caseData
-                                                                                            .getMiamChildProtectionConcernList());
+                                                                                            .getMiamDetails().getMiamChildProtectionConcernList());
         if (childCheck.isPresent()) {
-            childEvidence = caseData.getMiamChildProtectionConcernList()
+            childEvidence = caseData.getMiamDetails().getMiamChildProtectionConcernList()
                 .stream().map(MiamChildProtectionConcernChecklistEnum::getDisplayedValue)
                 .collect(Collectors.joining("\n"));
         } else {
@@ -864,8 +868,8 @@ public class ApplicationsTabService implements TabService {
         }
         PartyDetails currentRespondent = caseData.getRespondentsFL401();
         currentRespondent = maskFl401ConfidentialDetails(currentRespondent);
-        FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
 
+        FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
         return toMap(a);
     }
 

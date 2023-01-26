@@ -722,8 +722,8 @@ public class FL401ApplicationMapperTest {
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
-        assertEquals(YesOrNo.Yes, caseData1.getIsInterpreterNeeded());
-        assertEquals(YesOrNo.Yes, caseData1.getIsDisabilityPresent());
+        assertEquals(YesOrNo.Yes, caseData1.getAttendHearing().getIsInterpreterNeeded());
+        assertEquals(YesOrNo.Yes, caseData1.getAttendHearing().getIsDisabilityPresent());
     }
 
     @Test
@@ -775,10 +775,10 @@ public class FL401ApplicationMapperTest {
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
-        assertEquals(YesOrNo.Yes, caseData1.getIsInterpreterNeeded());
-        assertEquals(YesOrNo.Yes, caseData1.getIsDisabilityPresent());
+        assertEquals(YesOrNo.Yes, caseData1.getAttendHearing().getIsInterpreterNeeded());
+        assertEquals(YesOrNo.Yes, caseData1.getAttendHearing().getIsDisabilityPresent());
         assertNull(courtNavFl401.getFl401().getGoingToCourt().getAnySpecialMeasures());
-        assertNull(caseData1.getSpecialArrangementsRequired());
+        assertNull(caseData1.getAttendHearing().getSpecialArrangementsRequired());
     }
 
     @Test

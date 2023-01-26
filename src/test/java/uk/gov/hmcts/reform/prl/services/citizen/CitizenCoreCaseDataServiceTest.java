@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -57,7 +58,6 @@ public class CitizenCoreCaseDataServiceTest {
     private static final String LINK_CASE_TO_CITIZEN_SUMMARY = "Link case to Citizen account";
     private static final String LINK_CASE_TO_CITIZEN_DESCRIPTION = "Link case to Citizen account with access code";
 
-
     @Test
     public void linkCitizenAccountAndUpdateCaseData() throws Exception {
 
@@ -76,19 +76,15 @@ public class CitizenCoreCaseDataServiceTest {
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                                              .build())))
             .build();
-
-
-        UserDetails userDetails  = UserDetails.builder()
-            .id("testUser").build();
-
         bearerToken = "Bearer token";
-
         StartEventResponse startEventResponse = StartEventResponse.builder()
             .token(bearerToken).build();
-        CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
         Map<String, Object> stringObjectMap = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(stringObjectMap).build();
+        when(caseDataMock.toMap(any())).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        UserDetails userDetails  = UserDetails.builder()
+            .id("testUser").build();
         when(idamClient.getUserDetails(bearerToken)).thenReturn(userDetails);
         String serviceAuth = "serviceAuth";
         EventRequestData eventRequestData = eventRequest(CaseEvent.LINK_CITIZEN, "testUser");
@@ -99,16 +95,17 @@ public class CitizenCoreCaseDataServiceTest {
                                                      eventRequestData.getCaseTypeId(),
                                                      "12345",
                                                      eventRequestData.getEventId())).thenReturn(startEventResponse);
-        when(coreCaseDataApi.submitEventForCaseWorker(bearerToken,
-                                                       serviceAuth,
-                                                       eventRequestData.getUserId(),
-                                                       eventRequestData.getJurisdictionId(),
-                                                       eventRequestData.getCaseTypeId(),
-                                                       "12345",
-                                                       eventRequestData.isIgnoreWarning(),
-                                                       caseDataContent)).thenReturn(caseDetails);
+        when(coreCaseDataApi.submitEventForCaseWorker(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyBoolean(),
+            Mockito.any(CaseDataContent.class))).thenReturn(caseDetails);
 
-        CaseDetails updatedDetails = citizenCoreCaseDataService.linkDefendant(bearerToken,12345L,caseData,CaseEvent.LINK_CITIZEN);
+        CaseDetails updatedDetails = citizenCoreCaseDataService.linkDefendant(bearerToken,12345L,caseDataMock,CaseEvent.LINK_CITIZEN);
 
         Assert.assertEquals(caseDetails,updatedDetails);
     }

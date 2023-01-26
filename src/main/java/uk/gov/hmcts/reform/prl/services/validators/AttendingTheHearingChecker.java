@@ -22,11 +22,11 @@ public class AttendingTheHearingChecker implements EventChecker {
     public boolean isFinished(CaseData caseData) {
         boolean finished;
         finished = allNonEmpty(
-                    caseData.getIsWelshNeeded(),
-                    caseData.getIsInterpreterNeeded(),
-                    caseData.getIsDisabilityPresent(),
-                    caseData.getIsSpecialArrangementsRequired(),
-                    caseData.getIsIntermediaryNeeded()
+                    caseData.getAttendHearing().getIsWelshNeeded(),
+                    caseData.getAttendHearing().getIsInterpreterNeeded(),
+                    caseData.getAttendHearing().getIsDisabilityPresent(),
+                    caseData.getAttendHearing().getIsSpecialArrangementsRequired(),
+                    caseData.getAttendHearing().getIsIntermediaryNeeded()
         );
 
         if (finished) {
@@ -42,11 +42,11 @@ public class AttendingTheHearingChecker implements EventChecker {
         boolean isStarted = false;
 
         isStarted =  anyNonEmpty(
-                caseData.getIsWelshNeeded(),
-                caseData.getIsInterpreterNeeded(),
-                caseData.getIsDisabilityPresent(),
-                caseData.getSpecialArrangementsRequired(),
-                caseData.getIsIntermediaryNeeded()
+                caseData.getAttendHearing().getIsWelshNeeded(),
+                caseData.getAttendHearing().getIsInterpreterNeeded(),
+                caseData.getAttendHearing().getIsDisabilityPresent(),
+                caseData.getAttendHearing().getSpecialArrangementsRequired(),
+                caseData.getAttendHearing().getIsIntermediaryNeeded()
             );
 
         if (isStarted) {
