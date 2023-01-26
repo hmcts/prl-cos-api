@@ -111,10 +111,8 @@ public class CaseData implements MappableObject {
 
     private final State state;
 
-    @JsonIgnore
     private final LocalDateTime createdDate;
 
-    @JsonIgnore
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;

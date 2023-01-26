@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 
@@ -83,7 +84,8 @@ public class CaseService {
             linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
             return caseRepository.getCase(authToken, caseId);
         }
-        if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)) {
+        if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)
+            || CITIZEN_CASE_SUBMIT_WITH_HWF.getValue().equalsIgnoreCase(eventId)) {
             UserDetails userDetails = idamClient.getUserDetails(authToken);
             UserInfo userInfo = UserInfo
                     .builder()
