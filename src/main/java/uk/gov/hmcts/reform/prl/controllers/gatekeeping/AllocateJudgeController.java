@@ -91,23 +91,18 @@ public class AllocateJudgeController extends AbstractCallbackController {
 
     private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated) {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
-        if (null != caseDataUpdated.get("isSpecificJudgeOrLegalAdviserNeeded")) {
-            if (YesOrNo.Yes.equals((YesOrNo)caseDataUpdated.get("isSpecificJudgeOrLegalAdviserNeeded"))) {
-                allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
-                if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
-                    if (null != caseDataUpdated.get("judgesList")) {
-                        allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
-                        allocatedJudgeBuilder.judgeNameAndEmail(((DynamicList) caseDataUpdated.get("judgesList")).getValueLabel());
-                    }
-                    if (null != caseDataUpdated.get("legalAdvisorList")) {
-                        allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.LEGAL_ADVISER));
-                        allocatedJudgeBuilder.legalAdviserDetails(((DynamicList) caseDataUpdated.get("legalAdvisorList")).getValueLabel());
-                    }
+        if (null != caseDataUpdated.get("tierOfJudiciary")) {
+            allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
+            allocatedJudgeBuilder.tierOfJudiciary(TierOfJudiciaryEnum.valueOf(String.valueOf(caseDataUpdated.get("tierOfJudiciary"))));
+        } else {
+            if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
+                if (null != caseDataUpdated.get("judgesList")) {
+                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
+                    allocatedJudgeBuilder.judgeNameAndEmail(((DynamicList) caseDataUpdated.get("judgesList")).getValueLabel());
                 }
-            } else {
-                if (null != caseDataUpdated.get("tierOfJudiciary")) {
-                    allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
-                    allocatedJudgeBuilder.tierOfJudiciary(TierOfJudiciaryEnum.valueOf(String.valueOf(caseDataUpdated.get("tierOfJudiciary"))));
+                if (null != caseDataUpdated.get("legalAdvisorList")) {
+                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.LEGAL_ADVISER));
+                    allocatedJudgeBuilder.legalAdviserDetails(((DynamicList) caseDataUpdated.get("legalAdvisorList")).getValueLabel());
                 }
             }
         }
