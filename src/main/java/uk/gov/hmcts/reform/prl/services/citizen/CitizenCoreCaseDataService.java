@@ -69,9 +69,12 @@ public class CitizenCoreCaseDataService {
                 caseId,
                 true
             );
+
+            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+            Iterables.removeIf(caseDataMap.values(), Objects::isNull);
             log.info("after Start event response {}", startEventResponse);
-            log.info("after Start event response caseData{}", caseData);
-            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
+            log.info("after Start event response caseData{}", caseDataMap);
+            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataMap);
             return submitUpdate(
                 anonymousUserToken,
                 eventRequestData,
