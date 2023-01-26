@@ -91,7 +91,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
     private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated) {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
         if (null != caseDataUpdated.get("isSpecificJudgeOrLegalAdviserNeeded")) {
-            if (YesOrNo.Yes.equals((String)caseDataUpdated.get("isSpecificJudgeOrLegalAdviserNeeded"))) {
+            if (YesOrNo.Yes.equals((YesOrNo)caseDataUpdated.get("isSpecificJudgeOrLegalAdviserNeeded"))) {
                 allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                 if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
                     if (null != caseDataUpdated.get("judge")) {
