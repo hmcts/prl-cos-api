@@ -8,6 +8,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 
 @Data
 @Builder
@@ -20,11 +21,11 @@ public class AllocatedJudge {
     @JsonProperty("isJudgeOrLegalAdviser")
     private final AllocatedJudgeTypeEnum isJudgeOrLegalAdviser;
 
-    @JsonProperty("judge")
-    private final String judgeNameAndEmail;
+    @JsonProperty("judgesList")
+    private final DynamicList judgesList;
 
-    @JsonProperty("legalAdviser")
-    private final String legalAdviserDetails;
+    @JsonProperty("legalAdvisorList")
+    private final DynamicList legalAdvisorList;
 
     @JsonProperty("tierOfJudiciary")
     private final TierOfJudiciaryEnum tierOfJudiciary;
