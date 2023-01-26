@@ -18,9 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.ArrayList;
@@ -76,10 +80,36 @@ public class AllocateJudgeController extends AbstractCallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("*** allocate judge details for the case id : {}", caseData.getId());
         log.info("*** ********allocate judge details for the case id : {}", caseData.getAllocatedJudge());
-        caseDataUpdated.put("allocatedJudge",caseData.getAllocatedJudge());
+        AllocatedJudge allocatedJudge = mapAllocatedJudge(caseDataUpdated);
         caseData = caseData.toBuilder().allocatedJudge(caseData.getAllocatedJudge()).build();
+        caseDataUpdated.put("allocatedJudge",caseData.getAllocatedJudge());
         caseSummaryTabService.updateTab(caseData);
+        log.info("*** ********allocate judge details for the case id : {}", caseData.getAllocatedJudge());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+    private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated) {
+        AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
+        if (null != caseDataUpdated.get("isSpecificJudgeOrLegalAdviserNeeded")) {
+            if (YesOrNo.Yes.equals((String)caseDataUpdated.get("isSpecificJudgeOrLegalAdviserNeeded"))) {
+                allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
+                if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
+                    if (null != caseDataUpdated.get("judge")) {
+                        allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
+                        allocatedJudgeBuilder.judgeNameAndEmail((String) caseDataUpdated.get("judge"));
+                    }
+                    if (null != caseDataUpdated.get("legalAdvisorList")) {
+                        allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.LEGAL_ADVISER));
+                        allocatedJudgeBuilder.legalAdviserDetails(((DynamicList) caseDataUpdated.get("legalAdvisorList")).getValueLabel());
+                    }
+                }
+            } else {
+                if (null != caseDataUpdated.get("tierOfJudiciary")) {
+                    allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
+                    allocatedJudgeBuilder.tierOfJudiciary(TierOfJudiciaryEnum.valueOf((String)caseDataUpdated.get("tierOfJudiciary")));
+                }
+            }
+        }
+        return allocatedJudgeBuilder.build();
+    }
 }

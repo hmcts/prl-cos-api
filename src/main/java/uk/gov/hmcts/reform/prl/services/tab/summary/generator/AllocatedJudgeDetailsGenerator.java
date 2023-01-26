@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.tab.summary.generator;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
@@ -9,12 +10,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 @Component
+@Slf4j
 public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
 
     @Override
     public CaseSummary generate(CaseData caseData) {
         uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge allocatedJudge = caseData.getAllocatedJudge();
         if (null != allocatedJudge) {
+            log.info("*** ********allocate judge details for the case id in generator : {}", allocatedJudge);
             String[] judgeOrLegalAdvisorDetails = splitLastNameAndEmailAddress(caseData.getAllocatedJudge());
             boolean isLastNameAndEmailAvailable = isLastNameAndEmailAvailable(judgeOrLegalAdvisorDetails);
             return CaseSummary.builder().allocatedJudgeDetails(
@@ -43,7 +46,6 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
                 if (AllocatedJudgeTypeEnum.JUDGE.equals(allocatedJudge.getIsJudgeOrLegalAdviser())) {
                     String judgeNameAndEmail = allocatedJudge.getJudgeNameAndEmail();
                     if (null != judgeNameAndEmail) {
-
                         return judgeNameAndEmail.split("\\)")[0].split("\\(");
                     }
                 } else if (AllocatedJudgeTypeEnum.LEGAL_ADVISER.equals(allocatedJudge.getIsJudgeOrLegalAdviser())) {
