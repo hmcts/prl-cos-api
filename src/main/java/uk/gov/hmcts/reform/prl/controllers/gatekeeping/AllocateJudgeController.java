@@ -49,9 +49,9 @@ public class AllocateJudgeController extends AbstractCallbackController {
         log.info("*** request recieved to get the legalAdvisor details : {}", callbackRequest.toString());
 
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
-        dynamicListElements.add(DynamicListElement.builder().code("test1").label("test1").build());
-        dynamicListElements.add(DynamicListElement.builder().code("test2").label("test2").build());
-        dynamicListElements.add(DynamicListElement.builder().code("test3").label("test3").build());
+        dynamicListElements.add(DynamicListElement.builder().code("test1(test1@xxx.com)").label("test1(test1@xxx.com)").build());
+        dynamicListElements.add(DynamicListElement.builder().code("test2(test2@xxx.com)").label("test2(test2@xxx.com)").build());
+        dynamicListElements.add(DynamicListElement.builder().code("test3(test3@xxx.com)").label("test3(test3@xxx.com)").build());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("judgesList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(dynamicListElements)
