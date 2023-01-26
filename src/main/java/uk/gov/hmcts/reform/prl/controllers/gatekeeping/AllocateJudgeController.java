@@ -18,12 +18,17 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.NotFoundException;
@@ -79,11 +84,35 @@ public class AllocateJudgeController extends AbstractCallbackController {
         log.info("*** ********allocate judge details for the case id : {}", caseData.getJudgesList().getValueLabel());
         log.info("*** ********allocate judge details for the case id : {}", caseData.getLegalAdvisorList().getValueLabel());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        //AllocatedJudge allocatedJudge = mapAllocatedJudge(caseDataUpdated);
+        AllocatedJudge allocatedJudge = mapAllocatedJudge(caseDataUpdated);
         caseData = caseData.toBuilder().allocatedJudge(caseData.getAllocatedJudge()).build();
         caseDataUpdated.put("allocatedJudge",caseData.getAllocatedJudge());
         caseSummaryTabService.updateTab(caseData);
         log.info("*** ********allocate judge details after populating for the case id : {}", caseData.getAllocatedJudge());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated) {
+        AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
+        if (null != caseDataUpdated.get("tierOfJudiciary")) {
+            allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
+            allocatedJudgeBuilder.tierOfJudiciary(TierOfJudiciaryEnum.valueOf(String.valueOf(caseDataUpdated.get("tierOfJudiciary"))));
+        } else {
+            if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
+                if (null != caseDataUpdated.get("judgesList")) {
+                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
+                    Map judgeDetails = (LinkedHashMap)caseDataUpdated.get("judgesList");
+                    log.info("*** ********allocate judge details after populating for the case id : {}",
+                        judgeDetails.containsKey("value") ? ((DynamicListElement)judgeDetails.get("value")).getLabel()
+                            : "Keys: " + judgeDetails.keySet());
+                    //allocatedJudgeBuilder.judgesList(judgeDetails.get("value"));
+                }
+                if (null != caseDataUpdated.get("legalAdvisorList")) {
+                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.LEGAL_ADVISER));
+                    //allocatedJudgeBuilder.legalAdviserDetails(((DynamicList) caseDataUpdated.get("legalAdvisorList")).getValueLabel());
+                }
+            }
+        }
+        return allocatedJudgeBuilder.build();
     }
 }
