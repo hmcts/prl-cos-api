@@ -5,6 +5,8 @@ package uk.gov.hmcts.reform.prl.services;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 
 import java.util.ArrayList;
@@ -28,6 +30,15 @@ public class TaskListRenderElements {
     public String renderLink(Event event) {
         return format("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/%s/%s1'>%s</a>",
                       event.getId(), event.getId(), event.getName());
+    }
+
+    public String renderRespondentSolicitorLink(RespondentTask respondentTask) {
+        return renderRespondentSolicitorLink(respondentTask.getEvent());
+    }
+
+    public String renderRespondentSolicitorLink(RespondentSolicitorEvents respondentSolicitorEvents) {
+        return format("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/%s/%s1'>%s</a>",
+                      respondentSolicitorEvents.getEventId(), respondentSolicitorEvents.getEventId(), respondentSolicitorEvents.getEventName());
     }
 
     public String renderImage(String imageName, String title) {

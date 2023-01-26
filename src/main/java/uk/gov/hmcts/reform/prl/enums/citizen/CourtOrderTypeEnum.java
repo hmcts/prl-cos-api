@@ -2,11 +2,14 @@ package uk.gov.hmcts.reform.prl.enums.citizen;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @Getter
 @RequiredArgsConstructor
+@JsonSerialize(using = CustomEnumSerializer.class)
 public enum CourtOrderTypeEnum {
     changeChildrenNameSurname("Changing the children's names or surname"),
     allowMedicalTreatment("Allowing medical treatment to be carried out on the children"),

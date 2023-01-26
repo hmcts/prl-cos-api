@@ -25,6 +25,7 @@ import java.util.Objects;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.enums.CaseCreatedBy.CITIZEN;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
 
 @Slf4j
@@ -54,7 +55,12 @@ public class CitizenCoreCaseDataService {
         CaseEvent caseEvent
     ) {
         try {
+            log.info("User token {}", anonymousUserToken);
             UserDetails userDetails = idamClient.getUserDetails(anonymousUserToken);
+
+            log.info("User id {}", userDetails.getId());
+            log.info("User roles {}", userDetails.getRoles());
+            log.info("case event {}", caseEvent);
             EventRequestData eventRequestData = eventRequest(caseEvent, userDetails.getId());
 
             StartEventResponse startEventResponse = startUpdate(
@@ -63,8 +69,12 @@ public class CitizenCoreCaseDataService {
                 caseId,
                 true
             );
+            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+            Iterables.removeIf(caseDataMap.values(), Objects::isNull);
+            log.info("after Start event response {}", startEventResponse);
+            log.info("after Start event response caseData{}", caseDataMap);
 
-            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
+            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataMap);
             return submitUpdate(
                 anonymousUserToken,
                 eventRequestData,
@@ -213,6 +223,9 @@ public class CitizenCoreCaseDataService {
             userDetails.getId()
         );
 
+        if (userDetails.getRoles().contains(CITIZEN_ROLE)) {
+            caseData.setCaseCreatedBy(CITIZEN);
+        }
         StartEventResponse startEventResponse = startSubmitCreate(
             authorisation,
             cosApis2sToken,

@@ -173,4 +173,157 @@ public class PrlAppsConstants {
     public static final String CITIZEN_ROLE = "citizen";
 
     public static final String OTHER = "Other";
+    public static final String ENGDOCGEN = "isEngDocGen";
+
+    public static final String SERVICE_ID = "ABA5";
+    public static final String FAMILY_COURT_TYPE_ID = "18";
+
+    public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without hearing may ask the court to reconsider this order. "
+        + "You must do that within seven days of receiving the order by writing to the court"
+        + "(and notifying any other party) and asking the court to reconsider. "
+        + "Alternatively, the court may reconsider the directions at the first hearing";
+    public static final String SAFE_GUARDING_LETTER = "The court has considered the safeguarding letter from Cafcass or Cafcass Cymru "
+        + "and made a decision on how to progress your case.";
+    public static final String HEARING_NOT_NEEDED = "A[Judge/justices' legal adviser] has decided that appropriate directions "
+        + "can be given to progress the matter without the need for a hearing";
+    public static final String PARTICIPATION_DIRECTIONS = "If they not already done so, any part who considers that specific "
+        + "measures need to be taken to enable a party or witness to understand the"
+        + "proceedings and their role in them when in court, put their views to the  "
+        + "court, instruct their representatives before, during, and after the hearing "
+        + "or attend the hearing without significant distress should file an application "
+        + "notice and include the following information as far as practicable:"
+        + System.lineSeparator() + System.lineSeparator()
+        + "a. why the party or witness would benefit from assistance;"
+        + System.lineSeparator() + System.lineSeparator()
+        + "b. the measure or measures that would be likely to maximise as fas as practicable the "
+        + "quality of their evidence or participation and why;"
+        + System.lineSeparator() + System.lineSeparator()
+        + "c.written confirmations from any relevant witness of his/her views.";
+    public static final String JOINING_INSTRUCTIONS = "Joining instructions";
+    public static final String UPDATE_CONTACT_DETAILS = "The parties must, if their contact details have changed or missing from "
+        + "the applications, contact Cafcass or Cafcass Cymru quoting the case "
+        + "number at [CafcassCymruCAT@gov.wales/ privatelawapplications@cafcass.gov.uk]"
+        + "The email must include telephone contact details and email address so that they "
+        + "may be contacted for safeguarding purposes."
+        + System.lineSeparator() + System.lineSeparator()
+        + "Alternatively if any party is managing their case using the online dashboard, "
+        + "they can update their contact details on the and donot have to also contact "
+        + "Cafcass or Cafcass Cymru.";
+    public static final String CROSS_EXAMINATION_EX740 = "Under Section 31U of the MFPA, it appears to the court that the quality of "
+        + "the party's evidence on cross-examination is likely to be diminshed if the "
+        + "cross examination is conducted in person, or if the conduct of cross-examination "
+        + "in person would cause significant distress to a party and it would not be "
+        + "contrary of justice to make the direction."
+        + System.lineSeparator() + System.lineSeparator()
+        + "It is ordered that:"
+        + System.lineSeparator() + System.lineSeparator()
+        + "a. The applicant and respondent(delete as appropriate) must notify the court by "
+        + "4pm on[date] whether they intend to appoint their own qualified legal representative."
+        + System.lineSeparator()
+        + "b. If the applicant/respondent does not intend to appoint their own qulaified leagl "
+        + "representative, they (whichever party is the (alleged) victim of domestic abuse) "
+        + "must complete form EX740 (name the form) and return it to the court by 4pm on [date]";
+    public static final String CROSS_EXAMINATION_QUALIFIED_LEGAL = "Should a qualified legal representative be appointed by the court "
+        + System.lineSeparator()
+        + "The court has considered whether it necessary in the interest of justice for the "
+        + "witness(es) to be cross-examined by a qualified legal representative(s) and concluded "
+        + "that it is neccessary to appoint such a qualified legal representative(s) to conduct "
+        + "the cross examination."
+        + System.lineSeparator() + System.lineSeparator()
+        + "1. The court is to appoint a qualified leagal representaive on behalf of [name/s] "
+        + "for the hearing listed on [date] at [time] at [name of court].";
+    public static final String SPECIFIED_DOCUMENTS = "No document other than a document specified in an order or filled in accordance "
+        + "with the Rules or any Practice Direction shall be filled without the court's permission.";
+    public static final String SPIP_ATTENDANCE = "Both parents must attend the following programme at dates and at times to be confirmed "
+        + "by the activity provider."
+        + System.lineSeparator() + System.lineSeparator()
+        + "a. The required activity is a Separated Parenting Information programme"
+        + System.lineSeparator() + System.lineSeparator()
+        + "b. The Court shall spend this order to Cafcass/Cafcass Cymeru with parties contact details"
+        + System.lineSeparator() + System.lineSeparator()
+        + "c. The activity provider must notify the Court whether the course was at the conclusion of the activity directed";
+    public static final String PARENT_WITHCARE = "The application is transferred to the Family Court at [place]"
+        + System.lineSeparator() + System.lineSeparator()
+        + "The reason for transfer is another court is in the the area where the child usually lives / there "
+        + "are on-going proceedings in another court / free-text box reason";
+
+    public static final String DIO_RIGHT_TO_ASK =   "As the direction has been made without hearing may ask the court to reconsider this order. "
+        + "You must do that within seven days of receiving the order by writing to the court"
+        + "(and notifying any other party) and asking the court to reconsider. "
+        + "Alternatively, the court may reconsider the directions at the first hearing";
+
+    public static final String DIO_CASE_REVIEW =  "The case is adjourned for a case management review and directions "
+        + "in the absence of the parties on [date]. You should NOT attend court on this date. On this date a judge or "
+        + "legal adviser will review the file and the safeguarding letter from Cafcass/ Cafcass Cymru and decide what "
+        + "type of hearing/further directions are needed to deal with the issues in the case. A copy of the directions "
+        + "will be sent to the parties following the case management review with details of the next hearing and any directions. ";
+    public static final String DIO_UPDATE_CONTACT_DETAILS = "The parties must, if their contact details have changed or "
+        + "are missing from the application, contact Cafcass or Cafcass Cymru quoting the case number at "
+        + "[CafcassCymruCAT@gov.wales / privatelawapplications@cafcass.gov.uk] The email must include telephone"
+        + " contact details and email address so that they may be contacted for safeguarding purposes.  "
+        + System.lineSeparator()
+        + "Alternatively if any party is managing their case using the online dashboard, they can update "
+        + "their contact details on the dashboard and do not have to also contact Cafcass or Cafcass Cymru.";
+    public static final String DIO_SAFEGUARDING_CAFCASS = "The Court directs that Cafcass shall carry out safeguarding "
+        + "checks in relation to the child(ren) and parties and file a safeguarding letter within "
+        + "[number of working days)/by(insert date or time period]  of receipt of this order.  "
+        + "A copy of the letter shall also be served on the parties unless, in the opinion of the "
+        + "letter's author, this would create a risk of harm to a party or child.\n"
+        + System.lineSeparator()
+        + "A copy of this order to be served on Cafcass\n"
+        + System.lineSeparator()
+        + "The court has asked Cafcass to undertake some enquires to see if there are risk issues "
+        + "about a child that the court needs to consider when making any decisions. Cafcass will "
+        + "contact you by telephone to discuss your child's circumstances and talk about any such risk issues, "
+        + "before writing a short safeguarding letter to the court to provide further advice.  "
+        + "Cafcass can advise on risk issues only at this stage and so may not be able to discuss all aspects of "
+        + "your case, and they won't be able to talk to your child(ren) at this stage.\n"
+        + System.lineSeparator()
+        + "More information about Cafcass and the work they do can be found on their website:\n"
+        + System.lineSeparator()
+        + "www.cafcass.gov.uk";
+    public static final String DIO_SAFEGUARING_CAFCASS_CYMRU = "The Court directs that Cafcass Cymru shall carry "
+        + "out safeguarding checks in relation to the child(ren) and parties and file a safeguarding letter within "
+        + "[number working days})/by(insert date or time period] of receipt of this order.  A copy of the letter "
+        + "shall also be served on the parties unless, in the opinion of the letter's author, this would create a "
+        + "risk of harm to a party or child.\n"
+        + System.lineSeparator()
+        + "A copy of this order to be served on Cafcass\n"
+        + System.lineSeparator()
+        + "The court has asked Cafcass to undertake some enquires to see if there are risk issues about a child "
+        + "that the court needs to consider when making any decisions. Cafcass will contact you by telephone to "
+        + "discuss your child's circumstances and talk about any such risk issues, before writing a short safeguarding "
+        + "letter to the court to provide further advice.  Cafcass can advise on risk issues only at this stage and so "
+        + "may not be able to discuss all aspects of your case, and they won't be able to talk to your child(ren) at this stage.\n"
+        + System.lineSeparator()
+        + "More information about Cafcass and the work they do can be found on their website:\n"
+        + System.lineSeparator()
+        + "www.cafcass.gov.uk";
+    public static final String DIO_PARENT_WITHCARE = " The parent with care lives outside this Court’s area and may "
+        + "require proceedings to be transferred to their local Family Court to accommodate childcare responsibilities.\n"
+        + System.lineSeparator()
+        + "Any application for transfer should be made to the Court in writing within 5 working days of receipt of these directions.";
+    public static final String APPLICANT_CASE_NAME = "applicantCaseName";
+
+    public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
+
+    public static final String CAFCASS_REPORTS = "Cafcass reports";
+    public static final String EXPERT_REPORTS = "Expert reports";
+    public static final String APPLICANT_STATMENT =
+        "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot";
+
+
+    public static final String IS_ENG_DOC_GEN = "isEngDocGen";
+
+    public static final String IS_WELSH_DOC_GEN = "isWelshDocGen";
+
+    public static final String INVALID_CLIENT = "Invalid Client";
+
+    public static final String WAITING_TO_BE_LISTED = "WAITING_TO_BE_LISTED";
+    public static final String LISTED = "LISTED";
+    public static final String AWAITING_HEARING_DETAILS = "AWAITING_HEARING_DETAILS";
+    public static final String CANCELLED = "CANCELLED";
+    public static final String ADJOURNED = "ADJOURNED";
+    public static final String POSTPONED = "POSTPONED";
+    public static final String COMPLETED = "COMPLETED";
 }

@@ -190,6 +190,37 @@ public class ApplicationsTabService implements TabService {
         return childFinalList;
     }
 
+    private ChildDetails getChildDetails(Child child, List<Element<OtherPersonWhoLivesWithChildDetails>> otherPersonLiving) {
+        Optional<RelationshipsEnum> applicantsRelationshipToChild =
+                ofNullable(child.getApplicantsRelationshipToChild());
+        Optional<RelationshipsEnum> respondentsRelationshipToChild =
+                ofNullable(child.getRespondentsRelationshipToChild());
+        Optional<List<LiveWithEnum>> childLivesWith = ofNullable(child.getChildLiveWith());
+        Optional<List<OrderTypeEnum>> orderAppliedFor = ofNullable(child.getOrderAppliedFor());
+
+
+        return ChildDetails.builder().firstName(child.getFirstName())
+                .lastName(child.getLastName())
+                .dateOfBirth(child.getDateOfBirth())
+                .gender(child.getGender())
+                .otherGender(child.getOtherGender())
+                .applicantsRelationshipToChild(applicantsRelationshipToChild.isEmpty()
+                        ? null : child.getApplicantsRelationshipToChild().getDisplayedValue())
+                .otherApplicantsRelationshipToChild(child.getOtherApplicantsRelationshipToChild())
+                .respondentsRelationshipToChild(respondentsRelationshipToChild.isEmpty()
+                        ? null : child.getRespondentsRelationshipToChild().getDisplayedValue())
+                .otherRespondentsRelationshipToChild(child.getOtherRespondentsRelationshipToChild())
+                .personWhoLivesWithChild(otherPersonLiving)
+                .childLiveWith(childLivesWith.isEmpty() ? null : child.getChildLiveWith().stream()
+                        .map(LiveWithEnum::getDisplayedValue).collect(
+                                Collectors.joining(", ")))
+                .orderAppliedFor(orderAppliedFor.isEmpty() ? null : child.getOrderAppliedFor().stream()
+                        .map(OrderTypeEnum::getDisplayedValue).collect(
+                                Collectors.joining(", ")))
+                .parentalResponsibilityDetails(child.getParentalResponsibilityDetails())
+                .build();
+    }
+
     private ChildDetails mapChildDetails(Child child) {
 
         List<Element<OtherPersonWhoLivesWithChildDetails>> otherPersonLiving = new ArrayList<>();
@@ -200,51 +231,33 @@ public class ApplicationsTabService implements TabService {
                     .collect(Collectors.toList());
 
             for (OtherPersonWhoLivesWithChild otherPersonWhoLivesWithChild : otherPersonList) {
-                otherPersonLiving.add(Element.<OtherPersonWhoLivesWithChildDetails>builder()
-                        .value(OtherPersonWhoLivesWithChildDetails.builder()
-                                .firstName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                        .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL
-                                        : otherPersonWhoLivesWithChild.getFirstName())
-                                .lastName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                        .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
-                                        otherPersonWhoLivesWithChild.getLastName())
-                                .relationshipToChildDetails((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                        .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
-                                        otherPersonWhoLivesWithChild.getRelationshipToChildDetails())
-                                .isPersonIdentityConfidential(otherPersonWhoLivesWithChild.getIsPersonIdentityConfidential())
-                                .address((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                        .getIsPersonIdentityConfidential())
-                                        ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
-                                        : otherPersonWhoLivesWithChild.getAddress()).build()).build());
+                otherPersonLiving.add(getOtherPersonWhoLivesWithChildDetails(otherPersonWhoLivesWithChild));
             }
         }
-        Optional<RelationshipsEnum> applicantsRelationshipToChild =
-            ofNullable(child.getApplicantsRelationshipToChild());
-        Optional<RelationshipsEnum> respondentsRelationshipToChild =
-            ofNullable(child.getRespondentsRelationshipToChild());
-        Optional<List<LiveWithEnum>> childLivesWith = ofNullable(child.getChildLiveWith());
-        Optional<List<OrderTypeEnum>> orderAppliedFor = ofNullable(child.getOrderAppliedFor());
-        return ChildDetails.builder().firstName(child.getFirstName())
-            .lastName(child.getLastName())
-            .dateOfBirth(child.getDateOfBirth())
-            .gender(child.getGender())
-            .otherGender(child.getOtherGender())
-            .applicantsRelationshipToChild(applicantsRelationshipToChild.isEmpty()
-                                               ? null : child.getApplicantsRelationshipToChild().getDisplayedValue())
-            .otherApplicantsRelationshipToChild(child.getOtherApplicantsRelationshipToChild())
-            .respondentsRelationshipToChild(respondentsRelationshipToChild.isEmpty()
-                                                ? null : child.getRespondentsRelationshipToChild().getDisplayedValue())
-            .otherRespondentsRelationshipToChild(child.getOtherRespondentsRelationshipToChild())
-            .personWhoLivesWithChild(otherPersonLiving)
-            .childLiveWith(childLivesWith.isEmpty() ? null : child.getChildLiveWith().stream()
-                .map(LiveWithEnum::getDisplayedValue).collect(
-                Collectors.joining(", ")))
-            .orderAppliedFor(orderAppliedFor.isEmpty() ? null : child.getOrderAppliedFor().stream()
-                .map(OrderTypeEnum::getDisplayedValue).collect(
-                Collectors.joining(", ")))
-            .parentalResponsibilityDetails(child.getParentalResponsibilityDetails())
-            .build();
+        return getChildDetails(child, otherPersonLiving);
     }
+
+    private Element<OtherPersonWhoLivesWithChildDetails> getOtherPersonWhoLivesWithChildDetails(
+            OtherPersonWhoLivesWithChild otherPersonWhoLivesWithChild) {
+        return Element.<OtherPersonWhoLivesWithChildDetails>builder()
+                .value(OtherPersonWhoLivesWithChildDetails.builder()
+                        .firstName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL
+                                : otherPersonWhoLivesWithChild.getFirstName())
+                        .lastName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
+                                otherPersonWhoLivesWithChild.getLastName())
+                        .relationshipToChildDetails((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
+                                otherPersonWhoLivesWithChild.getRelationshipToChildDetails())
+                        .isPersonIdentityConfidential(otherPersonWhoLivesWithChild.getIsPersonIdentityConfidential())
+                        .address((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                .getIsPersonIdentityConfidential())
+                                ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
+                                : otherPersonWhoLivesWithChild.getAddress()).build()).build();
+    }
+
+
 
     public Map<String, Object> toMap(Object object) {
         return objectMapper.convertValue(object, Map.class);
@@ -394,19 +407,21 @@ public class ApplicationsTabService implements TabService {
     }
 
     public Map<String, Object> getMiamExemptionsTable(CaseData caseData) {
-        Optional<List<MiamExemptionsChecklistEnum>> miamExemptionsCheck = ofNullable(caseData.getMiamExemptionsChecklist());
+        Optional<List<MiamExemptionsChecklistEnum>> miamExemptionsCheck = ofNullable(caseData.getMiamDetails().getMiamExemptionsChecklist());
         String reasonsForMiamExemption;
         if (miamExemptionsCheck.isPresent()) {
-            reasonsForMiamExemption = caseData.getMiamExemptionsChecklist()
+            reasonsForMiamExemption = caseData.getMiamDetails().getMiamExemptionsChecklist()
                 .stream().map(MiamExemptionsChecklistEnum::getDisplayedValue).collect(Collectors.joining(", "));
         } else {
             reasonsForMiamExemption = "";
         }
 
         String domesticViolenceEvidence;
-        Optional<List<MiamDomesticViolenceChecklistEnum>> domesticViolenceCheck = ofNullable(caseData.getMiamDomesticViolenceChecklist());
+        Optional<List<MiamDomesticViolenceChecklistEnum>> domesticViolenceCheck
+            = ofNullable(caseData.getMiamDetails()
+                             .getMiamDomesticViolenceChecklist());
         if (domesticViolenceCheck.isPresent()) {
-            domesticViolenceEvidence = caseData.getMiamDomesticViolenceChecklist()
+            domesticViolenceEvidence = caseData.getMiamDetails().getMiamDomesticViolenceChecklist()
                 .stream().map(MiamDomesticViolenceChecklistEnum::getDisplayedValue)
                 .collect(Collectors.joining("\n"));
         } else {
@@ -414,9 +429,11 @@ public class ApplicationsTabService implements TabService {
         }
 
         String urgencyEvidence;
-        Optional<List<MiamUrgencyReasonChecklistEnum>> urgencyCheck = ofNullable(caseData.getMiamUrgencyReasonChecklist());
+        Optional<List<MiamUrgencyReasonChecklistEnum>> urgencyCheck =
+            ofNullable(caseData.getMiamDetails()
+                           .getMiamUrgencyReasonChecklist());
         if (urgencyCheck.isPresent()) {
-            urgencyEvidence = caseData.getMiamUrgencyReasonChecklist()
+            urgencyEvidence = caseData.getMiamDetails().getMiamUrgencyReasonChecklist()
                 .stream().map(MiamUrgencyReasonChecklistEnum::getDisplayedValue)
                 .collect(Collectors.joining("\n"));
         } else {
@@ -424,26 +441,26 @@ public class ApplicationsTabService implements TabService {
         }
 
         String previousAttendenceEvidence;
-        Optional<MiamPreviousAttendanceChecklistEnum> prevCheck = ofNullable(caseData.getMiamPreviousAttendanceChecklist());
+        Optional<MiamPreviousAttendanceChecklistEnum> prevCheck = ofNullable(caseData.getMiamDetails().getMiamPreviousAttendanceChecklist());
         if (prevCheck.isPresent()) {
-            previousAttendenceEvidence = caseData.getMiamPreviousAttendanceChecklist().getDisplayedValue();
+            previousAttendenceEvidence = caseData.getMiamDetails().getMiamPreviousAttendanceChecklist().getDisplayedValue();
         } else {
             previousAttendenceEvidence = "";
         }
 
         String otherGroundsEvidence;
-        Optional<MiamOtherGroundsChecklistEnum> othCheck = ofNullable(caseData.getMiamOtherGroundsChecklist());
+        Optional<MiamOtherGroundsChecklistEnum> othCheck = ofNullable(caseData.getMiamDetails().getMiamOtherGroundsChecklist());
         if (othCheck.isPresent()) {
-            otherGroundsEvidence = caseData.getMiamOtherGroundsChecklist().getDisplayedValue();
+            otherGroundsEvidence = caseData.getMiamDetails().getMiamOtherGroundsChecklist().getDisplayedValue();
         } else {
             otherGroundsEvidence = "";
         }
 
         String childEvidence;
         Optional<List<MiamChildProtectionConcernChecklistEnum>> childCheck = ofNullable(caseData
-                                                                                            .getMiamChildProtectionConcernList());
+                                                                                            .getMiamDetails().getMiamChildProtectionConcernList());
         if (childCheck.isPresent()) {
-            childEvidence = caseData.getMiamChildProtectionConcernList()
+            childEvidence = caseData.getMiamDetails().getMiamChildProtectionConcernList()
                 .stream().map(MiamChildProtectionConcernChecklistEnum::getDisplayedValue)
                 .collect(Collectors.joining("\n"));
         } else {
@@ -807,7 +824,7 @@ public class ApplicationsTabService implements TabService {
                 List<String> reasonForOrderWithoutNoticeEnum = reason.getReasonForOrderWithoutGivingNotice() != null
                     ? reason.getReasonForOrderWithoutGivingNotice().stream()
                     .map(ReasonForOrderWithoutGivingNoticeEnum::getDisplayedValue)
-                    .collect(Collectors.toList()) : new ArrayList<String>();
+                    .collect(Collectors.toList()) : new ArrayList<>();
                 builder.reasonForOrderWithoutGivingNotice(String.join(", ",
                     reasonForOrderWithoutNoticeEnum)).futherDetails(reason.getFutherDetails());
             }
@@ -851,8 +868,8 @@ public class ApplicationsTabService implements TabService {
         }
         PartyDetails currentRespondent = caseData.getRespondentsFL401();
         currentRespondent = maskFl401ConfidentialDetails(currentRespondent);
-        FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
 
+        FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
         return toMap(a);
     }
 
