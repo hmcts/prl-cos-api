@@ -59,8 +59,6 @@ public class CitizenCoreCaseDataServiceTest {
     private static final String LINK_CASE_TO_CITIZEN_SUMMARY = "Link case to Citizen account";
     private static final String LINK_CASE_TO_CITIZEN_DESCRIPTION = "Link case to Citizen account with access code";
 
-
-    @Ignore
     @Test
     public void linkCitizenAccountAndUpdateCaseData() throws Exception {
 
