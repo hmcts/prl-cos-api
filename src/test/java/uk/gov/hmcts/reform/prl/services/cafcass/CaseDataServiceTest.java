@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
@@ -76,9 +74,6 @@ public class CaseDataServiceTest {
         hearings.setCaseHearings(caseHearings);
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
         SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
                                                                     SearchResult.class);
