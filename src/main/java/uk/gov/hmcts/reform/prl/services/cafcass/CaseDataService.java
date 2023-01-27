@@ -45,6 +45,8 @@ public class CaseDataService {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
 
+        log.info("Search API start date - {}, end date - {}", startDate, endDate);
+
         String searchString = objectMapper.writeValueAsString(ccdQueryParam);
         SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
             authorisation,

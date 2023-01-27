@@ -44,9 +44,11 @@ public class CafCassFilter {
     }
 
     private void filterCaseByApplicationCaseType(CafCassResponse cafCassResponse) {
+        log.info("Cafcass response before filtering -> {}", cafCassResponse.getCases().size());
         List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases().stream()
             .filter(filterByCaseTypeAndState())
             .collect(Collectors.toList());
+        log.info("Cafcaas records after filtering -> {}", (cafCassCaseDetailList != null && cafCassCaseDetailList.size() != 0)? cafCassCaseDetailList.size() : 0);
         cafCassResponse.setCases(cafCassCaseDetailList);
     }
 
