@@ -21,9 +21,11 @@
     <exclude name="DefaultPackage"/>
     <exclude name="CommentDefaultAccessModifier"/>
   </rule>
-  <module name="EmptyLineSeparator">
-    <property name="tokens" value="VARIABLE_DEF, METHOD_DEF"/>
-  </module>
+  <rule ref="category/java/design.xml/EmptyLineSeparator">
+    <properties>
+      <property name="tokens" value="VARIABLE_DEF, METHOD_DEF"/>
+    </properties>
+  </rule>
   <rule ref="category/java/codestyle.xml/ClassNamingConventions">
     <properties>
       <!-- same as any other class -->
