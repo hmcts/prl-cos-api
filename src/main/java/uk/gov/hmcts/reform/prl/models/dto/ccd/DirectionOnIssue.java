@@ -139,6 +139,6 @@ public class DirectionOnIssue {
     @JsonProperty("dioParentWithCare")
     private final String dioParentWithCare;
     @JsonProperty("dioApplicationToApplyPermission")
-    private final DioApplicationToApplyPermission dioApplicationToApplyPermission;
+    private final List<Element<DioApplicationToApplyPermission>> dioApplicationToApplyPermission;
 
 }
