@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -20,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,11 +36,11 @@ public class PartyDetails {
     private UUID partyId;
     public void setPartyId(UUID partyId) {
         log.info("partyId == {}",partyId);
-        if(this.getPartyId() == null ){
+        if (this.getPartyId() == null ) {
             log.info("partyId is null");
-            if(partyId != null){
+            if (partyId != null) {
                 this.partyId = partyId;
-            }else {
+            } else {
                 this.partyId = UUID.randomUUID();
             }
             log.info("partyId is not null {}",this.partyId);
@@ -48,7 +49,7 @@ public class PartyDetails {
 
     private UUID solicitorOrgId;
     public void setSolicitorOrgId(UUID solicitorOrgId) {
-        if(this.getSolicitorOrgId() == null) {
+        if (this.getSolicitorOrgId() == null) {
             if (solicitorOrgId != null) {
                 this.solicitorOrgId = solicitorOrgId;
             } else {
