@@ -460,12 +460,30 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         requireNonNull(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
+        getGeneratePartyUuid(caseData);
         log.info("CASE Data before update --------> {}", caseDataUpdated);
         caseDataUpdated = searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated);
         log.info("CASE Data After update --------> {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+    private static void getGeneratePartyUuid(CaseData caseData) {
+        log.info("inside getGeneratePartyUuid START{}",caseData);
+        if (caseData.getApplicantsFL401() != null) {
+            log.info("=====");
+            if (caseData.getApplicantsFL401().getPartyId() == null) {
+                caseData.getApplicantsFL401().setPartyId(null);
+            }
+            if (caseData.getApplicantsFL401().getSolicitorPartyId() == null) {
+                caseData.getApplicantsFL401().setSolicitorPartyId(null);
+            }
+            if (caseData.getApplicantsFL401().getSolicitorOrg() != null
+                && caseData.getApplicantsFL401().getSolicitorOrg().getSolicitorOrgId() == null) {
+                caseData.getApplicantsFL401().getSolicitorOrg().setSolicitorOrgId(null);
+            }
+        }
+        log.info("inside getGeneratePartyUuid END {}",caseData);
+    }
+
 
     @PostMapping(path = "/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Copy fl401 case name to C100 Case name")
