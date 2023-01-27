@@ -466,6 +466,7 @@ public class CallbackController {
         log.info("CASE Data After update --------> {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
     private static void getGeneratePartyUuid(CaseData caseData) {
         log.info("inside getGeneratePartyUuid START{}",caseData);
         if (caseData.getApplicantsFL401() != null) {
