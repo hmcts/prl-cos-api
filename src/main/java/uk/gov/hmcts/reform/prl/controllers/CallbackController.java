@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildComplex;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
@@ -49,7 +50,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
@@ -626,11 +626,10 @@ public class CallbackController {
         List<DynamicMultiselectListElement> listElements = new ArrayList<>();
         if (caseData.getChildren() != null) {
             caseData.getChildren().forEach(child -> {
-                if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
-                    listElements.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
-                                         .label(child.getValue().getFirstName() + " "
-                                                    + child.getValue().getLastName()).build());
-                }
+                listElements.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
+                                     .label(child.getValue().getFirstName() + " "
+                                                + child.getValue().getLastName()).build());
+
             });
         } else if (caseData.getApplicantChildDetails() != null) {
             caseData.getApplicantChildDetails().forEach(child -> {
@@ -638,13 +637,13 @@ public class CallbackController {
                                      .label(child.getValue().getFullName()).build());
             });
         }
-        ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
-            .childOption(DynamicMultiSelectList.builder()
-                             .listItems(listElements).build()).build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .listItems(listElements).build();
 
-        log.info("**Manage orders with child list {}",manageOrders);
+        log.info("**Manage orders with child list {}",dynamicMultiSelectList);
         caseData = caseData.toBuilder()
-            .manageOrders(manageOrders)
+            .testChild(dynamicMultiSelectList)
+            .childComplex(ChildComplex.builder().childrenlist(dynamicMultiSelectList).build())
             .build();
         return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
             .data(caseData)
