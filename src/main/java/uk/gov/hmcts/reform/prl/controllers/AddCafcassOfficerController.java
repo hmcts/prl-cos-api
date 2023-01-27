@@ -33,7 +33,9 @@ public class AddCafcassOfficerController {
     @PostMapping(path = "/add-cafcass-officer/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Generate applicants")
     public AboutToStartOrSubmitCallbackResponse prePopulateChildDetails(@RequestBody CallbackRequest callbackRequest) {
+        log.info("in prePopulateChildDetails ------>");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("ChildAndCafcassOfficers before ------>" + caseData.getChildAndCafcassOfficers());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = null;
         if (caseData.getChildren() != null && !caseData.getChildren().isEmpty()) {
@@ -46,14 +48,16 @@ public class AddCafcassOfficerController {
             }
         }
         caseDataUpdated.put("childAndCafcassOfficers", childAndCafcassOfficers);
-
+        log.info("ChildAndCafcassOfficers after ------>" + caseData.getChildAndCafcassOfficers());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/add-cafcass-officer/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Generate applicants")
     public AboutToStartOrSubmitCallbackResponse populateChildDetailsWithCafcassOfficer(@RequestBody CallbackRequest callbackRequest) {
+        log.info("in populateChildDetailsWithCafcassOfficer ------>");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("caseData ------>" + caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = caseData.getChildAndCafcassOfficers();
 
