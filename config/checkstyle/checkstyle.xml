@@ -90,6 +90,7 @@
     <module name="ModifierOrder"/>
     <module name="EmptyLineSeparator">
       <property name="allowNoEmptyLineBetweenFields" value="true"/>
+      <property name="tokens" value="VARIABLE_DEF, METHOD_DEF"/>
     </module>
     <module name="SeparatorWrap">
       <property name="id" value="SeparatorWrapDot"/>
