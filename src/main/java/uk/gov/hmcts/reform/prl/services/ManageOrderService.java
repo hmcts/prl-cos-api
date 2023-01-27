@@ -914,8 +914,6 @@ public class ManageOrderService {
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
 
-        } else {
-            caseDataUpdated.put("previewOrderDoc", null);
         }
         if (documentLanguage.isGenWelsh()) {
             caseDataUpdated.put("isWelshDocGen", Yes.toString());
@@ -930,8 +928,6 @@ public class ManageOrderService {
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
 
-        } else {
-            caseDataUpdated.put("previewOrderDocWelsh", null);
         }
         return caseDataUpdated;
     }
@@ -942,6 +938,13 @@ public class ManageOrderService {
 
         ManageOrders orderData = ManageOrders.builder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
+            .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
+            .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
+            .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
+            .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+            .isOrderDrawnForCafcass(caseData.getManageOrders().getIsOrderDrawnForCafcass())
+            .orderDirections(caseData.getManageOrders().getOrderDirections())
+            .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .manageOrdersCourtName(null != caseData.getCourtName() ? caseData.getCourtName() : null)
             .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
                                                  caseData.getApplicantsFL401().getLastName()

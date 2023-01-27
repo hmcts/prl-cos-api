@@ -1224,6 +1224,7 @@ public class ManageOrderServiceTest {
         CaseData caseData = CaseData.builder()
             .applicantsFL401(partyDetails)
             .respondentsFL401(partyDetails)
+            .manageOrders(ManageOrders.builder().isTheOrderByConsent(YesOrNo.Yes).build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.generalForm).build();
         assertNotNull(manageOrderService.populateCustomOrderFields(caseData));
