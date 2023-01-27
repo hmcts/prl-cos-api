@@ -48,10 +48,10 @@ public class PartyDetails {
 
     private UUID solicitorOrgId;
     public void setSolicitorOrgId(UUID solicitorOrgId) {
-        if(this.getSolicitorOrgId() == null){
-            if(solicitorOrgId != null){
+        if(this.getSolicitorOrgId() == null) {
+            if (solicitorOrgId != null) {
                 this.solicitorOrgId = solicitorOrgId;
-            }else{
+            } else {
                 this.solicitorOrgId = UUID.randomUUID();
             }
         }
@@ -59,11 +59,10 @@ public class PartyDetails {
 
     private UUID solicitorPartyId;
     public void setSolicitorPartyId(UUID solicitorPartyId) {
-        if(this.getSolicitorPartyId() == null &&
-            (!isBlank(this.getRepresentativeFirstName()) ||  !isBlank(this.getRepresentativeLastName()))  ){
-            if(solicitorPartyId != null){
+        if (this.getSolicitorPartyId() == null && (!isBlank(this.getRepresentativeFirstName()) ||  !isBlank(this.getRepresentativeLastName()))) {
+            if (solicitorPartyId != null) {
                 this.solicitorPartyId = solicitorPartyId;
-            }else{
+            } else {
                 this.solicitorPartyId = UUID.randomUUID();
             }
         }
