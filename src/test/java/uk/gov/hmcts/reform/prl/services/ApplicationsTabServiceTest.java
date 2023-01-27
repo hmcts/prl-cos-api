@@ -471,6 +471,7 @@ public class ApplicationsTabServiceTest {
             .dateOfBirth(LocalDate.of(1989, 11, 30))
             .applicantsRelationshipToChild(RelationshipsEnum.father.getDisplayedValue())
             .orderAppliedFor("Child Arrangements Order, Prohibited Steps Order")
+            .cafcassOfficerAdded(No)
             .personWhoLivesWithChild(List.of(
                 Element
                     .<OtherPersonWhoLivesWithChildDetails>builder().value(confidentilPerson1).build(),

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.addcafcassofficer.CafcassOfficerPositionEnu
 @Builder(toBuilder = true)
 public class ChildAndCafcassOfficer {
 
+    private final String childId;
     private final String childName;
     private final String cafcassOfficerName;
     private final CafcassOfficerPositionEnum cafcassOfficerPosition;
