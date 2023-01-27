@@ -115,7 +115,7 @@ public class DirectionOnIssue {
     @JsonProperty("dioPersonWhoRequiresInterpreter")
     private final String dioPersonWhoRequiresInterpreter;
     @JsonProperty("dioInterpreterDialectRequired")
-    private final SdoLanguageDialect dioInterpreterDialectRequired;
+    private final List<Element<SdoLanguageDialect>> dioInterpreterDialectRequired;
     @JsonProperty("dioUpdateContactDetails")
     private final String dioUpdateContactDetails;
 
