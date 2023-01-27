@@ -20,6 +20,9 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
             log.info("*** ********allocate judge details for the case id in generator : {}", allocatedJudge);
             String[] judgeOrLegalAdvisorDetails = splitLastNameAndEmailAddress(caseData.getAllocatedJudge());
             boolean isLastNameAndEmailAvailable = isLastNameAndEmailAvailable(judgeOrLegalAdvisorDetails);
+            log.info("*** ********isLastNameAndEmailAvailable: {}", isLastNameAndEmailAvailable);
+            log.info("*** ********judgeOrLegalAdvisorDetails: {}", (null != judgeOrLegalAdvisorDetails)
+                ? judgeOrLegalAdvisorDetails.length : "");
             return CaseSummary.builder().allocatedJudgeDetails(
                 AllocatedJudge.builder().courtName(CommonUtils.getValue(caseData.getCourtName()))
                     .emailAddress((isLastNameAndEmailAvailable) ? judgeOrLegalAdvisorDetails[1] : "").judgeTitle(" ")
