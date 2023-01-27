@@ -95,7 +95,9 @@ public class OtherChildrenNotPartOfTheApplicationChecker implements EventChecker
         List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(child.getFirstName()));
         fields.add(ofNullable(child.getLastName()));
-        fields.add(ofNullable(child.getDateOfBirth()));
+        if (Yes.equals(child.getIsDateOfBirthKnown())) {
+            fields.add(ofNullable(child.getDateOfBirth()));
+        }
         Optional<Gender> gender = ofNullable(child.getGender());
         fields.add(gender);
         if (gender.isPresent() && gender.get().equals(other)) {
