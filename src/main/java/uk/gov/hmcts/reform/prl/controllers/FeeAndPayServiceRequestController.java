@@ -70,10 +70,8 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         log.info("Before {}", callbackRequest);
         return ok(SubmittedCallbackResponse.builder().confirmationHeader("# You are seeing confimration page").confirmationBody(
             "#### What happens next You can review this note in the case notes tab."
-                + "\n\n"
-                + "</br><a href='/cases/case-details/'" + callbackRequest.getCaseDetails().getCaseId() + "#Service%20Request"
-                + "\n\n"
-                + "/cases/case-details/" + callbackRequest.getCaseDetails().getCaseId() + "#Service%20Request").build());
+                + "\n\n <a href='/cases/case-details/'" + callbackRequest.getCaseDetails().getCaseId() + "'#Service%20Request'>click here to pay</a>"
+        ).build());
     }
 
     @PostMapping(path = "/generate-document-submit-application-test", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
