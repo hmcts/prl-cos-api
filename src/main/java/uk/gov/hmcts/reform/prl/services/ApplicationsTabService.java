@@ -184,6 +184,7 @@ public class ApplicationsTabService implements TabService {
             .collect(Collectors.toList());
         for (Child child : childList) {
             ChildDetails c = mapChildDetails(child);
+            log.info("ChildDetails ==========" + c);
             Element<ChildDetails> res = Element.<ChildDetails>builder().value(c).build();
             childFinalList.add(res);
         }
