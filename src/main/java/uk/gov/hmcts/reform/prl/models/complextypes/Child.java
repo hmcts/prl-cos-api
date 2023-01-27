@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class Child {
 
     private final String firstName;
@@ -43,5 +43,9 @@ public class Child {
     public boolean hasConfidentialInfo() {
         return YesOrNo.Yes.equals(this.isChildAddressConfidential);
     }
+
+    private final String cafcassOfficerName;
+    private final String cafcassOfficerEmailAddress;
+    private final String cafcassOfficerPhoneNo;
 
 }

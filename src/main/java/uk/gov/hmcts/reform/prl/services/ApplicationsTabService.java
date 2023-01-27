@@ -198,6 +198,12 @@ public class ApplicationsTabService implements TabService {
         Optional<List<LiveWithEnum>> childLivesWith = ofNullable(child.getChildLiveWith());
         Optional<List<OrderTypeEnum>> orderAppliedFor = ofNullable(child.getOrderAppliedFor());
 
+        YesOrNo cafcassOfficerAdded = YesOrNo.No;
+
+        if (child.getCafcassOfficerName() != null
+            && child.getCafcassOfficerEmailAddress() != null && child.getCafcassOfficerPhoneNo() != null) {
+            cafcassOfficerAdded =  YesOrNo.Yes;
+        }
 
         return ChildDetails.builder().firstName(child.getFirstName())
                 .lastName(child.getLastName())
@@ -218,6 +224,10 @@ public class ApplicationsTabService implements TabService {
                         .map(OrderTypeEnum::getDisplayedValue).collect(
                                 Collectors.joining(", ")))
                 .parentalResponsibilityDetails(child.getParentalResponsibilityDetails())
+                .cafcassOfficerAdded(cafcassOfficerAdded)
+                .cafcassOfficerName(child.getCafcassOfficerName())
+                .cafcassOfficerEmailAddress(child.getCafcassOfficerEmailAddress())
+                .cafcassOfficerEmailAddress(child.getCafcassOfficerPhoneNo())
                 .build();
     }
 
