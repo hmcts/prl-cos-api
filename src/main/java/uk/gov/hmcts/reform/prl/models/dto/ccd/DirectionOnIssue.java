@@ -135,7 +135,7 @@ public class DirectionOnIssue {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dioLocalAuthorityReportSubmitByDate;
     @JsonProperty("dioDisclosureOfPapersCaseNumbers")
-    private final SdoDisclosureOfPapersCaseNumber dioDisclosureOfPapersCaseNumbers;
+    private final List<Element<SdoDisclosureOfPapersCaseNumber>> dioDisclosureOfPapersCaseNumbers;
     @JsonProperty("dioParentWithCare")
     private final String dioParentWithCare;
     @JsonProperty("dioApplicationToApplyPermission")
