@@ -72,7 +72,7 @@ public class AddCafcassOfficerController {
                     childern.set(childern.indexOf(child), element(child.getId(), amendedChild));
                 });
         }
-
+        log.info("Children ------>" + caseData.getChildren());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
