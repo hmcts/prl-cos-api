@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.Alloca
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+
 @Component
 @Slf4j
 public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
@@ -25,8 +27,8 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
                 ? judgeOrLegalAdvisorDetails.length : "");
             return CaseSummary.builder().allocatedJudgeDetails(
                 AllocatedJudge.builder().courtName(CommonUtils.getValue(caseData.getCourtName()))
-                    .emailAddress((isLastNameAndEmailAvailable) ? judgeOrLegalAdvisorDetails[1] : "").judgeTitle(" ")
-                    .lastName((isLastNameAndEmailAvailable) ? judgeOrLegalAdvisorDetails[0] : "")
+                    .emailAddress((isLastNameAndEmailAvailable) ? judgeOrLegalAdvisorDetails[1] : EMPTY_SPACE_STRING).judgeTitle(EMPTY_SPACE_STRING)
+                    .lastName((isLastNameAndEmailAvailable) ? judgeOrLegalAdvisorDetails[0] : EMPTY_SPACE_STRING)
                     .tierOfJudiciaryType(getTierOfJudiciary(allocatedJudge)).build()).build();
         }
 
@@ -36,7 +38,7 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
     }
 
     private String getTierOfJudiciary(uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge allocatedJudge) {
-        return (null != allocatedJudge.getTierOfJudiciary()  ? allocatedJudge.getTierOfJudiciary().getDisplayedValue() : "");
+        return (null != allocatedJudge.getTierOfJudiciary()  ? allocatedJudge.getTierOfJudiciary().getDisplayedValue() : EMPTY_SPACE_STRING);
     }
 
     private boolean isLastNameAndEmailAvailable(String[] judgeOrLegalAdvisorDetails) {
