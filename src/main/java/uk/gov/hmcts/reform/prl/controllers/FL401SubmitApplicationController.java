@@ -123,15 +123,15 @@ public class FL401SubmitApplicationController {
                                             .listItems(locationRefDataService.getCourtLocations(authorisation))
                                             .build())
             .build();
-        getGeneratePartyUUID(caseData);
+        getGeneratePartyUuid(caseData);
         return CallbackResponse.builder()
             .data(caseData)
             .errors(errorList)
             .build();
     }
 
-    private static void getGeneratePartyUUID(CaseData caseData) {
-        if(caseData.getApplicantsFL401() !=null) {
+    private static void getGeneratePartyUuid(CaseData caseData) {
+        if (caseData.getApplicantsFL401() != null) {
             if (caseData.getApplicantsFL401().getPartyId() == null) {
                 caseData.getApplicantsFL401().setPartyId(null);
             }
