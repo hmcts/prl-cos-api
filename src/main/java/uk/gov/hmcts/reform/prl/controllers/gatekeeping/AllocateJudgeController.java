@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.services.judicial.JudicialUserInfoService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.ArrayList;
@@ -48,6 +49,9 @@ public class AllocateJudgeController extends AbstractCallbackController {
     @Autowired
     @Qualifier("caseSummaryTab")
     CaseSummaryTabService caseSummaryTabService;
+
+    @Autowired
+    JudicialUserInfoService judicialUserInfoService;
 
     @PostMapping(path = "/pre-populate-legalAdvisor-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to retrieve legal advisor details")
