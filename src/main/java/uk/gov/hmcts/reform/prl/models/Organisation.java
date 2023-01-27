@@ -19,6 +19,7 @@ public class Organisation {
     private String organisationName;
 
     private UUID solicitorOrgId;
+
     public void setSolicitorOrgId(UUID solicitorOrgId) {
         if (this.getSolicitorOrgId() == null) {
             if (solicitorOrgId != null) {

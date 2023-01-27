@@ -46,6 +46,7 @@ public class PartyDetails {
     }
 
     private UUID solicitorPartyId;
+
     public void setSolicitorPartyId(UUID solicitorPartyId) {
         if (this.getSolicitorPartyId() == null && (this.getRepresentativeFirstName() != null || this.getRepresentativeLastName() != null)) {
             if (solicitorPartyId != null) {
