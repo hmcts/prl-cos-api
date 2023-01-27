@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -26,6 +25,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 @Data
 @Builder(toBuilder = true)
 @Slf4j
@@ -35,7 +36,7 @@ public class PartyDetails {
     private UUID partyId;
     public void setPartyId(UUID partyId) {
         log.info("partyId == {}",partyId);
-        if (this.getPartyId() == null ) {
+        if (this.getPartyId() == null) {
             log.info("partyId is null");
             if (partyId != null) {
                 this.partyId = partyId;
