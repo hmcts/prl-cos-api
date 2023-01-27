@@ -64,7 +64,7 @@ public class AddCafcassOfficerController {
         for (Element<ChildAndCafcassOfficer> cafcassOfficer : childAndCafcassOfficers) {
             List<Element<Child>> childern = caseData.getChildren();
             childern.stream()
-                .filter(child -> Objects.equals(child.getId(), cafcassOfficer.getValue().getChildId()))
+                .filter(child -> Objects.equals(child.getId().toString(), cafcassOfficer.getValue().getChildId()))
                 .findFirst()
                 .ifPresent(child -> {
                     Child amendedChild = child.getValue().toBuilder()
