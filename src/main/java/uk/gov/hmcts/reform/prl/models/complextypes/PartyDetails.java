@@ -45,17 +45,6 @@ public class PartyDetails {
         }
     }
 
-    private UUID solicitorOrgId;
-    public void setSolicitorOrgId(UUID solicitorOrgId) {
-        if (this.getSolicitorOrgId() == null) {
-            if (solicitorOrgId != null) {
-                this.solicitorOrgId = solicitorOrgId;
-            } else {
-                this.solicitorOrgId = UUID.randomUUID();
-            }
-        }
-    }
-
     private UUID solicitorPartyId;
     public void setSolicitorPartyId(UUID solicitorPartyId) {
         if (this.getSolicitorPartyId() == null && (this.getRepresentativeFirstName() != null || this.getRepresentativeLastName() != null)) {
