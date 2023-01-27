@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -38,6 +39,9 @@ public class SearchCasesDataService {
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
+            log.info("inside updateApplicantAndChildNames === ");
+            fl401Applicant.setPartyId(UUID.randomUUID());
+            log.info("inside updateApplicantAndChildNames === {}",caseData);
             PartyDetails fl401respondent = caseData
                 .getRespondentsFL401();
 
