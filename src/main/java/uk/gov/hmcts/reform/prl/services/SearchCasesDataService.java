@@ -40,14 +40,14 @@ public class SearchCasesDataService {
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
             log.info("inside updateApplicantAndChildNames === ");
-            fl401Applicant.setPartyId(UUID.randomUUID());
-            log.info("inside updateApplicantAndChildNames === {}",caseData);
+
             PartyDetails fl401respondent = caseData
                 .getRespondentsFL401();
 
             if (Objects.nonNull(fl401Applicant)) {
+                fl401Applicant.setPartyId(UUID.randomUUID());
                 caseDetails.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
-
+                log.info("inside updateApplicantAndChildNames === {}",caseData);
                 setFL401ApplicantFlag(caseDetails, fl401Applicant);
             }
 
