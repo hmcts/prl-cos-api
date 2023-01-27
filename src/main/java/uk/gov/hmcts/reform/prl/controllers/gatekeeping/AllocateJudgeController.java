@@ -97,10 +97,12 @@ public class AllocateJudgeController extends AbstractCallbackController {
         } else {
             if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
                 if (null != judgeList && null != judgeList.getValue()) {
+                    allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
                     allocatedJudgeBuilder.judgeList(judgeList);
                 }
                 if (null != legalAdviserList && null != legalAdviserList.getValue()) {
+                    allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.LEGAL_ADVISER));
                     allocatedJudgeBuilder.legalAdviserList(legalAdviserList);
                 }
