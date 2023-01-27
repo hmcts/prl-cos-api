@@ -57,8 +57,11 @@ public class SubmitAndPayChecker implements EventChecker {
         mandatoryEvents.put(TYPE_OF_APPLICATION, eventsChecker.getApplicationTypeChecker());
         mandatoryEvents.put(HEARING_URGENCY, eventsChecker.getHearingUrgencyChecker());
         mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.getApplicantsChecker());
-        mandatoryEvents.put(CHILD_DETAILS, eventsChecker.getChildChecker());
-        mandatoryEvents.put(CHILD_DETAILS_REVISED, eventsChecker.getChildDetailsRevisedChecker());
+        if ("v2".equalsIgnoreCase(caseData.getTaskListVersion())) {
+            mandatoryEvents.put(CHILD_DETAILS_REVISED, eventsChecker.getChildDetailsRevisedChecker());
+        } else {
+            mandatoryEvents.put(CHILD_DETAILS, eventsChecker.getChildChecker());
+        }
         mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.getRespondentsChecker());
         if (YesOrNo.No.equals(caseData.getConsentOrder()) || caseData.getConsentOrder() == null) {
             mandatoryEvents.put(MIAM, eventsChecker.getMiamChecker());
@@ -75,7 +78,12 @@ public class SubmitAndPayChecker implements EventChecker {
         }
 
         EnumMap<Event, EventChecker> optionalEvents = new EnumMap<>(Event.class);
-        optionalEvents.put(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION, eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker());
+        if ("v2".equalsIgnoreCase(caseData.getTaskListVersion())) {
+            optionalEvents.put(
+                OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
+                eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()
+            );
+        }
         optionalEvents.put(OTHER_PEOPLE_IN_THE_CASE, eventsChecker.getOtherPeopleInTheCaseChecker());
         optionalEvents.put(OTHER_PROCEEDINGS, eventsChecker.getOtherProceedingsChecker());
         optionalEvents.put(ATTENDING_THE_HEARING, eventsChecker.getAttendingTheHearingChecker());
