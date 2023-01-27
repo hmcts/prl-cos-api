@@ -25,8 +25,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 @Data
 @Builder(toBuilder = true)
 @Slf4j
@@ -60,7 +58,7 @@ public class PartyDetails {
 
     private UUID solicitorPartyId;
     public void setSolicitorPartyId(UUID solicitorPartyId) {
-        if (this.getSolicitorPartyId() == null && (!isBlank(this.getRepresentativeFirstName()) ||  !isBlank(this.getRepresentativeLastName()))) {
+        if (this.getSolicitorPartyId() == null && (this.getRepresentativeFirstName() !=null || this.getRepresentativeLastName() !=null)) {
             if (solicitorPartyId != null) {
                 this.solicitorPartyId = solicitorPartyId;
             } else {
