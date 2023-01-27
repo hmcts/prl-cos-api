@@ -70,7 +70,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         log.info("Before {}", callbackRequest);
         return ok(SubmittedCallbackResponse.builder().confirmationHeader("# You are seeing confimration page").confirmationBody(
             "#### What happens next You can review this note in the case notes tab."
-                + "\n\n <a href='/cases/case-details/'" + callbackRequest.getCaseDetails().getCaseId() + "'#Service%20Request'>click here to pay</a>"
+                + "\n\n <a href='/cases/case-details/1674738209308376/#Service%20Request'>click here to pay</a>"
         ).build());
     }
 
