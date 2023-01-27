@@ -21,8 +21,9 @@ public class AllocatedJudgeDetailsGeneratorTest {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
                                                          .courtName("Test Court")
             .allocatedJudge(uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge
-                .builder().isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.JUDGE).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes).
-                judgeList(DynamicList.builder().value(DynamicListElement.builder().code("test1(test1@xxx.com)").label("test1(test1@xxx.com)").build()).build()).build())
+                .builder().isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.JUDGE).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes)
+                .judgeList(DynamicList.builder().value(DynamicListElement.builder().code("test1(test1@xxx.com)")
+                    .label("test1(test1@xxx.com)").build()).build()).build())
                                                              .build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()
