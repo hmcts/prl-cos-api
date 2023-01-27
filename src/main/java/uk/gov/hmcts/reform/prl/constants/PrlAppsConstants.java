@@ -326,4 +326,11 @@ public class PrlAppsConstants {
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
+
+    public static final String DISTRICT_JUDGE = "districtJudge";
+
+    public static final String MAGISTRATES = "magistrates";
+
+    public static final String CIRCUIT_JUDGE = "circuitJudge";
+    public static final String HIGHCOURT_JUDGE = "highCourtJudge";
 }

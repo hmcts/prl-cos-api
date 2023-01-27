@@ -33,6 +33,10 @@ import java.util.Map;
 import javax.ws.rs.NotFoundException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIRCUIT_JUDGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISTRICT_JUDGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HIGHCOURT_JUDGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES;
 
 @Slf4j
 @RestController
@@ -93,7 +97,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
         if (null != caseDataUpdated.get("tierOfJudiciary")) {
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
-            allocatedJudgeBuilder.tierOfJudiciary(TierOfJudiciaryEnum.valueOf(String.valueOf(caseDataUpdated.get("tierOfJudiciary"))));
+            allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get("tierOfJudiciary"))));
         } else {
             if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
                 if (null != judgeList && null != judgeList.getValue()) {
@@ -109,5 +113,26 @@ public class AllocateJudgeController extends AbstractCallbackController {
             }
         }
         return allocatedJudgeBuilder.build();
+    }
+
+    private TierOfJudiciaryEnum getTierOfJudiciary(String tierOfJudiciary) {
+        TierOfJudiciaryEnum tierOfJudiciaryEnum = null;
+        switch (tierOfJudiciary) {
+            case DISTRICT_JUDGE:
+                tierOfJudiciaryEnum = TierOfJudiciaryEnum.DISTRICT_JUDGE;
+                break;
+            case MAGISTRATES:
+                tierOfJudiciaryEnum = TierOfJudiciaryEnum.MAGISTRATES;
+                break;
+            case CIRCUIT_JUDGE:
+                tierOfJudiciaryEnum = TierOfJudiciaryEnum.CIRCUIT_JUDGE;
+                break;
+            case HIGHCOURT_JUDGE:
+                tierOfJudiciaryEnum = TierOfJudiciaryEnum.HIGHCOURT_JUDGE;
+                break;
+            default:
+                break;
+        }
+        return tierOfJudiciaryEnum;
     }
 }
