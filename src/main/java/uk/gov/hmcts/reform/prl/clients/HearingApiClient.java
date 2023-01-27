@@ -1,13 +1,13 @@
-package uk.gov.hmcts.reform.prl.clients.cafcass;
+package uk.gov.hmcts.reform.prl.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
-import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 
 @FeignClient(
-    name = "hearing-api-cafcaas",
+    name = "hearing-api",
     url = "${fis_hearing.api.url}",
     configuration = FeignClientProperties.FeignClientConfiguration.class
 )
@@ -21,9 +21,3 @@ public interface HearingApiClient {
     );
 
 }
-
-
-
-
-
-
