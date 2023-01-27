@@ -55,7 +55,7 @@ public class AddCafcassOfficerController {
     public AboutToStartOrSubmitCallbackResponse populateChildDetailsWithCafcassOfficer(@RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = caseData.getChildAndCafcassOfficer();
+        List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = caseData.getChildAndCafcassOfficers();
 
         for (Element<ChildAndCafcassOfficer> cafcassOfficer : childAndCafcassOfficers) {
             List<Element<Child>> childern = caseData.getChildren();
