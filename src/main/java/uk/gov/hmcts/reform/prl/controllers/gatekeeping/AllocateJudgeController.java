@@ -83,7 +83,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         AllocatedJudge allocatedJudge = mapAllocatedJudge(caseDataUpdated,caseData.getJudgeList(),caseData.getLegalAdviserList());
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
-        caseDataUpdated.put("allocatedJudge",allocatedJudge);
+        //caseDataUpdated.put("allocatedJudge",allocatedJudge);
         caseSummaryTabService.updateTab(caseData);
         log.info("*** ********allocate judge details after populating for the case id : {}", caseData.getAllocatedJudge());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
