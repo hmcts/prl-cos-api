@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -19,15 +20,54 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.time.LocalDate;
 import java.util.List;
-
+import java.util.UUID;
 
 @Data
 @Builder(toBuilder = true)
+@Slf4j
 @AllArgsConstructor
 public class PartyDetails {
+
+    private UUID partyId;
+    public void setPartyId(UUID partyId) {
+        log.info("partyId == {}",partyId);
+        if(this.getPartyId() == null ){
+            log.info("partyId is null");
+            if(partyId != null){
+                this.partyId = partyId;
+            }else {
+                this.partyId = UUID.randomUUID();
+            }
+            log.info("partyId is not null {}",this.partyId);
+        }
+    }
+
+    private UUID solicitorOrgId;
+    public void setSolicitorOrgId(UUID solicitorOrgId) {
+        if(this.getSolicitorOrgId() == null){
+            if(solicitorOrgId != null){
+                this.solicitorOrgId = solicitorOrgId;
+            }else{
+                this.solicitorOrgId = UUID.randomUUID();
+            }
+        }
+    }
+
+    private UUID solicitorPartyId;
+    public void setSolicitorPartyId(UUID solicitorPartyId) {
+        if(this.getSolicitorPartyId() == null &&
+            (!isBlank(this.getRepresentativeFirstName()) ||  !isBlank(this.getRepresentativeLastName()))  ){
+            if(solicitorPartyId != null){
+                this.solicitorPartyId = solicitorPartyId;
+            }else{
+                this.solicitorPartyId = UUID.randomUUID();
+            }
+        }
+    }
 
     private final String firstName;
     private final String lastName;
