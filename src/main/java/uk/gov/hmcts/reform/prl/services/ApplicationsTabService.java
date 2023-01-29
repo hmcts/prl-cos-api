@@ -228,7 +228,7 @@ public class ApplicationsTabService implements TabService {
                 .cafcassOfficerAdded(cafcassOfficerAdded)
                 .cafcassOfficerName(child.getCafcassOfficerName())
                 .cafcassOfficerEmailAddress(child.getCafcassOfficerEmailAddress())
-                .cafcassOfficerEmailAddress(child.getCafcassOfficerPhoneNo())
+                .cafcassOfficerPhoneNo(child.getCafcassOfficerPhoneNo())
                 .build();
     }
 
