@@ -7,7 +7,6 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
@@ -20,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyoune
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
@@ -56,7 +56,7 @@ public class Response {
     private final SolicitorMiam solicitorMiam;
 
     private final YesNoDontKnow currentOrPastProceedingsForChildren;
-    private final List<Element<ProceedingDetails>> respondentExistingProceedings;
+    private final List<Element<RespondentProceedingDetails>> respondentExistingProceedings;
     @JsonUnwrapped
     @Builder.Default
     private final SolicitorAbilityToParticipateInProceedings abilityToParticipate;
