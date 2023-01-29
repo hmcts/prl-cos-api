@@ -18,4 +18,9 @@ public class ApplicantChild {
     private final YesOrNo applicantRespondentShareParental;
     private final String respondentChildRelationship;
 
+    private final YesOrNo cafcassOfficerAdded;
+    private final String cafcassOfficerName;
+    private final String cafcassOfficerEmailAddress;
+    private final String cafcassOfficerPhoneNo;
+
 }

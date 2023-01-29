@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -41,17 +44,28 @@ public class AddCafcassOfficerController {
         log.info("ChildAndCafcassOfficers before ------>" + caseData.getChildAndCafcassOfficers());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = null;
-        if (caseData.getChildren() != null && !caseData.getChildren().isEmpty()) {
-            childAndCafcassOfficers = new ArrayList<>();
-            for (Element<Child> childElement : caseData.getChildren()) {
-                ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
-                    .childId(childElement.getId().toString())
-                    .childName(childElement.getValue().getFirstName() + " " + childElement.getValue().getLastName()).build();
-                childAndCafcassOfficers.add(element(childAndCafcassOfficer));
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            if (caseData.getChildren() != null && !caseData.getChildren().isEmpty()) {
+                childAndCafcassOfficers = new ArrayList<>();
+                for (Element<Child> childElement : caseData.getChildren()) {
+                    ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
+                        .childId(childElement.getId().toString())
+                        .childName(childElement.getValue().getFirstName() + " " + childElement.getValue().getLastName()).build();
+                    childAndCafcassOfficers.add(element(childAndCafcassOfficer));
+                }
+            }
+        } else {
+            if (YesOrNo.Yes.equals(caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren())) {
+                childAndCafcassOfficers = new ArrayList<>();
+                for (Element<ApplicantChild> applicantChildElement : caseData.getApplicantChildDetails()) {
+                    ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
+                        .childId(applicantChildElement.getId().toString())
+                        .childName(applicantChildElement.getValue().getFullName()).build();
+                    childAndCafcassOfficers.add(element(childAndCafcassOfficer));
+                }
             }
         }
         caseDataUpdated.put("childAndCafcassOfficers", childAndCafcassOfficers);
-        log.info("ChildAndCafcassOfficers after ------>" + caseData.getChildAndCafcassOfficers());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -65,22 +79,52 @@ public class AddCafcassOfficerController {
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = caseData.getChildAndCafcassOfficers();
 
         for (Element<ChildAndCafcassOfficer> cafcassOfficer : childAndCafcassOfficers) {
-            List<Element<Child>> childern = caseData.getChildren();
-            childern.stream()
-                .filter(child -> Objects.equals(child.getId().toString(), cafcassOfficer.getValue().getChildId()))
-                .findFirst()
-                .ifPresent(child -> {
-                    Child amendedChild = child.getValue().toBuilder()
-                        .cafcassOfficerName(cafcassOfficer.getValue().getCafcassOfficerName())
-                        .cafcassOfficerEmailAddress(cafcassOfficer.getValue().getCafcassOfficerEmailAddress())
-                        .cafcassOfficerPhoneNo(cafcassOfficer.getValue().getCafcassOfficerPhoneNo())
-                        .build();
-
-                    childern.set(childern.indexOf(child), element(child.getId(), amendedChild));
-                });
+            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                List<Element<Child>> children = caseData.getChildren();
+                children.stream()
+                    .filter(child -> Objects.equals(child.getId().toString(), cafcassOfficer.getValue().getChildId()))
+                    .findFirst()
+                    .ifPresent(child -> {
+                        Child amendedChild = child.getValue().toBuilder()
+                            .cafcassOfficerName(cafcassOfficer.getValue().getCafcassOfficerName())
+                            .cafcassOfficerEmailAddress(cafcassOfficer.getValue().getCafcassOfficerEmailAddress())
+                            .cafcassOfficerPhoneNo(cafcassOfficer.getValue().getCafcassOfficerPhoneNo())
+                            .build();
+                        children.set(children.indexOf(child), element(child.getId(), amendedChild));
+                    });
+                caseDataUpdated.put("childDetailsTable", applicationsTabService.getChildDetails(caseData));
+                log.info("Children C100------>" + caseData.getChildren());
+            } else {
+                if (YesOrNo.Yes.equals(caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren())) {
+                    List<Element<ApplicantChild>> applicantChildren = caseData.getApplicantChildDetails();
+                    applicantChildren.stream()
+                        .filter(applicantChild -> Objects.equals(
+                            applicantChild.getId().toString(),
+                            cafcassOfficer.getValue().getChildId()
+                        ))
+                        .findFirst()
+                        .ifPresent(applicantChild -> {
+                            ApplicantChild amendedApplicantChild = applicantChild.getValue().toBuilder()
+                                .cafcassOfficerAdded(cafcassOfficer.getValue().getCafcassOfficerName() != null ? YesOrNo.Yes : YesOrNo.No)
+                                .cafcassOfficerName(cafcassOfficer.getValue().getCafcassOfficerName())
+                                .cafcassOfficerEmailAddress(cafcassOfficer.getValue().getCafcassOfficerEmailAddress())
+                                .cafcassOfficerPhoneNo(cafcassOfficer.getValue().getCafcassOfficerPhoneNo())
+                                .build();
+                            applicantChildren.set(
+                                applicantChildren.indexOf(applicantChild),
+                                element(applicantChild.getId(), amendedApplicantChild)
+                            );
+                        });
+                    Map<String, Object> applicantFamilyMap = applicationsTabService.getApplicantsFamilyDetails(caseData);
+                    caseDataUpdated.put("applicantFamilyTable", applicantFamilyMap);
+                    if (("Yes").equals(applicantFamilyMap.get("doesApplicantHaveChildren"))) {
+                        caseDataUpdated.put("fl401ChildDetailsTable", applicantFamilyMap.get("applicantChild"));
+                    }
+                    log.info("Children FL401------>" + caseData.getApplicantChildDetails());
+                }
+            }
         }
-        log.info("Children ------>" + caseData.getChildren());
-        applicationsTabService.updateChildDetails(caseData, caseDataUpdated);
+
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
