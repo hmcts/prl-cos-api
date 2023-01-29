@@ -1041,4 +1041,12 @@ public class ApplicationsTabService implements TabService {
         return toMap(builder.build());
     }
 
+    public void updateChildDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseDataUpdated.put("childDetailsTable", getChildDetails(caseData));
+        } else {
+            log.info(caseData.getCaseTypeOfApplication());
+        }
+    }
+
 }

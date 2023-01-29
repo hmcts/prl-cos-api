@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -29,6 +30,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class AddCafcassOfficerController {
 
     private final ObjectMapper objectMapper;
+
+    private final ApplicationsTabService applicationsTabService;
 
     @PostMapping(path = "/add-cafcass-officer/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Generate applicants")
@@ -77,6 +80,7 @@ public class AddCafcassOfficerController {
                 });
         }
         log.info("Children ------>" + caseData.getChildren());
+        applicationsTabService.updateChildDetails(caseData, caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
