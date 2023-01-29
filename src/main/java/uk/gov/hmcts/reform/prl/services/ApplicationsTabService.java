@@ -199,13 +199,6 @@ public class ApplicationsTabService implements TabService {
         Optional<List<LiveWithEnum>> childLivesWith = ofNullable(child.getChildLiveWith());
         Optional<List<OrderTypeEnum>> orderAppliedFor = ofNullable(child.getOrderAppliedFor());
 
-        YesOrNo cafcassOfficerAdded = YesOrNo.No;
-
-        if (child.getCafcassOfficerName() != null
-            && child.getCafcassOfficerEmailAddress() != null && child.getCafcassOfficerPhoneNo() != null) {
-            cafcassOfficerAdded =  YesOrNo.Yes;
-        }
-
         return ChildDetails.builder().firstName(child.getFirstName())
                 .lastName(child.getLastName())
                 .dateOfBirth(child.getDateOfBirth())
@@ -225,7 +218,7 @@ public class ApplicationsTabService implements TabService {
                         .map(OrderTypeEnum::getDisplayedValue).collect(
                                 Collectors.joining(", ")))
                 .parentalResponsibilityDetails(child.getParentalResponsibilityDetails())
-                .cafcassOfficerAdded(cafcassOfficerAdded)
+                .cafcassOfficerAdded(child.getCafcassOfficerName() != null ? YesOrNo.Yes : YesOrNo.No)
                 .cafcassOfficerName(child.getCafcassOfficerName())
                 .cafcassOfficerEmailAddress(child.getCafcassOfficerEmailAddress())
                 .cafcassOfficerPhoneNo(child.getCafcassOfficerPhoneNo())
@@ -1039,14 +1032,6 @@ public class ApplicationsTabService implements TabService {
         }
 
         return toMap(builder.build());
-    }
-
-    public void updateChildDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseDataUpdated.put("childDetailsTable", getChildDetails(caseData));
-        } else {
-            log.info(caseData.getCaseTypeOfApplication());
-        }
     }
 
 }
