@@ -4,7 +4,7 @@
     {
       "id": 1661164783455399,
       "jurisdiction": "PRIVATELAW",
-      "state": "CASE_ISSUE",
+      "state": "DECISION_OUTCOME",
       "caseTypeOfApplication": "C100",
       "case_type_id": "PRLAPPS",
       "created_date": "2022-08-22T10:39:43.49",
@@ -139,7 +139,7 @@
     {
       "id": 1661447479032162,
       "jurisdiction": "PRIVATELAW",
-      "state": "CASE_ISSUE",
+      "state": "DECISION_OUTCOME",
       "caseTypeOfApplication": "C100",
       "case_type_id": "PRLAPPS",
       "created_date": "2022-08-25T17:11:19.007",

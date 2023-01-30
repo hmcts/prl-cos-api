@@ -74,8 +74,8 @@ public class CafCassControllerTest {
             objectMapper.writeValueAsString(expectedCafCassResponse),
             objectMapper.writeValueAsString(realCafCassResponse)
         );
-        assertEquals(realCafCassResponse.getTotal(), 2);
-        assertEquals(realCafCassResponse.getCases().size(), 2);
+        assertEquals(realCafCassResponse.getTotal(), 4);
+        assertEquals(realCafCassResponse.getCases().size(), 4);
     }
 
     @Test

@@ -13,11 +13,16 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -52,9 +57,22 @@ public class CaseDataServiceTest {
     @org.junit.Test
     public void getCaseData() throws IOException {
 
+        final List<CaseHearing> caseHearings = new ArrayList();
+
+        final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
+            .hmcStatus("LISTED").hearingType("ABA5-FFH").hearingID(Long.valueOf("2000004659")).hearingDaySchedule(
+                List.of(
+                    HearingDaySchedule.hearingDayScheduleWith()
+                        .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                        .hearingStartDateTime(LocalDateTime.parse("2023-05-09T09:00:00")).hearingEndDateTime(LocalDateTime.parse(
+                            "2023-05-09T09:45:00")).build())).build();
+
+        caseHearings.add(caseHearing);
+
         Hearings hearings = new Hearings();
-        hearings.setCaseRef("234567890");
-        hearings.setHmctsServiceCode("hmcts");
+        hearings.setCaseRef("1673970714366224");
+        hearings.setCaseHearings(caseHearings);
+
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
         SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,

@@ -415,7 +415,8 @@ postcodelookup:
 cafcaas:
   search-case-type-id: PRLAPPS
   caseTypeOfApplicationList: C100
-  caseState: CASE_ISSUE
+  caseState: DECISION_OUTCOME
+  hearingStatus: LISTED
 
 ccd:
   elastic-search-api:

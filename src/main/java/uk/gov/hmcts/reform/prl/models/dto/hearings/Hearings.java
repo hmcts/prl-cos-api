@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.cafcass.hearing;
+package uk.gov.hmcts.reform.prl.models.dto.hearings;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Hearings {
+    private String hmctsServiceCode;
 
     private String caseRef;
 
