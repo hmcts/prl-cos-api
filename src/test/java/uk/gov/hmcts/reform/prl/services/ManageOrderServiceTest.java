@@ -29,6 +29,8 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -44,6 +46,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -92,11 +95,34 @@ public class ManageOrderServiceTest {
     @Mock
     private DocumentLanguageService documentLanguageService;
 
+    @Mock
+    DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    private DynamicList dynamicList;
+    private DynamicMultiSelectList dynamicMultiSelectList;
+    private UUID uuid;
+    private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
 
     @Before
     public void setup() {
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(TEST_UUID).label(" ").build();
+        dynamicList = DynamicList.builder()
+            .listItems(List.of(dynamicListElement))
+            .value(dynamicListElement)
+            .build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code(TEST_UUID)
+            .label("test")
+            .build();
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        uuid = UUID.fromString(TEST_UUID);
+        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(Mockito.any(CaseData.class)))
+            .thenReturn(dynamicMultiSelectList);
     }
 
     @Test
@@ -1194,13 +1220,7 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testgetOrderToAmendDownloadLink() {
-        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code("00000000-0000-0000-0000-000000000000").label(" ").build();
-        DynamicList dynamicList = DynamicList.builder()
-            .listItems(List.of(dynamicListElement))
-            .value(dynamicListElement)
-            .build();
+
         CaseData caseData = CaseData.builder()
             .orderCollection(List.of(Element.<OrderDetails>builder().id(uuid).value(OrderDetails
                                                                                         .builder()
@@ -1260,14 +1280,6 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testServeOrderCA() throws Exception {
-
-        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code("00000000-0000-0000-0000-000000000000").label(" ").build();
-        DynamicList dynamicList = DynamicList.builder()
-            .listItems(List.of(dynamicListElement))
-            .value(dynamicListElement)
-            .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1276,7 +1288,7 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(YesOrNo.No)
-            .serveOrderDynamicList(dynamicList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                                       "abc.pdf").build())
@@ -1330,14 +1342,6 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testServeOrderCaCafcassServedOptionsYes() throws Exception {
-
-        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code("00000000-0000-0000-0000-000000000000").label(" ").build();
-        DynamicList dynamicList = DynamicList.builder()
-            .listItems(List.of(dynamicListElement))
-            .value(dynamicListElement)
-            .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1346,7 +1350,7 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassServedOptions(YesOrNo.Yes)
-            .serveOrderDynamicList(dynamicList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
@@ -1400,14 +1404,6 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testServeOrderDA() throws Exception {
-
-        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code("00000000-0000-0000-0000-000000000000").label(" ").build();
-        DynamicList dynamicList = DynamicList.builder()
-            .listItems(List.of(dynamicListElement))
-            .value(dynamicListElement)
-            .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1427,7 +1423,7 @@ public class ManageOrderServiceTest {
         orderList.add(orders);
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveOrderDynamicList(dynamicList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                                       "abc.pdf").build())
