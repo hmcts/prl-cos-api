@@ -119,4 +119,21 @@ public class CaseControllerFunctionalTest {
             .andReturn();
     }
 
+    @Test
+    public void testLinkCitizenToCaseWith401() throws Exception {
+        String requestBody = ResourceLoader.loadJson(LINK_CITIZEN_REQUEST_BODY);
+        when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
+
+        request
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .header("accessCode", "auth")
+            .header("caseId", "12345678")
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/citizen/link")
+            .then()
+            .assertThat().statusCode(403);
+    }
+
 }
