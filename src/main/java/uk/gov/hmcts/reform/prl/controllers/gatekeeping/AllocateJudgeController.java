@@ -111,7 +111,8 @@ public class AllocateJudgeController extends AbstractCallbackController {
                 if (null != caseDataUpdated.get("judgeNameAndEmail")) {
                     String[] personalCodes = new String[3];
                     try {
-                        personalCodes[0] =(new ObjectMapper().readValue(caseDataUpdated.get("judgeNameAndEmail").toString(),JudicialUser.class).getPersonalCode());
+                        personalCodes[0] = (new ObjectMapper().readValue(caseDataUpdated.get("judgeNameAndEmail")
+                            .toString(),JudicialUser.class).getPersonalCode());
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
