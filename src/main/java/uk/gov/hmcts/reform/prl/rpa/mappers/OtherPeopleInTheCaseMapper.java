@@ -58,6 +58,10 @@ public class OtherPeopleInTheCaseMapper {
                 "relationshipToChild",
                 getPersonRealationShipToChild(otherPeople.getOtherPersonRelationshipToChildren())
             )
+            .add("isAddressConfidential", CommonUtils.getYesOrNoValue(otherPeople.getIsAddressConfidential()))
+            .add("isPhoneNumberConfidential", CommonUtils.getYesOrNoValue(otherPeople.getIsPhoneNumberConfidential()))
+            .add("isEmailAddressConfidential", CommonUtils.getYesOrNoValue(otherPeople.getIsEmailAddressConfidential()))
+
             .build()).collect(JsonCollectors.toJsonArray());
     }
 

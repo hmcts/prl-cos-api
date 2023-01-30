@@ -98,13 +98,28 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         if (currAdd != null && currAdd.equals(Yes)) {
             additionalFields = party.getAddress().getAddressLine1() != null && party.getAddress().getPostCode() != null;
         }
+        Optional<YesOrNo> isAddressConfidential = ofNullable(party.getIsAddressConfidential());
+        if (ofNullable(party.getIsCurrentAddressKnown()).isPresent()
+            && Yes.equals(ofNullable(party.getIsCurrentAddressKnown()).get())) {
+            additionalFields = isAddressConfidential.isPresent();
+        }
         YesOrNo canProvideEmail = party.getCanYouProvideEmailAddress();
         if (canProvideEmail != null && canProvideEmail.equals(Yes)) {
             additionalFields = party.getEmail() != null;
         }
+        Optional<YesOrNo> isEmailAddressConfidential = ofNullable(party.getIsEmailAddressConfidential());
+        if (ofNullable(party.getCanYouProvideEmailAddress()).isPresent()
+            && Yes.equals(ofNullable(party.getCanYouProvideEmailAddress()).get())) {
+            additionalFields = isEmailAddressConfidential.isPresent();
+        }
         YesOrNo canProvideTel = party.getCanYouProvidePhoneNumber();
         if (canProvideTel != null && canProvideTel.equals(Yes)) {
             additionalFields = party.getPhoneNumber() != null;
+        }
+        Optional<YesOrNo> isPhoneNumberConfidential = ofNullable(party.getIsPhoneNumberConfidential());
+        if (ofNullable(party.getCanYouProvidePhoneNumber()).isPresent()
+            && Yes.equals(ofNullable(party.getCanYouProvidePhoneNumber()).get())) {
+            additionalFields = isPhoneNumberConfidential.isPresent();
         }
 
         List<Optional<String>> childFields = new ArrayList<>();
