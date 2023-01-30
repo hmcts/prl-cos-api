@@ -94,7 +94,6 @@ public class DraftAnOrderService {
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData));
-        log.info("current order details {}", orderDetails);
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(orderDetails);
@@ -110,7 +109,6 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getCurrentOrderDetails(CaseData caseData) {
-        log.info(" Getting current order details from case data {}", caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
@@ -218,7 +216,6 @@ public class DraftAnOrderService {
         }
         orderCollection.add(convertDraftOrderToFinal(auth, caseData, draftOrder));
         orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
-        log.info("final collection {}", orderCollection);
         return orderCollection;
     }
 
@@ -522,8 +519,6 @@ public class DraftAnOrderService {
 
     public Map<String, Object> updateDraftOrderCollection(CaseData caseData) {
 
-        log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
-        log.info(" ************ casedata {}", caseData);
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         log.info(" ************ Selected Order ***  {}", selectedOrder);
@@ -888,7 +883,6 @@ public class DraftAnOrderService {
         List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
         populateDioCourtDynamicList(courtList, caseDataUpdated);
 
-        log.info("Case data updated map {}", caseDataUpdated);
     }
 
     private void populateDioCourtDynamicList(List<DynamicListElement> courtList, Map<String, Object> caseDataUpdated) {

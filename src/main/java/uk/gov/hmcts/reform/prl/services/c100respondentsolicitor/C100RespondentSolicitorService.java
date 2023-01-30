@@ -75,7 +75,6 @@ public class C100RespondentSolicitorService {
             ? (getActiveRespondent.get().getValue().getFirstName() + " "
             + getActiveRespondent.get().getValue().getLastName()) : null;
 
-        log.info("Active Respondent name: {}", activeRespondentName);
         caseDataUpdated.put("respondentNameForResponse", activeRespondentName);
         return caseDataUpdated;
     }
@@ -93,7 +92,6 @@ public class C100RespondentSolicitorService {
                     break;
                 case KEEP_DETAILS_PRIVATE:
                     String[] keepDetailsPrivateFields = event.getCaseFieldName().split(",");
-                    log.info("Keep details private fields, :::{}", (Object) keepDetailsPrivateFields);
                     caseDataUpdated.put(keepDetailsPrivateFields[0], x.getValue().getResponse()
                         .getSolicitorKeepDetailsPriate().getRespKeepDetailsPrivate());
                     caseDataUpdated.put(keepDetailsPrivateFields[1], x.getValue().getResponse()
@@ -205,7 +203,6 @@ public class C100RespondentSolicitorService {
             CaseData.class
         );
 
-        log.info("populateAboutToSubmitCaseData:: caseData" + caseData);
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
 
         findActiveRespondent(caseData, authorisation).ifPresentOrElse(
@@ -317,7 +314,6 @@ public class C100RespondentSolicitorService {
         PartyDetails amended = party.getValue().toBuilder()
             .response(buildResponseForRespondent).build();
         respondents.set(respondents.indexOf(party), element(party.getId(), amended));
-        log.info("updateRespondents:: party found. before update " + party);
     }
 
     private Optional<Element<PartyDetails>> findActiveRespondent(CaseData caseData, String authorisation) {
@@ -330,7 +326,6 @@ public class C100RespondentSolicitorService {
                 .stream()
                 .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
                 .findFirst();
-            log.info("finding activeRespondent " + activeRespondent);
         }
         return activeRespondent;
     }
@@ -352,7 +347,6 @@ public class C100RespondentSolicitorService {
     private List<Element<PartyDetails>> getSolicitorRepresentedRespondents(CaseData caseData, FindUserCaseRolesResponse findUserCaseRolesResponse) {
         List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
         for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-            log.info("caseUser is = " + caseUser);
             SolicitorRole.from(caseUser.getCaseRole()).ifPresent(
                 x -> {
                     Element<PartyDetails> respondent;
@@ -365,7 +359,6 @@ public class C100RespondentSolicitorService {
                     }
                 });
         }
-        log.info("finding solicitorRepresentedParties Party " + solicitorRepresentedParties);
         return solicitorRepresentedParties;
     }
 
@@ -385,7 +378,6 @@ public class C100RespondentSolicitorService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("populateSolicitorRespondentList service: caseData is:: " + caseData);
         headerMap.put(CHOOSE_RESPONDENT_DYNAMIC_LIST, ElementUtils.asDynamicList(
             findSolicitorRepresentedRespondents(caseData, authorisation),
             null,
