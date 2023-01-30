@@ -439,7 +439,6 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-        log.info("parent Name " + selectedOrder.getParentName());
         caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
         caseDataMap.put("parentName", selectedOrder.getParentName());
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
@@ -507,7 +506,6 @@ public class DraftAnOrderService {
     public DraftOrder getSelectedDraftOrderDetails(CaseData caseData) {
         UUID orderId = elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper);
-        log.info("draftOrderdynamicList {}", caseData.getDraftOrdersDynamicList());
         log.info("inside getDraftOrderDocument orderId {}", orderId);
         return caseData.getDraftOrderCollection().stream()
             .filter(element -> element.getId().equals(orderId))
@@ -521,14 +519,12 @@ public class DraftAnOrderService {
 
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-        log.info(" ************ Selected Order ***  {}", selectedOrder);
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if ((draftOrder.getOrderDocument() != null && draftOrder.getOrderDocument().getDocumentFileName()
                 .equalsIgnoreCase(selectedOrder.getOrderDocument().getDocumentFileName()))
                 || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
                 .equalsIgnoreCase(selectedOrder.getOrderDocumentWelsh().getDocumentFileName()))) {
-                log.info("matching draftorder {}", draftOrder);
                 draftOrderCollection.set(draftOrderCollection.indexOf(e),
                         element(getUpdatedDraftOrder(draftOrder, caseData))
                 );
@@ -700,7 +696,6 @@ public class DraftAnOrderService {
                                   .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
                                   .build()).build();
         }
-        log.info("Case data after prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         return caseData;
     }
 
