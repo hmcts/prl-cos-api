@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -108,8 +110,12 @@ public class AllocateJudgeController extends AbstractCallbackController {
             if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
                 if (null != caseDataUpdated.get("judgeNameAndEmail")) {
                     String[] personalCodes = new String[3];
-                    JudicialUser allocatedJudge = ((JudicialUser)(caseDataUpdated.get("judgeNameAndEmail")));
-                    personalCodes[0] = allocatedJudge.getPersonalCode();
+                    try {
+                        personalCodes[0] =(new ObjectMapper().readValue(caseDataUpdated.get("judgeNameAndEmail").toString(),JudicialUser.class).getPersonalCode());
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                    log.info("*** ********PersonalCode for the selected judge id : {}", null != personalCodes ? personalCodes.length : personalCodes);
                     JudicialUsersApiResponse judgeDetails = judicialUserInfoService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
                         .personalCode(personalCodes).build(),serviceAuthorization,authorization);
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
