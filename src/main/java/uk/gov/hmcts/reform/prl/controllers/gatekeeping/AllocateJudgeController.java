@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
@@ -107,10 +108,10 @@ public class AllocateJudgeController extends AbstractCallbackController {
             if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
                 if (null != caseDataUpdated.get("judgeNameAndEmail")) {
                     String[] personalCodes = new String[3];
-                    personalCodes[0] = (String.valueOf(caseDataUpdated.get("judgeNameAndEmail")));
-                    JudicialUsersApiResponse judgeDetails = judicialUserInfoService.getAllJudicialUserDetails(
-                        JudicialUsersApiRequest.builder()
-                        .personalCode(personalCodes).build(), serviceAuthorization, authorization);
+                    JudicialUser allocatedJudge = ((JudicialUser)(caseDataUpdated.get("judgeNameAndEmail")));
+                    personalCodes[0] = allocatedJudge.getPersonalCode();
+                    JudicialUsersApiResponse judgeDetails = judicialUserInfoService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
+                        .personalCode(personalCodes).build(),serviceAuthorization,authorization);
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
                     allocatedJudgeBuilder.judgeName(judgeDetails.getSurname());
