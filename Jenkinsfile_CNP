@@ -89,6 +89,6 @@ withPipeline(type, product, component) {
   onPR() {
     env.ENV = 'preview'
     // enableCleanupOfHelmReleaseOnSuccess()
-    // enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
+    enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
 }
