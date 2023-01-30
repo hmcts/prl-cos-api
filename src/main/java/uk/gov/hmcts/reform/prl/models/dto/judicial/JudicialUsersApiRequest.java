@@ -13,11 +13,11 @@ in the request at a time */
 @Builder
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class JudicialUsersAPIRequest {
+public class JudicialUsersApiRequest {
     @JsonProperty("ccdServiceName")
     private final String ccdServiceName;
 
     @JsonProperty("personal_code")
-    private final String[] personal_code;
+    private final String[] personalCode;
 
 }

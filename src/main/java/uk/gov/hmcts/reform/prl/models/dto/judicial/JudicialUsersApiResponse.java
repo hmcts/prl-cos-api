@@ -10,24 +10,24 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class JudicialUsersAPIResponse {
+public class JudicialUsersApiResponse {
     @JsonProperty("email_id")
-    private final String email_id;
+    private final String emailId;
 
     @JsonProperty("full_name")
-    private final String full_name;
+    private final String fullName;
 
     @JsonProperty("known_as")
-    private final String known_as;
+    private final String knownAs;
 
     @JsonProperty("personal_code")
-    private final String personal_code;
+    private final String personalCode;
 
     @JsonProperty("post_nominals")
-    private final String post_nominals;
+    private final String postNominals;
 
     @JsonProperty("sidam_id")
-    private final String sidam_id;
+    private final String sidamId;
 
     @JsonProperty("surname")
     private final String surname;
