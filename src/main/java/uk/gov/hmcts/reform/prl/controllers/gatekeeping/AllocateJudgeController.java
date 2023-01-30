@@ -25,6 +25,8 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersAPIRequest;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersAPIResponse;
 import uk.gov.hmcts.reform.prl.services.judicial.JudicialUserInfoService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
@@ -66,8 +68,6 @@ public class AllocateJudgeController extends AbstractCallbackController {
         dynamicListElements.add(DynamicListElement.builder().code("test3(test3@xxx.com)").label("test3(test3@xxx.com)").build());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("judgeList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(dynamicListElements)
-            .build());
         caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(dynamicListElements)
             .build());
 
@@ -89,7 +89,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
         log.info("*** allocate judge details for the case id : {}", caseData.getId());
         log.info("*** ********allocate judge details for the case id before mapping : {}", caseData.getAllocatedJudge());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        AllocatedJudge allocatedJudge = mapAllocatedJudge(caseDataUpdated,caseData.getJudgeList(),caseData.getLegalAdviserList());
+        AllocatedJudge allocatedJudge = mapAllocatedJudge(authorization,serviceAuthorization,caseDataUpdated,caseData.getLegalAdviserList());
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
         //caseDataUpdated.put("allocatedJudge",allocatedJudge);
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
@@ -97,17 +97,23 @@ public class AllocateJudgeController extends AbstractCallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated, DynamicList judgeList, DynamicList legalAdviserList) {
+    private AllocatedJudge mapAllocatedJudge(String authorization, String serviceAuthorization, Map<String, Object> caseDataUpdated,
+                                             DynamicList legalAdviserList) {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
         if (null != caseDataUpdated.get("tierOfJudiciary")) {
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
             allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get("tierOfJudiciary"))));
         } else {
             if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
-                if (null != judgeList && null != judgeList.getValue()) {
+                if (null != caseDataUpdated.get("judgeNameAndEmail")) {
+                    String[] personalCodes = new String[3];
+                    personalCodes[0] = (String.valueOf(caseDataUpdated.get("judgeNameAndEmail")));
+                    JudicialUsersAPIResponse judgeDetails = judicialUserInfoService.getAllJudicialUserDetails(JudicialUsersAPIRequest.builder()
+                        .personal_code(personalCodes).build(),serviceAuthorization,authorization);
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
-                    allocatedJudgeBuilder.judgeList(judgeList);
+                    allocatedJudgeBuilder.judgeName(judgeDetails.getSurname());
+                    allocatedJudgeBuilder.judgeEmail(judgeDetails.getEmail_id());
                 }
                 if (null != legalAdviserList && null != legalAdviserList.getValue()) {
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);

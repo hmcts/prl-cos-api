@@ -21,8 +21,11 @@ public class AllocatedJudge {
     @JsonProperty("isJudgeOrLegalAdviser")
     private final AllocatedJudgeTypeEnum isJudgeOrLegalAdviser;
 
-    @JsonProperty("judgeList")
-    private final DynamicList judgeList;
+    @JsonProperty("judgeName")
+    private final String judgeName;
+
+    @JsonProperty("judgeEmail")
+    private final String judgeEmail;
 
     @JsonProperty("legalAdviserList")
     private final DynamicList legalAdviserList;

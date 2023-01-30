@@ -27,14 +27,14 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
                 ? judgeOrLegalAdvisorDetails.length : "");
             return CaseSummary.builder().allocatedJudgeDetails(
                 AllocatedJudge.builder().courtName(CommonUtils.getValue(caseData.getCourtName()))
-                    .emailAddress((isLastNameAndEmailAvailable) ? judgeOrLegalAdvisorDetails[1] : EMPTY_SPACE_STRING).judgeTitle(EMPTY_SPACE_STRING)
+                    .emailAddress((isLastNameAndEmailAvailable) ? judgeOrLegalAdvisorDetails[1] : EMPTY_SPACE_STRING)
                     .lastName((isLastNameAndEmailAvailable) ? judgeOrLegalAdvisorDetails[0] : EMPTY_SPACE_STRING)
                     .tierOfJudiciaryType(getTierOfJudiciary(allocatedJudge)).build()).build();
         }
 
         return CaseSummary.builder().allocatedJudgeDetails(
             AllocatedJudge.builder().courtName(CommonUtils.getValue(caseData.getCourtName()))
-                .emailAddress(" ").judgeTitle(" ").lastName(" ").build()).build();
+                .emailAddress(" ").tierOfJudiciaryType(" ").lastName(" ").build()).build();
     }
 
     private String getTierOfJudiciary(uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge allocatedJudge) {
@@ -49,11 +49,9 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
         if (null != allocatedJudge) {
             if (YesOrNo.Yes.equals(allocatedJudge.getIsSpecificJudgeOrLegalAdviserNeeded()) && null != allocatedJudge.getIsJudgeOrLegalAdviser()) {
                 if (AllocatedJudgeTypeEnum.JUDGE.equals(allocatedJudge.getIsJudgeOrLegalAdviser())) {
-                    String judgeNameAndEmail = allocatedJudge.getJudgeList().getValueLabel();
-                    log.info("*** ********judgeNameAndEmail for the case id in generator : {}", judgeNameAndEmail);
-                    if (null != judgeNameAndEmail) {
-                        return judgeNameAndEmail.split("\\)")[0].split("\\(");
-                    }
+                    String[] judgeOrLegalAdvisorDetails = null;
+                    judgeOrLegalAdvisorDetails[0] = allocatedJudge.getJudgeName();
+                    judgeOrLegalAdvisorDetails[1] = allocatedJudge.getJudgeEmail();
                 } else if (AllocatedJudgeTypeEnum.LEGAL_ADVISER.equals(allocatedJudge.getIsJudgeOrLegalAdviser())) {
                     String legalAdviserNameAndEmail = allocatedJudge.getLegalAdviserList().getValueLabel();
                     log.info("*** ********legalAdviserNameAndEmail for the case id in generator : {}", legalAdviserNameAndEmail);

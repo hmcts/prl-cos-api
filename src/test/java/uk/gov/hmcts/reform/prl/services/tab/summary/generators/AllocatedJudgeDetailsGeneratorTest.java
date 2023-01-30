@@ -4,8 +4,6 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -38,9 +36,8 @@ public class AllocatedJudgeDetailsGeneratorTest {
                 .courtName("Test Court")
                 .allocatedJudge(uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge
                      .builder().isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.JUDGE).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes)
-                .judgeList(DynamicList.builder().value(DynamicListElement.builder().code("test1(test1@xxx.com)")
-                    .label("test1(test1@xxx.com)").build()).build()).build())
-            .build());
+                .judgeEmail("test1(test1@xxx.com)")
+                    .judgeName("test1").build()).build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()
             .allocatedJudgeDetails(AllocatedJudge.builder().judgeTitle(" ").tierOfJudiciaryType(" ").emailAddress("test1@xxx.com")
@@ -56,9 +53,8 @@ public class AllocatedJudgeDetailsGeneratorTest {
             .courtName("Test Court")
             .allocatedJudge(uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge
                 .builder().isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.LEGAL_ADVISER).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes)
-                .judgeList(DynamicList.builder().value(DynamicListElement.builder().code("test2(test2@xxx.com)")
-                    .label("test2(test2@xxx.com)").build()).build()).build())
-            .build());
+                .judgeEmail("test1(test1@xxx.com)")
+                .judgeName("test1").build()).build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()
             .allocatedJudgeDetails(AllocatedJudge.builder().judgeTitle(" ").tierOfJudiciaryType(" ").emailAddress("test2@xxx.com")
