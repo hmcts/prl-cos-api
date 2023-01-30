@@ -124,16 +124,14 @@ public class CaseControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(LINK_CITIZEN_REQUEST_BODY);
         when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
 
-        request
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .header("accessCode", "auth")
-            .header("caseId", "12345678")
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/citizen/link")
-            .then()
-            .assertThat().statusCode(403);
+        mockMvc.perform(post("/citizen/link")
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("serviceAuthorization", "auth")
+                            .header("accessCode", "auth")
+                            .header("caseId", "12345678"))
+            .andExpect(status().is4xxClientError())
+            .andReturn();
     }
 
 }
