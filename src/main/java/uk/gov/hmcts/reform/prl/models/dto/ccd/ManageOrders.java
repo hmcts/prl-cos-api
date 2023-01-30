@@ -172,7 +172,7 @@ public class ManageOrders {
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
 
-    private DynamicList serveOrderDynamicList;
+    private DynamicMultiSelectList serveOrderDynamicList;
     @JsonProperty("serveOrderAdditionalDocuments")
     private final List<Element<Document>> serveOrderAdditionalDocuments;
 
