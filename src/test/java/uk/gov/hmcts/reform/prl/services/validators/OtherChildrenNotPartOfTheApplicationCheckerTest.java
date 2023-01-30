@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.Gender.other;
 
@@ -155,5 +156,11 @@ public class OtherChildrenNotPartOfTheApplicationCheckerTest {
     public void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
         CaseData caseData = CaseData.builder().build();
         assertTrue(!childChecker.hasMandatoryCompleted(caseData));
+    }
+
+
+    @Test
+    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+        assertNotNull(childChecker.getDefaultTaskState());
     }
 }
