@@ -335,4 +335,6 @@ public class PrlAppsConstants {
     public static final String HIGHCOURT_JUDGE = "highCourtJudge";
 
     public static final String EMPTY_SPACE_STRING = " ";
+
+    public static final String SERVICENAME = "PRIVATELAW";
 }

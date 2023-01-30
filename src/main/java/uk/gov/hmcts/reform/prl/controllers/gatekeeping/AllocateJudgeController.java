@@ -31,9 +31,9 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.services.judicial.JudicialUserInfoService;
+import uk.gov.hmcts.reform.prl.services.staff.StaffUserInfoService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.NotFoundException;
@@ -58,24 +58,20 @@ public class AllocateJudgeController extends AbstractCallbackController {
     @Autowired
     JudicialUserInfoService judicialUserInfoService;
 
+    @Autowired
+    StaffUserInfoService staffUserInfoService;
+
     @PostMapping(path = "/pre-populate-legalAdvisor-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to retrieve legal advisor details")
     public AboutToStartOrSubmitCallbackResponse prePopulateLegalAdvisorDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
         log.info("*** request recieved to get the legalAdvisor details : {}", callbackRequest.toString());
-
-        List<DynamicListElement> dynamicListElements = new ArrayList<>();
-        dynamicListElements.add(DynamicListElement.builder().code("test1(test1@xxx.com)").label("test1(test1@xxx.com)").build());
-        dynamicListElements.add(DynamicListElement.builder().code("test2(test2@xxx.com)").label("test2(test2@xxx.com)").build());
-        dynamicListElements.add(DynamicListElement.builder().code("test3(test3@xxx.com)").label("test3(test3@xxx.com)").build());
-
+        List<DynamicListElement> legalAdviserList = staffUserInfoService.getLegalAdvisorList(authorisation);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(dynamicListElements)
+        caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
             .build());
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-
     }
 
     @PostMapping(path = "/allocatedJudgeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

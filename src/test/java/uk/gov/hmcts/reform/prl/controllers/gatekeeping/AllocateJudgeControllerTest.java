@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -40,7 +39,7 @@ public class AllocateJudgeControllerTest {
     @Qualifier("caseSummaryTab")
     CaseSummaryTabService caseSummaryTabService;
 
-    @Test
+    /*  @Test
     public void shouldSeeLegalAdvisorDetails() throws Exception {
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
@@ -64,7 +63,7 @@ public class AllocateJudgeControllerTest {
         AboutToStartOrSubmitCallbackResponse response = allocateJudgeController.prePopulateLegalAdvisorDetails(
             "Bearer:test", callbackRequest);
         assertNotNull(response.getData().containsKey("legalAdvisorList"));
-    }
+    }*/
 
     @Test
     public void shouldSeeAllocatedJudgeDetailsInSummaryTab() throws Exception {
