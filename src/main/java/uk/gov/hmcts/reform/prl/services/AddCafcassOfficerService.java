@@ -12,10 +12,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCaf
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -42,7 +44,7 @@ public class AddCafcassOfficerService {
 
     private List<Element<ChildAndCafcassOfficer>> prePopulateChildNameForDA(CaseData caseData,
                                                                             List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers) {
-        if (YesOrNo.Yes.equals(caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren())) {
+        if (Yes.equals(caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren())) {
             childAndCafcassOfficers = new ArrayList<>();
             for (Element<ApplicantChild> applicantChildElement : caseData.getApplicantChildDetails()) {
                 ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
@@ -70,6 +72,9 @@ public class AddCafcassOfficerService {
 
     public void populateCafcassOfficerDetails(CaseData caseData, Map<String, Object> caseDataUpdated,
                                               Element<ChildAndCafcassOfficer> cafcassOfficer) {
+        if (caseDataUpdated == null) {
+            caseDataUpdated = new HashMap<>();
+        }
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             populateCafcassOfficerForCA(caseData, caseDataUpdated, cafcassOfficer);
         } else {
@@ -79,7 +84,7 @@ public class AddCafcassOfficerService {
 
     private void populateCafcassOfficerForDA(CaseData caseData, Map<String, Object> caseDataUpdated,
                                             Element<ChildAndCafcassOfficer> cafcassOfficer) {
-        if (YesOrNo.Yes.equals(caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren())) {
+        if (Yes.equals(caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren())) {
             List<Element<ApplicantChild>> applicantChildren = caseData.getApplicantChildDetails();
             applicantChildren.stream()
                 .filter(applicantChild -> Objects.equals(
@@ -89,7 +94,7 @@ public class AddCafcassOfficerService {
                 .findFirst()
                 .ifPresent(applicantChild -> {
                     ApplicantChild amendedApplicantChild = applicantChild.getValue().toBuilder()
-                        .cafcassOfficerAdded(cafcassOfficer.getValue().getCafcassOfficerName() != null ? YesOrNo.Yes : YesOrNo.No)
+                        .cafcassOfficerAdded(cafcassOfficer.getValue().getCafcassOfficerName() != null ? Yes : YesOrNo.No)
                         .cafcassOfficerName(cafcassOfficer.getValue().getCafcassOfficerName())
                         .cafcassOfficerEmailAddress(cafcassOfficer.getValue().getCafcassOfficerEmailAddress())
                         .cafcassOfficerPhoneNo(cafcassOfficer.getValue().getCafcassOfficerPhoneNo())
@@ -101,7 +106,7 @@ public class AddCafcassOfficerService {
                 });
             Map<String, Object> applicantFamilyMap = applicationsTabService.getApplicantsFamilyDetails(caseData);
             caseDataUpdated.put(APPLICANT_FAMILY_TABLE, applicantFamilyMap);
-            if (YesOrNo.Yes.equals(applicantFamilyMap.get(DOES_APPLICANT_HAVE_CHILDREN))) {
+            if (Yes.getDisplayedValue().equals(applicantFamilyMap.get(DOES_APPLICANT_HAVE_CHILDREN))) {
                 caseDataUpdated.put(FL_401_CHILD_DETAILS_TABLE, applicantFamilyMap.get(APPLICANT_CHILD));
             }
         }
