@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
@@ -16,27 +15,10 @@ import java.util.List;
 @AllArgsConstructor
 public class HearingDaySchedule {
 
+    private String hearingVenueName;
+
     private LocalDateTime hearingStartDateTime;
 
     private LocalDateTime hearingEndDateTime;
 
-    private String listAssistSessionId;
-
-    private String hearingVenueId;
-
-    private String hearingVenueName;
-
-    private String hearingVenueLocationCode;
-
-    private String hearingVenueAddress;
-
-    private String hearingRoomId;
-
-    private String hearingJudgeId;
-
-    private String hearingJudgeName;
-
-    private List<String> panelMemberIds;
-
-    private List<Attendee> attendees;
 }

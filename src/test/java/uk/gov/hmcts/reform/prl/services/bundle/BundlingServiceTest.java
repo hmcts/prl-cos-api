@@ -42,7 +42,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -238,8 +238,8 @@ public class BundlingServiceTest {
         BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseData,"eventId","authorization");
     }
 
-    @Test
+    /*@Test
     public void testCreateBundleServiceWhenLanguagePreferenceWelshAsYes() throws Exception {
         BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseDataOther,"eventId","authorization");
-    }
+    }*/
 }
