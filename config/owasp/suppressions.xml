@@ -96,19 +96,37 @@
   <suppress>
     <notes>spring-security-core-5.6.2.jar </notes>
     <cve>CVE-2022-22978</cve>
+  </suppress>
+  <suppress>
+    <notes>spring-security-core-5.6.2.jar </notes>
     <cve>CVE-2022-31692</cve>
+  </suppress>
+  <suppress>
+    <notes>spring-security-core-5.6.2.jar </notes>
     <cve>CVE-2022-31690</cve>
+  </suppress>
+  <suppress>
+    <notes>spring-security-core-5.6.2.jar </notes>
     <cve>CVE-2022-22976</cve>
   </suppress>
   <supress>
     <notes>spring-security-crypto-5.4.5.jar</notes>
     <cve>CVE-2022-22978</cve>
+  </supress>
+  <supress>
+    <notes>spring-security-crypto-5.4.5.jar</notes>
     <cve>CVE-2021-22119</cve>
+  </supress>
+  <supress>
+    <notes>spring-security-crypto-5.4.5.jar</notes>
     <cve>CVE-2022-22976</cve>
   </supress>
   <supress>
     <notes>spring-security-web-5.7.1.jar</notes>
     <cve>CVE-2022-31692</cve>
+  </supress>
+  <supress>
+    <notes>spring-security-web-5.7.1.jar</notes>
     <cve>CVE-2022-31690</cve>
   </supress>
 </suppressions>
