@@ -67,9 +67,9 @@ public class CafCassFilter {
 
         if (cafCassCaseDetailList != null && !cafCassCaseDetailList.isEmpty()) {
             cafCassCaseDetailList.forEach(cafCassCaseDetail -> {
-                final CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+                CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
 
-                caseData.toBuilder().applicants(filterNonValueList(caseData.getApplicants()))
+                final CafCassCaseData cafCassCaseData = caseData.toBuilder().applicants(filterNonValueList(caseData.getApplicants()))
                     .otherPeopleInTheCaseTable(filterNonValueList(caseData.getOtherPeopleInTheCaseTable()))
                     .respondents(filterNonValueList(caseData.getRespondents()))
                     .children(filterNonValueList(caseData.getChildren()))
@@ -78,6 +78,8 @@ public class CafCassFilter {
                     .manageOrderCollection(filterNonValueList(caseData.getManageOrderCollection()))
                     .orderCollection(filterNonValueList(caseData.getOrderCollection()))
                     .build();
+
+                cafCassCaseDetail.setCaseData(cafCassCaseData);
 
             });
 
