@@ -7,10 +7,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffApiResponse;
-import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffProfile;
+import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffResponse;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,27 +27,26 @@ public class StaffUserInfoService {
 
     public List<DynamicListElement> getLegalAdvisorList(String authorization) {
         try {
-            StaffApiResponse staffDetails = staffResponseDetailsApi.getAllStaffResponseDetails(
+            List<StaffResponse> listOfStaffResponse = staffResponseDetailsApi.getAllStaffResponseDetails(
                 authorization,
                 authTokenGenerator.generate(),
                 SERVICENAME);
-            return onlyLegalAdvisor(staffDetails);
+            return onlyLegalAdvisor(listOfStaffResponse);
         } catch (Exception e) {
             log.error("Staff details Lookup Failed - " + e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
     }
 
-    private List<DynamicListElement> onlyLegalAdvisor(StaffApiResponse staffDetails) {
-        return (staffDetails == null
-            ? new ArrayList<>()
-            : staffDetails.getStaffProfile().stream()
-            .filter(role -> "Legal office".equalsIgnoreCase(role.getUserType()))
-            .map(this::getDisplayEntry).collect(Collectors.toList()));
+    private List<DynamicListElement> onlyLegalAdvisor(List<StaffResponse> listOfStaffResponse) {
+        return listOfStaffResponse.stream()
+            .filter(response -> response.getStaffProfile().getUserType().equalsIgnoreCase("Legal office"))
+            .map(this::getDisplayEntry).collect(Collectors.toList());
     }
 
-    private DynamicListElement getDisplayEntry(StaffProfile staffProfile) {
-        String value = concat(concat(staffProfile.getLastName()," - "),staffProfile.getEmailId());
+
+    private DynamicListElement getDisplayEntry(StaffResponse staffResponse) {
+        String value = concat(concat(staffResponse.getStaffProfile().getLastName()," - "),staffResponse.getStaffProfile().getEmailId());
         return DynamicListElement.builder().code(value).build();
     }
 

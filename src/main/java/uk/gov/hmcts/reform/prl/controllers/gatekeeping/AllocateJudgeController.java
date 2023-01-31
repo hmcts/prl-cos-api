@@ -65,12 +65,13 @@ public class AllocateJudgeController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse prePopulateLegalAdvisorDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-        log.info("*** request recieved to get the legalAdvisor details : {}", callbackRequest.toString());
+        log.info("*** request recieved to get the legalAdvisor details : {}");
         List<DynamicListElement> legalAdviserList = staffUserInfoService.getLegalAdvisorList(authorisation);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
             .build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+
     }
 
     @PostMapping(path = "/allocatedJudgeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

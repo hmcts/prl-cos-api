@@ -6,18 +6,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
-
-
 @Data
 @Builder
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StaffApiResponse {
+public class StaffResponse {
 
-    @JsonProperty(value = "staffProfile")
-    private List<StaffProfile> staffProfile;
+    @JsonProperty("ccd_service_name")
+    private String ccdServiceName;
 
-
+    @JsonProperty(value = "staff_profile")
+    private StaffProfile staffProfile;
 
 }
