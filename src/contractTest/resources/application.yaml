@@ -385,3 +385,11 @@ fis_hearing:
 
 courts:
   filter: ${COURT_IDS_TO_FILTER:}
+
+staffDetails:
+  api:
+    url: ${STAFF_DETAILS_API:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}
+
+judicialUsers:
+  api:
+    url: ${JUDICIAL_USERS_API:http://rd-judicial-api-aat.service.core-compute-aat.internal}
