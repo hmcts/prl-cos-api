@@ -42,10 +42,9 @@ public class InternationalElementsChecker implements RespondentEventChecker {
                                                                                                           .getValue()
                                                                                                           .getResponse()
                                                                                                           .getResSolInternationalElements());
-            if (!solicitorInternationalElement.isEmpty()) {
-                if (checkInternationalElementMandatoryCompleted(solicitorInternationalElement)) {
-                    mandatoryInfo = true;
-                }
+            if (!solicitorInternationalElement.isEmpty() && checkInternationalElementMandatoryCompleted(
+                solicitorInternationalElement)) {
+                mandatoryInfo = true;
             }
         }
         return mandatoryInfo;
