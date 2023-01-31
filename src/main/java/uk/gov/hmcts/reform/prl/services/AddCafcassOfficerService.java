@@ -26,32 +26,13 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class AddCafcassOfficerService {
 
     public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
-    public static final String FL_401_CHILD_DETAILS_TABLE = "fl401ChildDetailsTable";
-    public static final String APPLICANT_FAMILY_TABLE = "applicantFamilyTable";
-    public static final String DOES_APPLICANT_HAVE_CHILDREN = "doesApplicantHaveChildren";
-    public static final String APPLICANT_CHILD = "applicantChild";
+
     private final ApplicationsTabService applicationsTabService;
 
     public List<Element<ChildAndCafcassOfficer>> prePopulateChildName(CaseData caseData) {
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = null;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             childAndCafcassOfficers = prePopulateChildNameForCA(caseData, childAndCafcassOfficers);
-        } else {
-            childAndCafcassOfficers = prePopulateChildNameForDA(caseData, childAndCafcassOfficers);
-        }
-        return childAndCafcassOfficers;
-    }
-
-    private List<Element<ChildAndCafcassOfficer>> prePopulateChildNameForDA(CaseData caseData,
-                                                                            List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers) {
-        if (Yes.equals(caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren())) {
-            childAndCafcassOfficers = new ArrayList<>();
-            for (Element<ApplicantChild> applicantChildElement : caseData.getApplicantChildDetails()) {
-                ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
-                    .childId(applicantChildElement.getId().toString())
-                    .childName(applicantChildElement.getValue().getFullName()).build();
-                childAndCafcassOfficers.add(element(childAndCafcassOfficer));
-            }
         }
         return childAndCafcassOfficers;
     }
@@ -77,38 +58,6 @@ public class AddCafcassOfficerService {
         }
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             populateCafcassOfficerForCA(caseData, caseDataUpdated, cafcassOfficer);
-        } else {
-            populateCafcassOfficerForDA(caseData, caseDataUpdated, cafcassOfficer);
-        }
-    }
-
-    private void populateCafcassOfficerForDA(CaseData caseData, Map<String, Object> caseDataUpdated,
-                                            Element<ChildAndCafcassOfficer> cafcassOfficer) {
-        if (Yes.equals(caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren())) {
-            List<Element<ApplicantChild>> applicantChildren = caseData.getApplicantChildDetails();
-            applicantChildren.stream()
-                .filter(applicantChild -> Objects.equals(
-                    applicantChild.getId().toString(),
-                    cafcassOfficer.getValue().getChildId()
-                ))
-                .findFirst()
-                .ifPresent(applicantChild -> {
-                    ApplicantChild amendedApplicantChild = applicantChild.getValue().toBuilder()
-                        .cafcassOfficerAdded(cafcassOfficer.getValue().getCafcassOfficerName() != null ? Yes : YesOrNo.No)
-                        .cafcassOfficerName(cafcassOfficer.getValue().getCafcassOfficerName())
-                        .cafcassOfficerEmailAddress(cafcassOfficer.getValue().getCafcassOfficerEmailAddress())
-                        .cafcassOfficerPhoneNo(cafcassOfficer.getValue().getCafcassOfficerPhoneNo())
-                        .build();
-                    applicantChildren.set(
-                        applicantChildren.indexOf(applicantChild),
-                        element(applicantChild.getId(), amendedApplicantChild)
-                    );
-                });
-            Map<String, Object> applicantFamilyMap = applicationsTabService.getApplicantsFamilyDetails(caseData);
-            caseDataUpdated.put(APPLICANT_FAMILY_TABLE, applicantFamilyMap);
-            if (Yes.getDisplayedValue().equals(applicantFamilyMap.get(DOES_APPLICANT_HAVE_CHILDREN))) {
-                caseDataUpdated.put(FL_401_CHILD_DETAILS_TABLE, applicantFamilyMap.get(APPLICANT_CHILD));
-            }
         }
     }
 
