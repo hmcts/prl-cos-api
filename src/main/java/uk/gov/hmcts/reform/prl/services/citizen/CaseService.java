@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -79,7 +78,6 @@ public class CaseService {
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
-        log.info("Case data map sending to update ccd : {}", caseData.toMap(CcdObjectMapper.getObjectMapper()));
 
         if (LINK_CASE.equalsIgnoreCase(eventId) && null != accessCode) {
             linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
@@ -164,10 +162,6 @@ public class CaseService {
             CaseData.class
         );
         log.info("caseId {}", caseId);
-        log.info("userId {}", userId);
-        log.info("emailId {}", emailId);
-        log.info("accesscode {}", accessCode);
-        log.info("Before checking the accesscode caseata {}", caseData);
         if ("Valid".equalsIgnoreCase(findAccessCodeStatus(accessCode, caseData))) {
             UUID partyId = null;
             YesOrNo isApplicant = YesOrNo.Yes;
@@ -180,15 +174,8 @@ public class CaseService {
                     invite.getValue().setInvitedUserId(userId);
                 }
             }
-            log.info("Before processUserDetailsForCase() :::: caseData {}", caseData);
-            log.info("Before processUserDetailsForCase() :::: userId {}", userId);
-            log.info("Before processUserDetailsForCase() :::: emailId {}", emailId);
-            log.info("Before processUserDetailsForCase() :::: partyId {}", partyId);
-            log.info("Before processUserDetailsForCase() :::: isApplicant {}", isApplicant);
 
             processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant);
-
-            log.info("After processUserDetailsForCase() :::: caseData {}", caseData);
 
             caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData);
         }
