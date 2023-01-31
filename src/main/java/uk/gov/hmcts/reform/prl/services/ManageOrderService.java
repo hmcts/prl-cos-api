@@ -57,7 +57,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum.withdrawnApplication;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -1113,8 +1112,7 @@ public class ManageOrderService {
                            .orderTypeId(flagSelectedOrderId)
                            .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
                                                  ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
-                           .isWithdrawnRequestApproved(caseData.getManageOrders().getWithdrawnOrRefusedOrder().equals(withdrawnApplication)
-                                                           ? String.valueOf(caseData.getManageOrders().getIsCaseWithdrawn()) : null)
+                           .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
                            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
                            .childrenList(getChildInfoFromCaseData(caseData))
@@ -1139,5 +1137,16 @@ public class ManageOrderService {
                                              .orderRecipients(getAllRecipients(caseData)).build())
                            .dateCreated(dateTime.now())
                            .build());
+    }
+
+    private String getWithdrawRequestInfo(CaseData caseData) {
+        String withdrawApproved = "";
+
+        if (null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
+            && caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue().equals("Withdrawn application")) {
+            withdrawApproved = String.valueOf(caseData.getManageOrders().getIsCaseWithdrawn());
+        }
+
+        return withdrawApproved;
     }
 }
