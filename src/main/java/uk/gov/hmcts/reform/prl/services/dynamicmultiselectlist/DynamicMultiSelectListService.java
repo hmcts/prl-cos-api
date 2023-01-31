@@ -27,11 +27,13 @@ public class DynamicMultiSelectListService {
     public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData) {
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-        orders.forEach(order -> {
-            OrderDetails orderDetails = order.getValue();
-            listItems.add(DynamicMultiselectListElement.builder().code(orderDetails.getOrderTypeId())
-                              .label(orderDetails.getLabelForDynamicList()).build());
-        });
+        if (null != orders) {
+            orders.forEach(order -> {
+                OrderDetails orderDetails = order.getValue();
+                listItems.add(DynamicMultiselectListElement.builder().code(orderDetails.getOrderTypeId())
+                                  .label(orderDetails.getLabelForDynamicList()).build());
+            });
+        }
         return DynamicMultiSelectList.builder().listItems(listItems).build();
     }
 
