@@ -896,8 +896,11 @@ public class DraftAnOrderService {
                 .build();
             dioApplicationToApplyPermissionList.add(element(dioApplicationToApplyPermission));
 
-            caseDataUpdated.put(
-                "dioApplicationToApplyPermission", dioApplicationToApplyPermissionList);
+            for (Element<DioApplicationToApplyPermission> dioApplicationToApplyPermissionElement : dioApplicationToApplyPermissionList) {
+                caseDataUpdated.put(
+                    "dioApplicationToApplyPermission", dioApplicationToApplyPermissionElement);
+            }
+
         }
 
         List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
