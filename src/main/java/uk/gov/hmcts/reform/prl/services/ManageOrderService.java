@@ -558,7 +558,7 @@ public class ManageOrderService {
     }
 
     private String getChildInfoFromCaseData(CaseData caseData) {
-        StringBuilder builder = new StringBuilder();
+        String childNames = "";
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             List<Child> children = new ArrayList<>();
             if (caseData.getChildren() != null) {
@@ -566,11 +566,11 @@ public class ManageOrderService {
                     .map(Element::getValue)
                     .collect(Collectors.toList());
             }
-            for (int i = 0; i < children.size(); i++) {
-                Child child = children.get(i);
-                builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + " " + child.getLastName()));
-                builder.append("\n");
-            }
+            List<String> childList = children.stream()
+                .map(element -> element.getFirstName() + " " + element.getLastName())
+                .collect(Collectors.toList());
+            childNames = String.join(", ", childList);
+
         } else {
             Optional<List<Element<ApplicantChild>>> applicantChildDetails =
                 ofNullable(caseData.getApplicantChildDetails());
@@ -578,14 +578,14 @@ public class ManageOrderService {
                 List<ApplicantChild> children = applicantChildDetails.get().stream()
                     .map(Element::getValue)
                     .collect(Collectors.toList());
-                for (int i = 0; i < children.size(); i++) {
-                    ApplicantChild child = children.get(i);
-                    builder.append(String.format("Child %d: %s", i + 1, child.getFullName()));
-                    builder.append("\n");
-                }
+                List<String> childList = children.stream()
+                    .map(ApplicantChild::getFullName)
+                    .collect(Collectors.toList());
+                childNames = String.join(", ", childList);
+
             }
         }
-        return builder.toString();
+        return childNames;
     }
 
     private List<Element<OrderDetails>> getCurrentOrderDetails(String authorisation, CaseData caseData)
@@ -1110,6 +1110,17 @@ public class ManageOrderService {
 
         return element(OrderDetails.builder().orderType(flagSelectedOrder)
                            .orderTypeId(flagSelectedOrderId)
+                           .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
+                                                 ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
+                           .isWithdrawnRequestApproved(caseData.getManageOrders().getWithdrawnOrRefusedOrder()
+                                                           .getDisplayedValue().equals("Withdrawn application")
+                                                           && (null != caseData.getManageOrders().getWithdrawnOrRefusedOrder())
+                                                           ? String.valueOf(caseData.getManageOrders().getIsCaseWithdrawn()) : null)
+                           .typeOfOrder(caseData.getSelectTypeOfOrder() != null
+                                            ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
+                           .childrenList(getChildInfoFromCaseData(caseData))
+                           .orderClosesCase(caseData.getSelectTypeOfOrder().getDisplayedValue().equals("Final")
+                                                ? caseData.getDoesOrderClosesCase() : null)
                            .orderDocument(Document.builder()
                                               .documentUrl(generatedDocumentInfo.getUrl())
                                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
