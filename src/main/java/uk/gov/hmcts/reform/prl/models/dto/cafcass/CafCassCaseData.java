@@ -215,5 +215,6 @@ public class CafCassCaseData {
     //private List<Element<HearingData>> hearingData;
     private Hearings hearingData;
 
+    @Setter(AccessLevel.NONE)
     private List<Element<CaseOrder>> orderCollection;
 }
