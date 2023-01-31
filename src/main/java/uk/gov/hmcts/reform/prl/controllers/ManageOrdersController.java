@@ -86,7 +86,7 @@ public class ManageOrdersController {
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
-            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
+            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions());
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getAppointmentOfGuardian());
         }
@@ -241,7 +241,7 @@ public class ManageOrdersController {
             List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
-            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
+            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions());
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

@@ -102,7 +102,7 @@ public class DraftAnOrderController {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         } else {
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
-            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
+            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
@@ -190,7 +190,7 @@ public class DraftAnOrderController {
             || "adminEditAndApproveAnOrder".equalsIgnoreCase(callbackRequest.getEventId())) {
             caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
         } else {
-            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
+            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
