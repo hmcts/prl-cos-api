@@ -26,6 +26,7 @@ public class CaseInvite {
     private String accessCode;
     private String invitedUserId;
     private String hasLinked;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate expiryDate;
     private YesOrNo isApplicant;
