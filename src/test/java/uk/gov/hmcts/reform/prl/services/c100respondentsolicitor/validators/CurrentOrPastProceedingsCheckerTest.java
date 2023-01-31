@@ -9,8 +9,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Collections;
@@ -30,14 +30,15 @@ public class CurrentOrPastProceedingsCheckerTest {
     @Before
     public void setUp() {
 
-        ProceedingDetails proceedingDetails = ProceedingDetails.builder()
+        RespondentProceedingDetails proceedingDetails = RespondentProceedingDetails.builder()
             .caseNumber("122344")
             .nameAndOffice("testoffice")
             .nameOfCourt("testCourt")
             .build();
 
-        Element<ProceedingDetails> proceedingDetailsElement = Element.<ProceedingDetails>builder().value(proceedingDetails).build();
-        List<Element<ProceedingDetails>> proceedingsList = Collections.singletonList(proceedingDetailsElement);
+        Element<RespondentProceedingDetails> proceedingDetailsElement = Element.<RespondentProceedingDetails>builder()
+            .value(proceedingDetails).build();
+        List<Element<RespondentProceedingDetails>> proceedingsList = Collections.singletonList(proceedingDetailsElement);
 
         PartyDetails respondent = PartyDetails.builder()
             .response(Response
@@ -64,7 +65,6 @@ public class CurrentOrPastProceedingsCheckerTest {
     @Test
     public void hasMandatoryCompletedTest() {
         boolean anyNonEmpty = currentOrPastProceedingsChecker.hasMandatoryCompleted(caseData);
-
         Assert.assertTrue(anyNonEmpty);
     }
 }
