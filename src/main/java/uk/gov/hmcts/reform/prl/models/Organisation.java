@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models;
 
+import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
@@ -15,6 +16,18 @@ public class Organisation {
     private String organisationID;
     @JsonProperty("OrganisationName")
     private String organisationName;
+
+    private UUID solicitorOrgId;
+
+    public void setSolicitorOrgId(UUID solicitorOrgId) {
+        if (this.getSolicitorOrgId() == null) {
+            if (solicitorOrgId != null) {
+                this.solicitorOrgId = solicitorOrgId;
+            } else {
+                this.solicitorOrgId = UUID.randomUUID();
+            }
+        }
+    }
 
     public static Organisation organisation(String id) {
         return Organisation.builder()

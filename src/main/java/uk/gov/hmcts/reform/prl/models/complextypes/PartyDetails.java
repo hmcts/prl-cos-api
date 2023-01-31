@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -23,11 +24,40 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnu
 import java.time.LocalDate;
 import java.util.List;
 
+import java.util.UUID;
 
 @Data
 @Builder(toBuilder = true)
+@Slf4j
 @AllArgsConstructor
 public class PartyDetails {
+
+    private UUID partyId;
+
+    public void setPartyId(UUID partyId) {
+        log.info("partyId ==  {}",partyId);
+        if (this.getPartyId() == null) {
+            log.info("partyId is null");
+            if (partyId != null) {
+                this.partyId = partyId;
+            } else {
+                this.partyId = UUID.randomUUID();
+            }
+            log.info("partyId is not null {}",this.partyId);
+        }
+    }
+
+    private UUID solicitorPartyId;
+
+    public void setSolicitorPartyId(UUID solicitorPartyId) {
+        if (this.getSolicitorPartyId() == null && (this.getRepresentativeFirstName() != null || this.getRepresentativeLastName() != null)) {
+            if (solicitorPartyId != null) {
+                this.solicitorPartyId = solicitorPartyId;
+            } else {
+                this.solicitorPartyId = UUID.randomUUID();
+            }
+        }
+    }
 
     private final String firstName;
     private final String lastName;

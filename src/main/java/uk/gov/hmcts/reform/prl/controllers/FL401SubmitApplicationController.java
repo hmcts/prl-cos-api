@@ -123,10 +123,26 @@ public class FL401SubmitApplicationController {
                                             .listItems(locationRefDataService.getCourtLocations(authorisation))
                                             .build())
             .build();
+        getGeneratePartyUuid(caseData);
         return CallbackResponse.builder()
             .data(caseData)
             .errors(errorList)
             .build();
+    }
+
+    private static void getGeneratePartyUuid(CaseData caseData) {
+        if (caseData.getApplicantsFL401() != null) {
+            if (caseData.getApplicantsFL401().getPartyId() == null) {
+                caseData.getApplicantsFL401().setPartyId(null);
+            }
+            if (caseData.getApplicantsFL401().getSolicitorPartyId() == null) {
+                caseData.getApplicantsFL401().setSolicitorPartyId(null);
+            }
+            if (caseData.getApplicantsFL401().getSolicitorOrg() != null
+                && caseData.getApplicantsFL401().getSolicitorOrg().getSolicitorOrgId() == null) {
+                caseData.getApplicantsFL401().getSolicitorOrg().setSolicitorOrgId(null);
+            }
+        }
     }
 
     @PostMapping(path = "/fl401-generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
