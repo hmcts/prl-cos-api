@@ -93,14 +93,10 @@ public class C100RespondentSolicitorServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
-
-
         List<RespondentWelshNeedsListEnum> welshNeedsListEnum = new ArrayList<>();
         welshNeedsListEnum.add(RespondentWelshNeedsListEnum.speakWelsh);
         List<PartyEnum> party = new ArrayList<>();
         party.add(PartyEnum.respondent);
-
-
 
         List<CaseUser> caseUserList  = new ArrayList<>();
         caseUserList.add(CaseUser.builder()
