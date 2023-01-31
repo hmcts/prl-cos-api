@@ -65,7 +65,7 @@ public class CafCassFilter {
      */
     private void setNonNullEmptyElementList(List<CafCassCaseDetail> cafCassCaseDetailList) {
 
-        if (cafCassCaseDetailList !=null && !cafCassCaseDetailList.isEmpty()) {
+        if (cafCassCaseDetailList != null && !cafCassCaseDetailList.isEmpty()) {
             cafCassCaseDetailList.forEach(cafCassCaseDetail -> {
                 final CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
 
