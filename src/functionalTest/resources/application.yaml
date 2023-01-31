@@ -413,9 +413,9 @@ fis_hearing:
 
 staffDetails:
   api:
-    url: ${LOCATION_REF_API:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}
+    url: ${STAFF_DETAILS_API:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}
 
 judicialUsers:
   api:
-    url: ${LOCATION_REF_API:http://rd-judicial-api-aat.service.core-compute-aat.internal}
+    url: ${JUDICIAL_USERS_API:http://rd-judicial-api-aat.service.core-compute-aat.internal}
 
