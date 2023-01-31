@@ -379,7 +379,6 @@ public class ManageOrderService {
         headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
         headerMap.put("serveOrderDynamicList", getOrdersAsDynamicList(caseData));
         headerMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
-        log.info("caseData=====" + caseData.getCaseTypeOfApplication());
         return headerMap;
     }
 
@@ -546,7 +545,6 @@ public class ManageOrderService {
 
     private String getSelectedOrderInfo(CaseData caseData) {
         StringBuilder selectedOrder = new StringBuilder();
-        log.info("*******caseData********{}", caseData);
         if (caseData.getManageOrdersOptions() != null) {
             selectedOrder.append(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
                                      ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
@@ -1032,7 +1030,6 @@ public class ManageOrderService {
                               .fl404CustomFields(orderData)
                               .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
-        log.info("Case data ---->: {}", caseData);
         return caseData;
     }
 
