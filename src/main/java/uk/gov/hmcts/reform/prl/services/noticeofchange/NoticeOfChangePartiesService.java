@@ -71,7 +71,7 @@ public class NoticeOfChangePartiesService {
         if (BLANK == strategy) {
             return Optional.of(NoticeOfChangeParties.builder().build());
         }
-        return element.map(e -> partiesConverter.generateForSubmission(e));
+        return element.map(partiesConverter::generateForSubmission);
     }
 
     public enum NoticeOfChangeAnswersPopulationStrategy {
