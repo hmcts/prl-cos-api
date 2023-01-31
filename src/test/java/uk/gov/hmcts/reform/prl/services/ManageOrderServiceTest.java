@@ -20,8 +20,10 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
+import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -92,9 +94,15 @@ public class ManageOrderServiceTest {
     @Mock
     private DocumentLanguageService documentLanguageService;
 
+    private ManageOrders manageOrders;
 
     @Before
     public void setup() {
+        manageOrders = ManageOrders.builder()
+            .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
+            .isCaseWithdrawn(YesOrNo.No)
+            .build();
+
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
     }
@@ -124,7 +132,7 @@ public class ManageOrderServiceTest {
             .build();
 
         CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
-        assertEquals("Child 1: Test Name\n", caseData1.getChildrenList());
+        assertEquals("Test Name", caseData1.getChildrenList());
         assertNotNull(caseData1.getSelectedOrder());
     }
 
@@ -159,7 +167,7 @@ public class ManageOrderServiceTest {
 
         CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
 
-        assertEquals("Child 1: TestName\n", caseData1.getChildrenList());
+        assertEquals("TestName", caseData1.getChildrenList());
         assertNotNull(caseData1.getSelectedOrder());
     }
 
@@ -689,8 +697,11 @@ public class ManageOrderServiceTest {
             .orderRecipients(recipientList)
             .applicants(partyDetails)
             .respondents(partyDetails)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(manageOrders)
             .build();
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
@@ -714,6 +725,8 @@ public class ManageOrderServiceTest {
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -755,6 +768,9 @@ public class ManageOrderServiceTest {
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrders(manageOrders)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -834,6 +850,9 @@ public class ManageOrderServiceTest {
             .respondents(partyDetails)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrders(manageOrders)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -864,6 +883,9 @@ public class ManageOrderServiceTest {
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrders(manageOrders)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -1067,6 +1089,9 @@ public class ManageOrderServiceTest {
             .respondents(partyDetails)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrders(manageOrders)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -1110,6 +1135,9 @@ public class ManageOrderServiceTest {
             .respondents(partyDetails)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrders(manageOrders)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -1180,8 +1208,11 @@ public class ManageOrderServiceTest {
             .orderRecipients(recipientList)
             .applicants(partyDetails)
             .respondents(partyDetails)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(manageOrders)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
