@@ -93,10 +93,6 @@ public class UpdatePartyDetailsService {
             if (caseData.getApplicantsFL401().getSolicitorPartyId() == null) {
                 caseData.getApplicantsFL401().setSolicitorPartyId(null);
             }
-            if (caseData.getApplicantsFL401().getSolicitorOrg() != null
-                && caseData.getApplicantsFL401().getSolicitorOrg().getSolicitorOrgId() == null) {
-                caseData.getApplicantsFL401().getSolicitorOrg().setSolicitorOrgId(null);
-            }
         }
     }
 
