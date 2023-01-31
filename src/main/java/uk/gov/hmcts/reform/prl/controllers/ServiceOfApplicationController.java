@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -45,6 +45,9 @@ public class ServiceOfApplicationController {
     @Autowired
     AllTabServiceImpl allTabService;
 
+    @Autowired
+    DynamicMultiSelectListService dynamicMultiSelectListService;
+
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for add case number submit event")
@@ -57,65 +60,23 @@ public class ServiceOfApplicationController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<DynamicMultiselectListElement> listElements = new ArrayList<>();
-        if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
-            caseData.getOrderCollection().forEach(order ->
-                listElements.add(DynamicMultiselectListElement.builder()
-                                     .code(order.getValue().getOrderTypeId())
-                                     .label(order.getValue().getLabelForDynamicList())
-                                     .build())
-            );
-            caseDataUpdated.put("serviceOfApplicationScreen1", DynamicMultiSelectList
-                .builder().listItems(listElements).build());
+        caseDataUpdated.put("serviceOfApplicationScreen1", dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData));
+        log.info("***** listElements : {}", caseDataUpdated.get("serviceOfApplicationScreen1"));
+        log.info("***** listElements : {}", caseDataUpdated);
 
-            log.info("***** listElements : {}", caseDataUpdated.get("serviceOfApplicationScreen1"));
-            log.info("***** listElements : {}", caseDataUpdated);
-        }
-        List<DynamicMultiselectListElement> applicantList = new ArrayList<>();
-        List<DynamicMultiselectListElement> applicantSolicitorList = new ArrayList<>();
-        List<DynamicMultiselectListElement> respondentList = new ArrayList<>();
-        List<DynamicMultiselectListElement> respondentSolicitorList = new ArrayList<>();
-        List<DynamicMultiselectListElement> otherPeopleList = new ArrayList<>();
+        Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
+            .getApplicantsMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> applicantList = applicantDetails.get("applicants");
+        List<DynamicMultiselectListElement> applicantSolicitorList = applicantDetails.get("applicantSolicitors");
+        Map<String, List<DynamicMultiselectListElement>> respondentDetails = dynamicMultiSelectListService
+            .getRespondentsMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> respondentList = respondentDetails.get("respondents");
+        List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
+        List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData);
+
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase("C100")) {
-            caseData.getApplicants().forEach(applicant -> {
-                applicantList.add(DynamicMultiselectListElement.builder()
-                                                                      .code(applicant.getId().toString())
-                                                                      .label(applicant.getValue().getFirstName() + " "
-                                                                                 + applicant.getValue().getLastName())
-                                                                      .build());
-
-                applicantSolicitorList.add(DynamicMultiselectListElement.builder()
-                                           .code(applicant.getId().toString())
-                                           .label(applicant.getValue().getRepresentativeFirstName() + " "
-                                           + applicant.getValue().getRepresentativeLastName())
-                                           .build());
-
-
-            });
             log.info("****** applicantList : {}", applicantList);
             log.info("****** applicantSolicitorList : {}", applicantSolicitorList);
-            caseData.getRespondents().forEach(respondent -> {
-
-                respondentList.add(DynamicMultiselectListElement.builder()
-                                       .code(respondent.getId().toString())
-                                       .label(respondent.getValue().getFirstName() + " "
-                                                  + respondent.getValue().getLastName())
-                                       .build());
-                if (YesNoDontKnow.yes.equals(respondent.getValue().getDoTheyHaveLegalRepresentation())) {
-                    respondentSolicitorList.add(DynamicMultiselectListElement.builder()
-                                                    .code(respondent.getId().toString())
-                                                    .label(respondent.getValue().getRepresentativeFirstName() + " "
-                                                               + respondent.getValue().getRepresentativeLastName())
-                                                    .build());
-                }
-            });
-            if (caseData.getOthersToNotify() != null) {
-                caseData.getOthersToNotify().forEach(others ->
-                    otherPeopleList.add(DynamicMultiselectListElement.builder()
-                                            .code(others.getId().toString())
-                                            .label(others.getValue().getFirstName() + " " + others.getValue().getLastName())
-                                            .build())
-                );
-            }
             log.info("****** respondent list : {}", respondentList);
             log.info("****** respondentSolicitorList : {}", respondentSolicitorList);
         }

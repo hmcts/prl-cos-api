@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
@@ -49,6 +50,8 @@ public class ServiceOfApplicationControllerTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     @Test
     public void testServiceOfApplicationAboutToStart() throws Exception {
@@ -92,7 +95,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void testServiceOfApplicationAboutToStartWillEmptyCollection() throws Exception {
+    public void testServiceOfApplicationAboutToStartWithEmptyCollection() throws Exception {
 
         Map<String, Object> caseData = new HashMap<>();
         CaseData caseData1 = CaseData.builder()

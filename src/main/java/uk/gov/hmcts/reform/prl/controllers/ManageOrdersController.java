@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -33,6 +32,7 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -66,6 +66,9 @@ public class ManageOrdersController {
 
     @Autowired
     private AmendOrderService amendOrderService;
+
+    @Autowired
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -133,24 +136,11 @@ public class ManageOrdersController {
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
-        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
-        if (caseData.getChildren() != null) {
-            caseData.getChildren().forEach(child -> {
-                if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
-                    listElements.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
-                                         .label(child.getValue().getFirstName() + " "
-                                                    + child.getValue().getLastName()).build());
-                }
-            });
-        } else if (caseData.getApplicantChildDetails() != null) {
-            caseData.getApplicantChildDetails().forEach(child -> {
-                listElements.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
-                                     .label(child.getValue().getFullName()).build());
-            });
-        }
+
         ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
             .childOption(DynamicMultiSelectList.builder()
-                             .listItems(listElements).build()).build();
+                             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
+            .build();
 
         log.info("**Manage orders with child list {}",manageOrders);
         caseData = caseData.toBuilder()
