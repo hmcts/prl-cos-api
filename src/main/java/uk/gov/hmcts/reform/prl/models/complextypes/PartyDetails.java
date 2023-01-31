@@ -34,7 +34,7 @@ public class PartyDetails {
     private UUID partyId;
 
     public void setPartyId(UUID partyId) {
-        log.info("partyId ==  {}",partyId);
+        log.info("partyId ==   {}",partyId);
         if (this.getPartyId() == null) {
             log.info("partyId is null");
             if (partyId != null) {
