@@ -55,6 +55,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
@@ -65,6 +66,7 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -210,6 +212,9 @@ public class CallbackControllerTest {
     private LocationRefDataService locationRefDataService;
     @Mock
     private ApplicantsListGenerator applicantsListGenerator;
+
+    @Mock
+    private PaymentRequestService paymentRequestService;
 
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -1338,6 +1343,8 @@ public class CallbackControllerTest {
                    "finalWelshDocument", "document"
             )
         );
+        when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
+            PaymentServiceResponse.builder().serviceRequestReference("1234").build());
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
@@ -1430,7 +1437,8 @@ public class CallbackControllerTest {
         when(confidentialityTabService.getConfidentialApplicantDetails(Mockito.any())).thenReturn(applicants);
         when(confidentialityTabService.getChildrenConfidentialDetails(Mockito.any())).thenReturn(
             childConfidentialityDetails);
-
+        when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
+            PaymentServiceResponse.builder().serviceRequestReference("1234").build());
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
                 authToken,
@@ -1609,6 +1617,8 @@ public class CallbackControllerTest {
                    "finalWelshDocument", "document"
             )
         );
+        when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
+            PaymentServiceResponse.builder().serviceRequestReference("1234").build());
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
