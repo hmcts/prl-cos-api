@@ -65,20 +65,23 @@ public class CafCassFilter {
      */
     private void setNonNullEmptyElementList(List<CafCassCaseDetail> cafCassCaseDetailList) {
 
-        cafCassCaseDetailList.forEach(cafCassCaseDetail -> {
-            final CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+        if (cafCassCaseDetailList != null && !cafCassCaseDetailList.isEmpty()) {
+            cafCassCaseDetailList.forEach(cafCassCaseDetail -> {
+                final CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
 
-            caseData.toBuilder().applicants(filterNonValueList(caseData.getApplicants()))
-              .otherPeopleInTheCaseTable(filterNonValueList(caseData.getOtherPeopleInTheCaseTable()))
-              .respondents(filterNonValueList(caseData.getRespondents()))
-              .children(filterNonValueList(caseData.getChildren()))
-              .interpreterNeeds(filterNonValueList(caseData.getInterpreterNeeds()))
-              .otherDocuments(filterNonValueList(caseData.getOtherDocuments()))
-              .manageOrderCollection(filterNonValueList(caseData.getManageOrderCollection()))
-              .orderCollection(filterNonValueList(caseData.getOrderCollection()))
-              .build();
+                caseData.toBuilder().applicants(filterNonValueList(caseData.getApplicants()))
+                    .otherPeopleInTheCaseTable(filterNonValueList(caseData.getOtherPeopleInTheCaseTable()))
+                    .respondents(filterNonValueList(caseData.getRespondents()))
+                    .children(filterNonValueList(caseData.getChildren()))
+                    .interpreterNeeds(filterNonValueList(caseData.getInterpreterNeeds()))
+                    .otherDocuments(filterNonValueList(caseData.getOtherDocuments()))
+                    .manageOrderCollection(filterNonValueList(caseData.getManageOrderCollection()))
+                    .orderCollection(filterNonValueList(caseData.getOrderCollection()))
+                    .build();
 
-        });
+            });
+
+        }
     }
 
     /**
