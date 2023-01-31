@@ -230,13 +230,11 @@ locationfinder:
 
 staffDetails:
   api:
-    url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
-    endpoint: /refdata/internal/staff/usersByServiceName
+    url: ${LOCATION_REF_API:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}
 
 judicialUsers:
   api:
-    url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
-    endpoint: /refdata/judicial/users
+    url: ${LOCATION_REF_API:http://rd-judicial-api-aat.service.core-compute-aat.internal}
 
 launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
