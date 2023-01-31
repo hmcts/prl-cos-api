@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnu
 
 import java.time.LocalDate;
 import java.util.List;
-
 import java.util.UUID;
 
 @Data
