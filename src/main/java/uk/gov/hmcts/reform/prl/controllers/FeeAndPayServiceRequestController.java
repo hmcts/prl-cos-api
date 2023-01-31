@@ -41,10 +41,12 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestBody CallbackRequest callbackRequest
     ) {
         log.info("Before {}", callbackRequest);
-        return ok(SubmittedCallbackResponse.builder().confirmationHeader("# Please pay for the application").confirmationBody(
-            "### Please use the below link to pay for the application."
+        return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+            "# Please visit service request to make the payment").confirmationBody(
+            "### What happens next \n\n The case will now display as 'Pending' in your case list. "
+                + "You need to visit Service Request tab to make the payment"
                 + "\n\n <a href='/cases/case-details/" + callbackRequest.getCaseDetails().getCaseId()
-                + "/#Service%20Request'>click here to pay</a>"
+                + "/#Service%20Request'>click here to pay</a> \n\n"
         ).build());
     }
 }
