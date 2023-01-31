@@ -90,7 +90,7 @@ public class PrlAppsConstants {
     public static final String SUBMITTED_STATE = State.SUBMITTED_PAID.getValue();
     public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
     public static final String ISSUED_STATE = State.CASE_ISSUE.getValue();
-    public static final String GATEKEEPING_STATE = State.GATEKEEPING.getValue();
+    public static final String GATEKEEPING_STATE = State.GATE_KEEPING.getValue();
 
     public static final String C8_HINT = "C8";
     public static final String C1A_HINT = "C1A";

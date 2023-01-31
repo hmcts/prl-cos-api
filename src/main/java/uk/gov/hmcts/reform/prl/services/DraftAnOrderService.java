@@ -50,7 +50,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -892,20 +891,13 @@ public class DraftAnOrderService {
             DioOtherEnum.applicationToApplyPermission)) {
 
             List<Element<DioApplicationToApplyPermission>> dioApplicationToApplyPermissionList = new ArrayList<>();
-            List<DioApplicationToApplyPermission> dioApplicationToApplyPermissions = caseData
-                .getDirectionOnIssue()
-                .getDioApplicationToApplyPermission()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-            for (DioApplicationToApplyPermission dioApplicationToApplyPermission1 : dioApplicationToApplyPermissions) {
-                dioApplicationToApplyPermission1 = DioApplicationToApplyPermission.builder()
-                    .applyPermissionToEditSection(DIO_APPLICATION_TO_APPLY_PERMISSION)
-                    .build();
-                dioApplicationToApplyPermissionList.add(element(dioApplicationToApplyPermission1));
-                caseDataUpdated.put(
-                    "dioApplicationToApplyPermission", dioApplicationToApplyPermissionList);
-            }
+            DioApplicationToApplyPermission dioApplicationToApplyPermission = DioApplicationToApplyPermission.builder()
+                .applyPermissionToEditSection(DIO_APPLICATION_TO_APPLY_PERMISSION)
+                .build();
+
+            dioApplicationToApplyPermissionList.add(element(dioApplicationToApplyPermission));
+            caseDataUpdated.put(
+                "dioApplicationToApplyPermission", dioApplicationToApplyPermissionList);
 
         }
 
