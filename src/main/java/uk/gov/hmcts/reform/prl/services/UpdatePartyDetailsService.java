@@ -36,7 +36,6 @@ public class UpdatePartyDetailsService {
     public Map<String, Object> updateApplicantAndChildNames(CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
 
-
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         log.info("222222 {}",caseData);
@@ -108,6 +107,11 @@ public class UpdatePartyDetailsService {
             }
             if (caseData.getApplicantsFL401().getSolicitorOrgUuid() == null) {
                 caseData.getApplicantsFL401().setSolicitorOrgUuid(null);
+            }
+        }
+        if (caseData.getRespondentsFL401() != null) {
+            if (caseData.getRespondentsFL401().getPartyId() == null) {
+                caseData.getRespondentsFL401().setPartyId(null);
             }
         }
     }
