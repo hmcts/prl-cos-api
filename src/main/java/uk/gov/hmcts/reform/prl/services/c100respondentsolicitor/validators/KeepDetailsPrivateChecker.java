@@ -19,7 +19,7 @@ public class KeepDetailsPrivateChecker implements RespondentEventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
+        Optional<Element<PartyDetails>> activeRespondent;
         activeRespondent = caseData.getRespondents()
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
@@ -46,10 +46,8 @@ public class KeepDetailsPrivateChecker implements RespondentEventChecker {
                                                                                                .getValue()
                                                                                                .getResponse()
                                                                                                .getSolicitorKeepDetailsPriate());
-            if (!keepDetailsPrivate.isEmpty()) {
-                if (checkKeepDetailsPrivateMandatoryCompleted(keepDetailsPrivate)) {
-                    mandatoryInfo = true;
-                }
+            if (!keepDetailsPrivate.isEmpty() && checkKeepDetailsPrivateMandatoryCompleted(keepDetailsPrivate)) {
+                mandatoryInfo = true;
             }
         }
         return mandatoryInfo;

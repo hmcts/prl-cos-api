@@ -895,11 +895,11 @@ public class ManageOrderService {
         });
     }
 
-    public Map<String, Object> getCaseData(String authorisation, CaseData caseData)
+    public Map<String, Object> getCaseData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum selectOrderOption)
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         GeneratedDocumentInfo generatedDocumentInfo = null;
-        Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
+        Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
