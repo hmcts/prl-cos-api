@@ -36,8 +36,10 @@ public class UpdatePartyDetailsService {
     public Map<String, Object> updateApplicantAndChildNames(CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
 
+
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
+        log.info("222222 {}",caseData);
         final Flags caseFlags = Flags.builder().build();
 
         updatedCaseData.put("caseFlags", caseFlags);
@@ -49,6 +51,9 @@ public class UpdatePartyDetailsService {
                 .getRespondentsFL401();
 
             if (Objects.nonNull(fl401Applicant)) {
+                log.info("33333333");
+                getGeneratePartyUuid(caseData);
+                log.info("555555 {}",caseData);
                 updatedCaseData.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
                 setFL401ApplicantFlag(updatedCaseData, fl401Applicant);
 
@@ -78,6 +83,21 @@ public class UpdatePartyDetailsService {
         }
 
         return updatedCaseData;
+    }
+
+    private static void getGeneratePartyUuid(CaseData caseData) {
+        if (caseData.getApplicantsFL401() != null) {
+            if (caseData.getApplicantsFL401().getPartyId() == null) {
+                caseData.getApplicantsFL401().setPartyId(null);
+            }
+            if (caseData.getApplicantsFL401().getSolicitorPartyId() == null) {
+                caseData.getApplicantsFL401().setSolicitorPartyId(null);
+            }
+            if (caseData.getApplicantsFL401().getSolicitorOrg() != null
+                && caseData.getApplicantsFL401().getSolicitorOrg().getSolicitorOrgId() == null) {
+                caseData.getApplicantsFL401().getSolicitorOrg().setSolicitorOrgId(null);
+            }
+        }
     }
 
     private void setApplicantFlag(CaseData caseData, Map<String, Object> caseDetails) {
