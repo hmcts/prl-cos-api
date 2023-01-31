@@ -55,7 +55,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     private final CaseSummaryTabService caseSummaryTab;
     private final DocumentGenService documentGenService;
 
-    @PostMapping(path = "/test-payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "
         + "successful")
     @ApiResponses(value = {
@@ -74,7 +74,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         ).build());
     }
 
-    @PostMapping(path = "/generate-document-submit-application-test", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Issue and send to local court")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse generateDocumentSubmitApplication(
