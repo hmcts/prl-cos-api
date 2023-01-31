@@ -57,6 +57,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum.withdrawnApplication;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -379,7 +380,6 @@ public class ManageOrderService {
         headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
         headerMap.put("serveOrderDynamicList", getOrdersAsDynamicList(caseData));
         headerMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
-        log.info("caseData=====" + caseData.getCaseTypeOfApplication());
         return headerMap;
     }
 
@@ -546,7 +546,6 @@ public class ManageOrderService {
 
     private String getSelectedOrderInfo(CaseData caseData) {
         StringBuilder selectedOrder = new StringBuilder();
-        log.info("*******caseData********{}", caseData);
         if (caseData.getManageOrdersOptions() != null) {
             selectedOrder.append(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
                                      ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
@@ -895,11 +894,11 @@ public class ManageOrderService {
         });
     }
 
-    public Map<String, Object> getCaseData(String authorisation, CaseData caseData)
+    public Map<String, Object> getCaseData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum selectOrderOption)
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         GeneratedDocumentInfo generatedDocumentInfo = null;
-        Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
+        Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -1032,7 +1031,6 @@ public class ManageOrderService {
                               .fl404CustomFields(orderData)
                               .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
-        log.info("Case data ---->: {}", caseData);
         return caseData;
     }
 
@@ -1115,9 +1113,7 @@ public class ManageOrderService {
                            .orderTypeId(flagSelectedOrderId)
                            .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
                                                  ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
-                           .isWithdrawnRequestApproved(caseData.getManageOrders().getWithdrawnOrRefusedOrder()
-                                                           .getDisplayedValue().equals("Withdrawn application")
-                                                           && (null != caseData.getManageOrders().getWithdrawnOrRefusedOrder())
+                           .isWithdrawnRequestApproved(caseData.getManageOrders().getWithdrawnOrRefusedOrder().equals(withdrawnApplication)
                                                            ? String.valueOf(caseData.getManageOrders().getIsCaseWithdrawn()) : null)
                            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
