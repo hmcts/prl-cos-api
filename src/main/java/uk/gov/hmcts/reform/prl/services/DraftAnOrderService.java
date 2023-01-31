@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
@@ -55,6 +56,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_EX740;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_QUALIFIED_LEGAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_APPLICATION_TO_APPLY_PERMISSION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASE_REVIEW;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PARENT_WITHCARE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_RIGHT_TO_ASK;
@@ -883,6 +885,19 @@ public class DraftAnOrderService {
             DioOtherEnum.parentWithCare)) {
             caseDataUpdated.put(
                 "dioParentWithCare", DIO_PARENT_WITHCARE);
+        }
+        if (!caseData.getDirectionOnIssue().getDioOtherList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioOtherList().contains(
+            DioOtherEnum.applicationToApplyPermission)) {
+
+            List<Element<DioApplicationToApplyPermission>> dioApplicationToApplyPermissionList = new ArrayList<>();
+            DioApplicationToApplyPermission dioApplicationToApplyPermission = DioApplicationToApplyPermission.builder()
+                .applyPermissionToEditSection(DIO_APPLICATION_TO_APPLY_PERMISSION)
+                .build();
+            dioApplicationToApplyPermissionList.add(element(dioApplicationToApplyPermission));
+
+            caseDataUpdated.put(
+                "dioApplicationToApplyPermission", dioApplicationToApplyPermissionList);
         }
 
         List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
