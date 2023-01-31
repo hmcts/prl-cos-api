@@ -303,6 +303,8 @@ public class PrlAppsConstants {
         + "require proceedings to be transferred to their local Family Court to accommodate childcare responsibilities.\n"
         + System.lineSeparator()
         + "Any application for transfer should be made to the Court in writing within 5 working days of receipt of these directions.";
+    public static final String DIO_APPLICATION_TO_APPLY_PERMISSION = " Any party intending at the FHDRA to apply for permission"
+         + " to instruct an expert must first comply fully with the requirements of Practice Direction 25C of the Family Procedure Rules.";
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
