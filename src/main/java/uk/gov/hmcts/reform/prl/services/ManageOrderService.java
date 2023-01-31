@@ -893,11 +893,11 @@ public class ManageOrderService {
         });
     }
 
-    public Map<String, Object> getCaseData(String authorisation, CaseData caseData)
+    public Map<String, Object> getCaseData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum selectOrderOption)
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         GeneratedDocumentInfo generatedDocumentInfo = null;
-        Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
+        Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -1112,10 +1112,7 @@ public class ManageOrderService {
                            .orderTypeId(flagSelectedOrderId)
                            .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
                                                  ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
-                           .isWithdrawnRequestApproved(caseData.getManageOrders().getWithdrawnOrRefusedOrder()
-                                                           .getDisplayedValue().equals("Withdrawn application")
-                                                           && (null != caseData.getManageOrders().getWithdrawnOrRefusedOrder())
-                                                           ? String.valueOf(caseData.getManageOrders().getIsCaseWithdrawn()) : null)
+                           .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
                            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
                            .childrenList(getChildInfoFromCaseData(caseData))
@@ -1140,5 +1137,16 @@ public class ManageOrderService {
                                              .orderRecipients(getAllRecipients(caseData)).build())
                            .dateCreated(dateTime.now())
                            .build());
+    }
+
+    private String getWithdrawRequestInfo(CaseData caseData) {
+        String withdrawApproved = "";
+
+        if (null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
+            && caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue().equals("Withdrawn application")) {
+            withdrawApproved = String.valueOf(caseData.getManageOrders().getIsCaseWithdrawn());
+        }
+
+        return withdrawApproved;
     }
 }

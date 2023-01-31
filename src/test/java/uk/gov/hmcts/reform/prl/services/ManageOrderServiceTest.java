@@ -311,7 +311,8 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData,
+                                                         CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
     }
@@ -342,7 +343,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
     }
@@ -373,7 +374,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.appointmentOfGuardian);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
     }
@@ -404,7 +405,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.parentalResponsibility);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
     }
@@ -435,7 +436,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.transferOfCaseToAnotherCourt);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
     }
@@ -466,7 +467,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.specialGuardianShip);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
     }
@@ -497,7 +498,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.powerOfArrest);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
     }
@@ -560,7 +561,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
     }
@@ -591,7 +592,8 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData,
+                                                         CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
 
@@ -623,7 +625,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.specialGuardianShip);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
 
@@ -655,7 +657,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
 
@@ -923,7 +925,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.amendDischargedVaried);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
 
@@ -955,7 +957,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blank);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
 
@@ -987,7 +989,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.nonMolestation);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
 
@@ -1019,7 +1021,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.generalForm);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
 
@@ -1051,7 +1053,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.noticeOfProceedings);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
 

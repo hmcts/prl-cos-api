@@ -912,42 +912,12 @@ public class DraftAnOrderService {
         return  getDraftOrderData(authorisation, caseData, draftOrder);
     }
 
-    private Map<String,Object> getDraftOrderData(String authorisation, CaseData caseData, DraftOrder draftOrder) throws Exception {
-        {
-            Map<String, Object> caseDataUpdated = new HashMap<>();
-            GeneratedDocumentInfo generatedDocumentInfo = null;
-            Map<String, String> fieldsMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
-            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-            if (documentLanguage.isGenEng()) {
-                caseDataUpdated.put("isEngDocGen", Yes.toString());
-                generatedDocumentInfo = dgsService.generateDocument(
-                    authorisation,
-                    CaseDetails.builder().caseData(caseData).build(),
-                    fieldsMap.get(PrlAppsConstants.TEMPLATE)
-                );
-                caseDataUpdated.put("previewOrderDoc", Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
-
-            }
-            if (documentLanguage.isGenWelsh()) {
-                caseDataUpdated.put("isWelshDocGen", Yes.toString());
-                generatedDocumentInfo = dgsService.generateWelshDocument(
-                    authorisation,
-                    CaseDetails.builder().caseData(caseData).build(),
-                    fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
-                );
-                caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
-
-            }
-            return caseDataUpdated;
-        }
-
+    private Map<String, Object> getDraftOrderData(String authorisation, CaseData caseData, DraftOrder draftOrder) throws Exception {
+        Map<String, Object> caseDataUpdated = manageOrderService.getCaseData(
+            authorisation,
+            caseData,
+            draftOrder.getOrderType()
+        );
+        return caseDataUpdated;
     }
 }
