@@ -82,6 +82,19 @@ public class PartyDetails {
     private final YesOrNo isPlaceOfBirthKnown;
     private final List<Element<OtherPersonRelationshipToChild>> otherPersonRelationshipToChildren;
     private final Organisation solicitorOrg;
+
+    private UUID solicitorOrgUuid;
+
+    public void setSolicitorOrgUuid(UUID solicitorOrgUuid) {
+        if (this.getSolicitorOrgUuid() == null) {
+            if (solicitorOrgUuid != null) {
+                this.solicitorOrgUuid = solicitorOrgUuid;
+            } else {
+                this.solicitorOrgUuid = UUID.randomUUID();
+            }
+        }
+    }
+
     private final Address solicitorAddress;
     private final String dxNumber;
     private final String solicitorReference;

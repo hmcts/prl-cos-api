@@ -52,14 +52,16 @@ public class UpdatePartyDetailsService {
 
             if (Objects.nonNull(fl401Applicant)) {
                 log.info("33333333");
-                getGeneratePartyUuid(caseData);
+                generatePartyUuidForFL401(caseData);
                 log.info("555555 {}",caseData);
                 updatedCaseData.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
                 setFL401ApplicantFlag(updatedCaseData, fl401Applicant);
-
             }
 
             if (Objects.nonNull(fl401respondent)) {
+                log.info("33333333 RESPPOnd");
+                generatePartyUuidForFL401(caseData);
+                log.info("555555  RESPPOnd{}",caseData);
                 updatedCaseData.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
                 setFL401RespondentFlag(updatedCaseData, fl401respondent);
             }
@@ -71,6 +73,7 @@ public class UpdatePartyDetailsService {
                     .stream()
                     .map(Element::getValue)
                     .collect(Collectors.toList());
+
                 PartyDetails applicant1 = applicants.get(0);
                 if (Objects.nonNull(applicant1)) {
                     updatedCaseData.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
@@ -85,13 +88,26 @@ public class UpdatePartyDetailsService {
         return updatedCaseData;
     }
 
-    private static void getGeneratePartyUuid(CaseData caseData) {
+    private static void generatePartyUuidForC100(PartyDetails partyDetails) {
+
+        if (partyDetails.getSolicitorPartyId() == null) {
+            partyDetails.setSolicitorPartyId(null);
+        }
+        if (partyDetails.getSolicitorOrgUuid() == null) {
+            partyDetails.setSolicitorOrgUuid(null);
+        }
+    }
+
+    private static void generatePartyUuidForFL401(CaseData caseData) {
         if (caseData.getApplicantsFL401() != null) {
             if (caseData.getApplicantsFL401().getPartyId() == null) {
                 caseData.getApplicantsFL401().setPartyId(null);
             }
             if (caseData.getApplicantsFL401().getSolicitorPartyId() == null) {
                 caseData.getApplicantsFL401().setSolicitorPartyId(null);
+            }
+            if (caseData.getApplicantsFL401().getSolicitorOrgUuid() == null) {
+                caseData.getApplicantsFL401().setSolicitorOrgUuid(null);
             }
         }
     }
@@ -106,6 +122,7 @@ public class UpdatePartyDetailsService {
                 .collect(Collectors.toList());
 
             for (PartyDetails applicant : applicants) {
+                generatePartyUuidForC100(applicant);
                 final String partyName = applicant.getFirstName() + " " + applicant.getLastName();
                 final Flags applicantFlag = Flags.builder().partyName(partyName)
                     .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
@@ -125,6 +142,7 @@ public class UpdatePartyDetailsService {
                 .collect(Collectors.toList());
 
             for (PartyDetails respondent : respondents) {
+                generatePartyUuidForC100(respondent);
                 final String partyName = respondent.getFirstName() + " " + respondent.getLastName();
                 final Flags respondentFlag = Flags.builder().partyName(partyName)
                     .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();

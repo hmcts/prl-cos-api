@@ -460,7 +460,6 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        log.info("11111111");
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest))
