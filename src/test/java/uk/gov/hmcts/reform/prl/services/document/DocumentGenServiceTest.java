@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.document;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -107,7 +106,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 public class DocumentGenServiceTest {
 
     @Mock
-    private DgsService dgsService;
+    DgsService dgsService;
 
     @Mock
     DocumentLanguageService documentLanguageService;
@@ -1405,7 +1404,6 @@ public class DocumentGenServiceTest {
         verifyNoMoreInteractions(dgsService);
     }
 
-    @Ignore
     @Test
     public void testGenerateCitizenDocument() throws Exception {
         Map<String, String> documentValues = new HashMap<>();
@@ -1428,16 +1426,11 @@ public class DocumentGenServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+        doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
             Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
+            Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
-
-        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseDataNotIssued);
-        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseDataNotIssued);
 
         String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
         String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
@@ -1466,9 +1459,9 @@ public class DocumentGenServiceTest {
             .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
-        verify(dgsService, times(2)).generateDocument(
+        verify(dgsService, times(1)).generateCitizenDocument(
             Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
+            Mockito.any(GenerateAndUploadDocumentRequest.class),
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
