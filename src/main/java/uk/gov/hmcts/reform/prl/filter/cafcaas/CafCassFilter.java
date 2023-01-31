@@ -50,7 +50,52 @@ public class CafCassFilter {
             .collect(Collectors.toList());
         log.info("Cafcaas records after filtering -> {}", (cafCassCaseDetailList != null && cafCassCaseDetailList.size() != 0)
             ? cafCassCaseDetailList.size() : 0);
+
+        setNonNullEmptyElementList(cafCassCaseDetailList);
+
         cafCassResponse.setCases(cafCassCaseDetailList);
+    }
+
+
+    /**
+     *  This method will filter List of Element type objects present in
+     *  caseData object.
+     *
+     * @param cafCassCaseDetailList - List of CafcassCaseDetail
+     */
+    private void setNonNullEmptyElementList(List<CafCassCaseDetail> cafCassCaseDetailList) {
+
+        cafCassCaseDetailList.forEach(cafCassCaseDetail -> {
+            final CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+
+            caseData.toBuilder().applicants(filterNonValueList(caseData.getApplicants()))
+              .otherPeopleInTheCaseTable(filterNonValueList(caseData.getOtherPeopleInTheCaseTable()))
+              .respondents(filterNonValueList(caseData.getRespondents()))
+              .children(filterNonValueList(caseData.getChildren()))
+              .interpreterNeeds(filterNonValueList(caseData.getInterpreterNeeds()))
+              .otherDocuments(filterNonValueList(caseData.getOtherDocuments()))
+              .manageOrderCollection(filterNonValueList(caseData.getManageOrderCollection()))
+              .orderCollection(filterNonValueList(caseData.getOrderCollection()))
+              .build();
+
+        });
+    }
+
+    /**
+     *  This method will accept List of Element object
+     *  and will return the list back if value object is not null.
+     *
+     * @param object - List of Element object
+     * @param <T> - Type of element in the List
+     * @return
+     */
+    public <T> List<Element<T>>  filterNonValueList(List<Element<T>> object) {
+        if (object != null && !object.isEmpty()) {
+            return object.stream().filter(element -> element.getValue() != null).collect(
+                Collectors.toList());
+        }
+
+        return null;
     }
 
     private Predicate<CafCassCaseDetail> filterByCaseTypeAndState() {
