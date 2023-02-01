@@ -43,12 +43,13 @@ public class SearchCasesDataService {
 
             if (Objects.nonNull(fl401Applicant)) {
                 caseDetails.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
-
+                generatePartyUuidForFL401(caseData);
                 setFL401ApplicantFlag(caseDetails, fl401Applicant);
             }
 
             if (Objects.nonNull(fl401respondent)) {
                 caseDetails.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
+                generatePartyUuidForFL401(caseData);
                 setFL401RespondentFlag(caseDetails,fl401respondent);
             }
         } else {
@@ -73,6 +74,35 @@ public class SearchCasesDataService {
         return caseDetails;
     }
 
+    private static void generatePartyUuidForC100(PartyDetails partyDetails) {
+
+        if (partyDetails.getSolicitorPartyId() == null) {
+            partyDetails.setSolicitorPartyId(null);
+        }
+        if (partyDetails.getSolicitorOrgUuid() == null) {
+            partyDetails.setSolicitorOrgUuid(null);
+        }
+    }
+
+    private static void generatePartyUuidForFL401(CaseData caseData) {
+        if (caseData.getApplicantsFL401() != null) {
+            if (caseData.getApplicantsFL401().getPartyId() == null) {
+                caseData.getApplicantsFL401().setPartyId(null);
+            }
+            if (caseData.getApplicantsFL401().getSolicitorPartyId() == null) {
+                caseData.getApplicantsFL401().setSolicitorPartyId(null);
+            }
+            if (caseData.getApplicantsFL401().getSolicitorOrgUuid() == null) {
+                caseData.getApplicantsFL401().setSolicitorOrgUuid(null);
+            }
+        }
+        if (caseData.getRespondentsFL401() != null) {
+            if (caseData.getRespondentsFL401().getPartyId() == null) {
+                caseData.getRespondentsFL401().setPartyId(null);
+            }
+        }
+    }
+
     private void setApplicantFlag(CaseData caseData, Map<String, Object> caseDetails) {
 
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
@@ -83,6 +113,7 @@ public class SearchCasesDataService {
                 .collect(Collectors.toList());
 
             for (PartyDetails applicant : applicants) {
+                generatePartyUuidForC100(applicant);
                 final String partyName = applicant.getFirstName() + " " + applicant.getLastName();
                 final Flags applicantFlag = Flags.builder().partyName(partyName)
                     .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
@@ -102,6 +133,7 @@ public class SearchCasesDataService {
                 .collect(Collectors.toList());
 
             for (PartyDetails respondent : respondents) {
+                generatePartyUuidForC100(respondent);
                 final String partyName = respondent.getFirstName() + " " + respondent.getLastName();
                 final Flags respondentFlag = Flags.builder().partyName(partyName)
                     .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
