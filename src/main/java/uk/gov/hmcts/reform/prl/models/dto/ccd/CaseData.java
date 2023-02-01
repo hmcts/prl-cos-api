@@ -52,7 +52,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildComplex;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
@@ -562,7 +561,6 @@ public class CaseData implements MappableObject {
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
-    private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
 
     @JsonProperty("childrenList")
     private final String childrenList;
@@ -586,7 +584,6 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
-
 
     /**
      * Solicitor Details.
@@ -623,8 +620,6 @@ public class CaseData implements MappableObject {
      */
     private String isWithdrawRequestSent;
 
-    private DynamicMultiSelectList testChild;
-    private ChildComplex childComplex;
     /**
      *  Courtnav uploaded files.
      */
@@ -737,6 +732,7 @@ public class CaseData implements MappableObject {
 
     private String judgeDirectionsToAdmin;
     private YesOrNo doYouWantToEditTheOrder;
+    private YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     private String courtAdminNotes;
 
     @JsonUnwrapped

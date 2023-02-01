@@ -77,7 +77,6 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("*** populate child option {}",caseData.getManageOrders());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
@@ -86,11 +85,10 @@ public class ManageOrdersController {
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
-            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
+            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getAppointmentOfGuardian());
         }
-        log.info("*** populate child option casedataupdated {}",caseDataUpdated.get("childOption"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
@@ -109,7 +107,6 @@ public class ManageOrdersController {
         );
         caseData = manageOrderService.getUpdatedCaseData(caseData);
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            log.info("Court name before prepopulate: {}", caseData.getCourtName());
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
         return CallbackResponse.builder()
@@ -125,7 +122,10 @@ public class ManageOrdersController {
     public CallbackResponse prepopulateFL401CaseDetails(
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -197,7 +197,6 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        log.info("*** about to submit child option : {}", callbackRequest.getCaseDetails().getData());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
@@ -224,14 +223,13 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("******* Child Option : {}",caseData.getManageOrders().getChildOption());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getCreateSelectOrderOptions() != null
             && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
             List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
-            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
+            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

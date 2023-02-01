@@ -37,10 +37,7 @@ import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildComplex;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
@@ -76,7 +73,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -609,58 +605,6 @@ public class CallbackController {
         } catch (Exception e) {
             log.error("Error while fetching User or Org details for the logged in user ", e);
         }
-
         return caseDataUpdated;
-    }
-
-    @PostMapping(path = "/test-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Copy fl401 case name to C100 Case name")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse testEndPointForDynamicList(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
-        if (caseData.getChildren() != null) {
-            caseData.getChildren().forEach(child -> {
-                listElements.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
-                                     .label(child.getValue().getFirstName() + " "
-                                                + child.getValue().getLastName()).build());
-
-            });
-        } else if (caseData.getApplicantChildDetails() != null) {
-            caseData.getApplicantChildDetails().forEach(child -> {
-                listElements.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
-                                     .label(child.getValue().getFullName()).build());
-            });
-        }
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .listItems(listElements).build();
-
-        log.info("**Manage orders with child list {}",dynamicMultiSelectList);
-        caseData = caseData.toBuilder()
-            .testChild(dynamicMultiSelectList)
-            .childComplex(ChildComplex.builder().childrenlist(dynamicMultiSelectList).build())
-            .build();
-        return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
-            .data(caseData)
-            .build();
-    }
-
-    @PostMapping(path = "/test-about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",  content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
-        @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody CallbackRequest callbackRequest
-    ) throws Exception {
-        log.info("*** about to submit child option : {}", callbackRequest.getCaseDetails().getData());
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
