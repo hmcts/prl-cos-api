@@ -203,7 +203,7 @@ public class DraftAnOrderControllerTest {
             .build();
         when(draftAnOrderService.generateDocument(callbackRequest, caseData)).thenReturn(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData));
+        caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
 
         Assert.assertEquals(caseDataUpdated, draftAnOrderController.generateDoc("test token", callbackRequest).getData());
     }
@@ -229,7 +229,7 @@ public class DraftAnOrderControllerTest {
             .build();
         when(draftAnOrderService.generateDocument(callbackRequest, caseData)).thenReturn(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData));
+        caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
 
         Assert.assertEquals(caseDataUpdated, draftAnOrderController.prepareDraftOrderCollection("test token", callbackRequest).getData());
 
