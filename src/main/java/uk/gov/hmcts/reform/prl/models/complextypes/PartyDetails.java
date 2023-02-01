@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnu
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 
 @Data
@@ -97,5 +98,40 @@ public class PartyDetails {
             return this.isEmailAddressConfidential == YesOrNo.No;
         }
         return this.isEmailAddressConfidential == YesOrNo.Yes;
+    }
+
+    /******Below fields added for hearing request.**/
+    private UUID partyId;
+    private UUID solicitorOrgUuid;
+    private UUID solicitorPartyId;
+
+    public void setPartyId(UUID partyId) {
+        if (this.getPartyId() == null) {
+            if (partyId != null) {
+                this.partyId = partyId;
+            } else {
+                this.partyId = UUID.randomUUID();
+            }
+        }
+    }
+
+    public void setSolicitorPartyId(UUID solicitorPartyId) {
+        if (this.getSolicitorPartyId() == null && (this.getRepresentativeFirstName() != null || this.getRepresentativeLastName() != null)) {
+            if (solicitorPartyId != null) {
+                this.solicitorPartyId = solicitorPartyId;
+            } else {
+                this.solicitorPartyId = UUID.randomUUID();
+            }
+        }
+    }
+
+    public void setSolicitorOrgUuid(UUID solicitorOrgUuid) {
+        if (this.getSolicitorOrgUuid() == null) {
+            if (solicitorOrgUuid != null) {
+                this.solicitorOrgUuid = solicitorOrgUuid;
+            } else {
+                this.solicitorOrgUuid = UUID.randomUUID();
+            }
+        }
     }
 }
