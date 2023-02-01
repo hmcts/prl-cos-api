@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -32,7 +33,6 @@ import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInf
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class ServiceOfApplicationPostServiceTest {
 
     @InjectMocks
@@ -46,6 +46,13 @@ public class ServiceOfApplicationPostServiceTest {
 
     private static final String AUTH = "Auth";
     private static final String LETTER_TYPE = "RespondentServiceOfApplication";
+    private DynamicMultiSelectList dynamicMultiSelectList;
+
+    @Before
+    public void setup() {
+        dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder().label("standardDirectionsOrder").build())).build();
+    }
 
     @Test
     public void givenOnlyRepresentedRespondents_thenNoPostSent() throws Exception {
@@ -89,7 +96,7 @@ public class ServiceOfApplicationPostServiceTest {
             .id(12345L)
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.No).build())
             .finalDocument(finalDoc)
-            .serviceOfApplicationScreen1(DynamicMultiSelectList.builder().build())
+            .serviceOfApplicationScreen1(dynamicMultiSelectList)
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .respondents(List.of(element(respondent)))
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
@@ -145,7 +152,7 @@ public class ServiceOfApplicationPostServiceTest {
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
             .finalWelshDocument(finalWelshDoc)
             .c1AWelshDocument(finalWelshC1a)
-            .serviceOfApplicationScreen1(DynamicMultiSelectList.builder().build())
+            .serviceOfApplicationScreen1(dynamicMultiSelectList)
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .respondents(List.of(element(respondent1),element(respondent2)))
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
@@ -192,7 +199,7 @@ public class ServiceOfApplicationPostServiceTest {
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
             .finalDocument(finalDoc)
             .c1ADocument(finalC1a)
-            .serviceOfApplicationScreen1(DynamicMultiSelectList.builder().build())
+            .serviceOfApplicationScreen1(dynamicMultiSelectList)
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .respondents(List.of(element(respondent)))
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
@@ -255,8 +262,7 @@ public class ServiceOfApplicationPostServiceTest {
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
             .finalDocument(finalDoc)
             .c1ADocument(finalC1a)
-            .serviceOfApplicationScreen1(DynamicMultiSelectList.builder().build())
-            .orderCollection(List.of(element(OrderDetails.builder().build())))
+            .serviceOfApplicationScreen1(dynamicMultiSelectList)
             .respondents(List.of(element(respondent)))
             .orderCollection(orderCollection)
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
@@ -299,8 +305,6 @@ public class ServiceOfApplicationPostServiceTest {
             .build();
 
         List<GeneratedDocumentInfo> sentDocs = postService.sendDocs(caseData, AUTH);
-        assertTrue(sentDocs.containsAll(List.of(
-                                                toGeneratedDocumentInfo(privacyNotice)
-                                                )));
+        assertTrue(sentDocs.contains(toGeneratedDocumentInfo(privacyNotice)));
     }
 }
