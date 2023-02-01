@@ -150,16 +150,9 @@ public class SendAndReplyController extends AbstractCallbackController {
         if (ofNullable(caseData.getClosedMessages()).isPresent()) {
             caseData.getClosedMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
         }
-        //REVERT AFTER TESTING
-        log.info("caseData before allTabService update {} ", caseData);
+
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
-        log.info("caseData after allTabService update {} ", caseData);
-        log.info("caseDataMap after allTabService update ");
-        caseDataMap.forEach((key, value) -> {
-            log.info("Key " + key);
-            log.info("Value " + value);
-        });
-        //REVERT AFTER TESTING
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();
