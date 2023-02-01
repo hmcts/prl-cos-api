@@ -39,7 +39,7 @@ public class AddCafcassOfficerService {
             for (Element<Child> childElement : caseData.getChildren()) {
                 ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
                     .childId(childElement.getId().toString())
-                    .childName("Child name: " + childElement.getValue().getFirstName() + " " + childElement.getValue().getLastName())
+                    .childName(childElement.getValue().getFirstName() + " " + childElement.getValue().getLastName())
                     .build();
                 childAndCafcassOfficers.add(element(childAndCafcassOfficer));
             }
