@@ -52,11 +52,11 @@ withPipeline(type, product, component) {
   enableSlackNotifications(channel)
   disableLegacyDeployment()
 
-  after('checkout') {
+  afterAlways('checkout') {
     echo 'prl-cos-api checked out'
   }
 
-  after('test') {
+  afterAlways('test') {
     steps.junit '**/test-results/**/*.xml'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
   }
@@ -65,7 +65,7 @@ withPipeline(type, product, component) {
     env.test_environment = 'aat'
   }
 
-  after('functionalTest:aat') {
+  afterAlways('functionalTest:aat') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
   }
@@ -75,7 +75,7 @@ withPipeline(type, product, component) {
     env.test_environment = 'aat'
   }
 
-  after('functionalTest:preview') {
+  afterAlways('functionalTest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
   }
