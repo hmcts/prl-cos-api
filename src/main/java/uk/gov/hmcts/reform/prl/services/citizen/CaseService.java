@@ -174,6 +174,7 @@ public class CaseService {
                     invite.getValue().setInvitedUserId(userId);
                 }
             }
+
             processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant);
 
             caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData);
