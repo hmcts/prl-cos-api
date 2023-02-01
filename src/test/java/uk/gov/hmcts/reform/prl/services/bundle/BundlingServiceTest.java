@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.BundleApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -34,9 +35,14 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -57,6 +63,9 @@ public class BundlingServiceTest {
     private BundleApiClient bundleApiClient;
 
     @Mock
+    private CoreCaseDataApi coreCaseDataApi;
+
+    @Mock
     private AuthTokenGenerator authTokenGenerator;
 
     @Mock
@@ -67,6 +76,9 @@ public class BundlingServiceTest {
     @Mock
     private BundleCreateRequestMapper bundleCreateRequestMapper;
 
+    @Mock
+    private HearingService hearingService;
+
     @InjectMocks
     private BundlingService bundlingService;
     private BundleCreateResponse bundleCreateResponse;
@@ -74,6 +86,9 @@ public class BundlingServiceTest {
     private CaseData caseData;
 
     CaseData c100CaseData;
+    CaseData c100CaseDataOther;
+
+    CaseData c100CaseData2;
     AllegationOfHarm allegationOfHarmYes;
     Map<String, Object> caseDataMap;
 
@@ -176,6 +191,10 @@ public class BundlingServiceTest {
         List<Element<ApplicantConfidentialityDetails>> applicantConfidentialList = Collections.singletonList(
             applicantConfidential);
 
+        List<Bundle> bundleList = new ArrayList<>();
+        bundleList.add(Bundle.builder().value(BundleDetails.builder().stitchedDocument(DocumentLink.builder().build())
+            .stitchStatus("DONE").stitchedDocument(DocumentLink.builder().build()).build()).build());
+
         c100CaseData = CaseData.builder()
             .id(123456789123L)
             .languagePreferenceWelsh(No)
@@ -185,26 +204,86 @@ public class BundlingServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
-            .state(State.GATEKEEPING)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .otherDocuments(ElementUtils.wrapElements(otherDocuments))
             .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
-            .bundleConfiguration("sampleConfig.yaml")
+            .bundleInformation(BundlingInformation.builder().build())
             //.home(homefull)
             .build();
         bundleCreateRequestMapper = new BundleCreateRequestMapper();
+
+        c100CaseDataOther = CaseData.builder()
+            .id(123456789123L)
+            .languagePreferenceWelsh(Yes)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .allegationOfHarm(allegationOfHarmYes)
+            .applicants(listOfApplicants)
+            .state(State.DECISION_OUTCOME)
+            //.allegationsOfHarmYesNo(No)
+            .applicantsConfidentialDetails(applicantConfidentialList)
+            .childrenConfidentialDetails(childConfidentialList)
+            .otherDocuments(ElementUtils.wrapElements(otherDocuments))
+            .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
+            .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
+            .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
+            .bundleInformation(BundlingInformation.builder().caseBundles(bundleList).build())
+            //.home(homefull)
+            .build();
+
+        c100CaseData2 = CaseData.builder()
+            .id(123456789123L)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .allegationOfHarm(allegationOfHarmYes)
+            .applicants(listOfApplicants)
+            .state(State.DECISION_OUTCOME)
+            //.allegationsOfHarmYesNo(No)
+            .applicantsConfidentialDetails(applicantConfidentialList)
+            .childrenConfidentialDetails(childConfidentialList)
+            .otherDocuments(ElementUtils.wrapElements(otherDocuments))
+            .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
+            .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
+            .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
+            .bundleInformation(BundlingInformation.builder().caseBundles(bundleList).build())
+            //.home(homefull)
+            .build();
     }
 
     @Test
     public void testCreateBundleService() throws Exception {
         when(authTokenGenerator.generate()).thenReturn("authToken");
         BundleCreateResponse bundleCreateResponse = BundleCreateResponse.builder().documentTaskId(123).build();
-        when(bundlingService.createBundleServiceRequest(c100CaseData,"authorization"))
+        when(bundlingService.createBundleServiceRequest(c100CaseData,"eventId","authorization"))
             .thenReturn(bundleCreateResponse);
-        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseData,"authorization");
+        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseData,"eventId","authorization");
         assertEquals(bundleCreateResponse.documentTaskId, expectedResponse.documentTaskId);
     }
 
+    @Test
+    public void testCreateBundleServiceWhenLanguagePreferenceWelshAsYes() throws Exception {
+        when(authTokenGenerator.generate()).thenReturn("authToken");
+        BundleCreateResponse bundleCreateResponse = BundleCreateResponse.builder().documentTaskId(123).build();
+        when(bundlingService.createBundleServiceRequest(c100CaseData,"eventId","authorization"))
+            .thenReturn(bundleCreateResponse);
+        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseDataOther,"eventId","authorization");
+        assertEquals(bundleCreateResponse.documentTaskId, expectedResponse.documentTaskId);
+    }
+
+    @Test
+    public void testCreateBundleServiceWhenLanguagePreferenceWelshNotSet() throws Exception {
+        when(authTokenGenerator.generate()).thenReturn("authToken");
+        BundleCreateResponse bundleCreateResponse = BundleCreateResponse.builder().documentTaskId(123).build();
+        when(bundlingService.createBundleServiceRequest(c100CaseData2,"eventId","authorization"))
+            .thenReturn(bundleCreateResponse);
+        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseDataOther,"eventId","authorization");
+        assertEquals(bundleCreateResponse.documentTaskId, expectedResponse.documentTaskId);
+    }
 }

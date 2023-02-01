@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.citizen.MiamUrgencyMapperEnum;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildMiamElements;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -43,22 +44,25 @@ public class CaseDataMiamElementsMapper {
                 buildMiamOtherGroundsChecklist(c100RebuildMiamElements);
 
         caseDataBuilder
-                .applicantAttendedMiam(c100RebuildMiamElements.getMiamAttendance())
-                .familyMediatorMiam(c100RebuildMiamElements.getMiamMediatorDocument())
-                .applicantConsentMiam(c100RebuildMiamElements.getMiamConsent())
-                .otherProceedingsMiam(c100RebuildMiamElements.getMiamOtherProceedings())
-                .claimingExemptionMiam(c100RebuildMiamElements.getMiamValidReason())
-                .miamExemptionsChecklist(buildMiamExemptionsCheckList(c100RebuildMiamElements))
-                .miamDomesticViolenceChecklist(buildMiamDomesticViolenceChecklist(c100RebuildMiamElements))
-                .miamChildProtectionConcernList(buildMiamChildProtectionConcernList(c100RebuildMiamElements))
-                .miamUrgencyReasonChecklist(buildMiamUrgencyReasonChecklist(c100RebuildMiamElements))
-                .miamPreviousAttendanceChecklist(isNotEmpty(previousAttendanceChecklistEnums)
-                        ? previousAttendanceChecklistEnums.get(0) : null)
-                .miamOtherGroundsChecklist(isNotEmpty(otherGroundsChecklistEnums)
-                        ? otherGroundsChecklistEnums.get(0) : null)
-                .miamPreviousAttendanceChecklist1(previousAttendanceChecklistEnums)
-                .miamOtherGroundsChecklist1(otherGroundsChecklistEnums)
-                .miamCertificationDocumentUpload(buildDocument(c100RebuildMiamElements.getMiamCertificate()));
+            .miamDetails(MiamDetails.builder()
+                             .applicantAttendedMiam(c100RebuildMiamElements.getMiamAttendance())
+                             .familyMediatorMiam(c100RebuildMiamElements.getMiamAttendance())
+                             .applicantConsentMiam(c100RebuildMiamElements.getMiamConsent())
+                             .otherProceedingsMiam(c100RebuildMiamElements.getMiamOtherProceedings())
+                             .claimingExemptionMiam(c100RebuildMiamElements.getMiamValidReason())
+                             .miamExemptionsChecklist(buildMiamExemptionsCheckList(c100RebuildMiamElements))
+
+                             .miamDomesticViolenceChecklist(buildMiamDomesticViolenceChecklist(c100RebuildMiamElements))
+                             .miamChildProtectionConcernList(buildMiamChildProtectionConcernList(c100RebuildMiamElements))
+                             .miamUrgencyReasonChecklist(buildMiamUrgencyReasonChecklist(c100RebuildMiamElements))
+                             .miamPreviousAttendanceChecklist(isNotEmpty(previousAttendanceChecklistEnums)
+                                                                  ? previousAttendanceChecklistEnums.get(0) : null)
+                             .miamOtherGroundsChecklist(isNotEmpty(otherGroundsChecklistEnums)
+                                                            ? otherGroundsChecklistEnums.get(0) : null)
+                             .miamPreviousAttendanceChecklist1(previousAttendanceChecklistEnums)
+                             .miamOtherGroundsChecklist1(otherGroundsChecklistEnums)
+                             .miamCertificationDocumentUpload(buildDocument(c100RebuildMiamElements.getMiamCertificate()))
+                             .build());
     }
 
     private static List<MiamOtherGroundsChecklistEnum> buildMiamOtherGroundsChecklist(C100RebuildMiamElements c100RebuildMiamElements) {
