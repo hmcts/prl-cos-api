@@ -34,7 +34,7 @@ public class AddCafcassOfficerService {
 
     private List<Element<ChildAndCafcassOfficer>> prePopulateChildNameForCA(CaseData caseData,
                                                                             List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers) {
-        if (caseData.getChildren() != null && !caseData.getChildren().isEmpty()) {
+        if (caseData.getChildren() != null) {
             childAndCafcassOfficers = new ArrayList<>();
             for (Element<Child> childElement : caseData.getChildren()) {
                 ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
