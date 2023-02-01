@@ -23,6 +23,9 @@ prl:
   document:
     generate:
       uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
+  refdata:
+    username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
+    password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
 
 management:
   endpoint:

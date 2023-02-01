@@ -38,7 +38,6 @@ java:
     HEARING_API_BASEURL : http://fis-hmc-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     JUDICIAL_USERS_API: http://rd-judicial-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     STAFF_DETAILS_API: http://rd-caseworker-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-
   keyVaults:
     prl:
       secrets:
@@ -58,3 +57,5 @@ java:
         - idam-solicitor-password
         - filtered-court-ids
         - postcode-lookup-token
+        - idam-refdata-username
+        - idam-refdata-password

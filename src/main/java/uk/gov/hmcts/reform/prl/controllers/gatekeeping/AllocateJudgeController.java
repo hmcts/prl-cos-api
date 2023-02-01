@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
+import uk.gov.hmcts.reform.prl.services.RefDataSystemUserService;
 import uk.gov.hmcts.reform.prl.services.judicial.JudicialUserInfoService;
 import uk.gov.hmcts.reform.prl.services.staff.StaffUserInfoService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -52,13 +53,15 @@ public class AllocateJudgeController extends AbstractCallbackController {
 
     @Autowired
     @Qualifier("caseSummaryTab")
-    CaseSummaryTabService caseSummaryTabService;
+    private CaseSummaryTabService caseSummaryTabService;
 
     @Autowired
-    JudicialUserInfoService judicialUserInfoService;
+    private JudicialUserInfoService judicialUserInfoService;
 
     @Autowired
-    StaffUserInfoService staffUserInfoService;
+    private StaffUserInfoService staffUserInfoService;
+
+    private final RefDataSystemUserService refDataSystemUserService;
 
     @PostMapping(path = "/pre-populate-legalAdvisor-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to retrieve legal advisor details")
@@ -88,6 +91,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
         log.info("*** allocate judge details for the case id : {}", caseData.getId());
         log.info("*** ********allocate judge details for the case id before mapping : {}", caseData.getAllocatedJudge());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        //allocatedJudgeService.getAllocatedJudgeDetails(serviceAuthorization,caseDataUpdated,caseData.getLegalAdviserList());
         AllocatedJudge allocatedJudge = mapAllocatedJudge(authorization,serviceAuthorization,caseDataUpdated,caseData.getLegalAdviserList());
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
         //caseDataUpdated.put("allocatedJudge",allocatedJudge);
@@ -113,12 +117,14 @@ public class AllocateJudgeController extends AbstractCallbackController {
                         throw new RuntimeException(e);
                     }
                     log.info("*** ********PersonalCode for the selected judge id : {}", null != personalCodes ? personalCodes.length : personalCodes);
-                    JudicialUsersApiResponse judgeDetails = judicialUserInfoService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                        .personalCode(personalCodes).build(),serviceAuthorization,authorization);
+                    List<JudicialUsersApiResponse> judgeDetails = judicialUserInfoService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
+                        .personalCode(personalCodes).build(),serviceAuthorization,refDataSystemUserService.getSysUserToken());
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
-                    allocatedJudgeBuilder.judgeName(judgeDetails.getSurname());
-                    allocatedJudgeBuilder.judgeEmail(judgeDetails.getEmailId());
+                    if (null != judgeDetails && judgeDetails.size() > 0) {
+                        allocatedJudgeBuilder.judgeName(judgeDetails.get(0).getSurname());
+                        allocatedJudgeBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
+                    }
                 }
                 if (null != legalAdviserList && null != legalAdviserList.getValue()) {
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);

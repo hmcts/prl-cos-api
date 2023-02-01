@@ -159,6 +159,9 @@ prl:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+  refdata:
+    username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
+    password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
 
 
 security:

@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 
+import java.util.List;
+
 @Slf4j
 @Service
 public class JudicialUserInfoService {
@@ -14,8 +16,8 @@ public class JudicialUserInfoService {
     @Autowired
     JudicialUserDetailsApi judicialUserDetailsApi;
 
-    public JudicialUsersApiResponse getAllJudicialUserDetails(JudicialUsersApiRequest judicialUsersApiRequest, String serviceAuthorization,
-                                                              String authorization) {
+    public List<JudicialUsersApiResponse> getAllJudicialUserDetails(JudicialUsersApiRequest judicialUsersApiRequest, String serviceAuthorization,
+                                                                    String authorization) {
         return judicialUserDetailsApi.getAllJudicialUserDetails(authorization,serviceAuthorization,judicialUsersApiRequest);
     }
 
