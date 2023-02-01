@@ -12,7 +12,9 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.List;
@@ -136,14 +138,18 @@ public class WhyCantISubmitListTest {
 
     @Test
     public void testMiamCheckerAddsError() {
-        caseData = caseData.toBuilder().consentOrder(YesOrNo.No).build();
+        caseData = caseData.toBuilder().miamDetails(
+            MiamDetails.builder().build()
+        ).consentOrder(YesOrNo.No).build();
         miamChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(MIAM, MIAM_ERROR, MIAM_ERROR.getError());
     }
 
     @Test
     public void testMiamCheckerDoesNotAddError() {
-        caseData = caseData.toBuilder().consentOrder(YesOrNo.Yes).build();
+        caseData = caseData.toBuilder()
+            .miamDetails(MiamDetails.builder().build())
+            .consentOrder(YesOrNo.Yes).build();
         miamChecker.isFinished(caseData);
         verify(taskErrorService).removeError(MIAM_ERROR);
     }
@@ -214,7 +220,11 @@ public class WhyCantISubmitListTest {
 
     @Test
     public void testAttendingTheHearingCheckerAddsError() {
-        caseData = caseData.toBuilder().isWelshNeeded(YesOrNo.Yes).build();
+        caseData = caseData.toBuilder()
+                .attendHearing(AttendHearing.builder()
+                                   .isWelshNeeded(YesOrNo.Yes)
+                                   .build())
+ .build();
         attendingTheHearingChecker.isStarted(caseData);
         verify(taskErrorService).addEventError(ATTENDING_THE_HEARING, ATTENDING_THE_HEARING_ERROR, ATTENDING_THE_HEARING_ERROR.getError());
     }
