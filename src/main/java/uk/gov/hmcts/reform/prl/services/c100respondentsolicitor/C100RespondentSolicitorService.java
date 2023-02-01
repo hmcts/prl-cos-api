@@ -350,7 +350,7 @@ public class C100RespondentSolicitorService {
                     if (respondent.getValue().getResponse() != null
                         && !(YesOrNo.Yes.equals(respondent.getValue().getResponse().getC7ResponseSubmitted()))) {
                         solicitorRepresentedParties.add(respondent);
-                    } else if (respondent.getValue().getResponse() == null) {
+                    } else {
                         solicitorRepresentedParties.add(respondent);
                     }
                 });
@@ -360,11 +360,10 @@ public class C100RespondentSolicitorService {
 
     private FindUserCaseRolesResponse findUserCaseRoles(CaseData caseData, String authorisation) {
         log.info("findUserCaseRoles : caseId is:: " + caseData.getId());
-        FindUserCaseRolesResponse findUserCaseRolesResponse = ccdDataStoreService.findUserCaseRoles(
+        return ccdDataStoreService.findUserCaseRoles(
             String.valueOf(caseData.getId()),
             authorisation
         );
-        return findUserCaseRolesResponse;
     }
 
     public Map<String, Object> populateSolicitorRespondentList(CallbackRequest callbackRequest, String authorisation) {

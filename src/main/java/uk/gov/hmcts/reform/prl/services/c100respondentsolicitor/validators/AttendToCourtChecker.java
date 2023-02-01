@@ -70,43 +70,51 @@ public class AttendToCourtChecker implements RespondentEventChecker {
     }
 
     private static void respondentIntermediaryNeeds(Optional<AttendToCourt> attendToCourt, List<Optional<?>> fields) {
-        Optional<YesOrNo> respondentIntermediaryNeeds = ofNullable(attendToCourt.get().getRespondentIntermediaryNeeds());
-        fields.add(respondentIntermediaryNeeds);
-        if (respondentIntermediaryNeeds.isPresent() && respondentIntermediaryNeeds.equals(Optional.of((YesOrNo.Yes)))) {
-            fields.add(ofNullable(attendToCourt.get().getRespondentIntermediaryNeedDetails()));
+        if (attendToCourt.isPresent()) {
+            Optional<YesOrNo> respondentIntermediaryNeeds = ofNullable(attendToCourt.get().getRespondentIntermediaryNeeds());
+            fields.add(respondentIntermediaryNeeds);
+            if (respondentIntermediaryNeeds.isPresent() && respondentIntermediaryNeeds.equals(Optional.of((YesOrNo.Yes)))) {
+                fields.add(ofNullable(attendToCourt.get().getRespondentIntermediaryNeedDetails()));
+            }
         }
     }
 
     private static void respondentSpecialArrangements(Optional<AttendToCourt> attendToCourt, List<Optional<?>> fields) {
-        Optional<YesOrNo> respondentSpecialArrangements = ofNullable(attendToCourt.get().getRespondentSpecialArrangements());
-        fields.add(respondentSpecialArrangements);
-        if (respondentSpecialArrangements.isPresent() && respondentSpecialArrangements.equals(Optional.of((YesOrNo.Yes)))) {
-            fields.add(ofNullable(attendToCourt.get().getRespondentSpecialArrangementDetails()));
+        if (attendToCourt.isPresent()) {
+            Optional<YesOrNo> respondentSpecialArrangements = ofNullable(attendToCourt.get().getRespondentSpecialArrangements());
+            fields.add(respondentSpecialArrangements);
+            if (respondentSpecialArrangements.isPresent() && respondentSpecialArrangements.equals(Optional.of((YesOrNo.Yes)))) {
+                fields.add(ofNullable(attendToCourt.get().getRespondentSpecialArrangementDetails()));
+            }
         }
     }
 
     private static void haveAnyDisability(Optional<AttendToCourt> attendToCourt, List<Optional<?>> fields) {
-        Optional<YesOrNo> haveAnyDisability = ofNullable(attendToCourt.get().getHaveAnyDisability());
-        fields.add(haveAnyDisability);
-        if (haveAnyDisability.isPresent() && haveAnyDisability.equals(Optional.of((YesOrNo.Yes)))) {
-            fields.add(ofNullable(attendToCourt.get().getDisabilityNeeds()));
+        if (attendToCourt.isPresent()) {
+            Optional<YesOrNo> haveAnyDisability = ofNullable(attendToCourt.get().getHaveAnyDisability());
+            fields.add(haveAnyDisability);
+            if (haveAnyDisability.isPresent() && haveAnyDisability.equals(Optional.of((YesOrNo.Yes)))) {
+                fields.add(ofNullable(attendToCourt.get().getDisabilityNeeds()));
+            }
         }
     }
 
     private static void isRespondentNeededInterpreter(Optional<AttendToCourt> attendToCourt, List<Optional<?>> fields) {
-        Optional<YesOrNo> isRespondentNeededInterpreter = ofNullable(attendToCourt.get().getIsRespondentNeededInterpreter());
-        fields.add(isRespondentNeededInterpreter);
-        if (isRespondentNeededInterpreter.isPresent() && isRespondentNeededInterpreter.equals(Optional.of((YesOrNo.Yes)))) {
-            List<RespondentInterpreterNeeds> respondentInterpreterNeeds = attendToCourt.get()
-                .getRespondentInterpreterNeeds()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-            for (RespondentInterpreterNeeds interpreterNeeds : respondentInterpreterNeeds) {
-                fields.add(ofNullable(interpreterNeeds.getParty()));
-                fields.add(ofNullable(interpreterNeeds.getRelationName()));
-                fields.add(ofNullable(interpreterNeeds.getRequiredLanguage()));
+        if (attendToCourt.isPresent()) {
+            Optional<YesOrNo> isRespondentNeededInterpreter = ofNullable(attendToCourt.get().getIsRespondentNeededInterpreter());
+            fields.add(isRespondentNeededInterpreter);
+            if (isRespondentNeededInterpreter.isPresent() && isRespondentNeededInterpreter.equals(Optional.of((YesOrNo.Yes)))) {
+                List<RespondentInterpreterNeeds> respondentInterpreterNeeds = attendToCourt.get()
+                    .getRespondentInterpreterNeeds()
+                    .stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+                for (RespondentInterpreterNeeds interpreterNeeds : respondentInterpreterNeeds) {
+                    fields.add(ofNullable(interpreterNeeds.getParty()));
+                    fields.add(ofNullable(interpreterNeeds.getRelationName()));
+                    fields.add(ofNullable(interpreterNeeds.getRequiredLanguage()));
 
+                }
             }
         }
     }
