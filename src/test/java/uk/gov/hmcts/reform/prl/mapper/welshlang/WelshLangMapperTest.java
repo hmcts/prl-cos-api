@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Arrays;
@@ -28,7 +29,10 @@ public class WelshLangMapperTest {
         List<Element<WelshNeed>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData data = CaseData.builder().ordersApplyingFor(Arrays.asList(OrderTypeEnum.childArrangementsOrder))
-            .welshNeeds(listOfChildren).build();
+            .attendHearing(AttendHearing.builder()
+                               .welshNeeds(listOfChildren)
+                               .build())
+            .build();
 
         // Get the Welsh Value of each object using Welsh Mapper
         Map<String, Object> caseDataMap  = AppObjectMapper.getObjectMapper()
@@ -61,7 +65,9 @@ public class WelshLangMapperTest {
                                                                        .orderType(Arrays.asList(
                                                                            FL401OrderTypeEnum.nonMolestationOrder))
                                                                        .build())
-            .welshNeeds(listOfChildren).build();
+            .attendHearing(AttendHearing.builder()
+                               .welshNeeds(listOfChildren)
+                               .build()).build();
 
         // Get the Welsh Value of each object using Welsh Mapper
         Map<String, Object> caseDataMap  = AppObjectMapper.getObjectMapper()
