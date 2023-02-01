@@ -44,8 +44,10 @@ public class CaseDataService {
     private final  AuthTokenGenerator authTokenGenerator;
 
     public CafCassResponse getCaseData(String authorisation, String serviceAuthorisation, String startDate, String endDate) throws IOException {
-        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
 
+        log.info("Search API start date - {}, end date - {}", startDate, endDate);
+
+        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -58,11 +60,11 @@ public class CaseDataService {
             authTokenGenerator.generate(),
             cafCassSearchCaseTypeId
         );
+        log.debug("CCD response: " + objectMapper.writeValueAsString(searchResult));
+
         CafCassResponse cafCassResponse = objectMapper.convertValue(searchResult,
                                                              CafCassResponse.class);
-        log.info("cafCassResponse11111 ==> {}",cafCassResponse);
         cafCassFilter.filter(cafCassResponse);
-        log.info("cafCassResponse222 ==> {}",cafCassResponse);
         getHearingDetails(authorisation,cafCassResponse);
         return cafCassResponse;
     }
