@@ -14,5 +14,4 @@ public class TestConstants {
     public static final String TEST_RESPONDENT_FIRST_NAME = "Zdzislaw";
     public static final String TEST_RESPONDENT_LAST_NAME = "Nowakowski";
     public static final String TEST_RESPONDENT_NAME = TEST_RESPONDENT_FIRST_NAME + " " + TEST_RESPONDENT_LAST_NAME;
-
 }

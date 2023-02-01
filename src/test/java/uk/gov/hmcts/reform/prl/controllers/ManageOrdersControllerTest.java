@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -39,6 +38,7 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -59,7 +59,6 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 
-@Ignore
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageOrdersControllerTest {
@@ -98,6 +97,8 @@ public class ManageOrdersControllerTest {
     @Mock
     private UserDetails userDetails;
 
+    @Mock
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     PartyDetails applicant;
 
@@ -118,7 +119,6 @@ public class ManageOrdersControllerTest {
             .build();
     }
 
-    @Ignore
     @Test
     public void testSubmitApplicationEventValidation() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
@@ -156,7 +156,6 @@ public class ManageOrdersControllerTest {
         assertNotNull(callbackResponse);
     }
 
-    @Ignore
     @Test
     public void testPopulatePreviewOrderWhenOrderUploaded() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
@@ -438,6 +437,7 @@ public class ManageOrdersControllerTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(ManageOrders.builder().build())
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .courtName("testCourt")
@@ -500,6 +500,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .courtName("testCourt")
+            .manageOrders(ManageOrders.builder().build())
             .children(listOfChildren)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .childrenList("Child 1: TestName\n")
@@ -561,6 +562,7 @@ public class ManageOrdersControllerTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .fl401FamilymanCaseNumber("12345")
             .childrenList("Child 1: TestName\n")
+            .manageOrders(ManageOrders.builder().build())
             .selectedOrder(
                 "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
                     + "enforcement application (C82)\\n\\n")

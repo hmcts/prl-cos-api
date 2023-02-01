@@ -1,11 +1,14 @@
 package uk.gov.hmcts.reform.prl.models.common.dynamic;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Representation of a CCD Dynamic List which is then converted to a select dropdown list.
@@ -27,18 +30,18 @@ public class DynamicMultiSelectList {
     @JsonProperty("list_items")
     private List<DynamicMultiselectListElement> listItems;
 
-    //    @JsonIgnore
-    //    public String getValueLabel() {
-    //        return value == null ? null : value.toString();
-    //    }
-    //
-    //    @JsonIgnore
-    //    public UUID getValueCodeAsUuid() {
-    //        return Optional.ofNullable(getValueCode()).map(UUID::fromString).orElse(null);
-    //    }
-    //
-    //    @JsonIgnore
-    //    public String getValueCode() {
-    //        return value == null ? null : value.toString();
-    //    }
+    @JsonIgnore
+    public String getValueLabel() {
+        return value == null ? null : value.toString();
+    }
+
+    @JsonIgnore
+    public UUID getValueCodeAsUuid() {
+        return Optional.ofNullable(getValueCode()).map(UUID::fromString).orElse(null);
+    }
+
+    @JsonIgnore
+    public String getValueCode() {
+        return value == null ? null : value.toString();
+    }
 }
