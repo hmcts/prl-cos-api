@@ -350,7 +350,7 @@ public class C100RespondentSolicitorService {
                     if (respondent.getValue().getResponse() != null
                         && !(YesOrNo.Yes.equals(respondent.getValue().getResponse().getC7ResponseSubmitted()))) {
                         solicitorRepresentedParties.add(respondent);
-                    } else {
+                    } else if (respondent.getValue().getResponse() == null) {
                         solicitorRepresentedParties.add(respondent);
                     }
                 });
