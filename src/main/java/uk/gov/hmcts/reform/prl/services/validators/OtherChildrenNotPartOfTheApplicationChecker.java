@@ -56,9 +56,6 @@ public class OtherChildrenNotPartOfTheApplicationChecker implements EventChecker
             for (OtherChildrenNotInTheCase c : children) {
                 log.debug("validateOtherChildrenNotInTheCase - validateMandatoryFieldsCompleted :{} ",validateMandatoryFieldsCompleted(c));
                 if (!(validateMandatoryFieldsCompleted(c))) {
-                    taskErrorService.addEventError(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
-                                                   OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION_ERROR,
-                                                   OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION_ERROR.getError());
                     return false;
                 }
             }
@@ -106,17 +103,6 @@ public class OtherChildrenNotPartOfTheApplicationChecker implements EventChecker
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 
-    }
-
-    private boolean validateAnyFieldStarted(OtherChildrenNotInTheCase c) {
-
-        List<Optional<?>> fields = new ArrayList<>();
-        fields.add(ofNullable(c.getFirstName()));
-        fields.add(ofNullable(c.getLastName()));
-        fields.add(ofNullable(c.getDateOfBirth()));
-        fields.add(ofNullable(c.getGender()));
-        fields.add(ofNullable(c.getOtherGender()));
-        return  fields.stream().anyMatch(Optional::isPresent);
     }
 
     @Override

@@ -34,7 +34,7 @@ public enum Event {
     OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION("otherChildNotInTheCase","Other children not in the case"),
     CHILDREN_AND_APPLICANTS("childrenAndApplicants","Children and applicants"),
     CHILDREN_AND_RESPONDENTS("childrenAndRespondents","Children and respondents"),
-    CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION("childrenAndOtherPeopleInThisApplication","Children and other people in this application"),
+    CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION("childrenAndOtherPeople","Children and other people"),
 
     // FL401 Events
     FL401_CASE_NAME("fl401CaseName", "Case name"),
