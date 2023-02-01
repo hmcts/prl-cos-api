@@ -22,8 +22,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class AddCafcassOfficerService {
 
-    public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
-
     private final ApplicationsTabService applicationsTabService;
 
     public List<Element<ChildAndCafcassOfficer>> prePopulateChildName(CaseData caseData) {
@@ -41,7 +39,8 @@ public class AddCafcassOfficerService {
             for (Element<Child> childElement : caseData.getChildren()) {
                 ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
                     .childId(childElement.getId().toString())
-                    .childName(childElement.getValue().getFirstName() + " " + childElement.getValue().getLastName()).build();
+                    .childName("Child name: " + childElement.getValue().getFirstName() + " " + childElement.getValue().getLastName())
+                    .build();
                 childAndCafcassOfficers.add(element(childAndCafcassOfficer));
             }
         }
@@ -72,6 +71,6 @@ public class AddCafcassOfficerService {
                     .build();
                 children.set(children.indexOf(child), element(child.getId(), amendedChild));
             });
-        caseDataUpdated.put(CHILD_DETAILS_TABLE, applicationsTabService.getChildDetails(caseData));
+        caseDataUpdated.put("childDetailsTable", applicationsTabService.getChildDetails(caseData));
     }
 }

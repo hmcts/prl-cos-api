@@ -24,7 +24,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Slf4j
 @RequiredArgsConstructor
 public class AddCafcassOfficerController {
-    public static final String CHILD_AND_CAFCASS_OFFICERS = "childAndCafcassOfficers";
+
     private final ObjectMapper objectMapper;
     private final AddCafcassOfficerService addCafcassOfficerService;
 
@@ -34,7 +34,7 @@ public class AddCafcassOfficerController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = addCafcassOfficerService.prePopulateChildName(caseData);
-        caseDataUpdated.put(CHILD_AND_CAFCASS_OFFICERS, childAndCafcassOfficers);
+        caseDataUpdated.put("childAndCafcassOfficers", childAndCafcassOfficers);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
