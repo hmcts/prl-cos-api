@@ -17,7 +17,7 @@ public class SpecialArrangementsGenerator implements  FieldGenerator {
     }
 
     private String isSpecialArrangementAvailable(CaseData caseData) {
-        return YesOrNo.Yes.equals(caseData.getIsSpecialArrangementsRequired())
+        return YesOrNo.Yes.equals(caseData.getAttendHearing().getIsSpecialArrangementsRequired())
             ? YesOrNo.Yes.getDisplayedValue() : YesOrNo.No.getDisplayedValue();
     }
 }
