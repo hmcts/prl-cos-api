@@ -111,6 +111,12 @@ uk:
             CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION: b6224e6a-f55c-46f8-bfc7-631d273070a4
             CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
             CITIZEN_CASE_SUBMISSION: 1e9c07a2-e565-4b16-9ead-bd49206ba8de
+            HEARING_DETAILS: 5eaadfec-e2c3-4013-b3bd-22412041f4fa
+            APPLICANT_SOLICITOR_HEARING_DETAILS: 30b28527-4c0e-4cda-9647-fff506e4ade5
+            RESPONDENT_SOLICITOR_HEARING_DETAILS: 1c839744-7915-409f-982f-faf81d60e0e8
+            HEARING_CHANGES: cafed1bc-a52e-43b9-b5a8-b28c7d6a92ba
+            HEARING_CANCELLED: 408a5116-a9f5-42ce-afc2-7caec641498d
+
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -217,6 +223,11 @@ courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
+locationfinder:
+  api:
+    url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
+    endpoint: /refdata/location/court-venues/services
+
 launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
 
@@ -265,7 +276,7 @@ document:
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
       fl401_fl406_draft_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Draft.docx
-      fl401_fl406_draft_filename: Power_of_arrest.pdf
+      fl401_fl406_draft_filename: Power_of_arrest_draft.pdf
       fl401_fl406_english_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Final.docx
       fl401_fl406_engllish_filename: Power_of_arrest.pdf
       fl401_fl406_welsh_draft_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Draft.docx
@@ -403,6 +414,13 @@ bundle:
   api:
     url: ${BUNDLE_URL:}
   english:
-    config: ${BUNDLE_ENGLISH_CONFIG:sample-config.yaml}
+    config: ${BUNDLE_ENGLISH_CONFIG:prl-bundle-config.yaml}
   welsh:
-    config: ${BUNDLE_WELSH_CONFIG:sample-config.yaml}
+    config: ${BUNDLE_WELSH_CONFIG:prl-bundle-config.yaml}
+
+courts:
+  filter: ${COURT_IDS_TO_FILTER:}
+
+fis_hearing:
+  api:
+    url: ${HEARING_API_BASEURL:http://fis-hmc-api-demo.service.core-compute-demo.internal}

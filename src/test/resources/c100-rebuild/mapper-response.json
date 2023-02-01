@@ -366,7 +366,7 @@
         "dateStarted":null,
         "dateEnded":null,
         "typeOfOrder":[
-          "superviosionOrder"
+          "supervisionOrder"
         ],
         "otherTypeOfOrder":null,
         "nameOfJudge":null,
@@ -391,7 +391,7 @@
         "dateStarted":null,
         "dateEnded":null,
         "typeOfOrder":[
-          "superviosionOrder"
+          "supervisionOrder"
         ],
         "otherTypeOfOrder":null,
         "nameOfJudge":null,
@@ -416,7 +416,7 @@
         "dateStarted":null,
         "dateEnded":null,
         "typeOfOrder":[
-          "superviosionOrder"
+          "supervisionOrder"
         ],
         "otherTypeOfOrder":null,
         "nameOfJudge":null,
@@ -806,7 +806,7 @@
   "jurisdictionIssue":"Yes",
   "jurisdictionIssueGiveReason":"India",
   "requestToForeignAuthority":"No",
-  "c100RebuildInternationalElements":"{\n  \"ie_internationalStart\":\"Yes\",\n  \"ie_provideDetailsStart\":\"Europe\",\n  \"ie_internationalParents\":\"No\",\n  \"ie_internationalJurisdiction\":\"Yes\",\n  \"ie_provideDetailsJurisdiction\":\"India\",\n  \"ie_internationalRequest\":\"No\"\n}",
+  "c100RebuildInternationalElements":"{\n  \"ie_internationalStart\":\"Yes\",\n  \"ie_provideDetailsStart\":\"Europe\",\n  \"ie_internationalParents\":\"Yes\",\n  \"ie_internationalJurisdiction\":\"Yes\",\n  \"ie_provideDetailsJurisdiction\":\"India\",\n  \"ie_internationalRequest\":\"No\"\n}\n",
   "c100RebuildReasonableAdjustments":"{\n  \"ra_typeOfHearing\":[\n    \"videoHearing\",\n    \"phoneHearing\"\n  ],\n  \"ra_languageNeeds\":[\n    \"speakInWelsh\",\n    \"readAndWriteInWelsh\",\n    \"needInterpreterInCertainLanguage\"\n  ],\n  \"ra_needInterpreterInCertainLanguageDetails\":\"Hindi interpretor \",\n  \"ra_specialArrangements\":[\n    \"separateWaitingRoom\",\n    \"separateExitEntrance\",\n    \"screenWithOtherPeople\",\n    \"separateToilets\",\n    \"visitCourtBeforeHearing\",\n    \"videoLinks\",\n    \"specialArrangementsOther\"\n  ],\n  \"ra_specialArrangementsOtherSubField\":\"Do you or the children need special arrangements at court?\",\n  \"ra_disabilityRequirements\":[\n    \"documentsHelp\",\n    \"communicationHelp\",\n    \"extraSupport\",\n    \"feelComfortableSupport\",\n    \"helpTravellingMovingBuildingSupport\"\n  ],\n  \"ra_documentInformation\":[\n    \"specifiedColorDocuments\",\n    \"easyReadFormatDocuments\",\n    \"brailleDocuments\",\n    \"largePrintDocuments\",\n    \"audioTranslationDocuments\",\n    \"readOutDocuments\",\n    \"emailInformation\",\n    \"documentHelpOther\"\n  ],\n  \"ra_specifiedColorDocumentsDetails\":\"Red\",\n  \"ra_largePrintDocumentsDetails\":\"Very large doc\",\n  \"ra_otherDetails\":\"Other format\",\n  \"ra_communicationHelp\":[\n    \"hearingLoop\",\n    \"infraredReceiver\",\n    \"needToBeClosedWithSpeaker\",\n    \"lipSpeaker\",\n    \"signLanguageInterpreter\",\n    \"speechToTextReporter\",\n    \"needExtraTime\",\n    \"visitCourtBeforeHearing\",\n    \"explanationOfCourt\",\n    \"intermediary\",\n    \"communicationHelpOther\"\n  ],\n  \"ra_signLanguageInterpreterDetails\":\"Sign lang\",\n  \"ra_communicationHelpOtherDetails\":\"I need help communicating and understanding\\r\\n\",\n  \"ra_supportCourt\":[\n    \"supportWorkerCarer\",\n    \"friendFamilyMember\",\n    \"assistanceGuideDog\",\n    \"therapyAnimal\",\n    \"supportCourtOther\"\n  ],\n  \"ra_supportWorkerCarerSubField\":\"A support worker or carer\",\n  \"ra_friendFamilyMemberSubField\":\"A friend or family member\",\n  \"ra_therapyAnimalSubField\":\"Therapy animal\",\n  \"ra_supportCourtOtherSubField\":\"Other need\",\n  \"ra_feelComportable\":[\n    \"appropriateLighting\",\n    \"regularBreaks\",\n    \"spaceUpAndMoveAround\",\n    \"feelComportableOther\"\n  ],\n  \"ra_appropriateLightingSubField\":\"Appropriate lighting\",\n  \"ra_feelComportableOtherSubField\":\"Other feel comfortable\",\n  \"ra_travellingCourt\":[\n    \"parkingSpace\",\n    \"wheelchairAccess\",\n    \"venueWheelchair\",\n    \"accessToilet\",\n    \"helpUsingLift\",\n    \"differentTypeChair\",\n    \"guideBuilding\",\n    \"travellingCourtOther\"\n  ],\n  \"ra_parkingSpaceSubField\":\"Parking space close to the venue\",\n  \"ra_differentTypeChairSubField\":\"A different type of chair\",\n  \"ra_travellingCourtOtherSubField\":\"Other travelling court\"\n}",
   "c100RebuildTypeOfOrder":"{\n  \"too_courtOrder\":[\n    \"whoChildLiveWith\",\n    \"childTimeSpent\",\n    \"stopOtherPeopleDoingSomething\",\n    \"resolveSpecificIssue\"\n  ],\n  \"too_stopOtherPeopleDoingSomethingSubField\":[\n    \"changeChildrenNameSurname\",\n    \"allowMedicalTreatment\",\n    \"takingChildOnHoliday\",\n    \"relocateChildrenDifferentUkArea\",\n    \"relocateChildrenOutsideUk\"\n  ],\n  \"too_resolveSpecificIssueSubField\":[\n    \"specificHoliday\",\n    \"whatSchoolChildrenWillGoTo\",\n    \"religiousIssue\",\n    \"changeChildrenNameSurnameA\",\n    \"medicalTreatment\",\n    \"relocateChildrenDifferentUkAreaA\",\n    \"relocateChildrenOutsideUkA\",\n    \"returningChildrenToYourCare\"\n  ],\n  \"too_shortStatement\":\"Describe what you want the court to do regarding the children in this application\"\n}",
   "c100RebuildHearingWithoutNotice":"{\n  \"hwn_hearingPart1\":\"Yes\",\n  \"hwn_reasonsForApplicationWithoutNotice\":\"Give details of why you’re asking for a without notice hearing\",\n  \"hwn_doYouNeedAWithoutNoticeHearing\":\"Yes\",\n  \"hwn_doYouNeedAWithoutNoticeHearingDetails\":\"hearing without notice text 1\",\n  \"hwn_doYouRequireAHearingWithReducedNotice\":\"Yes\",\n  \"hwn_doYouRequireAHearingWithReducedNoticeDetails\":\"hearing without notice text 2\"\n}",

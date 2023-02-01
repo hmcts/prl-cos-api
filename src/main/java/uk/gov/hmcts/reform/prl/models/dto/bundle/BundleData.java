@@ -17,7 +17,7 @@ public class BundleData {
     @JsonProperty("id")
     public String id;
     @JsonProperty("data")
-    public Data data;
+    public BundlingData data;
     @JsonProperty("caseBundles")
     public List<Bundle> caseBundles;
 
