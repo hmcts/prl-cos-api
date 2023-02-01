@@ -10,9 +10,9 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -86,19 +86,20 @@ public class CaseService {
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)) {
             UserDetails userDetails = idamClient.getUserDetails(authToken);
             UserInfo userInfo = UserInfo
-                    .builder()
-                    .idamId(userDetails.getId())
-                    .firstName(userDetails.getForename())
-                    .lastName(userDetails.getSurname().orElse(null))
-                    .emailAddress(userDetails.getEmail())
-                    .build();
+                .builder()
+                .idamId(userDetails.getId())
+                .firstName(userDetails.getForename())
+                .lastName(userDetails.getSurname().orElse(null))
+                .emailAddress(userDetails.getEmail())
+                .build();
 
             Court closestChildArrangementsCourt = buildCourt(caseData);
 
-            CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData.toBuilder()
-                    .userInfo(wrapElements(userInfo))
-                    .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
-                    .build());
+            CaseData updatedCaseData = caseDataMapper
+                .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
+                                          .courtName((closestChildArrangementsCourt != null)
+                                                         ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
+                                          .build());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
@@ -113,37 +114,17 @@ public class CaseService {
         return null;
     }
 
-    public List<CaseData> retrieveCases(String authToken, String s2sToken, String role, String userId) {
-        Map<String, String> searchCriteria = new HashMap<>();
-
-        searchCriteria.put("sortDirection", "desc");
-        searchCriteria.put("page", "1");
-
-        return searchCasesWith(authToken, s2sToken, searchCriteria);
-    }
-
     public List<CaseData> retrieveCases(String authToken, String s2sToken) {
         Map<String, String> searchCriteria = new HashMap<>();
 
         searchCriteria.put("sortDirection", "desc");
         searchCriteria.put("page", "1");
 
-        return searchCasesLinkedToCitizen(authToken, s2sToken, searchCriteria);
+        return searchCasesLinkedToUser(authToken, s2sToken, searchCriteria);
     }
 
-    private List<CaseData> searchCasesWith(String authToken, String s2sToken, Map<String, String> searchCriteria) {
-
-        UserDetails userDetails = idamClient.getUserDetails(authToken);
-        List<CaseDetails> caseDetails = new ArrayList<>();
-        caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
-        return caseDetails
-            .stream()
-            .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
-            .collect(Collectors.toList());
-    }
-
-    private List<CaseData> searchCasesLinkedToCitizen(String authToken, String s2sToken,
-                                                      Map<String, String> searchCriteria) {
+    private List<CaseData> searchCasesLinkedToUser(String authToken, String s2sToken,
+                                                   Map<String, String> searchCriteria) {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
         List<CaseDetails> caseDetails = new ArrayList<>();
@@ -180,7 +161,7 @@ public class CaseService {
             coreCaseDataApi.getCase(anonymousUserToken, s2sToken, caseId).getData(),
             CaseData.class
         );
-
+        log.info("caseId {}", caseId);
         if ("Valid".equalsIgnoreCase(findAccessCodeStatus(accessCode, caseData))) {
             UUID partyId = null;
             YesOrNo isApplicant = YesOrNo.Yes;
@@ -193,6 +174,7 @@ public class CaseService {
                     invite.getValue().setInvitedUserId(userId);
                 }
             }
+
             processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant);
 
             caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData);
@@ -207,24 +189,28 @@ public class CaseService {
         User user = User.builder().email(emailId)
             .idamId(userId).build();
         if (partyId != null) {
-            if (YesOrNo.Yes.equals(isApplicant)) {
-                for (Element<PartyDetails> partyDetails : caseData.getApplicants()) {
-                    if (partyId.equals(partyDetails.getId())) {
-                        partyDetails.getValue().setUser(user);
-                    }
-                }
-            } else {
-                for (Element<PartyDetails> partyDetails : caseData.getRespondents()) {
-                    if (partyId.equals(partyDetails.getId())) {
-                        partyDetails.getValue().setUser(user);
-                    }
-                }
-            }
+            getValuesFromPartyDetails(caseData, partyId, isApplicant, user);
         } else {
             if (YesOrNo.Yes.equals(isApplicant)) {
                 caseData.getApplicantsFL401().setUser(user);
             } else {
                 caseData.getRespondentsFL401().setUser(user);
+            }
+        }
+    }
+
+    private void getValuesFromPartyDetails(CaseData caseData, UUID partyId, YesOrNo isApplicant, User user) {
+        if (YesOrNo.Yes.equals(isApplicant)) {
+            for (Element<PartyDetails> partyDetails : caseData.getApplicants()) {
+                if (partyId.equals(partyDetails.getId())) {
+                    partyDetails.getValue().setUser(user);
+                }
+            }
+        } else {
+            for (Element<PartyDetails> partyDetails : caseData.getRespondents()) {
+                if (partyId.equals(partyDetails.getId())) {
+                    partyDetails.getValue().setUser(user);
+                }
             }
         }
     }
@@ -245,7 +231,7 @@ public class CaseService {
             .filter(x -> accessCode.equals(x.getAccessCode()))
             .collect(Collectors.toList());
 
-        if (matchingCaseInvite.size() > 0) {
+        if (!matchingCaseInvite.isEmpty()) {
             accessCodeStatus = "Valid";
             for (CaseInvite caseInvite : matchingCaseInvite) {
                 if ("Yes".equals(caseInvite.getHasLinked())) {

@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
@@ -29,6 +30,7 @@ import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -83,6 +85,9 @@ public class CallbackControllerFT {
 
     @MockBean
     private CourtFinderService courtLocatorService;
+
+    @MockBean
+    private LocationRefDataService locationRefDataService;
 
     private static final String MIAM_VALIDATION_REQUEST_ERROR = "requests/call-back-controller-miam-request-error.json";
     private static final String MIAM_VALIDATION_REQUEST_NO_ERROR = "requests/call-back-controller-miam-request-no-error.json";
@@ -253,7 +258,7 @@ public class CallbackControllerFT {
     public void givenC100Case_whenRpaResent_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
 
-        mockMvc.perform(post("/update-applicant-child-names")
+        mockMvc.perform(post("/update-party-details")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
@@ -307,20 +312,28 @@ public class CallbackControllerFT {
         when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(Court.builder().build());
         when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.of(CourtEmailAddress.builder()
             .address("123@gamil.com").build()));
+        when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement
+                                                                                                   .builder().build()));
         String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
-        mockMvc.perform(post("/pre-populate-court-details").contentType(MediaType.APPLICATION_JSON).content(requestBody)
-            .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+        mockMvc.perform(post("/pre-populate-court-details")
+                            .header("Authorization", "auth")
+                            .contentType(MediaType.APPLICATION_JSON).content(requestBody)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
                 .andExpect(jsonPath("data.localCourtAdmin[0].value.email").value("123@gamil.com")).andReturn();
     }
 
     @Test
     public void givenC100CasePrePopulateCourtDetailsWithoutValidCourt() throws Exception {
         when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(null);
+        when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement
+                                                                                                   .builder().build()));
         String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
-        mockMvc.perform(post("/pre-populate-court-details").contentType(MediaType.APPLICATION_JSON).content(requestBody)
-                .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+        mockMvc.perform(post("/pre-populate-court-details")
+                            .header("Authorization", "auth")
+                            .contentType(MediaType.APPLICATION_JSON).content(requestBody)
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
             .andExpect(jsonPath("data.localCourtAdmin").doesNotHaveJsonPath()).andReturn();
     }
-
-
 }
