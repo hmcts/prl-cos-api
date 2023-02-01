@@ -53,6 +53,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
@@ -215,7 +216,9 @@ public class CaseData implements MappableObject {
 
     private List<Element<ChildrenAndRespondentRelation>> childAndRespondentRelations;
 
+    private List<Element<ChildrenAndOtherPeopleRelation>> buffChildAndOtherPeopleRelations;
 
+    private List<Element<ChildrenAndOtherPeopleRelation>> childAndOtherPeopleRelations;
     /**
      * Type of application.
      */
