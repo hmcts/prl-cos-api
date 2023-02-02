@@ -36,7 +36,7 @@ public class CafCassFilter {
             caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
             caseStateList = caseStateList.stream().map(String::trim).collect(Collectors.toList());
             filterCaseByApplicationCaseType(cafCassResponse);
-            filterCasesByApplicationValidPostcode(cafCassResponse);
+            //filterCasesByApplicationValidPostcode(cafCassResponse);
             cafCassResponse.setTotal(cafCassResponse.getCases().size());
         } else {
             log.error(CAFCAAS_CASE_TYPE_OF_APPLICATION_LIST_NOT_CONFIGURED);
@@ -44,10 +44,63 @@ public class CafCassFilter {
     }
 
     private void filterCaseByApplicationCaseType(CafCassResponse cafCassResponse) {
+        log.info("Cafcass response before filtering -> {}", cafCassResponse.getCases().size());
         List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases().stream()
             .filter(filterByCaseTypeAndState())
             .collect(Collectors.toList());
+        log.info("Cafcaas records after filtering -> {}", (cafCassCaseDetailList != null && cafCassCaseDetailList.size() != 0)
+            ? cafCassCaseDetailList.size() : 0);
+
+        setNonNullEmptyElementList(cafCassCaseDetailList);
+
         cafCassResponse.setCases(cafCassCaseDetailList);
+    }
+
+
+    /**
+     *  This method will filter List of Element type objects present in
+     *  caseData object.
+     *
+     * @param cafCassCaseDetailList - List of CafcassCaseDetail
+     */
+    private void setNonNullEmptyElementList(List<CafCassCaseDetail> cafCassCaseDetailList) {
+
+        if (cafCassCaseDetailList != null && !cafCassCaseDetailList.isEmpty()) {
+            cafCassCaseDetailList.forEach(cafCassCaseDetail -> {
+                CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+
+                final CafCassCaseData cafCassCaseData = caseData.toBuilder().applicants(filterNonValueList(caseData.getApplicants()))
+                    .otherPeopleInTheCaseTable(filterNonValueList(caseData.getOtherPeopleInTheCaseTable()))
+                    .respondents(filterNonValueList(caseData.getRespondents()))
+                    .children(filterNonValueList(caseData.getChildren()))
+                    .interpreterNeeds(filterNonValueList(caseData.getInterpreterNeeds()))
+                    .otherDocuments(filterNonValueList(caseData.getOtherDocuments()))
+                    .manageOrderCollection(filterNonValueList(caseData.getManageOrderCollection()))
+                    .orderCollection(filterNonValueList(caseData.getOrderCollection()))
+                    .build();
+
+                cafCassCaseDetail.setCaseData(cafCassCaseData);
+
+            });
+
+        }
+    }
+
+    /**
+     *  This method will accept List of Element object
+     *  and will return the list back if value object is not null.
+     *
+     * @param object - List of Element object
+     * @param <T> - Type of element in the List
+     * @return
+     */
+    public <T> List<Element<T>>  filterNonValueList(List<Element<T>> object) {
+        if (object != null && !object.isEmpty()) {
+            return object.stream().filter(element -> element.getValue() != null).collect(
+                Collectors.toList());
+        }
+
+        return null;
     }
 
     private Predicate<CafCassCaseDetail> filterByCaseTypeAndState() {
@@ -56,6 +109,7 @@ public class CafCassFilter {
     }
 
     private void filterCasesByApplicationValidPostcode(CafCassResponse cafCassResponse) {
+
         List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases()
             .stream().filter(cafCassCaseDetail -> {
                 if (!ObjectUtils.isEmpty(cafCassCaseDetail.getCaseData().getApplicants())) {

@@ -32,7 +32,7 @@ public class CafCassFilterTest {
         caseTypeList.add("C100");
         ReflectionTestUtils.setField(cafCassFilter, "caseTypeList", caseTypeList);
         List<String> caseStateList = new LinkedList<>();
-        caseStateList.add("SUBMITTED_PAID");
+        caseStateList.add("DECISION_OUTCOME");
         ReflectionTestUtils.setField(cafCassFilter, "caseStateList", caseStateList);
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         CafCassResponse cafCassResponse = objectMapper.readValue(
