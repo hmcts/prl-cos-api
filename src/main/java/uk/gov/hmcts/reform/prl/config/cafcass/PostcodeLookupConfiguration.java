@@ -16,8 +16,6 @@ public class PostcodeLookupConfiguration {
     public PostcodeLookupConfiguration(
             @Value("${postcodelookup.api.url}") String url,
             @Value("${postcodelookup.api.key}") String accessKey) {
-        log.info("Postcode Keyyy {}",accessKey);
-        log.info("Postcode urlll {}",url);
         this.url = url;
         this.accessKey = accessKey;
     }
