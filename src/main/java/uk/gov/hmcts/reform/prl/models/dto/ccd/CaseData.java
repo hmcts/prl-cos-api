@@ -755,4 +755,5 @@ public class CaseData implements MappableObject {
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
 
     private final List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers;
+
 }
