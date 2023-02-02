@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.services.judicial.JudicialUserInfoService;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.idam.client.IdamClient.BEARER_AUTH_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIRCUIT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISTRICT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HIGHCOURT_JUDGE;
@@ -65,7 +66,7 @@ public class AllocatedJudgeService {
                     }
                     log.info("*** ********PersonalCode for the selected judge id : {}", null != personalCodes ? personalCodes.length : personalCodes);
                     List<JudicialUsersApiResponse> judgeDetails = judicialUserInfoService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                        .personalCode(personalCodes).build(),serviceAuthorization,idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword));
+                        .personalCode(personalCodes).build(),serviceAuthorization,BEARER_AUTH_TYPE + " " +idamClient.getAccessTokenResponse(refDataIdamUsername,refDataIdamPassword).accessToken);
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
                     if (null != judgeDetails && judgeDetails.size() > 0) {
