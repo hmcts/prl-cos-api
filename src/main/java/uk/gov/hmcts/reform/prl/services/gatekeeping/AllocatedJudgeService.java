@@ -64,7 +64,9 @@ public class AllocatedJudgeService {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                    log.info("*** ********PersonalCode for the selected judge id : {}", null != personalCodes ? personalCodes.length : personalCodes);
+                    //log.info("*** ********PersonalCode for the selected judge id : {}", null != personalCodes ? personalCodes.length : personalCodes);
+                    log.info("*** ********UserName retrieved from environment to get idam token: {}", refDataIdamUsername);
+                    log.info("*** ********Password retrieved from environment to get idam token: {}", refDataIdamPassword);
                     List<JudicialUsersApiResponse> judgeDetails = judicialUserInfoService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
                         .personalCode(personalCodes).build(),serviceAuthorization,BEARER_AUTH_TYPE + " "
                         + idamClient.getAccessTokenResponse(refDataIdamUsername,refDataIdamPassword).accessToken);
