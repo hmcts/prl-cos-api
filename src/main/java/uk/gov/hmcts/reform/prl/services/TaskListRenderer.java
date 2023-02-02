@@ -27,6 +27,10 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_ADDITIONAL_INFORMATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_APPLICATION_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_PEOPLE_TO_THE_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ONLY_COMPLETE_IF_RELEVANT;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
@@ -100,12 +104,12 @@ public class TaskListRenderer {
         final Map<Event, Task> tasks = allTasks.stream().collect(toMap(Task::getEvent, identity()));
 
         if ("v2".equalsIgnoreCase(caseData.getTaskListVersion())) {
-            final TaskSection applicationDetails = newSection("Add application details")
+            final TaskSection applicationDetails = newSection(ADD_APPLICATION_DETAILS)
                     .withTask(tasks.get(CASE_NAME))
                     .withTask(tasks.get(TYPE_OF_APPLICATION))
                     .withTask(tasks.get(HEARING_URGENCY));
 
-            final TaskSection peopleInTheCase = newSection("Add people to the case")
+            final TaskSection peopleInTheCase = newSection(ADD_PEOPLE_TO_THE_CASE)
                     .withInfo("if children live with another party in the case (other than the applicant or respondent) you can add these details to "
                             + "'Other people in the case.' if you do complete this section, you must keep it up to date.")
                     .withTask(tasks.get(CHILD_DETAILS_REVISED))
@@ -143,8 +147,8 @@ public class TaskListRenderer {
                     .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
                     .withTask(tasks.get(MIAM));
 
-            final TaskSection additionalInformation = newSection("Add additional information")
-                    .withInfo("Only complete if relevant")
+            final TaskSection additionalInformation = newSection(ADD_ADDITIONAL_INFORMATION)
+                    .withInfo(ONLY_COMPLETE_IF_RELEVANT)
                     .withTask(tasks.get(OTHER_PROCEEDINGS))
                     .withTask(tasks.get(ATTENDING_THE_HEARING))
                     .withTask(tasks.get(INTERNATIONAL_ELEMENT))
@@ -179,12 +183,12 @@ public class TaskListRenderer {
 
 
 
-        final TaskSection applicationDetails = newSection("Add application details")
+        final TaskSection applicationDetails = newSection(ADD_APPLICATION_DETAILS)
             .withTask(tasks.get(CASE_NAME))
             .withTask(tasks.get(TYPE_OF_APPLICATION))
             .withTask(tasks.get(HEARING_URGENCY));
 
-        final TaskSection peopleInTheCase = newSection("Add people to the case")
+        final TaskSection peopleInTheCase = newSection(ADD_PEOPLE_TO_THE_CASE)
             .withTask(tasks.get(APPLICANT_DETAILS))
             .withTask(tasks.get(CHILD_DETAILS))
             .withTask(tasks.get(RESPONDENT_DETAILS));
@@ -196,8 +200,8 @@ public class TaskListRenderer {
             .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
             .withTask(tasks.get(MIAM));
 
-        final TaskSection additionalInformation = newSection("Add additional information")
-            .withInfo("Only complete if relevant")
+        final TaskSection additionalInformation = newSection(ADD_ADDITIONAL_INFORMATION)
+            .withInfo(ONLY_COMPLETE_IF_RELEVANT)
             .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE))
             .withTask(tasks.get(OTHER_PROCEEDINGS))
             .withTask(tasks.get(ATTENDING_THE_HEARING))
@@ -328,12 +332,12 @@ public class TaskListRenderer {
         final Map<Event, Task> tasks = allTasks.stream().collect(toMap(Task::getEvent, identity()));
         Optional<TypeOfApplicationOrders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
 
-        final TaskSection applicationDetails = newSection("Add application details")
+        final TaskSection applicationDetails = newSection(ADD_APPLICATION_DETAILS)
             .withTask(tasks.get(FL401_CASE_NAME))
             .withTask(tasks.get(FL401_TYPE_OF_APPLICATION))
             .withTask(tasks.get(WITHOUT_NOTICE_ORDER));
 
-        final TaskSection peopleInTheCase = newSection("Add people to the case")
+        final TaskSection peopleInTheCase = newSection(ADD_PEOPLE_TO_THE_CASE)
             .withTask(tasks.get(APPLICANT_DETAILS))
             .withTask(tasks.get(RESPONDENT_DETAILS))
             .withTask(tasks.get(FL401_APPLICANT_FAMILY_DETAILS));
@@ -351,7 +355,7 @@ public class TaskListRenderer {
             addCaseDetails.withTask(tasks.get(RESPONDENT_BEHAVIOUR));
         }
 
-        final TaskSection additionalInformation = newSection("Add additional information")
+        final TaskSection additionalInformation = newSection(ADD_ADDITIONAL_INFORMATION)
             .withInfo("Only complete if relevant")
             .withTask(tasks.get(FL401_OTHER_PROCEEDINGS))
             .withTask(tasks.get(ATTENDING_THE_HEARING))

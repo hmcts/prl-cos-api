@@ -113,6 +113,35 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
 
 
     @Test
+    public void whenvalidateOtherChildrenNotInTheCaseReturnsFalse() {
+        CaseData caseData = CaseData.builder()
+            .build();
+        assertTrue(!otherPeopleInTheCaseChecker.isFinished(caseData));
+    }
+
+
+    @Test
+    public void whenAllChildDataPresentThenIsFinishedReturnsNull() {
+        ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder()
+            .otherPeopleFullName("Test")
+            .childFullName("Name").childAndOtherPeopleRelation(null)
+            .childLivesWith(YesOrNo.Yes)
+            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .build();
+
+        Element<ChildrenAndOtherPeopleRelation> wrappedChildren = Element.<ChildrenAndOtherPeopleRelation>builder().value(child).build();
+        List<Element<ChildrenAndOtherPeopleRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .childAndOtherPeopleRelations(listOfChildren)
+            .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
+            .build();
+        assertTrue(otherPeopleInTheCaseChecker.isFinished(caseData));
+    }
+
+
+
+    @Test
     public void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGenderOther() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder()
             .otherPeopleFullName("Test")

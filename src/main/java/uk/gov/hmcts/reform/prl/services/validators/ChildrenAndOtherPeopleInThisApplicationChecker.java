@@ -57,12 +57,15 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
 
     private boolean validateMandatoryFieldsCompleted(ChildrenAndOtherPeopleRelation child) {
 
+        final Optional<RelationshipsEnum> relationshipsEnum = ofNullable(child.getChildAndOtherPeopleRelation());
+
         List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(child.getOtherPeopleFullName()));
         fields.add(ofNullable(child.getChildFullName()));
         fields.add(ofNullable(child.getChildLivesWith()));
         fields.add(ofNullable(child.getIsChildLivesWithPersonConfidential()));
-        if (ofNullable(child.getChildAndOtherPeopleRelation()).get().equals(RelationshipsEnum.other)) {
+        if (!relationshipsEnum.isEmpty()
+            && relationshipsEnum.get().equals(RelationshipsEnum.other)) {
             fields.add(ofNullable(child.getChildAndOtherPeopleRelationOtherDetails()));
         }
 

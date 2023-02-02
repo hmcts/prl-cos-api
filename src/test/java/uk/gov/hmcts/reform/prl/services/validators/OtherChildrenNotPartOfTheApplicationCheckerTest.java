@@ -94,6 +94,7 @@ public class OtherChildrenNotPartOfTheApplicationCheckerTest {
         OtherChildrenNotInTheCase child = OtherChildrenNotInTheCase.builder()
             .firstName("Test")
             .lastName("Name")
+            .isDateOfBirthKnown(YesOrNo.Yes)
             .dateOfBirth(LocalDate.of(2000, 12, 22))
             .gender(female)
             .build();
@@ -109,6 +110,74 @@ public class OtherChildrenNotPartOfTheApplicationCheckerTest {
 
 
         assertTrue(childChecker.isFinished(caseData));
+    }
+
+
+    @Test
+    public void whenAllChildDataPresentThenIsFinishedReturnsTrueWithisDateOfBirthKnown() {
+        OtherChildrenNotInTheCase child = OtherChildrenNotInTheCase.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .isDateOfBirthKnown(YesOrNo.No)
+            .gender(other)
+            .otherGender("dfs")
+            .build();
+
+        Element<OtherChildrenNotInTheCase> wrappedChildren =
+            Element.<OtherChildrenNotInTheCase>builder().value(child).build();
+        List<Element<OtherChildrenNotInTheCase>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .childrenNotInTheCase(listOfChildren)
+            .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
+            .build();
+
+
+        assertTrue(childChecker.isFinished(caseData));
+    }
+
+
+    @Test
+    public void whenAllChildDataPresentThenIsFinishedReturnsFalse() {
+        OtherChildrenNotInTheCase child = OtherChildrenNotInTheCase.builder()
+            .firstName("Test")
+            .isDateOfBirthKnown(YesOrNo.No)
+            .gender(other)
+            .otherGender("dfs")
+            .build();
+
+        Element<OtherChildrenNotInTheCase> wrappedChildren =
+            Element.<OtherChildrenNotInTheCase>builder().value(child).build();
+        List<Element<OtherChildrenNotInTheCase>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .childrenNotInTheCase(listOfChildren)
+            .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
+            .build();
+
+
+        assertTrue(!childChecker.isFinished(caseData));
+    }
+
+
+    @Test
+    public void whenAllChildDataPresentThenIsFinishedReturnsFalseWithNull() {
+
+        CaseData caseData = CaseData.builder()
+            .childrenNotInTheCase(null)
+            .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
+            .build();
+        assertTrue(childChecker.isFinished(caseData));
+    }
+
+    @Test
+    public void whenAllChildDataPresentThenIsFinishedReturnsFalseWithNullYes() {
+
+        CaseData caseData = CaseData.builder()
+            .childrenNotInTheCase(null)
+            .childrenNotPartInTheCaseYesNo(null)
+            .build();
+        assertTrue(!childChecker.isFinished(caseData));
     }
 
     @Test

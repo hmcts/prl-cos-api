@@ -99,27 +99,29 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             additionalFields = party.getAddress().getAddressLine1() != null && party.getAddress().getPostCode() != null;
         }
         Optional<YesOrNo> isAddressConfidential = ofNullable(party.getIsAddressConfidential());
-        if (ofNullable(party.getIsCurrentAddressKnown()).isPresent()
+        if (!ofNullable(party.getIsCurrentAddressKnown()).isEmpty()
             && Yes.equals(ofNullable(party.getIsCurrentAddressKnown()).get())) {
-            additionalFields = isAddressConfidential.isPresent();
+            additionalFields = !isAddressConfidential.isEmpty();
         }
         YesOrNo canProvideEmail = party.getCanYouProvideEmailAddress();
         if (canProvideEmail != null && canProvideEmail.equals(Yes)) {
             additionalFields = party.getEmail() != null;
         }
         Optional<YesOrNo> isEmailAddressConfidential = ofNullable(party.getIsEmailAddressConfidential());
-        if (ofNullable(party.getCanYouProvideEmailAddress()).isPresent()
-            && Yes.equals(ofNullable(party.getCanYouProvideEmailAddress()).get())) {
-            additionalFields = isEmailAddressConfidential.isPresent();
+        Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(party.getCanYouProvideEmailAddress());
+        if (!canYouProvideEmailAddress.isEmpty()
+            && Yes.equals(canYouProvideEmailAddress.get())) {
+            additionalFields = !isEmailAddressConfidential.isEmpty();
         }
         YesOrNo canProvideTel = party.getCanYouProvidePhoneNumber();
         if (canProvideTel != null && canProvideTel.equals(Yes)) {
             additionalFields = party.getPhoneNumber() != null;
         }
         Optional<YesOrNo> isPhoneNumberConfidential = ofNullable(party.getIsPhoneNumberConfidential());
-        if (ofNullable(party.getCanYouProvidePhoneNumber()).isPresent()
-            && Yes.equals(ofNullable(party.getCanYouProvidePhoneNumber()).get())) {
-            additionalFields = isPhoneNumberConfidential.isPresent();
+        Optional<YesOrNo> canYouProvidePhoneNumber = ofNullable(party.getCanYouProvidePhoneNumber());
+        if (!canYouProvidePhoneNumber.isEmpty()
+            && Yes.equals(canYouProvidePhoneNumber.get())) {
+            additionalFields = !isPhoneNumberConfidential.isEmpty();
         }
 
         List<Optional<String>> childFields = new ArrayList<>();

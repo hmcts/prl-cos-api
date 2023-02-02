@@ -96,4 +96,26 @@ public class C100JsonMapperTest {
         when(otherChildrenNotInTheCaseMapper.map(listOfOtherChildrenNotInTheCase)).thenReturn(JsonValue.EMPTY_JSON_ARRAY);
         assertNotNull(c100JsonMapper.map(caseData));
     }
+
+
+    @Test
+    public void testC100JsonMapperForV2() {
+
+        OtherChildrenNotInTheCase childrenNotInTheCase = OtherChildrenNotInTheCase.builder()
+            .firstName("Test")
+            .lastName("Last")
+            .dateOfBirth(LocalDate.of(1990, 8, 1))
+            .gender(Gender.male)
+            .build();
+        Element<OtherChildrenNotInTheCase> wrappedOtherChildrenNotInTheCase =
+            Element.<OtherChildrenNotInTheCase>builder().value(childrenNotInTheCase).build();
+        List<Element<OtherChildrenNotInTheCase>> listOfOtherChildrenNotInTheCase = Collections.singletonList(wrappedOtherChildrenNotInTheCase);
+
+        CaseData caseData = CaseData.builder().courtId("CourtId").id(213123).feeAmount("312312")
+            .taskListVersion("v2")
+            .childrenNotInTheCase(listOfOtherChildrenNotInTheCase)
+            .familymanCaseNumber("123123").dateSubmitted("2019/1/2").build();
+        when(otherChildrenNotInTheCaseMapper.map(listOfOtherChildrenNotInTheCase)).thenReturn(JsonValue.EMPTY_JSON_ARRAY);
+        assertNotNull(c100JsonMapper.map(caseData));
+    }
 }
