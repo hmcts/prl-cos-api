@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 @Slf4j
 @Service
@@ -62,10 +63,20 @@ public class CaseDataService {
         );
         log.debug("CCD response: " + objectMapper.writeValueAsString(searchResult));
 
-        CafCassResponse cafCassResponse = objectMapper.convertValue(searchResult,
-                                                             CafCassResponse.class);
-        cafCassFilter.filter(cafCassResponse);
-        getHearingDetails(authorisation,cafCassResponse);
+        CafCassResponse cafCassResponse = objectMapper.convertValue(
+            searchResult,
+            CafCassResponse.class
+        );
+
+        if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
+
+            cafCassResponse = objectMapper.convertValue(searchResult,
+                                                        CafCassResponse.class);
+            cafCassFilter.filter(cafCassResponse);
+            getHearingDetails(authorisation, cafCassResponse);
+        } else {
+            cafCassResponse = CafCassResponse.builder().cases(new ArrayList<>()).build();
+        }
         return cafCassResponse;
     }
 
