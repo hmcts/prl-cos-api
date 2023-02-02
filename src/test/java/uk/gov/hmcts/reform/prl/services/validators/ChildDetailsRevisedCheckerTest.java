@@ -108,6 +108,33 @@ public class ChildDetailsRevisedCheckerTest {
         assertTrue(childChecker.isFinished(caseData));
     }
 
+
+    @Test
+    public void whenAllChildDataPresentThenIsFinishedReturnsTrue1() {
+        ChildDetailsRevised child = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .dateOfBirth(LocalDate.of(2000, 12, 22))
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<ChildDetailsRevised> wrappedChildren = Element.<ChildDetailsRevised>builder().value(child).build();
+        List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .newChildDetails(listOfChildren)
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            .childrenKnownToLocalAuthorityTextArea("TestString")
+            //.childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)
+            .build();
+
+
+        assertTrue(!childChecker.isFinished(caseData));
+    }
+
+
     @Test
     public void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGenderOther() {
         ChildDetailsRevised child = ChildDetailsRevised.builder()
@@ -131,6 +158,21 @@ public class ChildDetailsRevisedCheckerTest {
             .build();
         assertTrue(childChecker.isFinished(caseData));
     }
+
+
+
+    @Test
+    public void whenAllChildDataPresentThenIsFinishedReturnsTrueWithGNull() {
+
+        CaseData caseData = CaseData.builder()
+            .newChildDetails(null)
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            .childrenKnownToLocalAuthorityTextArea("TestString")
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)
+            .build();
+        assertTrue(!childChecker.isFinished(caseData));
+    }
+
 
     @Test
     public void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {

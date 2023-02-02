@@ -52,7 +52,7 @@ public class RelationshipsController {
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<Element<ChildrenAndApplicantRelation>> applicantChildRelationsList = new ArrayList();
+        List<Element<ChildrenAndApplicantRelation>> applicantChildRelationsList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData.getApplicants().forEach(eachApplicant ->
                 caseData.getNewChildDetails().forEach(eachChild -> {
@@ -65,7 +65,7 @@ public class RelationshipsController {
                 })
         );
         caseDataUpdated.put("buffChildAndApplicantRelations", applicantChildRelationsList);
-        log.info("data {}",new Gson().toJson(caseDataUpdated));
+        log.info("applicantData {}",new Gson().toJson(caseDataUpdated));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -81,11 +81,11 @@ public class RelationshipsController {
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("caseData {}",new Gson().toJson(caseData));
+        log.info("ApplicantCaseData {}",new Gson().toJson(caseData));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("buffChildAndApplicantRelations", null);
         caseDataUpdated.put("childAndApplicantRelations", caseData.getBuffChildAndApplicantRelations());
-        log.info("data {}",new Gson().toJson(caseDataUpdated));
+        log.info("PopulateApplicantData {}",new Gson().toJson(caseDataUpdated));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -101,7 +101,7 @@ public class RelationshipsController {
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<Element<ChildrenAndRespondentRelation>> applicantChildRelationsList = new ArrayList();
+        List<Element<ChildrenAndRespondentRelation>> applicantChildRelationsList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData.getRespondents().forEach(eachRespondent ->
                 caseData.getNewChildDetails().forEach(eachChild -> {
@@ -114,7 +114,7 @@ public class RelationshipsController {
                 })
         );
         caseDataUpdated.put("buffChildAndRespondentRelations", applicantChildRelationsList);
-        log.info("data {}",new Gson().toJson(caseDataUpdated));
+        log.info("RespondentData {}",new Gson().toJson(caseDataUpdated));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -134,7 +134,7 @@ public class RelationshipsController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("buffChildAndRespondentRelations", null);
         caseDataUpdated.put("childAndRespondentRelations", caseData.getBuffChildAndApplicantRelations());
-        log.info("data {}",new Gson().toJson(caseDataUpdated));
+        log.info("PopulateRespondentData {}",new Gson().toJson(caseDataUpdated));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -151,7 +151,7 @@ public class RelationshipsController {
     ) {
         log.info("callback Request : {}",callbackRequest);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<Element<ChildrenAndOtherPeopleRelation>> otherPeopleChildRelationsList = new ArrayList();
+        List<Element<ChildrenAndOtherPeopleRelation>> otherPeopleChildRelationsList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("case Data : {}",caseData);
         caseData.getOthersToNotify().forEach(eachPeople ->
@@ -165,7 +165,7 @@ public class RelationshipsController {
                   })
         );
         caseDataUpdated.put("buffChildAndOtherPeopleRelations", otherPeopleChildRelationsList);
-        log.info("data {}",new Gson().toJson(caseDataUpdated));
+        log.info("OtherPeopleData {}",new Gson().toJson(caseDataUpdated));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -182,11 +182,11 @@ public class RelationshipsController {
     ) {
         log.info("callback Request : {}",callbackRequest);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("caseData {}",new Gson().toJson(caseData));
+        log.info("caseData for OtherPeople: {}",new Gson().toJson(caseData));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("buffChildAndOtherPeopleRelations", null);
         caseDataUpdated.put("childAndOtherPeopleRelations", caseData.getBuffChildAndOtherPeopleRelations());
-        log.info("data {}",new Gson().toJson(caseDataUpdated));
+        log.info("PopulateOtherPeopleData {}",new Gson().toJson(caseDataUpdated));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
