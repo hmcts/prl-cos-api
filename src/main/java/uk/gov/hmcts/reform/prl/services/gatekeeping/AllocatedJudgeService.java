@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
@@ -36,19 +37,21 @@ public class AllocatedJudgeService {
     @Autowired
     private final IdamClient idamClient;
 
+    @Autowired
+    AuthTokenGenerator authTokenGenerator;
+
     @Value("${prl.refdata.username}")
     private String refDataIdamUsername;
 
     @Value("${prl.refdata.password}")
     private String refDataIdamPassword;
 
-    public AllocatedJudge getAllocatedJudgeDetails(String serviceAuthorization,
-                                                   Map<String, Object> caseDataUpdated, DynamicList legalAdviserList) {
-        return mapAllocatedJudge(serviceAuthorization,caseDataUpdated,legalAdviserList);
+    public AllocatedJudge getAllocatedJudgeDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList) {
+        return mapAllocatedJudge(caseDataUpdated,legalAdviserList);
 
     }
 
-    private AllocatedJudge mapAllocatedJudge(String serviceAuthorization, Map<String, Object> caseDataUpdated,
+    private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated,
                                              DynamicList legalAdviserList) {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
         if (null != caseDataUpdated.get("tierOfJudiciary")) {
@@ -64,11 +67,8 @@ public class AllocatedJudgeService {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                    log.info("*** ********UserName retrieved from environment to get idam token: {}", refDataIdamUsername);
-                    log.info("*** ********Password retrieved from environment to get idam token: {}", refDataIdamPassword);
                     List<JudicialUsersApiResponse> judgeDetails = judicialUserInfoService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                        .personalCode(personalCodes).build(),serviceAuthorization,BEARER_AUTH_TYPE + " "
-                        + idamClient.getAccessTokenResponse(refDataIdamUsername,refDataIdamPassword).accessToken);
+                        .personalCode(personalCodes).build(),authTokenGenerator.generate(),idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword));
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
                     if (null != judgeDetails && judgeDetails.size() > 0) {
