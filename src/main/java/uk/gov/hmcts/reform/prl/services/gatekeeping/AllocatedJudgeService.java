@@ -52,7 +52,7 @@ public class AllocatedJudgeService {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
         if (null != caseDataUpdated.get("tierOfJudiciary")) {
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
-//            allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get("tierOfJudiciary"))));
+            allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get("tierOfJudiciary"))));
         } else {
             if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
                 if (null != caseDataUpdated.get("judgeNameAndEmail")) {
