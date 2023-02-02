@@ -66,7 +66,8 @@ public class AllocatedJudgeService {
                     }
                     log.info("*** ********PersonalCode for the selected judge id : {}", null != personalCodes ? personalCodes.length : personalCodes);
                     List<JudicialUsersApiResponse> judgeDetails = judicialUserInfoService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                        .personalCode(personalCodes).build(),serviceAuthorization,BEARER_AUTH_TYPE + " " +idamClient.getAccessTokenResponse(refDataIdamUsername,refDataIdamPassword).accessToken);
+                        .personalCode(personalCodes).build(),serviceAuthorization,BEARER_AUTH_TYPE + " "
+                        + idamClient.getAccessTokenResponse(refDataIdamUsername,refDataIdamPassword).accessToken);
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
                     if (null != judgeDetails && judgeDetails.size() > 0) {
