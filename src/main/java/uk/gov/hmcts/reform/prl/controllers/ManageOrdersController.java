@@ -221,6 +221,7 @@ public class ManageOrdersController {
                 caseData
             ));
         }
+        log.info("*** Case type of application in manage orders submission : {}", caseDataUpdated.get("caseTypeOfApplication"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
