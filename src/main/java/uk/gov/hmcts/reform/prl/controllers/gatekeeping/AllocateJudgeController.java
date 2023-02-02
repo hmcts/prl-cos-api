@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,18 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
-import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
-import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
-import uk.gov.hmcts.reform.prl.services.RefDataSystemUserService;
-import uk.gov.hmcts.reform.prl.services.judicial.JudicialUserInfoService;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.staff.StaffUserInfoService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
@@ -39,10 +31,6 @@ import java.util.Map;
 import javax.ws.rs.NotFoundException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIRCUIT_JUDGE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISTRICT_JUDGE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HIGHCOURT_JUDGE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES;
 
 @Slf4j
 @RestController
@@ -56,12 +44,10 @@ public class AllocateJudgeController extends AbstractCallbackController {
     private CaseSummaryTabService caseSummaryTabService;
 
     @Autowired
-    private JudicialUserInfoService judicialUserInfoService;
-
-    @Autowired
     private StaffUserInfoService staffUserInfoService;
 
-    private final RefDataSystemUserService refDataSystemUserService;
+    @Autowired
+    private AllocatedJudgeService allocatedJudgeService;
 
     @PostMapping(path = "/pre-populate-legalAdvisor-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to retrieve legal advisor details")
@@ -91,69 +77,12 @@ public class AllocateJudgeController extends AbstractCallbackController {
         log.info("*** allocate judge details for the case id : {}", caseData.getId());
         log.info("*** ********allocate judge details for the case id before mapping : {}", caseData.getAllocatedJudge());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        //allocatedJudgeService.getAllocatedJudgeDetails(serviceAuthorization,caseDataUpdated,caseData.getLegalAdviserList());
-        AllocatedJudge allocatedJudge = mapAllocatedJudge(authorization,serviceAuthorization,caseDataUpdated,caseData.getLegalAdviserList());
+        AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(serviceAuthorization,
+            caseDataUpdated,caseData.getLegalAdviserList());
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
         //caseDataUpdated.put("allocatedJudge",allocatedJudge);
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         log.info("*** ********allocate judge details after populating for the case id : {}", caseData.getAllocatedJudge());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    private AllocatedJudge mapAllocatedJudge(String authorization, String serviceAuthorization, Map<String, Object> caseDataUpdated,
-                                             DynamicList legalAdviserList) {
-        AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
-        if (null != caseDataUpdated.get("tierOfJudiciary")) {
-            allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
-            allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get("tierOfJudiciary"))));
-        } else {
-            if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
-                if (null != caseDataUpdated.get("judgeNameAndEmail")) {
-                    String[] personalCodes = new String[3];
-                    try {
-                        personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
-                            .writeValueAsString(caseDataUpdated.get("judgeNameAndEmail")),JudicialUser.class).getPersonalCode();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                    log.info("*** ********PersonalCode for the selected judge id : {}", null != personalCodes ? personalCodes.length : personalCodes);
-                    List<JudicialUsersApiResponse> judgeDetails = judicialUserInfoService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                        .personalCode(personalCodes).build(),serviceAuthorization,refDataSystemUserService.getSysUserToken());
-                    allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
-                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
-                    if (null != judgeDetails && judgeDetails.size() > 0) {
-                        allocatedJudgeBuilder.judgeName(judgeDetails.get(0).getSurname());
-                        allocatedJudgeBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
-                    }
-                }
-                if (null != legalAdviserList && null != legalAdviserList.getValue()) {
-                    allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
-                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.LEGAL_ADVISER));
-                    allocatedJudgeBuilder.legalAdviserList(legalAdviserList);
-                }
-            }
-        }
-        return allocatedJudgeBuilder.build();
-    }
-
-    private TierOfJudiciaryEnum getTierOfJudiciary(String tierOfJudiciary) {
-        TierOfJudiciaryEnum tierOfJudiciaryEnum = null;
-        switch (tierOfJudiciary) {
-            case DISTRICT_JUDGE:
-                tierOfJudiciaryEnum = TierOfJudiciaryEnum.DISTRICT_JUDGE;
-                break;
-            case MAGISTRATES:
-                tierOfJudiciaryEnum = TierOfJudiciaryEnum.MAGISTRATES;
-                break;
-            case CIRCUIT_JUDGE:
-                tierOfJudiciaryEnum = TierOfJudiciaryEnum.CIRCUIT_JUDGE;
-                break;
-            case HIGHCOURT_JUDGE:
-                tierOfJudiciaryEnum = TierOfJudiciaryEnum.HIGHCOURT_JUDGE;
-                break;
-            default:
-                break;
-        }
-        return tierOfJudiciaryEnum;
     }
 }
