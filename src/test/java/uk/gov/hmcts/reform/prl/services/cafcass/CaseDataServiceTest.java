@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -100,9 +99,6 @@ public class CaseDataServiceTest {
     public void testGetCaseDataWithZeroRecords() throws IOException {
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafcassResponseNoData.json");
         SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
                                                                     SearchResult.class);
@@ -113,11 +109,9 @@ public class CaseDataServiceTest {
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation", "serviceAuthorisation",
                                                                "start", "end"
         );
-        assertEquals(objectMapper.writeValueAsString(cafCassResponse), objectMapper.writeValueAsString(realCafCassResponse));
+        assertEquals(cafCassResponse, realCafCassResponse);
 
         assertEquals(realCafCassResponse.getTotal(), 0);
-
-        assertNull(realCafCassResponse.getCases());
 
     }
 }
