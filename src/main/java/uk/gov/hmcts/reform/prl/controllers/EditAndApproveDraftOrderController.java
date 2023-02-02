@@ -100,6 +100,7 @@ public class EditAndApproveDraftOrderController {
         } else {
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
         }
+        log.info("*** Case type of application in edit and approve an order submission : {}", caseDataUpdated.get("caseTypeOfApplication"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

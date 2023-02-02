@@ -576,6 +576,7 @@ public class CallbackController {
             caseDataUpdated.put("otherDocNotConf", otherDocumentsForTabDisplayNotConfidential);
 
         }
+        log.info("*** Case type of application in manage docs submission : {}", caseDataUpdated.get("caseTypeOfApplication"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
