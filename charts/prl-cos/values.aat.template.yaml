@@ -24,8 +24,8 @@ java:
         - courtnav-functional-test-pwd
         - filtered-court-ids
         - postcode-lookup-token
-        - idam-refdata-username
-        - idam-refdata-password
+        - prl-rd-api-system-username
+        - prl-rd-api-system-user-password
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
