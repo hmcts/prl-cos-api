@@ -337,4 +337,6 @@ public class PrlAppsConstants {
     public static final String EMPTY_SPACE_STRING = " ";
 
     public static final String SERVICENAME = "PRIVATELAW";
+    public static final String STAFFSORTCOLUMN = "lastName";
+    public static final String STAFFORDERASC = "ASC";
 }

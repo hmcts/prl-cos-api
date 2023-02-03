@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
@@ -15,12 +13,11 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
-import uk.gov.hmcts.reform.prl.services.judicial.JudicialUserInfoService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.idam.client.IdamClient.BEARER_AUTH_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIRCUIT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISTRICT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HIGHCOURT_JUDGE;
@@ -32,23 +29,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES;
 public class AllocatedJudgeService {
 
     @Autowired
-    private final JudicialUserInfoService judicialUserInfoService;
-    @Autowired
-    private final IdamClient idamClient;
+    private final RefDataUserService refDataUserService;
 
-    @Value("${prl.refdata.username}")
-    private String refDataIdamUsername;
 
-    @Value("${prl.refdata.password}")
-    private String refDataIdamPassword;
-
-    public AllocatedJudge getAllocatedJudgeDetails(String serviceAuthorization,
-                                                   Map<String, Object> caseDataUpdated, DynamicList legalAdviserList) {
-        return mapAllocatedJudge(serviceAuthorization,caseDataUpdated,legalAdviserList);
+    public AllocatedJudge getAllocatedJudgeDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList) {
+        return mapAllocatedJudge(caseDataUpdated,legalAdviserList);
 
     }
 
-    private AllocatedJudge mapAllocatedJudge(String serviceAuthorization, Map<String, Object> caseDataUpdated,
+    private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated,
                                              DynamicList legalAdviserList) {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
         if (null != caseDataUpdated.get("tierOfJudiciary")) {
@@ -65,9 +54,8 @@ public class AllocatedJudgeService {
                         throw new RuntimeException(e);
                     }
                     log.info("*** ********PersonalCode for the selected judge id : {}", null != personalCodes ? personalCodes.length : personalCodes);
-                    List<JudicialUsersApiResponse> judgeDetails = judicialUserInfoService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                        .personalCode(personalCodes).build(),serviceAuthorization,BEARER_AUTH_TYPE + " "
-                        + idamClient.getAccessTokenResponse(refDataIdamUsername,refDataIdamPassword).accessToken);
+                    List<JudicialUsersApiResponse> judgeDetails = refDataUserService.getAllJudicialUserDetails(
+                        JudicialUsersApiRequest.builder().personalCode(personalCodes).build());
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
                     if (null != judgeDetails && judgeDetails.size() > 0) {

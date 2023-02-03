@@ -16,6 +16,8 @@ public interface StaffResponseDetailsApi {
     List<StaffResponse> getAllStaffResponseDetails(
         @RequestHeader("Authorization") String authorization,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
-        @RequestParam("ccd_service_names") String ccdServiceNames
+        @RequestParam("ccd_service_names") String ccdServiceNames,
+        @RequestParam("sort_column") String sortColumn,
+        @RequestParam("sort_direction") String sortDirection
     );
 }
