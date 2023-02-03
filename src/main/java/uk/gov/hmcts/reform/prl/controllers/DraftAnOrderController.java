@@ -20,8 +20,10 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.ConvertCourtDetailsService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -46,6 +48,10 @@ public class DraftAnOrderController {
     @Autowired
     private DraftAnOrderService draftAnOrderService;
 
+    public static final String SUBMIT_COUNTY_COURT_SELECTION = "submitCountyCourtSelection";
+
+    @Autowired
+    private ConvertCourtDetailsService convertCourtDetailsService;
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to reset fields")
@@ -65,6 +71,15 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse populateHeader(
         @RequestBody CallbackRequest callbackRequest
     ) {
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        if (caseDataMap.containsKey(SUBMIT_COUNTY_COURT_SELECTION)) {
+            caseDataMap = caseDataMap.get(SUBMIT_COUNTY_COURT_SELECTION) instanceof DynamicList
+                ? caseDataMap : convertCourtDetailsService.convertToDynamicList(
+                caseDataMap,
+                SUBMIT_COUNTY_COURT_SELECTION
+            );
+        }
+
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
