@@ -17,8 +17,18 @@ import static org.apache.logging.log4j.util.Strings.concat;
 @RequiredArgsConstructor
 public class ConvertCourtDetailsService {
 
+    public Map<String, Object> verifyIfDynamicList(Map<String, Object> caseDataMap, String key) {
+        Object submitCountyCourtSelection = caseDataMap.get(key);
+        caseDataMap = submitCountyCourtSelection.toString().contains("list_items")
+            ? caseDataMap : convertToDynamicList(
+            caseDataMap,
+            key
+        );
+        return caseDataMap;
+    }
 
-    public Map<String, Object> convertToDynamicList(Map<String, Object> caseDataMap, String key) {
+
+    private Map<String, Object> convertToDynamicList(Map<String, Object> caseDataMap, String key) {
 
         String courtNameKey = caseDataMap.get(key).toString();
         CourtDetailsPilotEnum courtDetailsPilotEnum = CourtDetailsPilotEnum.valueOf(courtNameKey);

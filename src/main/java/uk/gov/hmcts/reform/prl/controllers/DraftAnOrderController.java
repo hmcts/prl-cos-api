@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ConvertCourtDetailsService;
@@ -73,14 +72,7 @@ public class DraftAnOrderController {
     ) {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         if (caseDataMap.containsKey(SUBMIT_COUNTY_COURT_SELECTION)) {
-            Object submitCountyCourtSelection = caseDataMap.get(SUBMIT_COUNTY_COURT_SELECTION);
-            log.info("CaseData contains submitCountyCourtSelection " + submitCountyCourtSelection);
-            log.info("CaseData contains submitCountyCourtSelection " + submitCountyCourtSelection.getClass());
-            caseDataMap = submitCountyCourtSelection instanceof DynamicList
-                ? caseDataMap : convertCourtDetailsService.convertToDynamicList(
-                caseDataMap,
-                SUBMIT_COUNTY_COURT_SELECTION
-            );
+            caseDataMap = convertCourtDetailsService.verifyIfDynamicList(caseDataMap, SUBMIT_COUNTY_COURT_SELECTION);
         }
         CaseData caseData = objectMapper.convertValue(
             caseDataMap,

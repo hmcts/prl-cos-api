@@ -25,7 +25,7 @@ public class ConvertCourtDetailsServiceTest {
     public void testConvertToDynamicList() {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("submitCountyCourtSelection", "southamptonCountyCourt");
-        caseDataMap = convertCourtDetailsService.convertToDynamicList(caseDataMap, "submitCountyCourtSelection");
+        caseDataMap = convertCourtDetailsService.verifyIfDynamicList(caseDataMap, "submitCountyCourtSelection");
 
         assertNotNull(caseDataMap.get("submitCountyCourtSelection"));
         assertNotNull(((DynamicList)caseDataMap.get("submitCountyCourtSelection")).getListItems());
