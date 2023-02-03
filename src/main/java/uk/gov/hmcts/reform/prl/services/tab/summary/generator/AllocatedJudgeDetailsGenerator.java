@@ -49,9 +49,10 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
         if (null != allocatedJudge) {
             if (YesOrNo.Yes.equals(allocatedJudge.getIsSpecificJudgeOrLegalAdviserNeeded()) && null != allocatedJudge.getIsJudgeOrLegalAdviser()) {
                 if (AllocatedJudgeTypeEnum.JUDGE.equals(allocatedJudge.getIsJudgeOrLegalAdviser())) {
-                    String[] judgeOrLegalAdvisorDetails = null;
+                    String[] judgeOrLegalAdvisorDetails = new String[2];
                     judgeOrLegalAdvisorDetails[0] = allocatedJudge.getJudgeName();
                     judgeOrLegalAdvisorDetails[1] = allocatedJudge.getJudgeEmail();
+                    return judgeOrLegalAdvisorDetails;
                 } else if (AllocatedJudgeTypeEnum.LEGAL_ADVISER.equals(allocatedJudge.getIsJudgeOrLegalAdviser())) {
                     String legalAdviserNameAndEmail = allocatedJudge.getLegalAdviserList().getValueLabel();
                     log.info("*** ********legalAdviserNameAndEmail for the case id in generator : {}", legalAdviserNameAndEmail);

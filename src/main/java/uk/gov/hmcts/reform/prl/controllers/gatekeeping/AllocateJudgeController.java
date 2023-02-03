@@ -66,15 +66,15 @@ public class AllocateJudgeController extends AbstractCallbackController {
         @ApiResponse(responseCode = "200", description = "Allocated Judge Successfully ."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse allocateJudge(@RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
-                                                             @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
-                                                             String serviceAuthorization,
-                                                             @RequestBody CallbackRequest callbackRequest) {
+                                                              @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
+                                                              String serviceAuthorization,
+                                                              @RequestBody CallbackRequest callbackRequest) {
         log.info("*** request recieved to get the allocate Judge details : {}", callbackRequest.toString());
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         log.info("*** allocate judge details for the case id : {}", caseData.getId());
         log.info("*** ********allocate judge details for the case id before mapping : {}", caseData.getAllocatedJudge());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,caseData.getLegalAdviserList());
+        AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList());
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
         //caseDataUpdated.put("allocatedJudge",allocatedJudge);
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));

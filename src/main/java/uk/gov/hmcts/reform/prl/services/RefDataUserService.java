@@ -47,7 +47,7 @@ public class RefDataUserService {
     public List<DynamicListElement> getLegalAdvisorList() {
         try {
             List<StaffResponse> listOfStaffResponse = staffResponseDetailsApi.getAllStaffResponseDetails(
-                idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
+                idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
                 authTokenGenerator.generate(),
                 SERVICENAME,
                 STAFFSORTCOLUMN,
@@ -63,7 +63,7 @@ public class RefDataUserService {
 
     public List<JudicialUsersApiResponse> getAllJudicialUserDetails(JudicialUsersApiRequest judicialUsersApiRequest) {
         return judicialUserDetailsApi.getAllJudicialUserDetails(
-            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
+            idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
             authTokenGenerator.generate(),
             judicialUsersApiRequest);
     }
@@ -80,7 +80,7 @@ public class RefDataUserService {
 
 
     private DynamicListElement getDisplayEntry(StaffResponse staffResponse) {
-        String value = concat(concat(staffResponse.getStaffProfile().getLastName()," - "),staffResponse.getStaffProfile().getEmailId());
+        String value = concat(concat(staffResponse.getStaffProfile().getLastName(), " - "), staffResponse.getStaffProfile().getEmailId());
         return DynamicListElement.builder().code(value).build();
     }
 }
