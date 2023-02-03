@@ -61,6 +61,7 @@ import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.staff.StaffUserInfoService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
@@ -100,6 +101,7 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
+
 @RestController
 @RequiredArgsConstructor
 public class CallbackController {
@@ -132,6 +134,8 @@ public class CallbackController {
     private final LaunchDarklyClient launchDarklyClient;
 
     private final ApplicantsListGenerator applicantsListGenerator;
+    private StaffUserInfoService staffUserInfoService;
+
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -428,6 +432,20 @@ public class CallbackController {
         caseDataUpdated.putAll(allTabsFields);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/pre-populate-legalAdvisor-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to retrieve legal advisor details")
+    public AboutToStartOrSubmitCallbackResponse prePopulateLegalAdvisorDetails(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws javax.ws.rs.NotFoundException {
+        log.info("*** request recieved to get the legalAdvisor details : {}");
+        List<DynamicListElement> legalAdviserList = staffUserInfoService.getLegalAdvisorList(authorisation);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
+            .build());
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+
     }
 
     @PostMapping(path = "/resend-rpa", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
