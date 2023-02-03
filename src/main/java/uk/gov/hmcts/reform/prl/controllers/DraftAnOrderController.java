@@ -73,6 +73,7 @@ public class DraftAnOrderController {
     ) {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         if (caseDataMap.containsKey(SUBMIT_COUNTY_COURT_SELECTION)) {
+            log.info("CaseData contains submitCountyCourtSelection");
             caseDataMap = caseDataMap.get(SUBMIT_COUNTY_COURT_SELECTION) instanceof DynamicList
                 ? caseDataMap : convertCourtDetailsService.convertToDynamicList(
                 caseDataMap,
