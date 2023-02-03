@@ -52,6 +52,7 @@ public class AllocatedJudgeService {
 
     private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated,
                                              DynamicList legalAdviserList) {
+        log.info("*** idam client : {}", idamClient.toString());
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
         if (null != caseDataUpdated.get("tierOfJudiciary")) {
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
