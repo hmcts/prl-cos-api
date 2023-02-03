@@ -81,7 +81,7 @@ public class DraftAnOrderController {
         }
 
         CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
+            caseDataMap,
             CaseData.class
         );
         return AboutToStartOrSubmitCallbackResponse.builder()
