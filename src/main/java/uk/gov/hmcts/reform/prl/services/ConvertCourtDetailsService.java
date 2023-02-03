@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.CourtDetailsPilotEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 import static org.apache.logging.log4j.util.Strings.concat;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ConvertCourtDetailsService {
@@ -24,6 +26,7 @@ public class ConvertCourtDetailsService {
             caseDataMap,
             key
         );
+        log.info("court list ===> " + caseDataMap.get(key));
         return caseDataMap;
     }
 
