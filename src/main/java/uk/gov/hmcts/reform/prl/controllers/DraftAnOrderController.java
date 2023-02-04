@@ -48,9 +48,6 @@ public class DraftAnOrderController {
     @Autowired
     private DraftAnOrderService draftAnOrderService;
 
-    @Autowired
-    private CourtUtils convertCourtDetailsService;
-
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to reset fields")
