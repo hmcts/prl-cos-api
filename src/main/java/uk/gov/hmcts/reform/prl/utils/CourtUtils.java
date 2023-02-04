@@ -1,9 +1,7 @@
-package uk.gov.hmcts.reform.prl.services;
+package uk.gov.hmcts.reform.prl.utils;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.EnumUtils;
-import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.CourtDetailsPilotEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -16,20 +14,31 @@ import java.util.Map;
 import static org.apache.logging.log4j.util.Strings.concat;
 
 @Slf4j
-@Component
-@RequiredArgsConstructor
-public class ConvertCourtDetailsService {
+public class CourtUtils {
 
-    public Map<String, Object> verifyIfDynamicList(Map<String, Object> caseDataMap, String key) {
+    public static final String SUBMIT_COUNTY_COURT_SELECTION = "submitCountyCourtSelection";
+    public static final String COURT_LIST = "courtList";
+
+    public static Map<String, Object> checkCourtIsDynamicList(Map<String, Object> caseDataMap) {
+        if (caseDataMap.containsKey(SUBMIT_COUNTY_COURT_SELECTION)) {
+            caseDataMap = verifyCourtDetails(caseDataMap, SUBMIT_COUNTY_COURT_SELECTION);
+        }
+        if (caseDataMap.containsKey(COURT_LIST)) {
+            caseDataMap = verifyCourtDetails(caseDataMap, COURT_LIST);
+        }
+        return caseDataMap;
+    }
+
+    private static Map<String, Object> verifyCourtDetails(Map<String, Object> caseDataMap, String key) {
         Object submitCountyCourtSelection = caseDataMap.get(key);
         caseDataMap = EnumUtils.isValidEnum(CourtDetailsPilotEnum.class, submitCountyCourtSelection.toString())
             ? convertToDynamicList(caseDataMap, key) : caseDataMap;
-        log.info("Court List ===> " + caseDataMap.get(key));
+        log.info(key + " ===> " + caseDataMap.get(key));
         return caseDataMap;
     }
 
 
-    public Map<String, Object> convertToDynamicList(Map<String, Object> caseDataMap, String key) {
+    private static Map<String, Object> convertToDynamicList(Map<String, Object> caseDataMap, String key) {
 
         log.info("Inside convertToDynamicList");
         List<DynamicListElement> courtDynamicListElements = new ArrayList<>();
@@ -62,9 +71,11 @@ public class ConvertCourtDetailsService {
         return courtVenue;
     }
 
-    private DynamicListElement getModifiedDisplayEntry(CourtVenue location) {
-        String value = concat(concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
-                              location.getPostcode());
+    private static DynamicListElement getModifiedDisplayEntry(CourtVenue location) {
+        String value = concat(
+            concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
+            location.getPostcode()
+        );
         String key = location.getCourtEpimmsId();
         return DynamicListElement.builder().code(key).label(value).build();
     }

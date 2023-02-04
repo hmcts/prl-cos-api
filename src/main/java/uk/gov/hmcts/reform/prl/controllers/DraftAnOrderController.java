@@ -22,10 +22,10 @@ import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.ConvertCourtDetailsService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.CourtUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +38,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RestController
 @RequiredArgsConstructor
 public class DraftAnOrderController {
-    public static final String SUBMIT_COUNTY_COURT_SELECTION = "submitCountyCourtSelection";
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -49,7 +49,7 @@ public class DraftAnOrderController {
     private DraftAnOrderService draftAnOrderService;
 
     @Autowired
-    private ConvertCourtDetailsService convertCourtDetailsService;
+    private CourtUtils convertCourtDetailsService;
 
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -71,9 +71,8 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        if (caseDataMap.containsKey(SUBMIT_COUNTY_COURT_SELECTION)) {
-            caseDataMap = convertCourtDetailsService.verifyIfDynamicList(caseDataMap, SUBMIT_COUNTY_COURT_SELECTION);
-        }
+        caseDataMap = CourtUtils.checkCourtIsDynamicList(caseDataMap);
+
         CaseData caseData = objectMapper.convertValue(
             caseDataMap,
             CaseData.class
@@ -111,7 +110,11 @@ public class DraftAnOrderController {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         } else {
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
-            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
+            caseDataUpdated.putAll(manageOrderService.getCaseData(
+                authorisation,
+                caseData,
+                caseData.getCreateSelectOrderOptions()
+            ));
         }
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
@@ -199,7 +202,11 @@ public class DraftAnOrderController {
             || "adminEditAndApproveAnOrder".equalsIgnoreCase(callbackRequest.getEventId())) {
             caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
         } else {
-            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
+            caseDataUpdated.putAll(manageOrderService.getCaseData(
+                authorisation,
+                caseData,
+                caseData.getCreateSelectOrderOptions()
+            ));
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
