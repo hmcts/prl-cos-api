@@ -543,12 +543,29 @@ public class ManageOrderService {
         return fieldsMap;
     }
 
+    private String getSelectedOrderInfoForUpload(CaseData caseData) {
+        String selectedOrder = null;
+        if(caseData.getUploadOrderOptions() != null){
+            if(caseData.getUploadOrderOptions().getChildArrangementOrders() != null){
+                selectedOrder = caseData.getUploadOrderOptions().getChildArrangementOrders().getDisplayedValue();
+            } else if(caseData.getUploadOrderOptions().getDomesticAbuseOrders() != null){
+                selectedOrder = caseData.getUploadOrderOptions().getDomesticAbuseOrders().getDisplayedValue();
+            } else if(caseData.getUploadOrderOptions().getFcOrders() != null){
+                selectedOrder = caseData.getUploadOrderOptions().getFcOrders().getDisplayedValue();
+            } else if(caseData.getUploadOrderOptions().getOtherOrdersOption() != null){
+                selectedOrder = caseData.getUploadOrderOptions().getOtherOrdersOption().getDisplayedValue();
+            } else {
+                selectedOrder = "";
+            }
+        }
+        return selectedOrder;
+    }
     private String getSelectedOrderInfo(CaseData caseData) {
         StringBuilder selectedOrder = new StringBuilder();
         if (caseData.getManageOrdersOptions() != null) {
             selectedOrder.append(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
                                      ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
-                                     : caseData.getChildArrangementOrders().getDisplayedValue());
+                                     : getSelectedOrderInfoForUpload(caseData));
         } else {
             selectedOrder.append(caseData.getCreateSelectOrderOptions() != null
                                      ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
@@ -593,14 +610,14 @@ public class ManageOrderService {
 
         String flagSelectedOrder = caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
-            : caseData.getChildArrangementOrders().getDisplayedValue();
+            : getSelectedOrderInfoForUpload(caseData);
 
         String flagSelectedOrderId = null;
 
         if (caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder) {
             flagSelectedOrderId = String.valueOf(caseData.getCreateSelectOrderOptions());
         } else {
-            flagSelectedOrderId = String.valueOf(caseData.getChildArrangementOrders());
+            flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         }
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
