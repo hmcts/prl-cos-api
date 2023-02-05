@@ -47,7 +47,7 @@ public class AddCafcassOfficerServiceTest {
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = addCafcassOfficerService.prePopulateChildName(
             caseData);
         assertEquals("1accfb1e-2574-4084-b97e-1cd53fd14815", childAndCafcassOfficers.get(0).getValue().getChildId());
-        assertEquals("test test", childAndCafcassOfficers.get(0).getValue().getChildName());
+        assertEquals("Child name: test test", childAndCafcassOfficers.get(0).getValue().getChildName());
     }
 
     @Test
