@@ -532,7 +532,10 @@ public class CaseData implements MappableObject {
     private String isDocumentGenerated;
     private String isNotificationSent;
 
-    private ChildArrangementOrdersEnum childArrangementOrders;
+
+    @JsonUnwrapped
+    @Builder.Default
+    private UploadOrderOptions uploadOrderOptions;
 
     /**
      * Manage Orders.
