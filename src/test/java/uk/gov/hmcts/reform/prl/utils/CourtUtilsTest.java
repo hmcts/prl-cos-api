@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.prl.utils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CourtDetailsPilotEnum;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,15 +20,14 @@ public class CourtUtilsTest {
     @Test
     public void testConvertToDynamicListFromMatchingString() {
         Map<String, Object> caseDataMap = new HashMap<>();
-        String courtValue = "southamptonCountyCourt";
-        caseDataMap.put("submitCountyCourtSelection", courtValue);
-        caseDataMap.put("courtList", courtValue);
+        caseDataMap.put("submitCountyCourtSelection", CourtDetailsPilotEnum.southamptonCountyCourt);
+        caseDataMap.put("courtList", CourtDetailsPilotEnum.exeterCountyCourt);
         caseDataMap = CourtUtils.checkCourtIsDynamicList(caseDataMap);
 
         assertNotNull(caseDataMap.get("submitCountyCourtSelection"));
-        assertNotEquals(courtValue,caseDataMap.get("submitCountyCourtSelection"));
+        assertNotEquals(CourtDetailsPilotEnum.southamptonCountyCourt,caseDataMap.get("submitCountyCourtSelection"));
         assertNotNull(caseDataMap.get("courtList"));
-        assertNotEquals(courtValue,caseDataMap.get("courtList"));
+        assertNotEquals(CourtDetailsPilotEnum.exeterCountyCourt,caseDataMap.get("courtList"));
 
     }
 
