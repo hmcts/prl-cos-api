@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.utils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CourtDetailsPilotEnum;
 
 import java.util.HashMap;
