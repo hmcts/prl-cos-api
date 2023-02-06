@@ -222,7 +222,7 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
-        assertNotNull(responseMap.get("amendOrderDynamicList"));
+        assertNotNull(responseMap.get("caseTypeOfApplication"));
 
     }
 
@@ -1269,7 +1269,7 @@ public class ManageOrderServiceTest {
                                     .build())
             .build();
 
-        assertNotNull(manageOrderService.populateHeader(caseData).get("amendOrderDynamicList"));
+        assertNotNull(manageOrderService.populateHeader(caseData).get("caseTypeOfApplication"));
     }
 
 
