@@ -158,6 +158,7 @@ public class ManageOrdersController {
             } else {
                 isUploadAnOrderByAdmin = YesOrNo.No.getDisplayedValue();
             }
+            log.info("isUploadAnOrderByAdmin ===> " + isUploadAnOrderByAdmin);
         }
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
