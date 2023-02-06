@@ -545,14 +545,14 @@ public class ManageOrderService {
 
     private String getSelectedOrderInfoForUpload(CaseData caseData) {
         String selectedOrder = null;
-        if(caseData.getUploadOrderOptions() != null){
-            if(caseData.getUploadOrderOptions().getChildArrangementOrders() != null){
+        if (caseData.getUploadOrderOptions() != null) {
+            if (caseData.getUploadOrderOptions().getChildArrangementOrders() != null) {
                 selectedOrder = caseData.getUploadOrderOptions().getChildArrangementOrders().getDisplayedValue();
-            } else if(caseData.getUploadOrderOptions().getDomesticAbuseOrders() != null){
+            } else if (caseData.getUploadOrderOptions().getDomesticAbuseOrders() != null) {
                 selectedOrder = caseData.getUploadOrderOptions().getDomesticAbuseOrders().getDisplayedValue();
-            } else if(caseData.getUploadOrderOptions().getFcOrders() != null){
+            } else if (caseData.getUploadOrderOptions().getFcOrders() != null) {
                 selectedOrder = caseData.getUploadOrderOptions().getFcOrders().getDisplayedValue();
-            } else if(caseData.getUploadOrderOptions().getOtherOrdersOption() != null){
+            } else if (caseData.getUploadOrderOptions().getOtherOrdersOption() != null) {
                 selectedOrder = caseData.getUploadOrderOptions().getOtherOrdersOption().getDisplayedValue();
             } else {
                 selectedOrder = "";
@@ -560,6 +560,7 @@ public class ManageOrderService {
         }
         return selectedOrder;
     }
+
     private String getSelectedOrderInfo(CaseData caseData) {
         StringBuilder selectedOrder = new StringBuilder();
         if (caseData.getManageOrdersOptions() != null) {

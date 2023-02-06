@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadOrderOptions;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
@@ -311,7 +312,9 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .uploadOrderOptions(UploadOrderOptions.builder()
+                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+                                    .build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.generalForm)
             .build();
 
@@ -321,7 +324,9 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .uploadOrderOptions(UploadOrderOptions.builder()
+                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+                                    .build())
             .fl401FamilymanCaseNumber("12345")
             .childrenList("Child 1: TestName\n")
             .selectedOrder(
@@ -370,7 +375,9 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .uploadOrderOptions(UploadOrderOptions.builder()
+                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+                                    .build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .build();
 
@@ -380,7 +387,9 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .uploadOrderOptions(UploadOrderOptions.builder()
+                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+                                    .build())
             .fl401FamilymanCaseNumber("12345")
             .childrenList("Child 1: TestName\n")
             .selectedOrder(
@@ -429,7 +438,9 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .fl401FamilymanCaseNumber("familyman12345")
             .courtName("testCourt")
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .uploadOrderOptions(UploadOrderOptions.builder()
+                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+                                    .build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .build();
 
@@ -439,7 +450,9 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .manageOrders(ManageOrders.builder().build())
             .fl401FamilymanCaseNumber("familyman12345")
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .uploadOrderOptions(UploadOrderOptions.builder()
+                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+                                    .build())
             .courtName("testCourt")
             .childrenList("Child 1: TestName\n")
             .selectedOrder(
@@ -490,7 +503,9 @@ public class ManageOrdersControllerTest {
             .familymanCaseNumber("familyman12345")
             .courtName("testCourt")
             .children(listOfChildren)
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .uploadOrderOptions(UploadOrderOptions.builder()
+                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+                                    .build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .build();
 
@@ -502,7 +517,9 @@ public class ManageOrdersControllerTest {
             .courtName("testCourt")
             .manageOrders(ManageOrders.builder().build())
             .children(listOfChildren)
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .uploadOrderOptions(UploadOrderOptions.builder()
+                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+                                    .build())
             .childrenList("Child 1: TestName\n")
             .selectedOrder(
                 "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
@@ -550,7 +567,9 @@ public class ManageOrdersControllerTest {
             .familymanCaseNumber("familyman12345")
             .courtName("testCourt")
             .home(Home.builder().children(listOfChildren).build())
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .uploadOrderOptions(UploadOrderOptions.builder()
+                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+                                    .build())
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
@@ -559,7 +578,9 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .home(Home.builder().children(listOfChildren).build())
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .uploadOrderOptions(UploadOrderOptions.builder()
+                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+                                    .build())
             .fl401FamilymanCaseNumber("12345")
             .childrenList("Child 1: TestName\n")
             .manageOrders(ManageOrders.builder().build())
@@ -608,7 +629,9 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .home(Home.builder().children(listOfChildren).build())
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .uploadOrderOptions(UploadOrderOptions.builder()
+                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+                                    .build())
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
@@ -617,7 +640,9 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .home(Home.builder().children(listOfChildren).build())
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .uploadOrderOptions(UploadOrderOptions.builder()
+                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+                                    .build())
             .fl401FamilymanCaseNumber("12345")
             .childrenList("Child 1: TestName\n")
             .selectedOrder(
