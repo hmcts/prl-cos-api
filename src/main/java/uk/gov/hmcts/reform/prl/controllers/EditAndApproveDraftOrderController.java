@@ -91,6 +91,7 @@ public class EditAndApproveDraftOrderController {
             "********caseData.getDoYouWantCourtAdminToAddAnything***** {}",
             caseData.getJudgeDirectionsToAdmin()
         );
+        log.info("*** Case type of application in edit and approve an order submission before: {}", caseDataUpdated.get("caseTypeOfApplication"));
 
         if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
             && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
