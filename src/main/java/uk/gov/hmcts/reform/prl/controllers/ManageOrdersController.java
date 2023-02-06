@@ -267,6 +267,38 @@ public class ManageOrdersController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+    @PostMapping(path = "/manage-orders/add-upload-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse addUploadOrder(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
+            caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
+        } else {
+            caseDataUpdated.put("isWithdrawRequestSent", "Approved");
+        }
+        caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+            authorisation,
+            caseData
+        ));
+
+        CaseData modifiedCaseData = objectMapper.convertValue(
+            caseDataUpdated,
+            CaseData.class
+        );
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(manageOrderService.populateHeader(modifiedCaseData))
+            .build();
+    }
+
     private boolean isAdmin(UserDetails userDetails) {
         return userDetails.getRoles().contains("caseworker-privatelaw-courtadmin");
     }
