@@ -143,18 +143,10 @@ public class ManageOrdersController {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
 
-        ManageOrders manageOrders;
-        if (caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.uploadAnOrder) {
-            manageOrders = caseData.getManageOrders().toBuilder()
-                .uploadOrderChildOption(DynamicMultiSelectList.builder()
-                                            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
-                .build();
-        } else {
-            manageOrders = caseData.getManageOrders().toBuilder()
+        ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
                 .childOption(DynamicMultiSelectList.builder()
                                  .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
                 .build();
-        }
         log.info("**Manage orders with child list {}",manageOrders);
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
