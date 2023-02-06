@@ -388,8 +388,8 @@ public class ManageOrderService {
             );
             log.info("OrderCollection ===> " + caseData.getOrderCollection());
         }
-        headerMap.put("caseTypeOfApplication =====> ", caseData.getCaseTypeOfApplication());
-        log.info("caseTypeOfApplication" + caseData.getCaseTypeOfApplication());
+        headerMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        log.info("caseTypeOfApplication ===> " + caseData.getCaseTypeOfApplication());
         return headerMap;
     }
 
