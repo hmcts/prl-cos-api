@@ -20,11 +20,8 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {AllocateJudgeControllerIntegrationTest.class, Application.class})
 public class AllocateJudgeControllerIntegrationTest extends IntegrationTest {
-    @Value("${staffDetails.api.url}")
-    protected String staffDetailsServiceUrl;
-
-    @Value("${judicialUsers.api.url}")
-    protected String judicialUsersServiceUrl;
+    @Value("${case.orchestration.service.base.uri}")
+    protected String serviceUrl;
 
 
     private final String legalAdvisorEndpoint = "/allocateJudge/pre-populate-legalAdvisor-details";
@@ -38,10 +35,12 @@ public class AllocateJudgeControllerIntegrationTest extends IntegrationTest {
 
     private static final String VALID_REQUEST_BODY_LEGALADVISOR = "requests/LegalAdvisorApiRequest.json";
 
+    private static final String VALID_REQUEST_BODY_TIER_OF_JUDICIARY = "requests/AllocateJudgeDetailsRequest2.json";
+
     @Test
     public void testPrePoulateLegalAdvisorDetails_Return200() throws Exception {
 
-        HttpPost httpPost = new HttpPost(staffDetailsServiceUrl + legalAdvisorEndpoint);
+        HttpPost httpPost = new HttpPost(serviceUrl + legalAdvisorEndpoint);
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         httpPost.addHeader("Authorization", "Bearer testauthtoken");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
@@ -56,7 +55,7 @@ public class AllocateJudgeControllerIntegrationTest extends IntegrationTest {
     @Test
     public void testAllocateJudgeWhenJudgeDetailsProvided_Return200() throws Exception {
 
-        HttpPost httpPost = new HttpPost(judicialUsersServiceUrl + allocateJudgeEndpoint);
+        HttpPost httpPost = new HttpPost(serviceUrl + allocateJudgeEndpoint);
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_JUDGE);
         httpPost.addHeader("Authorization", "Bearer testauthtoken");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
@@ -71,7 +70,22 @@ public class AllocateJudgeControllerIntegrationTest extends IntegrationTest {
     @Test
     public void testAllocateJudgeWhenLegalAdvisorDetailsProvided_Return200() throws Exception {
 
-        HttpPost httpPost = new HttpPost(judicialUsersServiceUrl + allocateJudgeEndpoint);
+        HttpPost httpPost = new HttpPost(serviceUrl + allocateJudgeEndpoint);
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_LEGALADVISOR);
+        httpPost.addHeader("Authorization", "Bearer testauthtoken");
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(
+            HttpStatus.SC_OK,
+            httpResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testAllocateJudgeWhenTierOfJudiciaryProvided_Return200() throws Exception {
+
+        HttpPost httpPost = new HttpPost(serviceUrl + allocateJudgeEndpoint);
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_LEGALADVISOR);
         httpPost.addHeader("Authorization", "Bearer testauthtoken");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
