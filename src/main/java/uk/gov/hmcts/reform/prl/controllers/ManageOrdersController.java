@@ -230,6 +230,23 @@ public class ManageOrdersController {
                 caseData
             ));
         }
+
+        if (caseDataUpdated.containsKey("manageOrdersOptions")) {
+            caseDataUpdated.remove("manageOrdersOptions");
+        }
+        if (caseDataUpdated.containsKey("createSelectOrderOptions")) {
+            caseDataUpdated.remove("createSelectOrderOptions");
+        }
+        if (caseDataUpdated.containsKey("uploadOrderOptions")) {
+            caseDataUpdated.remove("uploadOrderOptions");
+        }
+        if (caseDataUpdated.containsKey("amendOrderDynamicList")) {
+            caseDataUpdated.remove("uploadOrderOptions");
+        }
+        if (caseDataUpdated.containsKey("serveOrderDynamicList")) {
+            caseDataUpdated.remove("serveOrderDynamicList");
+        }
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
