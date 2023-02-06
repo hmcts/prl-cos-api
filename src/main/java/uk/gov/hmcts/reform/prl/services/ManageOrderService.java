@@ -381,8 +381,12 @@ public class ManageOrderService {
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
         headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
-        headerMap.put("serveOrderDynamicList", dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData));
+        headerMap.put(
+            "serveOrderDynamicList",
+            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData)
+        );
         headerMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        log.info("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         return headerMap;
     }
 
