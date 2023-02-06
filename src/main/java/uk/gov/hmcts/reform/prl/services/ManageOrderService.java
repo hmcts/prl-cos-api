@@ -386,7 +386,7 @@ public class ManageOrderService {
             dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData)
         );
         headerMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
-        log.info("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        log.info("caseTypeOfApplication" + caseData.getCaseTypeOfApplication());
         return headerMap;
     }
 
