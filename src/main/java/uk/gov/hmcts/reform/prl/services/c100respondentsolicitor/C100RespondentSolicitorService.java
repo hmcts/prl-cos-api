@@ -485,6 +485,8 @@ public class C100RespondentSolicitorService {
                 respondents.set(respondents.indexOf(party), element(party.getId(), amended));
             });
 
+        log.info(" ****** C7 Response for respondent****** {}", caseData);
+
         respondents.stream()
             .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
             .findFirst()
