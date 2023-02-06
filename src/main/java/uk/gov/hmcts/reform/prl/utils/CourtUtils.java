@@ -30,8 +30,8 @@ public class CourtUtils {
     }
 
     private static Map<String, Object> verifyCourtDetails(Map<String, Object> caseDataMap, String key) {
-        Object submitCountyCourtSelection = caseDataMap.get(key);
-        caseDataMap = EnumUtils.isValidEnum(CourtDetailsPilotEnum.class, submitCountyCourtSelection.toString())
+        Object courtDetails = caseDataMap.get(key);
+        caseDataMap = EnumUtils.isValidEnum(CourtDetailsPilotEnum.class, courtDetails.toString())
             ? convertToDynamicList(caseDataMap, key) : caseDataMap;
         log.info(key + " ===> " + caseDataMap.get(key));
         return caseDataMap;
@@ -71,12 +71,12 @@ public class CourtUtils {
         return courtVenue;
     }
 
-    private static DynamicListElement getModifiedDisplayEntry(CourtVenue location) {
+    private static DynamicListElement getModifiedDisplayEntry(CourtVenue courtVenue) {
+        String key = courtVenue.getCourtEpimmsId();
         String value = concat(
-            concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
-            location.getPostcode()
+            concat(concat(courtVenue.getSiteName(), " - "), concat(courtVenue.getCourtAddress(), " - ")),
+            courtVenue.getPostcode()
         );
-        String key = location.getCourtEpimmsId();
         return DynamicListElement.builder().code(key).label(value).build();
     }
 }
