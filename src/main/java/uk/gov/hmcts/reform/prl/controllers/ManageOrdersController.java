@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -44,6 +46,7 @@ import javax.ws.rs.core.HttpHeaders;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 
 @Slf4j
 @RestController
@@ -70,6 +73,8 @@ public class ManageOrdersController {
 
     @Autowired
     private DynamicMultiSelectListService dynamicMultiSelectListService;
+    @Autowired
+    private final IdamClient idamClient;
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -256,5 +261,28 @@ public class ManageOrdersController {
             caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/check-upload-order-user", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to amend order mid-event")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse checkUploadOrderUser(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        UserDetails userDetails = idamClient.getUserDetails(authorisation);
+        if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
+            if (isAdmin(userDetails)) {
+                caseDataUpdated.put("isUploadAnOrderByAdmin", YesOrNo.Yes);
+            } else {
+                caseDataUpdated.put("isUploadAnOrderByAdmin", YesOrNo.No);
+            }
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private boolean isAdmin(UserDetails userDetails) {
+        return userDetails.getRoles().contains("caseworker-privatelaw-courtadmin");
     }
 }

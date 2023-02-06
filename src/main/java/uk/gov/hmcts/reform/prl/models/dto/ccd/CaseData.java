@@ -750,4 +750,6 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
+
+    private YesOrNo isUploadAnOrderByAdmin;
 }
