@@ -379,6 +379,7 @@ public class ManageOrderService {
         headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
         headerMap.put("serveOrderDynamicList", getOrdersAsDynamicList(caseData));
         headerMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        log.info("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         return headerMap;
     }
 
