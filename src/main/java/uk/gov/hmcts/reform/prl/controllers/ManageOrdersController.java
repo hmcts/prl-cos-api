@@ -124,7 +124,9 @@ public class ManageOrdersController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Order details are fetched"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
     public CallbackResponse prepopulateFL401CaseDetails(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
         CaseData caseData = objectMapper.convertValue(
@@ -147,8 +149,19 @@ public class ManageOrdersController {
                                  .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
                 .build();
         log.info("**Manage orders with child list {}",manageOrders);
+
+        UserDetails userDetails = idamClient.getUserDetails(authorisation);
+        String isUploadAnOrderByAdmin = null;
+        if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
+            if (isAdmin(userDetails)) {
+                isUploadAnOrderByAdmin = YesOrNo.Yes.getDisplayedValue();
+            } else {
+                isUploadAnOrderByAdmin = YesOrNo.No.getDisplayedValue();
+            }
+        }
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
+            .isUploadAnOrderByAdmin(isUploadAnOrderByAdmin)
             .build();
         return CallbackResponse.builder()
             .data(caseData)
@@ -250,25 +263,6 @@ public class ManageOrdersController {
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
-        }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    @PostMapping(path = "/check-upload-order-user", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to amend order mid-event")
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse checkUploadOrderUser(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        UserDetails userDetails = idamClient.getUserDetails(authorisation);
-        if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-            if (isAdmin(userDetails)) {
-                caseDataUpdated.put("isUploadAnOrderByAdmin", YesOrNo.Yes);
-            } else {
-                caseDataUpdated.put("isUploadAnOrderByAdmin", YesOrNo.No);
-            }
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
