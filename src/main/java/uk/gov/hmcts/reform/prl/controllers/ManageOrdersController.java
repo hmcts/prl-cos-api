@@ -152,7 +152,7 @@ public class ManageOrdersController {
 
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
         String isUploadAnOrderByAdmin = null;
-        if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
+        if (caseData.getManageOrdersOptions() != null && caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
             if (isAdmin(userDetails)) {
                 isUploadAnOrderByAdmin = YesOrNo.Yes.getDisplayedValue();
             } else {
