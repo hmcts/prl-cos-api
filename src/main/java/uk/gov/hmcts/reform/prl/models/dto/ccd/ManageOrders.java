@@ -173,10 +173,6 @@ public class ManageOrders {
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
 
-    @Builder.Default
-    @JsonProperty("uploadOrderChildOption")
-    private final DynamicMultiSelectList uploadOrderChildOption;
-
     private DynamicMultiSelectList serveOrderDynamicList;
     @JsonProperty("serveOrderAdditionalDocuments")
     private final List<Element<Document>> serveOrderAdditionalDocuments;
