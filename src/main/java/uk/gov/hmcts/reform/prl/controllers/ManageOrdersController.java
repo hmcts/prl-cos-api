@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -137,11 +138,18 @@ public class ManageOrdersController {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
 
-        ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
-            .childOption(DynamicMultiSelectList.builder()
-                             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
-            .build();
-
+        ManageOrders manageOrders;
+        if (caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.uploadAnOrder) {
+            manageOrders = caseData.getManageOrders().toBuilder()
+                .uploadOrderChildOption(DynamicMultiSelectList.builder()
+                                            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
+                .build();
+        } else {
+            manageOrders = caseData.getManageOrders().toBuilder()
+                .childOption(DynamicMultiSelectList.builder()
+                                 .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
+                .build();
+        }
         log.info("**Manage orders with child list {}",manageOrders);
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
