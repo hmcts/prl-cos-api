@@ -380,12 +380,15 @@ public class ManageOrderService {
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
-        headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
-        headerMap.put(
-            "serveOrderDynamicList",
-            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData)
-        );
-        headerMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        if (caseData.getOrderCollection() != null) {
+            headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
+            headerMap.put(
+                "serveOrderDynamicList",
+                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData)
+            );
+            log.info("OrderCollection ===> " + caseData.getOrderCollection());
+        }
+        headerMap.put("caseTypeOfApplication =====> ", caseData.getCaseTypeOfApplication());
         log.info("caseTypeOfApplication" + caseData.getCaseTypeOfApplication());
         return headerMap;
     }
