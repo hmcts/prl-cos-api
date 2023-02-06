@@ -208,7 +208,7 @@ public class DraftAnOrderController {
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("*** Case type of application in draft orders submission before: {}", caseData);
-        caseDataUpdated.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        caseDataUpdated.put("caseTypeOfApplication", caseData.getSelectedCaseTypeID());
         caseDataUpdated.putAll(draftAnOrderService.generateDraftOrderCollection(caseData));
         log.info("*** Case type of application in draft orders submission : {}", caseDataUpdated.get("caseTypeOfApplication"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
