@@ -339,4 +339,5 @@ public class PrlAppsConstants {
     public static final String SERVICENAME = "PRIVATELAW";
     public static final String STAFFSORTCOLUMN = "lastName";
     public static final String STAFFORDERASC = "ASC";
+    public static final String LEGALOFFICE = "Legal office";
 }

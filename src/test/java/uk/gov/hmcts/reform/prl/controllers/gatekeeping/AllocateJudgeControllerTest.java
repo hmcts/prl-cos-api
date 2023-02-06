@@ -1,9 +1,34 @@
 package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
- /*
+
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Qualifier;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 
 @Slf4j
@@ -15,6 +40,12 @@ public class AllocateJudgeControllerTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    RefDataUserService refDataUserService;
+
+    @Mock
+    AllocatedJudgeService allocatedJudgeService;
 
     @Mock
     @Qualifier("caseSummaryTab")
@@ -39,8 +70,7 @@ public class AllocateJudgeControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
-
-
+        when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
         AboutToStartOrSubmitCallbackResponse response = allocateJudgeController.prePopulateLegalAdvisorDetails(
              callbackRequest);
         assertNotNull(response.getData().containsKey("legalAdvisorList"));
@@ -79,10 +109,14 @@ public class AllocateJudgeControllerTest {
             "field5", "value5"
         );
 
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList())).thenReturn(allocatedJudge);
+
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
 
-        assertNotNull(allocateJudgeController.allocateJudge("Bearer:test","s2stoken",callbackRequest));
+        assertNotNull(allocateJudgeController.allocateJudge(callbackRequest));
 
-    }*/
+    }
 
-//}
+}
+

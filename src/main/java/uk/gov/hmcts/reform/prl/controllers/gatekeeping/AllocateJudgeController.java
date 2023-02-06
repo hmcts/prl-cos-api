@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -44,6 +42,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
 
     @Autowired
     RefDataUserService refDataUserService;
+    
     @Autowired
     private AllocatedJudgeService allocatedJudgeService;
 
@@ -51,8 +50,8 @@ public class AllocateJudgeController extends AbstractCallbackController {
     @Operation(description = "Callback to retrieve legal advisor details")
     public AboutToStartOrSubmitCallbackResponse prePopulateLegalAdvisorDetails(
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
+        log.info("Prepopulate Legal Advisor - case id : {}", callbackRequest.getCaseDetails().getId());
         List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
-        log.info("*** request recieved to get the legalAdvisor details : {}",legalAdviserList);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
             .build());
@@ -65,20 +64,13 @@ public class AllocateJudgeController extends AbstractCallbackController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Allocated Judge Successfully ."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse allocateJudge(@RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
-                                                              @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
-                                                              String serviceAuthorization,
-                                                              @RequestBody CallbackRequest callbackRequest) {
-        log.info("*** request recieved to get the allocate Judge details : {}", callbackRequest.toString());
+    public AboutToStartOrSubmitCallbackResponse allocateJudge(@RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        log.info("*** allocate judge details for the case id : {}", caseData.getId());
-        log.info("*** ********allocate judge details for the case id before mapping : {}", caseData.getAllocatedJudge());
+        log.info("Allocate judge details for the case id : {}", caseData.getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList());
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
-        //caseDataUpdated.put("allocatedJudge",allocatedJudge);
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-        log.info("*** ********allocate judge details after populating for the case id : {}", caseData.getAllocatedJudge());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.util.Strings.concat;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGALOFFICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFORDERASC;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFSORTCOLUMN;
@@ -75,7 +76,7 @@ public class RefDataUserService {
     private List<DynamicListElement> onlyLegalAdvisor(List<StaffResponse> listOfStaffResponse) {
         if (null != listOfStaffResponse) {
             return listOfStaffResponse.stream()
-                .filter(response -> response.getStaffProfile().getUserType().equalsIgnoreCase("Legal office"))
+                .filter(response -> response.getStaffProfile().getUserType().equalsIgnoreCase(LEGALOFFICE))
                 .map(this::getDisplayEntry).collect(Collectors.toList());
         }
         return List.of(DynamicListElement.builder().build());
@@ -84,7 +85,6 @@ public class RefDataUserService {
 
     private DynamicListElement getDisplayEntry(StaffResponse staffResponse) {
         String value = concat(staffResponse.getStaffProfile().getLastName(),"(").concat(staffResponse.getStaffProfile().getEmailId()).concat(")");
-        log.info("Values from DisplayEntry {}",value);
         return DynamicListElement.builder().code(value).label(value).build();
     }
 }
