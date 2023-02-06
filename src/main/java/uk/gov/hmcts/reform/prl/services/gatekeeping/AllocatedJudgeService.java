@@ -44,7 +44,8 @@ public class AllocatedJudgeService {
             allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get("tierOfJudiciary"))));
         } else {
             if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
-                if (null != caseDataUpdated.get("judgeNameAndEmail")) {
+                if (AllocatedJudgeTypeEnum.JUDGE.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("isJudgeOrLegalAdviser")))
+                    && null != caseDataUpdated.get("judgeNameAndEmail")) {
                     String[] personalCodes = new String[3];
                     try {
                         personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
@@ -61,8 +62,7 @@ public class AllocatedJudgeService {
                         allocatedJudgeBuilder.judgeName(judgeDetails.get(0).getSurname());
                         allocatedJudgeBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
                     }
-                }
-                if (null != legalAdviserList && null != legalAdviserList.getValue()) {
+                } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.LEGAL_ADVISER));
                     allocatedJudgeBuilder.legalAdviserList(legalAdviserList);
