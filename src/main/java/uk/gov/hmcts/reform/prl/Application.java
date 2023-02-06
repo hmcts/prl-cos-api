@@ -24,7 +24,7 @@ import javax.annotation.PostConstruct;
 @SpringBootConfiguration
 @EnableAutoConfiguration
 @ComponentScan(basePackages = {  "uk.gov.hmcts.reform.prl", "uk.gov.hmcts.reform.prl.services",
-    "uk.gov.hmcts.reform.prl.config","uk.gov.hmcts.reform.ccd.document","uk.gov.hmcts.reform.prl.models.common.judicial"})
+    "uk.gov.hmcts.reform.prl.config","uk.gov.hmcts.reform.ccd.document"})
 @Slf4j
 public class Application {
 

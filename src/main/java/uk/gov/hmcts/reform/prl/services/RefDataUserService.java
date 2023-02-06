@@ -83,8 +83,8 @@ public class RefDataUserService {
 
 
     private DynamicListElement getDisplayEntry(StaffResponse staffResponse) {
-        String value = concat(concat(staffResponse.getStaffProfile().getLastName()," - "),staffResponse.getStaffProfile().getEmailId());
+        String value = concat(staffResponse.getStaffProfile().getLastName(),"(").concat(staffResponse.getStaffProfile().getEmailId()).concat(")");
         log.info("Values from DisplayEntry {}",value);
-        return DynamicListElement.builder().code(value).build();
+        return DynamicListElement.builder().code(value).label(value).build();
     }
 }
