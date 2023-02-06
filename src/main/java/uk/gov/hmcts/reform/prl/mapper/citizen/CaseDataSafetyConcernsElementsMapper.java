@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
+package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
