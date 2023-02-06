@@ -33,12 +33,11 @@ public class AllocatedJudgeService {
 
 
     public AllocatedJudge getAllocatedJudgeDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList) {
-        return mapAllocatedJudge(caseDataUpdated,legalAdviserList);
+        return mapAllocatedJudge(caseDataUpdated, legalAdviserList);
 
     }
 
-    private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated,
-                                             DynamicList legalAdviserList) {
+    private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList) {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
         if (null != caseDataUpdated.get("tierOfJudiciary")) {
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
@@ -54,8 +53,8 @@ public class AllocatedJudgeService {
                         throw new RuntimeException(e);
                     }
                     log.info("*** ********PersonalCode for the selected judge id : {}", null != personalCodes ? personalCodes.length : personalCodes);
-                    List<JudicialUsersApiResponse> judgeDetails = refDataUserService.getAllJudicialUserDetails(
-                        JudicialUsersApiRequest.builder().personalCode(personalCodes).build());
+                    List<JudicialUsersApiResponse> judgeDetails =
+                        refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().personalCode(personalCodes).build());
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
                     if (null != judgeDetails && judgeDetails.size() > 0) {
