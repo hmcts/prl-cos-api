@@ -28,16 +28,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class AllocatedJudgeService {
 
-    @Autowired
-    private final RefDataUserService refDataUserService;
-
-
-    public AllocatedJudge getAllocatedJudgeDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList) {
-        return mapAllocatedJudge(caseDataUpdated, legalAdviserList);
+    public AllocatedJudge getAllocatedJudgeDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
+                                                   RefDataUserService refDataUserService) {
+        return mapAllocatedJudge(caseDataUpdated, legalAdviserList, refDataUserService);
 
     }
 
-    private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList) {
+    private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
+                                             RefDataUserService refDataUserService) {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
         if (null != caseDataUpdated.get("tierOfJudiciary")) {
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);

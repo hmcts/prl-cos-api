@@ -110,7 +110,7 @@ public class AllocateJudgeControllerTest {
         );
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList())).thenReturn(allocatedJudge);
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(),refDataUserService)).thenReturn(allocatedJudge);
 
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
 
