@@ -53,6 +53,8 @@ public class RefDataUserService {
                 STAFFSORTCOLUMN,
                 STAFFORDERASC
             );
+            if(listOfStaffResponse!=null)
+            log.info(" size of staff details {}",listOfStaffResponse.size());
             return onlyLegalAdvisor(listOfStaffResponse);
         } catch (Exception e) {
             log.error("Staff details Lookup Failed - " + e.getMessage(), e);
@@ -81,6 +83,7 @@ public class RefDataUserService {
 
     private DynamicListElement getDisplayEntry(StaffResponse staffResponse) {
         String value = concat(concat(staffResponse.getStaffProfile().getLastName()," - "),staffResponse.getStaffProfile().getEmailId());
+        log.info("Values from DisplayEntry {}",value);
         return DynamicListElement.builder().code(value).build();
     }
 }
