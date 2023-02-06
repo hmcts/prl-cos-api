@@ -152,7 +152,6 @@ public class SendAndReplyController extends AbstractCallbackController {
         }
 
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
-        log.info("*** Case type of application in send and reply submission : {}", caseDataMap.get("caseTypeOfApplication"));
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();
