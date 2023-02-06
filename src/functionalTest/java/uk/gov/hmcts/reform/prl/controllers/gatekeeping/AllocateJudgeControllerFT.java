@@ -47,18 +47,18 @@ public class AllocateJudgeControllerFT {
 
     private static final String LEGAL_ADVISER_PREPOPULATE_VALID_REQUEST_BODY = "controller/valid-request-body.json";
 
-    private static final String ALLOCATE_JUDGE_VALID_REQUEST_BODY = "gatekeeping/AllocateJudgeDetailsRequest1.json";
+    private static final String ALLOCATE_JUDGE_VALID_REQUEST_BODY = "requests/gatekeeping/AllocateJudgeDetailsRequest1.json";
 
-    private static final String ALLOCATE_LEGAL_ADVISER_VALID_REQUEST_BODY = "gatekeeping/LegalAdvisorApiRequest.json";
+    private static final String ALLOCATE_LEGAL_ADVISER_VALID_REQUEST_BODY = "requests/gatekeeping/LegalAdvisorApiRequest.json";
 
-    private static final String ALLOCATE_TIER_OF_JUDICIARY_VALID_REQUEST_BODY = "gatekeeping/AllocateJudgeDetailsRequest2.json";
+    private static final String ALLOCATE_TIER_OF_JUDICIARY_VALID_REQUEST_BODY = "requests/gatekeeping/AllocateJudgeDetailsRequest2.json";
 
     private final String prePopulateLegalAdvisersEndpoint = "/allocateJudge/pre-populate-legalAdvisor-details";
 
     private final String allocateJudgeEndpoint = "/allocateJudge/allocatedJudgeDetails";
 
     @Test
-    public void testPrepopulateLeagalAdviserDetails_200ResponseAndNoErrors() throws Exception {
+    public void testPrepopulateLegalAdviserDetails_200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(LEGAL_ADVISER_PREPOPULATE_VALID_REQUEST_BODY);
 
         mockMvc.perform(post(prePopulateLegalAdvisersEndpoint)
@@ -79,6 +79,7 @@ public class AllocateJudgeControllerFT {
         mockMvc.perform(post(allocateJudgeEndpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "auth")
+                .header("ServiceAuthorization", "serviceAuth")
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -94,6 +95,7 @@ public class AllocateJudgeControllerFT {
         mockMvc.perform(post(allocateJudgeEndpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "auth")
+                .header("ServiceAuthorization", "serviceAuth")
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -109,6 +111,7 @@ public class AllocateJudgeControllerFT {
         mockMvc.perform(post(allocateJudgeEndpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "auth")
+                .header("ServiceAuthorization", "serviceAuth")
                 .content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())

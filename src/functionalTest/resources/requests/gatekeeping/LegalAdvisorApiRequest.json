@@ -11,7 +11,7 @@
           "code": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)",
           "label": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)"
         },
-        "list_items":[
+        "list_items": [
           {
             "code": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)",
             "label": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)"
@@ -20,7 +20,8 @@
             "code": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)",
             "label": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)"
           }
-        ],
+        ]
+      },
       "children": [
         {
           "id": "ea726437-e8d0-4b09-8f99-d0979b81296e",
