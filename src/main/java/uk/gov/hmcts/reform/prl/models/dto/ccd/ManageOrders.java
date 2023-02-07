@@ -199,4 +199,6 @@ public class ManageOrders {
     private final List<Element<PostalInformation>> postalInformationDA;
     @JsonProperty("withdrawnOrRefusedOrder")
     private final WithDrawTypeOfOrderEnum withdrawnOrRefusedOrder;
+    @JsonProperty("ordersNeedToBeServed")
+    private final YesOrNo ordersNeedToBeServed;
 }
