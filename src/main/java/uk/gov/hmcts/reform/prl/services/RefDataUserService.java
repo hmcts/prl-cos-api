@@ -47,13 +47,7 @@ public class RefDataUserService {
 
     public List<DynamicListElement> getLegalAdvisorList() {
         try {
-            List<StaffResponse> listOfStaffResponse = staffResponseDetailsApi.getAllStaffResponseDetails(
-                idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
-                authTokenGenerator.generate(),
-                SERVICENAME,
-                STAFFSORTCOLUMN,
-                STAFFORDERASC
-            );
+            List<StaffResponse> listOfStaffResponse = getStaffResponse();
             if (listOfStaffResponse != null) {
                 log.info(" size of staff details {}", listOfStaffResponse.size());
             }
@@ -62,6 +56,16 @@ public class RefDataUserService {
             log.error("Staff details Lookup Failed - " + e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
+    }
+
+    public List<StaffResponse> getStaffResponse() {
+        return staffResponseDetailsApi.getAllStaffResponseDetails(
+            idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
+            authTokenGenerator.generate(),
+            SERVICENAME,
+            STAFFSORTCOLUMN,
+            STAFFORDERASC
+        );
     }
 
 
