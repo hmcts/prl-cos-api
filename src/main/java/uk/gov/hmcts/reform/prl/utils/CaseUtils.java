@@ -38,13 +38,17 @@ public class CaseUtils {
         return state != null ? state.getLabel() : "";
     }
 
-    public static long getRemainingDaysSubmitCase(CaseData caseData) {
-        long noDaysPassed = 0;
+    public static Long getRemainingDaysSubmitCase(CaseData caseData) {
+        Long noOfDaysRemaining = null;
+        System.out.println("caseCreatedBy " + caseData.getCaseCreatedBy() + "createdDate " + caseData.getCreatedDate());
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
             && State.AWAITING_SUBMISSION_TO_HMCTS.equals(caseData.getState())) {
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-            noDaysPassed = Duration.between(caseData.getCreatedDate(), zonedDateTime).toDays();
+            System.out.println("zonedDateTime " + zonedDateTime);
+            Long noDaysPassed = Duration.between(caseData.getCreatedDate(), zonedDateTime).toDays();
+            System.out.println("noDaysPassed " + noDaysPassed);
+            noOfDaysRemaining = PrlAppsConstants.CASE_SUBMISSION_THRESHOLD - noDaysPassed;
         }
-        return PrlAppsConstants.CASE_SUBMISSION_THRESHOLD - noDaysPassed;
+        return noOfDaysRemaining;
     }
 }
