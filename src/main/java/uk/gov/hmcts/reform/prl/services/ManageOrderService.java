@@ -58,6 +58,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLI
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -679,7 +680,7 @@ public class ManageOrderService {
         if (childOption != null && childOption.getValue() != null) {
             childList = new ArrayList<>();
             for (DynamicMultiselectListElement dynamicMultiselectChildElement : childOption.getValue()) {
-                childList.add(dynamicMultiselectChildElement.getCode() + " - " + dynamicMultiselectChildElement.getLabel());
+                childList.add(dynamicMultiselectChildElement.getLabel());
             }
             selectedChildNames = String.join(",", childList);
         }
@@ -750,31 +751,37 @@ public class ManageOrderService {
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
         throws Exception {
-        List<Element<OrderDetails>> orderCollection = new ArrayList<>();
+        List<Element<OrderDetails>> orderCollection;
         if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
             orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
             orderCollection.addAll(orderDetails);
             orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
-        } else {
-            if (null != caseData.getManageOrders().getServeOrderDynamicList()) {
-                List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
-                    .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-                List<Element<OrderDetails>> orders = caseData.getOrderCollection();
-
-                orders.stream()
-                    .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId()))
-                    .forEach(order -> {
-                        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                            servedC100Order(caseData, orders, order);
-                        } else {
-                            servedFL401Order(caseData, orders, order);
-                        }
-                    });
-                return Map.of("orderCollection", orders);
+            if (caseData.getManageOrdersOptions().equals(uploadAnOrder) && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                orderCollection = serveOrder(caseData);
             }
+        } else {
+            orderCollection = serveOrder(caseData);
         }
         return Map.of("orderCollection", orderCollection);
+    }
+
+    private List<Element<OrderDetails>> serveOrder(CaseData caseData) {
+        List<Element<OrderDetails>> orders = caseData.getOrderCollection();
+        if (null != caseData.getManageOrders().getServeOrderDynamicList()) {
+            List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
+            orders.stream()
+                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId()))
+                .forEach(order -> {
+                    if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                        servedC100Order(caseData, orders, order);
+                    } else {
+                        servedFL401Order(caseData, orders, order);
+                    }
+                });
+        }
+        return orders;
     }
 
     private static void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
