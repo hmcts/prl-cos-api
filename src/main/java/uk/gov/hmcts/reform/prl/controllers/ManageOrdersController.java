@@ -261,7 +261,7 @@ public class ManageOrdersController {
             caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
         }
         log.info("isJudgeOrLa {}", isJudgeOrLa);
-        caseDataUpdated.put("isJudgeOrLa", isJudgeOrLa);
+        caseDataUpdated.put("isJudgeOrLa", isJudgeOrLa ? "Judge" : "CaseWorker");
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
