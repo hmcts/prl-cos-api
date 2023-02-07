@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -72,7 +71,7 @@ public class AllocateJudgeControllerTest {
             .build();
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
         AboutToStartOrSubmitCallbackResponse response = allocateJudgeController.prePopulateLegalAdvisorDetails(
-             callbackRequest);
+            callbackRequest);
         assertNotNull(response.getData().containsKey("legalAdvisorList"));
     }
 
@@ -110,7 +109,8 @@ public class AllocateJudgeControllerTest {
         );
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(),refDataUserService)).thenReturn(allocatedJudge);
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService)).thenReturn(
+            allocatedJudge);
 
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
 
