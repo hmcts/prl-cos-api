@@ -389,7 +389,7 @@ public class ManageOrderService {
             log.info("OrderCollection ===> " + caseData.getOrderCollection());
         }
         headerMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
-        log.info("caseTypeOfApplication ===> " + caseData.getCaseTypeOfApplication());
+        log.info("after populate-header map ===> " + headerMap);
         return headerMap;
     }
 
