@@ -73,11 +73,7 @@ public class CaseController {
         if (null == caseDetails) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "case not found");
         } else {
-            CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-                .toBuilder().id(caseDetails.getId())
-                .createdDate(caseDetails.getCreatedDate())
-                .state(State.tryFromValue(caseDetails.getState()).orElse(null))
-                .build();
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             return caseData.toBuilder().noOfDaysRemainingToSubmitCase(
                 CaseUtils.getRemainingDaysSubmitCase(caseData)).build();
         }
