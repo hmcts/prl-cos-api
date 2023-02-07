@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -79,18 +78,17 @@ public class CaseControllerFunctionalTest {
     }
 
     @Test
-    @Disabled
-        public void createCaseInCcd() throws Exception {
-        String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
-        request
-                .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
-                .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-                .body(requestBody)
-                .when()
-                .contentType("application/json")
-                .post("/case/create")
-                .then()
-                .assertThat().statusCode(200);
+    public void createCaseInCcd() throws Exception {
+    String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
+    request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/case/create")
+            .then()
+            .assertThat().statusCode(200);
     }
 
     @Test
