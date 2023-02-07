@@ -750,4 +750,7 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
+
+    //Added for c100 rebuild
+    private long noOfDaysRemainingToSubmitCase;
 }
