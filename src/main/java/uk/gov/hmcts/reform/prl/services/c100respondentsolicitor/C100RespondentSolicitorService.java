@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,9 @@ public class C100RespondentSolicitorService {
             + getActiveRespondent.get().getValue().getLastName()) : null;
 
         caseDataUpdated.put("respondentNameForResponse", activeRespondentName);
+        Gson gson = new Gson();
+        String json = gson.toJson(caseData);
+        log.info(" ****** about to start C7 Response for respondent****** {}", json);
         return caseDataUpdated;
     }
 
@@ -485,7 +489,9 @@ public class C100RespondentSolicitorService {
                 respondents.set(respondents.indexOf(party), element(party.getId(), amended));
             });
 
-        log.info(" ****** C7 Response for respondent****** {}", caseData);
+        Gson gson = new Gson();
+        String json = gson.toJson(caseData);
+        log.info(" ****** C7 Response for respondent****** {}", json);
 
         respondents.stream()
             .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
