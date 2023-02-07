@@ -44,16 +44,9 @@ public class AllocatedJudgeService {
             if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
                 if (AllocatedJudgeTypeEnum.JUDGE.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("isJudgeOrLegalAdviser")))
                     && null != caseDataUpdated.get("judgeNameAndEmail")) {
-                    String[] personalCodes = new String[3];
-                    try {
-                        personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
-                            .writeValueAsString(caseDataUpdated.get("judgeNameAndEmail")), JudicialUser.class).getPersonalCode();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                    log.info("*** ********PersonalCode for the selected judge id : {}", null != personalCodes ? personalCodes.length : personalCodes);
                     List<JudicialUsersApiResponse> judgeDetails =
-                        refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().personalCode(personalCodes).build());
+                        refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
+                            .personalCode(getPersonalCode(caseDataUpdated.get("judgeNameAndEmail"))).build());
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
                     if (null != judgeDetails && judgeDetails.size() > 0) {
@@ -68,6 +61,17 @@ public class AllocatedJudgeService {
             }
         }
         return allocatedJudgeBuilder.build();
+    }
+
+    private String[] getPersonalCode(Object judgeDetails) {
+        String[] personalCodes = new String[3];
+        try {
+            personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
+                .writeValueAsString(judgeDetails), JudicialUser.class).getPersonalCode();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return personalCodes;
     }
 
     private TierOfJudiciaryEnum getTierOfJudiciary(String tierOfJudiciary) {

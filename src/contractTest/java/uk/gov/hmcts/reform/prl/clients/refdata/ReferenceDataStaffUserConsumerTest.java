@@ -16,7 +16,13 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
+import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffResponse;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
+
+import java.util.List;
+
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
 
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -61,11 +67,14 @@ public class ReferenceDataStaffUserConsumerTest {
     @PactTestFor(pactMethod = "generateStaffUsers")
     public void verifyGetStaffUsers() {
 
-        staffResponseDetailsApi.getAllStaffResponseDetails(
+        List<StaffResponse> staffResponseList = staffResponseDetailsApi.getAllStaffResponseDetails(
             AUTHORIZATION_TOKEN,
             SERVICE_AUTH_TOKEN,
             "PRIVATELAW","lastName","ASC"
         );
+        assertNotNull(staffResponseList);
+        assertEquals("Rama",staffResponseList.get(0).getStaffProfile().getLastName());
+        assertEquals("crd_func_test_2.0_rdcc_3831_107@justice.gov.uk",staffResponseList.get(0).getStaffProfile().getEmailId());
     }
 
 }
