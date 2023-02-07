@@ -42,7 +42,6 @@ public class CitizenEmailService {
     }
 
     public void sendEmail(String address, EmailTemplateVars email) {
-        log.info("Sending case submission email to " + address);
         emailService.send(
             address,
             EmailTemplateNames.CITIZEN_CASE_SUBMISSION,
