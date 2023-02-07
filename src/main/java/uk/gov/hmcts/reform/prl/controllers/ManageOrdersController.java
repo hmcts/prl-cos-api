@@ -217,6 +217,7 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
+        log.info("inside manage-orders/about-to-submit start ===> " + callbackRequest.getCaseDetails().getData());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
