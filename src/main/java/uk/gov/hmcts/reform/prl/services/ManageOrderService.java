@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -658,6 +659,7 @@ public class ManageOrderService {
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                                        .orderTypeId(flagSelectedOrderId)
                                        .orderDocument(caseData.getAppointmentOfGuardian())
+                                       .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
                                        .otherDetails(OtherOrderDetails.builder()
                                                          .createdBy(caseData.getJudgeOrMagistratesLastName())
                                                          .orderCreatedDate(dateTime.now()
@@ -669,6 +671,19 @@ public class ManageOrderService {
                                        .dateCreated(dateTime.now())
                                        .build()));
         }
+    }
+
+    private String getSelectedChildInfoFromMangeOrder(DynamicMultiSelectList childOption) {
+        String selectedChildNames = null;
+        List<String> childList;
+        if (childOption != null && childOption.getValue() != null) {
+            childList = new ArrayList<>();
+            for (DynamicMultiselectListElement dynamicMultiselectChildElement : childOption.getValue()) {
+                childList.add(dynamicMultiselectChildElement.getCode() + " - " + dynamicMultiselectChildElement.getLabel());
+            }
+            selectedChildNames = String.join(",", childList);
+        }
+        return selectedChildNames;
     }
 
 
