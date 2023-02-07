@@ -217,8 +217,19 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        if (caseDetails.getData().containsKey("isTheOrderAboutAllChildren") && caseDetails.getData().get(
+            "isTheOrderAboutAllChildren") != null && !caseDetails.getData().get(
+            "isTheOrderAboutAllChildren").toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
+            caseDetails.getData().remove("childOption");
+        }
+        if (caseDetails.getData().containsKey("isTheUploadOrderAboutChildren") && caseDetails.getData().get(
+            "isTheUploadOrderAboutChildren") != null && !caseDetails.getData().get(
+            "isTheUploadOrderAboutChildren").toString().equalsIgnoreCase(PrlAppsConstants.YES)) {
+            caseDetails.getData().remove("childOption");
+        }
+        CaseData caseData = CaseUtils.getCaseData(caseDetails,objectMapper);
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
             caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
         } else {
