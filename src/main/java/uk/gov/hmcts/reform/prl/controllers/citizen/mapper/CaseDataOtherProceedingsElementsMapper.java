@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.mapper.citizen;
+package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;

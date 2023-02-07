@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.mapper.citizen;
+package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
 
 import uk.gov.hmcts.reform.prl.enums.citizen.UrgentHearingReasonEnum;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper.COMMA_SEPARATOR;
 
 public class CaseDataUrgencyElementsMapper {
 
