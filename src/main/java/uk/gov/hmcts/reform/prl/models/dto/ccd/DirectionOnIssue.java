@@ -115,7 +115,7 @@ public class DirectionOnIssue {
     @JsonProperty("dioPersonWhoRequiresInterpreter")
     private final String dioPersonWhoRequiresInterpreter;
     @JsonProperty("dioInterpreterDialectRequired")
-    private final SdoLanguageDialect dioInterpreterDialectRequired;
+    private final List<Element<SdoLanguageDialect>> dioInterpreterDialectRequired;
     @JsonProperty("dioUpdateContactDetails")
     private final String dioUpdateContactDetails;
 
@@ -135,10 +135,10 @@ public class DirectionOnIssue {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dioLocalAuthorityReportSubmitByDate;
     @JsonProperty("dioDisclosureOfPapersCaseNumbers")
-    private final SdoDisclosureOfPapersCaseNumber dioDisclosureOfPapersCaseNumbers;
+    private final List<Element<SdoDisclosureOfPapersCaseNumber>> dioDisclosureOfPapersCaseNumbers;
     @JsonProperty("dioParentWithCare")
     private final String dioParentWithCare;
     @JsonProperty("dioApplicationToApplyPermission")
-    private final DioApplicationToApplyPermission dioApplicationToApplyPermission;
+    private final List<Element<DioApplicationToApplyPermission>> dioApplicationToApplyPermission;
 
 }
