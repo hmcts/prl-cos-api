@@ -1,11 +1,11 @@
-package uk.gov.hmcts.reform.prl.mapper.citizen;
+package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
 
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildHearingWithoutNoticeElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper.COMMA_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
-import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.HYPHEN_SEPARATOR;
 
 public class CaseDataHwnElementsMapper {
 
