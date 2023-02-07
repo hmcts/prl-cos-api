@@ -759,6 +759,7 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .doesOrderClosesCase(YesOrNo.Yes)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(ManageOrders.builder().build())
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .build();
 
