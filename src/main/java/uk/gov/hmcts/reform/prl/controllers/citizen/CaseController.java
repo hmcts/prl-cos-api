@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -73,7 +74,10 @@ public class CaseController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "case not found");
         } else {
             CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-                .toBuilder().id(caseDetails.getId()).createdDate(caseDetails.getCreatedDate()).build();
+                .toBuilder().id(caseDetails.getId())
+                .createdDate(caseDetails.getCreatedDate())
+                .state(State.tryFromValue(caseDetails.getState()).orElse(null))
+                .build();
             return caseData.toBuilder().noOfDaysRemainingToSubmitCase(
                 CaseUtils.getRemainingDaysSubmitCase(caseData)).build();
         }
