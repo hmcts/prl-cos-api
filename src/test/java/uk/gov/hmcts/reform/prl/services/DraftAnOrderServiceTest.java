@@ -54,7 +54,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DirectionOnIssue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadOrderOptions;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -207,9 +206,7 @@ public class DraftAnOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.blankOrderOrDirections)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.blankOrderOrDirections)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
             .selectedOrder("test order")
             .selectTypeOfOrder(SelectTypeOfOrderEnum.general)
@@ -330,9 +327,7 @@ public class DraftAnOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.blankOrderOrDirections)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.blankOrderOrDirections)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
             .selectedOrder("test order")
             .selectTypeOfOrder(SelectTypeOfOrderEnum.general)
@@ -1118,9 +1113,7 @@ public class DraftAnOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.blankOrderOrDirections)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.blankOrderOrDirections)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
             .selectedOrder("test order")
             .previewOrderDoc(Document.builder()
