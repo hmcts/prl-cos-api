@@ -567,6 +567,7 @@ public class ManageOrderService {
         } else {
             selectedOrder = "";
         }
+        log.info("selectedOrder type for upload ====> " + selectedOrder);
         return selectedOrder;
     }
 
