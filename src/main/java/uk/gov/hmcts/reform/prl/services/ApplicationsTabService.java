@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
@@ -31,6 +32,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
@@ -50,6 +52,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ApplicantFamily;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildrenDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Respondent;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401SolicitorDetails;
@@ -93,6 +96,7 @@ import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
+import static uk.gov.hmcts.reform.prl.enums.Gender.other;
 
 
 @Slf4j
@@ -130,7 +134,11 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("allegationsOfHarmDomesticAbuseTable", getDomesticAbuseTable(caseData));
             applicationTab.put("allegationsOfHarmChildAbductionTable", getChildAbductionTable(caseData));
             applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
-            applicationTab.put("childDetailsTable", getChildDetails(caseData));
+            if ("v2".equals(caseData.getTaskListVersion())) {
+                applicationTab.put("childDetailsRevisedTable", getChildRevisedDetails(caseData));
+            } else {
+                applicationTab.put("childDetailsTable", getChildDetails(caseData));
+            }
             applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
@@ -1028,6 +1036,43 @@ public class ApplicationsTabService implements TabService {
         }
 
         return toMap(builder.build());
+    }
+
+    public List<Element<ChildrenDetailsRevised>> getChildRevisedDetails(CaseData caseData) {
+        Optional<List<Element<ChildDetailsRevised>>> childElementsCheck = ofNullable(caseData.getNewChildDetails());
+        List<Element<ChildrenDetailsRevised>> childFinalList = new ArrayList<>();
+        if (childElementsCheck.isEmpty()) {
+            ChildrenDetailsRevised child = ChildrenDetailsRevised.builder().build();
+            Element<ChildrenDetailsRevised> app = Element.<ChildrenDetailsRevised>builder().value(child).build();
+            childFinalList.add(app);
+            return childFinalList;
+        }
+        List<ChildDetailsRevised> childList = caseData.getNewChildDetails().stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+        for (ChildDetailsRevised child : childList) {
+            ChildrenDetailsRevised c = getChildDetailsRevised(child);
+            Element<ChildrenDetailsRevised> res = Element.<ChildrenDetailsRevised>builder().value(c).build();
+            childFinalList.add(res);
+        }
+        log.info("getChildRevisedDetails : {}",childFinalList);
+        return childFinalList;
+    }
+
+
+    private ChildrenDetailsRevised getChildDetailsRevised(ChildDetailsRevised child) {
+        Optional<List<OrderTypeEnum>> orderAppliedFor = ofNullable(child.getOrderAppliedFor());
+        Optional<Gender> childGender = ofNullable(child.getGender());
+        return ChildrenDetailsRevised.builder().firstName(child.getFirstName())
+            .lastName(child.getLastName())
+            .dateOfBirth(child.getDateOfBirth())
+            .gender(child.getGender())
+            .otherGender(!childGender.isEmpty() &&  childGender.isPresent() && childGender.get().equals(other) ? child.getOtherGender() : "")
+            .orderAppliedFor(orderAppliedFor.isEmpty() ? null : child.getOrderAppliedFor().stream()
+                .map(OrderTypeEnum::getDisplayedValue).collect(
+                    Collectors.joining(", ")))
+            .parentalResponsibilityDetails(child.getParentalResponsibilityDetails())
+            .build();
     }
 
 }
