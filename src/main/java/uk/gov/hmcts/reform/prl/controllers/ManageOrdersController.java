@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -45,6 +46,7 @@ import static java.util.stream.Collectors.joining;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 
 @Slf4j
@@ -56,7 +58,7 @@ public class ManageOrdersController {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private final UserService userService;
+    private UserService userService;
 
     @Autowired
     private ManageOrderService manageOrderService;
@@ -251,11 +253,15 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        List<String> roles = userDetails.getRoles();
+        boolean isJudgeOrLa = roles.stream().anyMatch(ROLES_JUDGE::contains);
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
         }
-
+        log.info("isJudgeOrLa {}", isJudgeOrLa);
+        caseDataUpdated.put("isJudgeOrLa", isJudgeOrLa);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
