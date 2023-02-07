@@ -127,5 +127,6 @@ public class AllocatedJudgeServiceTest {
         assertEquals(YesOrNo.Yes,actualResponse.getIsSpecificJudgeOrLegalAdviserNeeded());
         assertEquals("test@Email.com",actualResponse.getJudgeEmail());
         assertEquals("testSurname",actualResponse.getJudgeName());
+
     }
 }

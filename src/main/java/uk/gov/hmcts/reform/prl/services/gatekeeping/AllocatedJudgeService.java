@@ -70,6 +70,7 @@ public class AllocatedJudgeService {
                 .writeValueAsString(judgeDetails), JudicialUser.class).getPersonalCode();
         } catch (Exception e) {
             throw new RuntimeException(e);
+
         }
         return personalCodes;
     }

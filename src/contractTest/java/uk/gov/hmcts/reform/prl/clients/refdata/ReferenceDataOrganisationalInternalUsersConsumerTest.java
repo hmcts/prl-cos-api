@@ -42,6 +42,7 @@ public class ReferenceDataOrganisationalInternalUsersConsumerTest extends Refere
         Organisations orgainisation = organisationApi.findOrganisation(AUTHORIZATION_TOKEN, SERVICE_AUTH_TOKEN, "orgId");
         assertThat(orgainisation, is(notNullValue()));
         assertThat(orgainisation.getOrganisationIdentifier(), is("someOrganisationIdentifier"));
+
     }
 
 }
