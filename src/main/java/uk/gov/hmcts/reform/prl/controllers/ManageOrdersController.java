@@ -133,7 +133,7 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("fetch-order-details before caseData ===> " + caseData);
+        log.info("fetch-order-details before caseData ===> " + callbackRequest.getCaseDetails().getData());
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {

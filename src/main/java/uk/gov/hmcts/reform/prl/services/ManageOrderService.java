@@ -394,7 +394,11 @@ public class ManageOrderService {
     }
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
-        return caseData.toBuilder().childrenList(getChildInfoFromCaseData(caseData))
+        String caseTypeOfApplication = caseData.getCaseTypeOfApplication() != null
+            ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
+        return caseData.toBuilder()
+            .childrenList(getChildInfoFromCaseData(caseData))
+            .caseTypeOfApplication(caseTypeOfApplication)
             .manageOrders(ManageOrders.builder()
                               .childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)).build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
