@@ -13,6 +13,12 @@
   <suppress>
     <notes>Temporary Suppression</notes>
     <cve>CVE-2021-37533</cve>
+    <cve>CVE-2022-22978</cve>
+    <cve>CVE-2022-22976</cve>
+    <cve>CVE-2021-22119</cve>
+    <cve>CVE-2020-15522</cve>
+    <cve>CVE-2022-31692</cve>
+    <cve>CVE-2022-31690</cve>
 
   </suppress>
   <suppress>
@@ -80,6 +86,7 @@
     <notes><![CDATA[
       bcprov-jdk15on-1.64.jar ]]></notes>
     <cve>CVE-2020-15522</cve>
+    <cve>CVE-2021-4277</cve>
   </suppress>
   <suppress>
     <packageUrl regex="true">^pkg:maven/.*/.*@.*$</packageUrl>

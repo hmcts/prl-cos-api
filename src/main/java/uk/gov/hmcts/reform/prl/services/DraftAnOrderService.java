@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
@@ -55,6 +56,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_EX740;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_QUALIFIED_LEGAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_APPLICATION_TO_APPLY_PERMISSION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASE_REVIEW;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PARENT_WITHCARE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_RIGHT_TO_ASK;
@@ -94,7 +96,6 @@ public class DraftAnOrderService {
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData));
-        log.info("current order details {}", orderDetails);
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(orderDetails);
@@ -110,7 +111,6 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getCurrentOrderDetails(CaseData caseData) {
-        log.info(" Getting current order details from case data {}", caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
@@ -218,7 +218,6 @@ public class DraftAnOrderService {
         }
         orderCollection.add(convertDraftOrderToFinal(auth, caseData, draftOrder));
         orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
-        log.info("final collection {}", orderCollection);
         return orderCollection;
     }
 
@@ -442,7 +441,6 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-        log.info("parent Name " + selectedOrder.getParentName());
         caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
         caseDataMap.put("parentName", selectedOrder.getParentName());
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
@@ -510,7 +508,6 @@ public class DraftAnOrderService {
     public DraftOrder getSelectedDraftOrderDetails(CaseData caseData) {
         UUID orderId = elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper);
-        log.info("draftOrderdynamicList {}", caseData.getDraftOrdersDynamicList());
         log.info("inside getDraftOrderDocument orderId {}", orderId);
         return caseData.getDraftOrderCollection().stream()
             .filter(element -> element.getId().equals(orderId))
@@ -522,18 +519,14 @@ public class DraftAnOrderService {
 
     public Map<String, Object> updateDraftOrderCollection(CaseData caseData) {
 
-        log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
-        log.info(" ************ casedata {}", caseData);
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-        log.info(" ************ Selected Order ***  {}", selectedOrder);
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if ((draftOrder.getOrderDocument() != null && draftOrder.getOrderDocument().getDocumentFileName()
                 .equalsIgnoreCase(selectedOrder.getOrderDocument().getDocumentFileName()))
                 || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
                 .equalsIgnoreCase(selectedOrder.getOrderDocumentWelsh().getDocumentFileName()))) {
-                log.info("matching draftorder {}", draftOrder);
                 draftOrderCollection.set(draftOrderCollection.indexOf(e),
                         element(getUpdatedDraftOrder(draftOrder, caseData))
                 );
@@ -705,7 +698,6 @@ public class DraftAnOrderService {
                                   .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
                                   .build()).build();
         }
-        log.info("Case data after prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         return caseData;
     }
 
@@ -884,11 +876,24 @@ public class DraftAnOrderService {
             caseDataUpdated.put(
                 "dioParentWithCare", DIO_PARENT_WITHCARE);
         }
+        if (!caseData.getDirectionOnIssue().getDioOtherList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioOtherList().contains(
+            DioOtherEnum.applicationToApplyPermission)) {
+
+            List<Element<DioApplicationToApplyPermission>> dioApplicationToApplyPermissionList = new ArrayList<>();
+            DioApplicationToApplyPermission dioApplicationToApplyPermission = DioApplicationToApplyPermission.builder()
+                .applyPermissionToEditSection(DIO_APPLICATION_TO_APPLY_PERMISSION)
+                .build();
+
+            dioApplicationToApplyPermissionList.add(element(dioApplicationToApplyPermission));
+            caseDataUpdated.put(
+                "dioApplicationToApplyPermission", dioApplicationToApplyPermissionList);
+
+        }
 
         List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
         populateDioCourtDynamicList(courtList, caseDataUpdated);
 
-        log.info("Case data updated map {}", caseDataUpdated);
     }
 
     private void populateDioCourtDynamicList(List<DynamicListElement> courtList, Map<String, Object> caseDataUpdated) {
@@ -907,42 +912,12 @@ public class DraftAnOrderService {
         return  getDraftOrderData(authorisation, caseData, draftOrder);
     }
 
-    private Map<String,Object> getDraftOrderData(String authorisation, CaseData caseData, DraftOrder draftOrder) throws Exception {
-        {
-            Map<String, Object> caseDataUpdated = new HashMap<>();
-            GeneratedDocumentInfo generatedDocumentInfo = null;
-            Map<String, String> fieldsMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
-            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-            if (documentLanguage.isGenEng()) {
-                caseDataUpdated.put("isEngDocGen", Yes.toString());
-                generatedDocumentInfo = dgsService.generateDocument(
-                    authorisation,
-                    CaseDetails.builder().caseData(caseData).build(),
-                    fieldsMap.get(PrlAppsConstants.TEMPLATE)
-                );
-                caseDataUpdated.put("previewOrderDoc", Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
-
-            }
-            if (documentLanguage.isGenWelsh()) {
-                caseDataUpdated.put("isWelshDocGen", Yes.toString());
-                generatedDocumentInfo = dgsService.generateWelshDocument(
-                    authorisation,
-                    CaseDetails.builder().caseData(caseData).build(),
-                    fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
-                );
-                caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
-
-            }
-            return caseDataUpdated;
-        }
-
+    private Map<String, Object> getDraftOrderData(String authorisation, CaseData caseData, DraftOrder draftOrder) throws Exception {
+        Map<String, Object> caseDataUpdated = manageOrderService.getCaseData(
+            authorisation,
+            caseData,
+            draftOrder.getOrderType()
+        );
+        return caseDataUpdated;
     }
 }
