@@ -133,6 +133,7 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("fetch-order-details before caseData ===> " + caseData);
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -158,12 +159,12 @@ public class ManageOrdersController {
             } else {
                 isUploadAnOrderByAdmin = YesOrNo.No.getDisplayedValue();
             }
-            log.info("isUploadAnOrderByAdmin ===> " + isUploadAnOrderByAdmin);
         }
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .isUploadAnOrderByAdmin(isUploadAnOrderByAdmin)
             .build();
+        log.info("after fetch-order-details caseData ===> " + caseData);
         return CallbackResponse.builder()
             .data(caseData)
             .build();
@@ -181,6 +182,7 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("caseData before populate-header ===> " + caseData);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageOrderService.populateHeader(caseData))
             .build();
@@ -231,7 +233,7 @@ public class ManageOrdersController {
                 caseData
             ));
         }
-
+        log.info("caseDataUpdated before cleanup ===> " + caseDataUpdated);
         if (caseDataUpdated.containsKey("manageOrdersOptions")) {
             caseDataUpdated.remove("manageOrdersOptions");
         }
@@ -247,6 +249,7 @@ public class ManageOrdersController {
         if (caseDataUpdated.containsKey("serveOrderDynamicList")) {
             caseDataUpdated.remove("serveOrderDynamicList");
         }
+        log.info("caseDataUpdated after cleanup ===> " + caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -297,6 +300,7 @@ public class ManageOrdersController {
     ) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("/manage-orders/add-upload-order before caseDataUpdated ===> " + caseDataUpdated);
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
             caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
         } else {
@@ -312,8 +316,10 @@ public class ManageOrdersController {
             CaseData.class
         );
 
+        caseDataUpdated.putAll(manageOrderService.populateHeader(modifiedCaseData));
+        log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(manageOrderService.populateHeader(modifiedCaseData))
+            .data(caseDataUpdated)
             .build();
     }
 
