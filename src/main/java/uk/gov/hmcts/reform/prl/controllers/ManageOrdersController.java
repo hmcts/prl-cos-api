@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -45,6 +44,7 @@ import javax.ws.rs.core.HttpHeaders;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 
 @Slf4j
@@ -72,8 +72,6 @@ public class ManageOrdersController {
 
     @Autowired
     private DynamicMultiSelectListService dynamicMultiSelectListService;
-    @Autowired
-    private final IdamClient idamClient;
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -146,23 +144,15 @@ public class ManageOrdersController {
         }
 
         ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
-                .childOption(DynamicMultiSelectList.builder()
-                                 .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
-                .build();
-        log.info("**Manage orders with child list {}",manageOrders);
+            .childOption(DynamicMultiSelectList.builder()
+                             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
+            .ordersNeedToBeServed(caseData.getManageOrdersOptions() == servedSavedOrders ? YesOrNo.Yes : YesOrNo.No)
+            .build();
+        log.info("**Manage orders with child list {}", manageOrders);
 
-        UserDetails userDetails = idamClient.getUserDetails(authorisation);
-        String isUploadAnOrderByAdmin = null;
-        if (caseData.getManageOrdersOptions() != null && caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-            if (isAdmin(userDetails)) {
-                isUploadAnOrderByAdmin = YesOrNo.Yes.getDisplayedValue();
-            } else {
-                isUploadAnOrderByAdmin = YesOrNo.No.getDisplayedValue();
-            }
-        }
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
-            .isUploadAnOrderByAdmin(isUploadAnOrderByAdmin)
+            .isUploadAnOrderByAdmin(isAdmin(authorisation, caseData))
             .build();
         log.info("after fetch-order-details caseData ===> " + caseData);
         return CallbackResponse.builder()
@@ -244,26 +234,11 @@ public class ManageOrdersController {
                 caseData
             ));
         }
-        log.info("caseDataUpdated before cleanup ===> " + caseDataUpdated);
-        if (caseDataUpdated.containsKey("manageOrdersOptions")) {
-            caseDataUpdated.remove("manageOrdersOptions");
-        }
-        if (caseDataUpdated.containsKey("createSelectOrderOptions")) {
-            caseDataUpdated.remove("createSelectOrderOptions");
-        }
-        if (caseDataUpdated.containsKey("uploadOrderOptions")) {
-            caseDataUpdated.remove("uploadOrderOptions");
-        }
-        if (caseDataUpdated.containsKey("amendOrderDynamicList")) {
-            caseDataUpdated.remove("uploadOrderOptions");
-        }
-        if (caseDataUpdated.containsKey("serveOrderDynamicList")) {
-            caseDataUpdated.remove("serveOrderDynamicList");
-        }
-        log.info("caseDataUpdated after cleanup ===> " + caseDataUpdated);
+        cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
 
     @PostMapping(path = "/show-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order for special guardianship create order")
@@ -321,6 +296,9 @@ public class ManageOrdersController {
             authorisation,
             caseData
         ));
+        if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
+            caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
+        }
 
         CaseData modifiedCaseData = objectMapper.convertValue(
             caseDataUpdated,
@@ -335,7 +313,36 @@ public class ManageOrdersController {
             .build();
     }
 
-    private boolean isAdmin(UserDetails userDetails) {
-        return userDetails.getRoles().contains("caseworker-privatelaw-courtadmin");
+    private String isAdmin(String authorisation, CaseData caseData) {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String isUploadAnOrderByAdmin = "";
+        if (caseData.getManageOrdersOptions() != null && caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
+            if (userDetails.getRoles().contains("caseworker-privatelaw-courtadmin")) {
+                isUploadAnOrderByAdmin = PrlAppsConstants.YES;
+            } else {
+                isUploadAnOrderByAdmin = PrlAppsConstants.NO;
+            }
+        }
+        return isUploadAnOrderByAdmin;
+    }
+
+    private static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
+        log.info("caseDataUpdated before cleanup ===> " + caseDataUpdated);
+        if (caseDataUpdated.containsKey("manageOrdersOptions")) {
+            caseDataUpdated.remove("manageOrdersOptions");
+        }
+        if (caseDataUpdated.containsKey("createSelectOrderOptions")) {
+            caseDataUpdated.remove("createSelectOrderOptions");
+        }
+        if (caseDataUpdated.containsKey("uploadOrderOptions")) {
+            caseDataUpdated.remove("uploadOrderOptions");
+        }
+        if (caseDataUpdated.containsKey("amendOrderDynamicList")) {
+            caseDataUpdated.remove("uploadOrderOptions");
+        }
+        if (caseDataUpdated.containsKey("serveOrderDynamicList")) {
+            caseDataUpdated.remove("serveOrderDynamicList");
+        }
+        log.info("caseDataUpdated after cleanup ===> " + caseDataUpdated);
     }
 }
