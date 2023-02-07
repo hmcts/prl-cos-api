@@ -752,5 +752,5 @@ public class CaseData implements MappableObject {
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
 
     //Added for c100 rebuild
-    private long noOfDaysRemainingToSubmitCase;
+    private Long noOfDaysRemainingToSubmitCase;
 }
