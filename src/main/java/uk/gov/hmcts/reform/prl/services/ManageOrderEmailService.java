@@ -289,6 +289,8 @@ public class ManageOrderEmailService {
 
         ManageOrders manageOrders  = caseData.getManageOrders();
 
+        log.info("ManageOrders ====>" + manageOrders);
+
         List<String> cafcassEmails = manageOrders.getCafcassEmailAddress()
             .stream()
             .map(Element::getValue)
