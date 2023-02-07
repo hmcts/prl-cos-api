@@ -43,10 +43,8 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
                                                                               .getValue()
                                                                               .getResponse()
                                                                               .getCitizenDetails());
-            if (!citizenDetails.isEmpty()) {
-                if (checkContactDetailsMandatoryCompleted(citizenDetails)) {
-                    mandatoryInfo = true;
-                }
+            if (!citizenDetails.isEmpty() && checkContactDetailsMandatoryCompleted(citizenDetails)) {
+                mandatoryInfo = true;
             }
         }
         return mandatoryInfo;

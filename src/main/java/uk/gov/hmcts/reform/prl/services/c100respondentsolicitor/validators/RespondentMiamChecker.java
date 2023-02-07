@@ -20,7 +20,7 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 public class RespondentMiamChecker implements RespondentEventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
+        Optional<Element<PartyDetails>> activeRespondent;
         activeRespondent = caseData.getRespondents()
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
@@ -36,7 +36,7 @@ public class RespondentMiamChecker implements RespondentEventChecker {
     public boolean hasMandatoryCompleted(CaseData caseData) {
         boolean mandatoryInfo = false;
 
-        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
+        Optional<Element<PartyDetails>> activeRespondent;
         activeRespondent = caseData.getRespondents()
             .stream()
             .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))

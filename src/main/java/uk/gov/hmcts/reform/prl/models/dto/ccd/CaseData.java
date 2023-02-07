@@ -88,6 +88,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCou
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
@@ -711,7 +712,7 @@ public class CaseData implements MappableObject {
      * Respondent solicitor's Current or Past proceedings.
      */
     private final YesNoDontKnow currentOrPastProceedingsForChildren;
-    private final List<Element<ProceedingDetails>> respondentExistingProceedings;
+    private final List<Element<RespondentProceedingDetails>> respondentExistingProceedings;
 
     /**
      * Respondent solicitor's Ability to participate proceedings.
