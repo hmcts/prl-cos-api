@@ -68,14 +68,12 @@ public class RefDataUserService {
         );
     }
 
-
     public List<JudicialUsersApiResponse> getAllJudicialUserDetails(JudicialUsersApiRequest judicialUsersApiRequest) {
         return judicialUserDetailsApi.getAllJudicialUserDetails(
             idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
             authTokenGenerator.generate(),
             judicialUsersApiRequest);
     }
-
 
     private List<DynamicListElement> onlyLegalAdvisor(List<StaffResponse> listOfStaffResponse) {
         if (null != listOfStaffResponse) {
@@ -85,7 +83,6 @@ public class RefDataUserService {
         }
         return List.of(DynamicListElement.builder().build());
     }
-
 
     private DynamicListElement getDisplayEntry(StaffResponse staffResponse) {
         String value = concat(staffResponse.getStaffProfile().getLastName(),"(").concat(staffResponse.getStaffProfile().getEmailId()).concat(")");

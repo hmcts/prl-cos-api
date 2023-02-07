@@ -22,7 +22,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGALOFFICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICENAME;
@@ -70,27 +70,26 @@ public class RefDataUserServiceTest {
     @Test
     public void testGetStaffDetailssWithNullStaffData() {
         when(staffResponseDetailsApi.getAllStaffResponseDetails(
-            authToken,
-            s2sToken,
+            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
+            authTokenGenerator.generate(),
             SERVICENAME,
             STAFFSORTCOLUMN,
             STAFFORDERASC)).thenReturn(null);
         List<DynamicListElement> staffDetails = refDataUserService.getLegalAdvisorList();
-        assertTrue(staffDetails.isEmpty());
-
+        assertNull(staffDetails.get(0).getCode());
     }
 
     @Test
     public void testGetStaffDetailsWithException() {
         when(staffResponseDetailsApi.getAllStaffResponseDetails(
-                 authToken,
-                 s2sToken,
+                 idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
+                 authTokenGenerator.generate(),
                  SERVICENAME,
                  STAFFSORTCOLUMN,
                  STAFFORDERASC))
             .thenThrow(NullPointerException.class);
         List<DynamicListElement> legalAdvisor = refDataUserService.getLegalAdvisorList();
-        assertEquals(0,legalAdvisor.size());
+        assertNull(legalAdvisor.get(0).getCode());
     }
 
     @Test
