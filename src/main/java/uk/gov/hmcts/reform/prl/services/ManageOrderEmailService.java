@@ -289,17 +289,20 @@ public class ManageOrderEmailService {
 
         ManageOrders manageOrders  = caseData.getManageOrders();
 
-        log.info("ManageOrders ====>" + manageOrders);
-
-        List<String> cafcassEmails = manageOrders.getCafcassEmailAddress()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
-        List<String> otherEmails = manageOrders.getOtherEmailAddress()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
+        List<String> cafcassEmails = new ArrayList<>();
+        List<String> otherEmails = new ArrayList<>();
+        if (manageOrders.getCafcassEmailAddress() != null) {
+            cafcassEmails = manageOrders.getCafcassEmailAddress()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+        }
+        if (manageOrders.getOtherEmailAddress() != null) {
+            otherEmails = manageOrders.getOtherEmailAddress()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+        }
 
         cafcassEmails.addAll(otherEmails);
 
