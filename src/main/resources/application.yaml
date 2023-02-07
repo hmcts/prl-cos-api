@@ -6,6 +6,7 @@ runs-locally: ${RUNS_LOCALLY:true}
 env: ${test_environment:local}
 TEST_URL: https://localhost:4044
 
+
 case:
   orchestration:
     service:
