@@ -300,7 +300,7 @@ public class ManageOrdersController {
     ) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("/manage-orders/add-upload-order before caseDataUpdated ===> " + caseDataUpdated);
+        log.info("/manage-orders/add-upload-order before caseData ===> " + callbackRequest.getCaseDetails());
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
             caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
         } else {

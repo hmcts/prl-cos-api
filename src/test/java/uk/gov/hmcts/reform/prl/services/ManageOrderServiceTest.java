@@ -47,7 +47,6 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadOrderOptions;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -160,9 +159,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
@@ -196,9 +193,7 @@ public class ManageOrderServiceTest {
             .home(Home.builder()
                       .children(listOfHomeChildren)
                       .build())
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
@@ -215,9 +210,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .fl401FamilymanCaseNumber("familyman12345")
             .familymanCaseNumber("familyman6789")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
@@ -233,9 +226,7 @@ public class ManageOrderServiceTest {
             .id(12345674L)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .courtName("Court name")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.authorityC31)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.authorityC31)
             .applicantsFL401(PartyDetails.builder()
                                  .firstName("app")
                                  .lastName("testLast")
@@ -297,9 +288,7 @@ public class ManageOrderServiceTest {
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .manageOrders(expectedDetails)
             .courtName("Court name")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.authorityC31)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.authorityC31)
             .applicantsFL401(PartyDetails.builder()
                                  .firstName("app")
                                  .lastName("testLast")
@@ -344,9 +333,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -378,9 +365,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -411,9 +396,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.appointmentOfGuardian)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -444,9 +427,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.parentalResponsibility)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -477,9 +458,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.transferOfCaseToAnotherCourt)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -510,9 +489,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -543,9 +520,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.powerOfArrest)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -565,9 +540,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
@@ -584,9 +557,7 @@ public class ManageOrderServiceTest {
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
@@ -612,9 +583,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -645,9 +614,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -680,9 +647,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -714,9 +679,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -793,9 +756,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .doesOrderClosesCase(YesOrNo.Yes)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
@@ -838,9 +799,7 @@ public class ManageOrderServiceTest {
             .fl401FamilymanCaseNumber("familyman12345")
             .orderCollection(new ArrayList<>())
             .dateOrderMade(LocalDate.now())
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
             .manageOrders(manageOrders)
@@ -922,9 +881,7 @@ public class ManageOrderServiceTest {
             .orderRecipients(recipientList)
             .applicants(partyDetails)
             .respondents(partyDetails)
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
@@ -957,9 +914,7 @@ public class ManageOrderServiceTest {
             .fl401FamilymanCaseNumber("familyman12345")
             .orderCollection(new ArrayList<>())
             .dateOrderMade(LocalDate.now())
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
             .manageOrders(manageOrders)
@@ -992,9 +947,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.amendDischargedVaried)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -1026,9 +979,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -1060,9 +1011,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -1094,9 +1043,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.generalForm)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -1128,9 +1075,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .fl401FamilymanCaseNumber("familyman12345")
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -1175,9 +1120,7 @@ public class ManageOrderServiceTest {
             .orderRecipients(recipientList)
             .applicants(partyDetails)
             .respondents(partyDetails)
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
@@ -1223,9 +1166,7 @@ public class ManageOrderServiceTest {
             .orderRecipients(recipientList)
             .applicants(partyDetails)
             .respondents(partyDetails)
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
@@ -1264,9 +1205,7 @@ public class ManageOrderServiceTest {
             .orderRecipients(recipientList)
             .applicants(partyDetails)
             .respondents(partyDetails)
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         assertNotNull(manageOrderService.populateHeader(caseData).get("caseTypeOfApplication"));
@@ -1304,9 +1243,7 @@ public class ManageOrderServiceTest {
             .respondents(partyDetails)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .manageOrders(manageOrders)
             .build();
@@ -1426,9 +1363,7 @@ public class ManageOrderServiceTest {
             .fl401FamilymanCaseNumber("familyman12345")
             .orderCollection(orderList)
             .dateOrderMade(LocalDate.now())
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .manageOrders(manageOrders)
             .build();
@@ -1490,9 +1425,7 @@ public class ManageOrderServiceTest {
             .fl401FamilymanCaseNumber("familyman12345")
             .orderCollection(orderList)
             .dateOrderMade(LocalDate.now())
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .manageOrders(manageOrders)
             .build();
@@ -1551,9 +1484,7 @@ public class ManageOrderServiceTest {
             .fl401FamilymanCaseNumber("familyman12345")
             .orderCollection(orderList)
             .dateOrderMade(LocalDate.now())
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                                    .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .manageOrders(manageOrders)
             .build();
@@ -1606,9 +1537,7 @@ public class ManageOrderServiceTest {
             .manageOrders(expectedDetails)
             .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
-            .uploadOrderOptions(UploadOrderOptions.builder()
-                                    .childArrangementOrders(ChildArrangementOrdersEnum.blankOrderOrDirections)
-                                    .build()).build();
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82).build();
         assertNotNull(manageOrderService.populateCustomOrderFields(caseData));
     }
 
