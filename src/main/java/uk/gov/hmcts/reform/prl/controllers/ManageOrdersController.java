@@ -78,7 +78,6 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("**********callbackRequest**********{}", callbackRequest);
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -171,7 +170,6 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("**** Case management location {}", caseData);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageOrderService.populateHeader(caseData))
             .build();
@@ -232,7 +230,6 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse showPreviewOrderWhenOrderCreated(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        log.info("**********callbackRequesttttt**********{}", callbackRequest);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getCreateSelectOrderOptions() != null
