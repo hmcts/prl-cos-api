@@ -555,18 +555,18 @@ public class ManageOrderService {
     }
 
     private String getSelectedOrderInfoForUpload(CaseData caseData) {
-        String selectedOrder = null;
-            if (caseData.getChildArrangementOrders() != null) {
-                selectedOrder = caseData.getChildArrangementOrders().getDisplayedValue();
-            } else if (caseData.getDomesticAbuseOrders() != null) {
-                selectedOrder = caseData.getDomesticAbuseOrders().getDisplayedValue();
-            } else if (caseData.getFcOrders() != null) {
-                selectedOrder = caseData.getFcOrders().getDisplayedValue();
-            } else if (caseData.getOtherOrdersOption() != null) {
-                selectedOrder = caseData.getOtherOrdersOption().getDisplayedValue();
-            } else {
-                selectedOrder = "";
-            }
+        String selectedOrder;
+        if (caseData.getChildArrangementOrders() != null) {
+            selectedOrder = caseData.getChildArrangementOrders().getDisplayedValue();
+        } else if (caseData.getDomesticAbuseOrders() != null) {
+            selectedOrder = caseData.getDomesticAbuseOrders().getDisplayedValue();
+        } else if (caseData.getFcOrders() != null) {
+            selectedOrder = caseData.getFcOrders().getDisplayedValue();
+        } else if (caseData.getOtherOrdersOption() != null) {
+            selectedOrder = caseData.getOtherOrdersOption().getDisplayedValue();
+        } else {
+            selectedOrder = "";
+        }
         return selectedOrder;
     }
 
