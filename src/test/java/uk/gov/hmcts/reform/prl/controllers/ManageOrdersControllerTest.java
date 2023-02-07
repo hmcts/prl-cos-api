@@ -435,6 +435,7 @@ public class ManageOrdersControllerTest {
             .courtName("testCourt")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
@@ -442,6 +443,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .manageOrders(ManageOrders.builder().build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .courtName("testCourt")
@@ -555,6 +557,7 @@ public class ManageOrdersControllerTest {
             .courtName("testCourt")
             .home(Home.builder().children(listOfChildren).build())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
@@ -567,6 +570,7 @@ public class ManageOrdersControllerTest {
             .fl401FamilymanCaseNumber("12345")
             .childrenList("Child 1: TestName\n")
             .manageOrders(ManageOrders.builder().build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectedOrder(
                 "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
                     + "enforcement application (C82)\\n\\n")
