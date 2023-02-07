@@ -656,6 +656,7 @@ public class ManageOrderService {
             return orderCollection;
         } else {
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
+                                       .orderTypeId(flagSelectedOrderId)
                                        .orderDocument(caseData.getAppointmentOfGuardian())
                                        .otherDetails(OtherOrderDetails.builder()
                                                          .createdBy(caseData.getJudgeOrMagistratesLastName())

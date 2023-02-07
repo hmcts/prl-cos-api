@@ -315,6 +315,7 @@ public class ManageOrdersController {
             caseDataUpdated,
             CaseData.class
         );
+        log.info("modifiedCaseData ===> " + modifiedCaseData);
 
         caseDataUpdated.putAll(manageOrderService.populateHeader(modifiedCaseData));
         log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
