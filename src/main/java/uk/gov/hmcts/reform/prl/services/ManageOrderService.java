@@ -758,16 +758,15 @@ public class ManageOrderService {
             orderCollection.addAll(orderDetails);
             orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
             if (caseData.getManageOrdersOptions().equals(uploadAnOrder) && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
-                orderCollection = serveOrder(caseData);
+                orderCollection = serveOrder(caseData, orderCollection);
             }
         } else {
-            orderCollection = serveOrder(caseData);
+            orderCollection = serveOrder(caseData, caseData.getOrderCollection());
         }
         return Map.of("orderCollection", orderCollection);
     }
 
-    private List<Element<OrderDetails>> serveOrder(CaseData caseData) {
-        List<Element<OrderDetails>> orders = caseData.getOrderCollection();
+    private List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
         if (null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
