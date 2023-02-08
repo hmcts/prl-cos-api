@@ -205,7 +205,7 @@ public class DraftAnOrderController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("previewOrderDoc","");
         caseDataUpdated.putAll(draftAnOrderService.generateDraftOrderCollection(caseData));
-        System.out.println("caseDataUpdated"+ caseDataUpdated);
+        System.out.println("caseDataUpdated" + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
