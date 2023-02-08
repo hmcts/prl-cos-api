@@ -43,6 +43,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
@@ -56,7 +57,7 @@ public class ManageOrdersController {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private final UserService userService;
+    private UserService userService;
 
     @Autowired
     private ManageOrderService manageOrderService;
@@ -267,12 +268,18 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        List<String> roles = userDetails.getRoles();
+        boolean isJudgeOrLa = roles.stream().anyMatch(ROLES_JUDGE::contains);
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
         } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
         }
+        log.info("isJudgeOrLa {}", isJudgeOrLa);
+        caseDataUpdated.put("isJudgeOrLa", isJudgeOrLa ? "Judge" : "CaseWorker");
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
