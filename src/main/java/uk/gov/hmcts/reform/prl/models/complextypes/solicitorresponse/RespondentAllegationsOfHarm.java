@@ -28,7 +28,6 @@ public class RespondentAllegationsOfHarm {
     private final LocalDate respondentNonMolestationOrderEndDate;
     private final YesOrNo respondentNonMolestationOrderIsCurrent;
     private final String respondentNonMolestationOrderCourt;
-    private final String respondentNonMolestationOrderCaseNumber;
     private final Document respondentNonMolestationOrderDocument;
     private final YesOrNo respondentOccupationOrder;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -37,7 +36,6 @@ public class RespondentAllegationsOfHarm {
     private final LocalDate respondentOccupationOrderEndDate;
     private final YesOrNo respondentOccupationOrderIsCurrent;
     private final String respondentOccupationOrderCourt;
-    private final String respondentOccupationOrderCaseNumber;
     private final Document respondentOccupationOrderDocument;
 
     private final YesOrNo respondentForcedMarriageOrder;
@@ -47,7 +45,6 @@ public class RespondentAllegationsOfHarm {
     private final LocalDate respondentForcedMarriageEndDate;
     private final YesOrNo respondentForcedMarriageIsCurrent;
     private final String respondentForcedMarriageCourt;
-    private final String respondentForcedMarriageCaseNumber;
     private final Document respondentForcedMarriageDocument;
 
     private final YesOrNo respondentRestrainingOrder;
@@ -57,7 +54,6 @@ public class RespondentAllegationsOfHarm {
     private final LocalDate respondentRestrainingEndDate;
     private final YesOrNo respondentRestrainingIsCurrent;
     private final String respondentRestrainingCourt;
-    private final String respondentRestrainingCaseNumber;
     private final Document respondentRestrainingDocument;
 
     private final YesOrNo respondentOtherInjunctiveOrder;
@@ -67,7 +63,6 @@ public class RespondentAllegationsOfHarm {
     private final LocalDate respondentOtherInjunctiveEndDate;
     private final YesOrNo respondentOtherInjunctiveIsCurrent;
     private final String respondentOtherInjunctiveCourt;
-    private final String respondentOtherInjunctiveCaseNumber;
     private final Document respondentOtherInjunctiveDocument;
 
     private final YesOrNo respondentUndertakingOrder;
@@ -77,7 +72,6 @@ public class RespondentAllegationsOfHarm {
     private final LocalDate respondentUndertakingEndDate;
     private final YesOrNo respondentUndertakingIsCurrent;
     private final String respondentUndertakingCourt;
-    private final String respondentUndertakingCaseNumber;
     private final Document respondentUndertakingDocument;
 
 
