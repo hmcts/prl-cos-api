@@ -52,6 +52,8 @@ public class AllocateJudgeController extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
         log.info("Prepopulate Legal Advisor - case id : {}", callbackRequest.getCaseDetails().getId());
         List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
+        log.info("Prepopulate Legal Advisor legal advisor list size {} for the case id : {}",
+                 legalAdviserList.size(),callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
             .build());
