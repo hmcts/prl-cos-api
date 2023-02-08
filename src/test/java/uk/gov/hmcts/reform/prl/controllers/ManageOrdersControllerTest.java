@@ -111,9 +111,12 @@ public class ManageOrdersControllerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
+        List<String> roles = new ArrayList();
+        roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
             .surname("Solicitor")
+            .roles(roles)
             .build();
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -1015,8 +1018,6 @@ public class ManageOrdersControllerTest {
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
-
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             callbackRequest
@@ -1102,8 +1103,7 @@ public class ManageOrdersControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
+        CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(12345L)
                              .data(stringObjectMap)
@@ -1113,6 +1113,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
         when(manageOrderService.getOrderToAmendDownloadLink(caseData)).thenReturn(new HashMap<>());
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateOrderToAmendDownloadLink(
             authToken,
             callbackRequest
