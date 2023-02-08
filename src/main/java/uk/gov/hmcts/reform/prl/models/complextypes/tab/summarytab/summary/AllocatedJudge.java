@@ -6,6 +6,7 @@ import lombok.Data;
 @Builder
 @Data
 public class AllocatedJudge {
+    private final String judgePersonalCode;
     private final String tierOfJudiciaryType;
     private final String lastName;
     private final String emailAddress;

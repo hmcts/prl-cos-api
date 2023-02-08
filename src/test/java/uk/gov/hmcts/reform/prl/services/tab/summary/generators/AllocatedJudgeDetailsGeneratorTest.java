@@ -30,7 +30,7 @@ public class AllocatedJudgeDetailsGeneratorTest {
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().allocatedJudgeDetails(
                 AllocatedJudge.builder().tierOfJudiciaryType(" ").emailAddress("test1@xxx.com").lastName("test1")
-                    .courtName("Test Court").build())
+                    .courtName("Test Court").judgePersonalCode("1234").build())
             .build());
     }
 
