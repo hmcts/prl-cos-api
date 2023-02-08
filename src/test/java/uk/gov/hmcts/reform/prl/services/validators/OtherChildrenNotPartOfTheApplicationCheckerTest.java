@@ -230,6 +230,6 @@ public class OtherChildrenNotPartOfTheApplicationCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(childChecker.getDefaultTaskState());
+        assertNotNull(childChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

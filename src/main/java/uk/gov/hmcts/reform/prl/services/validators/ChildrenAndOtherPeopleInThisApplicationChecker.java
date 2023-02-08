@@ -86,7 +86,7 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
     }
 
     @Override
-    public TaskState getDefaultTaskState() {
+    public TaskState getDefaultTaskState(CaseData caseData) {
         return TaskState.CANNOT_START_YET;
     }
 

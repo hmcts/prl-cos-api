@@ -655,7 +655,7 @@ public class SubmitAndPayCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(submitAndPayChecker.getDefaultTaskState());
+        assertNotNull(submitAndPayChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 
 

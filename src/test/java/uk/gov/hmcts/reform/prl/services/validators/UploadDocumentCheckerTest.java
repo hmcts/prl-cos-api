@@ -48,6 +48,6 @@ public class UploadDocumentCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(uploadDocumentChecker.getDefaultTaskState());
+        assertNotNull(uploadDocumentChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

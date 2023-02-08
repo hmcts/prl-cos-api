@@ -11,5 +11,5 @@ public interface EventChecker {
 
     boolean hasMandatoryCompleted(CaseData caseData);
 
-    TaskState getDefaultTaskState();
+    TaskState getDefaultTaskState(CaseData caseData);
 }

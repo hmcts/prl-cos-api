@@ -86,6 +86,6 @@ public class PdfCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(pdfChecker.getDefaultTaskState());
+        assertNotNull(pdfChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

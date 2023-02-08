@@ -7,7 +7,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILDREN_AND_APPLICANTS_ERROR;
 
 @Service
@@ -15,6 +17,9 @@ public class ChildrenAndApplicantsChecker implements EventChecker {
 
     @Autowired
     TaskErrorService taskErrorService;
+
+    @Autowired
+    EventsChecker eventsChecker;
 
     @Override
     public boolean isFinished(CaseData caseData) {
@@ -52,7 +57,11 @@ public class ChildrenAndApplicantsChecker implements EventChecker {
     }
 
     @Override
-    public TaskState getDefaultTaskState() {
+    public TaskState getDefaultTaskState(CaseData caseData) {
+
+        if (eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData) && eventsChecker.isFinished(APPLICANT_DETAILS, caseData)) {
+            return TaskState.NOT_STARTED;
+        }
         return TaskState.CANNOT_START_YET;
     }
 

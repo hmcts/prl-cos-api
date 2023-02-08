@@ -81,6 +81,6 @@ public class InternationalElementCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(internationalElementChecker.getDefaultTaskState());
+        assertNotNull(internationalElementChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

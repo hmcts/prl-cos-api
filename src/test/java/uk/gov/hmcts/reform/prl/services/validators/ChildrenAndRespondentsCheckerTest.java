@@ -146,6 +146,6 @@ public class ChildrenAndRespondentsCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(childrenAndRespondentsChecker.getDefaultTaskState());
+        assertNotNull(childrenAndRespondentsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

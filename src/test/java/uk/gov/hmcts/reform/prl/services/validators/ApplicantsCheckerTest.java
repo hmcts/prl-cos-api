@@ -142,7 +142,7 @@ public class ApplicantsCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(applicantsChecker.getDefaultTaskState());
+        assertNotNull(applicantsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 
 }

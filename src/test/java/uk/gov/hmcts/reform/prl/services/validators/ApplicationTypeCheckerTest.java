@@ -107,6 +107,6 @@ public class ApplicationTypeCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(applicationTypeChecker.getDefaultTaskState());
+        assertNotNull(applicationTypeChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

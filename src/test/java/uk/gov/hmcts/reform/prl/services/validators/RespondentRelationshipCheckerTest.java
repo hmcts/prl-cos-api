@@ -98,6 +98,6 @@ public class RespondentRelationshipCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(respondentRelationshipChecker.getDefaultTaskState());
+        assertNotNull(respondentRelationshipChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }
