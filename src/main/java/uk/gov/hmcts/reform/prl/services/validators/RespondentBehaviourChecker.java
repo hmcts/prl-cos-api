@@ -81,7 +81,7 @@ public class RespondentBehaviourChecker implements EventChecker {
     }
 
     @Override
-    public TaskState getDefaultTaskState() {
+    public TaskState getDefaultTaskState(CaseData caseData) {
         return TaskState.NOT_STARTED;
     }
 

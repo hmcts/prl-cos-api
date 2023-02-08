@@ -120,7 +120,7 @@ public class WithoutNoticeOrderCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(withoutNoticeOrderChecker.getDefaultTaskState());
+        assertNotNull(withoutNoticeOrderChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 
 

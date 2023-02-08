@@ -242,6 +242,6 @@ public class RespondentsCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(respondentsChecker.getDefaultTaskState());
+        assertNotNull(respondentsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

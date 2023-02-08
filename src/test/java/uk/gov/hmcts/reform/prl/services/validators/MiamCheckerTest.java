@@ -136,6 +136,6 @@ public class MiamCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(miamChecker.getDefaultTaskState());
+        assertNotNull(miamChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

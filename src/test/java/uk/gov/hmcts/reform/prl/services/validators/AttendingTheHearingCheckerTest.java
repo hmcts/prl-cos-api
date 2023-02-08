@@ -102,6 +102,6 @@ public class AttendingTheHearingCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(attendingTheHearingChecker.getDefaultTaskState());
+        assertNotNull(attendingTheHearingChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

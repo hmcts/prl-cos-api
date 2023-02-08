@@ -387,6 +387,6 @@ public class HomeCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(homeChecker.getDefaultTaskState());
+        assertNotNull(homeChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

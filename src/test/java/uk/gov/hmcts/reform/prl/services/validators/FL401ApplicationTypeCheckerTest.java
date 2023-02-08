@@ -165,6 +165,6 @@ public class FL401ApplicationTypeCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(fl401ApplicationTypeChecker.getDefaultTaskState());
+        assertNotNull(fl401ApplicationTypeChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }
