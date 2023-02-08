@@ -38,7 +38,6 @@ public class UpdatePartyDetailsService {
 
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
-        log.info("222222 {}",caseData);
         final Flags caseFlags = Flags.builder().build();
 
         updatedCaseData.put("caseFlags", caseFlags);
@@ -50,17 +49,13 @@ public class UpdatePartyDetailsService {
                 .getRespondentsFL401();
 
             if (Objects.nonNull(fl401Applicant)) {
-                log.info("33333333");
                 generatePartyUuidForFL401(caseData);
-                log.info("555555 {}",caseData);
                 updatedCaseData.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
                 setFL401ApplicantFlag(updatedCaseData, fl401Applicant);
             }
 
             if (Objects.nonNull(fl401respondent)) {
-                log.info("33333333 RESPPOnd");
                 generatePartyUuidForFL401(caseData);
-                log.info("555555  RESPPOnd{}",caseData);
                 updatedCaseData.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
                 setFL401RespondentFlag(updatedCaseData, fl401respondent);
             }
