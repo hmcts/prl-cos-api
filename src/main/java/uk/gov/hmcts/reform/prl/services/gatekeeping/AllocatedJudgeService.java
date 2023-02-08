@@ -53,7 +53,7 @@ public class AllocatedJudgeService {
                     if (null != judgeDetails && judgeDetails.size() > 0) {
                         allocatedJudgeBuilder.judgeName(judgeDetails.get(0).getSurname());
                         allocatedJudgeBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
-                        allocatedJudgeBuilder.judgePersonalCode(judgePersonalCode[0]);
+                        //allocatedJudgeBuilder.judgePersonalCode(judgePersonalCode[0]);
                     }
                 } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);

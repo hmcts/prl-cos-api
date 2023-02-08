@@ -26,7 +26,7 @@ public class AllocatedJudgeDetailsGeneratorTest {
             uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge.builder().isJudgeOrLegalAdviser(
                     AllocatedJudgeTypeEnum.JUDGE)
                 .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes).judgeEmail("test1@xxx.com").judgeName("test1")
-                .judgePersonalCode("1234").build()).build());
+                .build()).build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().allocatedJudgeDetails(
                 AllocatedJudge.builder().tierOfJudiciaryType(" ").emailAddress("test1@xxx.com").lastName("test1")
