@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
@@ -201,20 +199,5 @@ public class C100RespondentSolicitorController {
                 errorList))
             .errors(errorList)
             .build();
-    }
-
-    @PostMapping(path = "/test", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "test NoC")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public AboutToStartOrSubmitCallbackResponse submittedNoCRequest(
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) {
-        log.info("Calling test noc request in backend");
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("nocApproved", YesOrNo.Yes);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
