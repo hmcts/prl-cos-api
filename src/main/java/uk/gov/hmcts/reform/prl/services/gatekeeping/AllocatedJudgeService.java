@@ -44,6 +44,7 @@ public class AllocatedJudgeService {
             if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
                 if (AllocatedJudgeTypeEnum.JUDGE.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("isJudgeOrLegalAdviser")))
                     && null != caseDataUpdated.get("judgeNameAndEmail")) {
+                    String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get("judgeNameAndEmail"));
                     List<JudicialUsersApiResponse> judgeDetails =
                         refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
                             .personalCode(getPersonalCode(caseDataUpdated.get("judgeNameAndEmail"))).build());
@@ -52,6 +53,7 @@ public class AllocatedJudgeService {
                     if (null != judgeDetails && judgeDetails.size() > 0) {
                         allocatedJudgeBuilder.judgeName(judgeDetails.get(0).getSurname());
                         allocatedJudgeBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
+                        allocatedJudgeBuilder.judgePersonalCode(judgePersonalCode[0]);
                     }
                 } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
