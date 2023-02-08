@@ -13,6 +13,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
@@ -38,6 +39,7 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -45,6 +47,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -95,6 +98,11 @@ public class ManageOrdersControllerTest {
     @Mock
     private UserDetails userDetails;
 
+    @Mock
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    @Mock
+    private IdamClient idamClient;
 
     PartyDetails applicant;
 
@@ -103,9 +111,12 @@ public class ManageOrdersControllerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
+        List<String> roles = new ArrayList();
+        roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
             .surname("Solicitor")
+            .roles(roles)
             .build();
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -298,7 +309,7 @@ public class ManageOrdersControllerTest {
             .parentalResponsibilityDetails("test")
             .build();
 
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        Element<Child> wrappedChildren = Element.<Child>builder().id(UUID.randomUUID()).value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
@@ -357,7 +368,7 @@ public class ManageOrdersControllerTest {
             .parentalResponsibilityDetails("test")
             .build();
 
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        Element<Child> wrappedChildren = Element.<Child>builder().id(UUID.randomUUID()).value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
@@ -427,12 +438,15 @@ public class ManageOrdersControllerTest {
             .courtName("testCourt")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(ManageOrders.builder().build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .courtName("testCourt")
@@ -456,7 +470,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
 
-        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails(callbackRequest);
+        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test",  callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
@@ -475,7 +489,7 @@ public class ManageOrdersControllerTest {
             .parentalResponsibilityDetails("test")
             .build();
 
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        Element<Child> wrappedChildren = Element.<Child>builder().id(UUID.randomUUID()).value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
@@ -484,6 +498,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .courtName("testCourt")
+            .children(listOfChildren)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .build();
@@ -494,6 +509,8 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .courtName("testCourt")
+            .manageOrders(ManageOrders.builder().build())
+            .children(listOfChildren)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .childrenList("Child 1: TestName\n")
             .selectedOrder(
@@ -518,7 +535,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
 
-        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails(callbackRequest);
+        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test", callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
@@ -543,6 +560,7 @@ public class ManageOrdersControllerTest {
             .courtName("testCourt")
             .home(Home.builder().children(listOfChildren).build())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
@@ -554,6 +572,8 @@ public class ManageOrdersControllerTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .fl401FamilymanCaseNumber("12345")
             .childrenList("Child 1: TestName\n")
+            .manageOrders(ManageOrders.builder().build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectedOrder(
                 "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
                     + "enforcement application (C82)\\n\\n")
@@ -576,7 +596,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
 
-        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails(callbackRequest);
+        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test", callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
@@ -998,8 +1018,6 @@ public class ManageOrdersControllerTest {
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
-
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             callbackRequest
@@ -1085,8 +1103,7 @@ public class ManageOrdersControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
+        CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(12345L)
                              .data(stringObjectMap)
@@ -1096,6 +1113,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
         when(manageOrderService.getOrderToAmendDownloadLink(caseData)).thenReturn(new HashMap<>());
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateOrderToAmendDownloadLink(
             authToken,
             callbackRequest

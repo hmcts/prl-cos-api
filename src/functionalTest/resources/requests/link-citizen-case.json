@@ -2710,10 +2710,12 @@
     "PostCode": "string"
   },
   "serveOrderDynamicList": {
-    "value": {
+    "value": [
+      {
       "code": "string",
       "label": "string"
-    },
+      }
+    ],
     "list_items": [
       {
         "code": "string",
