@@ -49,7 +49,7 @@ public class DraftAnOrderController {
     @Autowired
     private DraftAnOrderService draftAnOrderService;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CcdCaseApi.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DraftAnOrderController.class);
 
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -210,7 +210,7 @@ public class DraftAnOrderController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("previewOrderDoc","");
         caseDataUpdated.putAll(draftAnOrderService.generateDraftOrderCollection(caseData));
-        LOGGER.info("caseDataUpdated for DO ", caseDataUpdated);
+        LOGGER.info("caseDataUpdated for DO {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
