@@ -212,13 +212,16 @@ public class ManageOrdersController {
         if (caseDetails.getData().containsKey("isTheOrderAboutAllChildren") && caseDetails.getData().get(
             "isTheOrderAboutAllChildren") != null && !caseDetails.getData().get(
             "isTheOrderAboutAllChildren").toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
+            log.info("inside isTheOrderAboutAllChildren =====> " + caseDetails.getData().get("childOption"));
             caseDetails.getData().remove("childOption");
         }
         if (caseDetails.getData().containsKey("isTheOrderAboutChildren") && caseDetails.getData().get(
             "isTheOrderAboutChildren") != null && !caseDetails.getData().get(
             "isTheOrderAboutChildren").toString().equalsIgnoreCase(PrlAppsConstants.YES)) {
+            log.info("inside isTheOrderAboutChildren =====> " + caseDetails.getData().get("childOption"));
             caseDetails.getData().remove("childOption");
         }
+        log.info("before about to submit caseDetails =====> " + caseDetails);
         CaseData caseData = CaseUtils.getCaseData(caseDetails,objectMapper);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
