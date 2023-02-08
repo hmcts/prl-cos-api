@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 
 @RestController
 @RequestMapping("/respondent-solicitor")
@@ -149,7 +149,7 @@ public class C100RespondentSolicitorController {
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
-            DOCUMENT_C7_DRAFT_HINT,
+            SOLICITOR_C7_DRAFT_DOCUMENT,
             false
         );
 
