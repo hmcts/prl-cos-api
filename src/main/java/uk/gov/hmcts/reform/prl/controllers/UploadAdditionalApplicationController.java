@@ -53,7 +53,7 @@ public class UploadAdditionalApplicationController {
     @Operation(description = "Callback to Generate applicants")
     public AboutToStartOrSubmitCallbackResponse prePopulateApplicants(@RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<DynamicMultiselectListElement> listItems = new ArrayList<>(List.of(DynamicMultiselectListElement.EMPTY));
+        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         listItems.addAll(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData).get("applicants"));
         listItems.addAll(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData).get("respondents"));
         listItems.addAll(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData));
