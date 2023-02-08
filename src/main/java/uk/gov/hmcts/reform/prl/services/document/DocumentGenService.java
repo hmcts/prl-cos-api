@@ -88,6 +88,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_PDF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
@@ -236,6 +237,12 @@ public class DocumentGenService {
 
     @Value("${document.templates.common.prl_c7_final_filename_wel}")
     protected String docC7FinalWelshFilename;
+
+    @Value("${document.templates.common.prl_solicitor_c7_draft_template}")
+    protected String solicitorC7DraftTemplate;
+
+    @Value("${document.templates.common.prl_solicitor_c7_draft_template}")
+    protected String solicitorC7DraftFilename;
 
     @Value("${document.templates.common.prl_c1a_blank_template}")
     protected String docC1aBlankTemplate;
@@ -670,6 +677,9 @@ public class DocumentGenService {
             case C7_FINAL_WELSH:
                 fileName = docC7FinalWelshFilename;
                 break;
+            case SOLICITOR_C7_DRAFT_DOCUMENT:
+                fileName = docC7FinalWelshFilename;
+                break;
             default:
                 fileName = "";
         }
@@ -758,6 +768,9 @@ public class DocumentGenService {
                 break;
             case C7_FINAL_WELSH:
                 template = docC7FinalWelshTemplate;
+                break;
+            case SOLICITOR_C7_DRAFT_DOCUMENT:
+                template = solicitorC7DraftTemplate;
                 break;
             default:
                 template = "";
