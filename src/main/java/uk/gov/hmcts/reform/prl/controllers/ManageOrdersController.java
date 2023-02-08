@@ -147,7 +147,6 @@ public class ManageOrdersController {
         ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
             .childOption(DynamicMultiSelectList.builder()
                              .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
-            .ordersNeedToBeServed(caseData.getManageOrdersOptions() == servedSavedOrders ? YesOrNo.Yes : YesOrNo.No)
             .build();
         log.info("**Manage orders with child list {}", manageOrders);
 
@@ -271,6 +270,8 @@ public class ManageOrdersController {
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
+        } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+            caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
