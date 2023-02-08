@@ -336,14 +336,29 @@ public class ManageOrdersController {
         if (caseDataUpdated.containsKey("createSelectOrderOptions")) {
             caseDataUpdated.remove("createSelectOrderOptions");
         }
-        if (caseDataUpdated.containsKey("uploadOrderOptions")) {
-            caseDataUpdated.remove("uploadOrderOptions");
+        if (caseDataUpdated.containsKey("childArrangementOrders")) {
+            caseDataUpdated.remove("childArrangementOrders");
+        }
+        if (caseDataUpdated.containsKey("domesticAbuseOrders")) {
+            caseDataUpdated.remove("domesticAbuseOrders");
+        }
+        if (caseDataUpdated.containsKey("fcOrders")) {
+            caseDataUpdated.remove("fcOrders");
+        }
+        if (caseDataUpdated.containsKey("otherOrdersOption")) {
+            caseDataUpdated.remove("otherOrdersOption");
         }
         if (caseDataUpdated.containsKey("amendOrderDynamicList")) {
-            caseDataUpdated.remove("uploadOrderOptions");
+            caseDataUpdated.remove("amendOrderDynamicList");
         }
         if (caseDataUpdated.containsKey("serveOrderDynamicList")) {
             caseDataUpdated.remove("serveOrderDynamicList");
+        }
+        if (caseDataUpdated.containsKey("ordersNeedToBeServed")) {
+            caseDataUpdated.remove("ordersNeedToBeServed");
+        }
+        if (caseDataUpdated.containsKey("isUploadAnOrderByAdmin")) {
+            caseDataUpdated.remove("isUploadAnOrderByAdmin");
         }
         log.info("caseDataUpdated after cleanup ===> " + caseDataUpdated);
     }
