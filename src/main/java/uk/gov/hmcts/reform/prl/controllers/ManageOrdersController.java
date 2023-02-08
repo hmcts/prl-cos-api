@@ -216,8 +216,8 @@ public class ManageOrdersController {
             caseDetails.getData().remove("childOption");
         }
         if (caseDetails.getData().containsKey("isTheOrderAboutChildren") && caseDetails.getData().get(
-            "isTheOrderAboutChildren") != null && !caseDetails.getData().get(
-            "isTheOrderAboutChildren").toString().equalsIgnoreCase(PrlAppsConstants.YES)) {
+            "isTheOrderAboutChildren") != null && caseDetails.getData().get(
+            "isTheOrderAboutChildren").toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
             log.info("inside isTheOrderAboutChildren =====> " + caseDetails.getData().get("childOption"));
             caseDetails.getData().remove("childOption");
         }
