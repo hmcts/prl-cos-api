@@ -56,7 +56,8 @@ public class AllocatedJudgeDetailsGeneratorTest {
                 .tierOfJudiciary(TierOfJudiciaryEnum.CIRCUIT_JUDGE).build()).build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().allocatedJudgeDetails(
-            AllocatedJudge.builder().tierOfJudiciaryType(TierOfJudiciaryEnum.CIRCUIT_JUDGE.getDisplayedValue()).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+            AllocatedJudge.builder().tierOfJudiciaryType(TierOfJudiciaryEnum.CIRCUIT_JUDGE.getDisplayedValue())
+                .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
                 .emailAddress(" ").lastName(" ")
                 .courtName("Test Court")
                 .build()).build());
