@@ -592,6 +592,6 @@ public class AllegationsOfHarmCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(allegationsOfHarmChecker.getDefaultTaskState());
+        assertNotNull(allegationsOfHarmChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

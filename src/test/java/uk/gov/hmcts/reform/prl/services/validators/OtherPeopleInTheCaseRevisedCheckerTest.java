@@ -247,7 +247,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(otherPeopleInTheCaseChecker.getDefaultTaskState());
+        assertNotNull(otherPeopleInTheCaseChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 
 

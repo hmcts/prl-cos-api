@@ -81,6 +81,6 @@ public class OtherProceedingsCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(otherProceedingsChecker.getDefaultTaskState());
+        assertNotNull(otherProceedingsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

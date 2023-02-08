@@ -214,6 +214,6 @@ public class FL401ApplicantFamilyCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(fl401ApplicantFamilyChecker.getDefaultTaskState());
+        assertNotNull(fl401ApplicantFamilyChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

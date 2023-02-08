@@ -48,6 +48,6 @@ public class StatementTruthSubmitCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(statementTruthSubmitChecker.getDefaultTaskState());
+        assertNotNull(statementTruthSubmitChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

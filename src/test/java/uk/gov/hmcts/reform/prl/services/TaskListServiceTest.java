@@ -98,7 +98,7 @@ public class TaskListServiceTest {
             Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
             Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build(),
             Task.builder().event(SUBMIT).state(NOT_STARTED).build());
-        Mockito.when(eventsChecker.getDefaultState(Mockito.any(Event.class))).thenReturn(NOT_STARTED);
+        Mockito.when(eventsChecker.getDefaultState(Mockito.any(Event.class),Mockito.any(CaseData.class))).thenReturn(NOT_STARTED);
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
         assertThat(expectedTasks).isEqualTo(actualTasks);
@@ -141,7 +141,7 @@ public class TaskListServiceTest {
             Task.builder().event(FL401_RESUBMIT).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build()
             );
-        Mockito.when(eventsChecker.getDefaultState(Mockito.any(Event.class))).thenReturn(NOT_STARTED);
+        Mockito.when(eventsChecker.getDefaultState(Mockito.any(Event.class),Mockito.any(CaseData.class))).thenReturn(NOT_STARTED);
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
         assertThat(expectedTasks).isEqualTo(actualTasks);
@@ -185,7 +185,7 @@ public class TaskListServiceTest {
             Task.builder().event(FL401_SOT_AND_SUBMIT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_RESUBMIT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_HOME).state(NOT_STARTED).build());
-        Mockito.when(eventsChecker.getDefaultState(Mockito.any(Event.class))).thenReturn(NOT_STARTED);
+        Mockito.when(eventsChecker.getDefaultState(Mockito.any(Event.class),Mockito.any(CaseData.class))).thenReturn(NOT_STARTED);
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
         assertThat(expectedTasks).isEqualTo(actualTasks);
@@ -231,7 +231,7 @@ public class TaskListServiceTest {
             Task.builder().event(FL401_RESUBMIT).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
             Task.builder().event(FL401_HOME).state(NOT_STARTED).build());
-        Mockito.when(eventsChecker.getDefaultState(Mockito.any(Event.class))).thenReturn(NOT_STARTED);
+        Mockito.when(eventsChecker.getDefaultState(Mockito.any(Event.class),Mockito.any(CaseData.class))).thenReturn(NOT_STARTED);
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
         assertThat(expectedTasks).isEqualTo(actualTasks);
@@ -265,7 +265,7 @@ public class TaskListServiceTest {
             Task.builder().event(SUBMIT).state(NOT_STARTED).build());
         Event event = CASE_NAME;
         when(eventsChecker.isFinished(event, caseData)).thenReturn(true);
-        when(eventsChecker.getDefaultState(Mockito.any())).thenReturn(NOT_STARTED);
+        when(eventsChecker.getDefaultState(Mockito.any(),Mockito.any(CaseData.class))).thenReturn(NOT_STARTED);
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
         assertThat(expectedTasks).isEqualTo(actualTasks);
@@ -300,7 +300,7 @@ public class TaskListServiceTest {
 
         Event event = TYPE_OF_APPLICATION;
         when(eventsChecker.isStarted(event, caseData)).thenReturn(true);
-        when(eventsChecker.getDefaultState(Mockito.any())).thenReturn(NOT_STARTED);
+        when(eventsChecker.getDefaultState(Mockito.any(),Mockito.any(CaseData.class))).thenReturn(NOT_STARTED);
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
         assertThat(expectedTasks).isEqualTo(actualTasks);
@@ -335,7 +335,7 @@ public class TaskListServiceTest {
 
         Event event = TYPE_OF_APPLICATION;
         when(eventsChecker.hasMandatoryCompleted(event, caseData)).thenReturn(true);
-        when(eventsChecker.getDefaultState(Mockito.any())).thenReturn(NOT_STARTED);
+        when(eventsChecker.getDefaultState(Mockito.any(),Mockito.any(CaseData.class))).thenReturn(NOT_STARTED);
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
         assertThat(expectedTasks).isEqualTo(actualTasks);
@@ -393,9 +393,9 @@ public class TaskListServiceTest {
                 Task.builder().event(VIEW_PDF_DOCUMENT).build(),
                 Task.builder().event(SUBMIT_AND_PAY).build(),
                 Task.builder().event(SUBMIT).build());
-        when(eventsChecker.getDefaultState(CHILDREN_AND_APPLICANTS)).thenReturn(CANNOT_START_YET);
-        when(eventsChecker.getDefaultState(CHILDREN_AND_RESPONDENTS)).thenReturn(CANNOT_START_YET);
-        when(eventsChecker.getDefaultState(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION)).thenReturn(CANNOT_START_YET);
+        when(eventsChecker.getDefaultState(CHILDREN_AND_APPLICANTS,caseData)).thenReturn(CANNOT_START_YET);
+        when(eventsChecker.getDefaultState(CHILDREN_AND_RESPONDENTS,caseData)).thenReturn(CANNOT_START_YET);
+        when(eventsChecker.getDefaultState(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION,caseData)).thenReturn(CANNOT_START_YET);
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
         assertThat(expectedTasks).isEqualTo(actualTasks);

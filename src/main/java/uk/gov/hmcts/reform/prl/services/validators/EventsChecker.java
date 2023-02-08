@@ -199,8 +199,8 @@ public class EventsChecker {
         return eventStatus.get(event).hasMandatoryCompleted(caseData);
     }
 
-    public TaskState getDefaultState(Event event) {
-        return eventStatus.get(event).getDefaultTaskState();
+    public TaskState getDefaultState(Event event,CaseData caseData) {
+        return eventStatus.get(event).getDefaultTaskState(caseData);
     }
 
     public Map<Event, EventChecker> getEventStatus() {

@@ -6,7 +6,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 
 @Service
-public class SubmitChecker implements EventChecker {
+public class  SubmitChecker implements EventChecker {
 
     @Autowired
     SubmitAndPayChecker submitAndPayChecker;
@@ -27,7 +27,7 @@ public class SubmitChecker implements EventChecker {
     }
 
     @Override
-    public TaskState getDefaultTaskState() {
+    public TaskState getDefaultTaskState(CaseData caseData) {
         return TaskState.NOT_STARTED;
     }
 }

@@ -218,7 +218,7 @@ public class RespondentBehaviourCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(respondentBehaviourChecker.getDefaultTaskState());
+        assertNotNull(respondentBehaviourChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 
 }

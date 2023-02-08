@@ -401,7 +401,7 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(fl401StatementOfTruthAndSubmitChecker.getDefaultTaskState());
+        assertNotNull(fl401StatementOfTruthAndSubmitChecker.getDefaultTaskState(caseData));
     }
 
 }
