@@ -43,7 +43,7 @@ public class FL401ResubmitCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(fl401ResubmitChecker.getDefaultTaskState());
+        assertNotNull(fl401ResubmitChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 
 }

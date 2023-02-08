@@ -82,6 +82,6 @@ public class LitigationCapacityCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(litigationCapacityChecker.getDefaultTaskState());
+        assertNotNull(litigationCapacityChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

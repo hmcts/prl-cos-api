@@ -72,6 +72,6 @@ public class CaseNameCheckerTest {
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
         CaseNameChecker caseNameChecker = new CaseNameChecker();
-        assertNotNull(caseNameChecker.getDefaultTaskState());
+        assertNotNull(caseNameChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

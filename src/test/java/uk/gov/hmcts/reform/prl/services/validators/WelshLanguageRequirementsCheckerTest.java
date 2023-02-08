@@ -36,6 +36,6 @@ public class WelshLanguageRequirementsCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(welshLanguageRequirementsChecker.getDefaultTaskState());
+        assertNotNull(welshLanguageRequirementsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

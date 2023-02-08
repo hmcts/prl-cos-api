@@ -141,6 +141,6 @@ public class HearingUrgencyCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(hearingUrgencyChecker.getDefaultTaskState());
+        assertNotNull(hearingUrgencyChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

@@ -98,7 +98,7 @@ public class TaskListService {
         if (eventsChecker.isStarted(event, caseData)) {
             return TaskState.IN_PROGRESS;
         }
-        return eventsChecker.getDefaultState(event);
+        return eventsChecker.getDefaultState(event,caseData);
     }
 
     private List<Event> getEvents(CaseData caseData) {

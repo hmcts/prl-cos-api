@@ -25,6 +25,8 @@ public class ChildrenAndApplicantsCheckerTest {
     @Mock
     TaskErrorService taskErrorService;
 
+    @Mock
+    EventsChecker eventsChecker;
 
     @InjectMocks
     ChildrenAndApplicantsChecker childrenAndApplicantsChecker;
@@ -140,6 +142,6 @@ public class ChildrenAndApplicantsCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(childrenAndApplicantsChecker.getDefaultTaskState());
+        assertNotNull(childrenAndApplicantsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }
