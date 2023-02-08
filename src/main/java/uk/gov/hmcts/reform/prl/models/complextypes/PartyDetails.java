@@ -112,40 +112,7 @@ public class PartyDetails {
 
     private UUID partyId;
 
-    public void setPartyId(UUID partyId) {
-        log.info("partyId ==  {}",partyId);
-        if (this.getPartyId() == null) {
-            log.info("partyId is null");
-            if (partyId != null) {
-                this.partyId = partyId;
-            } else {
-                this.partyId = UUID.randomUUID();
-            }
-            log.info("partyId is not null {}",this.partyId);
-        }
-    }
-
-    private UUID solicitorPartyId;
-
-    public void setSolicitorPartyId(UUID solicitorPartyId) {
-        if (this.getSolicitorPartyId() == null && (this.getRepresentativeFirstName() != null || this.getRepresentativeLastName() != null)) {
-            if (solicitorPartyId != null) {
-                this.solicitorPartyId = solicitorPartyId;
-            } else {
-                this.solicitorPartyId = UUID.randomUUID();
-            }
-        }
-    }
-
     private UUID solicitorOrgUuid;
 
-    public void setSolicitorOrgUuid(UUID solicitorOrgUuid) {
-        if (this.getSolicitorOrgUuid() == null) {
-            if (solicitorOrgUuid != null) {
-                this.solicitorOrgUuid = solicitorOrgUuid;
-            } else {
-                this.solicitorOrgUuid = UUID.randomUUID();
-            }
-        }
-    }
+    private UUID solicitorPartyId;
 }
