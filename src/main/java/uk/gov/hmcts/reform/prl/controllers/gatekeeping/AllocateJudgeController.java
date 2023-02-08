@@ -71,6 +71,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
             caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
+        caseDataUpdated.put("allocatedJudge",allocatedJudge);
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
