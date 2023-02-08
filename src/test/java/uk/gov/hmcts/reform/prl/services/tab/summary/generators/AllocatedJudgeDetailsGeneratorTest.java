@@ -25,10 +25,13 @@ public class AllocatedJudgeDetailsGeneratorTest {
         CaseSummary caseSummary = generator.generate(CaseData.builder().courtName("Test Court").allocatedJudge(
             uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge.builder().isJudgeOrLegalAdviser(
                     AllocatedJudgeTypeEnum.JUDGE)
-                .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes).judgeEmail("test1@xxx.com").judgeName("test1").build()).build());
+                .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes).judgeEmail("test1@xxx.com").judgeName("test1")
+                .judgePersonalCode("1234").build()).build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().allocatedJudgeDetails(
-                AllocatedJudge.builder().tierOfJudiciaryType(" ").emailAddress("test1@xxx.com").lastName("test1").courtName("Test Court").build())
+                AllocatedJudge.builder().tierOfJudiciaryType(" ").emailAddress("test1@xxx.com").lastName("test1")
+                    .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.JUDGE)
+                    .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes).courtName("Test Court").judgePersonalCode("1234").build())
             .build());
     }
 
@@ -41,7 +44,9 @@ public class AllocatedJudgeDetailsGeneratorTest {
                 .build()).build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().allocatedJudgeDetails(
-                AllocatedJudge.builder().tierOfJudiciaryType(" ").emailAddress(" ").lastName(" ").courtName("Test Court").build())
+                AllocatedJudge.builder().tierOfJudiciaryType(" ").emailAddress(" ").lastName(" ").courtName("Test Court")
+                .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.LEGAL_ADVISER)
+                .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes).build())
             .build());
     }
 
@@ -53,6 +58,7 @@ public class AllocatedJudgeDetailsGeneratorTest {
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().allocatedJudgeDetails(
             AllocatedJudge.builder().tierOfJudiciaryType(TierOfJudiciaryEnum.CIRCUIT_JUDGE.getDisplayedValue()).emailAddress(" ").lastName(" ")
-                .courtName("Test Court").build()).build());
+                .courtName("Test Court")
+                .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No).build()).build());
     }
 }

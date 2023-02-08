@@ -33,4 +33,7 @@ public class AllocatedJudge {
     @JsonProperty("tierOfJudiciary")
     private final TierOfJudiciaryEnum tierOfJudiciary;
 
+    @JsonProperty("judgePersonalCode")
+    private final String judgePersonalCode;
+
 }
