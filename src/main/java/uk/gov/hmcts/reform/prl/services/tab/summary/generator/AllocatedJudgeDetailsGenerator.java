@@ -47,12 +47,12 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
     private String[] splitLastNameAndEmailAddress(uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge allocatedJudge) {
         if (null != allocatedJudge) {
             if (YesOrNo.Yes.equals(allocatedJudge.getIsSpecificJudgeOrLegalAdviserNeeded()) && null != allocatedJudge.getIsJudgeOrLegalAdviser()) {
-                if (AllocatedJudgeTypeEnum.JUDGE.equals(allocatedJudge.getIsJudgeOrLegalAdviser())) {
+                if (AllocatedJudgeTypeEnum.judge.equals(allocatedJudge.getIsJudgeOrLegalAdviser())) {
                     String[] judgeOrLegalAdvisorDetails = new String[2];
                     judgeOrLegalAdvisorDetails[0] = allocatedJudge.getJudgeName();
                     judgeOrLegalAdvisorDetails[1] = allocatedJudge.getJudgeEmail();
                     return judgeOrLegalAdvisorDetails;
-                } else if (AllocatedJudgeTypeEnum.LEGAL_ADVISER.equals(allocatedJudge.getIsJudgeOrLegalAdviser())) {
+                } else if (AllocatedJudgeTypeEnum.legalAdviser.equals(allocatedJudge.getIsJudgeOrLegalAdviser())) {
                     String legalAdviserNameAndEmail = allocatedJudge.getLegalAdviserList().getValueLabel();
                     if (null != legalAdviserNameAndEmail) {
                         return legalAdviserNameAndEmail.split("\\)")[0].split("\\(");

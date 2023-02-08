@@ -42,14 +42,14 @@ public class AllocatedJudgeService {
             allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get("tierOfJudiciary"))));
         } else {
             if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
-                if (AllocatedJudgeTypeEnum.JUDGE.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("isJudgeOrLegalAdviser")))
+                if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("isJudgeOrLegalAdviser")))
                     && null != caseDataUpdated.get("judgeNameAndEmail")) {
                     String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get("judgeNameAndEmail"));
                     List<JudicialUsersApiResponse> judgeDetails =
                         refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
                             .personalCode(getPersonalCode(caseDataUpdated.get("judgeNameAndEmail"))).build());
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
-                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.JUDGE));
+                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.judge));
                     if (null != judgeDetails && judgeDetails.size() > 0) {
                         allocatedJudgeBuilder.judgeName(judgeDetails.get(0).getSurname());
                         allocatedJudgeBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
@@ -57,7 +57,7 @@ public class AllocatedJudgeService {
                     }
                 } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
-                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.LEGAL_ADVISER));
+                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.legalAdviser));
                     allocatedJudgeBuilder.legalAdviserList(legalAdviserList);
                 }
             }
