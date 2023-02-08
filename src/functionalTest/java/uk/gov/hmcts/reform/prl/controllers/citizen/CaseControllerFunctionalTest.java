@@ -78,17 +78,17 @@ public class CaseControllerFunctionalTest {
     }
 
     @Test
-    public void createCaseInCcd() throws Exception {
-    String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
-    request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/case/create")
-            .then()
-            .assertThat().statusCode(200);
+        public void createCaseInCcd() throws Exception {
+        String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
+        request
+                .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+                .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+                .body(requestBody)
+                .when()
+                .contentType("application/json")
+                .post("/case/create")
+                .then()
+                .assertThat().statusCode(200);
     }
 
     @Test
