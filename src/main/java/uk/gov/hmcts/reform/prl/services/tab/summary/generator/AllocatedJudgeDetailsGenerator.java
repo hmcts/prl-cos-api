@@ -26,7 +26,8 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
                     .emailAddress((isLastNameAndEmailAvailable) ? judgeOrLegalAdvisorDetails[1] : EMPTY_SPACE_STRING)
                     .lastName((isLastNameAndEmailAvailable) ? judgeOrLegalAdvisorDetails[0] : EMPTY_SPACE_STRING)
                     .tierOfJudiciaryType(getTierOfJudiciary(allocatedJudge))
-                    .judgePersonalCode(allocatedJudge.getJudgePersonalCode())
+                    .judgePersonalCode(allocatedJudge.getJudgePersonalCode()).isJudgeOrLegalAdviser(allocatedJudge.getIsJudgeOrLegalAdviser())
+                    .isSpecificJudgeOrLegalAdviserNeeded(allocatedJudge.getIsSpecificJudgeOrLegalAdviserNeeded())
                     .build()).build();
         }
 

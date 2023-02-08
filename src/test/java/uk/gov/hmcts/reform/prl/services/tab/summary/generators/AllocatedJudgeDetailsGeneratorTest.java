@@ -30,7 +30,8 @@ public class AllocatedJudgeDetailsGeneratorTest {
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().allocatedJudgeDetails(
                 AllocatedJudge.builder().tierOfJudiciaryType(" ").emailAddress("test1@xxx.com").lastName("test1")
-                    .courtName("Test Court").judgePersonalCode("1234").build())
+                    .courtName("Test Court").judgePersonalCode("1234").isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.JUDGE)
+                    .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes).build())
             .build());
     }
 
@@ -44,7 +45,7 @@ public class AllocatedJudgeDetailsGeneratorTest {
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().allocatedJudgeDetails(
                 AllocatedJudge.builder().tierOfJudiciaryType(" ").emailAddress(" ").lastName(" ").courtName("Test Court")
-                    .build())
+                    .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.LEGAL_ADVISER).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes).build())
             .build());
     }
 
@@ -55,7 +56,8 @@ public class AllocatedJudgeDetailsGeneratorTest {
                 .tierOfJudiciary(TierOfJudiciaryEnum.CIRCUIT_JUDGE).build()).build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().allocatedJudgeDetails(
-            AllocatedJudge.builder().tierOfJudiciaryType(TierOfJudiciaryEnum.CIRCUIT_JUDGE.getDisplayedValue()).emailAddress(" ").lastName(" ")
+            AllocatedJudge.builder().tierOfJudiciaryType(TierOfJudiciaryEnum.CIRCUIT_JUDGE.getDisplayedValue()).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+                .emailAddress(" ").lastName(" ")
                 .courtName("Test Court")
                 .build()).build());
     }
