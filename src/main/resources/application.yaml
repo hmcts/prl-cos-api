@@ -348,6 +348,8 @@ document:
       prl_c7_final_filename_eng: C7_Document.pdf
       prl_c7_final_template_wel: FL-PRL-GOR-WEL-C7R-Final.docx
       prl_c7_final_filename_wel: C7_Document_Welsh.pdf
+      prl_solicitor_c7_draft_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-DRAFT.docx
+      prl_solicitor_c7_draft_filename: C7_Response_Draft_Document.pdf
       prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
       prl_c8_blank_filename: C8BlankDocument.pdf
       prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx

@@ -644,8 +644,6 @@ public class CaseData implements MappableObject {
     @JsonProperty("citizenResponseC7DocumentList")
     private final List<Element<ResponseDocuments>> citizenResponseC7DocumentList;
 
-    private YesOrNo nocApproved;
-
     /**
      * Courtnav.
      */
@@ -708,6 +706,8 @@ public class CaseData implements MappableObject {
     private final String viewC7PdflinkText;
     private final String isEngC7DocGen;
     private final Document draftC7ResponseDoc;
+
+    private YesOrNo nocApproved;
 
     /**
      * Respondent solicitor's Current or Past proceedings.
