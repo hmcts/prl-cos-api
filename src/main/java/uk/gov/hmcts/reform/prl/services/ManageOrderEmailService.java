@@ -73,8 +73,10 @@ public class ManageOrderEmailService {
 
     public void sendEmailToApplicantAndRespondent(CaseDetails caseDetails) {
         CaseData caseData = emailService.getCaseData(caseDetails);
-        SelectTypeOfOrderEnum isFinalOrder = caseData.getSelectTypeOfOrder();
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+        SelectTypeOfOrderEnum isFinalOrder = getSelectTypeOfOrder(caseData);
+        String caseTypeofApplication = caseData.getCaseTypeOfApplication() != null
+            ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
+        if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             Map<String, String> applicantsMap = getEmailPartyWithName(caseData
                                                                          .getApplicants());
             Map<String, String> respondentMap = getEmailPartyWithName(caseData
@@ -99,6 +101,16 @@ public class ManageOrderEmailService {
         }
 
 
+    }
+
+    private static SelectTypeOfOrderEnum getSelectTypeOfOrder(CaseData caseData) {
+        SelectTypeOfOrderEnum isFinalOrder = null;
+        if (caseData.getSelectTypeOfOrder() != null) {
+            isFinalOrder = caseData.getSelectTypeOfOrder();
+        } else if (caseData.getServeOrderData() != null) {
+            isFinalOrder = caseData.getServeOrderData().getSelectTypeOfUploadOrder();
+        }
+        return isFinalOrder;
     }
 
     private void sendEmailForFlCaseType(CaseDetails caseDetails, CaseData caseData, SelectTypeOfOrderEnum isFinalOrder) {
