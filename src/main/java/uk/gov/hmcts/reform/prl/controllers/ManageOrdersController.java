@@ -91,7 +91,7 @@ public class ManageOrdersController {
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         } else {
-            caseDataUpdated.put("previewOrderDoc", caseData.getAppointmentOfGuardian());
+            caseDataUpdated.put("previewOrderDoc", caseData.getUploadOrderDoc());
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 

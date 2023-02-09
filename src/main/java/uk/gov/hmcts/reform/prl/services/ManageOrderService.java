@@ -677,7 +677,7 @@ public class ManageOrderService {
             }
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                                        .orderTypeId(flagSelectedOrderId)
-                                       .orderDocument(caseData.getAppointmentOfGuardian())
+                                       .orderDocument(caseData.getUploadOrderDoc())
                                        .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
                                        .otherDetails(OtherOrderDetails.builder()
                                                          .createdBy(caseData.getJudgeOrMagistratesLastName())
@@ -839,7 +839,7 @@ public class ManageOrderService {
         return DraftOrder.builder()
             .typeOfOrder(typeOfOrder)
             .orderTypeId(flagSelectedOrderId)
-            .orderDocument(caseData.getAppointmentOfGuardian())
+            .orderDocument(caseData.getUploadOrderDoc())
             .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
