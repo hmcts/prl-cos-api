@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
@@ -28,6 +30,7 @@ public class CaseInitiationControllerTest {
 
     private final String auth = "testAuth";
 
+
     @InjectMocks
     private CaseInitiationController caseInitiationController;
 
@@ -46,8 +49,11 @@ public class CaseInitiationControllerTest {
     @Mock
     EventService eventPublisher;
 
+    @Mock
+    CoreCaseDataApi coreCaseDataApi;
 
-
+    @Mock
+    AuthTokenGenerator authTokenGenerator;
 
     @Before
     public void setUp() {
@@ -76,8 +82,6 @@ public class CaseInitiationControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
-
-
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         doNothing().when(assignCaseAccessService).assignCaseAccess(String.valueOf(caseData.getId()),auth);

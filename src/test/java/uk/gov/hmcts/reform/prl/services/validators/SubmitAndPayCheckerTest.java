@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -311,11 +312,13 @@ public class SubmitAndPayCheckerTest {
             .childrenKnownToLocalAuthorityTextArea("TestString")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)
             .respondents(respondentsList)
-            .applicantAttendedMiam(Yes)
-            .mediatorRegistrationNumber("123456")
-            .familyMediatorServiceName("Test Name")
-            .soleTraderName("Trade Sole")
-            .miamCertificationDocumentUpload(Document.builder().build())
+            .miamDetails(MiamDetails.builder()
+                             .applicantAttendedMiam(Yes)
+                             .mediatorRegistrationNumber("123456")
+                             .familyMediatorServiceName("Test Name")
+                             .soleTraderName("Trade Sole")
+                             .miamCertificationDocumentUpload(Document.builder().build())
+                             .build())
             .allegationOfHarm(AllegationOfHarm.builder()
                                   .allegationsOfHarmYesNo(No).build())
 
@@ -446,11 +449,13 @@ public class SubmitAndPayCheckerTest {
             .childrenKnownToLocalAuthorityTextArea("TestString")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)
             .respondents(respondentsList)
-            .applicantAttendedMiam(Yes)
-            .mediatorRegistrationNumber("123456")
-            .familyMediatorServiceName("Test Name")
-            .soleTraderName("Trade Sole")
-            .miamCertificationDocumentUpload(Document.builder().build())
+            .miamDetails(MiamDetails.builder()
+                             .applicantAttendedMiam(Yes)
+                             .mediatorRegistrationNumber("123456")
+                             .familyMediatorServiceName("Test Name")
+                             .soleTraderName("Trade Sole")
+                             .miamCertificationDocumentUpload(Document.builder().build())
+                             .build())
             .allegationOfHarm(AllegationOfHarm.builder()
                                   .allegationsOfHarmYesNo(No).build())
             .build();

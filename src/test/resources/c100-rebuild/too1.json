@@ -1,0 +1,24 @@
+{
+  "too_courtOrder":[
+    "whoChildLiveWith",
+    "stopOtherPeopleDoingSomething",
+    "resolveSpecificIssue"
+  ],
+  "too_stopOtherPeopleDoingSomethingSubField":[
+    "changeChildrenNameSurname",
+    "allowMedicalTreatment",
+    "takingChildOnHoliday",
+    "relocateChildrenDifferentUkArea",
+    "relocateChildrenOutsideUk"
+  ],
+  "too_resolveSpecificIssueSubField":[
+    "specificHoliday",
+    "whatSchoolChildrenWillGoTo",
+    "religiousIssue",
+    "changeChildrenNameSurnameA",
+    "medicalTreatment",
+    "relocateChildrenDifferentUkAreaA",
+    "relocateChildrenOutsideUkA",
+    "returningChildrenToYourCare"
+  ]
+}
