@@ -21,7 +21,6 @@ public class ManageOrdersControllerFunctionalTest {
 
     private final String userToken = "Bearer testToken";
 
-    private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
 
     @MockBean
@@ -39,7 +38,7 @@ public class ManageOrdersControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_whenPostRequestToPopulatePreviewOrder_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
         request
             .header("Authorization", userToken)
             .body(requestBody)
