@@ -69,9 +69,10 @@ public class AmendOrderService {
         UUID selectedOrderId = caseData.getManageOrders().getAmendOrderDynamicList().getValueCodeAsUuid();
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
 
-        if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+        if (!"Judge".equalsIgnoreCase(caseData.getManageOrders().getIsJudgeOrLa())
+            && (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             || WhatToDoWithOrderEnum.finalizeSaveToServeLater
-                .equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
+                .equals(caseData.getServeOrderData().getWhatDoWithOrder()))) {
             orders.stream()
                 .filter(order -> Objects.equals(order.getId(), selectedOrderId))
                 .findFirst()
