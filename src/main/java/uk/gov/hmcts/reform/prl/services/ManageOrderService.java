@@ -391,7 +391,7 @@ public class ManageOrderService {
             headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
             headerMap.put(
                 "serveOrderDynamicList",
-                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData)
+                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, servedSavedOrders.getDisplayedValue())
             );
             log.info("OrderCollection ===> " + caseData.getOrderCollection());
         }
