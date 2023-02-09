@@ -194,7 +194,7 @@ public class C100RespondentSolicitorController {
             .build();
     }
 
-    @PostMapping(path = "/test", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/set-noc-flag-true", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "test NoC")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
@@ -208,4 +208,26 @@ public class C100RespondentSolicitorController {
         caseDataUpdated.put("nocApproved", YesOrNo.Yes);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+    @PostMapping(path = "/set-noc-flag-false", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "test NoC")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse hideEventsAfterResponseSubmission(
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        log.info("checking the dynamic list for respondent::{}", caseData.getChooseRespondentDynamicList());
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        if (caseData.getChooseRespondentDynamicList().getValue().getLabel().isEmpty()) {
+            caseDataUpdated.put("nocApproved", YesOrNo.No);
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+
 }
