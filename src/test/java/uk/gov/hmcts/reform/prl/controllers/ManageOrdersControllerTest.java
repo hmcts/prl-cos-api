@@ -133,7 +133,7 @@ public class ManageOrdersControllerTest {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .courtName("Horsham Court")
-            .appointmentOfGuardian(Document.builder().build())
+            .uploadOrderDoc(Document.builder().build())
             .build();
 
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
@@ -169,7 +169,7 @@ public class ManageOrdersControllerTest {
     public void testPopulatePreviewOrderWhenOrderUploaded() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
-            .appointmentOfGuardian(Document.builder().build())
+            .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .dateOrderMade(LocalDate.now())
             .build();
@@ -208,7 +208,7 @@ public class ManageOrdersControllerTest {
 
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
-            .appointmentOfGuardian(Document.builder().build())
+            .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
 
@@ -221,7 +221,7 @@ public class ManageOrdersControllerTest {
                                  .documentHash(generatedDocumentInfo.getHashToken())
                                  .documentFileName("c21DraftFilename")
                                  .build())
-            .appointmentOfGuardian(Document.builder()
+            .uploadOrderDoc(Document.builder()
                                        .documentUrl(generatedDocumentInfo.getUrl())
                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                        .documentHash(generatedDocumentInfo.getHashToken())
@@ -256,7 +256,7 @@ public class ManageOrdersControllerTest {
 
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
-            .appointmentOfGuardian(Document.builder().build())
+            .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .build();
 
@@ -269,7 +269,7 @@ public class ManageOrdersControllerTest {
                                  .documentHash(generatedDocumentInfo.getHashToken())
                                  .documentFileName("fl404bDraftFilename")
                                  .build())
-            .appointmentOfGuardian(Document.builder()
+            .uploadOrderDoc(Document.builder()
                                        .documentUrl(generatedDocumentInfo.getUrl())
                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                        .documentHash(generatedDocumentInfo.getHashToken())
