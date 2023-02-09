@@ -74,7 +74,7 @@ public class AmendOrderService {
         log.info("Result =====" + (!"Judge".equalsIgnoreCase(caseData.getManageOrders().getIsJudgeOrLa())
             && (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             || WhatToDoWithOrderEnum.finalizeSaveToServeLater
-            .equals(caseData.getServeOrderData().getWhatDoWithOrder()))) );
+            .equals(caseData.getServeOrderData().getWhatDoWithOrder()))));
         if (!"Judge".equalsIgnoreCase(caseData.getManageOrders().getIsJudgeOrLa())
             && (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             || WhatToDoWithOrderEnum.finalizeSaveToServeLater
