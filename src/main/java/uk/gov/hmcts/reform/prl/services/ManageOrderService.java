@@ -660,6 +660,13 @@ public class ManageOrderService {
             }
             return orderCollection;
         } else {
+            String orderMadeDate = null;
+            if (caseData.getDateOrderMade() != null) {
+                orderMadeDate = caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
+                    PrlAppsConstants.D_MMMM_YYYY,
+                    Locale.UK
+                ));
+            }
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                                        .orderTypeId(flagSelectedOrderId)
                                        .orderDocument(caseData.getAppointmentOfGuardian())
@@ -671,6 +678,7 @@ public class ManageOrderService {
                                                                                    PrlAppsConstants.D_MMMM_YYYY,
                                                                                    Locale.UK
                                                                                )))
+                                                         .orderMadeDate(orderMadeDate)
                                                          .orderRecipients(getAllRecipients(caseData)).build())
                                        .dateCreated(dateTime.now())
                                        .build()));
@@ -808,7 +816,8 @@ public class ManageOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status("Draft").build())
-            .dateOrderMade(caseData.getDateUploadOrderMade())
+            .dateOrderMade(caseData.getDateOrderMade())
+            .orderSelectionType(caseData.getManageOrdersOptions())
             .build();
     }
 
