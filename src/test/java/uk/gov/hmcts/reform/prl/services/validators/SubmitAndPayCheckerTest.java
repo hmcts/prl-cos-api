@@ -84,6 +84,9 @@ public class SubmitAndPayCheckerTest {
     OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
 
     @Mock
+    OtherPeopleInTheCaseRevisedChecker otherPeopleInTheCaseRevisedChecker;
+
+    @Mock
     OtherChildrenNotPartOfTheApplicationChecker otherChildrenNotPartOfTheApplicationChecker;
 
     @Mock
@@ -619,6 +622,9 @@ public class SubmitAndPayCheckerTest {
         when(otherPeopleInTheCaseChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(otherPeopleInTheCaseChecker.isFinished(caseData)).thenReturn(true);
         when(otherPeopleInTheCaseChecker.isFinished(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseRevisedChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseRevisedChecker.isFinished(caseData)).thenReturn(true);
+        when(otherPeopleInTheCaseRevisedChecker.isFinished(caseData)).thenReturn(true);
         when(otherProceedingsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(otherProceedingsChecker.isFinished(caseData)).thenReturn(true);
         when(otherChildrenNotPartOfTheApplicationChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
@@ -644,6 +650,7 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
         when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
         when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
+        when(eventsChecker.getOtherPeopleInTheCaseRevisedChecker()).thenReturn(otherPeopleInTheCaseRevisedChecker);
         when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
         when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
         when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);
