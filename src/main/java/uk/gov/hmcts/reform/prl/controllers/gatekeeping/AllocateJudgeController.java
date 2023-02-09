@@ -53,8 +53,8 @@ public class AllocateJudgeController extends AbstractCallbackController {
         log.info("Prepopulate Legal Advisor - case id : {}", callbackRequest.getCaseDetails().getId());
         List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
-            .build());
+        caseDataUpdated.put("allocatedJudge", AllocatedJudge.builder().legalAdviserList(DynamicList.builder().value(DynamicListElement.EMPTY)
+            .listItems(legalAdviserList).build()).build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
@@ -69,8 +69,8 @@ public class AllocateJudgeController extends AbstractCallbackController {
         log.info("Allocate judge details for the case id : {}", caseData.getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("Allocate judge details for the case id before calling  : {}", caseData.getAllocatedJudge());
-        AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
-            caseData.getLegalAdviserList(), refDataUserService);
+        /*AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
+            caseData.getLegalAdviserList(), refDataUserService);*/
         /*caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
         caseDataUpdated.put("allocatedJudge",allocatedJudge);*/
         //caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
