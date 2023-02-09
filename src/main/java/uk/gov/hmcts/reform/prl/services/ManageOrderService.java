@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
@@ -380,6 +381,8 @@ public class ManageOrderService {
 
     private final ElementUtils elementUtils;
 
+    private final DraftAnOrderService draftAnOrderService;
+
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
         if (caseData.getOrderCollection() != null) {
@@ -559,7 +562,7 @@ public class ManageOrderService {
         return fieldsMap;
     }
 
-    private String getSelectedOrderInfoForUpload(CaseData caseData) {
+    public String getSelectedOrderInfoForUpload(CaseData caseData) {
         String selectedOrder;
         if (caseData.getChildArrangementOrders() != null) {
             selectedOrder = caseData.getChildArrangementOrders().getDisplayedValue();
@@ -628,7 +631,7 @@ public class ManageOrderService {
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
             : getSelectedOrderInfoForUpload(caseData);
 
-        String flagSelectedOrderId = null;
+        String flagSelectedOrderId;
 
         if (caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder) {
             flagSelectedOrderId = String.valueOf(caseData.getCreateSelectOrderOptions());
@@ -674,7 +677,7 @@ public class ManageOrderService {
         }
     }
 
-    private String getSelectedChildInfoFromMangeOrder(DynamicMultiSelectList childOption) {
+    public String getSelectedChildInfoFromMangeOrder(DynamicMultiSelectList childOption) {
         String selectedChildNames = null;
         List<String> childList;
         if (childOption != null && childOption.getValue() != null) {
@@ -751,14 +754,23 @@ public class ManageOrderService {
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
         throws Exception {
-        List<Element<OrderDetails>> orderCollection;
+        List<Element<OrderDetails>> orderCollection = null;
         if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-            List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
-            orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
-            orderCollection.addAll(orderDetails);
-            orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
-            if (caseData.getManageOrdersOptions().equals(uploadAnOrder) && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
-                orderCollection = serveOrder(caseData, orderCollection);
+            if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
+                && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+                && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
+                return draftAnOrderService.generateDraftOrderCollection(caseData);
+            } else {
+                List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
+                orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
+                orderCollection.addAll(orderDetails);
+                orderCollection.sort(Comparator.comparing(
+                    m -> m.getValue().getDateCreated(),
+                    Comparator.reverseOrder()
+                ));
+                if (caseData.getManageOrdersOptions().equals(uploadAnOrder) && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                    orderCollection = serveOrder(caseData, orderCollection);
+                }
             }
         } else {
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());

@@ -112,6 +112,7 @@ public class DraftOrder {
     private final YesOrNo underTakingFormSign;
 
     private final ManageOrdersOptionsEnum orderSelectionType;
+    private final String childrenList;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
