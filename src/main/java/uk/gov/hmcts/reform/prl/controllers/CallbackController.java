@@ -435,7 +435,7 @@ public class CallbackController {
         log.info("Send to Gatekeeping details for the case id : {}", caseData.getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        log.info("Send to Gatekeeping details for the case: {}", caseData.getGatekeeper());
+        log.info("Send to Gatekeeping details for the case: {}", caseData.getGatekeepingDetails());
 
         GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(caseDataUpdated,
                                                                                                 caseData.getLegalAdviserList(), refDataUserService);
