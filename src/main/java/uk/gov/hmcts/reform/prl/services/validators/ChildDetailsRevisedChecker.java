@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILD_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILD_DETAILS_REVISED_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.Gender.other;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
@@ -45,13 +44,13 @@ public class ChildDetailsRevisedChecker implements EventChecker {
                 log.debug("validateMandatoryFieldsCompleted  :{} ",validateMandatoryFieldsCompleted(c));
                 log.debug("validateAdditionalFieldsCompleted  :{} ",validateAdditionalFieldsCompleted(caseData));
                 if (!(validateMandatoryFieldsCompleted(c)) || !(validateAdditionalFieldsCompleted(caseData))) {
-                    taskErrorService.addEventError(CHILD_DETAILS_REVISED, CHILD_DETAILS_ERROR, CHILD_DETAILS_ERROR.getError());
+                    taskErrorService.addEventError(CHILD_DETAILS_REVISED, CHILD_DETAILS_REVISED_ERROR, CHILD_DETAILS_REVISED_ERROR.getError());
                     return false;
                 }
             }
         }
         if (childrenWrapped.isEmpty()) {
-            taskErrorService.addEventError(CHILD_DETAILS_REVISED, CHILD_DETAILS_ERROR, CHILD_DETAILS_ERROR.getError());
+            taskErrorService.addEventError(CHILD_DETAILS_REVISED, CHILD_DETAILS_REVISED_ERROR, CHILD_DETAILS_REVISED_ERROR.getError());
             return false;
         }
         taskErrorService.removeError(CHILD_DETAILS_REVISED_ERROR);

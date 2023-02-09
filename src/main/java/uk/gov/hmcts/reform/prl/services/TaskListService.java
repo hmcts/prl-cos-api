@@ -44,6 +44,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
@@ -115,7 +116,7 @@ public class TaskListService {
                     CHILD_DETAILS_REVISED,
                     APPLICANT_DETAILS,
                     RESPONDENT_DETAILS,
-                    OTHER_PEOPLE_IN_THE_CASE,
+                    OTHER_PEOPLE_IN_THE_CASE_REVISED,
                     OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
                     CHILDREN_AND_APPLICANTS,
                     CHILDREN_AND_RESPONDENTS,

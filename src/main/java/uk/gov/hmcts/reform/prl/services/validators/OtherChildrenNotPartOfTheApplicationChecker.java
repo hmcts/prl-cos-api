@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILD_DETAILS_REVISED_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.Gender.other;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -40,7 +39,7 @@ public class OtherChildrenNotPartOfTheApplicationChecker implements EventChecker
             return false;
         }
 
-        taskErrorService.removeError(CHILD_DETAILS_REVISED_ERROR);
+        taskErrorService.removeError(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION_ERROR);
 
         return true;
     }
