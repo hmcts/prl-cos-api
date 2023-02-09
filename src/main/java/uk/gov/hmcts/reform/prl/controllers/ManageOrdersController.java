@@ -145,16 +145,21 @@ public class ManageOrdersController {
             && !caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        List<String> roles = userDetails.getRoles();
+        boolean isJudgeOrLa = roles.stream().anyMatch(ROLES_JUDGE::contains);
+
+        log.info("isJudgeOrLa {}", isJudgeOrLa);
 
         ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
             .childOption(DynamicMultiSelectList.builder()
                              .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
+            .isJudgeOrLa(isJudgeOrLa ? "Judge" : "CaseWorker")
             .build();
         log.info("**Manage orders with child list {}", manageOrders);
 
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
-            .isUploadAnOrderByAdmin(isAdmin(authorisation, caseData))
             .build();
         log.info("after fetch-order-details caseData ===> " + caseData);
         return CallbackResponse.builder()
@@ -213,13 +218,16 @@ public class ManageOrdersController {
         if (caseDetails.getData().containsKey("isTheOrderAboutAllChildren") && caseDetails.getData().get(
             "isTheOrderAboutAllChildren") != null && !caseDetails.getData().get(
             "isTheOrderAboutAllChildren").toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
+            log.info("inside isTheOrderAboutAllChildren =====> " + caseDetails.getData().get("childOption"));
             caseDetails.getData().remove("childOption");
         }
         if (caseDetails.getData().containsKey("isTheOrderAboutChildren") && caseDetails.getData().get(
-            "isTheOrderAboutChildren") != null && !caseDetails.getData().get(
-            "isTheOrderAboutChildren").toString().equalsIgnoreCase(PrlAppsConstants.YES)) {
+            "isTheOrderAboutChildren") != null && caseDetails.getData().get(
+            "isTheOrderAboutChildren").toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
+            log.info("inside isTheOrderAboutChildren =====> " + caseDetails.getData().get("childOption"));
             caseDetails.getData().remove("childOption");
         }
+        log.info("before about to submit caseDetails =====> " + caseDetails);
         CaseData caseData = CaseUtils.getCaseData(caseDetails,objectMapper);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
@@ -327,19 +335,6 @@ public class ManageOrdersController {
             .build();
     }
 
-    private String isAdmin(String authorisation, CaseData caseData) {
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        String isUploadAnOrderByAdmin = "";
-        if (caseData.getManageOrdersOptions() != null && caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-            if (userDetails.getRoles().contains("caseworker-privatelaw-courtadmin")) {
-                isUploadAnOrderByAdmin = PrlAppsConstants.YES;
-            } else {
-                isUploadAnOrderByAdmin = PrlAppsConstants.NO;
-            }
-        }
-        return isUploadAnOrderByAdmin;
-    }
-
     private static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
         log.info("caseDataUpdated before cleanup ===> " + caseDataUpdated);
         if (caseDataUpdated.containsKey("manageOrdersOptions")) {
@@ -369,8 +364,8 @@ public class ManageOrdersController {
         if (caseDataUpdated.containsKey("ordersNeedToBeServed")) {
             caseDataUpdated.remove("ordersNeedToBeServed");
         }
-        if (caseDataUpdated.containsKey("isUploadAnOrderByAdmin")) {
-            caseDataUpdated.remove("isUploadAnOrderByAdmin");
+        if (caseDataUpdated.containsKey("isJudgeOrLa")) {
+            caseDataUpdated.remove("isJudgeOrLa");
         }
         log.info("caseDataUpdated after cleanup ===> " + caseDataUpdated);
     }
