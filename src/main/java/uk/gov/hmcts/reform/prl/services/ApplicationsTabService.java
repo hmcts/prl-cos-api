@@ -63,6 +63,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.LitigationCapa
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamExemptions;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Order;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherProceedingsDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.RelationshipToRespondent;
@@ -104,6 +105,9 @@ public class ApplicationsTabService implements TabService {
     CoreCaseDataService coreCaseDataService;
 
     @Autowired
+    ApplicationsTabServiceHelper applicationsTabServiceHelper;
+
+    @Autowired
     ObjectMapper objectMapper;
 
     @Override
@@ -125,13 +129,29 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("attendingTheHearingTable", getAttendingTheHearingTable(caseData));
             applicationTab.put("litigationCapacityTable", getLitigationCapacityDetails(caseData));
             applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
-            applicationTab.put("otherPeopleInTheCaseTable", getOtherPeopleInTheCaseTable(caseData));
             applicationTab.put("allegationsOfHarmOrdersTable", getAllegationsOfHarmOrdersTable(caseData));
             applicationTab.put("allegationsOfHarmDomesticAbuseTable", getDomesticAbuseTable(caseData));
             applicationTab.put("allegationsOfHarmChildAbductionTable", getChildAbductionTable(caseData));
             applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
-            applicationTab.put("childDetailsTable", getChildDetails(caseData));
-            applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
+
+            if ("v2".equals(caseData.getTaskListVersion())) {
+                applicationTab.put("childDetailsRevisedTable", applicationsTabServiceHelper.getChildRevisedDetails(caseData));
+                applicationTab.put("childDetailsRevisedExtraTable", getExtraChildDetailsTable(caseData));
+                //applicationTab.put("otherPeopleInTheCaseRevisedTable", applicationsTabServiceHelper.getOtherPeopleInTheCaseRevisedTable(caseData));
+                //applicationTab.put("childDetailsTable", applicationsTabServiceHelper.getChildRevisedDetails(caseData));
+                //applicationTab.put("childDetailsTable", getChildDetails(caseData));
+                applicationTab.put("otherPeopleInTheCaseTable", getOtherPeopleInTheCaseTable(caseData));
+                //applicationTab.put("otherPeopleInTheCaseRevisedTable", applicationsTabServiceHelper.getOtherPeopleInTheCaseRevisedTable(caseData));
+                //applicationTab.put("otherChildNotInTheCaseTable", getOtherChildNotInTheCaseTable(caseData));
+                //applicationTab.put("childAndApplicantsRelationTable", applicationsTabServiceHelper.getChildAndApplicantsRelationTable(caseData));
+                //applicationTab.put("childAndRespondentRelationTable", applicationsTabServiceHelper.getChildAndRespondentRelationsTable(caseData));
+                //applicationTab.put("childAndOtherPeopleRelationsTable",
+                // applicationsTabServiceHelper.getChildAndOtherPeopleRelationsTable(caseData));
+            } else {
+                applicationTab.put("childDetailsTable", getChildDetails(caseData));
+                applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
+                applicationTab.put("otherPeopleInTheCaseTable", getOtherPeopleInTheCaseTable(caseData));
+            }
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
             applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));
@@ -1028,6 +1048,33 @@ public class ApplicationsTabService implements TabService {
         }
 
         return toMap(builder.build());
+    }
+
+    public List<Element<OtherChildrenNotInTheCase>> getOtherChildNotInTheCaseTable(CaseData caseData) {
+        log.info("getOtherChildNotInTheCaseTable()--->start");
+        Optional<List<Element<uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase>>> otherPeopleCheck =
+            ofNullable(caseData.getChildrenNotInTheCase());
+        List<Element<OtherChildrenNotInTheCase>> otherPersonsInTheCase = new ArrayList<>();
+
+        if (otherPeopleCheck.isEmpty() || otherPeopleCheck.get().isEmpty()) {
+            OtherChildrenNotInTheCase op = OtherChildrenNotInTheCase.builder().build();
+            Element<OtherChildrenNotInTheCase> other = Element.<OtherChildrenNotInTheCase>builder().value(op).build();
+            otherPersonsInTheCase.add(other);
+            return otherPersonsInTheCase;
+        }
+
+        List<uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase> otherPeople =
+            caseData.getChildrenNotInTheCase().stream().map(Element::getValue).collect(Collectors.toList());
+
+        for (uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase p : otherPeople) {
+            OtherChildrenNotInTheCase other = objectMapper.convertValue(p, OtherChildrenNotInTheCase.class);
+            Element<OtherChildrenNotInTheCase> wrappedPerson = Element.<OtherChildrenNotInTheCase>builder()
+                .value(other).build();
+            otherPersonsInTheCase.add(wrappedPerson);
+        }
+        log.info("otherPersonsInTheCase : {}",otherPersonsInTheCase);
+        log.info("getOtherChildNotInTheCaseTable()--->end");
+        return otherPersonsInTheCase;
     }
 
 }

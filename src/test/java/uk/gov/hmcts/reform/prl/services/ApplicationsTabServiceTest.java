@@ -113,7 +113,8 @@ public class ApplicationsTabServiceTest {
 
     @Mock
     ObjectMapper objectMapper;
-
+    @Mock
+    ApplicationsTabServiceHelper applicationsTabServiceHelper;
     CaseData caseDataWithParties;
     CaseData emptyCaseData;
     Address address;

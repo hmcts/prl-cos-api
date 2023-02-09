@@ -37,7 +37,7 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
     }
 
     @Test
-    public void whenEmptyChildDataPresentThenIsStartedReturnsFalse() {
+    public void whenEmptyChildDataPresentThenIsStartedReturnsTrue() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder().build();
         Element<ChildrenAndOtherPeopleRelation> wrappedChildren =
             Element.<ChildrenAndOtherPeopleRelation>builder().value(child).build();
@@ -45,16 +45,7 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
 
         CaseData caseData = CaseData.builder().childAndOtherPeopleRelations(listOfChildren).build();
 
-        assertTrue(!otherPeopleInTheCaseChecker.isStarted(caseData));
-    }
-
-    @Test
-    public void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
-
-        CaseData caseData = CaseData.builder()
-            .build();
-
-        assertTrue(!otherPeopleInTheCaseChecker.isStarted(caseData));
+        assertTrue(otherPeopleInTheCaseChecker.isStarted(caseData));
     }
 
 

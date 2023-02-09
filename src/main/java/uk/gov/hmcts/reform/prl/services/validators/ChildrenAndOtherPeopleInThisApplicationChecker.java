@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -63,7 +64,10 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
         fields.add(ofNullable(child.getOtherPeopleFullName()));
         fields.add(ofNullable(child.getChildFullName()));
         fields.add(ofNullable(child.getChildLivesWith()));
-        fields.add(ofNullable(child.getIsChildLivesWithPersonConfidential()));
+        Optional<YesOrNo> childLivesWith = ofNullable(child.getChildLivesWith());
+        if (childLivesWith.isPresent() && YesOrNo.Yes.equals(childLivesWith.get())) {
+            fields.add(ofNullable(child.getIsChildLivesWithPersonConfidential()));
+        }
         if (!relationshipsEnum.isEmpty()
             && relationshipsEnum.get().equals(RelationshipsEnum.other)) {
             fields.add(ofNullable(child.getChildAndOtherPeopleRelationOtherDetails()));
@@ -77,7 +81,7 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        return ofNullable(caseData.getChildAndApplicantRelations()).isPresent();
+        return ofNullable(caseData.getChildAndOtherPeopleRelations()).isPresent();
     }
 
     @Override
