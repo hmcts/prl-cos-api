@@ -508,7 +508,7 @@ public class CaseData implements MappableObject {
     /**
      * Send to Gatekeeper.
      */
-    private final List<Element<GatekeepingDetails>> gatekeeper;
+    private final GatekeepingDetails gatekeeper;
 
     /**
      * FL401 Other Proceedings.
@@ -757,6 +757,6 @@ public class CaseData implements MappableObject {
 
     private final DynamicList legalAdviserList;
     private AllocatedJudge allocatedJudge;
-    private GatekeepingDetails gatekeepingDetails;
+    // private GatekeepingDetails gatekeepingDetails;
 }
 

@@ -432,12 +432,14 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("Allocate judge details for the case id : {}", caseData.getId());
+        log.info("Send to Gatekeeping details for the case id : {}", caseData.getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        log.info("Send to Gatekeeping details for the case: {}", caseData.getGatekeeper());
 
         GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(caseDataUpdated,
                                                                                                 caseData.getLegalAdviserList(), refDataUserService);
-        caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
+        // caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
 
         // below code related to SummaryTabService
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
