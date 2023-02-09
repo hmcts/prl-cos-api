@@ -13,8 +13,11 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -559,7 +562,7 @@ public class ManageOrderService {
         return fieldsMap;
     }
 
-    private String getSelectedOrderInfoForUpload(CaseData caseData) {
+    public String getSelectedOrderInfoForUpload(CaseData caseData) {
         String selectedOrder;
         if (caseData.getChildArrangementOrders() != null) {
             selectedOrder = caseData.getChildArrangementOrders().getDisplayedValue();
@@ -628,7 +631,7 @@ public class ManageOrderService {
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
             : getSelectedOrderInfoForUpload(caseData);
 
-        String flagSelectedOrderId = null;
+        String flagSelectedOrderId;
 
         if (caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder) {
             flagSelectedOrderId = String.valueOf(caseData.getCreateSelectOrderOptions());
@@ -657,6 +660,13 @@ public class ManageOrderService {
             }
             return orderCollection;
         } else {
+            String orderMadeDate = null;
+            if (caseData.getDateOrderMade() != null) {
+                orderMadeDate = caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
+                    PrlAppsConstants.D_MMMM_YYYY,
+                    Locale.UK
+                ));
+            }
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                                        .orderTypeId(flagSelectedOrderId)
                                        .orderDocument(caseData.getAppointmentOfGuardian())
@@ -668,13 +678,14 @@ public class ManageOrderService {
                                                                                    PrlAppsConstants.D_MMMM_YYYY,
                                                                                    Locale.UK
                                                                                )))
+                                                         .orderMadeDate(orderMadeDate)
                                                          .orderRecipients(getAllRecipients(caseData)).build())
                                        .dateCreated(dateTime.now())
                                        .build()));
         }
     }
 
-    private String getSelectedChildInfoFromMangeOrder(DynamicMultiSelectList childOption) {
+    public String getSelectedChildInfoFromMangeOrder(DynamicMultiSelectList childOption) {
         String selectedChildNames = null;
         List<String> childList;
         if (childOption != null && childOption.getValue() != null) {
@@ -751,19 +762,63 @@ public class ManageOrderService {
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
         throws Exception {
-        List<Element<OrderDetails>> orderCollection;
+        List<Element<OrderDetails>> orderCollection = null;
         if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-            List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
-            orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
-            orderCollection.addAll(orderDetails);
-            orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
-            if (caseData.getManageOrdersOptions().equals(uploadAnOrder) && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
-                orderCollection = serveOrder(caseData, orderCollection);
+            if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
+                && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+                && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
+                return setDraftOrderCollection(caseData);
+            } else {
+                List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
+                orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
+                orderCollection.addAll(orderDetails);
+                orderCollection.sort(Comparator.comparing(
+                    m -> m.getValue().getDateCreated(),
+                    Comparator.reverseOrder()
+                ));
+                if (caseData.getManageOrdersOptions().equals(uploadAnOrder) && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                    orderCollection = serveOrder(caseData, orderCollection);
+                }
             }
         } else {
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
         }
         return Map.of("orderCollection", orderCollection);
+    }
+
+    public Map<String, Object> setDraftOrderCollection(CaseData caseData) {
+        List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
+        Element<DraftOrder> draftOrderElement = element(getCurrentDraftOrderDetails(caseData));
+        if (caseData.getDraftOrderCollection() != null) {
+            draftOrderList.addAll(caseData.getDraftOrderCollection());
+            draftOrderList.add(draftOrderElement);
+        } else {
+            draftOrderList.add(draftOrderElement);
+        }
+        draftOrderList.sort(Comparator.comparing(
+            m -> m.getValue().getOtherDetails().getDateCreated(),
+            Comparator.reverseOrder()
+        ));
+        return Map.of("draftOrderCollection", draftOrderList
+        );
+    }
+
+    private DraftOrder getCurrentDraftOrderDetails(CaseData caseData) {
+        String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
+        String flagSelectedOrder = getSelectedOrderInfoForUpload(caseData);
+
+        return DraftOrder.builder()
+            .typeOfOrder(flagSelectedOrder)
+            .orderTypeId(flagSelectedOrderId)
+            .orderDocument(caseData.getAppointmentOfGuardian())
+            .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .dateCreated(dateTime.now())
+                              .status("Draft").build())
+            .dateOrderMade(caseData.getDateOrderMade())
+            .orderSelectionType(caseData.getManageOrdersOptions())
+            .build();
     }
 
     private List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
