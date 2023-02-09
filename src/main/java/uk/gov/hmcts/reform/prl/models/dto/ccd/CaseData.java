@@ -508,7 +508,7 @@ public class CaseData implements MappableObject {
     /**
      * Send to Gatekeeper.
      */
-    private final List<Element<GatekeeperEmail>> gatekeeper;
+    private final List<Element<GatekeepingDetails>> gatekeeper;
 
     /**
      * FL401 Other Proceedings.
