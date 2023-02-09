@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -95,6 +97,8 @@ public class ManageOrdersControllerTest {
     @Mock
     private UserDetails userDetails;
 
+    @Mock
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     PartyDetails applicant;
 
@@ -298,7 +302,7 @@ public class ManageOrdersControllerTest {
             .parentalResponsibilityDetails("test")
             .build();
 
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        Element<Child> wrappedChildren = Element.<Child>builder().id(UUID.randomUUID()).value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
@@ -357,7 +361,7 @@ public class ManageOrdersControllerTest {
             .parentalResponsibilityDetails("test")
             .build();
 
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        Element<Child> wrappedChildren = Element.<Child>builder().id(UUID.randomUUID()).value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
@@ -433,6 +437,7 @@ public class ManageOrdersControllerTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(ManageOrders.builder().build())
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .courtName("testCourt")
@@ -475,7 +480,7 @@ public class ManageOrdersControllerTest {
             .parentalResponsibilityDetails("test")
             .build();
 
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        Element<Child> wrappedChildren = Element.<Child>builder().id(UUID.randomUUID()).value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
@@ -484,6 +489,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .courtName("testCourt")
+            .children(listOfChildren)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .build();
@@ -494,6 +500,8 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .courtName("testCourt")
+            .manageOrders(ManageOrders.builder().build())
+            .children(listOfChildren)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .childrenList("Child 1: TestName\n")
             .selectedOrder(
@@ -554,6 +562,7 @@ public class ManageOrdersControllerTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .fl401FamilymanCaseNumber("12345")
             .childrenList("Child 1: TestName\n")
+            .manageOrders(ManageOrders.builder().build())
             .selectedOrder(
                 "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
                     + "enforcement application (C82)\\n\\n")
