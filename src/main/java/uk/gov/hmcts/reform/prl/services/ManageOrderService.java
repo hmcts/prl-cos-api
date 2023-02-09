@@ -696,7 +696,7 @@ public class ManageOrderService {
                                        .serveOrderDetails(ServeOrderDetails.builder()
                                                               .cafcassOrCymruNeedToProvideReport(
                                                                   serveOrderData.getCafcassOrCymruNeedToProvideReport())
-                                                              .cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
+                                                              //.cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
                                                               .whenReportsMustBeFiled(serveOrderData.getWhenReportsMustBeFiled() != null
                                                                                           ? serveOrderData.getWhenReportsMustBeFiled()
                                                                                               .format(DateTimeFormatter.ofPattern(
