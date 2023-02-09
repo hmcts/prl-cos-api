@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
@@ -32,7 +33,8 @@ public class MiamCheckerTest {
 
     @Test
     public void whenNoCaseDataThenIsStartedReturnsFalse() {
-        CaseData caseData = CaseData.builder().build();
+        CaseData caseData = CaseData.builder()
+            .miamDetails(MiamDetails.builder().build()).build();
 
         assertTrue(!miamChecker.isStarted(caseData));
     }
@@ -40,9 +42,11 @@ public class MiamCheckerTest {
     @Test
     public void whenBasicMiamCaseDataPresentThenIsStartedReturnsTrue() {
         CaseData caseData = CaseData.builder()
-            .applicantAttendedMiam(Yes)
-            .claimingExemptionMiam(No)
-            .familyMediatorMiam(No)
+            .miamDetails(MiamDetails.builder()
+                             .applicantAttendedMiam(Yes)
+                             .claimingExemptionMiam(No)
+                             .familyMediatorMiam(No)
+                             .build())
             .build();
 
 
@@ -58,7 +62,9 @@ public class MiamCheckerTest {
 
     @Test
     public void whenNoDataIsFinishedReturnsFalse() {
-        CaseData caseData = CaseData.builder().build();
+        CaseData caseData = CaseData.builder().miamDetails(
+            MiamDetails.builder().build()
+        ).build();
 
         assertTrue(!miamChecker.isFinished(caseData));
     }
@@ -66,11 +72,13 @@ public class MiamCheckerTest {
     @Test
     public void whenApplicantHasAttendedMiamAndDetailsProvidedIsFinishedReturnsTrue() {
         CaseData caseData = CaseData.builder()
-            .applicantAttendedMiam(Yes)
-            .mediatorRegistrationNumber("123456")
-            .familyMediatorServiceName("Test Name")
-            .soleTraderName("Trade Sole")
-            .miamCertificationDocumentUpload(Document.builder().build().builder().build())
+            .miamDetails(MiamDetails.builder()
+                             .applicantAttendedMiam(Yes)
+                             .mediatorRegistrationNumber("123456")
+                             .familyMediatorServiceName("Test Name")
+                             .soleTraderName("Trade Sole")
+                             .miamCertificationDocumentUpload(Document.builder().build().builder().build())
+                             .build())
             .build();
 
         assertTrue(miamChecker.isFinished(caseData));
@@ -79,13 +87,15 @@ public class MiamCheckerTest {
     @Test
     public void whenApplicantHasNotAttendedMiamButHasApprovedExemptionIsFinishedReturnsTrue() {
         CaseData caseData = CaseData.builder()
-            .applicantAttendedMiam(No)
-            .claimingExemptionMiam(Yes)
-            .familyMediatorMiam(Yes)
-            .mediatorRegistrationNumber1("123456")
-            .familyMediatorServiceName1("Test Name")
-            .soleTraderName1("Trade Sole")
-            .miamCertificationDocumentUpload1(Document.builder().build())
+            .miamDetails(MiamDetails.builder()
+                             .applicantAttendedMiam(No)
+                             .claimingExemptionMiam(Yes)
+                             .familyMediatorMiam(Yes)
+                             .mediatorRegistrationNumber1("123456")
+                             .familyMediatorServiceName1("Test Name")
+                             .soleTraderName1("Trade Sole")
+                             .miamCertificationDocumentUpload1(Document.builder().build())
+                             .build())
             .build();
 
         assertTrue(miamChecker.isFinished(caseData));
@@ -94,25 +104,30 @@ public class MiamCheckerTest {
     @Test
     public void whenApplicantHasNotAttendedMiamButHasCompletedExemptionsSectionIsFinishedReturnsTrue() {
         CaseData caseData = CaseData.builder()
-            .applicantAttendedMiam(No)
-            .claimingExemptionMiam(Yes)
-            .familyMediatorMiam(No)
-            .miamExemptionsChecklist(Collections.singletonList(domesticViolence))
-            .miamDomesticViolenceChecklist(Collections.singletonList(miamDomesticViolenceChecklistEnum_Value_1))
+            .miamDetails(MiamDetails.builder()
+                             .applicantAttendedMiam(No)
+                             .claimingExemptionMiam(Yes)
+                             .familyMediatorMiam(No)
+                             .miamExemptionsChecklist(Collections.singletonList(domesticViolence))
+                             .miamDomesticViolenceChecklist(Collections.singletonList(miamDomesticViolenceChecklistEnum_Value_1))
+                             .build())
+
             .build();
 
         assertTrue(miamChecker.isFinished(caseData));
-
     }
 
     @Test
     public void whenApplicantHasNotAttendedMiamButHasCompletedExemptionsSectionSubmittedChildProtectionConcernIsFinishedReturnsTrue() {
         CaseData caseData = CaseData.builder()
-            .applicantAttendedMiam(No)
-            .claimingExemptionMiam(Yes)
-            .familyMediatorMiam(No)
-            .miamExemptionsChecklist(Collections.singletonList(childProtectionConcern))
-            .miamChildProtectionConcernList(Collections.singletonList(MIAMChildProtectionConcernChecklistEnum_value_1))
+            .miamDetails(MiamDetails.builder()
+                             .applicantAttendedMiam(No)
+                             .claimingExemptionMiam(Yes)
+                             .familyMediatorMiam(No)
+                             .miamExemptionsChecklist(Collections.singletonList(childProtectionConcern))
+                             .miamChildProtectionConcernList(Collections.singletonList(MIAMChildProtectionConcernChecklistEnum_value_1))
+                             .build())
+
             .build();
 
         assertTrue(miamChecker.isFinished(caseData));

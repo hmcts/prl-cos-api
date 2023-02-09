@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -77,10 +78,9 @@ public class BulkPrintServiceTest {
 
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void senLetterServiceWithInValidInput() {
-        assertEquals(bulkPrintService.send("123", authToken, "abc", null), uuid);
-
+        assertThrows(NullPointerException.class, () -> bulkPrintService.send("123", authToken, "abc", null));
     }
 
 }

@@ -131,8 +131,6 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .build();
 
             caseData = buildGeneratedDocumentCaseData(authorisation, callbackRequest, caseData, caseDataForOrgDetails);
-
-            log.info("Saving Court name into DB..");
         }
 
         return CallbackResponse.builder()

@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -40,6 +42,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @PropertySource(value = "classpath:application.yaml")
@@ -895,4 +898,63 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
+
+    @Test
+    public void verifyEmailNotificationTriggeredForFinalOrderIssued() throws  Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .state(State.ALL_FINAL_ORDERS_ISSUED)
+            .applicants(List.of(element(PartyDetails.builder()
+                                            .solicitorEmail("test@gmail.com")
+                                            .representativeLastName("LastName")
+                                            .representativeFirstName("FirstName")
+                                            .build())))
+            .respondents(List.of(element(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build())))
+            .build();
+
+
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        Mockito.when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
+
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
+                                                           Mockito.any(),
+                                                           Mockito.any(),Mockito.any());
+    }
+
+    @Test
+    public void verifyNoEmailNotificationTriggeredIfStateIsNotAllOrderIssued() throws  Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder()
+                                            .solicitorEmail("test@gmail.com")
+                                            .representativeLastName("LastName")
+                                            .representativeFirstName("FirstName")
+                                            .build())))
+            .respondents(List.of(element(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build())))
+            .build();
+
+
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        Mockito.when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
+
+        Mockito.verify(emailService,Mockito.times(0)).send(Mockito.anyString(),
+                                                           Mockito.any(),
+                                                           Mockito.any(),Mockito.any());
+    }
+
+
 }

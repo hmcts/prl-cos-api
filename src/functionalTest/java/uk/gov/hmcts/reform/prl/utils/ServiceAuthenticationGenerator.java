@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.test.context.TestPropertySource;
@@ -14,6 +15,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @TestPropertySource("classpath:application.yaml")
 @Service
+@Slf4j
 public class ServiceAuthenticationGenerator {
 
     @Value("${idam.s2s-auth.microservice}")

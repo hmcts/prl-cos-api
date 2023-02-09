@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 
 @FeignClient(
-    name = "hearing-api",
+    name = "hearing-api-cafcaas",
     url = "${fis_hearing.api.url}",
     configuration = FeignClientProperties.FeignClientConfiguration.class
 )

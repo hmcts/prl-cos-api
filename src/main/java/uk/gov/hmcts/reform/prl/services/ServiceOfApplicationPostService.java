@@ -105,12 +105,11 @@ public class ServiceOfApplicationPostService {
     }
 
     private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
-        CaseData respondentCaseData = CaseData
+        return CaseData
             .builder()
             .id(caseData.getId())
             .respondents(List.of(element(partyDetails)))
             .build();
-        return respondentCaseData;
     }
 
     private List<GeneratedDocumentInfo> getUploadedDocumentsServiceOfApplication(CaseData caseData) {

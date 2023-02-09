@@ -85,11 +85,10 @@ public class ManageOrdersController {
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
-            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
+            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions());
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getAppointmentOfGuardian());
         }
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
@@ -108,7 +107,6 @@ public class ManageOrdersController {
         );
         caseData = manageOrderService.getUpdatedCaseData(caseData);
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            log.info("Court name before prepopulate: {}", caseData.getCourtName());
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
         String childOption = null;
@@ -189,25 +187,25 @@ public class ManageOrdersController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
+        manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
+        manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/manage-orders/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",  content = @Content(mediaType = "application/json",
+        @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true)  String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
             caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
@@ -218,12 +216,11 @@ public class ManageOrdersController {
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else {
-            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,
-                                                                                                caseData));
-            manageOrderEmailService.sendEmailToApplicantAndRespondent(callbackRequest.getCaseDetails());
-
+            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+                authorisation,
+                caseData
+            ));
         }
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -231,7 +228,7 @@ public class ManageOrdersController {
     @Operation(description = "Callback to show preview order for special guardianship create order")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse showPreviewOrderWhenOrderCreated(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true)  String authorisation,
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -240,7 +237,7 @@ public class ManageOrdersController {
             List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
-            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
+            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions());
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -261,6 +258,4 @@ public class ManageOrdersController {
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
-
 }

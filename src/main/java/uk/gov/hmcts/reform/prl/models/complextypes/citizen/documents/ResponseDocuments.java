@@ -10,8 +10,7 @@ import java.time.LocalDate;
 @Builder
 public class ResponseDocuments {
     private final String partyName;
-    private final String uploadedBy;
+    private final String createdBy;
     private final LocalDate dateCreated;
-    private final DocumentDetails documentDetails;
     private final Document citizenDocument;
 }

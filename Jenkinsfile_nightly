@@ -28,7 +28,10 @@ def secrets = [
     secret("idam-solicitor-password", "IDAM_SOLICITOR_PASSWORD"),
     secret("send-grid-api-key", "SEND_GRID_API_KEY"),
     secret("rpa-notify-to-email", "RPA_NOTIFY_TO_EMAIL"),
-    secret("rpa-notify-from-email", "RPA_NOTIFY_FROM_EMAIL")
+    secret("rpa-notify-from-email", "RPA_NOTIFY_FROM_EMAIL"),
+    secret("citizen-user", "IDAM_CITIZEN_USERNAME"),
+    secret("citizen-password", "IDAM_CITIZEN_PASSWORD"),
+    secret('prl-citizen-frontend-idam-client-secret', 'CITIZEN_IDAM_CLIENT_SECRET')
   ]
 ]
 
@@ -51,12 +54,12 @@ withNightlyPipeline(type, product, component) {
   enableMutationTest()
   enableFullFunctionalTest(200)
 
-  after('fullFunctionalTest') {
+  afterAlways('fullFunctionalTest') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
   }
 
-  after('fortify-scan') {
+  afterAlways('fortify-scan') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
   }

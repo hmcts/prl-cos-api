@@ -15,4 +15,5 @@ public class CitizenFlags {
     private final YesOrNo isApplicationViewed;
     private final YesOrNo isAllegationOfHarmViewed;
     private final YesOrNo isAllDocumentsViewed;
+    private final YesOrNo isResponseInitiated;
 }

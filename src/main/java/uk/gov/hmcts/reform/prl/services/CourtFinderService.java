@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.applicant;
@@ -39,17 +41,23 @@ public class CourtFinderService {
     private CourtFinderApi courtFinderApi;
 
     public Court getNearestFamilyCourt(CaseData caseData) throws NotFoundException {
-        ServiceArea serviceArea;
-
-        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            serviceArea = courtFinderApi
-                .findClosestDomesticAbuseCourtByPostCode(
-                    getPostcodeFromWrappedParty(caseData.getApplicantsFL401()));
-        } else {
-            serviceArea = courtFinderApi
-                .findClosestChildArrangementsCourtByPostcode(getCorrectPartyPostcode(caseData));
+        ServiceArea serviceArea = null;
+        try {
+            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                serviceArea = courtFinderApi
+                  .findClosestDomesticAbuseCourtByPostCode(
+                      getPostcodeFromWrappedParty(caseData.getApplicantsFL401()));
+            } else {
+                serviceArea = courtFinderApi
+                    .findClosestChildArrangementsCourtByPostcode(
+                            nonNull(caseData.getC100RebuildData())
+                                    && nonNull(caseData.getC100RebuildData().getC100RebuildChildPostCode())
+                            ? caseData.getC100RebuildData().getC100RebuildChildPostCode()
+                            : getCorrectPartyPostcode(caseData));
+            }
+        } catch (Exception e) {
+            log.info("CourtFinderService.getNearestFamilyCourt() method is throwing exception : ",e.getMessage());
         }
-
         if (serviceArea != null
             && !serviceArea.getCourts().isEmpty()) {
             return getCourtDetails(serviceArea.getCourts()
@@ -84,13 +92,20 @@ public class CourtFinderService {
             }
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
         } else if (child.getChildLiveWith().contains(anotherPerson) && ofNullable(getFirstOtherPerson(child)).isPresent()) {
-            if (ofNullable(getFirstOtherPerson(child).getAddress().getPostCode()).isEmpty()) {
+            if (getPostCode(getFirstOtherPerson(child)).isEmpty()) {
                 return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
             }
             return getFirstOtherPerson(child).getAddress().getPostCode();
         }
         //default to the applicant postcode
-        return getPostcodeFromWrappedParty(caseData.    getApplicants().get(0));
+        return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+    }
+
+    public String getPostCode(OtherPersonWhoLivesWithChild otherPerson) {
+        return ofNullable(otherPerson)
+            .map(OtherPersonWhoLivesWithChild::getAddress)
+            .map(Address::getPostCode)
+            .orElse("");
     }
 
     public CaseData setCourtNameAndId(CaseData caseData, Court court) {
@@ -130,7 +145,7 @@ public class CourtFinderService {
                 emailAddress = findEmailWithFamilyOnlyKey(nearestDomesticAbuseCourt);
             }
             if (emailAddress.isEmpty()) {
-                emailAddress  = findEmailWithChildOnlyKey(nearestDomesticAbuseCourt);
+                emailAddress = findEmailWithChildOnlyKey(nearestDomesticAbuseCourt);
             }
         }
         return emailAddress;

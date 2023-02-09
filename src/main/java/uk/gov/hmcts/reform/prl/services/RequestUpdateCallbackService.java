@@ -111,8 +111,8 @@ public class RequestUpdateCallbackService {
             if (serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)) {
                 ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
                 caseData = caseData.toBuilder()
-                    .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                     .state(State.SUBMITTED_PAID)
+                    .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                     .build();
 
             } else {

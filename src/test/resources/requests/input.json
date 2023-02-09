@@ -1,0 +1,1382 @@
+{
+  "case_details": {
+    "caseTypeId": "123",
+    "jurisdictionId": "123",
+    "case_data": {
+      "_links": {
+        "self": {
+          "href": "http://ccd-data-store-api-aat.service.core-compute-aat.internal/cases/1663336680763541"
+        }
+      },
+      "id": "1663336680763541",
+      "jurisdiction": "PRIVATELAW",
+      "case_type": "PRLAPPS",
+      "created_on": "2022-09-16T13:58:00.736904",
+      "last_modified_on": "2022-10-06T12:51:12.201825",
+      "last_state_modified_on": "2022-09-16T16:37:24.38012",
+      "state": "AWAITING_RESUBMISSION_TO_HMCTS",
+      "security_classification": "PUBLIC",
+      "data": {
+        "welshLanguageRequirementsTable": {
+          "welshLanguageRequirement": null,
+          "welshLanguageRequirementApplication": null,
+          "languageRequirementApplicationNeedWelsh": null,
+          "welshLanguageRequirementApplicationNeedEnglish": null
+        },
+        "summaryTabForOrderAppliedFor": {
+          "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order",
+          "typeOfChildArrangementsOrder": "Spend time with order"
+        },
+        "ordersApplyingFor": [
+          "childArrangementsOrder",
+          "prohibitedStepsOrder"
+        ],
+        "setOutReasonsBelow": null,
+        "applicants": [
+          {
+            "id": "48fd1001-a785-454c-b142-d0056fec7556",
+            "value": {
+              "email": null,
+              "gender": "male",
+              "address": {
+                "County": "",
+                "Country": "United Kingdom",
+                "PostCode": "LU1 3DF",
+                "PostTown": "Luton",
+                "AddressLine1": "Apartment 104",
+                "AddressLine2": "The Academy",
+                "AddressLine3": "Holly Street"
+              },
+              "dxNumber": "rrteter",
+              "landline": null,
+              "lastName": "test updated",
+              "firstName": "test",
+              "dateOfBirth": "1967-01-01",
+              "otherGender": null,
+              "phoneNumber": "01234567890",
+              "placeOfBirth": "luton",
+              "previousName": "jhkjhj",
+              "solicitorOrg": {
+                "OrganisationID": null,
+                "OrganisationName": null
+              },
+              "sendSignUpLink": null,
+              "solicitorEmail": "g@g.com",
+              "isAddressUnknown": null,
+              "solicitorAddress": {
+                "County": "",
+                "Country": "United Kingdom",
+                "PostCode": "SA1 4PF",
+                "PostTown": "Swansea",
+                "AddressLine1": "Swansea Crown Court, Law Court",
+                "AddressLine2": "St. Helens Road",
+                "AddressLine3": ""
+              },
+              "isDateOfBirthKnown": null,
+              "solicitorReference": "sfdfdf",
+              "solicitorTelephone": null,
+              "isPlaceOfBirthKnown": null,
+              "isDateOfBirthUnknown": null,
+              "isAddressConfidential": "No",
+              "isCurrentAddressKnown": null,
+              "relationshipToChildren": null,
+              "representativeLastName": "test",
+              "representativeFirstName": "test",
+              "canYouProvidePhoneNumber": null,
+              "applicantPreferredContact": [],
+              "canYouProvideEmailAddress": "No",
+              "isAtAddressLessThan5Years": "No",
+              "isPhoneNumberConfidential": "No",
+              "isEmailAddressConfidential": null,
+              "applicantContactInstructions": null,
+              "respondentLivedWithApplicant": null,
+              "doTheyHaveLegalRepresentation": null,
+              "addressLivedLessThan5YearsDetails": null,
+              "otherPersonRelationshipToChildren": [],
+              "isAtAddressLessThan5YearsWithDontKnow": null
+            }
+          }
+        ],
+        "c1AWelshDocument": null,
+        "caseSubmittedTimeStamp": "2022-09-16T15:03:12.813264+01:00",
+        "submitAndPayDownloadApplicationLink": {
+          "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d2494d31-cc28-4c19-8717-2ff286df785e",
+          "document_filename": "Draft_C100_application.pdf",
+          "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d2494d31-cc28-4c19-8717-2ff286df785e/binary"
+        },
+        "otherProceedingsTable": {
+          "previousOrOngoingProceedings": ""
+        },
+        "applicationTypeDetails": {},
+        "caseTypeOfApplication": "C100",
+        "furtherEvidences": [
+          {
+            "id": "48bec397-3ff8-4460-9ec2-83d7bc91a8e9",
+            "value": {
+              "documentFurtherEvidence": {
+                "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b6f5b557-8c31-4bfe-8b2c-8fa456e76b66",
+                "document_filename": "SampleDoc1.pdf",
+                "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b6f5b557-8c31-4bfe-8b2c-8fa456e76b66/binary"
+              },
+              "typeOfDocumentFurtherEvidence": "consentOrder",
+              "restrictCheckboxFurtherEvidence": []
+            }
+          },
+          {
+            "id": "391eb8f1-6e38-4086-acc1-78bf384fc12f",
+            "value": {
+              "documentFurtherEvidence": {
+                "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/42b2d014-337e-447e-bd11-00b10e75091e",
+                "document_filename": "SampleDoc2.pdf",
+                "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/42b2d014-337e-447e-bd11-00b10e75091e/binary"
+              },
+              "typeOfDocumentFurtherEvidence": "miamCertificate",
+              "restrictCheckboxFurtherEvidence": []
+            }
+          },
+          {
+            "id": "2c08761e-199d-4852-a949-ec0b3ec05a9a",
+            "value": {
+              "documentFurtherEvidence": {
+                "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/91db0bb9-2a9c-4ce9-9ae6-49c08a9b3fb2",
+                "document_filename": "Sampledoc3WithWord.docx",
+                "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/91db0bb9-2a9c-4ce9-9ae6-49c08a9b3fb2/binary"
+              },
+              "typeOfDocumentFurtherEvidence": "previousOrders",
+              "restrictCheckboxFurtherEvidence": []
+            }
+          }
+        ],
+        "c100ConfidentialityStatementDisclaimer": [
+          "confidentialityStatementUnderstood"
+        ],
+        "caseworkerEmailAddress": "aloknath.datta@hmcts.net",
+        "miamExemptionsChecklist": [
+          "domesticViolence"
+        ],
+        "children": [
+          {
+            "id": "c0651c7d-0db9-47aa-9baa-933013f482ea",
+            "value": {
+              "gender": "male",
+              "lastName": "kllk",
+              "firstName": "jkhkjshjk,hk",
+              "dateOfBirth": "1967-01-01",
+              "otherGender": null,
+              "childLiveWith": [
+                "applicant"
+              ],
+              "orderAppliedFor": [
+                "childArrangementsOrder"
+              ],
+              "isDateOfBirthUnknown": null,
+              "personWhoLivesWithChild": [],
+              "relationshipToApplicant": null,
+              "relationshipToRespondent": null,
+              "applicantsRelationshipToChild": "father",
+              "parentalResponsibilityDetails": "`sxxs",
+              "respondentsRelationshipToChild": "father",
+              "otherApplicantsRelationshipToChild": null,
+              "otherRespondentsRelationshipToChild": null
+            }
+          }
+        ],
+        "c1ADocument": null,
+        "dateOfSubmission": {
+          "dateOfSubmission": "16 09 2022"
+        },
+        "draftConsentOrderFile": null,
+        "effortsMadeWithRespondents": null,
+        "id": "1663336680763541",
+        "litigationCapacityTable": {
+          "litigationCapacityFactors": null,
+          "litigationCapacityReferrals": null,
+          "litigationCapacityOtherFactors": null,
+          "litigationCapacityOtherFactorsDetails": null
+        },
+        "allegationsOfHarmYesNo": "No",
+        "isWelshDocGen": null,
+        "courtId": "258",
+        "applicationPermissionRequired": "noNotRequired",
+        "isEngDocGen": "Yes",
+        "childDetailsExtraTable": {
+          "childrenKnownToLocalAuthority": "No",
+          "childrenSubjectOfChildProtectionPlan": "No"
+        },
+        "familyMediatorMiam": "No",
+        "areRespondentsAwareOfProceedings": "No",
+        "payAgreeStatement": [
+          "agree"
+        ],
+        "childrenKnownToLocalAuthorityTextArea": null,
+        "applicantName": "test test updated",
+        "applicantAttendedMiam": "No",
+        "selectedCaseTypeID": "C100",
+        "respondents": [
+          {
+            "id": "aa875476-e169-4e8e-b688-8c1c5170f58c",
+            "value": {
+              "email": null,
+              "gender": "male",
+              "address": {
+                "County": null,
+                "Country": null,
+                "PostCode": null,
+                "PostTown": null,
+                "AddressLine1": null,
+                "AddressLine2": null,
+                "AddressLine3": null
+              },
+              "dxNumber": null,
+              "landline": null,
+              "lastName": "hfkl",
+              "firstName": "jhgjhgj",
+              "dateOfBirth": null,
+              "otherGender": null,
+              "phoneNumber": null,
+              "placeOfBirth": null,
+              "previousName": "ghhg",
+              "solicitorOrg": {
+                "OrganisationID": null,
+                "OrganisationName": null
+              },
+              "sendSignUpLink": null,
+              "solicitorEmail": null,
+              "isAddressUnknown": null,
+              "solicitorAddress": {
+                "County": null,
+                "Country": null,
+                "PostCode": null,
+                "PostTown": null,
+                "AddressLine1": null,
+                "AddressLine2": null,
+                "AddressLine3": null
+              },
+              "isDateOfBirthKnown": "No",
+              "solicitorReference": null,
+              "solicitorTelephone": null,
+              "isPlaceOfBirthKnown": "No",
+              "isDateOfBirthUnknown": null,
+              "isAddressConfidential": null,
+              "isCurrentAddressKnown": "No",
+              "relationshipToChildren": null,
+              "representativeLastName": null,
+              "representativeFirstName": null,
+              "canYouProvidePhoneNumber": "No",
+              "applicantPreferredContact": [],
+              "canYouProvideEmailAddress": "No",
+              "isAtAddressLessThan5Years": null,
+              "isPhoneNumberConfidential": null,
+              "isEmailAddressConfidential": null,
+              "applicantContactInstructions": null,
+              "respondentLivedWithApplicant": null,
+              "doTheyHaveLegalRepresentation": "no",
+              "addressLivedLessThan5YearsDetails": null,
+              "otherPersonRelationshipToChildren": [],
+              "isAtAddressLessThan5YearsWithDontKnow": "no"
+            }
+          }
+        ],
+        "otherProceedingEmptyTable": {
+          "otherProceedingEmptyField": " "
+        },
+        "declarationTable": {
+          "agreedBy": "AAT Solicitor",
+          "declarationText": "I understand that proceedings for contempt of court may be brought against anyone who makes, or causes to be made, a false statement in a document verified by a statement of truth without an honest belief in its truth. The applicant believes that the facts stated in this form and any continuation sheets are true. AAT Solicitor is authorised by the applicant to sign this statement."
+        },
+        "allegationsOfHarmOverviewTable": {
+          "allegationsOfHarmYesNo": "No",
+          "allegationsOfHarmChildAbuseYesNo": null,
+          "allegationsOfHarmDomesticAbuseYesNo": null,
+          "allegationsOfHarmOtherConcernsYesNo": null,
+          "allegationsOfHarmChildAbductionYesNo": null,
+          "allegationsOfHarmSubstanceAbuseYesNo": null
+        },
+        "applicationPermissionRequiredReason": null,
+        "consentOrder": "No",
+        "documentCategoryChecklist": "documentCategoryChecklistEnumValue3",
+        "paymentCallbackServiceRequestUpdate": {
+          "payment": {
+            "accountNumber": "",
+            "caseReference": "1663336680763541",
+            "paymentAmount": "232",
+            "paymentMethod": "card",
+            "paymentReference": "RC-1663-3461-4503-5823"
+          },
+          "ccdCaseNumber": "1663336680763541",
+          "serviceRequestAmount": "232",
+          "serviceRequestStatus": "Paid",
+          "callBackUpdateTimestamp": "2022-09-16T16:36:44.857721",
+          "serviceRequestReference": "2022-1663336993914"
+        },
+        "claimingExemptionMiam": "Yes",
+        "reasonsForApplicationWithoutNotice": null,
+        "confidentialDetails": {
+          "isConfidentialDetailsAvailable": "No"
+        },
+        "dateSubmitted": "2022-09-16",
+        "childDetailsTable": [
+          {
+            "id": "b0f0c845-c629-41b2-8205-478c94aed92d",
+            "value": {
+              "gender": "male",
+              "lastName": "kllk",
+              "firstName": "jkhkjshjk,hk",
+              "dateOfBirth": "1967-01-01",
+              "otherGender": null,
+              "childLiveWith": "Applicant",
+              "orderAppliedFor": "Child Arrangements Order",
+              "personWhoLivesWithChild": [],
+              "applicantsRelationshipToChild": "Father",
+              "parentalResponsibilityDetails": "`sxxs",
+              "respondentsRelationshipToChild": "Father",
+              "otherApplicantsRelationshipToChild": null,
+              "otherRespondentsRelationshipToChild": null
+            }
+          }
+        ],
+        "typeOfChildArrangementsOrder": "spendTimeWithOrder",
+        "applicantOrganisationPolicy": {
+          "Organisation": {
+            "OrganisationID": "QO4A1Q8",
+            "OrganisationName": "FPRL-test-organisation"
+          },
+          "OrgPolicyReference": null,
+          "OrgPolicyCaseAssignedRole": "[APPLICANTSOLICITOR]"
+        },
+        "specialArrangement": {
+          "areAnySpecialArrangements": "No"
+        },
+        "otherProceedingsDetailsTable": [
+          {
+            "id": "2fcbc030-93f9-451a-964f-ce7ddb26cf7e",
+            "value": {
+              "dateEnded": null,
+              "caseNumber": null,
+              "dateStarted": null,
+              "nameOfCourt": null,
+              "nameOfJudge": null,
+              "typeOfOrder": null,
+              "nameAndOffice": null,
+              "nameOfGuardian": null,
+              "otherTypeOfOrder": null,
+              "nameOfChildrenInvolved": null,
+              "previousOrOngoingProceedings": null
+            }
+          }
+        ],
+        "allegationsOfHarmDomesticAbuseTable": {
+          "sexualAbuseVictim": "",
+          "physicalAbuseVictim": "",
+          "emotionalAbuseVictim": "",
+          "financialAbuseVictim": "",
+          "psychologicalAbuseVictim": ""
+        },
+        "taskListReturn": "                            \n\n<div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!</span><strong class='govuk-warning-text__text'>Application has been returned</strong></div>\n\nYour application has been  returned for the following reasons:\n\nConsent Order not provided\n\nApplication incomplete\n\nResolve these concerns and resend your application.You have been emailed the full details of your application return.",
+        "caseStatus": {
+          "state": "Returned"
+        },
+        "taskList": "<div class='width-50'>\n\n<br/>\n\n## Add application details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/caseName/caseName1'>Case name</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/selectApplicationType/selectApplicationType1'>Type of application</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/hearingUrgency/hearingUrgency1'>Hearing urgency</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add people to the case\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetails/childDetails1'>Child details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add required details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## MIAM details\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/miam/miam1'>MIAM</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add additional information\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>Only complete if relevant</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCase/otherPeopleInTheCase1'>Other people in the case</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherProceedings/otherProceedings1'>Other proceedings</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/internationalElement/internationalElement1'>International element</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/litigationCapacity/litigationCapacity1'>Litigation capacity</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/welshLanguageRequirements/welshLanguageRequirements1'>Welsh language requirements</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## View PDF application\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/viewPdfDocument/viewPdfDocument1'>View PDF application</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Submit\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/submit/submit1'>Submit</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started yet'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n</div>",
+        "applicantTable": [
+          {
+            "id": "de8a7051-8036-4114-a80e-04efe933d89f",
+            "value": {
+              "email": null,
+              "gender": "male",
+              "address": {
+                "County": "",
+                "Country": "United Kingdom",
+                "PostCode": "LU1 3DF",
+                "PostTown": "Luton",
+                "AddressLine1": "Apartment 104",
+                "AddressLine2": "The Academy",
+                "AddressLine3": "Holly Street"
+              },
+              "dxNumber": "rrteter",
+              "lastName": "test updated",
+              "firstName": "test",
+              "dateOfBirth": "1967-01-01",
+              "otherGender": null,
+              "phoneNumber": "01234567890",
+              "placeOfBirth": "luton",
+              "previousName": "jhkjhj",
+              "solicitorOrg": {},
+              "solicitorEmail": "g@g.com",
+              "solicitorReference": "sfdfdf",
+              "isAddressConfidential": "No",
+              "representativeLastName": "test",
+              "representativeFirstName": "test",
+              "canYouProvideEmailAddress": "No",
+              "isAtAddressLessThan5Years": "No",
+              "isPhoneNumberConfidential": "No",
+              "isEmailAddressConfidential": null,
+              "addressLivedLessThan5YearsDetails": null
+            }
+          }
+        ],
+        "caseSolicitorOrgName": "FPRL-test-organisation",
+        "doYouNeedAWithoutNoticeHearing": "No",
+        "caseSolicitorName": "AAT Solicitor",
+        "finalWelshDocument": null,
+        "applicantSolicitorEmailAddress": "prl_aat_solicitor@mailinator.com",
+        "courtName": "Luton Justice Centre",
+        "solicitorName": "AAT Solicitor",
+        "hearingUrgencyTable": {
+          "isCaseUrgent": "No",
+          "setOutReasonsBelow": null,
+          "caseUrgencyTimeAndReason": null,
+          "effortsMadeWithRespondents": null,
+          "doYouNeedAWithoutNoticeHearing": "No",
+          "areRespondentsAwareOfProceedings": "No",
+          "reasonsForApplicationWithoutNotice": null,
+          "doYouRequireAHearingWithReducedNotice": "No"
+        },
+        "childrenKnownToLocalAuthority": "no",
+        "urgencyDetails": {
+          "urgencyStatus": "Not urgent"
+        },
+        "natureOfOrder": "kn,n",
+        "allegationsOfHarmOtherConcernsTable": {
+          "agreeChildOtherContact": null,
+          "agreeChildSupervisedTime": null,
+          "agreeChildUnsupervisedTime": null,
+          "allegationsOfHarmOtherConcerns": null,
+          "allegationsOfHarmOtherConcernsDetails": null,
+          "allegationsOfHarmOtherConcernsCourtActions": null
+        },
+        "doYouRequireAHearingWithReducedNotice": "No",
+        "otherDocuments": [
+          {
+            "id": "9bb1aecf-58b8-4cf8-8b94-a7655ccde370",
+            "value": {
+              "notes": null,
+              "documentName": "Application docu",
+              "documentOther": {
+                "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/08b3fcd9-4ead-4eeb-8f13-6d99095d9c07",
+                "document_filename": "Sampledoc3WithWord.docx",
+                "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/08b3fcd9-4ead-4eeb-8f13-6d99095d9c07/binary"
+              },
+              "documentTypeOther": "applicantStatement",
+              "restrictCheckboxOtherDocuments": []
+            }
+          }
+        ],
+        "caseUrgencyTimeAndReason": null,
+        "otherPeopleInTheCaseTable": [
+          {
+            "id": "f7ca1a72-ce10-434c-8f77-5bd175868f92",
+            "value": {
+              "email": null,
+              "gender": null,
+              "address": {},
+              "lastName": null,
+              "firstName": null,
+              "dateOfBirth": null,
+              "otherGender": null,
+              "phoneNumber": null,
+              "placeOfBirth": null,
+              "previousName": null,
+              "isDateOfBirthKnown": null,
+              "isPlaceOfBirthKnown": null,
+              "relationshipToChild": [],
+              "isCurrentAddressKnown": null,
+              "canYouProvidePhoneNumber": null,
+              "canYouProvideEmailAddress": null
+            }
+          }
+        ],
+        "attendingTheHearingTable": {
+          "isWelshNeeded": null,
+          "adjustmentsRequired": null,
+          "isDisabilityPresent": null,
+          "isInterpreterNeeded": null,
+          "isIntermediaryNeeded": null,
+          "reasonsForIntermediary": null,
+          "specialArrangementsRequired": null,
+          "isSpecialArrangementsRequired": null
+        },
+        "confidentialityDisclaimer": {
+          "confidentialityChecksChecked": [
+            "confidentialityChecksChecked"
+          ]
+        },
+        "allegationsOfHarmOrdersTable": {
+          "occupationOrder": {},
+          "ordersOccupation": null,
+          "restrainingOrder": {},
+          "ordersRestraining": null,
+          "nonMolestationOrder": {},
+          "ordersNonMolestation": null,
+          "otherInjunctiveOrder": {},
+          "ordersOtherInjunctive": null,
+          "undertakingInPlaceOrder": {},
+          "ordersUndertakingInPlace": null,
+          "forcedMarriageProtectionOrder": {},
+          "ordersForcedMarriageProtection": null
+        },
+        "isCaseUrgent": "No",
+        "typeOfApplicationTable": {
+          "natureOfOrder": "kn,n",
+          "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order",
+          "typeOfChildArrangementsOrder": "Spend time with order",
+          "applicationPermissionRequired": "No, permission is not required",
+          "applicationPermissionRequiredReason": null
+        },
+        "miamDomesticViolenceChecklist": [
+          "miamDomesticViolenceChecklistEnum_Value_21"
+        ],
+        "giveDetails": "Sample files added to test",
+        "internationalElementTable": {
+          "jurisdictionIssue": null,
+          "requestToForeignAuthority": null,
+          "jurisdictionIssueGiveReason": null,
+          "habitualResidentInOtherState": null,
+          "requestToForeignAuthorityGiveReason": null,
+          "habitualResidentInOtherStateGiveReason": null
+        },
+        "allegationsOfHarmChildAbductionTable": {
+          "childrenLocationNow": null,
+          "previousAbductionThreats": null,
+          "childAtRiskOfAbductionReason": null,
+          "abductionPassportOfficeNotified": null,
+          "previousAbductionThreatsDetails": null,
+          "abductionPreviousPoliceInvolvement": null,
+          "abductionPreviousPoliceInvolvementDetails": null
+        },
+        "otherProceedingsForSummaryTab": [
+          {
+            "id": "35d47e4c-faea-4d6a-b966-7d9b8ee08c89",
+            "value": {
+              "caseNumber": null,
+              "nameOfCourt": null,
+              "typeOfOrder": null
+            }
+          }
+        ],
+        "allegationOfHarm": {
+          "typesOfHarm": "No Allegations of harm"
+        },
+        "miamTable": {
+          "soleTraderName": null,
+          "familyMediatorMiam": "No",
+          "applicantAttendedMiam": "No",
+          "claimingExemptionMiam": "Yes",
+          "familyMediatorServiceName": null,
+          "mediatorRegistrationNumber": null
+        },
+        "childrenSubjectOfChildProtectionPlan": "no",
+        "paymentServiceRequestReferenceNumber": null,
+        "feeAmount": "£232.00",
+        "finalDocument": null,
+        "miamExemptionsTable": {
+          "urgencyEvidence": "",
+          "otherGroundsEvidence": "",
+          "childProtectionEvidence": "",
+          "reasonsForMiamExemption": "Domestic violence",
+          "domesticViolenceEvidence": "A letter from the Secretary of State for the Home Department confirming that a prospective party has been granted leave to remain in the United Kingdom under paragraph 289B of the Rules made by the Home Secretary under section 3(2) of the Immigration Act 1971, which can be found at https://www. gov.uk/guidance/immigration-rules/immigration-rules-index;",
+          "previousAttendenceEvidence": ""
+        },
+        "respondentTable": [
+          {
+            "id": "cae5488e-bd5a-4408-a8cf-daaf9b63b233",
+            "value": {
+              "email": null,
+              "gender": "male",
+              "address": {
+                "County": null,
+                "Country": null,
+                "PostCode": null,
+                "PostTown": null,
+                "AddressLine1": null,
+                "AddressLine2": null,
+                "AddressLine3": null
+              },
+              "dxNumber": null,
+              "lastName": "hfkl",
+              "firstName": "jhgjhgj",
+              "dateOfBirth": null,
+              "otherGender": null,
+              "phoneNumber": null,
+              "placeOfBirth": null,
+              "previousName": "ghhg",
+              "solicitorOrg": {},
+              "solicitorEmail": null,
+              "solicitorReference": null,
+              "isPlaceOfBirthKnown": "No",
+              "isCurrentAddressKnown": "No",
+              "representativeLastName": null,
+              "representativeFirstName": null,
+              "canYouProvidePhoneNumber": "No",
+              "canYouProvideEmailAddress": "No",
+              "doTheyHaveLegalRepresentation": "no",
+              "addressLivedLessThan5YearsDetails": null,
+              "isAtAddressLessThan5YearsWithDontKnow": "no"
+            }
+          }
+        ],
+        "applicationDetails": "sds",
+        "allocatedJudgeDetails": {
+          "lastName": " ",
+          "courtName": "Luton Justice Centre",
+          "judgeTitle": " ",
+          "emailAddress": " "
+        },
+        "applicantCaseName": "test praneeth"
+      },
+      "data_classification": {
+        "welshLanguageRequirementsTable": {
+          "value": {
+            "welshLanguageRequirement": "PUBLIC",
+            "welshLanguageRequirementApplication": "PUBLIC",
+            "languageRequirementApplicationNeedWelsh": "PUBLIC",
+            "welshLanguageRequirementApplicationNeedEnglish": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "summaryTabForOrderAppliedFor": {
+          "value": {
+            "ordersApplyingFor": "PUBLIC",
+            "typeOfChildArrangementsOrder": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "ordersApplyingFor": "PUBLIC",
+        "setOutReasonsBelow": "PUBLIC",
+        "applicants": {
+          "value": [
+            {
+              "id": "48fd1001-a785-454c-b142-d0056fec7556",
+              "value": {
+                "email": "PUBLIC",
+                "gender": "PUBLIC",
+                "address": {
+                  "value": {
+                    "County": "PUBLIC",
+                    "Country": "PUBLIC",
+                    "PostCode": "PUBLIC",
+                    "PostTown": "PUBLIC",
+                    "AddressLine1": "PUBLIC",
+                    "AddressLine2": "PUBLIC",
+                    "AddressLine3": "PUBLIC"
+                  },
+                  "classification": "PUBLIC"
+                },
+                "dxNumber": "PUBLIC",
+                "landline": "PUBLIC",
+                "lastName": "PUBLIC",
+                "firstName": "PUBLIC",
+                "dateOfBirth": "PUBLIC",
+                "otherGender": "PUBLIC",
+                "phoneNumber": "PUBLIC",
+                "placeOfBirth": "PUBLIC",
+                "previousName": "PUBLIC",
+                "solicitorOrg": {
+                  "value": {
+                    "OrganisationID": "PUBLIC",
+                    "OrganisationName": "PUBLIC"
+                  },
+                  "classification": "PUBLIC"
+                },
+                "sendSignUpLink": "PUBLIC",
+                "solicitorEmail": "PUBLIC",
+                "isAddressUnknown": "PUBLIC",
+                "solicitorAddress": {
+                  "value": {
+                    "County": "PUBLIC",
+                    "Country": "PUBLIC",
+                    "PostCode": "PUBLIC",
+                    "PostTown": "PUBLIC",
+                    "AddressLine1": "PUBLIC",
+                    "AddressLine2": "PUBLIC",
+                    "AddressLine3": "PUBLIC"
+                  },
+                  "classification": "PUBLIC"
+                },
+                "isDateOfBirthKnown": "PUBLIC",
+                "solicitorReference": "PUBLIC",
+                "solicitorTelephone": "PUBLIC",
+                "isPlaceOfBirthKnown": "PUBLIC",
+                "isDateOfBirthUnknown": "PUBLIC",
+                "isAddressConfidential": "PUBLIC",
+                "isCurrentAddressKnown": "PUBLIC",
+                "relationshipToChildren": "PUBLIC",
+                "representativeLastName": "PUBLIC",
+                "representativeFirstName": "PUBLIC",
+                "canYouProvidePhoneNumber": "PUBLIC",
+                "applicantPreferredContact": "PUBLIC",
+                "canYouProvideEmailAddress": "PUBLIC",
+                "isAtAddressLessThan5Years": "PUBLIC",
+                "isPhoneNumberConfidential": "PUBLIC",
+                "isEmailAddressConfidential": "PUBLIC",
+                "applicantContactInstructions": "PUBLIC",
+                "respondentLivedWithApplicant": "PUBLIC",
+                "doTheyHaveLegalRepresentation": "PUBLIC",
+                "addressLivedLessThan5YearsDetails": "PUBLIC",
+                "otherPersonRelationshipToChildren": {
+                  "value": [],
+                  "classification": "PUBLIC"
+                },
+                "isAtAddressLessThan5YearsWithDontKnow": "PUBLIC"
+              }
+            }
+          ],
+          "classification": "PUBLIC"
+        },
+        "c1AWelshDocument": "PUBLIC",
+        "caseSubmittedTimeStamp": "PUBLIC",
+        "submitAndPayDownloadApplicationLink": "PUBLIC",
+        "otherProceedingsTable": {
+          "value": {
+            "previousOrOngoingProceedings": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "applicationTypeDetails": {
+          "value": {},
+          "classification": "PUBLIC"
+        },
+        "caseTypeOfApplication": "PUBLIC",
+        "furtherEvidences": {
+          "value": [
+            {
+              "id": "48bec397-3ff8-4460-9ec2-83d7bc91a8e9",
+              "value": {
+                "documentFurtherEvidence": "PUBLIC",
+                "typeOfDocumentFurtherEvidence": "PUBLIC",
+                "restrictCheckboxFurtherEvidence": "PUBLIC"
+              }
+            },
+            {
+              "id": "391eb8f1-6e38-4086-acc1-78bf384fc12f",
+              "value": {
+                "documentFurtherEvidence": "PUBLIC",
+                "typeOfDocumentFurtherEvidence": "PUBLIC",
+                "restrictCheckboxFurtherEvidence": "PUBLIC"
+              }
+            },
+            {
+              "id": "2c08761e-199d-4852-a949-ec0b3ec05a9a",
+              "value": {
+                "documentFurtherEvidence": "PUBLIC",
+                "typeOfDocumentFurtherEvidence": "PUBLIC",
+                "restrictCheckboxFurtherEvidence": "PUBLIC"
+              }
+            }
+          ],
+          "classification": "PUBLIC"
+        },
+        "c100ConfidentialityStatementDisclaimer": "PUBLIC",
+        "caseworkerEmailAddress": "PUBLIC",
+        "miamExemptionsChecklist": "PUBLIC",
+        "children": {
+          "value": [
+            {
+              "id": "c0651c7d-0db9-47aa-9baa-933013f482ea",
+              "value": {
+                "gender": "PUBLIC",
+                "lastName": "PUBLIC",
+                "firstName": "PUBLIC",
+                "dateOfBirth": "PUBLIC",
+                "otherGender": "PUBLIC",
+                "childLiveWith": "PUBLIC",
+                "orderAppliedFor": "PUBLIC",
+                "isDateOfBirthUnknown": "PUBLIC",
+                "personWhoLivesWithChild": {
+                  "value": [],
+                  "classification": "PUBLIC"
+                },
+                "relationshipToApplicant": "PUBLIC",
+                "relationshipToRespondent": "PUBLIC",
+                "applicantsRelationshipToChild": "PUBLIC",
+                "parentalResponsibilityDetails": "PUBLIC",
+                "respondentsRelationshipToChild": "PUBLIC",
+                "otherApplicantsRelationshipToChild": "PUBLIC",
+                "otherRespondentsRelationshipToChild": "PUBLIC"
+              }
+            }
+          ],
+          "classification": "PUBLIC"
+        },
+        "c1ADocument": "PUBLIC",
+        "dateOfSubmission": {
+          "value": {
+            "dateOfSubmission": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "draftConsentOrderFile": "PUBLIC",
+        "effortsMadeWithRespondents": "PUBLIC",
+        "id": "PUBLIC",
+        "litigationCapacityTable": {
+          "value": {
+            "litigationCapacityFactors": "PUBLIC",
+            "litigationCapacityReferrals": "PUBLIC",
+            "litigationCapacityOtherFactors": "PUBLIC",
+            "litigationCapacityOtherFactorsDetails": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "allegationsOfHarmYesNo": "PUBLIC",
+        "isWelshDocGen": "PUBLIC",
+        "courtId": "PUBLIC",
+        "applicationPermissionRequired": "PUBLIC",
+        "isEngDocGen": "PUBLIC",
+        "childDetailsExtraTable": {
+          "value": {
+            "childrenKnownToLocalAuthority": "PUBLIC",
+            "childrenSubjectOfChildProtectionPlan": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "familyMediatorMiam": "PUBLIC",
+        "areRespondentsAwareOfProceedings": "PUBLIC",
+        "payAgreeStatement": "PUBLIC",
+        "childrenKnownToLocalAuthorityTextArea": "PUBLIC",
+        "applicantName": "PUBLIC",
+        "applicantAttendedMiam": "PUBLIC",
+        "selectedCaseTypeID": "PUBLIC",
+        "respondents": {
+          "value": [
+            {
+              "id": "aa875476-e169-4e8e-b688-8c1c5170f58c",
+              "value": {
+                "email": "PUBLIC",
+                "gender": "PUBLIC",
+                "address": {
+                  "value": {
+                    "County": "PUBLIC",
+                    "Country": "PUBLIC",
+                    "PostCode": "PUBLIC",
+                    "PostTown": "PUBLIC",
+                    "AddressLine1": "PUBLIC",
+                    "AddressLine2": "PUBLIC",
+                    "AddressLine3": "PUBLIC"
+                  },
+                  "classification": "PUBLIC"
+                },
+                "dxNumber": "PUBLIC",
+                "landline": "PUBLIC",
+                "lastName": "PUBLIC",
+                "firstName": "PUBLIC",
+                "dateOfBirth": "PUBLIC",
+                "otherGender": "PUBLIC",
+                "phoneNumber": "PUBLIC",
+                "placeOfBirth": "PUBLIC",
+                "previousName": "PUBLIC",
+                "solicitorOrg": {
+                  "value": {
+                    "OrganisationID": "PUBLIC",
+                    "OrganisationName": "PUBLIC"
+                  },
+                  "classification": "PUBLIC"
+                },
+                "sendSignUpLink": "PUBLIC",
+                "solicitorEmail": "PUBLIC",
+                "isAddressUnknown": "PUBLIC",
+                "solicitorAddress": {
+                  "value": {
+                    "County": "PUBLIC",
+                    "Country": "PUBLIC",
+                    "PostCode": "PUBLIC",
+                    "PostTown": "PUBLIC",
+                    "AddressLine1": "PUBLIC",
+                    "AddressLine2": "PUBLIC",
+                    "AddressLine3": "PUBLIC"
+                  },
+                  "classification": "PUBLIC"
+                },
+                "isDateOfBirthKnown": "PUBLIC",
+                "solicitorReference": "PUBLIC",
+                "solicitorTelephone": "PUBLIC",
+                "isPlaceOfBirthKnown": "PUBLIC",
+                "isDateOfBirthUnknown": "PUBLIC",
+                "isAddressConfidential": "PUBLIC",
+                "isCurrentAddressKnown": "PUBLIC",
+                "relationshipToChildren": "PUBLIC",
+                "representativeLastName": "PUBLIC",
+                "representativeFirstName": "PUBLIC",
+                "canYouProvidePhoneNumber": "PUBLIC",
+                "applicantPreferredContact": "PUBLIC",
+                "canYouProvideEmailAddress": "PUBLIC",
+                "isAtAddressLessThan5Years": "PUBLIC",
+                "isPhoneNumberConfidential": "PUBLIC",
+                "isEmailAddressConfidential": "PUBLIC",
+                "applicantContactInstructions": "PUBLIC",
+                "respondentLivedWithApplicant": "PUBLIC",
+                "doTheyHaveLegalRepresentation": "PUBLIC",
+                "addressLivedLessThan5YearsDetails": "PUBLIC",
+                "otherPersonRelationshipToChildren": {
+                  "value": [],
+                  "classification": "PUBLIC"
+                },
+                "isAtAddressLessThan5YearsWithDontKnow": "PUBLIC"
+              }
+            }
+          ],
+          "classification": "PUBLIC"
+        },
+        "otherProceedingEmptyTable": {
+          "value": {
+            "otherProceedingEmptyField": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "declarationTable": {
+          "value": {
+            "agreedBy": "PUBLIC",
+            "declarationText": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "allegationsOfHarmOverviewTable": {
+          "value": {
+            "allegationsOfHarmYesNo": "PUBLIC",
+            "allegationsOfHarmChildAbuseYesNo": "PUBLIC",
+            "allegationsOfHarmDomesticAbuseYesNo": "PUBLIC",
+            "allegationsOfHarmOtherConcernsYesNo": "PUBLIC",
+            "allegationsOfHarmChildAbductionYesNo": "PUBLIC",
+            "allegationsOfHarmSubstanceAbuseYesNo": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "applicationPermissionRequiredReason": "PUBLIC",
+        "consentOrder": "PUBLIC",
+        "documentCategoryChecklist": "PUBLIC",
+        "paymentCallbackServiceRequestUpdate": {
+          "value": {
+            "payment": {
+              "value": {
+                "accountNumber": "PUBLIC",
+                "caseReference": "PUBLIC",
+                "paymentAmount": "PUBLIC",
+                "paymentMethod": "PUBLIC",
+                "paymentReference": "PUBLIC"
+              },
+              "classification": "PUBLIC"
+            },
+            "ccdCaseNumber": "PUBLIC",
+            "serviceRequestAmount": "PUBLIC",
+            "serviceRequestStatus": "PUBLIC",
+            "callBackUpdateTimestamp": "PUBLIC",
+            "serviceRequestReference": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "claimingExemptionMiam": "PUBLIC",
+        "reasonsForApplicationWithoutNotice": "PUBLIC",
+        "confidentialDetails": {
+          "value": {
+            "isConfidentialDetailsAvailable": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "dateSubmitted": "PUBLIC",
+        "childDetailsTable": {
+          "value": [
+            {
+              "id": "b0f0c845-c629-41b2-8205-478c94aed92d",
+              "value": {
+                "gender": "PUBLIC",
+                "lastName": "PUBLIC",
+                "firstName": "PUBLIC",
+                "dateOfBirth": "PUBLIC",
+                "otherGender": "PUBLIC",
+                "childLiveWith": "PUBLIC",
+                "orderAppliedFor": "PUBLIC",
+                "personWhoLivesWithChild": {
+                  "value": [],
+                  "classification": "PUBLIC"
+                },
+                "applicantsRelationshipToChild": "PUBLIC",
+                "parentalResponsibilityDetails": "PUBLIC",
+                "respondentsRelationshipToChild": "PUBLIC",
+                "otherApplicantsRelationshipToChild": "PUBLIC",
+                "otherRespondentsRelationshipToChild": "PUBLIC"
+              }
+            }
+          ],
+          "classification": "PUBLIC"
+        },
+        "typeOfChildArrangementsOrder": "PUBLIC",
+        "specialArrangement": {
+          "value": {
+            "areAnySpecialArrangements": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "otherProceedingsDetailsTable": {
+          "value": [
+            {
+              "id": "2fcbc030-93f9-451a-964f-ce7ddb26cf7e",
+              "value": {
+                "dateEnded": "PUBLIC",
+                "caseNumber": "PUBLIC",
+                "dateStarted": "PUBLIC",
+                "nameOfCourt": "PUBLIC",
+                "nameOfJudge": "PUBLIC",
+                "typeOfOrder": "PUBLIC",
+                "nameAndOffice": "PUBLIC",
+                "nameOfGuardian": "PUBLIC",
+                "otherTypeOfOrder": "PUBLIC",
+                "nameOfChildrenInvolved": "PUBLIC",
+                "previousOrOngoingProceedings": "PUBLIC"
+              }
+            }
+          ],
+          "classification": "PUBLIC"
+        },
+        "allegationsOfHarmDomesticAbuseTable": {
+          "value": {
+            "sexualAbuseVictim": "PUBLIC",
+            "physicalAbuseVictim": "PUBLIC",
+            "emotionalAbuseVictim": "PUBLIC",
+            "financialAbuseVictim": "PUBLIC",
+            "psychologicalAbuseVictim": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "taskListReturn": "PUBLIC",
+        "caseStatus": {
+          "value": {
+            "state": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "taskList": "PUBLIC",
+        "applicantTable": {
+          "value": [
+            {
+              "id": "de8a7051-8036-4114-a80e-04efe933d89f",
+              "value": {
+                "email": "PUBLIC",
+                "gender": "PUBLIC",
+                "address": {
+                  "value": {
+                    "County": "PUBLIC",
+                    "Country": "PUBLIC",
+                    "PostCode": "PUBLIC",
+                    "PostTown": "PUBLIC",
+                    "AddressLine1": "PUBLIC",
+                    "AddressLine2": "PUBLIC",
+                    "AddressLine3": "PUBLIC"
+                  },
+                  "classification": "PUBLIC"
+                },
+                "dxNumber": "PUBLIC",
+                "lastName": "PUBLIC",
+                "firstName": "PUBLIC",
+                "dateOfBirth": "PUBLIC",
+                "otherGender": "PUBLIC",
+                "phoneNumber": "PUBLIC",
+                "placeOfBirth": "PUBLIC",
+                "previousName": "PUBLIC",
+                "solicitorOrg": {
+                  "value": {},
+                  "classification": "PUBLIC"
+                },
+                "solicitorEmail": "PUBLIC",
+                "solicitorReference": "PUBLIC",
+                "isAddressConfidential": "PUBLIC",
+                "representativeLastName": "PUBLIC",
+                "representativeFirstName": "PUBLIC",
+                "canYouProvideEmailAddress": "PUBLIC",
+                "isAtAddressLessThan5Years": "PUBLIC",
+                "isPhoneNumberConfidential": "PUBLIC",
+                "isEmailAddressConfidential": "PUBLIC",
+                "addressLivedLessThan5YearsDetails": "PUBLIC"
+              }
+            }
+          ],
+          "classification": "PUBLIC"
+        },
+        "caseSolicitorOrgName": "PUBLIC",
+        "doYouNeedAWithoutNoticeHearing": "PUBLIC",
+        "caseSolicitorName": "PUBLIC",
+        "finalWelshDocument": "PUBLIC",
+        "applicantSolicitorEmailAddress": "PUBLIC",
+        "courtName": "PUBLIC",
+        "solicitorName": "PUBLIC",
+        "hearingUrgencyTable": {
+          "value": {
+            "isCaseUrgent": "PUBLIC",
+            "setOutReasonsBelow": "PUBLIC",
+            "caseUrgencyTimeAndReason": "PUBLIC",
+            "effortsMadeWithRespondents": "PUBLIC",
+            "doYouNeedAWithoutNoticeHearing": "PUBLIC",
+            "areRespondentsAwareOfProceedings": "PUBLIC",
+            "reasonsForApplicationWithoutNotice": "PUBLIC",
+            "doYouRequireAHearingWithReducedNotice": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "childrenKnownToLocalAuthority": "PUBLIC",
+        "urgencyDetails": {
+          "value": {
+            "urgencyStatus": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "natureOfOrder": "PUBLIC",
+        "allegationsOfHarmOtherConcernsTable": {
+          "value": {
+            "agreeChildOtherContact": "PUBLIC",
+            "agreeChildSupervisedTime": "PUBLIC",
+            "agreeChildUnsupervisedTime": "PUBLIC",
+            "allegationsOfHarmOtherConcerns": "PUBLIC",
+            "allegationsOfHarmOtherConcernsDetails": "PUBLIC",
+            "allegationsOfHarmOtherConcernsCourtActions": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "doYouRequireAHearingWithReducedNotice": "PUBLIC",
+        "otherDocuments": {
+          "value": [
+            {
+              "id": "9bb1aecf-58b8-4cf8-8b94-a7655ccde370",
+              "value": {
+                "notes": "PUBLIC",
+                "documentName": "PUBLIC",
+                "documentOther": "PUBLIC",
+                "documentTypeOther": "PUBLIC",
+                "restrictCheckboxOtherDocuments": "PUBLIC"
+              }
+            }
+          ],
+          "classification": "PUBLIC"
+        },
+        "caseUrgencyTimeAndReason": "PUBLIC",
+        "otherPeopleInTheCaseTable": {
+          "value": [
+            {
+              "id": "f7ca1a72-ce10-434c-8f77-5bd175868f92",
+              "value": {
+                "email": "PUBLIC",
+                "gender": "PUBLIC",
+                "address": {
+                  "value": {},
+                  "classification": "PUBLIC"
+                },
+                "lastName": "PUBLIC",
+                "firstName": "PUBLIC",
+                "dateOfBirth": "PUBLIC",
+                "otherGender": "PUBLIC",
+                "phoneNumber": "PUBLIC",
+                "placeOfBirth": "PUBLIC",
+                "previousName": "PUBLIC",
+                "isDateOfBirthKnown": "PUBLIC",
+                "isPlaceOfBirthKnown": "PUBLIC",
+                "relationshipToChild": {
+                  "value": [],
+                  "classification": "PUBLIC"
+                },
+                "isCurrentAddressKnown": "PUBLIC",
+                "canYouProvidePhoneNumber": "PUBLIC",
+                "canYouProvideEmailAddress": "PUBLIC"
+              }
+            }
+          ],
+          "classification": "PUBLIC"
+        },
+        "attendingTheHearingTable": {
+          "value": {
+            "isWelshNeeded": "PUBLIC",
+            "adjustmentsRequired": "PUBLIC",
+            "isDisabilityPresent": "PUBLIC",
+            "isInterpreterNeeded": "PUBLIC",
+            "isIntermediaryNeeded": "PUBLIC",
+            "reasonsForIntermediary": "PUBLIC",
+            "specialArrangementsRequired": "PUBLIC",
+            "isSpecialArrangementsRequired": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "confidentialityDisclaimer": {
+          "value": {
+            "confidentialityChecksChecked": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "allegationsOfHarmOrdersTable": {
+          "value": {
+            "occupationOrder": {
+              "value": {},
+              "classification": "PUBLIC"
+            },
+            "ordersOccupation": "PUBLIC",
+            "restrainingOrder": {
+              "value": {},
+              "classification": "PUBLIC"
+            },
+            "ordersRestraining": "PUBLIC",
+            "nonMolestationOrder": {
+              "value": {},
+              "classification": "PUBLIC"
+            },
+            "ordersNonMolestation": "PUBLIC",
+            "otherInjunctiveOrder": {
+              "value": {},
+              "classification": "PUBLIC"
+            },
+            "ordersOtherInjunctive": "PUBLIC",
+            "undertakingInPlaceOrder": {
+              "value": {},
+              "classification": "PUBLIC"
+            },
+            "ordersUndertakingInPlace": "PUBLIC",
+            "forcedMarriageProtectionOrder": {
+              "value": {},
+              "classification": "PUBLIC"
+            },
+            "ordersForcedMarriageProtection": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "isCaseUrgent": "PUBLIC",
+        "typeOfApplicationTable": {
+          "value": {
+            "natureOfOrder": "PUBLIC",
+            "ordersApplyingFor": "PUBLIC",
+            "typeOfChildArrangementsOrder": "PUBLIC",
+            "applicationPermissionRequired": "PUBLIC",
+            "applicationPermissionRequiredReason": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "miamDomesticViolenceChecklist": "PUBLIC",
+        "giveDetails": "PUBLIC",
+        "internationalElementTable": {
+          "value": {
+            "jurisdictionIssue": "PUBLIC",
+            "requestToForeignAuthority": "PUBLIC",
+            "jurisdictionIssueGiveReason": "PUBLIC",
+            "habitualResidentInOtherState": "PUBLIC",
+            "requestToForeignAuthorityGiveReason": "PUBLIC",
+            "habitualResidentInOtherStateGiveReason": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "allegationsOfHarmChildAbductionTable": {
+          "value": {
+            "childrenLocationNow": "PUBLIC",
+            "previousAbductionThreats": "PUBLIC",
+            "childAtRiskOfAbductionReason": "PUBLIC",
+            "abductionPassportOfficeNotified": "PUBLIC",
+            "previousAbductionThreatsDetails": "PUBLIC",
+            "abductionPreviousPoliceInvolvement": "PUBLIC",
+            "abductionPreviousPoliceInvolvementDetails": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "otherProceedingsForSummaryTab": {
+          "value": [
+            {
+              "id": "35d47e4c-faea-4d6a-b966-7d9b8ee08c89",
+              "value": {
+                "caseNumber": "PUBLIC",
+                "nameOfCourt": "PUBLIC",
+                "typeOfOrder": "PUBLIC"
+              }
+            }
+          ],
+          "classification": "PUBLIC"
+        },
+        "allegationOfHarm": {
+          "value": {
+            "typesOfHarm": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "miamTable": {
+          "value": {
+            "soleTraderName": "PUBLIC",
+            "familyMediatorMiam": "PUBLIC",
+            "applicantAttendedMiam": "PUBLIC",
+            "claimingExemptionMiam": "PUBLIC",
+            "familyMediatorServiceName": "PUBLIC",
+            "mediatorRegistrationNumber": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "childrenSubjectOfChildProtectionPlan": "PUBLIC",
+        "paymentServiceRequestReferenceNumber": "PUBLIC",
+        "feeAmount": "PUBLIC",
+        "finalDocument": "PUBLIC",
+        "miamExemptionsTable": {
+          "value": {
+            "urgencyEvidence": "PUBLIC",
+            "otherGroundsEvidence": "PUBLIC",
+            "childProtectionEvidence": "PUBLIC",
+            "reasonsForMiamExemption": "PUBLIC",
+            "domesticViolenceEvidence": "PUBLIC",
+            "previousAttendenceEvidence": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "respondentTable": {
+          "value": [
+            {
+              "id": "cae5488e-bd5a-4408-a8cf-daaf9b63b233",
+              "value": {
+                "email": "PUBLIC",
+                "gender": "PUBLIC",
+                "address": {
+                  "value": {
+                    "County": "PUBLIC",
+                    "Country": "PUBLIC",
+                    "PostCode": "PUBLIC",
+                    "PostTown": "PUBLIC",
+                    "AddressLine1": "PUBLIC",
+                    "AddressLine2": "PUBLIC",
+                    "AddressLine3": "PUBLIC"
+                  },
+                  "classification": "PUBLIC"
+                },
+                "dxNumber": "PUBLIC",
+                "lastName": "PUBLIC",
+                "firstName": "PUBLIC",
+                "dateOfBirth": "PUBLIC",
+                "otherGender": "PUBLIC",
+                "phoneNumber": "PUBLIC",
+                "placeOfBirth": "PUBLIC",
+                "previousName": "PUBLIC",
+                "solicitorOrg": {
+                  "value": {},
+                  "classification": "PUBLIC"
+                },
+                "solicitorEmail": "PUBLIC",
+                "solicitorReference": "PUBLIC",
+                "isPlaceOfBirthKnown": "PUBLIC",
+                "isCurrentAddressKnown": "PUBLIC",
+                "representativeLastName": "PUBLIC",
+                "representativeFirstName": "PUBLIC",
+                "canYouProvidePhoneNumber": "PUBLIC",
+                "canYouProvideEmailAddress": "PUBLIC",
+                "doTheyHaveLegalRepresentation": "PUBLIC",
+                "addressLivedLessThan5YearsDetails": "PUBLIC",
+                "isAtAddressLessThan5YearsWithDontKnow": "PUBLIC"
+              }
+            }
+          ],
+          "classification": "PUBLIC"
+        },
+        "applicationDetails": "PUBLIC",
+        "allocatedJudgeDetails": {
+          "value": {
+            "lastName": "PUBLIC",
+            "courtName": "PUBLIC",
+            "judgeTitle": "PUBLIC",
+            "emailAddress": "PUBLIC"
+          },
+          "classification": "PUBLIC"
+        },
+        "applicantCaseName": "PUBLIC"
+      },
+      "after_submit_callback_response": null,
+      "callback_response_status_code": null,
+      "callback_response_status": null,
+      "delete_draft_response_status_code": null,
+      "delete_draft_response_status": null
+    }
+  },
+  "event_id": "asyncStitchingComplete"
+}
