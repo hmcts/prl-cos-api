@@ -118,10 +118,16 @@ public class C100RespondentSolicitorServiceTest {
         Element<RespondentInterpreterNeeds> wrappedInterpreter = Element.<RespondentInterpreterNeeds>builder()
             .value(interpreterNeeds).build();
         DynamicListElement dynamicListElement = DynamicListElement
-            .builder().code("1afdfa01-8280-4e2c-b810-ab7cf741988a").build();
+            .builder().code("1afdfa01-8280-4e2c-b810-ab7cf741988a")
+            .label("test test")
+            .build();
+        List<DynamicListElement> dynamicListElementList = new ArrayList<>();
+        dynamicListElementList.add(dynamicListElement);
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
-        DynamicList chooseRespondent = DynamicList.builder().value(dynamicListElement).build();
+        DynamicList chooseRespondent = DynamicList.builder().value(dynamicListElement)
+            .listItems(dynamicListElementList)
+            .build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
