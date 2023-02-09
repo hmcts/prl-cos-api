@@ -54,6 +54,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
@@ -115,7 +116,7 @@ public class TaskListRenderer {
                     .withTask(tasks.get(CHILD_DETAILS_REVISED))
                     .withTask(tasks.get(APPLICANT_DETAILS))
                     .withTask(tasks.get(RESPONDENT_DETAILS))
-                    .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE))
+                    .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE_REVISED))
                     .withTask(tasks.get(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION));
 
             final TaskSection relationships = newSection("Relationships")
