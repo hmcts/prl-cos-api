@@ -43,8 +43,8 @@ public class GatekeepingDetailsService {
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
                 gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.JUDGE));
                 if (null != judgeDetails && judgeDetails.size() > 0) {
-                    gatekeepingDetailsBuilder.judgeName(judgeDetails.get(0).getSurname());
-                    gatekeepingDetailsBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
+                    gatekeepingDetailsBuilder.judgeName(JudicialUser.builder()
+                                                            .personalCode(getPersonalCode(caseDataUpdated.get("judgeName"))[0]).build());
                 }
             } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
