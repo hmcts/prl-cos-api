@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
@@ -28,8 +29,8 @@ import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-
 @Service
+@Slf4j
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class AmendOrderService {
     private static final String MEDIA_TYPE = "application/pdf";
@@ -69,6 +70,11 @@ public class AmendOrderService {
         UUID selectedOrderId = caseData.getManageOrders().getAmendOrderDynamicList().getValueCodeAsUuid();
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
 
+        log.info("***** ROLE *** {} ", caseData.getManageOrders().getIsJudgeOrLa());
+        log.info("Result =====" + (!"Judge".equalsIgnoreCase(caseData.getManageOrders().getIsJudgeOrLa())
+            && (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+            || WhatToDoWithOrderEnum.finalizeSaveToServeLater
+            .equals(caseData.getServeOrderData().getWhatDoWithOrder()))) );
         if (!"Judge".equalsIgnoreCase(caseData.getManageOrders().getIsJudgeOrLa())
             && (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             || WhatToDoWithOrderEnum.finalizeSaveToServeLater
@@ -91,6 +97,10 @@ public class AmendOrderService {
 
                     orders.addAll(List.of(element(amended)));
                 });
+            orders.sort(Comparator.comparing(
+                m -> m.getValue().getOtherDetails().getOrderCreatedDate(),
+                Comparator.reverseOrder()
+            ));
             return Map.of("orderCollection", orders);
         } else {
             return  setDraftOrderCollection(caseData, amendedDocument);
