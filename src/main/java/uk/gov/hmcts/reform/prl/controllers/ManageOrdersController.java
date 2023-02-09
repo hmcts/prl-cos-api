@@ -366,6 +366,12 @@ public class ManageOrdersController {
         if (caseDataUpdated.containsKey("isJudgeOrLa")) {
             caseDataUpdated.remove("isJudgeOrLa");
         }
+        if (caseDataUpdated.containsKey("doYouWantToServeOrder")) {
+            caseDataUpdated.remove("doYouWantToServeOrder");
+        }
+        if (caseDataUpdated.containsKey("whatDoWithOrder")) {
+            caseDataUpdated.remove("whatDoWithOrder");
+        }
         log.info("caseDataUpdated after cleanup ===> " + caseDataUpdated);
     }
 }
