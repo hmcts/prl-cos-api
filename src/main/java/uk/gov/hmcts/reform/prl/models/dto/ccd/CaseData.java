@@ -568,8 +568,6 @@ public class CaseData implements MappableObject {
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate dateUploadOrderMade;
 
     @JsonProperty("childrenList")
     private final String childrenList;
