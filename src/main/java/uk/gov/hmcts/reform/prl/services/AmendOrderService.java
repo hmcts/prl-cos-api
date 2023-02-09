@@ -75,10 +75,9 @@ public class AmendOrderService {
             && (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             || WhatToDoWithOrderEnum.finalizeSaveToServeLater
             .equals(caseData.getServeOrderData().getWhatDoWithOrder()))));
-        if (!"Judge".equalsIgnoreCase(caseData.getManageOrders().getIsJudgeOrLa())
-            && (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+        if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             || WhatToDoWithOrderEnum.finalizeSaveToServeLater
-                .equals(caseData.getServeOrderData().getWhatDoWithOrder()))) {
+                .equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
             orders.stream()
                 .filter(order -> Objects.equals(order.getId(), selectedOrderId))
                 .findFirst()
