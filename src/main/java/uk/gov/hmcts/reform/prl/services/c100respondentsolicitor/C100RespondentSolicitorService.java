@@ -504,7 +504,7 @@ public class C100RespondentSolicitorService {
                 respondents.set(respondents.indexOf(party), element(party.getId(), amended));
             });
 
-        if (caseData.getChooseRespondentDynamicList().getListItems().isEmpty()) {
+        if (caseData.getChooseRespondentDynamicList() == null) {
             updatedCaseData.put("nocApproved", YesOrNo.No);
         }
         updatedCaseData.put(RESPONDENTS, respondents);
