@@ -693,7 +693,7 @@ public class ManageOrderService {
                                                             ? serveOrderData.getSelectTypeOfUploadOrder().getDisplayedValue() : null)
                                        .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(serveOrderData.getSelectTypeOfUploadOrder())
                                            ? caseData.getDoesOrderClosesCase() : null)
-                                       .serveOrderDetails(ServeOrderDetails.builder()
+                                       /* .serveOrderDetails(ServeOrderDetails.builder()
                                                               .cafcassOrCymruNeedToProvideReport(
                                                                   serveOrderData.getCafcassOrCymruNeedToProvideReport())
                                                               .cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
@@ -705,7 +705,7 @@ public class ManageOrderService {
                                                                                               )) : null)
                                                               .orderEndsInvolvementOfCafcassOrCymru(
                                                                   serveOrderData.getOrderEndsInvolvementOfCafcassOrCymru())
-                                                              .build())
+                                                              .build()) */
                                        .build()));
         }
     }
