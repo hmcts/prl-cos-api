@@ -78,7 +78,7 @@ public class AmendOrderService {
                                       .build())
                     .build();
 
-                orders.set(orders.indexOf(order), element(order.getId(), amended));
+                orders.add(element(order.getId(), amended));
             });
         return Map.of("orderCollection", orders);
 
