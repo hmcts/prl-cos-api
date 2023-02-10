@@ -207,6 +207,9 @@ public class ManageOrders {
     private final YesOrNo isTheOrderAboutChildren;
     @JsonProperty("isJudgeOrLa")
     private final String isJudgeOrLa;
+    @JsonProperty("judgeDirectionsToAdminAmendOrder")
+    private final String judgeDirectionsToAdminAmendOrder;
+
     @JsonProperty("amendOrderSelectCheckOptions")
     private final AmendOrderCheckEnum amendOrderSelectCheckOptions;
     @JsonProperty("amendOrderSelectJudgeOrLa")
