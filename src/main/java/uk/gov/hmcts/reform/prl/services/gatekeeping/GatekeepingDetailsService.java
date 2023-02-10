@@ -37,14 +37,17 @@ public class GatekeepingDetailsService {
         if (null != caseDataUpdated.get("isJudgeOrLegalAdviserGatekeeping")) {
             if (AllocatedJudgeTypeEnum.JUDGE.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("isJudgeOrLegalAdviserGatekeeping")))
                 && null != caseDataUpdated.get("judgeName")) {
+                String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get("judgeNameAndEmail"));
                 List<JudicialUsersApiResponse> judgeDetails =
                     refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
                                                                      .personalCode(getPersonalCode(caseDataUpdated.get("judgeName"))).build());
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
                 gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.JUDGE));
                 if (null != judgeDetails && judgeDetails.size() > 0) {
-                    gatekeepingDetailsBuilder.judgeName(judgeDetails.get(0).getSurname());
-                    gatekeepingDetailsBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
+                    gatekeepingDetailsBuilder.judgeName(JudicialUser.builder()
+                                                            .personalCode(getPersonalCode(caseDataUpdated.get("judgeName"))[0]).build());
+                    gatekeepingDetailsBuilder.judgePersonalCode(judgePersonalCode[0]);
+
                 }
             } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);

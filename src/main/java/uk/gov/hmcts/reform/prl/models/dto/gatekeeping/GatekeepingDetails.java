@@ -8,6 +8,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
 @Data
 @Builder
@@ -21,13 +22,13 @@ public class GatekeepingDetails {
     private final SendToGatekeeperTypeEnum isJudgeOrLegalAdviserGatekeeping;
 
     @JsonProperty("judgeName")
-    private final String judgeName;
-
-    @JsonProperty("judgeEmail")
-    private final String judgeEmail;
+    private final JudicialUser judgeName;
 
     @JsonProperty("legalAdviserList")
     private final DynamicList legalAdviserList;
+
+    @JsonProperty("judgePersonalCode")
+    private final String judgePersonalCode;
 
 
 }
