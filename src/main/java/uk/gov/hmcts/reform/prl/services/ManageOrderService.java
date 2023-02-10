@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -35,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -667,6 +669,12 @@ public class ManageOrderService {
                     Locale.UK
                 ));
             }
+            ServeOrderData serveOrderData;
+            if (caseData.getServeOrderData() != null) {
+                serveOrderData = caseData.getServeOrderData();
+            } else {
+                serveOrderData = ServeOrderData.builder().build();
+            }
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                                        .orderTypeId(flagSelectedOrderId)
                                        .orderDocument(caseData.getAppointmentOfGuardian())
@@ -681,6 +689,23 @@ public class ManageOrderService {
                                                          .orderMadeDate(orderMadeDate)
                                                          .orderRecipients(getAllRecipients(caseData)).build())
                                        .dateCreated(dateTime.now())
+                                       .typeOfOrder(serveOrderData.getSelectTypeOfUploadOrder() != null
+                                                            ? serveOrderData.getSelectTypeOfUploadOrder().getDisplayedValue() : null)
+                                       .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(serveOrderData.getSelectTypeOfUploadOrder())
+                                           ? caseData.getDoesOrderClosesCase() : null)
+                                       .serveOrderDetails(ServeOrderDetails.builder()
+                                                              .cafcassOrCymruNeedToProvideReport(
+                                                                  serveOrderData.getCafcassOrCymruNeedToProvideReport())
+                                                              //.cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
+                                                              .whenReportsMustBeFiled(serveOrderData.getWhenReportsMustBeFiled() != null
+                                                                                          ? serveOrderData.getWhenReportsMustBeFiled()
+                                                                                              .format(DateTimeFormatter.ofPattern(
+                                                                                                  PrlAppsConstants.D_MMMM_YYYY,
+                                                                                                  Locale.UK
+                                                                                              )) : null)
+                                                              .orderEndsInvolvementOfCafcassOrCymru(
+                                                                  serveOrderData.getOrderEndsInvolvementOfCafcassOrCymru())
+                                                              .build())
                                        .build()));
         }
     }
@@ -805,10 +830,14 @@ public class ManageOrderService {
 
     private DraftOrder getCurrentDraftOrderDetails(CaseData caseData) {
         String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
-        String flagSelectedOrder = getSelectedOrderInfoForUpload(caseData);
+        String typeOfOrder = null;
+        if (caseData.getServeOrderData() != null & caseData.getServeOrderData().getSelectTypeOfUploadOrder() != null) {
+            typeOfOrder = caseData.getServeOrderData().getSelectTypeOfUploadOrder().getDisplayedValue();
+        }
+
 
         return DraftOrder.builder()
-            .typeOfOrder(flagSelectedOrder)
+            .typeOfOrder(typeOfOrder)
             .orderTypeId(flagSelectedOrderId)
             .orderDocument(caseData.getAppointmentOfGuardian())
             .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
@@ -939,7 +968,14 @@ public class ManageOrderService {
             servingRespondentsOptions = (ServingRespondentsEnum) servedOrderDetails.get(SERVING_RESPONDENTS_OPTIONS);
         }
 
-        ServeOrderDetails serveOrderDetails = ServeOrderDetails.builder().serveOnRespondent(serveOnRespondent)
+        ServeOrderDetails tempServeOrderDetails;
+        if (order.getValue().getServeOrderDetails() != null) {
+            tempServeOrderDetails = order.getValue().getServeOrderDetails();
+        } else {
+            tempServeOrderDetails = ServeOrderDetails.builder().build();
+        }
+
+        ServeOrderDetails serveOrderDetails = tempServeOrderDetails.toBuilder().serveOnRespondent(serveOnRespondent)
             .servingRespondent(servingRespondentsOptions)
             .cafcassServed(cafcassServed)
             .cafcassEmail(cafCassEmail)
