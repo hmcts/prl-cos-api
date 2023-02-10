@@ -204,6 +204,5 @@ public class ManageOrders {
     @JsonProperty("isTheOrderAboutChildren")
     private final YesOrNo isTheOrderAboutChildren;
     private final String isJudgeOrLa;
-    @JsonProperty("isUploadedOrAmendedOrder")
-    private final YesOrNo isUploadedOrAmendedOrder;
+
 }
