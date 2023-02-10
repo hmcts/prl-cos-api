@@ -209,10 +209,6 @@ public class DraftAnOrderController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(draftAnOrderService.generateDraftOrderCollection(caseData));
         caseDataUpdated.put("previewOrderDoc",null);
-        LOGGER.info("caseDataUpdated for DO {}", caseDataUpdated);
-        AboutToStartOrSubmitCallbackResponse resp = AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-        LOGGER.info("AboutToStartOrSubmitCallbackResponse data {}", resp.getData());
-        LOGGER.info("AboutToStartOrSubmitCallbackResponse errors {}", resp.getErrors());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
