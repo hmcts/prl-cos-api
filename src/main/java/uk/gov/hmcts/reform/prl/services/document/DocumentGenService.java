@@ -89,6 +89,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_PDF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
@@ -243,6 +244,12 @@ public class DocumentGenService {
 
     @Value("${document.templates.common.prl_solicitor_c7_draft_template}")
     protected String solicitorC7DraftFilename;
+
+    @Value("${document.templates.common.prl_solicitor_c7_final_template}")
+    protected String solicitorC7FinalTemplate;
+
+    @Value("${document.templates.common.prl_solicitor_c7_final_filename}")
+    protected String solicitorC7FinalFilename;
 
     @Value("${document.templates.common.prl_c1a_blank_template}")
     protected String docC1aBlankTemplate;
@@ -678,7 +685,10 @@ public class DocumentGenService {
                 fileName = docC7FinalWelshFilename;
                 break;
             case SOLICITOR_C7_DRAFT_DOCUMENT:
-                fileName = docC7FinalWelshFilename;
+                fileName = solicitorC7DraftFilename;
+                break;
+            case SOLICITOR_C7_FINAL_DOCUMENT:
+                fileName = solicitorC7FinalFilename;
                 break;
             default:
                 fileName = "";
@@ -771,6 +781,9 @@ public class DocumentGenService {
                 break;
             case SOLICITOR_C7_DRAFT_DOCUMENT:
                 template = solicitorC7DraftTemplate;
+                break;
+            case SOLICITOR_C7_FINAL_DOCUMENT:
+                template = solicitorC7FinalTemplate;
                 break;
             default:
                 template = "";

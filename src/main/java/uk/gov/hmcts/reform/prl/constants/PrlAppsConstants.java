@@ -330,5 +330,6 @@ public class PrlAppsConstants {
     public static final String COMPLETED = "COMPLETED";
 
     public static final String SOLICITOR_C7_DRAFT_DOCUMENT = "SOLICITOR_C7_DRAFT";
+    public static final String SOLICITOR_C7_FINAL_DOCUMENT = "SOLICITOR_C7_FINAL";
 
 }
