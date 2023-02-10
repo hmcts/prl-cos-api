@@ -756,7 +756,4 @@ public class CaseData implements MappableObject {
     private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
 
-    @JsonProperty("isJudgeOrLa")
-    private final String isJudgeOrLa;
-
 }
