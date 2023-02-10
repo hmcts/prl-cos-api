@@ -1388,6 +1388,9 @@ public class ManageOrderService {
             caseData.setChildrenListForDocmosis(children);
         }
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        caseData.setChildrenList(dynamicMultiSelectListService
+                                     .getStringFromDynamicMultiSelectList(caseData.getManageOrders().getChildOption()));
+        log.info("**** Case data before generating doc : {}", caseData);
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
             generatedDocumentInfo = dgsService.generateDocument(
