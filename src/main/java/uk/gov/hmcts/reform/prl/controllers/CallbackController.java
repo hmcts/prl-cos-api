@@ -438,9 +438,9 @@ public class CallbackController {
         GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(caseDataUpdated,
                                                                                                 caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
-
+        caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
         // below code related to SummaryTabService
-        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+        // caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
 
         //  ****** OLD CODE BELOW FOR sending email functionality *******
         //  final CaseDetails caseDetails = callbackRequest.getCaseDetails();
