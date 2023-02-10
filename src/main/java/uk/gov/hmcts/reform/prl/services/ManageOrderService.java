@@ -841,6 +841,7 @@ public class ManageOrderService {
         String isLoggedinAsJudgeOrLa = null;
         if (caseData.getManageOrders() != null) {
             isLoggedinAsJudgeOrLa = caseData.getManageOrders().getIsJudgeOrLa();
+            log.info("isLoggedinAsJudgeOrLa" + isLoggedinAsJudgeOrLa);
         }
         return DraftOrder.builder()
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
