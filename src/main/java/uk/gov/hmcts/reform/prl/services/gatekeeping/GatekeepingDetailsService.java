@@ -33,14 +33,14 @@ public class GatekeepingDetailsService {
                                                      RefDataUserService refDataUserService) {
         GatekeepingDetails.GatekeepingDetailsBuilder gatekeepingDetailsBuilder = GatekeepingDetails.builder();
         if (null != caseDataUpdated.get("isJudgeOrLegalAdviserGatekeeping")) {
-            if (SendToGatekeeperTypeEnum.JUDGE.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("isJudgeOrLegalAdviserGatekeeping")))
+            if (SendToGatekeeperTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("isJudgeOrLegalAdviserGatekeeping")))
                 && null != caseDataUpdated.get("judgeName")) {
                 String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get("judgeName"));
                 List<JudicialUsersApiResponse> judgeDetails =
                     refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
                                                                      .personalCode(getPersonalCode(caseDataUpdated.get("judgeName"))).build());
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
-                gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.JUDGE));
+                gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.judge));
                 if (null != judgeDetails && judgeDetails.size() > 0) {
                     gatekeepingDetailsBuilder.judgeName(JudicialUser.builder()
                                                             .personalCode(getPersonalCode(caseDataUpdated.get("judgeName"))[0]).build());
@@ -49,7 +49,7 @@ public class GatekeepingDetailsService {
                 }
             } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
-                gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.LEGAL_ADVISER));
+                gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.legalAdviser));
                 gatekeepingDetailsBuilder.legalAdviserList(legalAdviserList);
             }
         }
