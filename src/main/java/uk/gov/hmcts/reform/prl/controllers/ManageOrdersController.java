@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -234,8 +235,9 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.put("isWithdrawRequestSent", "Approved");
         }
-
-        if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+        log.info("Selection from Admin##### {}", caseData.getManageOrders().getAmendOrderSelectCheckOptions());
+        if (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+            && caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else {
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
@@ -371,6 +373,9 @@ public class ManageOrdersController {
         }
         if (caseDataUpdated.containsKey("whatDoWithOrder")) {
             caseDataUpdated.remove("whatDoWithOrder");
+        }
+        if (caseDataUpdated.containsKey("amendOrderSelectCheckOptions")) {
+            caseDataUpdated.remove("amendOrderSelectCheckOptions");
         }
         log.info("caseDataUpdated after cleanup ===> " + caseDataUpdated);
     }
