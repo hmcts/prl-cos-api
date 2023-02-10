@@ -27,5 +27,9 @@ public class GatekeepingDetails {
     @JsonProperty("legalAdviserList")
     private final DynamicList legalAdviserList;
 
+    @JsonProperty("judgePersonalCode")
+    private final String judgePersonalCode;
+
+
 }
 
