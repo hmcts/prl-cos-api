@@ -3,11 +3,40 @@
     "callback_response_status": "string",
     "case_data": {
       "id": "1648728532100635",
-      "isSpecificJudgeOrLegalAdviserNeeded": "Yes",
-      "isJudgeOrLegalAdviser": "judge",
-      "judgeNameAndEmail": {
-        "idamId" :null,
-        "personalCode": "49933940"
+      "allocatedJudge": {
+        "lastName": null,
+        "courtName": null,
+        "judgeName": null,
+        "judgeEmail": null,
+        "emailAddress": null,
+        "judgeDetails": {
+          "idamId" :null,
+          "personalCode": "49933940"
+        },
+        "tierOfJudiciary": null,
+        "legalAdviserList": {
+          "value": {
+            "code": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)",
+            "label": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)"
+          },
+          "list_items": [
+            {
+              "code": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)",
+              "label": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)"
+            },
+            {
+              "code": "Ahir(crd_func_test_2.0_rdcc_3831_44@justice.gov.uk)",
+              "label": "Ahir(crd_func_test_2.0_rdcc_3831_44@justice.gov.uk)"
+            },
+            {
+              "code": "Ahir(crd_func_test_2.0_rdcc_3831_614@justice.gov.uk)",
+              "label": "Ahir(crd_func_test_2.0_rdcc_3831_614@justice.gov.uk)"
+            }
+          ]
+        },
+        "tierOfJudiciaryType": null,
+        "isJudgeOrLegalAdviser": "judge",
+        "isSpecificJudgeOrLegalAdviserNeeded": "Yes"
       },
       "children": [
         {

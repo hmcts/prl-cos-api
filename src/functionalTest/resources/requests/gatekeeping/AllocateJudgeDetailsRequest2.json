@@ -3,8 +3,37 @@
     "callback_response_status": "string",
     "case_data": {
       "id": "1648728532100635",
-      "isSpecificJudgeOrLegalAdviserNeeded": "No",
-      "tierOfJudiciary": "circuitJudge",
+      "allocatedJudge": {
+        "lastName": null,
+        "courtName": null,
+        "judgeName": null,
+        "judgeEmail": null,
+        "emailAddress": null,
+        "judgeDetails": {
+          "idamId": "",
+          "personalCode": ""
+        },
+        "tierOfJudiciary": null,
+        "legalAdviserList": {
+          "list_items": [
+            {
+              "code": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)",
+              "label": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)"
+            },
+            {
+              "code": "Ahir(crd_func_test_2.0_rdcc_3831_44@justice.gov.uk)",
+              "label": "Ahir(crd_func_test_2.0_rdcc_3831_44@justice.gov.uk)"
+            },
+            {
+              "code": "Ahir(crd_func_test_2.0_rdcc_3831_614@justice.gov.uk)",
+              "label": "Ahir(crd_func_test_2.0_rdcc_3831_614@justice.gov.uk)"
+            }
+          ]
+        },
+        "tierOfJudiciaryType": "circuitJudge",
+        "isJudgeOrLegalAdviser": null,
+        "isSpecificJudgeOrLegalAdviserNeeded": "No"
+      },
       "children": [
         {
           "id": "ea726437-e8d0-4b09-8f99-d0979b81296e",
