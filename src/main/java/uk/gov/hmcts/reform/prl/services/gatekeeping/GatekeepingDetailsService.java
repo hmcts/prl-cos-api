@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
@@ -24,7 +23,6 @@ import java.util.Map;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class GatekeepingDetailsService {
 
-    // rename getAllocatedJudgeDetails
     public GatekeepingDetails getGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
                                                     RefDataUserService refDataUserService) {
         return mapGatekeepingDetails(caseDataUpdated, legalAdviserList, refDataUserService);
@@ -35,7 +33,7 @@ public class GatekeepingDetailsService {
                                                      RefDataUserService refDataUserService) {
         GatekeepingDetails.GatekeepingDetailsBuilder gatekeepingDetailsBuilder = GatekeepingDetails.builder();
         if (null != caseDataUpdated.get("isJudgeOrLegalAdviserGatekeeping")) {
-            if (AllocatedJudgeTypeEnum.JUDGE.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("isJudgeOrLegalAdviserGatekeeping")))
+            if (SendToGatekeeperTypeEnum.JUDGE.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("isJudgeOrLegalAdviserGatekeeping")))
                 && null != caseDataUpdated.get("judgeName")) {
                 String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get("judgeName"));
                 List<JudicialUsersApiResponse> judgeDetails =
