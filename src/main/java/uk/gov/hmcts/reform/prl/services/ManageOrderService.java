@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
@@ -397,14 +398,14 @@ public class ManageOrderService {
         }
         headerMap.put(
             "caseTypeOfApplication",
-            getCaseTypeOfApplication(caseData)
+            CaseUtils.getCaseTypeOfApplication(caseData)
         );
         log.info("after populate-header map ===> " + headerMap);
         return headerMap;
     }
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
-        String caseTypeOfApplication = getCaseTypeOfApplication(caseData);
+        String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         return caseData.toBuilder()
             .childrenList(getChildInfoFromCaseData(caseData))
             .caseTypeOfApplication(caseTypeOfApplication)
@@ -596,7 +597,7 @@ public class ManageOrderService {
 
     private String getChildInfoFromCaseData(CaseData caseData) {
         String childNames = "";
-        if (C100_CASE_TYPE.equalsIgnoreCase(getCaseTypeOfApplication(caseData))) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<Child> children = new ArrayList<>();
             if (caseData.getChildren() != null) {
                 children = caseData.getChildren().stream()
@@ -674,6 +675,8 @@ public class ManageOrderService {
             } else {
                 serveOrderData = ServeOrderData.builder().build();
             }
+            SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                                        .orderTypeId(flagSelectedOrderId)
                                        .orderDocument(caseData.getAppointmentOfGuardian())
@@ -691,9 +694,9 @@ public class ManageOrderService {
                                                              caseData) : null)
                                                          .build())
                                        .dateCreated(dateTime.now())
-                                       .typeOfOrder(serveOrderData.getSelectTypeOfUploadOrder() != null
-                                                            ? serveOrderData.getSelectTypeOfUploadOrder().getDisplayedValue() : null)
-                                       .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(serveOrderData.getSelectTypeOfUploadOrder())
+                                       .typeOfOrder(typeOfOrder != null
+                                                            ? typeOfOrder.getDisplayedValue() : null)
+                                       .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
                                            ? caseData.getDoesOrderClosesCase() : null)
                                        .serveOrderDetails(ServeOrderDetails.builder()
                                                               .cafcassOrCymruNeedToProvideReport(
@@ -742,7 +745,7 @@ public class ManageOrderService {
     }
 
     private String getApplicantSolicitorDetails(CaseData caseData) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(getCaseTypeOfApplication(caseData))) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<PartyDetails> applicants = caseData
                 .getApplicants()
                 .stream()
@@ -762,7 +765,7 @@ public class ManageOrderService {
     }
 
     private String getRespondentSolicitorDetails(CaseData caseData) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(getCaseTypeOfApplication(caseData))) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<PartyDetails> respondents = caseData
                 .getRespondents()
                 .stream()
@@ -832,14 +835,10 @@ public class ManageOrderService {
 
     private DraftOrder getCurrentDraftOrderDetails(CaseData caseData) {
         String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
-        String typeOfOrder = null;
-        if (caseData.getServeOrderData() != null & caseData.getServeOrderData().getSelectTypeOfUploadOrder() != null) {
-            typeOfOrder = caseData.getServeOrderData().getSelectTypeOfUploadOrder().getDisplayedValue();
-        }
-
+        SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
 
         return DraftOrder.builder()
-            .typeOfOrder(typeOfOrder)
+            .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderTypeId(flagSelectedOrderId)
             .orderDocument(caseData.getAppointmentOfGuardian())
             .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
@@ -859,7 +858,7 @@ public class ManageOrderService {
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId()))
                 .forEach(order -> {
-                    if (C100_CASE_TYPE.equalsIgnoreCase(getCaseTypeOfApplication(caseData))) {
+                    if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, order);
                     } else {
                         servedFL401Order(caseData, orders, order);
@@ -1255,14 +1254,15 @@ public class ManageOrderService {
                 template
             );
         }
+        SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
 
         return element(OrderDetails.builder().orderType(flagSelectedOrder)
                            .orderTypeId(flagSelectedOrderId)
                            .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
                                                  ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
                            .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
-                           .typeOfOrder(caseData.getSelectTypeOfOrder() != null
-                                            ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
+                           .typeOfOrder(typeOfOrder != null
+                                            ? typeOfOrder.getDisplayedValue() : null)
                            .childrenList(getChildInfoFromCaseData(caseData))
                            .orderClosesCase(caseData.getSelectTypeOfOrder().getDisplayedValue().equals("Final")
                                                 ? caseData.getDoesOrderClosesCase() : null)
@@ -1296,11 +1296,6 @@ public class ManageOrderService {
         }
 
         return withdrawApproved;
-    }
-
-    private static String getCaseTypeOfApplication(CaseData caseData) {
-        return caseData.getCaseTypeOfApplication() != null
-            ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
     }
 
 }
