@@ -60,7 +60,10 @@ public class ServiceOfApplicationController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<DynamicMultiselectListElement> listElements = new ArrayList<>();
-        caseDataUpdated.put("serviceOfApplicationScreen1", dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData));
+        caseDataUpdated.put(
+            "serviceOfApplicationScreen1",
+            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, null)
+        );
         log.info("***** listElements : {}", caseDataUpdated.get("serviceOfApplicationScreen1"));
         log.info("***** listElements : {}", caseDataUpdated);
 
