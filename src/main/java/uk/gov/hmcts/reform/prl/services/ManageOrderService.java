@@ -798,6 +798,7 @@ public class ManageOrderService {
                 && (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder()))
                 || (caseData.getManageOrders() != null && "Judge".equalsIgnoreCase(caseData.getManageOrders().getIsJudgeOrLa())))  {
+                log.info("caseData ======> " + caseData);
                 log.info("IsJudgeOrLa " + caseData.getManageOrders().getIsJudgeOrLa());
                 return setDraftOrderCollection(caseData);
             } else {
