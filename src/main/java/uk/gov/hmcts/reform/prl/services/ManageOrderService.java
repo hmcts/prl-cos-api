@@ -848,6 +848,9 @@ public class ManageOrderService {
                               .status("Draft").build())
             .dateOrderMade(caseData.getDateOrderMade())
             .orderSelectionType(caseData.getManageOrdersOptions())
+            .isUploadedOrAmendedOrder(null != caseData.getManageOrdersOptions()
+                                          && caseData.getManageOrdersOptions().getDisplayedValue().equals("Upload an order")
+                                          ? Yes : No)
             .build();
     }
 

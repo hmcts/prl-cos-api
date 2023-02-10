@@ -235,8 +235,6 @@ public class ManageOrdersController {
             caseDataUpdated.put("isWithdrawRequestSent", "Approved");
         }
 
-        caseDataUpdated.put("isUploadedOrAmendedOrder", YesOrNo.Yes);
-        log.info("uploaded order flag details: {}", YesOrNo.Yes);
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else {
