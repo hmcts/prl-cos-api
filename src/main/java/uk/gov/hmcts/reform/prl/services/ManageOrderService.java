@@ -797,9 +797,9 @@ public class ManageOrderService {
             if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
                 && (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder()))
-                || (caseData.getManageOrders() != null && "Judge".equalsIgnoreCase(caseData.getManageOrders().getIsJudgeOrLa())))  {
+                || (caseData.getManageOrders() != null && "Judge".equalsIgnoreCase(caseData.getIsJudgeOrLa())))  {
                 log.info("caseData ======> " + caseData);
-                log.info("IsJudgeOrLa " + caseData.getManageOrders().getIsJudgeOrLa());
+                log.info("IsJudgeOrLa " + caseData.getIsJudgeOrLa());
                 return setDraftOrderCollection(caseData);
             } else {
                 List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
@@ -842,7 +842,7 @@ public class ManageOrderService {
 
         String isLoggedinAsJudgeOrLa = null;
         if (caseData.getManageOrders() != null) {
-            isLoggedinAsJudgeOrLa = caseData.getManageOrders().getIsJudgeOrLa();
+            isLoggedinAsJudgeOrLa = caseData.getIsJudgeOrLa();
             log.info("isLoggedinAsJudgeOrLa " + isLoggedinAsJudgeOrLa);
         }
         return DraftOrder.builder()
