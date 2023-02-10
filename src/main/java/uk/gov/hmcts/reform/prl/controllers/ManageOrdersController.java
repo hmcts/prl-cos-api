@@ -46,6 +46,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 
@@ -239,7 +240,9 @@ public class ManageOrdersController {
         if (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
             && caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
-        } else {
+        } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
+            || caseData.getManageOrdersOptions().equals(uploadAnOrder)
+            || caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                 authorisation,
                 caseData
