@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.OTHER_PEOPLE_REVISED_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.Gender.other;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -70,7 +70,7 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
 
             boolean started = others.stream().anyMatch(Objects::nonNull);
             if (started) {
-                taskErrorService.addEventError(OTHER_PEOPLE_IN_THE_CASE, OTHER_PEOPLE_REVISED_ERROR, OTHER_PEOPLE_REVISED_ERROR.getError());
+                taskErrorService.addEventError(OTHER_PEOPLE_IN_THE_CASE_REVISED, OTHER_PEOPLE_REVISED_ERROR, OTHER_PEOPLE_REVISED_ERROR.getError());
                 return true;
             }
         }
