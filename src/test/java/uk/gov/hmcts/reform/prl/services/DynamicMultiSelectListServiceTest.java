@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -145,5 +146,18 @@ public class DynamicMultiSelectListServiceTest {
                                                .build())).build();
         List<DynamicMultiselectListElement> children = dynamicMultiSelectListService.getChildrenMultiSelectList(caseData);
         assertNotNull(children);
+    }
+
+    @Test
+    public void testGetStringFromDynMulSelectList() {
+        DynamicMultiselectListElement listElement = DynamicMultiselectListElement.builder()
+            .label("Child (Child 1)")
+            .build();
+        String str = dynamicMultiSelectListService
+            .getStringFromDynamicMultiSelectList(DynamicMultiSelectList
+                                                     .builder()
+                                                     .value(List.of(listElement, listElement))
+                                                     .build());
+        assertEquals("Child , Child ", str);
     }
 }

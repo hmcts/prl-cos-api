@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,12 +41,15 @@ public class DynamicMultiSelectListService {
     public List<DynamicMultiselectListElement> getChildrenMultiSelectList(CaseData caseData) {
         List<Element<Child>> children = caseData.getChildren();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+        IncrementalInteger i = new IncrementalInteger(1);
+        IncrementalInteger j = new IncrementalInteger(1);
         if (children != null) {
             children.forEach(child -> {
                 if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
                     listItems.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
                                          .label(child.getValue().getFirstName() + " "
-                                                    + child.getValue().getLastName()).build());
+                                                    + child.getValue().getLastName()
+                                                    + " (Child " + i.getAndIncrement() + ")").build());
                 }
             });
         } else if (caseData.getApplicantChildDetails() != null) {
@@ -61,21 +65,33 @@ public class DynamicMultiSelectListService {
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         List<DynamicMultiselectListElement> respondentSolicitorList = new ArrayList<>();
+        IncrementalInteger i = new IncrementalInteger(1);
+        IncrementalInteger j = new IncrementalInteger(1);
         if (respondents != null) {
             respondents.forEach(respondent -> {
                 listItems.add(DynamicMultiselectListElement.builder().code(respondent.getId().toString())
                                   .label(respondent.getValue().getFirstName() + " "
-                                             + respondent.getValue().getLastName()).build());
+                                             + respondent.getValue().getLastName()
+                                             + " (Respondent " + i.getAndIncrement() + ")").build());
                 if (YesNoDontKnow.yes.equals(respondent.getValue().getDoTheyHaveLegalRepresentation())) {
                     respondentSolicitorList.add(DynamicMultiselectListElement.builder()
                                                     .code(respondent.getId().toString())
                                                     .label(respondent.getValue().getRepresentativeFirstName() + " "
-                                                               + respondent.getValue().getRepresentativeLastName())
+                                                               + respondent.getValue().getRepresentativeLastName()
+                                                               + " (Respondent solicitor " + j.getAndIncrement() + ")")
                                                     .build());
                 }
             });
         } else if (caseData.getRespondentsFL401() != null) {
-            String name = caseData.getRespondentsFL401().getFirstName() + " " + caseData.getRespondentsFL401().getLastName();
+            String name = caseData.getRespondentsFL401().getFirstName() + " "
+                + caseData.getRespondentsFL401().getLastName()
+                + " (Respondent)";
+            respondentSolicitorList.add(DynamicMultiselectListElement.builder()
+                                            .code(name)
+                                            .label(caseData.getRespondentsFL401().getRepresentativeFirstName() + " "
+                                                       + caseData.getRespondentsFL401().getRepresentativeLastName()
+                                                       + " (Respondent solicitor)")
+                                            .build());
             listItems.add(DynamicMultiselectListElement.builder().code(name).label(name).build());
         }
         Map<String, List<DynamicMultiselectListElement>> respondentdetails = new HashMap<>();
@@ -88,20 +104,29 @@ public class DynamicMultiSelectListService {
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         List<DynamicMultiselectListElement> applicantSolicitorList = new ArrayList<>();
-
+        IncrementalInteger i = new IncrementalInteger(1);
+        IncrementalInteger j = new IncrementalInteger(1);
         if (applicants != null) {
             applicants.forEach(applicant -> {
                 listItems.add(DynamicMultiselectListElement.builder().code(applicant.getId().toString())
                                   .label(applicant.getValue().getFirstName() + " "
-                                             + applicant.getValue().getLastName()).build());
+                                             + applicant.getValue().getLastName()
+                                             + " (Applicant " + i.getAndIncrement() + ")").build());
                 applicantSolicitorList.add(DynamicMultiselectListElement.builder()
                                                .code(applicant.getId().toString())
                                                .label(applicant.getValue().getRepresentativeFirstName() + " "
-                                                          + applicant.getValue().getRepresentativeLastName())
+                                                          + applicant.getValue().getRepresentativeLastName()
+                                                          + " (Applicant Solicitor " + j.getAndIncrement() + ")")
                                                .build());
             });
         } else if (caseData.getApplicantsFL401() != null) {
-            String name = caseData.getApplicantsFL401().getFirstName() + " " + caseData.getApplicantsFL401().getLastName();
+            String name = caseData.getApplicantsFL401().getFirstName() + " "
+                + caseData.getApplicantsFL401().getLastName()
+                + "(Applicant)";
+            applicantSolicitorList.add(DynamicMultiselectListElement.builder().code(name)
+                                           .label(caseData.getApplicantsFL401().getFirstName() + " "
+                                                      + caseData.getApplicantsFL401().getRepresentativeLastName()
+                                           + "(Applicant solicitor)").build());
             listItems.add(DynamicMultiselectListElement.builder().code(name).label(name).build());
         }
         Map<String, List<DynamicMultiselectListElement>> applicantdetails = new HashMap<>();
@@ -118,10 +143,24 @@ public class DynamicMultiSelectListService {
                                                                              .code(others.getId().toString())
                                                                              .label(others.getValue().getFirstName()
                                                                                         + " "
-                                                                                        + others.getValue().getLastName())
+                                                                                        + others.getValue().getLastName()
+                                                                             + others.getValue())
                                                                              .build())
             );
         }
         return otherPeopleList;
+    }
+
+    public String getStringFromDynamicMultiSelectList(DynamicMultiSelectList dynamicMultiSelectList) {
+        List<String> strList = new ArrayList<>();
+        if (null != dynamicMultiSelectList.getValue()) {
+            dynamicMultiSelectList.getValue().forEach(value -> {
+                strList.add(value.getLabel().split("\\(")[0]);
+            });
+        }
+        if (strList.size() > 0) {
+            return String.join(", ",strList);
+        }
+        return "";
     }
 }
