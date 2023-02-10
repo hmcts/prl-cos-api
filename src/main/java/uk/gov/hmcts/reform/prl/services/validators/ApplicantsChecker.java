@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
@@ -193,6 +194,11 @@ public class ApplicantsChecker implements EventChecker {
     public boolean verifyAddressCompleted(Address address) {
         return ofNullable(address.getAddressLine1()).isPresent()
             && ofNullable(address.getPostCode()).isPresent();
+    }
+
+    @Override
+    public TaskState getDefaultTaskState(CaseData caseData) {
+        return TaskState.NOT_STARTED;
     }
 
 }

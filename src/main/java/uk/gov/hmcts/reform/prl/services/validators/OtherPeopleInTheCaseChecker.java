@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
@@ -130,6 +131,11 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             party.getCanYouProvidePhoneNumber()
         );
         return baseFields && additionalFields && childFields.stream().anyMatch(Optional::isPresent);
+    }
+
+    @Override
+    public TaskState getDefaultTaskState(CaseData caseData) {
+        return TaskState.NOT_STARTED;
     }
 
 }

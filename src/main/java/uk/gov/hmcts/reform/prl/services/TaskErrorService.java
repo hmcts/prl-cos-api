@@ -28,7 +28,7 @@ public class TaskErrorService {
         for (Map.Entry<EventErrorsEnum, EventValidationErrors> entry : eventErrors.entrySet()) {
             eventErrorList.add(entry.getValue());
         }
-        eventErrorList.sort(Comparator.comparingInt(x -> Event.getEventOrder(caseData.getCaseTypeOfApplication())
+        eventErrorList.sort(Comparator.comparingInt(x -> Event.getEventOrder(caseData)
             .indexOf(x.getEvent())));
         return eventErrorList;
     }
