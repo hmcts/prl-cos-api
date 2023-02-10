@@ -288,6 +288,8 @@ public class ManageOrdersController {
         log.info("isJudgeOrLa {}", isJudgeOrLa);
         caseDataUpdated.put("isJudgeOrLa", isJudgeOrLa ? "Judge" : "CaseWorker");
 
+        log.info("/amend-order/mid-event after" + caseDataUpdated);
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
