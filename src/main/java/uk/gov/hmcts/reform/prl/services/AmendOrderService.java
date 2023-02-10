@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -90,11 +91,10 @@ public class AmendOrderService {
                         .build();
 
                     orders.addAll(List.of(element(amended)));
+                    orders.sort(Comparator.comparing(
+                        m -> m.getValue().getOtherDetails().getOrderCreatedDate(),
+                        Comparator.reverseOrder()));
                 });
-            orders.sort(Comparator.comparing(
-                m -> m.getValue().getOtherDetails().getOrderCreatedDate(),
-                Comparator.reverseOrder()
-            ));
             return Map.of("orderCollection", orders);
         } else {
             return  setDraftOrderCollection(caseData, amendedDocument);
