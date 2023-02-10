@@ -838,6 +838,10 @@ public class ManageOrderService {
         String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
 
+        String isLoggedinAsJudgeOrLa = null;
+        if (caseData.getManageOrders() != null) {
+            isLoggedinAsJudgeOrLa = caseData.getManageOrders().getIsJudgeOrLa();
+        }
         return DraftOrder.builder()
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderTypeId(flagSelectedOrderId)
@@ -847,7 +851,8 @@ public class ManageOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
-                              .status("Draft").build())
+                              .status("Judge".equals(isLoggedinAsJudgeOrLa) ? "Judge reviewed" : "Draft")
+                              .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .judgeNotes(caseData.getManageOrders() != null
                         ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
