@@ -318,6 +318,9 @@ public class ManageOrdersController {
         }
         if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated)
+                .build();
         } else {
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                 authorisation,
