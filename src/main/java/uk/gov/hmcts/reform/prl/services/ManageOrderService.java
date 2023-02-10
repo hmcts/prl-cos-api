@@ -686,7 +686,10 @@ public class ManageOrderService {
                                                                                    Locale.UK
                                                                                )))
                                                          .orderMadeDate(orderMadeDate)
-                                                         .orderRecipients(getAllRecipients(caseData)).build())
+                                                         .orderRecipients(caseData.getManageOrdersOptions().equals(
+                                                             ManageOrdersOptionsEnum.createAnOrder) ? getAllRecipients(
+                                                             caseData) : null)
+                                                         .build())
                                        .dateCreated(dateTime.now())
                                        .typeOfOrder(serveOrderData.getSelectTypeOfUploadOrder() != null
                                                             ? serveOrderData.getSelectTypeOfUploadOrder().getDisplayedValue() : null)
