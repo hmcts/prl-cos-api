@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -17,6 +19,8 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION_ERROR;
 
 
@@ -27,6 +31,10 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
 
     @Autowired
     TaskErrorService taskErrorService;
+
+    @Autowired
+    @Lazy
+    EventsChecker eventsChecker;
 
     @Override
     public boolean isFinished(CaseData caseData) {
@@ -63,7 +71,9 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
         fields.add(ofNullable(child.getOtherPeopleFullName()));
         fields.add(ofNullable(child.getChildFullName()));
         fields.add(ofNullable(child.getChildLivesWith()));
-        fields.add(ofNullable(child.getIsChildLivesWithPersonConfidential()));
+        if (YesOrNo.Yes.equals(child.getChildLivesWith())) {
+            fields.add(ofNullable(child.getIsChildLivesWithPersonConfidential()));
+        }
         if (!relationshipsEnum.isEmpty()
             && relationshipsEnum.get().equals(RelationshipsEnum.other)) {
             fields.add(ofNullable(child.getChildAndOtherPeopleRelationOtherDetails()));
@@ -77,7 +87,7 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        return ofNullable(caseData.getChildAndApplicantRelations()).isPresent();
+        return ofNullable(caseData.getChildAndOtherPeopleRelations()).isPresent();
     }
 
     @Override
@@ -87,6 +97,9 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
 
     @Override
     public TaskState getDefaultTaskState(CaseData caseData) {
+        if (eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData) && eventsChecker.isFinished(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData)) {
+            return TaskState.NOT_STARTED;
+        }
         return TaskState.CANNOT_START_YET;
     }
 

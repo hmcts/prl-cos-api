@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
 @Getter
 @RequiredArgsConstructor
@@ -76,7 +77,7 @@ public enum Event {
     }
 
     private static List<Event> getC100Events(CaseData caseData) {
-        if ("v2".equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return List.of(
                     CASE_NAME,
                     TYPE_OF_APPLICATION,
