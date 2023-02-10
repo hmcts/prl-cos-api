@@ -397,15 +397,14 @@ public class ManageOrderService {
         }
         headerMap.put(
             "caseTypeOfApplication",
-            caseData.getCaseTypeOfApplication() != null ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID()
+            getCaseTypeOfApplication(caseData)
         );
         log.info("after populate-header map ===> " + headerMap);
         return headerMap;
     }
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
-        String caseTypeOfApplication = caseData.getCaseTypeOfApplication() != null
-            ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
+        String caseTypeOfApplication = getCaseTypeOfApplication(caseData);
         return caseData.toBuilder()
             .childrenList(getChildInfoFromCaseData(caseData))
             .caseTypeOfApplication(caseTypeOfApplication)
@@ -597,7 +596,7 @@ public class ManageOrderService {
 
     private String getChildInfoFromCaseData(CaseData caseData) {
         String childNames = "";
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(getCaseTypeOfApplication(caseData))) {
             List<Child> children = new ArrayList<>();
             if (caseData.getChildren() != null) {
                 children = caseData.getChildren().stream()
@@ -740,7 +739,7 @@ public class ManageOrderService {
     }
 
     private String getApplicantSolicitorDetails(CaseData caseData) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(getCaseTypeOfApplication(caseData))) {
             List<PartyDetails> applicants = caseData
                 .getApplicants()
                 .stream()
@@ -760,7 +759,7 @@ public class ManageOrderService {
     }
 
     private String getRespondentSolicitorDetails(CaseData caseData) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(getCaseTypeOfApplication(caseData))) {
             List<PartyDetails> respondents = caseData
                 .getRespondents()
                 .stream()
@@ -857,7 +856,7 @@ public class ManageOrderService {
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId()))
                 .forEach(order -> {
-                    if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                    if (C100_CASE_TYPE.equalsIgnoreCase(getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, order);
                     } else {
                         servedFL401Order(caseData, orders, order);
@@ -1295,4 +1294,10 @@ public class ManageOrderService {
 
         return withdrawApproved;
     }
+
+    private static String getCaseTypeOfApplication(CaseData caseData) {
+        return caseData.getCaseTypeOfApplication() != null
+            ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
+    }
+
 }
