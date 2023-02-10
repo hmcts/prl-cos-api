@@ -14,7 +14,7 @@ public class FlagDetail {
     //  public List<Element<Path>> path;
     public String hearingRelevant;
 
-//    public LocalDateTime dateTimeCreated;
+    //  public LocalDateTime dateTimeCreated;
     public String flagComment;
     // public Object subTypeKey;
     public String flagCode;
