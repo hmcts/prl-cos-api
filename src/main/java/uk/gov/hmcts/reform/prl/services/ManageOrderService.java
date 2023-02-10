@@ -795,8 +795,9 @@ public class ManageOrderService {
         List<Element<OrderDetails>> orderCollection = null;
         if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
-                && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
-                && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
+                && (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+                && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder()))
+                || (caseData.getManageOrders() != null && "Judge".equalsIgnoreCase(caseData.getManageOrders().getIsJudgeOrLa())))  {
                 return setDraftOrderCollection(caseData);
             } else {
                 List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
@@ -841,12 +842,15 @@ public class ManageOrderService {
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderTypeId(flagSelectedOrderId)
             .orderDocument(caseData.getAppointmentOfGuardian())
-            .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
+            .childrenList(caseData.getManageOrders() != null
+                              ? getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()) : null)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status("Draft").build())
             .dateOrderMade(caseData.getDateOrderMade())
+            .judgeNotes(caseData.getManageOrders() != null
+                        ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
             .orderSelectionType(caseData.getManageOrdersOptions())
             .build();
     }
