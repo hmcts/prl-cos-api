@@ -426,6 +426,7 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
+        caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         if (language.isGenEng()) {
             caseDataMap.put("previewDraftOrder", selectedOrder.getOrderDocument());
         }
