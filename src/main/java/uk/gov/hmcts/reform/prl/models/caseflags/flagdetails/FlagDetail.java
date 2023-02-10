@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @lombok.Data
 @Builder(toBuilder = true)
 @Getter
@@ -15,7 +13,8 @@ import java.time.LocalDateTime;
 public class FlagDetail {
     //  public List<Element<Path>> path;
     public String hearingRelevant;
-    public LocalDateTime dateTimeCreated;
+
+//    public LocalDateTime dateTimeCreated;
     public String flagComment;
     // public Object subTypeKey;
     public String flagCode;
