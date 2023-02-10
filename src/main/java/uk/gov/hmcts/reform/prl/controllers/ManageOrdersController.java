@@ -235,6 +235,8 @@ public class ManageOrdersController {
             caseDataUpdated.put("isWithdrawRequestSent", "Approved");
         }
 
+        caseDataUpdated.put("isUploadedOrAmendedOrder", YesOrNo.Yes);
+        log.info("uploaded order flag details: {}", caseData.getManageOrders().getIsUploadedOrAmendedOrder());
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else {
@@ -323,7 +325,6 @@ public class ManageOrdersController {
             caseDataUpdated,
             CaseData.class
         );
-        caseDataUpdated.put("isUploadedOrAmendedOrder", YesOrNo.Yes);
 
         log.info("modifiedCaseData ===> " + modifiedCaseData);
         caseDataUpdated.putAll(manageOrderService.populateHeader(modifiedCaseData));
