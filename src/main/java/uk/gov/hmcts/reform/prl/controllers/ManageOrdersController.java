@@ -243,6 +243,7 @@ public class ManageOrdersController {
                 caseData
             ));
         }
+        cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -311,7 +312,7 @@ public class ManageOrdersController {
             caseDataUpdated.put("isWithdrawRequestSent", "Approved");
         }
         if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
-            amendOrderService.updateOrder(caseData, authorisation);
+            caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else {
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                 authorisation,
