@@ -203,7 +203,7 @@ public class ManageOrders {
     private final YesOrNo ordersNeedToBeServed;
     @JsonProperty("isTheOrderAboutChildren")
     private final YesOrNo isTheOrderAboutChildren;
-    @JsonProperty("isJudgeOrLa")
     private final String isJudgeOrLa;
-
+    @JsonProperty("isUploadedOrAmendedOrder")
+    private final YesOrNo isUploadedOrAmendedOrder;
 }
