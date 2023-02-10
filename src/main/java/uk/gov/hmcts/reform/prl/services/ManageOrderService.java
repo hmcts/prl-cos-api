@@ -901,8 +901,11 @@ public class ManageOrderService {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        caseData.setChildrenList(dynamicMultiSelectListService
-                                     .getStringFromDynamicMultiSelectList(caseData.getManageOrders().getChildOption()));
+        List<Child> children = dynamicMultiSelectListService
+            .getChildrenForDocmosis(caseData);
+        if (children.size() != 0) {
+            caseData.setChildrenListForDocmosis(children);
+        }
         log.info("**** Case data before generating doc : {}", caseData);
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());

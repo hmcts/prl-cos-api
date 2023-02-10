@@ -563,7 +563,7 @@ public class CaseData implements MappableObject {
     private final LocalDate dateOrderMade;
 
     @JsonProperty("childrenList")
-    private String childrenList;
+    private final String childrenList;
     @JsonProperty("magistrateLastName")
     private final List<Element<MagistrateLastName>> magistrateLastName;
 
@@ -572,6 +572,9 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final ManageOrders manageOrders;
+
+    @JsonIgnore
+    private List<Child> childrenListForDocmosis;
 
     @JsonUnwrapped
     @Builder.Default
