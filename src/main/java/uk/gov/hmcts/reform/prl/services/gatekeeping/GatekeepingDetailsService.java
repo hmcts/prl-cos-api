@@ -37,7 +37,7 @@ public class GatekeepingDetailsService {
         if (null != caseDataUpdated.get("isJudgeOrLegalAdviserGatekeeping")) {
             if (AllocatedJudgeTypeEnum.JUDGE.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("isJudgeOrLegalAdviserGatekeeping")))
                 && null != caseDataUpdated.get("judgeName")) {
-                String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get("judgeNameAndEmail"));
+                String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get("judgeName"));
                 List<JudicialUsersApiResponse> judgeDetails =
                     refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
                                                                      .personalCode(getPersonalCode(caseDataUpdated.get("judgeName"))).build());
