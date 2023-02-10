@@ -243,7 +243,6 @@ public class ManageOrdersController {
                 caseData
             ));
         }
-        cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
