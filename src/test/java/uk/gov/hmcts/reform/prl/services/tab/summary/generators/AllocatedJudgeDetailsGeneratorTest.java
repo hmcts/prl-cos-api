@@ -24,7 +24,7 @@ public class AllocatedJudgeDetailsGeneratorTest {
     public void testSummaryDetailsWhenJudgeDetailsProvided() {
         CaseSummary caseSummary = generator.generate(CaseData.builder().courtName("Test Court").allocatedJudge(
             uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge.builder().isJudgeOrLegalAdviser(
-                    AllocatedJudgeTypeEnum.JUDGE)
+                    AllocatedJudgeTypeEnum.judge)
                 .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes).judgeEmail("test1@xxx.com").judgeName("test1")
                 .build()).build());
 
@@ -37,7 +37,7 @@ public class AllocatedJudgeDetailsGeneratorTest {
     @Test
     public void testSummaryDetailsWhenLegalAdvisorDetailsProvided() {
         CaseSummary caseSummary = generator.generate(CaseData.builder().courtName("Test Court").allocatedJudge(
-            uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge.builder().isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.LEGAL_ADVISER)
+            uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge.builder().isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
                 .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes)
                 .legalAdviserList(DynamicList.builder().value(DynamicListElement.builder().code("test1").label("legalAdvisor1").build()).build())
                 .build()).build());

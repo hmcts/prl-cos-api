@@ -26,7 +26,7 @@ public class AllocatedJudgeService {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
         if (null != allocatedJudge) {
             AllocatedJudgeTypeEnum allocatedJudgeType = allocatedJudge.getIsJudgeOrLegalAdviser();
-            if (null != allocatedJudgeType && AllocatedJudgeTypeEnum.JUDGE.getId().equals(allocatedJudgeType.getId())) {
+            if (null != allocatedJudgeType && AllocatedJudgeTypeEnum.judge.equals(allocatedJudgeType)) {
                 String[] personalCodes = new String[3];
                 personalCodes[0] = allocatedJudge.getJudgeDetails().getPersonalCode();
                 List<JudicialUsersApiResponse> judgeDetails =

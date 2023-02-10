@@ -98,8 +98,8 @@ public class AllocatedJudgeServiceTest {
         DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
             .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(AllocatedJudge.builder()
-            .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.LEGAL_ADVISER).legalAdviserList(legalAdviserList).build(),null);
-        assertEquals(AllocatedJudgeTypeEnum.LEGAL_ADVISER,expectedResponse.getIsJudgeOrLegalAdviser());
+            .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser).legalAdviserList(legalAdviserList).build(),null);
+        assertEquals(AllocatedJudgeTypeEnum.legalAdviser,expectedResponse.getIsJudgeOrLegalAdviser());
         assertNotNull(expectedResponse.getLegalAdviserList());
     }
 
@@ -117,10 +117,10 @@ public class AllocatedJudgeServiceTest {
             .personalCode(personalCodes).build())).thenReturn(apiResponseList);
         AllocatedJudge actualResponse = allocatedJudgeService.getAllocatedJudgeDetails(AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes)
-            .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.JUDGE).judgeDetails(JudicialUser.builder()
+            .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.judge).judgeDetails(JudicialUser.builder()
                 .personalCode("123456").build()).build(), refDataUserService);
         assertNotNull(actualResponse);
-        assertEquals(AllocatedJudgeTypeEnum.JUDGE, actualResponse.getIsJudgeOrLegalAdviser());
+        assertEquals(AllocatedJudgeTypeEnum.judge, actualResponse.getIsJudgeOrLegalAdviser());
         assertEquals(YesOrNo.Yes, actualResponse.getIsSpecificJudgeOrLegalAdviserNeeded());
         assertEquals("test@Email.com", actualResponse.getJudgeEmail());
         assertEquals("testSurname", actualResponse.getJudgeName());
