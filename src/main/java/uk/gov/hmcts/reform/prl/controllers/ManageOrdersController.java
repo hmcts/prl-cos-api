@@ -283,9 +283,8 @@ public class ManageOrdersController {
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
-        } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-            caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
         }
+
         log.info("isJudgeOrLa {}", isJudgeOrLa);
         caseDataUpdated.put("isJudgeOrLa", isJudgeOrLa ? "Judge" : "CaseWorker");
 
@@ -367,5 +366,23 @@ public class ManageOrdersController {
         }
         log.info("orderCollection after cleanup ===> " + caseDataUpdated.get("orderCollection"));
         log.info("draftOrderCollection after cleanup ===> " + caseDataUpdated.get("draftOrderCollection"));
+    }
+
+    @PostMapping(path = "/manage-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to amend order mid-event")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse manageOrderMidEvent(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("/manage-order/mid-event before" + callbackRequest.getCaseDetails());
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+            caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
+        }
+
+        log.info("/manage-order/mid-event after" + caseDataUpdated);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
