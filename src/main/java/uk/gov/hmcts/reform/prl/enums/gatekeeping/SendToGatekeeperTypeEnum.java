@@ -11,9 +11,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum SendToGatekeeperTypeEnum {
     @JsonProperty("judge")
-    JUDGE("judge", "Judge"),
+    judge("judge", "Judge"),
     @JsonProperty("legalAdviser")
-    LEGAL_ADVISER("legalAdviser", "Legal Adviser");
+    legalAdviser("legalAdviser", "Legal Adviser");
 
     private final String id;
     private final String displayedValue;
