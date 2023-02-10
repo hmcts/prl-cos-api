@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -162,5 +163,29 @@ public class DynamicMultiSelectListService {
             return String.join(", ",strList);
         }
         return "";
+    }
+
+    public List<Child> getChildrenForDocmosis(CaseData caseData) {
+        List<Child> childList = new ArrayList<>();
+        if (null != caseData.getManageOrders()) {
+            if (null != caseData.getManageOrders().getChildOption()) {
+                if (null != caseData.getManageOrders().getChildOption().getValue()) {
+                    caseData.getManageOrders().getChildOption().getValue().forEach(value -> {
+                        Child child = getChildDetails(caseData, value.getCode());
+                        if (null != child) {
+                            childList.add(child);
+                        }
+                    });
+                }
+            }
+        }
+        return childList;
+    }
+
+    private Child getChildDetails(CaseData caseData, String id) {
+        Optional<Child> child = caseData.getChildren().stream().filter(element -> element.getId().toString().equalsIgnoreCase(id))
+            .map(Element::getValue)
+            .findFirst();
+        return child.orElseGet(() -> null);
     }
 }
