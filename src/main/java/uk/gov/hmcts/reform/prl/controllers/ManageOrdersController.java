@@ -153,12 +153,12 @@ public class ManageOrdersController {
         ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
             .childOption(DynamicMultiSelectList.builder()
                              .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
+            .isJudgeOrLa(isJudgeOrLa ? "Judge" : "CaseWorker")
             .build();
         log.info("**Manage orders with child list {}", manageOrders);
 
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
-            .isJudgeOrLa(isJudgeOrLa ? "Judge" : "CaseWorker")
             .build();
         log.info("after fetch-order-details caseData ===> " + caseData);
         return CallbackResponse.builder()
