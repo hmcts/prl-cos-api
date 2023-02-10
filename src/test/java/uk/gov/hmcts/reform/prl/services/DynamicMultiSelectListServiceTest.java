@@ -82,7 +82,7 @@ public class DynamicMultiSelectListServiceTest {
     @Test
     public void testOrderDetails() throws Exception {
         DynamicMultiSelectList dynamicMultiSelectList = dynamicMultiSelectListService
-            .getOrdersAsDynamicMultiSelectList(caseData);
+            .getOrdersAsDynamicMultiSelectList(caseData,  null);
         assertNotNull(dynamicMultiSelectList);
     }
 
