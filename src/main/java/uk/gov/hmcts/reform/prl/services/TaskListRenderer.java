@@ -31,6 +31,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_ADDITIONAL_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_APPLICATION_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_PEOPLE_TO_THE_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ONLY_COMPLETE_IF_RELEVANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
@@ -104,7 +105,7 @@ public class TaskListRenderer {
     private List<TaskSection> groupInSections(List<Task> allTasks, CaseData caseData) {
         final Map<Event, Task> tasks = allTasks.stream().collect(toMap(Task::getEvent, identity()));
 
-        if ("v2".equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             final TaskSection applicationDetails = newSection(ADD_APPLICATION_DETAILS)
                     .withTask(tasks.get(CASE_NAME))
                     .withTask(tasks.get(TYPE_OF_APPLICATION))

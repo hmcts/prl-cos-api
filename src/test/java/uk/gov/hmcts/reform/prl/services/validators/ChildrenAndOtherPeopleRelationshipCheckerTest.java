@@ -25,6 +25,9 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
     @Mock
     TaskErrorService taskErrorService;
 
+    @Mock
+    EventsChecker eventsChecker;
+
 
     @InjectMocks
     ChildrenAndOtherPeopleInThisApplicationChecker otherPeopleInTheCaseChecker;
@@ -45,7 +48,7 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
 
         CaseData caseData = CaseData.builder().childAndOtherPeopleRelations(listOfChildren).build();
 
-        assertTrue(!otherPeopleInTheCaseChecker.isStarted(caseData));
+        assertTrue(otherPeopleInTheCaseChecker.isStarted(caseData));
     }
 
     @Test
