@@ -152,9 +152,7 @@ public class C100RespondentSolicitorController {
             SOLICITOR_C7_DRAFT_DOCUMENT,
             false
         );
-
         caseDataUpdated.put("draftC7ResponseDoc", document);
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -174,7 +172,8 @@ public class C100RespondentSolicitorController {
             .builder()
             .data(respondentSolicitorService.validateActiveRespondentResponse(
                 callbackRequest,
-                errorList))
+                errorList,
+                authorisation))
             .errors(errorList)
             .build();
     }

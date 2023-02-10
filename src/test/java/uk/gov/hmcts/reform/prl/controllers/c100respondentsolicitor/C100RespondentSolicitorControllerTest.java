@@ -286,7 +286,7 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
-        when(respondentSolicitorService.validateActiveRespondentResponse(callbackRequest, errorList)).thenReturn(stringObjectMap);
+        when(respondentSolicitorService.validateActiveRespondentResponse(callbackRequest, errorList, authToken)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.validateActiveRespondentResponseBeforeStart(
             authToken,

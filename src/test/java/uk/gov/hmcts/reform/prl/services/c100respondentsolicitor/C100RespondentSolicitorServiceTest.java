@@ -664,7 +664,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void validateActiveRespondentResponse() {
+    public void validateActiveRespondentResponse() throws Exception {
 
         List<String> errorList = new ArrayList<>();
 
@@ -683,7 +683,7 @@ public class C100RespondentSolicitorServiceTest {
             .build();
 
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
-            callbackRequest, errorList
+            callbackRequest, errorList, authToken
         );
 
         assertTrue(response.containsKey("respondents"));
