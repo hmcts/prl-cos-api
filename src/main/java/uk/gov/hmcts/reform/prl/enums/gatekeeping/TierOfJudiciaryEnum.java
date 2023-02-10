@@ -11,13 +11,13 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum TierOfJudiciaryEnum {
     @JsonProperty("magistrates")
-    MAGISTRATES("magistrates", "Magistrates"),
+    magistrates("magistrates", "Magistrates"),
     @JsonProperty("districtJudge")
-    DISTRICT_JUDGE("districtJudge", "District Judge"),
+    districtJudge("districtJudge", "District Judge"),
     @JsonProperty("circuitJudge")
-    CIRCUIT_JUDGE("circuitJudge", "Circuit Judge"),
+    circuitJudge("circuitJudge", "Circuit Judge"),
     @JsonProperty("highCourtJudge")
-    HIGHCOURT_JUDGE("highCourtJudge", "High Court Judge");
+    highCourtJudge("highCourtJudge", "High Court Judge");
 
     private final String id;
     private final String displayedValue;

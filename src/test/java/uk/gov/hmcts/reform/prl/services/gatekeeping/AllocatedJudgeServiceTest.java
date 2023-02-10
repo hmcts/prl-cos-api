@@ -46,8 +46,8 @@ public class AllocatedJudgeServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(AllocatedJudge.builder()
-            .tierOfJudiciary(TierOfJudiciaryEnum.CIRCUIT_JUDGE).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No).build(),null);
-        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.CIRCUIT_JUDGE.getDisplayedValue());
+            .tierOfJudiciary(TierOfJudiciaryEnum.circuitJudge).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No).build(),null);
+        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.circuitJudge.getDisplayedValue());
     }
 
     @Test
@@ -57,8 +57,8 @@ public class AllocatedJudgeServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(AllocatedJudge.builder()
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No).build(),null);
-        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.DISTRICT_JUDGE.getDisplayedValue());
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No).build(),null);
+        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.districtJudge.getDisplayedValue());
 
     }
 
@@ -70,8 +70,8 @@ public class AllocatedJudgeServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(AllocatedJudge.builder()
-            .tierOfJudiciary(TierOfJudiciaryEnum.HIGHCOURT_JUDGE).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No).build(),null);
-        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.HIGHCOURT_JUDGE.getDisplayedValue());
+            .tierOfJudiciary(TierOfJudiciaryEnum.highCourtJudge).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No).build(),null);
+        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.highCourtJudge.getDisplayedValue());
 
     }
 
@@ -83,8 +83,8 @@ public class AllocatedJudgeServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(AllocatedJudge.builder()
-            .tierOfJudiciary(TierOfJudiciaryEnum.MAGISTRATES).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No).build(),null);
-        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.MAGISTRATES.getDisplayedValue());
+            .tierOfJudiciary(TierOfJudiciaryEnum.magistrates).isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No).build(),null);
+        assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.magistrates.getDisplayedValue());
         assertEquals(YesOrNo.No,expectedResponse.getIsSpecificJudgeOrLegalAdviserNeeded());
 
     }

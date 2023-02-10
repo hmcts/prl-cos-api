@@ -80,7 +80,7 @@ public class AllocateJudgeControllerTest {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
 
         CaseData caseData = CaseData.builder()
