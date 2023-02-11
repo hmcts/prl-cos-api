@@ -4,8 +4,10 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -61,6 +63,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLIC
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
@@ -386,6 +389,9 @@ public class ManageOrderService {
 
     private final ElementUtils elementUtils;
 
+    @Autowired
+    private final UserService userService;
+
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
         if (caseData.getOrderCollection() != null) {
@@ -679,7 +685,7 @@ public class ManageOrderService {
 
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                                        .orderTypeId(flagSelectedOrderId)
-                                       .orderDocument(caseData.getUploadOrderDoc())
+                                       .orderDocument(caseData.getAppointmentOfGuardian())
                                        .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
                                        .otherDetails(OtherOrderDetails.builder()
                                                          .createdBy(caseData.getJudgeOrMagistratesLastName())
@@ -698,7 +704,7 @@ public class ManageOrderService {
                                                             ? typeOfOrder.getDisplayedValue() : null)
                                        .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
                                            ? caseData.getDoesOrderClosesCase() : null)
-                                       /* .serveOrderDetails(ServeOrderDetails.builder()
+                                       .serveOrderDetails(ServeOrderDetails.builder()
                                                               .cafcassOrCymruNeedToProvideReport(
                                                                   serveOrderData.getCafcassOrCymruNeedToProvideReport())
                                                               .cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
@@ -710,7 +716,7 @@ public class ManageOrderService {
                                                                                               )) : null)
                                                               .orderEndsInvolvementOfCafcassOrCymru(
                                                                   serveOrderData.getOrderEndsInvolvementOfCafcassOrCymru())
-                                                              .build()) */
+                                                              .build())
                                        .build()));
         }
     }
@@ -792,12 +798,17 @@ public class ManageOrderService {
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
         throws Exception {
-        List<Element<OrderDetails>> orderCollection = null;
+        List<Element<OrderDetails>> orderCollection;
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        List<String> roles = userDetails.getRoles();
+        boolean isLoggedIsAsJudgeOrLa = roles.stream().anyMatch(ROLES_JUDGE::contains);
+
         if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
-                && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
-                && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
-                return setDraftOrderCollection(caseData);
+                && (isLoggedIsAsJudgeOrLa || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+                && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
+
+                return setDraftOrderCollection(caseData, isLoggedIsAsJudgeOrLa);
             } else {
                 List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
                 orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
@@ -816,9 +827,9 @@ public class ManageOrderService {
         return Map.of("orderCollection", orderCollection);
     }
 
-    public Map<String, Object> setDraftOrderCollection(CaseData caseData) {
+    public Map<String, Object> setDraftOrderCollection(CaseData caseData, boolean isLoggedIsAsJudgeOrLa) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
-        Element<DraftOrder> draftOrderElement = element(getCurrentDraftOrderDetails(caseData));
+        Element<DraftOrder> draftOrderElement = element(getCurrentDraftOrderDetails(caseData, isLoggedIsAsJudgeOrLa));
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(draftOrderElement);
@@ -833,7 +844,7 @@ public class ManageOrderService {
         );
     }
 
-    private DraftOrder getCurrentDraftOrderDetails(CaseData caseData) {
+    private DraftOrder getCurrentDraftOrderDetails(CaseData caseData, boolean isLoggedIsAsJudgeOrLa) {
         String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
 
@@ -845,8 +856,11 @@ public class ManageOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
-                              .status("Draft").build())
+                              .status(isLoggedIsAsJudgeOrLa ? "Judge reviewed" : "Draft")
+                              .build())
             .dateOrderMade(caseData.getDateOrderMade())
+            .judgeNotes(caseData.getManageOrders() != null
+                        ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
             .orderSelectionType(caseData.getManageOrdersOptions())
             .isUploadedOrAmendedOrder(null != caseData.getManageOrdersOptions()
                                           && caseData.getManageOrdersOptions().getDisplayedValue().equals("Upload an order")
