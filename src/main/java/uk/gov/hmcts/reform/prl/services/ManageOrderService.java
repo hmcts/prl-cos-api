@@ -685,7 +685,7 @@ public class ManageOrderService {
 
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                                        .orderTypeId(flagSelectedOrderId)
-                                       .orderDocument(caseData.getAppointmentOfGuardian())
+                                       .orderDocument(caseData.getUploadOrderDoc())
                                        .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
                                        .otherDetails(OtherOrderDetails.builder()
                                                          .createdBy(caseData.getJudgeOrMagistratesLastName())
