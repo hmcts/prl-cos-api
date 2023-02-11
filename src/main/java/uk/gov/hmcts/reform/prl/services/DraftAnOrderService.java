@@ -511,10 +511,7 @@ public class DraftAnOrderService {
             caseData.getDraftOrdersDynamicList(), objectMapper);
         log.info("inside getDraftOrderDocument orderId {}", orderId);
         return caseData.getDraftOrderCollection().stream()
-            .filter(element -> {
-                log.info("Order collection id:: {}", element.getId());
-                return element.getId().equals(orderId);
-            })
+            .filter(element -> element.getId().equals(orderId))
             .map(Element::getValue)
             .findFirst()
             .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
