@@ -328,13 +328,13 @@ public class ManageOrdersController {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
         }
 
-        CaseData modifiedCaseData = objectMapper.convertValue(
+        /*        CaseData modifiedCaseData = objectMapper.convertValue(
             caseDataUpdated,
             CaseData.class
         );
         log.info("modifiedCaseData ===> " + modifiedCaseData);
 
-        caseDataUpdated.putAll(manageOrderService.populateHeader(modifiedCaseData));
+        caseDataUpdated.putAll(manageOrderService.populateHeader(modifiedCaseData));*/
         log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
