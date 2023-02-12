@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.Landlord;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.Mortgage;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChildDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -63,6 +64,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.LitigationCapa
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamExemptions;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Order;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherChildNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherProceedingsDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.RelationshipToRespondent;
@@ -132,6 +134,8 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
             applicationTab.put("childDetailsTable", getChildDetails(caseData));
             applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
+            applicationTab.put("otherChildNotInTheCaseTable", getOtherChildNotInTheCaseTable(caseData));
+
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
             applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));
@@ -1028,6 +1032,31 @@ public class ApplicationsTabService implements TabService {
         }
 
         return toMap(builder.build());
+    }
+
+    public List<Element<OtherChildNotInTheCase>> getOtherChildNotInTheCaseTable(CaseData caseData) {
+        log.info("getOtherChildNotInTheCaseTable()--->start");
+        Optional<List<Element<OtherChildrenNotInTheCase>>> otherPeopleCheck = ofNullable(caseData.getChildrenNotInTheCase());
+        List<Element<OtherChildNotInTheCase>> otherPersonsInTheCase = new ArrayList<>();
+
+        if (otherPeopleCheck.isEmpty() || otherPeopleCheck.get().isEmpty()) {
+            OtherChildNotInTheCase op = OtherChildNotInTheCase.builder().build();
+            Element<OtherChildNotInTheCase> other = Element.<OtherChildNotInTheCase>builder().value(op).build();
+            otherPersonsInTheCase.add(other);
+            return otherPersonsInTheCase;
+        }
+
+        List<OtherChildrenNotInTheCase> otherPeople = caseData.getChildrenNotInTheCase().stream().map(Element::getValue).collect(Collectors.toList());
+
+        for (OtherChildrenNotInTheCase p : otherPeople) {
+            OtherChildNotInTheCase other = objectMapper.convertValue(p, OtherChildNotInTheCase.class);
+            Element<OtherChildNotInTheCase> wrappedPerson = Element.<OtherChildNotInTheCase>builder()
+                .value(other).build();
+            otherPersonsInTheCase.add(wrappedPerson);
+        }
+        log.info("otherPersonsInTheCase : {}",otherPersonsInTheCase);
+        log.info("getOtherChildNotInTheCaseTable()--->end");
+        return otherPersonsInTheCase;
     }
 
 }

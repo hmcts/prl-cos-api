@@ -46,6 +46,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.Landlord;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.Mortgage;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
@@ -72,6 +73,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.LitigationCapa
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamExemptions;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Order;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherChildNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherProceedingsDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Respondent;
@@ -102,6 +104,7 @@ import static org.testng.AssertJUnit.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
+import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -1386,7 +1389,47 @@ public class ApplicationsTabServiceTest {
 
 
 
+    @Test
+    public void testGetOtherChildNotInTheCaseTable() {
+        OtherChildrenNotInTheCase child = OtherChildrenNotInTheCase.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .dateOfBirth(LocalDate.of(2000, 12, 22))
+            .gender(female)
+            .build();
 
+        Element<OtherChildrenNotInTheCase> wrappedChildren =
+            Element.<OtherChildrenNotInTheCase>builder().value(child).build();
+        List<Element<OtherChildrenNotInTheCase>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .childrenNotInTheCase(listOfChildren)
+            .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
+            .build();
+        assertNotNull(applicationsTabService.getOtherChildNotInTheCaseTable(caseData));
+    }
+
+    @Test
+    public void testGetOtherChildNotInTheCaseTableEmpyList() {
+        OtherChildrenNotInTheCase child = OtherChildrenNotInTheCase.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .dateOfBirth(LocalDate.of(2000, 12, 22))
+            .gender(female)
+            .build();
+
+        Element<OtherChildrenNotInTheCase> wrappedChildren =
+            Element.<OtherChildrenNotInTheCase>builder().value(child).build();
+        List<Element<OtherChildrenNotInTheCase>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            //.childrenNotInTheCase(listOfChildren)
+            //.childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
+            .build();
+        assertNotNull(applicationsTabService.getOtherChildNotInTheCaseTable(caseData));
+    }
 
 
 }
