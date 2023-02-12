@@ -319,6 +319,10 @@ public class ManageOrdersController {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
         }
 
+        if (caseData.getManageOrdersOptions().getDisplayedValue().equals("Upload an order")) {
+            caseDataUpdated.put("isOrderUploadedByJudgeOrAdmin", YesOrNo.Yes);
+            log.info("isOrderUploadedByJudgeOrAdmin is set:: {}", caseDataUpdated.get("isOrderUploadedByJudgeOrAdmin"));
+        }
         CaseData modifiedCaseData = objectMapper.convertValue(
             caseDataUpdated,
             CaseData.class

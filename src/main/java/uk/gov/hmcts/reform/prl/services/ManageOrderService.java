@@ -650,6 +650,7 @@ public class ManageOrderService {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             List<Element<OrderDetails>> orderCollection = new ArrayList<>();
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+
             if (documentLanguage.isGenEng()) {
                 log.info("*** Generating Final order in English ***");
                 orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
@@ -862,9 +863,9 @@ public class ManageOrderService {
             .judgeNotes(caseData.getManageOrders() != null
                         ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
             .orderSelectionType(caseData.getManageOrdersOptions())
-            .isUploadedOrAmendedOrder(null != caseData.getManageOrdersOptions()
+            .isOrderUploadedByJudgeOrAdmin(null != caseData.getManageOrdersOptions()
                                           && caseData.getManageOrdersOptions().getDisplayedValue().equals("Upload an order")
-                                          ? Yes : No)
+                                          ? caseData.getManageOrders().getIsOrderUploadedByJudgeOrAdmin() : No)
             .build();
     }
 
