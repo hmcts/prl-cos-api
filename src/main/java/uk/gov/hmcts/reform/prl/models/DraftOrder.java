@@ -112,8 +112,8 @@ public class DraftOrder {
     private final YesOrNo underTakingFormSign;
 
     private final ManageOrdersOptionsEnum orderSelectionType;
-    @JsonProperty("isUploadedOrAmendedOrder")
-    private final YesOrNo isUploadedOrAmendedOrder;
+    @JsonProperty("isOrderUploadedByJudgeOrAdmin")
+    private final YesOrNo isOrderUploadedByJudgeOrAdmin;
     private final String childrenList;
 
     @JsonIgnore
