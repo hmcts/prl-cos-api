@@ -799,9 +799,7 @@ public class ManageOrderService {
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
         throws Exception {
         List<Element<OrderDetails>> orderCollection;
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        List<String> roles = userDetails.getRoles();
-        boolean isLoggedIsAsJudgeOrLa = roles.stream().anyMatch(ROLES_JUDGE::contains);
+        boolean isLoggedIsAsJudgeOrLa = isLoggedInAsJudgeOrLa(authorisation);
 
         if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
@@ -1311,6 +1309,13 @@ public class ManageOrderService {
         }
 
         return withdrawApproved;
+    }
+
+    public boolean isLoggedInAsJudgeOrLa(String authorisation) {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        List<String> roles = userDetails.getRoles();
+        boolean isJudgeOrLa = roles.stream().anyMatch(ROLES_JUDGE::contains);
+        return isJudgeOrLa;
     }
 
 }
