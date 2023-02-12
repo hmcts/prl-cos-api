@@ -441,7 +441,7 @@ public class CallbackController {
         log.info("Gatekeeping caseData: {}", caseData);
 
         caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
-//        caseDataUpdated.put("gatekeepingDetails", GatekeepingDetails.builder().isSpecificGateKeeperNeeded(YesOrNo.Yes));
+        // caseDataUpdated.put("gatekeepingDetails", GatekeepingDetails.builder().isSpecificGateKeeperNeeded(YesOrNo.Yes));
 
 
         // below code related to SummaryTabService
