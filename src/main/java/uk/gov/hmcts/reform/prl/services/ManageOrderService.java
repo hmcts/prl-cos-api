@@ -863,9 +863,7 @@ public class ManageOrderService {
             .judgeNotes(caseData.getManageOrders() != null
                         ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
             .orderSelectionType(caseData.getManageOrdersOptions())
-            .isOrderUploadedByJudgeOrAdmin(null != caseData.getManageOrdersOptions()
-                                          && caseData.getManageOrdersOptions().getDisplayedValue().equals("Upload an order")
-                                          ? caseData.getManageOrders().getIsOrderUploadedByJudgeOrAdmin() : No)
+            .isOrderUploadedByJudgeOrAdmin(caseData.getManageOrders().getIsOrderUploadedByJudgeOrAdmin())
             .build();
     }
 
