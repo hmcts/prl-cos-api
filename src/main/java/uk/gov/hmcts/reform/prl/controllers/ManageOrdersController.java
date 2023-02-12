@@ -319,7 +319,7 @@ public class ManageOrdersController {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
         }
 
-        if (caseData.getManageOrdersOptions().getDisplayedValue().equals("Upload an order")) {
+        if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
             caseDataUpdated.put("isOrderUploadedByJudgeOrAdmin", YesOrNo.Yes);
             log.info("isOrderUploadedByJudgeOrAdmin is set:: {}", caseDataUpdated.get("isOrderUploadedByJudgeOrAdmin"));
         }
