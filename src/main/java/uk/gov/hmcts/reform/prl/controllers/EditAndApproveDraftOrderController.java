@@ -50,16 +50,11 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getDraftOrderCollection() != null
             && !caseData.getDraftOrderCollection().isEmpty()) {
-            caseDataUpdated.put("isOrderUploadedByJudgeOrAdmin",
-                                caseData.getManageOrders().getIsOrderUploadedByJudgeOrAdmin());
-            caseDataUpdated.put("manageOrdersOptions", caseData.getManageOrdersOptions());
-            caseDataUpdated.putAll(draftAnOrderService.getDraftOrderDynamicList(
-                caseData.getDraftOrderCollection(), caseData.getCaseTypeOfApplication()));
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated).build();
+                .data(draftAnOrderService.getDraftOrderDynamicList(
+                    caseData.getDraftOrderCollection(), caseData.getCaseTypeOfApplication())).build();
         } else {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
         }

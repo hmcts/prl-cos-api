@@ -557,9 +557,6 @@ public class CaseData implements MappableObject {
     private final List<OrderRecipientsEnum> orderRecipients;
     private final SelectTypeOfOrderEnum selectTypeOfOrder;
 
-    private final YesOrNo uploadOrderFlag;
-    private final String manageOrderOption;
-
     @JsonProperty("doesOrderClosesCase")
     private final YesOrNo doesOrderClosesCase;
     @JsonProperty("wasTheOrderApprovedAtHearing")
