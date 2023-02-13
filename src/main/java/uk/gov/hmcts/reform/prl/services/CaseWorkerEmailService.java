@@ -254,7 +254,7 @@ public class CaseWorkerEmailService {
     public void sendEmailToCourtAdmin(CaseDetails caseDetails) {
 
         caseData = emailService.getCaseData(caseDetails);
-        log.info("*** Case worker email service {}", caseData);
+        log.info("Triggering case worker email service to send mail to court admin");
         List<LocalCourtAdminEmail> localCourtAdminEmails = caseData
             .getLocalCourtAdmin()
             .stream()
