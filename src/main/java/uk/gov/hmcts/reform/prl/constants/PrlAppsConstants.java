@@ -342,4 +342,10 @@ public class PrlAppsConstants {
     public static final String STAFFSORTCOLUMN = "lastName";
     public static final String STAFFORDERASC = "ASC";
     public static final String LEGALOFFICE = "Legal office";
+
+    public static final String TIER_OF_JUDICIARY = "tierOfJudiciary";
+
+    public static final String IS_JUDGE_OR_LEGAL_ADVISOR = "isJudgeOrLegalAdviser";
+
+    public static final String JUDGE_NAME_EMAIL = "judgeNameAndEmail";
 }

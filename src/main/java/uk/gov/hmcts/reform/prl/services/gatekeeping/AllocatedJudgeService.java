@@ -21,7 +21,10 @@ import java.util.Map;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIRCUIT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISTRICT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HIGHCOURT_JUDGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TIER_OF_JUDICIARY;
 
 @Slf4j
 @Service
@@ -37,17 +40,17 @@ public class AllocatedJudgeService {
     private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
                                              RefDataUserService refDataUserService) {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
-        if (null != caseDataUpdated.get("tierOfJudiciary")) {
+        if (null != caseDataUpdated.get(TIER_OF_JUDICIARY)) {
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
-            allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get("tierOfJudiciary"))));
+            allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get(TIER_OF_JUDICIARY))));
         } else {
-            if (null != caseDataUpdated.get("isJudgeOrLegalAdviser")) {
-                if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("isJudgeOrLegalAdviser")))
-                    && null != caseDataUpdated.get("judgeNameAndEmail")) {
-                    String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get("judgeNameAndEmail"));
+            if (null != caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR)) {
+                if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR)))
+                    && null != caseDataUpdated.get(JUDGE_NAME_EMAIL)) {
+                    String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL));
                     List<JudicialUsersApiResponse> judgeDetails =
                         refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                            .personalCode(getPersonalCode(caseDataUpdated.get("judgeNameAndEmail"))).build());
+                            .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL))).build());
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.judge));
                     if (null != judgeDetails && judgeDetails.size() > 0) {
