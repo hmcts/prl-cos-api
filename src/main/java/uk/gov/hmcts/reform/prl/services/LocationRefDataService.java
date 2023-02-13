@@ -30,11 +30,17 @@ public class LocationRefDataService {
     @Value("${courts.filter}")
     protected String courtsToFilter;
 
+    @Value("${locationfinder.api.url}")
+    protected String locationfinderUrl;
+
     public List<DynamicListElement> getCourtLocations(String authToken) {
         try {
             CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(authToken,
                                                                                     authTokenGenerator.generate(),
                                                                                     SERVICE_ID);
+            log.info("courtDetails in location Ref data service", courtDetails);
+            log.info("location ref url in location Ref data service", locationfinderUrl);
+            log.info("courtsTofilter in location Ref data service", courtsToFilter);
             return onlyEnglandAndWalesLocations(courtDetails);
         } catch (Exception e) {
             log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
