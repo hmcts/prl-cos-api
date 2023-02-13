@@ -91,6 +91,7 @@ public class CaseControllerFunctionalTest {
                 .assertThat().statusCode(200);
     }
 
+
     @Test
     public void testRetrieveCitizenCases() {
         request

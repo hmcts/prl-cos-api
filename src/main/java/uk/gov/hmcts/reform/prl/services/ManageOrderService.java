@@ -4,17 +4,23 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -32,9 +38,11 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
@@ -55,6 +63,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLIC
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
@@ -380,27 +389,29 @@ public class ManageOrderService {
 
     private final ElementUtils elementUtils;
 
+    @Autowired
+    private final UserService userService;
+
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
         if (caseData.getOrderCollection() != null) {
             headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
             headerMap.put(
                 "serveOrderDynamicList",
-                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData)
+                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, servedSavedOrders.getDisplayedValue())
             );
             log.info("OrderCollection ===> " + caseData.getOrderCollection());
         }
         headerMap.put(
             "caseTypeOfApplication",
-            caseData.getCaseTypeOfApplication() != null ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID()
+            CaseUtils.getCaseTypeOfApplication(caseData)
         );
         log.info("after populate-header map ===> " + headerMap);
         return headerMap;
     }
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
-        String caseTypeOfApplication = caseData.getCaseTypeOfApplication() != null
-            ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
+        String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         return caseData.toBuilder()
             .childrenList(getChildInfoFromCaseData(caseData))
             .caseTypeOfApplication(caseTypeOfApplication)
@@ -559,7 +570,7 @@ public class ManageOrderService {
         return fieldsMap;
     }
 
-    private String getSelectedOrderInfoForUpload(CaseData caseData) {
+    public String getSelectedOrderInfoForUpload(CaseData caseData) {
         String selectedOrder;
         if (caseData.getChildArrangementOrders() != null) {
             selectedOrder = caseData.getChildArrangementOrders().getDisplayedValue();
@@ -592,7 +603,7 @@ public class ManageOrderService {
 
     private String getChildInfoFromCaseData(CaseData caseData) {
         String childNames = "";
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<Child> children = new ArrayList<>();
             if (caseData.getChildren() != null) {
                 children = caseData.getChildren().stream()
@@ -628,7 +639,7 @@ public class ManageOrderService {
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
             : getSelectedOrderInfoForUpload(caseData);
 
-        String flagSelectedOrderId = null;
+        String flagSelectedOrderId;
 
         if (caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder) {
             flagSelectedOrderId = String.valueOf(caseData.getCreateSelectOrderOptions());
@@ -657,6 +668,21 @@ public class ManageOrderService {
             }
             return orderCollection;
         } else {
+            String orderMadeDate = null;
+            if (caseData.getDateOrderMade() != null) {
+                orderMadeDate = caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
+                    PrlAppsConstants.D_MMMM_YYYY,
+                    Locale.UK
+                ));
+            }
+            ServeOrderData serveOrderData;
+            if (caseData.getServeOrderData() != null) {
+                serveOrderData = caseData.getServeOrderData();
+            } else {
+                serveOrderData = ServeOrderData.builder().build();
+            }
+            SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                                        .orderTypeId(flagSelectedOrderId)
                                        .orderDocument(caseData.getAppointmentOfGuardian())
@@ -668,13 +694,34 @@ public class ManageOrderService {
                                                                                    PrlAppsConstants.D_MMMM_YYYY,
                                                                                    Locale.UK
                                                                                )))
-                                                         .orderRecipients(getAllRecipients(caseData)).build())
+                                                         .orderMadeDate(orderMadeDate)
+                                                         .orderRecipients(caseData.getManageOrdersOptions().equals(
+                                                             ManageOrdersOptionsEnum.createAnOrder) ? getAllRecipients(
+                                                             caseData) : null)
+                                                         .build())
                                        .dateCreated(dateTime.now())
+                                       .typeOfOrder(typeOfOrder != null
+                                                            ? typeOfOrder.getDisplayedValue() : null)
+                                       .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
+                                           ? caseData.getDoesOrderClosesCase() : null)
+                                       .serveOrderDetails(ServeOrderDetails.builder()
+                                                              .cafcassOrCymruNeedToProvideReport(
+                                                                  serveOrderData.getCafcassOrCymruNeedToProvideReport())
+                                                              .cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
+                                                              .whenReportsMustBeFiled(serveOrderData.getWhenReportsMustBeFiled() != null
+                                                                                          ? serveOrderData.getWhenReportsMustBeFiled()
+                                                                                              .format(DateTimeFormatter.ofPattern(
+                                                                                                  PrlAppsConstants.D_MMMM_YYYY,
+                                                                                                  Locale.UK
+                                                                                              )) : null)
+                                                              .orderEndsInvolvementOfCafcassOrCymru(
+                                                                  serveOrderData.getOrderEndsInvolvementOfCafcassOrCymru())
+                                                              .build())
                                        .build()));
         }
     }
 
-    private String getSelectedChildInfoFromMangeOrder(DynamicMultiSelectList childOption) {
+    public String getSelectedChildInfoFromMangeOrder(DynamicMultiSelectList childOption) {
         String selectedChildNames = null;
         List<String> childList;
         if (childOption != null && childOption.getValue() != null) {
@@ -704,7 +751,7 @@ public class ManageOrderService {
     }
 
     private String getApplicantSolicitorDetails(CaseData caseData) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<PartyDetails> applicants = caseData
                 .getApplicants()
                 .stream()
@@ -724,7 +771,7 @@ public class ManageOrderService {
     }
 
     private String getRespondentSolicitorDetails(CaseData caseData) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<PartyDetails> respondents = caseData
                 .getRespondents()
                 .stream()
@@ -752,13 +799,27 @@ public class ManageOrderService {
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
         throws Exception {
         List<Element<OrderDetails>> orderCollection;
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        List<String> roles = userDetails.getRoles();
+        boolean isLoggedIsAsJudgeOrLa = roles.stream().anyMatch(ROLES_JUDGE::contains);
+
         if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-            List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
-            orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
-            orderCollection.addAll(orderDetails);
-            orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
-            if (caseData.getManageOrdersOptions().equals(uploadAnOrder) && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
-                orderCollection = serveOrder(caseData, orderCollection);
+            if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
+                && (isLoggedIsAsJudgeOrLa || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+                && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
+
+                return setDraftOrderCollection(caseData, isLoggedIsAsJudgeOrLa);
+            } else {
+                List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
+                orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
+                orderCollection.addAll(orderDetails);
+                orderCollection.sort(Comparator.comparing(
+                    m -> m.getValue().getDateCreated(),
+                    Comparator.reverseOrder()
+                ));
+                if (caseData.getManageOrdersOptions().equals(uploadAnOrder) && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                    orderCollection = serveOrder(caseData, orderCollection);
+                }
             }
         } else {
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
@@ -766,14 +827,53 @@ public class ManageOrderService {
         return Map.of("orderCollection", orderCollection);
     }
 
-    private List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
+    public Map<String, Object> setDraftOrderCollection(CaseData caseData, boolean isLoggedIsAsJudgeOrLa) {
+        List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
+        Element<DraftOrder> draftOrderElement = element(getCurrentDraftOrderDetails(caseData, isLoggedIsAsJudgeOrLa));
+        if (caseData.getDraftOrderCollection() != null) {
+            draftOrderList.addAll(caseData.getDraftOrderCollection());
+            draftOrderList.add(draftOrderElement);
+        } else {
+            draftOrderList.add(draftOrderElement);
+        }
+        draftOrderList.sort(Comparator.comparing(
+            m -> m.getValue().getOtherDetails().getDateCreated(),
+            Comparator.reverseOrder()
+        ));
+        return Map.of("draftOrderCollection", draftOrderList
+        );
+    }
+
+    private DraftOrder getCurrentDraftOrderDetails(CaseData caseData, boolean isLoggedIsAsJudgeOrLa) {
+        String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
+        SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+
+        return DraftOrder.builder()
+            .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
+            .orderTypeId(flagSelectedOrderId)
+            .orderDocument(caseData.getAppointmentOfGuardian())
+            .childrenList(caseData.getManageOrders() != null
+                              ? getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()) : null)
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .dateCreated(dateTime.now())
+                              .status(isLoggedIsAsJudgeOrLa ? "Judge reviewed" : "Draft")
+                              .build())
+            .dateOrderMade(caseData.getDateOrderMade())
+            .judgeNotes(caseData.getManageOrders() != null
+                        ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
+            .orderSelectionType(caseData.getManageOrdersOptions())
+            .build();
+    }
+
+    public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
         if (null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId()))
                 .forEach(order -> {
-                    if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                    if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, order);
                     } else {
                         servedFL401Order(caseData, orders, order);
@@ -884,7 +984,14 @@ public class ManageOrderService {
             servingRespondentsOptions = (ServingRespondentsEnum) servedOrderDetails.get(SERVING_RESPONDENTS_OPTIONS);
         }
 
-        ServeOrderDetails serveOrderDetails = ServeOrderDetails.builder().serveOnRespondent(serveOnRespondent)
+        ServeOrderDetails tempServeOrderDetails;
+        if (order.getValue().getServeOrderDetails() != null) {
+            tempServeOrderDetails = order.getValue().getServeOrderDetails();
+        } else {
+            tempServeOrderDetails = ServeOrderDetails.builder().build();
+        }
+
+        ServeOrderDetails serveOrderDetails = tempServeOrderDetails.toBuilder().serveOnRespondent(serveOnRespondent)
             .servingRespondent(servingRespondentsOptions)
             .cafcassServed(cafcassServed)
             .cafcassEmail(cafCassEmail)
@@ -1162,14 +1269,15 @@ public class ManageOrderService {
                 template
             );
         }
+        SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
 
         return element(OrderDetails.builder().orderType(flagSelectedOrder)
                            .orderTypeId(flagSelectedOrderId)
                            .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
                                                  ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
                            .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
-                           .typeOfOrder(caseData.getSelectTypeOfOrder() != null
-                                            ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
+                           .typeOfOrder(typeOfOrder != null
+                                            ? typeOfOrder.getDisplayedValue() : null)
                            .childrenList(getChildInfoFromCaseData(caseData))
                            .orderClosesCase(caseData.getSelectTypeOfOrder().getDisplayedValue().equals("Final")
                                                 ? caseData.getDoesOrderClosesCase() : null)
@@ -1204,4 +1312,5 @@ public class ManageOrderService {
 
         return withdrawApproved;
     }
+
 }

@@ -10,8 +10,10 @@ import uk.gov.hmcts.reform.prl.enums.CafcassReportsEnum;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ApplicantOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.RespondentOccupationEnum;
@@ -201,4 +203,19 @@ public class ManageOrders {
     private final WithDrawTypeOfOrderEnum withdrawnOrRefusedOrder;
     @JsonProperty("ordersNeedToBeServed")
     private final YesOrNo ordersNeedToBeServed;
+    @JsonProperty("isTheOrderAboutChildren")
+    private final YesOrNo isTheOrderAboutChildren;
+    @JsonProperty("isJudgeOrLa")
+    private final String isJudgeOrLa;
+    @JsonProperty("judgeDirectionsToAdminAmendOrder")
+    private final String judgeDirectionsToAdminAmendOrder;
+
+    @JsonProperty("amendOrderSelectCheckOptions")
+    private final AmendOrderCheckEnum amendOrderSelectCheckOptions;
+    @JsonProperty("amendOrderSelectJudgeOrLa")
+    private final JudgeOrLegalAdvisorCheckEnum amendOrderSelectJudgeOrLa;
+    @JsonProperty("nameOfJudgeAmendOrder")
+    private final String nameOfJudgeAmendOrder;
+    @JsonProperty("nameOfLaAmendOrder")
+    private final String nameOfLaAmendOrder;
 }
