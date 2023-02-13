@@ -544,7 +544,6 @@ public class CaseData implements MappableObject {
     /**
      * Manage Orders.
      */
-    @JsonProperty("orderCollection")
     private final List<Element<OrderDetails>> orderCollection;
 
     private LocalDate approvalDate;
