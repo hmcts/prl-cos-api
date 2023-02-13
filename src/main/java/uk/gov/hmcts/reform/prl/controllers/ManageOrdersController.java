@@ -43,6 +43,7 @@ import javax.ws.rs.core.HttpHeaders;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 
@@ -232,10 +233,12 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.put("isWithdrawRequestSent", "Approved");
         }
-
+        log.info("Selection from Admin##### {}", caseData.getManageOrders().getAmendOrderSelectCheckOptions());
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
-        } else {
+        } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
+            || caseData.getManageOrdersOptions().equals(uploadAnOrder)
+            || caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                 authorisation,
                 caseData
@@ -299,27 +302,31 @@ public class ManageOrdersController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("/manage-orders/add-upload-order before caseData ===> " + callbackRequest.getCaseDetails());
-        caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
-            authorisation,
-            caseData
-        ));
         if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
-            caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
+            caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
+            if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
+                caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
+            } else {
+                caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+                    authorisation,
+                    caseData
+                ));
+            }
+            CaseData modifiedCaseData = objectMapper.convertValue(
+                caseDataUpdated,
+                CaseData.class
+            );
+            log.info("modifiedCaseData ===> " + modifiedCaseData);
+            caseDataUpdated.put(
+                "serveOrderDynamicList",
+                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, servedSavedOrders.getDisplayedValue())
+            );
+            log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
         }
-
-        CaseData modifiedCaseData = objectMapper.convertValue(
-            caseDataUpdated,
-            CaseData.class
-        );
-        log.info("modifiedCaseData ===> " + modifiedCaseData);
-
-        caseDataUpdated.putAll(manageOrderService.populateHeader(modifiedCaseData));
-        log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
     }
-
 
     @PostMapping(path = "/manage-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to amend order mid-event")
