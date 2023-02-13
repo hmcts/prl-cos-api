@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
-import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -43,7 +42,6 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
@@ -54,11 +52,11 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 @RequiredArgsConstructor
 public class ManageOrdersController {
 
+    public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
+    public static final String IS_THE_ORDER_ABOUT_ALL_CHILDREN = "isTheOrderAboutAllChildren";
+    public static final String CHILD_OPTION = "childOption";
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private ManageOrderService manageOrderService;
@@ -74,6 +72,19 @@ public class ManageOrdersController {
 
     @Autowired
     private DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
+    private static final List<String> MANAGE_ORDER_FIELDS = List.of("manageOrdersOptions",
+                                                                    "createSelectOrderOptions",
+                                                                    "childArrangementOrders",
+                                                                    "domesticAbuseOrders",
+                                                                    "fcOrders",
+                                                                    "otherOrdersOption",
+                                                                    "amendOrderDynamicList",
+                                                                    "serveOrderDynamicList",
+                                                                    "ordersNeedToBeServed",
+                                                                    "isJudgeOrLa"
+    );
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -145,16 +156,14 @@ public class ManageOrdersController {
             && !caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        List<String> roles = userDetails.getRoles();
-        boolean isJudgeOrLa = roles.stream().anyMatch(ROLES_JUDGE::contains);
+        boolean isJudgeOrLa = manageOrderService.isLoggedInAsJudgeOrLa(authorisation);
 
         log.info("isJudgeOrLa {}", isJudgeOrLa);
 
         ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
             .childOption(DynamicMultiSelectList.builder()
                              .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
-            .isJudgeOrLa(isJudgeOrLa ? "Judge" : "CaseWorker")
+            .isJudgeOrLa(isJudgeOrLa ? PrlAppsConstants.JUDGE : PrlAppsConstants.CASEWORKER)
             .build();
         log.info("**Manage orders with child list {}", manageOrders);
 
@@ -215,18 +224,7 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        if (caseDetails.getData().containsKey("isTheOrderAboutAllChildren") && caseDetails.getData().get(
-            "isTheOrderAboutAllChildren") != null && !caseDetails.getData().get(
-            "isTheOrderAboutAllChildren").toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
-            log.info("inside isTheOrderAboutAllChildren =====> " + caseDetails.getData().get("childOption"));
-            caseDetails.getData().remove("childOption");
-        }
-        if (caseDetails.getData().containsKey("isTheOrderAboutChildren") && caseDetails.getData().get(
-            "isTheOrderAboutChildren") != null && caseDetails.getData().get(
-            "isTheOrderAboutChildren").toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
-            log.info("inside isTheOrderAboutChildren =====> " + caseDetails.getData().get("childOption"));
-            caseDetails.getData().remove("childOption");
-        }
+        resetChildOptions(caseDetails);
         log.info("before about to submit caseDetails =====> " + caseDetails);
         CaseData caseData = CaseUtils.getCaseData(caseDetails,objectMapper);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
@@ -247,10 +245,8 @@ public class ManageOrdersController {
             ));
         }
         cleanUpSelectedManageOrderOptions(caseDataUpdated);
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
 
     @PostMapping(path = "/show-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order for special guardianship create order")
@@ -270,7 +266,6 @@ public class ManageOrdersController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-
     @PostMapping(path = "/amend-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to amend order mid-event")
     @SecurityRequirement(name = "Bearer Authentication")
@@ -280,16 +275,14 @@ public class ManageOrdersController {
         log.info("/amend-order/mid-event before" + callbackRequest.getCaseDetails());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        List<String> roles = userDetails.getRoles();
-        boolean isJudgeOrLa = roles.stream().anyMatch(ROLES_JUDGE::contains);
+        boolean isJudgeOrLa = manageOrderService.isLoggedInAsJudgeOrLa(authorisation);
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
         }
 
         log.info("isJudgeOrLa {}", isJudgeOrLa);
-        caseDataUpdated.put("isJudgeOrLa", isJudgeOrLa ? "Judge" : "CaseWorker");
+        caseDataUpdated.put("isJudgeOrLa", isJudgeOrLa ? PrlAppsConstants.JUDGE : PrlAppsConstants.CASEWORKER);
 
         log.info("/amend-order/mid-event after" + caseDataUpdated);
 
@@ -309,7 +302,6 @@ public class ManageOrdersController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("/manage-orders/add-upload-order before caseData ===> " + callbackRequest.getCaseDetails());
-
         if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
             if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
@@ -320,7 +312,6 @@ public class ManageOrdersController {
                     caseData
                 ));
             }
-
             CaseData modifiedCaseData = objectMapper.convertValue(
                 caseDataUpdated,
                 CaseData.class
@@ -332,56 +323,9 @@ public class ManageOrdersController {
             );
             log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
         }
-
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
-    }
-
-    private static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
-        log.info("caseDataUpdated before cleanup ===> " + caseDataUpdated);
-        if (caseDataUpdated.containsKey("manageOrdersOptions")) {
-            caseDataUpdated.remove("manageOrdersOptions");
-        }
-        if (caseDataUpdated.containsKey("createSelectOrderOptions")) {
-            caseDataUpdated.remove("createSelectOrderOptions");
-        }
-        if (caseDataUpdated.containsKey("childArrangementOrders")) {
-            caseDataUpdated.remove("childArrangementOrders");
-        }
-        if (caseDataUpdated.containsKey("domesticAbuseOrders")) {
-            caseDataUpdated.remove("domesticAbuseOrders");
-        }
-        if (caseDataUpdated.containsKey("fcOrders")) {
-            caseDataUpdated.remove("fcOrders");
-        }
-        if (caseDataUpdated.containsKey("otherOrdersOption")) {
-            caseDataUpdated.remove("otherOrdersOption");
-        }
-        if (caseDataUpdated.containsKey("amendOrderDynamicList")) {
-            caseDataUpdated.remove("amendOrderDynamicList");
-        }
-        if (caseDataUpdated.containsKey("serveOrderDynamicList")) {
-            caseDataUpdated.remove("serveOrderDynamicList");
-        }
-        if (caseDataUpdated.containsKey("ordersNeedToBeServed")) {
-            caseDataUpdated.remove("ordersNeedToBeServed");
-        }
-        if (caseDataUpdated.containsKey("isJudgeOrLa")) {
-            caseDataUpdated.remove("isJudgeOrLa");
-        }
-        if (caseDataUpdated.containsKey("doYouWantToServeOrder")) {
-            caseDataUpdated.remove("doYouWantToServeOrder");
-        }
-        if (caseDataUpdated.containsKey("whatDoWithOrder")) {
-            caseDataUpdated.remove("whatDoWithOrder");
-        }
-        if (caseDataUpdated.containsKey("amendOrderSelectCheckOptions")) {
-            caseDataUpdated.remove("amendOrderSelectCheckOptions");
-        }
-        log.info("caseDataUpdated after cleanup ===> " + caseDataUpdated);
-        log.info("orderCollection after cleanup ===> " + caseDataUpdated.get("orderCollection"));
-        log.info("draftOrderCollection after cleanup ===> " + caseDataUpdated.get("draftOrderCollection"));
     }
 
     @PostMapping(path = "/manage-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -394,11 +338,39 @@ public class ManageOrdersController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-            caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
+            caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
         }
 
         log.info("/manage-order/mid-event after" + caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
+        log.info("caseDataUpdated before cleanup ===> " + caseDataUpdated);
+        for (String field : MANAGE_ORDER_FIELDS) {
+            if (caseDataUpdated.containsKey(field)) {
+                caseDataUpdated.remove(field);
+            }
+        }
+        log.info("orderCollection after cleanup ===> " + caseDataUpdated.get("orderCollection"));
+        log.info("draftOrderCollection after cleanup ===> " + caseDataUpdated.get("draftOrderCollection"));
+    }
+
+    private static void resetChildOptions(CaseDetails caseDetails) {
+        if (caseDetails.getData().containsKey(IS_THE_ORDER_ABOUT_ALL_CHILDREN) && caseDetails.getData().get(
+            IS_THE_ORDER_ABOUT_ALL_CHILDREN) != null && !caseDetails.getData().get(
+            IS_THE_ORDER_ABOUT_ALL_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
+            log.info("inside isTheOrderAboutAllChildren =====> " + caseDetails.getData().get(CHILD_OPTION));
+            caseDetails.getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
+                .listItems(List.of(DynamicMultiselectListElement.EMPTY)).build());
+        }
+        if (caseDetails.getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN) && caseDetails.getData().get(
+            IS_THE_ORDER_ABOUT_CHILDREN) != null && caseDetails.getData().get(
+            IS_THE_ORDER_ABOUT_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
+            log.info("inside isTheOrderAboutChildren =====> " + caseDetails.getData().get(CHILD_OPTION));
+            caseDetails.getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
+                .listItems(List.of(DynamicMultiselectListElement.EMPTY)).build());
+        }
     }
 }
