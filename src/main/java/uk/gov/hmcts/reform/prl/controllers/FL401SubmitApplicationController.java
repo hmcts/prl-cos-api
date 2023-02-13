@@ -142,8 +142,11 @@ public class FL401SubmitApplicationController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(COURT_NAME_FIELD, courtName);
         caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
-        String courtEmail = Arrays.stream(idEmail).toArray()[0].toString();
-        caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
+        String courtEmail = "";
+        if (idEmail.length > 1) {
+            courtEmail = Arrays.stream(idEmail).toArray()[1].toString();
+            caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
+        }
         String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
         String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
         String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
@@ -193,10 +196,11 @@ public class FL401SubmitApplicationController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         UserDetails userDetails = userService.getUserDetails(authorisation);
-
         try {
             solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
-            caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+            if (null != caseData.getCourtEmailAddress()) {
+                caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+            }
             caseData = caseData.toBuilder()
                 .isNotificationSent("Yes")
                 .build();
