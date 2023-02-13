@@ -40,6 +40,9 @@ public class AmendOrderService {
     private final  UploadDocumentService uploadService;
     private final Time time;
 
+    @Autowired
+    private ManageOrderService manageOrderService;
+
     public Map<String, Object> updateOrder(CaseData caseData, String authorisation) throws IOException {
         ManageOrders eventData = caseData.getManageOrders();
 
@@ -69,7 +72,7 @@ public class AmendOrderService {
 
         UUID selectedOrderId = caseData.getManageOrders().getAmendOrderDynamicList().getValueCodeAsUuid();
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
-
+        List<Element<OrderDetails>> updatedOrders;
         if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             || WhatToDoWithOrderEnum.finalizeSaveToServeLater
                 .equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
@@ -94,7 +97,12 @@ public class AmendOrderService {
                         m -> m.getValue().getOtherDetails().getOrderCreatedDate(),
                         Comparator.reverseOrder()));
                 });
-            return Map.of("orderCollection", orders);
+            if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+                updatedOrders =  manageOrderService.serveOrder(caseData,orders);
+            } else {
+                updatedOrders = orders;
+            }
+            return Map.of("orderCollection", updatedOrders);
         } else {
             return  setDraftOrderCollection(caseData, amendedDocument);
         }
