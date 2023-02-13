@@ -43,7 +43,7 @@ public class LocationRefDataServiceTest {
     @Before
     public void setUp() {
         when(authTokenGenerator.generate()).thenReturn("");
-        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1,2,3,4");
+        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2:email,3:email,4:email");
     }
 
     @Test
