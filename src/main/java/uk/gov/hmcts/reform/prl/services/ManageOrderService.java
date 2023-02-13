@@ -4,6 +4,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -32,19 +33,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -63,6 +57,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RequiredArgsConstructor
 public class ManageOrderService {
+
+    @Autowired
+    LocationRefDataService locationRefDataService;
 
     public static final String CAFCASS_SERVED = "cafcassServed";
     public static final String SERVE_ON_RESPONDENT = "serveOnRespondent";
@@ -1148,5 +1145,22 @@ public class ManageOrderService {
         }
 
         return withdrawApproved;
+    }
+
+    public boolean cafcassFlag(uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails, String authorization) {
+
+        boolean cafcassFlag = false;
+
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        String baseLocationId = caseData.getSubmitCountyCourtSelection().getValue().getCode();
+        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,authorization).split("-");
+
+        int regionId = Integer.parseInt(Arrays.stream(venueDetails).toArray()[1].toString());
+
+        if (regionId < 7 && regionId > 0) {
+            cafcassFlag = true; //english regions
+        }
+
+        return cafcassFlag;
     }
 }
