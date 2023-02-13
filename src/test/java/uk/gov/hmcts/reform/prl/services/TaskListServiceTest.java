@@ -23,6 +23,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
@@ -368,7 +369,7 @@ public class TaskListServiceTest {
         CaseData caseData = CaseData.builder()
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
                 .consentOrder(YesOrNo.Yes)
-                .taskListVersion("v2")
+                .taskListVersion(TASK_LIST_VERSION_V2)
                 .build();
 
         List<Task> expectedTasks = List.of(

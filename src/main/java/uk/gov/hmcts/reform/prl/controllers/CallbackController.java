@@ -97,6 +97,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -495,7 +496,7 @@ public class CallbackController {
         if (caseDataUpdated.get(CASE_TYPE_OF_APPLICATION) != null) {
             caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
             if (C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
-                caseDataUpdated.put("taskListVersion", "v2");
+                caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
             }
         }
 

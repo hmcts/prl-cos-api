@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+
 
 @Service
 public class C100DocumentTemplateFinderService {
@@ -47,7 +49,7 @@ public class C100DocumentTemplateFinderService {
 
     public String findC100FinalDocumentTemplate(CaseData caseData) {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        if ("v2".equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return !documentLanguage.isGenWelsh() ? c100FinalTemplateV2 : c100FinalWelshTemplateV2;
         }
         return !documentLanguage.isGenWelsh() ? c100FinalTemplate : c100FinalWelshTemplate;
@@ -56,7 +58,7 @@ public class C100DocumentTemplateFinderService {
 
     public String findC100FinalDraftDocumentTemplate(CaseData caseData) {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        if ("v2".equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return !documentLanguage.isGenWelsh() ? c100DraftTemplateV2 : c100DraftWelshTemplateV2;
         }
         return !documentLanguage.isGenWelsh()  ? c100DraftTemplate : c100DraftWelshTemplate;
