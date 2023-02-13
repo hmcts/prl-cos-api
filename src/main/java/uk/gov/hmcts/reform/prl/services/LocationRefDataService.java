@@ -74,7 +74,8 @@ public class LocationRefDataService {
         String value = concat(concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
                               location.getPostcode());
         String key = location.getCourtEpimmsId();
-        log.info("key in display entry method() {} value {}",key,value);
+        log.info("key in display entry method() {} ",key);
+        log.info("value in display entry method() {} ",value);
         return DynamicListElement.builder().code(key).label(value).build();
     }
 
