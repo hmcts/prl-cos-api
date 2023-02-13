@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
@@ -76,10 +77,9 @@ public class C100IssueCaseController {
                 .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
             String courtEmail = Arrays.stream(idEmail).toArray()[1].toString();
-            caseData = caseData.toBuilder()
-                .localCourtAdmin(List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
-                                             .value(LocalCourtAdminEmail.builder().email(courtEmail).build()).build()))
-                .build();
+            caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
+                                                               .value(LocalCourtAdminEmail.builder().email(courtEmail)
+                                                                          .build()).build()));
         }
         caseData.setCourtName(caseDataUpdated.get("courtName").toString());
         caseData.setIssueDate();
@@ -91,9 +91,9 @@ public class C100IssueCaseController {
         caseDataUpdated.put("issueDate", LocalDate.now());
         caseDataUpdated.putAll(allTabsFields);
         try {
-            caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
+            caseWorkerEmailService.sendEmailToCourtAdmin(CaseDetails.builder().data(caseDataUpdated).build());
         } catch (Exception ex) {
-            log.error("Email notification could not be sent");
+            log.error("Email notification could not be sent", ex);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
