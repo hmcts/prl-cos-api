@@ -35,7 +35,6 @@ public class LocationRefDataService {
             CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(authToken,
                                                                                     authTokenGenerator.generate(),
                                                                                     SERVICE_ID);
-            log.info("courtDetails in location ref data service", courtDetails);
             return onlyEnglandAndWalesLocations(courtDetails);
         } catch (Exception e) {
             log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
