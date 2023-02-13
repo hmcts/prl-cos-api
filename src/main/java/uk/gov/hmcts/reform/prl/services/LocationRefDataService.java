@@ -55,7 +55,6 @@ public class LocationRefDataService {
                 List<String> ids = Arrays.stream(courtList).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
                         .toString())
                     .collect(Collectors.toList());
-
                 return ids.contains(location.getCourtEpimmsId());
             })
             .map(this::getDisplayEntry).collect(Collectors.toList()));
@@ -64,7 +63,12 @@ public class LocationRefDataService {
     private DynamicListElement getDisplayEntry(CourtVenue location) {
         String value = concat(concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
                               location.getPostcode());
-        String key = location.getCourtEpimmsId();
+        Optional<String> code = Arrays.stream(courtsToFilter.split(",")).filter(ele -> Arrays.stream(ele.split(":")).toArray()[0]
+                .toString().equalsIgnoreCase(location.getCourtEpimmsId())).findFirst();
+        String key = location.getCourtEpimmsId() + ":";
+        if (code.isPresent()) {
+            key += Arrays.stream(code.get().split(":")).toArray()[1].toString();
+        }
         return DynamicListElement.builder().code(key).label(value).build();
     }
 
