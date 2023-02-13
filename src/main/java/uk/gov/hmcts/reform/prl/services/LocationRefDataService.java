@@ -63,13 +63,16 @@ public class LocationRefDataService {
     private DynamicListElement getDisplayEntry(CourtVenue location) {
         String value = concat(concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
                               location.getPostcode());
-        Optional<String> code = Arrays.stream(courtsToFilter.split(",")).filter(ele -> Arrays.stream(ele.split(":")).toArray()[0]
-                .toString().equalsIgnoreCase(location.getCourtEpimmsId())).findFirst();
         String key = location.getCourtEpimmsId() + ":";
-        if (code.isPresent()) {
-            key += Arrays.stream(code.get().split(":")).toArray()[1].toString();
+        if (courtsToFilter.length() > 1) {
+            Optional<String> code = Arrays.stream(courtsToFilter.split(",")).filter(ele -> Arrays.stream(ele.split(":")).toArray()[0]
+                .toString().equalsIgnoreCase(location.getCourtEpimmsId())).findFirst();
+            if (code.isPresent()) {
+                String[] fields = (String[]) Arrays.stream(code.get().split(":")).toArray();
+                key += fields.length > 1 ? fields[1] : "";
+                log.info("** Court venue key: {}, value: {} ", key, value);
+            }
         }
-        log.info("** Court venue key: {}, value: {} ", key, value);
         return DynamicListElement.builder().code(key).label(value).build();
     }
 
