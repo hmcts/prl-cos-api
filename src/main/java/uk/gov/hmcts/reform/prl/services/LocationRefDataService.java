@@ -52,7 +52,11 @@ public class LocationRefDataService {
                 if (courtList.length == 1) {
                     return true;
                 }
-                return Arrays.asList(courtList).contains(location.getCourtEpimmsId());
+                List<String> ids = Arrays.stream(courtList).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
+                        .toString())
+                    .collect(Collectors.toList());
+
+                return ids.contains(location.getCourtEpimmsId());
             })
             .map(this::getDisplayEntry).collect(Collectors.toList()));
     }

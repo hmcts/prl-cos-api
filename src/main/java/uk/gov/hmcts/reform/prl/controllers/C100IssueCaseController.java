@@ -58,7 +58,8 @@ public class C100IssueCaseController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
-            String baseLocationId = caseData.getCourtList().getValue().getCode();
+            String[] idEmail = caseData.getCourtList().getValue().getCode().split(":");
+            String baseLocationId = Arrays.stream(idEmail).toArray()[0].toString();
             String key = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
             String[] venueDetails = key.split("-");
             String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
