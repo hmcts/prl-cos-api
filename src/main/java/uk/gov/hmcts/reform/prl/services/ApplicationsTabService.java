@@ -130,8 +130,8 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("allegationsOfHarmDomesticAbuseTable", getDomesticAbuseTable(caseData));
             applicationTab.put("allegationsOfHarmChildAbductionTable", getChildAbductionTable(caseData));
             applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
-            applicationTab.put("childDetailsTable", getChildDetails(caseData));
-            applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
+            //applicationTab.put("childDetailsTable", getChildDetails(caseData));
+            //applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
             applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));

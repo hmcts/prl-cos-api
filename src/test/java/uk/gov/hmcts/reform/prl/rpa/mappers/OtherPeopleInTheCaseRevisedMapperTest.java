@@ -57,6 +57,8 @@ public class OtherPeopleInTheCaseRevisedMapperTest {
             .otherGender("Female").canYouProvideEmailAddress(YesOrNo.Yes).email("Email")
             .canYouProvidePhoneNumber(YesOrNo.Yes).phoneNumber("23123123").isPlaceOfBirthKnown(YesOrNo.Yes)
             .placeOfBirth("London").isCurrentAddressKnown(YesOrNo.Yes).address(address)
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
+            .addressLivedLessThan5YearsDetails("Test")
             .build();
         Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(partyDetails).build();
         otherPeopleInTheCase = Collections.singletonList(partyDetailsElement);
