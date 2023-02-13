@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -82,6 +83,7 @@ public class AmendOrderService {
                 .ifPresent(order -> {
                     OrderDetails amended = order.getValue().toBuilder()
                         .orderDocument(amendedDocument)
+                        .dateCreated(LocalDateTime.now())
                         .orderType(order.getValue().getOrderType())
                         .typeOfOrder(order.getValue().getTypeOfOrder())
                         .otherDetails(order.getValue().getOtherDetails().toBuilder()
@@ -94,7 +96,7 @@ public class AmendOrderService {
 
                     orders.addAll(List.of(element(amended)));
                     orders.sort(Comparator.comparing(
-                        m -> m.getValue().getOtherDetails().getOrderCreatedDate(),
+                        m -> m.getValue().getDateCreated(),
                         Comparator.reverseOrder()));
                 });
             if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
