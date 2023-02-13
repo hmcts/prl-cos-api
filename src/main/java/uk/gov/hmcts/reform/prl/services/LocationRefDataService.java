@@ -52,7 +52,10 @@ public class LocationRefDataService {
                 if (courtList.length == 1) {
                     return true;
                 }
-                return Arrays.asList(courtList).contains(location.getCourtEpimmsId());
+                List<String> ids = Arrays.stream(courtList).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
+                        .toString())
+                    .collect(Collectors.toList());
+                return ids.contains(location.getCourtEpimmsId());
             })
             .map(this::getDisplayEntry).collect(Collectors.toList()));
     }
@@ -60,7 +63,16 @@ public class LocationRefDataService {
     private DynamicListElement getDisplayEntry(CourtVenue location) {
         String value = concat(concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
                               location.getPostcode());
-        String key = location.getCourtEpimmsId();
+        String key = location.getCourtEpimmsId() + ":";
+        if (courtsToFilter.length() > 1) {
+            Optional<String> code = Arrays.stream(courtsToFilter.split(",")).filter(ele -> Arrays.stream(ele.split(":")).toArray()[0]
+                .toString().equalsIgnoreCase(location.getCourtEpimmsId())).findFirst();
+            if (code.isPresent()) {
+                String[] fields = (String[]) Arrays.stream(code.get().split(":")).toArray();
+                key += fields.length > 1 ? fields[1] : "";
+                log.info("** Court venue key: {}, value: {} ", key, value);
+            }
+        }
         return DynamicListElement.builder().code(key).label(value).build();
     }
 

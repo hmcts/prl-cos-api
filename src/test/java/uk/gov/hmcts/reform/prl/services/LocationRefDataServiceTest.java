@@ -19,6 +19,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -43,7 +44,7 @@ public class LocationRefDataServiceTest {
     @Before
     public void setUp() {
         when(authTokenGenerator.generate()).thenReturn("");
-        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1,2,3,4");
+        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2:email,3:email,4:email");
     }
 
     @Test
@@ -100,5 +101,18 @@ public class LocationRefDataServiceTest {
                             .build());
         String actual = locationRefDataService.getCourtDetailsFromEpimmsId("2", "test");
         assertEquals("2-id-1-123-test-test", actual);
+    }
+
+    @Test
+    public void testCourtListWithoutEmail() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
+                                                     .region("test").siteName("test")
+                                                     .courtEpimmsId("2")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .build());
+        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
+        assertNotNull(locationRefDataService.getCourtLocations("test"));
     }
 }
