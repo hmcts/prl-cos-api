@@ -38,9 +38,11 @@ public class LocationRefDataService {
             CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(authToken,
                                                                                     authTokenGenerator.generate(),
                                                                                     SERVICE_ID);
-            log.info("courtDetails in location Ref data service", courtDetails);
-            log.info("location ref url in location Ref data service", locationfinderUrl);
-            log.info("courtsTofilter in location Ref data service", courtsToFilter);
+            log.info("courtDetails in location Ref data service {}", courtDetails);
+            log.info("court venues in location Ref data service {}", null != courtDetails.getCourtVenues()
+                ? courtDetails.getCourtVenues().size() : "court venues is empty");
+            log.info("location ref url in location Ref data service {}", locationfinderUrl);
+            log.info("courtsTofilter in location Ref data service {}", courtsToFilter);
             return onlyEnglandAndWalesLocations(courtDetails);
         } catch (Exception e) {
             log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
@@ -50,12 +52,15 @@ public class LocationRefDataService {
 
     private List<DynamicListElement> onlyEnglandAndWalesLocations(CourtDetails locationRefData) {
         String[] courtList = courtsToFilter.split(",");
+
         return (locationRefData == null
             ? new ArrayList<>()
             : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> {
+                log.info("locations inside filter locations {}",location.getCourtEpimmsId());
                 if (courtList.length == 1) {
+                    log.info("courtList lenght is 1 inside onlyEnglandAndWalesLocations");
                     return true;
                 }
                 return Arrays.asList(courtList).contains(location.getCourtEpimmsId());
@@ -67,6 +72,7 @@ public class LocationRefDataService {
         String value = concat(concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
                               location.getPostcode());
         String key = location.getCourtEpimmsId();
+        log.info("key in display entry method() {} value {}",key,value);
         return DynamicListElement.builder().code(key).label(value).build();
     }
 
