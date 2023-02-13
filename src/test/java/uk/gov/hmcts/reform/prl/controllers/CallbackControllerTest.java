@@ -1155,7 +1155,7 @@ public class CallbackControllerTest {
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
         verify(solicitorEmailService, times(1))
             .sendWithDrawEmailToFl401SolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
-        verify(caseWorkerEmailService, times(0))
+        verify(caseWorkerEmailService, times(1))
             .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(), "test@gmail.com");
     }
 
