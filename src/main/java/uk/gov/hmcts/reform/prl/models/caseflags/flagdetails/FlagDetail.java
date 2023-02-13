@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class FlagDetail {
     //  public List<Element<Path>> path;
     public String hearingRelevant;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     public LocalDateTime dateTimeCreated;
     public String flagComment;
     // public Object subTypeKey;
