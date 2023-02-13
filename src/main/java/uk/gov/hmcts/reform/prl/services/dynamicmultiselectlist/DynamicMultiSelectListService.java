@@ -37,7 +37,7 @@ public class DynamicMultiSelectListService {
                     return;
                 }
                 listItems.add(DynamicMultiselectListElement.builder().code(orderDetails.getOrderTypeId() + "-"
-                                                                               + orderDetails.getDateCreated())
+                                                                               + orderDetails.getOtherDetails().getOrderCreatedDate())
                                   .label(orderDetails.getLabelForDynamicList()).build());
             });
         }
