@@ -321,7 +321,7 @@ public class ManageOrdersController {
             log.info("modifiedCaseData ===> " + modifiedCaseData);
             caseDataUpdated.put(
                 "serveOrderDynamicList",
-                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, servedSavedOrders.getDisplayedValue())
+                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(modifiedCaseData, servedSavedOrders.getDisplayedValue())
             );
             log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
         }
