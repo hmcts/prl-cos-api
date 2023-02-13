@@ -83,7 +83,9 @@ public class ManageOrdersController {
                                                                     "amendOrderDynamicList",
                                                                     "serveOrderDynamicList",
                                                                     "ordersNeedToBeServed",
-                                                                    "isJudgeOrLa"
+                                                                    "isJudgeOrLa",
+                                                                    "doYouWantToServeOrder",
+                                                                    "whatDoWithOrder"
     );
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
