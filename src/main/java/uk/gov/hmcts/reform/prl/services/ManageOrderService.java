@@ -802,6 +802,7 @@ public class ManageOrderService {
         boolean isLoggedIsAsJudgeOrLa = isLoggedInAsJudgeOrLa(authorisation);
 
         if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+            log.info("value of orderCollection  ----> " + caseData.getOrderCollection());
             if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
                 && (isLoggedIsAsJudgeOrLa || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
