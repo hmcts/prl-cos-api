@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -237,8 +236,7 @@ public class ManageOrdersController {
             caseDataUpdated.put("isWithdrawRequestSent", "Approved");
         }
         log.info("Selection from Admin##### {}", caseData.getManageOrders().getAmendOrderSelectCheckOptions());
-        if (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-            && caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+        if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
             || caseData.getManageOrdersOptions().equals(uploadAnOrder)
@@ -316,26 +314,30 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.put("isWithdrawRequestSent", "Approved");
         }
-        if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
-            caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
-        } else {
-            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
-                authorisation,
-                caseData
-            ));
-        }
+
         if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
+            if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
+                caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
+            } else {
+                caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+                    authorisation,
+                    caseData
+                ));
+            }
+
+            CaseData modifiedCaseData = objectMapper.convertValue(
+                caseDataUpdated,
+                CaseData.class
+            );
+            log.info("modifiedCaseData ===> " + modifiedCaseData);
+            caseDataUpdated.put(
+                "serveOrderDynamicList",
+                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, servedSavedOrders.getDisplayedValue())
+            );
+            log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
         }
 
-        /*        CaseData modifiedCaseData = objectMapper.convertValue(
-            caseDataUpdated,
-            CaseData.class
-        );
-        log.info("modifiedCaseData ===> " + modifiedCaseData);
-
-        caseDataUpdated.putAll(manageOrderService.populateHeader(modifiedCaseData));*/
-        log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
