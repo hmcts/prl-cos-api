@@ -68,8 +68,8 @@ public class LocationRefDataService {
             Optional<String> code = Arrays.stream(courtsToFilter.split(",")).filter(ele -> Arrays.stream(ele.split(":")).toArray()[0]
                 .toString().equalsIgnoreCase(location.getCourtEpimmsId())).findFirst();
             if (code.isPresent()) {
-                String[] fields = (String[]) Arrays.stream(code.get().split(":")).toArray();
-                key += fields.length > 1 ? fields[1] : "";
+                key += Arrays.stream(code.get().split(":")).toArray().length > 1
+                    ? Arrays.stream(code.get().split(":")).toArray()[1] : "";
                 log.info("** Court venue key: {}, value: {} ", key, value);
             }
         }
