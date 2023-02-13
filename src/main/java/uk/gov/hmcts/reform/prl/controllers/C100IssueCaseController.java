@@ -79,8 +79,8 @@ public class C100IssueCaseController {
             caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
                                                                .value(LocalCourtAdminEmail.builder().email(courtEmail)
                                                                           .build()).build()));
+            caseData.setCourtName(caseDataUpdated.get("courtName").toString());
         }
-        caseData.setCourtName(caseDataUpdated.get("courtName").toString());
         caseData.setIssueDate();
         // Generate All Docs and set to casedataupdated.
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
