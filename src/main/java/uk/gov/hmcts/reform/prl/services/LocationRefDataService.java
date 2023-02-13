@@ -39,8 +39,10 @@ public class LocationRefDataService {
                                                                                     authTokenGenerator.generate(),
                                                                                     SERVICE_ID);
             log.info("courtDetails in location Ref data service {}", courtDetails);
-            log.info("court venues in location Ref data service {}", null != courtDetails.getCourtVenues()
-                ? courtDetails.getCourtVenues().size() : "court venues is empty");
+            if (null != courtDetails) {
+                log.info("court venues in location Ref data service {}", null != courtDetails.getCourtVenues()
+                    ? courtDetails.getCourtVenues().size() : "court venues is empty");
+            }
             log.info("location ref url in location Ref data service {}", locationfinderUrl);
             log.info("courtsTofilter in location Ref data service {}", courtsToFilter);
             return onlyEnglandAndWalesLocations(courtDetails);
