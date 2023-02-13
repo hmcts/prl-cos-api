@@ -196,7 +196,6 @@ public class FL401SubmitApplicationController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        log.info("*CaseDatra at fl401 submit {}", caseData);
         try {
             solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
             if (null != caseData.getCourtEmailAddress()) {
