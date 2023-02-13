@@ -264,13 +264,17 @@ public class CaseWorkerEmailService {
         List<String> emailList = localCourtAdminEmails.stream()
             .map(LocalCourtAdminEmail::getEmail)
             .collect(Collectors.toList());
-
-        emailList.forEach(email ->   emailService.send(
-            email,
-            EmailTemplateNames.COURTADMIN,
-            buildCourtAdminEmail(caseDetails),
-            LanguagePreference.english
-        ));
+        emailList.forEach(email -> {
+            if (null != email) {
+                log.info(" Sending notification to court email : {}", email);
+                emailService.send(
+                    email,
+                    EmailTemplateNames.COURTADMIN,
+                    buildCourtAdminEmail(caseDetails),
+                    LanguagePreference.english
+                );
+            }
+        });
     }
 
     public EmailTemplateVars buildCourtAdminEmail(CaseDetails caseDetails) {
