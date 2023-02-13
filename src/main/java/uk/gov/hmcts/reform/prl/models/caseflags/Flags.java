@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 
 import java.util.List;
 
@@ -15,5 +16,5 @@ public class Flags {
     String partyName;
     String roleOnCase;
 
-    List<Element<String>> details;
+    List<Element<FlagDetail>> details;
 }
