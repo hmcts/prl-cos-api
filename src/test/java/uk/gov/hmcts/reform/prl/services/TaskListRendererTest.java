@@ -24,6 +24,7 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
@@ -343,7 +344,7 @@ public class TaskListRendererTest {
         CaseData caseData = CaseData.builder()
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
                 .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                .taskListVersion("v2")
+                .taskListVersion(TASK_LIST_VERSION_V2)
                 .build();
         List<String> lines = new ArrayList<>();
 

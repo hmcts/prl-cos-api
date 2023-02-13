@@ -27,6 +27,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -569,7 +570,7 @@ public class SubmitAndPayCheckerTest {
             .applicationPermissionRequired(noNotRequired)
             .applicationDetails("Test details")
             .isCaseUrgent(Yes)
-            .taskListVersion("v2")
+            .taskListVersion(TASK_LIST_VERSION_V2)
             .doYouNeedAWithoutNoticeHearing(Yes)
             .caseUrgencyTimeAndReason("reason")
             .effortsMadeWithRespondents("efforts")

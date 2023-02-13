@@ -17,6 +17,7 @@ import javax.json.JsonValue;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
 @RunWith(MockitoJUnitRunner.class)
 public class C100JsonMapperTest {
@@ -112,7 +113,7 @@ public class C100JsonMapperTest {
         List<Element<OtherChildrenNotInTheCase>> listOfOtherChildrenNotInTheCase = Collections.singletonList(wrappedOtherChildrenNotInTheCase);
 
         CaseData caseData = CaseData.builder().courtId("CourtId").id(213123).feeAmount("312312")
-            .taskListVersion("v2")
+            .taskListVersion(TASK_LIST_VERSION_V2)
             .childrenNotInTheCase(listOfOtherChildrenNotInTheCase)
             .familymanCaseNumber("123123").dateSubmitted("2019/1/2").build();
         when(otherChildrenNotInTheCaseMapper.map(listOfOtherChildrenNotInTheCase)).thenReturn(JsonValue.EMPTY_JSON_ARRAY);

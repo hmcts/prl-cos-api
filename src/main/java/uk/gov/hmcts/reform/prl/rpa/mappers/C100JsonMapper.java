@@ -17,6 +17,7 @@ import javax.json.stream.JsonCollectors;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_ARRANGEMENT_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_EVENT_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_EVENT_SEQUENCE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -42,7 +43,7 @@ public class C100JsonMapper {
             .add("solicitor", combinedMapper.map(caseData))
             .add("header", getHeader(caseData.getCourtId(), caseData.getCourtName(), caseData.getId()))
             .add("id", caseData.getId())
-            .add("children", "v2".equalsIgnoreCase(caseData.getTaskListVersion())
+            .add("children", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
                 ? childDetailsRevisedMapper.map(caseData.getNewChildDetails()) : childrenMapper.map(caseData.getChildren()))
             .add("applicants", combinedMapper.getApplicantArray())
             .add("respondents", combinedMapper.getRespondentArray())

@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import java.util.EnumMap;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
@@ -58,7 +59,7 @@ public class SubmitAndPayChecker implements EventChecker {
         mandatoryEvents.put(TYPE_OF_APPLICATION, eventsChecker.getApplicationTypeChecker());
         mandatoryEvents.put(HEARING_URGENCY, eventsChecker.getHearingUrgencyChecker());
         mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.getApplicantsChecker());
-        if ("v2".equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             mandatoryEvents.put(CHILD_DETAILS_REVISED, eventsChecker.getChildDetailsRevisedChecker());
         } else {
             mandatoryEvents.put(CHILD_DETAILS, eventsChecker.getChildChecker());
@@ -79,7 +80,7 @@ public class SubmitAndPayChecker implements EventChecker {
         }
 
         EnumMap<Event, EventChecker> optionalEvents = new EnumMap<>(Event.class);
-        if ("v2".equalsIgnoreCase(caseData.getTaskListVersion())) {
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             optionalEvents.put(
                 OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
                 eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()
