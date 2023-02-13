@@ -264,11 +264,7 @@ public class CallbackController {
                             .collect(
                                 Collectors.toList())))
             .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(
-                caseData.getChildren()
-                    .stream()
-                    .map(Element::getValue)
-                    .collect(
-                        Collectors.toList()))).state(
+                caseData)).state(
                 State.SUBMITTED_NOT_PAID)
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
             .build();

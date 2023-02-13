@@ -111,9 +111,15 @@ public class ManageOrdersController {
         }
         String childOption = null;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            childOption = IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
-                .mapToObj(Integer::toString)
-                .collect(joining());
+            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
+                childOption = IntStream.range(0, defaultIfNull(caseData.getNewChildDetails(), emptyList()).size())
+                    .mapToObj(Integer::toString)
+                    .collect(joining());
+            } else {
+                childOption = IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
+                    .mapToObj(Integer::toString)
+                    .collect(joining());
+            }
         } else {
             Optional<List<Element<ApplicantChild>>> applicantChildDetails = Optional.ofNullable(caseData.getApplicantChildDetails());
             if (applicantChildDetails.isPresent()) {

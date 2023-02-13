@@ -54,6 +54,8 @@ public class OtherPeopleInTheCaseRevisedMapper {
             .add("isCurrentAddressKnown", CommonUtils.getYesOrNoValue(otherPeople.getIsCurrentAddressKnown()))
             .add("address", addressMapper.mapAddress(otherPeople.getAddress()))
             .add("isAddressConfidential", CommonUtils.getYesOrNoValue(otherPeople.getIsAddressConfidential()))
+            .add("isAtAddressLessThan5Years", CommonUtils.getYesOrNoValue(otherPeople.getIsAtAddressLessThan5Years()))
+            .add("addressLivedLessThan5YearsDetails", otherPeople.getAddressLivedLessThan5YearsDetails())
             .add("isPhoneNumberConfidential", CommonUtils.getYesOrNoValue(otherPeople.getIsPhoneNumberConfidential()))
             .add("isEmailAddressConfidential", CommonUtils.getYesOrNoValue(otherPeople.getIsEmailAddressConfidential()))
 

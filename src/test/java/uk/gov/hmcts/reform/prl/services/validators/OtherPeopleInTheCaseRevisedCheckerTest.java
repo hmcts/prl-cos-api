@@ -88,10 +88,6 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
     @Test
     public void whenCompletePartyDetailsThenValidationReturnsTrue() {
 
-        OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
-            .personRelationshipToChild("Test relationship")
-            .build();
-
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("firstName")
             .lastName("lastName")
@@ -106,13 +102,13 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
                          .postCode("postcode")
                          .build())
             .isAddressConfidential(YesOrNo.Yes)
+            .isAtAddressLessThan5Years(YesOrNo.No)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("email@email.com")
             .isEmailAddressConfidential(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("02086656656")
             .isPhoneNumberConfidential(YesOrNo.Yes)
-            .otherPersonRelationshipToChildren(List.of(element(personRelationshipToChild)))
             .build();
 
         assertTrue(otherPeopleInTheCaseChecker.validateMandatoryPartyDetailsForOtherPerson(partyDetails));
@@ -182,6 +178,8 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
             .dxNumber("123456")
             .gender(Gender.female)
             .lastName("lastName")
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
+            .addressLivedLessThan5YearsDetails("Test")
             .previousName("testPreviousname")
             .isDateOfBirthKnown(YesOrNo.Yes)
             .isCurrentAddressKnown(YesOrNo.No)
@@ -223,6 +221,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
             .isPlaceOfBirthKnown(YesOrNo.Yes)
             .placeOfBirth("London")
             .isCurrentAddressKnown(YesOrNo.Yes)
+            .isAtAddressLessThan5Years(YesOrNo.No)
             .address(Address.builder()
                          .addressLine1("add1")
                          .postCode("postcode")

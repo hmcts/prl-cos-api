@@ -106,6 +106,12 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
             fields.add(ofNullable(applicant.getIsAddressConfidential()));
         }
 
+        Optional<YesOrNo> isAtAddressLessThan5Years = ofNullable(applicant.getIsAtAddressLessThan5Years());
+        fields.add(isAtAddressLessThan5Years);
+        if (isAtAddressLessThan5Years.isPresent() && isAtAddressLessThan5Years.get().equals(Yes)) {
+            fields.add(ofNullable(applicant.getAddressLivedLessThan5YearsDetails()));
+        }
+
         Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(applicant.getCanYouProvideEmailAddress());
         fields.add(canYouProvideEmailAddress);
         if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(Yes)) {
