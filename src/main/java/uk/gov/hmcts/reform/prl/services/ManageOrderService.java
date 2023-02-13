@@ -869,7 +869,7 @@ public class ManageOrderService {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
             orders.stream()
-                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId()))
+                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-" + order.getValue().getDateCreated()))
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, order);
