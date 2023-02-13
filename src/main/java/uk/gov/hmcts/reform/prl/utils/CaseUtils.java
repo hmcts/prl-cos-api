@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.ZoneId;
@@ -33,5 +34,20 @@ public class CaseUtils {
 
     public static String getStateLabel(State state) {
         return state != null ? state.getLabel() : "";
+    }
+
+    public static SelectTypeOfOrderEnum getSelectTypeOfOrder(CaseData caseData) {
+        SelectTypeOfOrderEnum isFinalOrder = null;
+        if (caseData.getSelectTypeOfOrder() != null) {
+            isFinalOrder = caseData.getSelectTypeOfOrder();
+        } else if (caseData.getServeOrderData() != null) {
+            isFinalOrder = caseData.getServeOrderData().getSelectTypeOfUploadOrder();
+        }
+        return isFinalOrder;
+    }
+
+    public static String getCaseTypeOfApplication(CaseData caseData) {
+        return caseData.getCaseTypeOfApplication() != null
+            ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
     }
 }
