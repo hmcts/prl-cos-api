@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.HearingDetailsEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -57,6 +58,9 @@ public class HearingManagementService {
 
     public static final String HEARING_STATE_CHANGE_SUCCESS = "hmcCaseUpdateSuccess";
     public static final String HEARING_STATE_CHANGE_FAILURE = "hmcCaseUpdateFailure";
+
+    public static final String NEXT_HEARING_DATE_UPDATE_SUCCESS = "updateNextHearingDate";
+
     private static final String DATE_FORMAT = "dd-MM-yyyy";
 
     private final AuthorisationService authorisationService;
@@ -88,6 +92,8 @@ public class HearingManagementService {
             authTokenGenerator.generate(),
             hearingRequest.getCaseRef()
         );
+
+        log.info("HHHHHHHH {}",caseDetails.getData());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         String hmcStatus = hearingRequest.getHearingUpdate().getHmcStatus();
@@ -163,6 +169,8 @@ public class HearingManagementService {
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
         allTabService.updateAllTabsIncludingConfTab(caseData);
     }
+
+
 
     private void sendHearingChangeDetailsEmail(CaseData caseData) {
 
@@ -514,5 +522,55 @@ public class HearingManagementService {
                 .partyName(partyName)
                 .hearingDetailsPageLink(dashboardUrl + "/dashboard")
                 .build();
+    }
+
+    public void caseNextHearingDateChangeForHearingManagement(NextHearingDateRequest nextHearingDateRequest) throws Exception {
+
+        log.info("Processing the callback for the caseId {} with next hearing date {}", nextHearingDateRequest.getCaseRef(),
+                 nextHearingDateRequest.getHearingDetails().getNextHearingDate());
+
+        String userToken = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(userToken);
+        log.info("Fetching the Case details based on caseId {}", nextHearingDateRequest.getCaseRef()
+        );
+        CaseDetails listedCaseDetails = createEventForNextHearingDate(nextHearingDateRequest, userToken, systemUpdateUserId,
+                                                                      NEXT_HEARING_DATE_UPDATE_SUCCESS);
+        updateTabsAfterStateChange(listedCaseDetails.getData(), listedCaseDetails.getId());
+    }
+
+    private CaseDetails createEventForNextHearingDate(NextHearingDateRequest nextHearingDateRequest, String userToken,
+                                                      String systemUpdateUserId, String eventId) {
+
+        StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
+            userToken,
+            authTokenGenerator.generate(),
+            systemUpdateUserId,
+            JURISDICTION,
+            CASE_TYPE,
+            nextHearingDateRequest.getCaseRef(),
+            eventId
+        );
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("hearingDetails", nextHearingDateRequest.getHearingDetails());
+
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .eventToken(startEventResponse.getToken())
+            .event(Event.builder()
+                       .id(startEventResponse.getEventId())
+                       .build())
+            .data(caseDataMap)
+            .build();
+
+        return  coreCaseDataApi.submitEventForCaseWorker(
+            userToken,
+            authTokenGenerator.generate(),
+            systemUpdateUserId,
+            JURISDICTION,
+            CASE_TYPE,
+            nextHearingDateRequest.getCaseRef(),
+            true,
+            caseDataContent
+        );
     }
 }

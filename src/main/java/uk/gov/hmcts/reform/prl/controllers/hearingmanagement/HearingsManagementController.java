@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.exception.HearingManagementValidationException;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -72,6 +73,22 @@ public class HearingsManagementController {
             throw new HearingManagementValidationException("Provide a valid s2s token");
         } else {
             hearingManagementService.caseStateChangeForHearingManagement(hearingRequest);
+        }
+
+    }
+
+    @PutMapping(path = "/hearing-management-next-hearing-date-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "updates the next hearing date in the prl to and send the status of update")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public void nextHearingDateUpdateByHearingManagement(@RequestHeader("serviceAuthorization") String s2sToken,
+                                                   @RequestBody NextHearingDateRequest nextHearingDateRequest) throws Exception {
+        if (Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
+            throw new HearingManagementValidationException("Provide a valid s2s token");
+        } else {
+            hearingManagementService.caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
         }
 
     }
