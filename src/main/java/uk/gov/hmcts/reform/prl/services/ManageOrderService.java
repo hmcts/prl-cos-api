@@ -804,7 +804,7 @@ public class ManageOrderService {
         List<String> roles = userDetails.getRoles();
         boolean isLoggedIsAsJudgeOrLa = roles.stream().anyMatch(ROLES_JUDGE::contains);
 
-        if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+        if (null != caseData.getManageOrdersOptions() && !caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
                 && (isLoggedIsAsJudgeOrLa || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {

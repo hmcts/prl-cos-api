@@ -13,14 +13,12 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -88,10 +86,6 @@ public class EditAndApproveDraftOrderControllerTest {
             .draftOrderCollection(draftOrderCollection)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
-            .manageOrders(ManageOrders.builder()
-                              .isOrderUploadedByJudgeOrAdmin(Yes)
-                              .build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -100,8 +94,6 @@ public class EditAndApproveDraftOrderControllerTest {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
-        caseDataMap.put("isOrderUploadedByJudgeOrAdmin", caseData.getManageOrders().getIsOrderUploadedByJudgeOrAdmin());
-        caseDataMap.put("manageOrdersOptions", caseData.getManageOrdersOptions());
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()

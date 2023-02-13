@@ -206,7 +206,5 @@ public class ManageOrders {
     private final String isJudgeOrLa;
     @JsonProperty("judgeDirectionsToAdminAmendOrder")
     private final String judgeDirectionsToAdminAmendOrder;
-    @JsonProperty("isOrderUploadedByJudgeOrAdmin")
-    private final YesOrNo isOrderUploadedByJudgeOrAdmin;
 
 }

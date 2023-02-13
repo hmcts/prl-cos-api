@@ -50,7 +50,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -179,14 +178,6 @@ public class DraftAnOrderService {
             DraftOrder::getLabelForOrdersDynamicList
         ));
         caseDataMap.put("caseTypeOfApplication", caseTypeOfApplication);
-        List<DraftOrder> draftOrders = draftOrderCollection
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-        for (DraftOrder draft : draftOrders) {
-            log.info("Manage order selection type::  ****{}***** ", draft.getOrderSelectionType());
-            log.info("Manage is Order uploaded::  ****{}***** ", draft.getIsOrderUploadedByJudgeOrAdmin());
-        }
         return caseDataMap;
     }
 
@@ -434,8 +425,11 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderDocument(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-        DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
+        caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
+        caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
+        DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
+
         if (language.isGenEng()) {
             caseDataMap.put("previewDraftOrder", selectedOrder.getOrderDocument());
         }

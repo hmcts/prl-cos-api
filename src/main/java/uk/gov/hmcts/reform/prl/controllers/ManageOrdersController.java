@@ -47,7 +47,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
-import static uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum.saveAsDraft;
 
 @Slf4j
 @RestController
@@ -234,13 +233,6 @@ public class ManageOrdersController {
             caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
         } else {
             caseDataUpdated.put("isWithdrawRequestSent", "Approved");
-        }
-
-        if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
-            && caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.No)
-            && caseData.getServeOrderData().getWhatDoWithOrder().equals(saveAsDraft)) {
-            caseDataUpdated.put("isOrderUploadedByJudgeOrAdmin", YesOrNo.Yes);
-            log.info("isOrderUploadedByJudgeOrAdmin is set:: {}", caseDataUpdated.get("isOrderUploadedByJudgeOrAdmin"));
         }
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
