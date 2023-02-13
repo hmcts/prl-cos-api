@@ -441,17 +441,6 @@ public class CallbackController {
         log.info("Gatekeeping caseData: {}", caseData);
 
         caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
-        // caseDataUpdated.put("gatekeepingDetails", GatekeepingDetails.builder().isSpecificGateKeeperNeeded(YesOrNo.Yes));
-
-
-        // below code related to SummaryTabService
-        // caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-
-        //  ****** OLD CODE BELOW FOR sending email functionality *******
-        //  final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        //  caseWorkerEmailService.sendEmailToGateKeeper(caseDetails);
-        //  CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        //  Map<String, Object> caseDataUpdated = caseDetails.getData(); ******
 
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
