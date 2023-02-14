@@ -113,6 +113,7 @@ public class LocationRefDataServiceTest {
                                                      .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
                             .build());
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
-        assertNotNull(locationRefDataService.getCourtLocations("test"));
+        List<DynamicListElement> test = locationRefDataService.getCourtLocations("test");
+        assertNotNull(test);
     }
 }
