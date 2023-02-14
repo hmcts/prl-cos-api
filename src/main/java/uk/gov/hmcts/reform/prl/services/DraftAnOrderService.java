@@ -438,9 +438,12 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> populateDraftOrderDocument(CaseData caseData) {
+        log.info("after entering into populateDraftOrderDocument...");
+
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
+        log.info("selectpreviewUploadedOrder document {}", selectedOrder.getOrderDocument());
         log.info("selectedOrder.getIsOrderUploadedByJudgeOrAdmin() {}", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
