@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -338,7 +337,6 @@ public class TaskListRendererTest {
         assertEquals(expectedTaskList, actualTaskList);
     }
 
-    @Ignore
     @Test
     public void shouldRenderC100V2TaskList() throws IOException {
         CaseData caseData = CaseData.builder()
