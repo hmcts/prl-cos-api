@@ -230,8 +230,6 @@ public class CallbackController {
         }
         log.info("       ------------********--------------      ");
         List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
-        log.info("       ------------********--------------      ");
-        log.info("       -----------courtList-------------- {}",courtList);
         caseDataUpdated.put("courtList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
             .build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
