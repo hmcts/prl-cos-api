@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -77,7 +79,7 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
+        log.info("before entering into populateDraftOrderDocument...");
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(draftAnOrderService.populateDraftOrderDocument(
                 caseData)).build();
@@ -122,6 +124,28 @@ public class EditAndApproveDraftOrderController {
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/judge-or-admin-edit-approve/about-to-submit",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Remove dynamic list from the caseData")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback to populate draft order dropdown"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse saveServeOrderDetails(
+        @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
+        caseDataUpdated.put("orderCollection", manageOrderService.serveOrder(caseData, orderCollection));
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated).build();
+
     }
 
     @PostMapping(path = "/judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON,
