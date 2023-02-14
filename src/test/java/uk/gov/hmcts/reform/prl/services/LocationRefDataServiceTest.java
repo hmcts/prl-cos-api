@@ -104,7 +104,7 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
-    public void testIsCafcass(){
+    public void testIsCafcass() {
         YesOrNo isCafcass = locationRefDataService.cafcassFlag("1");
         assertEquals(YesOrNo.Yes, isCafcass);
     }
