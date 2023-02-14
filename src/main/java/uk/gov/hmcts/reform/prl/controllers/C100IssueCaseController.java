@@ -75,7 +75,10 @@ public class C100IssueCaseController {
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
                 .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
-            String courtEmail = Arrays.stream(idEmail).toArray()[1].toString();
+            String courtEmail = "";
+            if (idEmail.length > 1) {
+                courtEmail = Arrays.stream(idEmail).toArray()[1].toString();
+            }
             caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
                                                                .value(LocalCourtAdminEmail.builder().email(courtEmail)
                                                                           .build()).build()));
