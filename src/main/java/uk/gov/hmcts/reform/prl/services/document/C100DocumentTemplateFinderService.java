@@ -46,8 +46,32 @@ public class C100DocumentTemplateFinderService {
     @Value("${document.templates.c100.c100_draft_welsh_template_v2}")
     protected String c100DraftWelshTemplateV2;
 
+    @Value("${document.templates.c100.c100_c8_template}")
+    protected String c100C8Template;
 
-    public String findC100FinalDocumentTemplate(CaseData caseData) {
+    @Value("${document.templates.c100.c100_c8_template_v2}")
+    protected String c100C8TemplateV2;
+
+    @Value("${document.templates.c100.c100_c8_draft_template}")
+    protected String c100C8DraftTemplate;
+
+    @Value("${document.templates.c100.c100_c8_draft_template_v2}")
+    protected String c100C8DraftTemplateV2;
+
+    @Value("${document.templates.c100.c100_c8_welsh_template}")
+    protected String c100C8WelshTemplate;
+
+    @Value("${document.templates.c100.c100_c8_welsh_template_v2}")
+    protected String c100C8WelshTemplateV2;
+
+    @Value("${document.templates.c100.c100_c8_draft_welsh_template}")
+    protected String c100C8DraftWelshTemplate;
+
+    @Value("${document.templates.c100.c100_c8_draft_welsh_template_v2}")
+    protected String c100C8DraftWelshTemplateV2;
+
+
+    public String findFinalDocumentTemplate(CaseData caseData) {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return !documentLanguage.isGenWelsh() ? c100FinalTemplateV2 : c100FinalWelshTemplateV2;
@@ -56,12 +80,30 @@ public class C100DocumentTemplateFinderService {
 
     }
 
-    public String findC100FinalDraftDocumentTemplate(CaseData caseData) {
+    public String findFinalDraftDocumentTemplate(CaseData caseData) {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             return !documentLanguage.isGenWelsh() ? c100DraftTemplateV2 : c100DraftWelshTemplateV2;
         }
         return !documentLanguage.isGenWelsh()  ? c100DraftTemplate : c100DraftWelshTemplate;
+
+    }
+
+    public String findC8DocumentTemplate(CaseData caseData) {
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+            return !documentLanguage.isGenWelsh() ? c100C8TemplateV2 : c100C8WelshTemplateV2;
+        }
+        return !documentLanguage.isGenWelsh() ? c100C8Template : c100C8WelshTemplate;
+
+    }
+
+    public String findC8DraftDocumentTemplate(CaseData caseData) {
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+            return !documentLanguage.isGenWelsh() ? c100C8DraftTemplateV2 : c100C8DraftWelshTemplateV2;
+        }
+        return !documentLanguage.isGenWelsh()  ? c100C8DraftTemplate : c100C8DraftWelshTemplate;
 
     }
 }

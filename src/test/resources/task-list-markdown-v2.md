@@ -84,7 +84,7 @@ Add people to the case details to to <a href='/cases/case-details/${[CASE_REFERE
 
 Add people to the case details to to <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details</a>
 
-Add the details about other people in the case to <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCase/otherPeopleInTheCase1'>Other people in the case</a>
+Add the details about other people in the case to <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCaseRevised/otherPeopleInTheCaseRevised1'>Other people in the case</a>
 
 </div>
 

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.json.stream.JsonCollectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_ARRANGEMENT_CASE;
@@ -37,6 +38,8 @@ public class C100JsonMapper {
     private final InternationalElementMapper internationalElementMapper;
     private final LitigationCapacityMapper litigationCapacityMapper;
     private final CombinedMapper combinedMapper;
+    private final ChildrenAndApplicantsMapper childrenAndApplicantsMapper;
+    private final ChildrenAndRespondentsMapper childrenAndRespondentsMapper;
 
     public JsonObject map(CaseData caseData) {
         return new NullAwareJsonObjectBuilder()
@@ -45,6 +48,10 @@ public class C100JsonMapper {
             .add("id", caseData.getId())
             .add("children", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
                 ? childDetailsRevisedMapper.map(caseData.getNewChildDetails()) : childrenMapper.map(caseData.getChildren()))
+                .add("childAndApplicantRelations", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                        ? childrenAndApplicantsMapper.map(caseData.getChildAndApplicantRelations()) : JsonValue.EMPTY_JSON_ARRAY)
+                .add("childAndRespondentRelations", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                        ? childrenAndRespondentsMapper.map(caseData.getChildAndRespondentRelations()) : JsonValue.EMPTY_JSON_ARRAY)
             .add("applicants", combinedMapper.getApplicantArray())
             .add("respondents", combinedMapper.getRespondentArray())
             .add("typeOfApplication", typeOfApplicantionMapper.map(caseData))

@@ -107,12 +107,6 @@ public class DocumentGenService {
     @Value("${document.templates.c100.c100_draft_filename}")
     protected String c100DraftFilename;
 
-    @Value("${document.templates.c100.c100_c8_template}")
-    protected String c100C8Template;
-
-    @Value("${document.templates.c100.c100_c8_draft_template}")
-    protected String c100C8DraftTemplate;
-
     @Value("${document.templates.c100.c100_c8_filename}")
     protected String c100C8Filename;
 
@@ -136,12 +130,6 @@ public class DocumentGenService {
 
     @Value("${document.templates.c100.c100_draft_welsh_filename}")
     protected String c100DraftWelshFilename;
-
-    @Value("${document.templates.c100.c100_c8_welsh_template}")
-    protected String c100C8WelshTemplate;
-
-    @Value("${document.templates.c100.c100_c8_draft_welsh_template}")
-    protected String c100C8DraftWelshTemplate;
 
     @Value("${document.templates.c100.c100_c8_welsh_filename}")
     protected String c100C8WelshFilename;
@@ -706,15 +694,14 @@ public class DocumentGenService {
     }
 
     private String getTemplate(CaseData caseData, String docGenFor, boolean isWelsh) {
-        String caseTypeOfApp = caseData.getCaseTypeOfApplication();
         String template = "";
 
         switch (docGenFor) {
             case C8_HINT:
-                template = findC8Template(isWelsh, caseTypeOfApp);
+                template = findC8Template(isWelsh, caseData);
                 break;
             case C8_DRAFT_HINT:
-                template = !isWelsh ? c100C8DraftTemplate : c100C8DraftWelshTemplate;
+                template = c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData);
                 break;
             case C1A_HINT:
                 template = !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
@@ -761,7 +748,7 @@ public class DocumentGenService {
     private String findDraftTemplate(boolean isWelsh, CaseData caseData) {
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return c100DocumentTemplateFinderService.findC100FinalDraftDocumentTemplate((caseData));
+            return c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate((caseData));
         }
         return !isWelsh ? fl401DraftTemplate : fl401DraftWelshTemplate;
 
@@ -770,16 +757,16 @@ public class DocumentGenService {
     private String findFinalTemplate(boolean isWelsh, CaseData caseData) {
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return c100DocumentTemplateFinderService.findC100FinalDocumentTemplate(caseData);
+            return c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData);
         }
         return !isWelsh ? fl401FinalTemplate : fl401FinalWelshTemplate;
 
     }
 
-    private String findC8Template(boolean isWelsh, String caseTypeOfApp) {
+    private String findC8Template(boolean isWelsh, CaseData caseData) {
         String template;
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
-            template = !isWelsh ? c100C8Template : c100C8WelshTemplate;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            return c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData);
         } else {
             template = !isWelsh ? fl401C8Template : fl401C8WelshTemplate;
         }
