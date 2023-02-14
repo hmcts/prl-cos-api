@@ -303,7 +303,7 @@ public class DraftAnOrderService {
 
     }
 
-    private ServeOrderDetails getServeOrderDetailsFromCaseData(CaseData caseData) {
+    public ServeOrderDetails getServeOrderDetailsFromCaseData(CaseData caseData) {
 
         ServeOrderDetails serveOrderDetails = null;
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
