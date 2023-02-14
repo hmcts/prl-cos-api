@@ -259,7 +259,8 @@ public class DraftAnOrderService {
                         )) : null)
                     .orderRecipients(manageOrderService.getAllRecipients(caseData)).build())
             .serveOrderDetails(serveOrderDetails).build();
-        if (!Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
+        if (!Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())
+            && !Yes.equals(caseData.getManageOrders().getOrderUploadedAsDraftFlag())) {
             try {
                 if (documentLanguage.isGenEng()) {
                     generatedDocumentInfo = dgsService.generateDocument(
@@ -290,7 +291,8 @@ public class DraftAnOrderService {
                     draftOrder.getOrderType()
                 );
             }
-        } else {
+        } else  if (Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())
+            && Yes.equals(caseData.getManageOrders().getOrderUploadedAsDraftFlag())) {
             orderDetails = orderDetails.toBuilder()
                 .orderDocument(caseData.getManageOrders().getEditedUploadOrderDoc())
                 .build();
@@ -565,6 +567,9 @@ public class DraftAnOrderService {
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData) {
         Document orderDocumentEng;
         Document orderDocumentWelsh;
+        if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
+            orderDocumentEng = caseData.getManageOrders().getEditedUploadOrderDoc();
+        }
         if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
             orderDocumentEng = caseData.getPreviewOrderDoc();
             orderDocumentWelsh = caseData.getPreviewOrderDocWelsh();

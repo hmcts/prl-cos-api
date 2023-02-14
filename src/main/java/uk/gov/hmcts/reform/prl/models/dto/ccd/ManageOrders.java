@@ -219,6 +219,7 @@ public class ManageOrders {
     @JsonProperty("nameOfLaAmendOrder")
     private final String nameOfLaAmendOrder;
 
+    private Document previewUploadedOrder;
     private YesOrNo orderUploadedAsDraftFlag;
     private YesOrNo makeChangesToUploadedOrder;
     private Document editedUploadOrderDoc;
