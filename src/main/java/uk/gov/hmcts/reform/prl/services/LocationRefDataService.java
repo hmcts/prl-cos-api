@@ -80,7 +80,7 @@ public class LocationRefDataService {
 
     public YesOrNo cafcassFlag(String regionId) {
 
-        YesOrNo cafcassFlag = YesOrNo.No;
+        YesOrNo cafcassFlag = YesOrNo.No; //wales
 
         int intRegionId = Integer.parseInt(regionId);
 
