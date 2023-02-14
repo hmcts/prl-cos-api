@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.tab.summary.generator;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -22,6 +23,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @Component
+@Slf4j
 public class OtherProceedingsGenerator implements  FieldGenerator {
     @Override
     public CaseSummary generate(CaseData caseData) {
@@ -54,6 +56,14 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
     }
 
     public List<Element<OtherProceedings>> getOtherProceedingsDetails(CaseData caseData) {
+
+        log.info("inside getOtherProceedingsDetails");
+
+        log.info("case data -> {} ", caseData);
+
+
+        log.info("case data getCaseTypeOfApplication-> {} ", caseData.getCaseTypeOfApplication());
+
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
             return getC100OtherProceedingsDetails(caseData);
         }
