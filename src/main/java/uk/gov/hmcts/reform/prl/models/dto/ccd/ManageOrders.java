@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.Post
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -217,4 +218,8 @@ public class ManageOrders {
     private final String nameOfJudgeAmendOrder;
     @JsonProperty("nameOfLaAmendOrder")
     private final String nameOfLaAmendOrder;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+    private final LocalDateTime currentOrderCreatedDateTime;
+
 }
