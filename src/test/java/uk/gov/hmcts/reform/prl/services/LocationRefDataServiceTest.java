@@ -103,6 +103,7 @@ public class LocationRefDataServiceTest {
         assertEquals("2-id-1-123-test-test", actual);
     }
 
+
     @Test
     public void testCourtListWithoutEmail() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
