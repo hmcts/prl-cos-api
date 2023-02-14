@@ -74,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -226,11 +227,7 @@ public class DraftAnOrderService {
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
         GeneratedDocumentInfo generatedDocumentInfoWelsh = null;
-        ServeOrderDetails serveOrderDetails = null;
-        if (YesOrNo.Yes.equals(caseData.getServeOrderData()
-                                   .getDoYouWantToServeOrder())) {
-            serveOrderDetails = getServeOrderDetailsFromCaseData(caseData);
-        }
+
         OrderDetails orderDetails = OrderDetails.builder()
             .orderType(draftOrder.getOrderTypeId())
             .typeOfOrder(draftOrder.getOrderType() != null
@@ -257,7 +254,7 @@ public class DraftAnOrderService {
                             Locale.UK
                         )) : null)
                     .orderRecipients(manageOrderService.getAllRecipients(caseData)).build())
-            .serveOrderDetails(serveOrderDetails).build();
+            .build();
         if (!Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())
             && !Yes.equals(caseData.getManageOrders().getOrderUploadedAsDraftFlag())) {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -439,9 +436,13 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> populateDraftOrderDocument(CaseData caseData) {
+        log.info("after entering into populateDraftOrderDocument...");
+
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
+        log.info("selectpreviewUploadedOrder document {}", selectedOrder.getOrderDocument());
+        log.info("selectedOrder.getIsOrderUploadedByJudgeOrAdmin() {}", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
         DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
@@ -581,7 +582,8 @@ public class DraftAnOrderService {
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
             .typeOfOrder(draftOrder.getOrderType() != null
                              ? draftOrder.getOrderType().getDisplayedValue() : null)
-            .orderTypeId(draftOrder.getOrderType().getDisplayedValue())
+            .orderTypeId(!uploadAnOrder.equals(draftOrder.getOrderSelectionType())
+                             ? draftOrder.getOrderType().getDisplayedValue() : null)
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()
