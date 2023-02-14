@@ -254,6 +254,9 @@ public class DraftAnOrderService {
                         )) : null)
                     .orderRecipients(manageOrderService.getAllRecipients(caseData)).build())
             .build();
+
+        log.info("Makechanges to upload order {}", caseData.getManageOrders().getMakeChangesToUploadedOrder());
+        log.info("upload order flag {}", caseData.getManageOrders().getOrderUploadedAsDraftFlag());
         if (!Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())
             && !Yes.equals(caseData.getManageOrders().getOrderUploadedAsDraftFlag())) {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -438,6 +441,7 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
+        log.info("selectedOrder.getIsOrderUploadedByJudgeOrAdmin() {}", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
         DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
