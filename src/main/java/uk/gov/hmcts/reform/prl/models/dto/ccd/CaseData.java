@@ -756,8 +756,9 @@ public class CaseData implements MappableObject {
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
 
     private final DynamicList legalAdviserList;
-    
+
     private AllocatedJudge allocatedJudge;
+    @JsonProperty("gatekeepingDetails")
     private GatekeepingDetails gatekeepingDetails;
 }
 
