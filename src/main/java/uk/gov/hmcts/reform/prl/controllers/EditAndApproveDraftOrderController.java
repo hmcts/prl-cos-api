@@ -103,9 +103,7 @@ public class EditAndApproveDraftOrderController {
             && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
             .equals(caseData.getServeOrderData().getWhatDoWithOrder())
             || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
-            if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
-                caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
-            }
+
             CaseData updatedCaseData = objectMapper.convertValue(
                 caseDataUpdated,
                 CaseData.class
