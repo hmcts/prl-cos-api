@@ -578,8 +578,8 @@ public class DraftAnOrderService {
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
             .typeOfOrder(draftOrder.getOrderType() != null
                              ? draftOrder.getOrderType().getDisplayedValue() : null)
-            .orderTypeId(!uploadAnOrder.equals(draftOrder.getOrderSelectionType())
-                             ? draftOrder.getOrderType().getDisplayedValue() : null)
+            .orderTypeId(null != draftOrder.getOrderType()
+                              ? draftOrder.getOrderType().getDisplayedValue() : manageOrderService.getSelectedOrderInfoForUpload(caseData))
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()
