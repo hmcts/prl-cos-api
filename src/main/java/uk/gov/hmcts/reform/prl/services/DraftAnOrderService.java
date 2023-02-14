@@ -229,61 +229,74 @@ public class DraftAnOrderService {
         GeneratedDocumentInfo generatedDocumentInfoWelsh = null;
         ServeOrderDetails serveOrderDetails = null;
         if (YesOrNo.Yes.equals(caseData.getServeOrderData()
-                                  .getDoYouWantToServeOrder())) {
+                                   .getDoYouWantToServeOrder())) {
             serveOrderDetails = getServeOrderDetailsFromCaseData(caseData);
         }
-        try {
-            if (documentLanguage.isGenEng()) {
-                generatedDocumentInfo = dgsService.generateDocument(
-                    auth,
-                    CaseDetails.builder().caseData(caseData).build(),
-                    fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderType(draftOrder.getOrderTypeId())
+            .typeOfOrder(draftOrder.getOrderType() != null
+                             ? draftOrder.getOrderType().getDisplayedValue() : null)
+            .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
+            .adminNotes(caseData.getCourtAdminNotes())
+            .dateCreated(draftOrder.getOtherDetails().getDateCreated())
+            .judgeNotes(draftOrder.getJudgeNotes())
+            .otherDetails(
+                OtherOrderDetails.builder().createdBy(draftOrder.getOtherDetails().getCreatedBy())
+                    .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
+                        PrlAppsConstants.D_MMMM_YYYY,
+                        Locale.UK
+                    )))
+                    .orderMadeDate(draftOrder.getOtherDetails().getDateCreated().format(
+                        DateTimeFormatter.ofPattern(
+                            PrlAppsConstants.D_MMMM_YYYY,
+                            Locale.UK
+                        )))
+                    .orderServedDate(YesOrNo.Yes.equals(caseData.getServeOrderData()
+                                                            .getDoYouWantToServeOrder()) ? LocalDate.now()
+                        .format(DateTimeFormatter.ofPattern(
+                            PrlAppsConstants.D_MMMM_YYYY,
+                            Locale.UK
+                        )) : null)
+                    .orderRecipients(manageOrderService.getAllRecipients(caseData)).build())
+            .serveOrderDetails(serveOrderDetails).build();
+        if (!Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
+            try {
+                if (documentLanguage.isGenEng()) {
+                    generatedDocumentInfo = dgsService.generateDocument(
+                        auth,
+                        CaseDetails.builder().caseData(caseData).build(),
+                        fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
+                    );
+                }
+                if (documentLanguage.isGenWelsh()) {
+                    generatedDocumentInfoWelsh = dgsService.generateDocument(
+                        auth,
+                        CaseDetails.builder().caseData(caseData).build(),
+                        fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH)
+                    );
+                }
+                orderDetails = orderDetails.toBuilder()
+                    .orderDocument(getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
+                    .orderDocumentWelsh(getGeneratedDocument(
+                        generatedDocumentInfoWelsh,
+                        documentLanguage.isGenWelsh(),
+                        fieldMap
+                    ))
+                    .build();
+            } catch (Exception e) {
+                log.error(
+                    "Error while generating the final document for case {} and  order {}",
+                    caseData.getId(),
+                    draftOrder.getOrderType()
                 );
             }
-            if (documentLanguage.isGenWelsh()) {
-                generatedDocumentInfoWelsh = dgsService.generateDocument(
-                    auth,
-                    CaseDetails.builder().caseData(caseData).build(),
-                    fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH)
-                );
-            }
-        } catch (Exception e) {
-            log.error(
-                "Error while generating the final document for case {} and  order {}",
-                caseData.getId(),
-                draftOrder.getOrderType()
-            );
+        } else {
+            orderDetails = orderDetails.toBuilder()
+                .orderDocument(caseData.getManageOrders().getEditedUploadOrderDoc())
+                .build();
         }
 
-        return element(OrderDetails.builder()
-                           .orderType(draftOrder.getOrderTypeId())
-                           .typeOfOrder(draftOrder.getOrderType() != null
-                                            ? draftOrder.getOrderType().getDisplayedValue() : null)
-                           .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
-                           .orderDocument(getGeneratedDocument(generatedDocumentInfo,false,fieldMap))
-                           .orderDocumentWelsh(getGeneratedDocument(generatedDocumentInfoWelsh,documentLanguage.isGenWelsh(),fieldMap))
-                           .adminNotes(caseData.getCourtAdminNotes())
-                           .dateCreated(draftOrder.getOtherDetails().getDateCreated())
-                           .judgeNotes(draftOrder.getJudgeNotes())
-                           .otherDetails(
-                               OtherOrderDetails.builder().createdBy(draftOrder.getOtherDetails().getCreatedBy())
-                                   .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                       PrlAppsConstants.D_MMMM_YYYY,
-                                       Locale.UK
-                                   )))
-                                   .orderMadeDate(draftOrder.getOtherDetails().getDateCreated().format(
-                                       DateTimeFormatter.ofPattern(
-                                           PrlAppsConstants.D_MMMM_YYYY,
-                                           Locale.UK
-                                       )))
-                                   .orderServedDate(YesOrNo.Yes.equals(caseData.getServeOrderData()
-                                                                           .getDoYouWantToServeOrder()) ? LocalDate.now()
-                                       .format(DateTimeFormatter.ofPattern(
-                                           PrlAppsConstants.D_MMMM_YYYY,
-                                           Locale.UK
-                                       )) : null)
-                                   .orderRecipients(manageOrderService.getAllRecipients(caseData)).build())
-                           .serveOrderDetails(serveOrderDetails).build());
+        return element(orderDetails);
 
     }
 

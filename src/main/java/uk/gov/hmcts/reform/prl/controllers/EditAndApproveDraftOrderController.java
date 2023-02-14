@@ -23,12 +23,14 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 
 @Slf4j
 @RestController
@@ -38,6 +40,9 @@ public class EditAndApproveDraftOrderController {
     private final DraftAnOrderService draftAnOrderService;
     @Autowired
     private ManageOrderService manageOrderService;
+
+    @Autowired
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
@@ -79,7 +84,7 @@ public class EditAndApproveDraftOrderController {
 
     }
 
-    @PostMapping(path = "/judge-or-admin-edit-approve/about-to-submit", consumes = APPLICATION_JSON,
+    @PostMapping(path = "/judge-or-admin-edit-approve/mid-event", consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate draft order collection")
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
@@ -97,6 +102,10 @@ public class EditAndApproveDraftOrderController {
             .equals(caseData.getServeOrderData().getWhatDoWithOrder())
             || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
             caseDataUpdated.putAll(draftAnOrderService.removeDraftOrderAndAddToFinalOrder(authorisation, caseData));
+            caseDataUpdated.put(
+                "serveOrderDynamicList",
+                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, servedSavedOrders.getDisplayedValue())
+            );
         } else {
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
         }
