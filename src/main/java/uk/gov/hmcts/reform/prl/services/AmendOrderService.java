@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class AmendOrderService {
 
     private Map<String, Object> updateAmendedOrderDetails(CaseData caseData,
                                                           uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument) {
-
+        Map<String, Object> orderMap = new HashMap<>();
         UUID selectedOrderId = caseData.getManageOrders().getAmendOrderDynamicList().getValueCodeAsUuid();
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         List<Element<OrderDetails>> updatedOrders;
@@ -83,10 +84,13 @@ public class AmendOrderService {
                 .ifPresent(order -> {
                     OrderDetails amended = order.getValue().toBuilder()
                         .orderDocument(amendedDocument)
-                        .dateCreated(LocalDateTime.now())
+                        .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
+                                         ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : LocalDateTime.now())
                         .orderType(order.getValue().getOrderType())
                         .typeOfOrder(order.getValue().getTypeOfOrder())
+                        .serveOrderDetails(null)
                         .otherDetails(order.getValue().getOtherDetails().toBuilder()
+                                          .orderServedDate(null)
                                           .orderCreatedDate(time.now().format(DateTimeFormatter.ofPattern(
                                               PrlAppsConstants.D_MMMM_YYYY,
                                               Locale.UK
@@ -98,13 +102,16 @@ public class AmendOrderService {
                     orders.sort(Comparator.comparing(
                         m -> m.getValue().getDateCreated(),
                         Comparator.reverseOrder()));
+                    LocalDateTime currentOrderCreatedDateTime = amended.getDateCreated();
+                    orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
                 });
             if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
                 updatedOrders =  manageOrderService.serveOrder(caseData,orders);
             } else {
                 updatedOrders = orders;
             }
-            return Map.of("orderCollection", updatedOrders);
+            orderMap.put("orderCollection", updatedOrders);
+            return orderMap;
         } else {
             return  setDraftOrderCollection(caseData, amendedDocument);
         }

@@ -46,6 +46,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -650,7 +651,6 @@ public class ManageOrderService {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             List<Element<OrderDetails>> orderCollection = new ArrayList<>();
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-
             if (documentLanguage.isGenEng()) {
                 log.info("*** Generating Final order in English ***");
                 orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
@@ -700,7 +700,8 @@ public class ManageOrderService {
                                                              ManageOrdersOptionsEnum.createAnOrder) ? getAllRecipients(
                                                              caseData) : null)
                                                          .build())
-                                       .dateCreated(dateTime.now())
+                                       .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
+                                                        ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
                                        .typeOfOrder(typeOfOrder != null
                                                             ? typeOfOrder.getDisplayedValue() : null)
                                        .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
@@ -802,7 +803,7 @@ public class ManageOrderService {
         List<Element<OrderDetails>> orderCollection;
         boolean isLoggedIsAsJudgeOrLa = isLoggedInAsJudgeOrLa(authorisation);
 
-        if (null != caseData.getManageOrdersOptions() && !caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+        if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
                 && (isLoggedIsAsJudgeOrLa || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
@@ -819,11 +820,14 @@ public class ManageOrderService {
                 if (caseData.getManageOrdersOptions().equals(uploadAnOrder) && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
                     orderCollection = serveOrder(caseData, orderCollection);
                 }
+                LocalDateTime currentOrderCreatedDateTime = orderDetails.get(0).getValue().getDateCreated();
+                orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
             }
         } else {
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
         }
-        return Map.of("orderCollection", orderCollection);
+        orderMap.put("orderCollection", orderCollection);
+        return orderMap;
     }
 
     public Map<String, Object> setDraftOrderCollection(CaseData caseData, boolean isLoggedIsAsJudgeOrLa) {
@@ -851,7 +855,8 @@ public class ManageOrderService {
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderTypeId(flagSelectedOrderId)
             .orderDocument(caseData.getUploadOrderDoc())
-            .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
+            .childrenList(caseData.getManageOrders() != null
+                              ? getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()) : null)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
@@ -872,7 +877,8 @@ public class ManageOrderService {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
             orders.stream()
-                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-" + order.getValue().getDateCreated()))
+                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-"
+                                                               + order.getValue().getDateCreated()))
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, order);
