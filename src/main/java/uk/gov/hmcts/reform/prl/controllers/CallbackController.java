@@ -439,9 +439,11 @@ public class CallbackController {
         GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(caseDataUpdated,
                                                                                                 caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
-        log.info("Gatekeeping caseData: {}", caseData);
+        log.info("Gatekeeping caseData: {}", caseData.getGatekeepingDetails());
 
         caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
+
+        log.info("Gatekeeping caseDataUpdated: {}", caseDataUpdated.get("gatekeepingDetails"));
 
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
