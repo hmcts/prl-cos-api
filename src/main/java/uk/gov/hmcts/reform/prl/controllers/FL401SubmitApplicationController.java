@@ -189,7 +189,7 @@ public class FL401SubmitApplicationController {
         }
         caseData = caseData.setDateSubmittedDate();
 
-        caseData.setIsCafcass(cafcassFlag(regionId));
+        caseData.setIsCafcass(YesOrNo.No);
 
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
 
@@ -237,18 +237,4 @@ public class FL401SubmitApplicationController {
             .data(caseData)
             .build();
     }
-
-    public YesOrNo cafcassFlag(String regionId) {
-
-        YesOrNo cafcassFlag = YesOrNo.No;
-
-        int intRegionId = Integer.parseInt(regionId);
-
-        if (intRegionId > 0 && intRegionId < 7) {
-            cafcassFlag = YesOrNo.Yes; //english regions
-        }
-
-        return cafcassFlag;
-    }
-
 }
