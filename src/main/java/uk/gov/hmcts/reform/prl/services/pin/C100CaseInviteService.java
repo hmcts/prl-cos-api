@@ -51,7 +51,9 @@ public class C100CaseInviteService implements CaseInviteService {
             }
         }
         //PRLC100-431 - Generate case invites & send notification to c100 applicants for case created/submitted by citizen
-        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+        if (launchDarklyClient.isFeatureEnabled("generate-ca-citizen-applicant-pin")
+            && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            log.info("Generating case invites and sending notification to citizen applicants with email");
             for (Element<PartyDetails> applicant : caseData.getApplicants()) {
                 if (!hasLegalRepresentation(applicant.getValue()) && Yes.equals(applicant.getValue().getCanYouProvideEmailAddress())) {
                     CaseInvite caseInvite = generateCaseInvite(applicant, Yes);
