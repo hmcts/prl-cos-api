@@ -143,6 +143,8 @@ public class CaseData implements MappableObject {
      */
     private CaseCreatedBy caseCreatedBy;
 
+    private YesOrNo isCafcass;
+
     /**
      * Case Type Of Application.
      */

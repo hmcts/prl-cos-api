@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
@@ -52,12 +53,7 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 
 @Slf4j
 @RestController
@@ -188,6 +184,8 @@ public class FL401SubmitApplicationController {
         }
         caseData = caseData.setDateSubmittedDate();
 
+        caseData.setIsCafcass(cafcassFlag(regionId, authorisation));
+
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
 
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
@@ -196,6 +194,7 @@ public class FL401SubmitApplicationController {
 
         caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
         caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
+
 
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder()
@@ -232,6 +231,19 @@ public class FL401SubmitApplicationController {
         return CallbackResponse.builder()
             .data(caseData)
             .build();
+    }
+
+    public YesOrNo cafcassFlag(String regionId, String authorization) {
+
+        YesOrNo cafcassFlag = YesOrNo.No;
+
+        int intRegionId = Integer.parseInt(regionId);
+
+        if (intRegionId > 0 && intRegionId < 7) {
+            cafcassFlag = YesOrNo.Yes; //english regions
+        }
+
+        return cafcassFlag;
     }
 
 }
