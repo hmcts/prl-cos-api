@@ -226,11 +226,7 @@ public class DraftAnOrderService {
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
         GeneratedDocumentInfo generatedDocumentInfoWelsh = null;
-        ServeOrderDetails serveOrderDetails = null;
-        if (YesOrNo.Yes.equals(caseData.getServeOrderData()
-                                   .getDoYouWantToServeOrder())) {
-            serveOrderDetails = getServeOrderDetailsFromCaseData(caseData);
-        }
+
         OrderDetails orderDetails = OrderDetails.builder()
             .orderType(draftOrder.getOrderTypeId())
             .typeOfOrder(draftOrder.getOrderType() != null
@@ -257,7 +253,7 @@ public class DraftAnOrderService {
                             Locale.UK
                         )) : null)
                     .orderRecipients(manageOrderService.getAllRecipients(caseData)).build())
-            .serveOrderDetails(serveOrderDetails).build();
+            .build();
         if (!Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())
             && !Yes.equals(caseData.getManageOrders().getOrderUploadedAsDraftFlag())) {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
