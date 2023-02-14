@@ -593,7 +593,6 @@ public class CaseData implements MappableObject {
     private String caseSolicitorOrgName;
     private String selectedOrder;
 
-
     /**
      * FL401 Court details for Pilot.
      */
@@ -615,6 +614,7 @@ public class CaseData implements MappableObject {
 
         return this;
     }
+
 
     /**
      * Withdraw request flag.
@@ -749,4 +749,7 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
+    @JsonProperty("cafcassUploadedDocs")
+    private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
+
 }
