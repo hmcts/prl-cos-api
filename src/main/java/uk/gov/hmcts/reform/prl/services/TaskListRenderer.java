@@ -282,7 +282,7 @@ public class TaskListRenderer {
                               + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added"));
                 break;
             case CANNOT_START_YET:
-                lines.add(taskListRenderElements.renderLink(task)
+                lines.add(taskListRenderElements.renderDisabledLink(task)
                         + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
                 break;
             case FINISHED:
