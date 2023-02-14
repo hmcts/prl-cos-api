@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -38,6 +39,8 @@ public class AllocateJudgeControllerFT {
 
     private final String allocateJudgeEndpoint = "/allocateJudge/allocatedJudgeDetails";
 
+    private final String userToken = "Bearer testToken";
+
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
@@ -52,6 +55,7 @@ public class AllocateJudgeControllerFT {
         String requestBody = ResourceLoader.loadJson(ALLOCATE_TIER_OF_JUDICIARY_VALID_REQUEST_BODY);
 
         Response response = request
+            .header(HttpHeaders.AUTHORIZATION,userToken)
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -67,6 +71,7 @@ public class AllocateJudgeControllerFT {
         String requestBody = ResourceLoader.loadJson(ALLOCATE_LEGAL_ADVISER_VALID_REQUEST_BODY);
 
         Response response = request
+            .header(HttpHeaders.AUTHORIZATION,userToken)
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -83,6 +88,7 @@ public class AllocateJudgeControllerFT {
         String requestBody = ResourceLoader.loadJson(ALLOCATE_JUDGE_VALID_REQUEST_BODY);
 
         Response response = request
+            .header(HttpHeaders.AUTHORIZATION,userToken)
             .body(requestBody)
             .when()
             .contentType("application/json")

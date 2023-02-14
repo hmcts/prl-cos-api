@@ -70,7 +70,7 @@ public class AllocateJudgeControllerTest {
             .build();
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
         AboutToStartOrSubmitCallbackResponse response = allocateJudgeController.prePopulateLegalAdvisorDetails(
-            callbackRequest);
+            "auth",callbackRequest);
         assertNotNull(response.getData().containsKey("legalAdvisorList"));
     }
 
@@ -113,7 +113,7 @@ public class AllocateJudgeControllerTest {
 
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
 
-        assertNotNull(allocateJudgeController.allocateJudge(callbackRequest));
+        assertNotNull(allocateJudgeController.allocateJudge("auth",callbackRequest));
 
     }
 

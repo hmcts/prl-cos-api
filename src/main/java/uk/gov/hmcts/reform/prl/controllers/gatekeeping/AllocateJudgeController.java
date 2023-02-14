@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -8,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -49,6 +52,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
     @PostMapping(path = "/pre-populate-legalAdvisor-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to retrieve legal advisor details")
     public AboutToStartOrSubmitCallbackResponse prePopulateLegalAdvisorDetails(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
         log.info("Prepopulate Legal Advisor - case id : {}", callbackRequest.getCaseDetails().getId());
         List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
@@ -64,7 +68,9 @@ public class AllocateJudgeController extends AbstractCallbackController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Allocated Judge Successfully ."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse allocateJudge(@RequestBody CallbackRequest callbackRequest) {
+    public AboutToStartOrSubmitCallbackResponse allocateJudge(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         log.info("Allocate judge details for the case id : {}", caseData.getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
