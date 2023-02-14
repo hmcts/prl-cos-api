@@ -223,8 +223,7 @@ public class DraftAnOrderService {
 
     private Element<OrderDetails> convertDraftOrderToFinal(String auth, CaseData caseData, DraftOrder draftOrder) {
         log.info("draftOrder.getOrderType************ {}", draftOrder.getOrderType());
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
+
         GeneratedDocumentInfo generatedDocumentInfo = null;
         GeneratedDocumentInfo generatedDocumentInfoWelsh = null;
         ServeOrderDetails serveOrderDetails = null;
@@ -261,6 +260,8 @@ public class DraftAnOrderService {
             .serveOrderDetails(serveOrderDetails).build();
         if (!Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())
             && !Yes.equals(caseData.getManageOrders().getOrderUploadedAsDraftFlag())) {
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             try {
                 if (documentLanguage.isGenEng()) {
                     generatedDocumentInfo = dgsService.generateDocument(
@@ -294,7 +295,7 @@ public class DraftAnOrderService {
         } else  if (Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())
             && Yes.equals(caseData.getManageOrders().getOrderUploadedAsDraftFlag())) {
             orderDetails = orderDetails.toBuilder()
-                .orderDocument(caseData.getManageOrders().getEditedUploadOrderDoc())
+                .orderDocument(draftOrder.getOrderDocument())
                 .build();
         }
 
