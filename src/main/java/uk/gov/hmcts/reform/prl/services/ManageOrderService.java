@@ -800,9 +800,7 @@ public class ManageOrderService {
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
         throws Exception {
         List<Element<OrderDetails>> orderCollection;
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        List<String> roles = userDetails.getRoles();
-        boolean isLoggedIsAsJudgeOrLa = roles.stream().anyMatch(ROLES_JUDGE::contains);
+        boolean isLoggedIsAsJudgeOrLa = isLoggedInAsJudgeOrLa(authorisation);
 
         if (null != caseData.getManageOrdersOptions() && !caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
@@ -869,12 +867,12 @@ public class ManageOrderService {
             .build();
     }
 
-    private List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
+    public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
         if (null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
             orders.stream()
-                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId()))
+                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-" + order.getValue().getDateCreated()))
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, order);
@@ -1314,6 +1312,13 @@ public class ManageOrderService {
         }
 
         return withdrawApproved;
+    }
+
+    public boolean isLoggedInAsJudgeOrLa(String authorisation) {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        List<String> roles = userDetails.getRoles();
+        boolean isJudgeOrLa = roles.stream().anyMatch(ROLES_JUDGE::contains);
+        return isJudgeOrLa;
     }
 
 }
