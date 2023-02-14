@@ -11,6 +11,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
@@ -100,5 +101,11 @@ public class LocationRefDataServiceTest {
                             .build());
         String actual = locationRefDataService.getCourtDetailsFromEpimmsId("2", "test");
         assertEquals("2-id-1-123-test-test", actual);
+    }
+
+    @Test
+    public void testIsCafcass(){
+        YesOrNo isCafcass = locationRefDataService.cafcassFlag("1");
+        assertEquals(YesOrNo.Yes, isCafcass);
     }
 }
