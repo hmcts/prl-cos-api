@@ -101,10 +101,22 @@ public class EditAndApproveDraftOrderController {
             && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
             .equals(caseData.getServeOrderData().getWhatDoWithOrder())
             || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
-            caseDataUpdated.putAll(draftAnOrderService.removeDraftOrderAndAddToFinalOrder(authorisation, caseData));
+            if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
+                caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
+            }
+            CaseData updatedCaseData = objectMapper.convertValue(
+                caseDataUpdated,
+                CaseData.class
+            );
+            caseDataUpdated.putAll(draftAnOrderService.removeDraftOrderAndAddToFinalOrder(authorisation, updatedCaseData));
+            CaseData modifiedCaseData = objectMapper.convertValue(
+                caseDataUpdated,
+                CaseData.class
+            );
+            log.info("modifiedCaseData ===> " + modifiedCaseData);
             caseDataUpdated.put(
                 "serveOrderDynamicList",
-                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, servedSavedOrders.getDisplayedValue())
+                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(modifiedCaseData, servedSavedOrders.getDisplayedValue())
             );
         } else {
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
