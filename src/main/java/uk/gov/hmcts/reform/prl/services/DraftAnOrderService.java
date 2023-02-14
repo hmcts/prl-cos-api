@@ -536,7 +536,6 @@ public class DraftAnOrderService {
             .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
     }
 
-
     public Map<String, Object> updateDraftOrderCollection(CaseData caseData) {
 
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
@@ -565,7 +564,9 @@ public class DraftAnOrderService {
         Document orderDocumentEng;
         Document orderDocumentWelsh;
         if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
+            log.info("entering if loop for upload...");
             orderDocumentEng = caseData.getManageOrders().getEditedUploadOrderDoc();
+            log.info("upload.order doc....{}", orderDocumentEng);
         }
         if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
             orderDocumentEng = caseData.getPreviewOrderDoc();
@@ -577,8 +578,7 @@ public class DraftAnOrderService {
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
             .typeOfOrder(draftOrder.getOrderType() != null
                              ? draftOrder.getOrderType().getDisplayedValue() : null)
-            .orderTypeId(null != draftOrder.getOrderType()
-                              ? draftOrder.getOrderType().getDisplayedValue() : manageOrderService.getSelectedOrderInfoForUpload(caseData))
+            .orderTypeId(draftOrder.getOrderType().getDisplayedValue())
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()
