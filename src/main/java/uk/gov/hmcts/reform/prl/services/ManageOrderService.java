@@ -805,7 +805,7 @@ public class ManageOrderService {
 
         Map<String, Object> orderMap = new HashMap<>();
 
-        if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+        if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
             log.info("value of orderCollection  ----> " + caseData.getOrderCollection());
             if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
                 && (isLoggedIsAsJudgeOrLa || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
