@@ -79,6 +79,10 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                    @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        log.info("Case Details ----------------> {} ", caseDetails);
+
+
         CaseData caseData = getCaseData(caseDetails);
 
         log.info("handleMidEvent case data getCaseTypeOfApplication-> {} ", caseData.getCaseTypeOfApplication());
