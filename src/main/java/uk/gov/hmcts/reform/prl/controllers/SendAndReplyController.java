@@ -80,6 +80,8 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
+
+        log.info("handleMidEvent case data getCaseTypeOfApplication-> {} ", caseData.getCaseTypeOfApplication());
         Map<String, Object> caseDataMap = new HashMap<>();
 
         List<String> errors = new ArrayList<>();
@@ -91,6 +93,7 @@ public class SendAndReplyController extends AbstractCallbackController {
             }
         }
 
+        log.info("case data getCaseTypeOfApplication-> {} ", caseData.getCaseTypeOfApplication());
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder()

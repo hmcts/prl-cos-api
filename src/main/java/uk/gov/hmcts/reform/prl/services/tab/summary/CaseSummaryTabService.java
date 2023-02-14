@@ -72,6 +72,8 @@ public class CaseSummaryTabService implements TabService {
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {
 
+        log.info("updateTab case data getCaseTypeOfApplication-> {} ", caseData.getCaseTypeOfApplication());
+
         Map<String, Object> summaryTabFields = getGenerators(caseData).stream()
             .map(generator -> generator.generate(caseData))
             .flatMap(summary -> objectMapper.convertValue(
@@ -86,6 +88,9 @@ public class CaseSummaryTabService implements TabService {
                     m.put(v.getKey(), v.getValue());
                 }
             }, HashMap::putAll);
+
+        log.info("updateTab case data getCaseTypeOfApplication- Afterr> {} ", caseData.getCaseTypeOfApplication());
+
 
         // For Collection Fields, We should do manually since it should have element structure..
         CaseSummary caseSummary = otherProceedingsGenerator.generate(caseData);

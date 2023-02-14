@@ -98,8 +98,11 @@ public class AllTabServiceImpl implements AllTabsService {
     }
 
     private Map<String, Object> getCombinedMap(CaseData caseData) {
+        log.info("getCombinedMap case data getCaseTypeOfApplication-> {} ", caseData.getCaseTypeOfApplication());
         Map<String, Object> applicationTabFields = applicationsTabService.updateTab(
             caseData);
+
+        log.info("getCombinedMap case data getCaseTypeOfApplication Afterrrrr -> {} ", caseData.getCaseTypeOfApplication());
 
         Map<String, Object> summaryTabFields = caseSummaryTabService.updateTab(caseData);
 
