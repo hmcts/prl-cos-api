@@ -1156,20 +1156,4 @@ public class ManageOrderService {
         return withdrawApproved;
     }
 
-    public boolean cafcassFlag(uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails, String authorization) {
-
-        boolean cafcassFlag = false;
-
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        String baseLocationId = caseData.getSubmitCountyCourtSelection().getValue().getCode();
-        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,authorization).split("-");
-
-        int regionId = Integer.parseInt(Arrays.stream(venueDetails).toArray()[1].toString());
-
-        if (regionId < 7 && regionId > 0) {
-            cafcassFlag = true; //english regions
-        }
-
-        return cafcassFlag;
-    }
 }
