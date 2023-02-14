@@ -803,7 +803,10 @@ public class ManageOrderService {
         List<Element<OrderDetails>> orderCollection;
         boolean isLoggedIsAsJudgeOrLa = isLoggedInAsJudgeOrLa(authorisation);
 
+        Map<String, Object> orderMap = new HashMap<>();
+
         if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+            log.info("value of orderCollection  ----> " + caseData.getOrderCollection());
             if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
                 && (isLoggedIsAsJudgeOrLa || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
