@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Data
 @Builder(toBuilder = true)
-public class HearingDetails {
+public class NextHearingDetails {
 
     @JsonProperty("hearingID")
     private final String hearingID;

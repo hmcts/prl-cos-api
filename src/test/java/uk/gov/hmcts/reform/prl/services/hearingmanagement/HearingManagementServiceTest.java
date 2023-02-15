@@ -22,6 +22,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingsUpdate;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.HearingDetailsEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
@@ -29,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,6 +68,9 @@ public class HearingManagementServiceTest {
     private EmailService emailService;
 
     private HearingRequest hearingRequest;
+
+    private NextHearingDateRequest nextHearingDateRequest;
+
     private CaseData c100CaseData;
     private HearingDetailsEmail applicantEmailVars;
     private HearingDetailsEmail respondentEmailVars;
@@ -86,9 +92,11 @@ public class HearingManagementServiceTest {
     private final String eventToken = "eventToken";
     private String dashBoardUrl = "https://privatelaw.aat.platform.hmcts.net/dashboard";
 
+    private LocalDateTime testNextHearingDate = LocalDateTime.of(2024, 04, 28, 1, 0);
+
     @Before
     public void setup() {
-
+        testNextHearingDate = LocalDateTime.of(2024, 04, 28, 1, 0);
         hearingRequest = HearingRequest.builder()
             .hearingId("123")
             .caseRef("1669565933090179")
@@ -99,6 +107,12 @@ public class HearingManagementServiceTest {
                                .hearingVenueId("MRD-CRT-0817")
                                .hearingVenueName("Aldershot")
                                .hmcStatus("LISTED")
+                               .build())
+            .build();
+
+        nextHearingDateRequest = NextHearingDateRequest.builder()
+            .caseRef("1669565933090179")
+            .nextHearingDetails(NextHearingDetails.builder().hearingID("123").nextHearingDate(testNextHearingDate)
                                .build())
             .build();
 
@@ -349,6 +363,19 @@ public class HearingManagementServiceTest {
     private CaseDataContent buildCaseDataContent(String eventId, String eventToken, State state) {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("state", state);
+
+        return CaseDataContent.builder()
+            .eventToken(eventToken)
+            .event(Event.builder()
+                       .id(eventId)
+                       .build())
+            .data(caseDataMap)
+            .build();
+    }
+
+    private CaseDataContent buildCaseDataContentForNhd(String eventId, String eventToken, NextHearingDetails nextHearingDetails) {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("nextHearingDetails", nextHearingDetails);
 
         return CaseDataContent.builder()
             .eventToken(eventToken)
@@ -661,6 +688,34 @@ public class HearingManagementServiceTest {
                                                          caseType, hearingRequest1.getCaseRef(), true,
                                                          buildCaseDataContent("hmcCaseUpdateFailure", eventToken,
                                                                               fl401CaseData.getState())
+        );
+        assertTrue(true);
+    }
+
+    @Test
+    public void testHmcNextHearingDateChangeAndNotificationForC100() throws Exception {
+
+        Map<String, Object> stringObjectMap = c100CaseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(c100CaseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1669565933090179L).data(stringObjectMap).build();
+        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                     caseType, nextHearingDateRequest.getCaseRef(), "updateNextHearingDate"))
+            .thenReturn(buildStartEventResponse("updateNextHearingDate", eventToken));
+        NextHearingDetails nextHearingDetails = NextHearingDetails.builder().hearingID("123").nextHearingDate(testNextHearingDate).build();
+        when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                      caseType, nextHearingDateRequest.getCaseRef(), true,
+                                                      buildCaseDataContentForNhd("updateNextHearingDate", eventToken,nextHearingDetails)))
+            .thenReturn(caseDetails);
+
+        hearingManagementService.caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
+
+        verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                        caseType, nextHearingDateRequest.getCaseRef(), "updateNextHearingDate"
+        );
+        verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                         caseType, nextHearingDateRequest.getCaseRef(), true,
+                                                         buildCaseDataContentForNhd("updateNextHearingDate", eventToken,nextHearingDetails)
         );
         assertTrue(true);
     }

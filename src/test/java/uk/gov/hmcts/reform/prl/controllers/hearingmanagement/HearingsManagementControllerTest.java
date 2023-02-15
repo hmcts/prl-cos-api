@@ -9,10 +9,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.exception.HearingManagementValidationException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingsUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
 
@@ -63,7 +63,7 @@ public class HearingsManagementControllerTest {
 
         nextHearingDateRequest = nextHearingDateRequest.builder()
             .caseRef("1669565933090179")
-            .hearingDetails(HearingDetails.builder()
+            .nextHearingDetails(NextHearingDetails.builder()
                                .nextHearingDate(LocalDateTime.parse("2023-04-13T09:00:00"))
                                .hearingID("2000004862")
                                .build())

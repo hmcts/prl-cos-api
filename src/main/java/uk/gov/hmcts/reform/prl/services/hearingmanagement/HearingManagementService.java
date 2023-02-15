@@ -527,12 +527,12 @@ public class HearingManagementService {
     public void caseNextHearingDateChangeForHearingManagement(NextHearingDateRequest nextHearingDateRequest) throws Exception {
 
         log.info("Processing the callback for the caseId {} with next hearing date {}", nextHearingDateRequest.getCaseRef(),
-                 nextHearingDateRequest.getHearingDetails().getNextHearingDate());
+                 nextHearingDateRequest.getNextHearingDetails().getNextHearingDate());
 
         String userToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(userToken);
         log.info("Fetching the Case details based on caseId {}", nextHearingDateRequest.getCaseRef());
-        CaseDetails listedCaseDetails = createEventForNextHearingDate(nextHearingDateRequest, userToken, systemUpdateUserId,
+        createEventForNextHearingDate(nextHearingDateRequest, userToken, systemUpdateUserId,
                                                                       NEXT_HEARING_DATE_UPDATE_SUCCESS);
     }
 
@@ -550,7 +550,7 @@ public class HearingManagementService {
         );
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("nextHearingDetails", nextHearingDateRequest.getHearingDetails());
+        caseDataMap.put("nextHearingDetails", nextHearingDateRequest.getNextHearingDetails());
 
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())

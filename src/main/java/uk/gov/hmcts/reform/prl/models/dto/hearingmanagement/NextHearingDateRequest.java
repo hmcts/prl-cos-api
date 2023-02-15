@@ -14,5 +14,5 @@ public class NextHearingDateRequest {
 
     @JsonProperty("caseRef")
     private final String caseRef;
-    private final HearingDetails hearingDetails;
+    private final NextHearingDetails nextHearingDetails;
 }
