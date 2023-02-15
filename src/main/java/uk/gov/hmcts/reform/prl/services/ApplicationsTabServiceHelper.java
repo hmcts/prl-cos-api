@@ -111,7 +111,7 @@ public class ApplicationsTabServiceHelper {
         List<Element<ChildAndApplicantRelation>> applicants = new ArrayList<>();
         Optional<List<Element<ChildrenAndApplicantRelation>>> checkApplicants = ofNullable(caseData.getChildAndApplicantRelations());
 
-        if (checkApplicants.isEmpty() || checkApplicants.get().isEmpty()) {
+        if (checkApplicants.isEmpty() || checkApplicants.get().isEmpty() || checkApplicants.get().size() == 0) {
             ChildAndApplicantRelation a = ChildAndApplicantRelation.builder().build();
             Element<ChildAndApplicantRelation> app = Element.<ChildAndApplicantRelation>builder().value(a).build();
             applicants.add(app);
@@ -136,7 +136,7 @@ public class ApplicationsTabServiceHelper {
         List<Element<ChildAndRespondentRelation>> respondents = new ArrayList<>();
         Optional<List<Element<ChildrenAndRespondentRelation>>> checkRespondents = ofNullable(caseData.getChildAndRespondentRelations());
 
-        if (checkRespondents.isEmpty() || checkRespondents.get().isEmpty()) {
+        if (checkRespondents.isEmpty() || checkRespondents.get().isEmpty() || checkRespondents.get().size() == 0) {
             ChildAndRespondentRelation a = ChildAndRespondentRelation.builder().build();
             Element<ChildAndRespondentRelation> app = Element.<ChildAndRespondentRelation>builder().value(a).build();
             respondents.add(app);
@@ -160,7 +160,7 @@ public class ApplicationsTabServiceHelper {
         List<Element<ChildAndOtherPeopleRelation>> otherPeopleRelations = new ArrayList<>();
         Optional<List<Element<ChildrenAndOtherPeopleRelation>>> checkRespondents = ofNullable(caseData.getChildAndOtherPeopleRelations());
 
-        if (checkRespondents.isEmpty() || checkRespondents.get().isEmpty()) {
+        if (checkRespondents.isEmpty() || checkRespondents.get().isEmpty() || checkRespondents.get().size() == 0) {
             ChildAndOtherPeopleRelation a = ChildAndOtherPeopleRelation.builder().build();
             Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(a).build();
             otherPeopleRelations.add(app);
