@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 public class HearingDetails {
 
-    @JsonProperty("hearingId")
-    private final String hearingId;
+    @JsonProperty("hearingID")
+    private final String hearingID;
     @JsonProperty("nextHearingDate")
     private final LocalDateTime nextHearingDate;
 

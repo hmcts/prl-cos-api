@@ -9,12 +9,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.exception.HearingManagementValidationException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingsUpdate;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -40,6 +43,8 @@ public class HearingsManagementControllerTest {
 
     private HearingRequest hearingRequest;
 
+    private NextHearingDateRequest nextHearingDateRequest;
+
     @Before
     public void setUp() {
 
@@ -53,6 +58,14 @@ public class HearingsManagementControllerTest {
                                .hearingVenueId("MRD-CRT-0817")
                                .hearingVenueName("Aldershot")
                                .hmcStatus("LISTED")
+                               .build())
+            .build();
+
+        nextHearingDateRequest = nextHearingDateRequest.builder()
+            .caseRef("1669565933090179")
+            .hearingDetails(HearingDetails.builder()
+                               .nextHearingDate(LocalDateTime.parse("2023-04-13T09:00:00"))
+                               .hearingID("2000004862")
                                .build())
             .build();
     }
@@ -87,4 +100,26 @@ public class HearingsManagementControllerTest {
             () -> hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest)
         );
     }
+
+    @Test
+    public void shouldUpdateCaseNextHearingDateWhenCalled() throws Exception {
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        doNothing().when(hearingManagementService).caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
+
+        hearingsManagementController.nextHearingDateUpdateByHearingManagement("s2s token", nextHearingDateRequest);
+        assertTrue(true);
+
+    }
+
+    @Test
+    public void shouldReturnErrorIfInvalidAuthTokenIsProvidedForNextHearing() throws Exception {
+        when(authorisationService.authoriseService(any())).thenReturn(false);
+        doNothing().when(hearingManagementService).caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
+        assertThrows(
+            HearingManagementValidationException.class,
+            () -> hearingsManagementController.nextHearingDateUpdateByHearingManagement("s2s token", nextHearingDateRequest)
+        );
+    }
+
 }

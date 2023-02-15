@@ -74,7 +74,6 @@ public class HearingsManagementController {
         } else {
             hearingManagementService.caseStateChangeForHearingManagement(hearingRequest);
         }
-
     }
 
     @PutMapping(path = "/hearing-management-next-hearing-date-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

@@ -531,11 +531,9 @@ public class HearingManagementService {
 
         String userToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(userToken);
-        log.info("Fetching the Case details based on caseId {}", nextHearingDateRequest.getCaseRef()
-        );
+        log.info("Fetching the Case details based on caseId {}", nextHearingDateRequest.getCaseRef());
         CaseDetails listedCaseDetails = createEventForNextHearingDate(nextHearingDateRequest, userToken, systemUpdateUserId,
                                                                       NEXT_HEARING_DATE_UPDATE_SUCCESS);
-        updateTabsAfterStateChange(listedCaseDetails.getData(), listedCaseDetails.getId());
     }
 
     private CaseDetails createEventForNextHearingDate(NextHearingDateRequest nextHearingDateRequest, String userToken,
@@ -552,7 +550,7 @@ public class HearingManagementService {
         );
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("hearingDetails", nextHearingDateRequest.getHearingDetails());
+        caseDataMap.put("nextHearingDetails", nextHearingDateRequest.getHearingDetails());
 
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
