@@ -46,7 +46,6 @@ public class DraftAnOrderController {
     @Autowired
     private DraftAnOrderService draftAnOrderService;
 
-
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to reset fields")
     @ApiResponses(value = {
@@ -211,7 +210,7 @@ public class DraftAnOrderController {
         caseDataUpdated.put("caseTypeOfApplication", caseData.getSelectedCaseTypeID());
         caseDataUpdated.putAll(draftAnOrderService.generateDraftOrderCollection(caseData));
         log.info("*** Case type of application in draft orders submission : {}", caseDataUpdated.get("caseTypeOfApplication"));
+        caseDataUpdated.put("previewOrderDoc",null);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
-
