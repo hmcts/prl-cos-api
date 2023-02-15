@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import java.util.ArrayList;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +46,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
-import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -669,10 +667,15 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse prePopulateHearingType(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
+
+        ArrayList hearingType = new ArrayList<>();
+        hearingType.add("Test1");
+        hearingType.add("Test2");
+        hearingType.add("Test3");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("listWithoutNoticeHearingDetails",HearingData.builder().hearingTypes(DynamicList.builder().value(DynamicListElement.builder().code("Test1").build()).build()));
-        caseDataUpdated.put("listWithoutNoticeHearingDetails",HearingData.builder().hearingTypes(DynamicList.builder().value(DynamicListElement.builder().code("Test2").build()).build()));
-        caseDataUpdated.put("listWithoutNoticeHearingDetails",HearingData.builder().hearingTypes(DynamicList.builder().value(DynamicListElement.builder().code("Test3").build()).build()));
+        caseDataUpdated.put("listWithoutNoticeHearingDetails",HearingData.builder()
+                                .hearingTypes(DynamicList.builder().value(DynamicListElement.EMPTY).listItems(hearingType).build()));
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
