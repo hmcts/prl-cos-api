@@ -65,7 +65,9 @@ public class PrePopulateFeeAndSolicitorNameController {
     @Autowired
     private DgsService dgsService;
 
+    @Autowired
     private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
+
 
     @Autowired
     private OrganisationService organisationService;
