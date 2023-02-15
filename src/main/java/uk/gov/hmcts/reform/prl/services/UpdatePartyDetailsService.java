@@ -83,8 +83,6 @@ public class UpdatePartyDetailsService {
         return updatedCaseData;
     }
 
-
-
     private void setApplicantFlag(CaseData caseData, Map<String, Object> caseDetails) {
 
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());

@@ -34,4 +34,12 @@ public class CaseUtils {
     public static String getStateLabel(State state) {
         return state != null ? state.getLabel() : "";
     }
+
+    public static String getCaseType(CaseData caseData) {
+        String caseType = caseData.getCaseTypeOfApplication();
+        if (caseType == null) {
+            caseType = caseData.getSelectedCaseTypeID();
+        }
+        return caseType;
+    }
 }

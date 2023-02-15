@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -74,7 +75,7 @@ public class ManageOrderEmailService {
     public void sendEmailToApplicantAndRespondent(CaseDetails caseDetails) {
         CaseData caseData = emailService.getCaseData(caseDetails);
         SelectTypeOfOrderEnum isFinalOrder = caseData.getSelectTypeOfOrder();
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+        if (CaseUtils.getCaseType(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             Map<String, String> applicantsMap = getEmailPartyWithName(caseData
                                                                          .getApplicants());
             Map<String, String> respondentMap = getEmailPartyWithName(caseData
@@ -129,7 +130,7 @@ public class ManageOrderEmailService {
     private void sendNotificationToRespondent(CaseDetails caseDetails) {
         log.info("inside sendNotificationToRespondent");
         CaseData caseData = emailService.getCaseData(caseDetails);
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+        if (CaseUtils.getCaseType(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             for (Element<PartyDetails> respondent : caseData.getRespondents()) {
                 if (!StringUtils.isEmpty(respondent.getValue().getEmail())) {
                     emailService.send(
@@ -157,7 +158,7 @@ public class ManageOrderEmailService {
     private void sendNotificationToRespondentSolicitor(CaseDetails caseDetails) {
         log.info("inside sendNotificationToRespondentSolicitor ");
         CaseData caseData = emailService.getCaseData(caseDetails);
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+        if (CaseUtils.getCaseType(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             for (Map<String, List<String>> resSols : getRespondentSolicitor(caseDetails)) {
                 String solicitorEmail = resSols.keySet().toArray()[0].toString();
                 if (!StringUtils.isEmpty(solicitorEmail)) {
