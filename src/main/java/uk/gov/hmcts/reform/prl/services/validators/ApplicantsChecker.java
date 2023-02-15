@@ -39,7 +39,7 @@ public class ApplicantsChecker implements EventChecker {
 
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
-        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+        if (FL401_CASE_TYPE.equals(CaseUtils.getCaseType(caseData))
             && caseData.getApplicantsFL401() != null) {
             Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getApplicantsFL401()).build();
             applicantsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
@@ -57,7 +57,7 @@ public class ApplicantsChecker implements EventChecker {
             Optional<String> dxNumber = ofNullable(applicant.getDxNumber());
             boolean mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(
                 applicant,
-                caseData.getCaseTypeOfApplication()
+                CaseUtils.getCaseType(caseData)
             );
             boolean dxCompleted = (dxNumber.isPresent() && !(dxNumber.get().isBlank()));
 
@@ -88,7 +88,7 @@ public class ApplicantsChecker implements EventChecker {
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> applicantsWrapped = Optional.empty();
-        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+        if (FL401_CASE_TYPE.equals(CaseUtils.getCaseType(caseData))) {
             if (caseData.getApplicantsFL401() != null) {
                 Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getApplicantsFL401()).build();
                 applicantsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
@@ -108,7 +108,7 @@ public class ApplicantsChecker implements EventChecker {
             for (PartyDetails applicant : applicants) {
                 mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(
                     applicant,
-                    caseData.getCaseTypeOfApplication()
+                    CaseUtils.getCaseType(caseData)
                 );
                 if (!mandatoryCompleted) {
                     break;
