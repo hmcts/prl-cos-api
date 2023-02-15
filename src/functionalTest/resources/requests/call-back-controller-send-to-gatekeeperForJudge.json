@@ -4,23 +4,12 @@
     "case_data": {
       "caseTypeOfApplication": "C100",
       "isSpecificJudgeOrLegalAdviserNeeded": "Yes",
-      "isJudgeOrLegalAdviser": "legalAdviser",
-      "judgeNameAndEmail": {},
+      "isJudgeOrLegalAdviser": "judge",
+      "judgeNameAndEmail": {
+        "idamId" :null,
+        "personalCode": "49933940"
+      },
       "legalAdviserList": {
-        "value": {
-          "code": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)",
-          "label": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)"
-        },
-        "list_items": [
-          {
-            "code": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)",
-            "label": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)"
-          },
-          {
-            "code": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)",
-            "label": "Ahir(crd_func_test_2.0_rdcc_3831_74@justice.gov.uk)"
-          }
-        ]
       }
     },
     "case_type_id": "string",

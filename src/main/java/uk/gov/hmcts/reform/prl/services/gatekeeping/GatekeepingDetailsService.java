@@ -17,6 +17,9 @@ import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME;
+
 
 @Slf4j
 @Service
@@ -32,18 +35,18 @@ public class GatekeepingDetailsService {
     private GatekeepingDetails mapGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
                                                      RefDataUserService refDataUserService) {
         GatekeepingDetails.GatekeepingDetailsBuilder gatekeepingDetailsBuilder = GatekeepingDetails.builder();
-        if (null != caseDataUpdated.get("isJudgeOrLegalAdviserGatekeeping")) {
-            if (SendToGatekeeperTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("isJudgeOrLegalAdviserGatekeeping")))
+        if (null != caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)) {
+            if (SendToGatekeeperTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)))
                 && null != caseDataUpdated.get("judgeName")) {
-                String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get("judgeName"));
+                String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get(JUDGE_NAME));
                 List<JudicialUsersApiResponse> judgeDetails =
                     refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                                                                     .personalCode(getPersonalCode(caseDataUpdated.get("judgeName"))).build());
+                                                                     .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME))).build());
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
                 gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.judge));
                 if (null != judgeDetails && judgeDetails.size() > 0) {
                     gatekeepingDetailsBuilder.judgeName(JudicialUser.builder()
-                                                            .personalCode(getPersonalCode(caseDataUpdated.get("judgeName"))[0]).build());
+                                                            .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME))[0]).build());
                     gatekeepingDetailsBuilder.judgePersonalCode(judgePersonalCode[0]);
 
                 }
