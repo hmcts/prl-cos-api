@@ -15,7 +15,7 @@ public enum HearingDateConfirmOptionEnum {
     @JsonProperty("dateReservedWithListAssit")
     dateReservedWithListAssit("dateReservedWithListAssit", "The date is reserved with List Assist"),
     @JsonProperty("dateConfirmed")
-    dateConfirmed("dateConfirmed", "The date is confirmed in the Hearings tab"),
+    dateConfirmedInHearings("dateConfirmed", "The date is confirmed in the Hearings tab"),
     @JsonProperty("dateConfirmedByListingTeam")
     dateConfirmedByListingTeam("dateConfirmedByListingTeam", "The date needs to be confirmed by the listing team before service"),
     @JsonProperty("dateToBeFixed")
