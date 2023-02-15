@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +29,7 @@ public class TaskErrorService {
         for (Map.Entry<EventErrorsEnum, EventValidationErrors> entry : eventErrors.entrySet()) {
             eventErrorList.add(entry.getValue());
         }
-        eventErrorList.sort(Comparator.comparingInt(x -> Event.getEventOrder(caseData.getCaseTypeOfApplication())
+        eventErrorList.sort(Comparator.comparingInt(x -> Event.getEventOrder(CaseUtils.getCaseType(caseData))
             .indexOf(x.getEvent())));
         return eventErrorList;
     }
