@@ -118,6 +118,7 @@ public class CaseData implements MappableObject {
 
     private final long id;
     private final long id1;
+    private final long id2;
 
     private final State state;
 
