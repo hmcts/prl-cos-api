@@ -171,9 +171,20 @@ public class ApplicationsTabServiceHelper {
             .collect(Collectors.toList());
 
         for (ChildrenAndOtherPeopleRelation otherPeople : currentApplicants) {
-            ChildAndOtherPeopleRelation a = objectMapper.convertValue(otherPeople, ChildAndOtherPeopleRelation.class);
-            Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(a).build();
-            otherPeopleRelations.add(app);
+            log.info("getOtherPeopleFullName :{}",otherPeople.getOtherPeopleFullName());
+            log.info("getChildFullName : {}",otherPeople.getChildFullName());
+            log.info("getChildAndOtherPeopleRelation {}",otherPeople.getChildAndOtherPeopleRelation());
+            log.info("getChildAndOtherPeopleRelationOtherDetails: {}",otherPeople.getChildAndOtherPeopleRelationOtherDetails());
+            log.info("getChildLivesWith {}",otherPeople.getChildLivesWith());
+            log.info("getIsChildLivesWithPersonConfidential {}",otherPeople.getIsChildLivesWithPersonConfidential());
+            if (ofNullable(otherPeople.getChildAndOtherPeopleRelation()).isPresent()) {
+                ChildAndOtherPeopleRelation a = objectMapper.convertValue(
+                    otherPeople,
+                    ChildAndOtherPeopleRelation.class
+                );
+                Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(a).build();
+                otherPeopleRelations.add(app);
+            }
         }
         log.info("-->getChildAndOtherPeopleRelationsTable()--->End");
         return otherPeopleRelations;
