@@ -760,5 +760,8 @@ public class CaseData implements MappableObject {
     private AllocatedJudge allocatedJudge;
     @JsonProperty("gatekeepingDetails")
     private GatekeepingDetails gatekeepingDetails;
+
+
+    private final List<Element<HearingData>> hearingData;
 }
 
