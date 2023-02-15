@@ -55,7 +55,8 @@ public class C100JsonMapperTest {
     ChildrenAndApplicantsMapper childrenAndApplicantsMapper;
     @Mock
     ChildrenAndRespondentsMapper childrenAndRespondentsMapper;
-
+    @Mock
+    ChildrenAndOtherPeopleMapper childrenAndOtherPeopleMapper;
 
     @Test
     public void testC100JsonMapperWithSomeFields() {
