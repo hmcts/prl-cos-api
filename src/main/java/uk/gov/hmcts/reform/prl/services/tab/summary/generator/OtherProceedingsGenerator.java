@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedingEmptyTable;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,7 +55,7 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
     }
 
     public List<Element<OtherProceedings>> getOtherProceedingsDetails(CaseData caseData) {
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
+        if (CaseUtils.getCaseType(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
             return getC100OtherProceedingsDetails(caseData);
         }
 
