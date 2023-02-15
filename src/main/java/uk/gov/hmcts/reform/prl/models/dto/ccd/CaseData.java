@@ -117,6 +117,8 @@ import java.util.Map;
 public class CaseData implements MappableObject {
 
     private final long id;
+    private final long id1;
+    private final long id2;
 
     private final State state;
 
@@ -484,6 +486,7 @@ public class CaseData implements MappableObject {
     @JsonProperty("finalWelshDocument")
     private final Document finalWelshDocument;
 
+    /**
     /**
      * Confidentiality details.
      */
