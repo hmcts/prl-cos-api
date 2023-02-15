@@ -37,8 +37,6 @@ public class C100DocumentTemplateFinderService {
     @Value("${document.templates.c100.c100_draft_welsh_template}")
     protected String c100DraftWelshTemplate;
 
-
-
     @Value("${document.templates.c100.c100_draft_template_v2}")
     protected String c100DraftTemplateV2;
 
