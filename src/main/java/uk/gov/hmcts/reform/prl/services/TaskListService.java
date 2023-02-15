@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.validators.EventsChecker;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,11 +97,7 @@ public class TaskListService {
     }
 
     private List<Event> getEvents(CaseData caseData) {
-        String caseType = caseData.getCaseTypeOfApplication();
-        if (caseType == null) {
-            caseType = caseData.getSelectedCaseTypeID();
-        }
-        return caseType.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)
+        return CaseUtils.getCaseType(caseData).equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)
             ? getFL401Events(caseData) : getC100Events();
     }
 

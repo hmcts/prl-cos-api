@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,8 +80,7 @@ public class ApplicantsChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-
-        return (caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)
+        return (CaseUtils.getCaseType(caseData).equals(FL401_CASE_TYPE)
             ? caseData.getApplicantsFL401() != null
             : caseData.getApplicants() != null);
     }
