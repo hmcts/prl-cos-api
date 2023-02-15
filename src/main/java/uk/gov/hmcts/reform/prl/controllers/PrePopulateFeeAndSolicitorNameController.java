@@ -148,7 +148,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
-                    c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData)
+                    c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails)
             );
 
             caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
@@ -163,7 +163,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 callbackRequest.getCaseDetails(),
-                    c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData)
+                    c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails)
             );
 
             caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())
