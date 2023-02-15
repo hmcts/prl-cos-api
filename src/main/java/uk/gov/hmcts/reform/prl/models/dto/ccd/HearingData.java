@@ -23,4 +23,5 @@ public class HearingData {
     @JsonProperty("hearingDateConfirmOptionEnum")
     public HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum;
 
+
 }
