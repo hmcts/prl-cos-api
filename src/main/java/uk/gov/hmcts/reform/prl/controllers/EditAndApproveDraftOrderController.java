@@ -73,6 +73,8 @@ public class EditAndApproveDraftOrderController {
             CaseData.class
         );
 
+        log.info("casedata james draft order issue", caseData);
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(draftAnOrderService.populateDraftOrderDocument(
                 caseData)).build();
@@ -145,6 +147,7 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("casedata james issue", caseData);
         Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(caseData);
         String orderStatus = (String) response.remove("status");
         log.info("** Order status {}", orderStatus);
