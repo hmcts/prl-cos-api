@@ -717,6 +717,7 @@ public class HearingManagementServiceTest {
                                                          caseType, nextHearingDateRequest.getCaseRef(), true,
                                                          buildCaseDataContentForNhd("updateNextHearingDate", eventToken,nextHearingDetails)
         );
+
         assertTrue(true);
     }
 }
