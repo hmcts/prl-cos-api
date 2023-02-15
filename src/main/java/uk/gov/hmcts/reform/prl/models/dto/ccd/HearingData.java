@@ -15,12 +15,12 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 public class HearingData {
 
     @JsonProperty("hearingTypes")
-    private final DynamicList hearingTypes;
+    public final DynamicList hearingTypes;
 
     @JsonProperty("hearingTypeOtherDetails")
-    private String hearingTypeOtherDetails;
+    public String hearingTypeOtherDetails;
 
     @JsonProperty("hearingDateConfirmOptionEnum")
-    private HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum;
+    public HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum;
 
 }
