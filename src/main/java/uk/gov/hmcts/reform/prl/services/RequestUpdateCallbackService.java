@@ -56,6 +56,7 @@ public class RequestUpdateCallbackService {
                  serviceRequestUpdateDto.getServiceRequestStatus()
         );
         String userToken = systemUserService.getSysUserToken();
+
         String systemUpdateUserId = systemUserService.getUserId(userToken);
         log.info("Fetching the Case details based on caseId {}", serviceRequestUpdateDto.getCcdCaseNumber()
         );
