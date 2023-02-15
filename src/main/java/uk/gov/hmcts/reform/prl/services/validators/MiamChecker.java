@@ -35,14 +35,14 @@ public class MiamChecker implements EventChecker {
 
         boolean finished = false;
 
-        Optional<YesOrNo> applicantAttendedMiam = ofNullable(caseData.getApplicantAttendedMiam());
-        Optional<YesOrNo> claimingExemptionMiam = ofNullable(caseData.getClaimingExemptionMiam());
-        Optional<YesOrNo> familyMediatiorMiam = ofNullable(caseData.getFamilyMediatorMiam());
+        Optional<YesOrNo> applicantAttendedMiam = ofNullable(caseData.getMiamDetails().getApplicantAttendedMiam());
+        Optional<YesOrNo> claimingExemptionMiam = ofNullable(caseData.getMiamDetails().getClaimingExemptionMiam());
+        Optional<YesOrNo> familyMediatiorMiam = ofNullable(caseData.getMiamDetails().getFamilyMediatorMiam());
 
-        Optional<String> mediatorRegNumber = ofNullable(caseData.getMediatorRegistrationNumber());
-        Optional<String> mediatorServiceName = ofNullable(caseData.getFamilyMediatorServiceName());
-        Optional<String> mediatorSoleTrader = ofNullable(caseData.getSoleTraderName());
-        Optional<Document> miamCertDocument = ofNullable(caseData.getMiamCertificationDocumentUpload());
+        Optional<String> mediatorRegNumber = ofNullable(caseData.getMiamDetails().getMediatorRegistrationNumber());
+        Optional<String> mediatorServiceName = ofNullable(caseData.getMiamDetails().getFamilyMediatorServiceName());
+        Optional<String> mediatorSoleTrader = ofNullable(caseData.getMiamDetails().getSoleTraderName());
+        Optional<Document> miamCertDocument = ofNullable(caseData.getMiamDetails().getMiamCertificationDocumentUpload());
 
         if (applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(Yes)) {
             finished = mediatorRegNumber.isPresent()
@@ -54,10 +54,10 @@ public class MiamChecker implements EventChecker {
             && (claimingExemptionMiam.isPresent() && claimingExemptionMiam.get().equals(Yes))
             && (familyMediatiorMiam.isPresent() && familyMediatiorMiam.get().equals(Yes))) {
 
-            Optional<String> mediatorRegNumber1 = ofNullable(caseData.getMediatorRegistrationNumber1());
-            Optional<String> mediatorServiceName1 = ofNullable(caseData.getFamilyMediatorServiceName1());
-            Optional<String> mediatorSoleTrader1 = ofNullable(caseData.getSoleTraderName1());
-            Optional<Document> miamCertDocument1 = ofNullable(caseData.getMiamCertificationDocumentUpload1());
+            Optional<String> mediatorRegNumber1 = ofNullable(caseData.getMiamDetails().getMediatorRegistrationNumber1());
+            Optional<String> mediatorServiceName1 = ofNullable(caseData.getMiamDetails().getFamilyMediatorServiceName1());
+            Optional<String> mediatorSoleTrader1 = ofNullable(caseData.getMiamDetails().getSoleTraderName1());
+            Optional<Document> miamCertDocument1 = ofNullable(caseData.getMiamDetails().getMiamCertificationDocumentUpload1());
 
             finished = mediatorRegNumber1.isPresent()
                 && mediatorServiceName1.isPresent()
@@ -65,7 +65,7 @@ public class MiamChecker implements EventChecker {
                 && miamCertDocument1.isPresent();
 
         } else {
-            Optional<List<MiamExemptionsChecklistEnum>> exceptions = ofNullable(caseData.getMiamExemptionsChecklist());
+            Optional<List<MiamExemptionsChecklistEnum>> exceptions = ofNullable(caseData.getMiamDetails().getMiamExemptionsChecklist());
             if (exceptions.isPresent()) {
                 finished =  checkMiamExemptions(caseData);
             }
@@ -86,9 +86,9 @@ public class MiamChecker implements EventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
         return anyNonEmpty(
-            caseData.getApplicantAttendedMiam(),
-            caseData.getClaimingExemptionMiam(),
-            caseData.getFamilyMediatorMiam()
+            caseData.getMiamDetails().getApplicantAttendedMiam(),
+            caseData.getMiamDetails().getClaimingExemptionMiam(),
+            caseData.getMiamDetails().getFamilyMediatorMiam()
         );
     }
 
@@ -99,7 +99,7 @@ public class MiamChecker implements EventChecker {
 
     public boolean checkMiamExemptions(CaseData caseData) {
 
-        Optional<List<MiamExemptionsChecklistEnum>> exceptions = ofNullable(caseData.getMiamExemptionsChecklist());
+        Optional<List<MiamExemptionsChecklistEnum>> exceptions = ofNullable(caseData.getMiamDetails().getMiamExemptionsChecklist());
 
         boolean dvCompleted = true;
         boolean urgencyCompleted = true;
@@ -108,19 +108,19 @@ public class MiamChecker implements EventChecker {
         boolean childProtectionCompleted = true;
 
         if (exceptions.isPresent() && exceptions.get().contains(domesticViolence)) {
-            dvCompleted = anyNonEmpty(caseData.getMiamDomesticViolenceChecklist());
+            dvCompleted = anyNonEmpty(caseData.getMiamDetails().getMiamDomesticViolenceChecklist());
         }
         if (exceptions.isPresent() && exceptions.get().contains(urgency)) {
-            urgencyCompleted = anyNonEmpty(caseData.getMiamUrgencyReasonChecklist());
+            urgencyCompleted = anyNonEmpty(caseData.getMiamDetails().getMiamUrgencyReasonChecklist());
         }
         if (exceptions.isPresent() && exceptions.get().contains(previousMIAMattendance)) {
-            prevAttendCompleted = anyNonEmpty(caseData.getMiamPreviousAttendanceChecklist());
+            prevAttendCompleted = anyNonEmpty(caseData.getMiamDetails().getMiamPreviousAttendanceChecklist());
         }
         if (exceptions.isPresent() && exceptions.get().contains(other)) {
-            otherCompleted = anyNonEmpty(caseData.getMiamOtherGroundsChecklist());
+            otherCompleted = anyNonEmpty(caseData.getMiamDetails().getMiamOtherGroundsChecklist());
         }
         if (exceptions.isPresent() && exceptions.get().contains(childProtectionConcern)) {
-            childProtectionCompleted = anyNonEmpty(caseData.getMiamChildProtectionConcernList());
+            childProtectionCompleted = anyNonEmpty(caseData.getMiamDetails().getMiamChildProtectionConcernList());
         }
 
         return dvCompleted && urgencyCompleted && prevAttendCompleted && otherCompleted && childProtectionCompleted;
@@ -128,4 +128,3 @@ public class MiamChecker implements EventChecker {
     }
 
 }
-

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
@@ -78,6 +79,9 @@ public class PartyDetails {
     private Response response;
     private YesOrNo currentRespondent;
 
+    // it will hold either applicant flag or respondent flag
+    private Flags partyLevelFlag;
+
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
             || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
@@ -93,5 +97,14 @@ public class PartyDetails {
             return this.isEmailAddressConfidential == YesOrNo.No;
         }
         return this.isEmailAddressConfidential == YesOrNo.Yes;
+    }
+
+    @JsonIgnore
+    public String getLabelForDynamicList() {
+        return String.format(
+            "%s %s",
+            this.firstName,
+            this.lastName
+        );
     }
 }
