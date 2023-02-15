@@ -96,7 +96,11 @@ public class TaskListService {
     }
 
     private List<Event> getEvents(CaseData caseData) {
-        return caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)
+        String caseType = caseData.getCaseTypeOfApplication();
+        if (caseType == null) {
+            caseType = caseData.getSelectedCaseTypeID();
+        }
+        return caseType.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)
             ? getFL401Events(caseData) : getC100Events();
     }
 
