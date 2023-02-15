@@ -32,5 +32,15 @@ public enum YesNoDontKnow {
         return YesNoDontKnow.valueOf(key);
     }
 
-
+    public static YesNoDontKnow getDisplayedValueIgnoreCase(String enteredValue) {
+        if (enteredValue.equalsIgnoreCase("Yes")) {
+            return YesNoDontKnow.yes;
+        } else if (enteredValue.equalsIgnoreCase("No")) {
+            return YesNoDontKnow.no;
+        } else if (enteredValue.equalsIgnoreCase("Dont know")) {
+            return YesNoDontKnow.dontKnow;
+        } else {
+            return null;
+        }
+    }
 }
