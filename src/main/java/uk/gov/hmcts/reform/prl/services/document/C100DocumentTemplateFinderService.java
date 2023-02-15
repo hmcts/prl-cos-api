@@ -74,10 +74,10 @@ public class C100DocumentTemplateFinderService {
     public String findFinalDocumentTemplate(CaseData caseData) {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            log.info("generate v2 {}" ,!documentLanguage.isGenWelsh() ? c100FinalTemplateV2 : c100FinalWelshTemplateV2);
+            log.info("generate v2 {}", !documentLanguage.isGenWelsh() ? c100FinalTemplateV2 : c100FinalWelshTemplateV2);
             return !documentLanguage.isGenWelsh() ? c100FinalTemplateV2 : c100FinalWelshTemplateV2;
         }
-        log.info("generate v1 {}" ,!documentLanguage.isGenWelsh() ? c100FinalTemplate : c100FinalWelshTemplate);
+        log.info("generate v1 {}",!documentLanguage.isGenWelsh() ? c100FinalTemplate : c100FinalWelshTemplate);
         return !documentLanguage.isGenWelsh() ? c100FinalTemplate : c100FinalWelshTemplate;
 
     }
@@ -85,10 +85,10 @@ public class C100DocumentTemplateFinderService {
     public String findFinalDraftDocumentTemplate(CaseData caseData) {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            log.info("generate v2 {}" ,!documentLanguage.isGenWelsh() ? c100DraftTemplateV2 : c100DraftWelshTemplateV2);
+            log.info("generate v2 {}",!documentLanguage.isGenWelsh() ? c100DraftTemplateV2 : c100DraftWelshTemplateV2);
             return !documentLanguage.isGenWelsh() ? c100DraftTemplateV2 : c100DraftWelshTemplateV2;
         }
-        log.info("generate v1 {}" ,!documentLanguage.isGenWelsh()  ? c100DraftTemplate : c100DraftWelshTemplate);
+        log.info("generate v1 {}",!documentLanguage.isGenWelsh()  ? c100DraftTemplate : c100DraftWelshTemplate);
         return !documentLanguage.isGenWelsh()  ? c100DraftTemplate :  c100DraftWelshTemplate;
 
     }
