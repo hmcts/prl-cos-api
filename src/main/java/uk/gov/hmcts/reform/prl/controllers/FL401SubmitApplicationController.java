@@ -189,7 +189,7 @@ public class FL401SubmitApplicationController {
         }
         caseData = caseData.setDateSubmittedDate();
 
-        caseData.setIsCafcass(YesOrNo.No);
+        caseDataUpdated.put("isCafcass", YesOrNo.No);
 
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
 
