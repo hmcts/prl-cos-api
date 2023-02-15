@@ -343,12 +343,11 @@ public class PrlAppsConstants {
     public static final String STAFFORDERASC = "ASC";
     public static final String LEGALOFFICE = "Legal office";
 
-    public static final String IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING =  "isJudgeOrLegalAdviserGatekeeping";
-    public static final String JUDGE_NAME = "judgeName";
-
     public static final String TIER_OF_JUDICIARY = "tierOfJudiciary";
 
     public static final String IS_JUDGE_OR_LEGAL_ADVISOR = "isJudgeOrLegalAdviser";
 
     public static final String JUDGE_NAME_EMAIL = "judgeNameAndEmail";
+    public static final String IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING =  "isJudgeOrLegalAdviserGatekeeping";
+    public static final String JUDGE_NAME = "judgeName";
 }
