@@ -40,6 +40,7 @@ public class ApplicationsTabServiceHelper {
     ObjectMapper objectMapper;
 
     public List<Element<OtherPersonInTheCaseRevised>> getOtherPeopleInTheCaseRevisedTable(CaseData caseData) {
+        log.info("-->getOtherPeopleInTheCaseRevisedTable()--->start");
         Optional<List<Element<PartyDetails>>> otherPeopleCheck = ofNullable(caseData.getOthersToNotify());
         List<Element<OtherPersonInTheCaseRevised>> otherPersonsInTheCase = new ArrayList<>();
 
@@ -49,8 +50,8 @@ public class ApplicationsTabServiceHelper {
             otherPersonsInTheCase.add(other);
             return otherPersonsInTheCase;
         }
-
         List<PartyDetails> otherPeople = caseData.getOthersToNotify().stream().map(Element::getValue).collect(Collectors.toList());
+        log.info("-->otherPeople LIST BEFORE --->{}",otherPeople);
         otherPeople = maskConfidentialDetails(otherPeople);
         for (PartyDetails p : otherPeople) {
             OtherPersonInTheCaseRevised other = objectMapper.convertValue(p, OtherPersonInTheCaseRevised.class);
@@ -58,6 +59,7 @@ public class ApplicationsTabServiceHelper {
                 .value(other).build();
             otherPersonsInTheCase.add(wrappedPerson);
         }
+        log.info("-->getOtherPeopleInTheCaseRevisedTable()---> end");
         return otherPersonsInTheCase;
     }
 
@@ -69,7 +71,7 @@ public class ApplicationsTabServiceHelper {
         Optional<List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised>>> childElementsCheck =
             ofNullable(caseData.getNewChildDetails());
         List<Element<ChildDetailsRevised>> childFinalList = new ArrayList<>();
-        if (childElementsCheck.isEmpty()) {
+        if (childElementsCheck.isEmpty() || childElementsCheck.get().isEmpty()) {
             ChildDetailsRevised child = ChildDetailsRevised.builder().build();
             Element<ChildDetailsRevised> app = Element.<ChildDetailsRevised>builder().value(child).build();
             childFinalList.add(app);
@@ -84,7 +86,7 @@ public class ApplicationsTabServiceHelper {
             Element<ChildDetailsRevised> res = Element.<ChildDetailsRevised>builder().value(c).build();
             childFinalList.add(res);
         }
-        log.info("getChildRevisedDetails : {}",childFinalList);
+        log.info("getChildRevisedDetails()----> end");
         return childFinalList;
     }
 
@@ -96,7 +98,7 @@ public class ApplicationsTabServiceHelper {
             .lastName(child.getLastName())
             .dateOfBirth(child.getDateOfBirth())
             .gender(child.getGender())
-            .otherGender(!childGender.isEmpty() &&  childGender.isPresent() && childGender.get().equals(other) ? child.getOtherGender() : "")
+            .otherGender(childGender.isPresent() && childGender.get().equals(other) ? child.getOtherGender() : "")
             .orderAppliedFor(orderAppliedFor.isEmpty() ? null : child.getOrderAppliedFor().stream()
                 .map(OrderTypeEnum::getDisplayedValue).collect(
                     Collectors.joining(", ")))
@@ -105,10 +107,11 @@ public class ApplicationsTabServiceHelper {
     }
 
     public List<Element<ChildAndApplicantRelation>> getChildAndApplicantsRelationTable(CaseData caseData) {
+        log.info("getChildAndApplicantsRelationTable()--->start");
         List<Element<ChildAndApplicantRelation>> applicants = new ArrayList<>();
         Optional<List<Element<ChildrenAndApplicantRelation>>> checkApplicants = ofNullable(caseData.getChildAndApplicantRelations());
 
-        if (checkApplicants.isEmpty()) {
+        if (checkApplicants.isEmpty() || checkApplicants.get().isEmpty()) {
             ChildAndApplicantRelation a = ChildAndApplicantRelation.builder().build();
             Element<ChildAndApplicantRelation> app = Element.<ChildAndApplicantRelation>builder().value(a).build();
             applicants.add(app);
@@ -123,16 +126,17 @@ public class ApplicationsTabServiceHelper {
             Element<ChildAndApplicantRelation> app = Element.<ChildAndApplicantRelation>builder().value(a).build();
             applicants.add(app);
         }
+        log.info("getChildAndApplicantsRelationTable()--->end");
         return applicants;
     }
 
 
     public List<Element<ChildAndRespondentRelation>> getChildAndRespondentRelationsTable(CaseData caseData) {
-        log.info("-->getChildRevisedDetails()--->start");
+        log.info("getChildAndRespondentRelationsTable()--->start");
         List<Element<ChildAndRespondentRelation>> respondents = new ArrayList<>();
         Optional<List<Element<ChildrenAndRespondentRelation>>> checkRespondents = ofNullable(caseData.getChildAndRespondentRelations());
 
-        if (!checkRespondents.isPresent()) {
+        if (checkRespondents.isEmpty() || checkRespondents.get().isEmpty()) {
             ChildAndRespondentRelation a = ChildAndRespondentRelation.builder().build();
             Element<ChildAndRespondentRelation> app = Element.<ChildAndRespondentRelation>builder().value(a).build();
             respondents.add(app);
@@ -141,23 +145,22 @@ public class ApplicationsTabServiceHelper {
         List<ChildrenAndRespondentRelation> currentApplicants = caseData.getChildAndRespondentRelations().stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
-        log.info("-->currentApplicants before --->{}",currentApplicants);
         for (ChildrenAndRespondentRelation respondent : currentApplicants) {
             ChildAndRespondentRelation a = objectMapper.convertValue(respondent, ChildAndRespondentRelation.class);
             Element<ChildAndRespondentRelation> app = Element.<ChildAndRespondentRelation>builder().value(a).build();
             respondents.add(app);
         }
-        log.info("-->respondents final List--->{}",respondents);
-        log.info("-->getChildRevisedDetails()--->start");
+        log.info("-->getChildAndRespondentRelationsTable()--->End");
         return respondents;
     }
 
 
     public List<Element<ChildAndOtherPeopleRelation>> getChildAndOtherPeopleRelationsTable(CaseData caseData) {
+        log.info("-->getChildAndOtherPeopleRelationsTable()--->Start");
         List<Element<ChildAndOtherPeopleRelation>> otherPeopleRelations = new ArrayList<>();
         Optional<List<Element<ChildrenAndOtherPeopleRelation>>> checkRespondents = ofNullable(caseData.getChildAndOtherPeopleRelations());
 
-        if (checkRespondents.isEmpty()) {
+        if (checkRespondents.isEmpty() || checkRespondents.get().isEmpty()) {
             ChildAndOtherPeopleRelation a = ChildAndOtherPeopleRelation.builder().build();
             Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(a).build();
             otherPeopleRelations.add(app);
@@ -172,6 +175,7 @@ public class ApplicationsTabServiceHelper {
             Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(a).build();
             otherPeopleRelations.add(app);
         }
+        log.info("-->getChildAndOtherPeopleRelationsTable()--->End");
         return otherPeopleRelations;
     }
 
@@ -213,7 +217,6 @@ public class ApplicationsTabServiceHelper {
                 .value(other).build();
             otherPersonsInTheCase.add(wrappedPerson);
         }
-        log.info("otherPersonsInTheCase : {}",otherPersonsInTheCase);
         log.info("getOtherChildNotInTheCaseTable()--->end");
         return otherPersonsInTheCase;
     }

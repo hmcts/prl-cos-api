@@ -40,6 +40,7 @@ public class C100JsonMapper {
     private final CombinedMapper combinedMapper;
     private final ChildrenAndApplicantsMapper childrenAndApplicantsMapper;
     private final ChildrenAndRespondentsMapper childrenAndRespondentsMapper;
+    private final ChildrenAndOtherPeopleMapper childrenAndOtherPeopleMapper;
 
     public JsonObject map(CaseData caseData) {
         return new NullAwareJsonObjectBuilder()
@@ -52,6 +53,8 @@ public class C100JsonMapper {
                         ? childrenAndApplicantsMapper.map(caseData.getChildAndApplicantRelations()) : JsonValue.EMPTY_JSON_ARRAY)
                 .add("childAndRespondentRelations", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
                         ? childrenAndRespondentsMapper.map(caseData.getChildAndRespondentRelations()) : JsonValue.EMPTY_JSON_ARRAY)
+            .add("childAndOtherPeopleRelations", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                ? childrenAndOtherPeopleMapper.map(caseData.getChildAndOtherPeopleRelations()) : JsonValue.EMPTY_JSON_ARRAY)
             .add("applicants", combinedMapper.getApplicantArray())
             .add("respondents", combinedMapper.getRespondentArray())
             .add("typeOfApplication", typeOfApplicantionMapper.map(caseData))
