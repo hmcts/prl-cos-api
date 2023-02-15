@@ -89,7 +89,7 @@ public class C100DocumentTemplateFinderService {
             return !documentLanguage.isGenWelsh() ? c100DraftTemplateV2 : c100DraftWelshTemplateV2;
         }
         log.info("generate v1 {}" ,!documentLanguage.isGenWelsh()  ? c100DraftTemplate : c100DraftWelshTemplate);
-        return !documentLanguage.isGenWelsh()  ? c100DraftTemplate : c100DraftWelshTemplate;
+        return !documentLanguage.isGenWelsh()  ? c100DraftTemplate :  c100DraftWelshTemplate;
 
     }
 
