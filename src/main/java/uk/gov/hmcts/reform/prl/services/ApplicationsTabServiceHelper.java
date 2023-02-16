@@ -171,6 +171,9 @@ public class ApplicationsTabServiceHelper {
 
         for (ChildrenAndOtherPeopleRelation otherPeople : currentApplicants) {
             ChildAndOtherPeopleRelation a = objectMapper.convertValue(otherPeople, ChildAndOtherPeopleRelation.class);
+            if (ofNullable(a).isEmpty()) {
+                a = ChildAndOtherPeopleRelation.builder().build();
+            }
             Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(a).build();
             otherPeopleRelations.add(app);
         }
