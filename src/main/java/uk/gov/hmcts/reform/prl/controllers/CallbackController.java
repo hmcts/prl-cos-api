@@ -49,7 +49,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
@@ -81,6 +80,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -664,17 +664,15 @@ public class CallbackController {
     @PostMapping(path = "/pre-populate-hearing-type", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate Hearing type details")
     public AboutToStartOrSubmitCallbackResponse prePopulateHearingType(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-
-        List<DynamicListElement> hearingType = List.of(DynamicListElement.builder().build());
-        /* hearingType.add(DynamicListElement.defaultListItem("Test1"));
-        hearingType.add(DynamicListElement.defaultListItem("Test2"));
-        hearingType.add(DynamicListElement.defaultListItem("Test3"));*/
+        log.info("Inside Prepopulate Hearing Type for the case id {}",callbackRequest.getCaseDetails().getId());
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().code("test1").label("test1").build());
+        dynamicListElements.add(DynamicListElement.builder().code("test2").label("test2").build());
+        dynamicListElements.add(DynamicListElement.builder().code("test3").label("test3").build());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("listWithoutNoticeHearingDetails",HearingData.builder()
-                                .hearingTypes(DynamicList.builder().value(DynamicListElement.EMPTY).listItems(hearingType).build()));
-
+        caseDataUpdated.put("hearingType", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(dynamicListElements)
+            .build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
