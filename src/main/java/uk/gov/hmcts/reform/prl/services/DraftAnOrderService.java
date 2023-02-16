@@ -177,7 +177,9 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
+        log.info("before case type of application in about to start::: {} :::", caseTypeOfApplication);
         caseDataMap.put("caseTypeOfApplication", caseTypeOfApplication);
+        log.info("after setting case type of application::: {} :::", caseDataMap.get("caseTypeOfApplication"));
         return caseDataMap;
     }
 
