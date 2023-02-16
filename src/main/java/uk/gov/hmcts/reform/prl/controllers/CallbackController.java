@@ -81,7 +81,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -669,7 +668,7 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
 
         List<DynamicListElement> hearingType = List.of(DynamicListElement.builder().build());
-       /* hearingType.add(DynamicListElement.defaultListItem("Test1"));
+        /* hearingType.add(DynamicListElement.defaultListItem("Test1"));
         hearingType.add(DynamicListElement.defaultListItem("Test2"));
         hearingType.add(DynamicListElement.defaultListItem("Test3"));*/
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
