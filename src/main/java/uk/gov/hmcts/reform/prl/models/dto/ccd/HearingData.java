@@ -11,16 +11,16 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties
 public class HearingData {
 
     @JsonProperty("hearingTypes")
-    public final DynamicList hearingTypes;
+    private final DynamicList hearingTypes;
 
     @JsonProperty("hearingTypeOtherDetails")
-    public String hearingTypeOtherDetails;
+    private String hearingTypeOtherDetails;
 
     @JsonProperty("hearingDateConfirmOptionEnum")
-    public HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum;
+    private HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum;
 
 }
