@@ -807,8 +807,7 @@ public class ManageOrderService {
 
         if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             log.info("value of orderCollection  ----> " + caseData.getOrderCollection());
-            if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
-                && (isLoggedIsAsJudgeOrLa || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+            if ((isLoggedIsAsJudgeOrLa || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
 
                 return setDraftOrderCollection(caseData, isLoggedIsAsJudgeOrLa);
