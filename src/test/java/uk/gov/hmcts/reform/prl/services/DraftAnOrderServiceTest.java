@@ -361,7 +361,7 @@ public class DraftAnOrderServiceTest {
             .build();
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-
+        when(manageOrderService.getCurrentCreateDraftOrderDetails(caseData)).thenReturn(draftOrder);
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap = draftAnOrderService.generateDraftOrderCollection(caseData);
         assertNotNull(stringObjectMap.get("draftOrderCollection"));
