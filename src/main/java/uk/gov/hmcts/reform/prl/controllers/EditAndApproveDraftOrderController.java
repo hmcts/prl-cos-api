@@ -72,7 +72,7 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
+        log.info("*** Case type in judge-or-admin-populate-draft-order: {}", caseData.getCaseTypeOfApplication());
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(draftAnOrderService.populateDraftOrderDocument(
                 caseData)).build();
