@@ -668,10 +668,10 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
 
-        List<DynamicListElement> hearingType = new ArrayList<>();
-        hearingType.add(DynamicListElement.defaultListItem("Test1"));
+        List<DynamicListElement> hearingType = List.of(DynamicListElement.builder().build());
+       /* hearingType.add(DynamicListElement.defaultListItem("Test1"));
         hearingType.add(DynamicListElement.defaultListItem("Test2"));
-        hearingType.add(DynamicListElement.defaultListItem("Test3"));
+        hearingType.add(DynamicListElement.defaultListItem("Test3"));*/
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("listWithoutNoticeHearingDetails",HearingData.builder()
                                 .hearingTypes(DynamicList.builder().value(DynamicListElement.EMPTY).listItems(hearingType).build()));
