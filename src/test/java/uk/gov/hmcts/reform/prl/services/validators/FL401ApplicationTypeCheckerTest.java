@@ -19,7 +19,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FL401ApplicationTypeCheckerTest {
@@ -161,10 +160,5 @@ public class FL401ApplicationTypeCheckerTest {
             .build();
 
         assertFalse(fl401ApplicationTypeChecker.hasMandatoryCompleted(caseData));
-    }
-
-    @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(fl401ApplicationTypeChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

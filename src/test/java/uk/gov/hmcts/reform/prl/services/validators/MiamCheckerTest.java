@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.Collections;
 
 import static org.junit.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum.MIAMChildProtectionConcernChecklistEnum_value_1;
 import static uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.childProtectionConcern;
@@ -132,10 +131,5 @@ public class MiamCheckerTest {
             .build();
 
         assertTrue(miamChecker.isFinished(caseData));
-    }
-
-    @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(miamChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

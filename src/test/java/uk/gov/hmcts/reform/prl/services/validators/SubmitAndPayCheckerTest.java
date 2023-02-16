@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
@@ -25,9 +24,7 @@ import java.util.List;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -50,14 +47,6 @@ public class SubmitAndPayCheckerTest {
     CaseNameChecker caseNameChecker;
 
     @Mock
-    ChildrenAndApplicantsChecker childrenAndApplicantsChecker;
-
-    @Mock
-    ChildrenAndRespondentsChecker childrenAndRespondentsChecker;
-    @Mock
-    ChildrenAndOtherPeopleInThisApplicationChecker childrenAndOtherPeopleInThisApplicationChecker;
-
-    @Mock
     ApplicationTypeChecker applicationTypeChecker;
 
     @Mock
@@ -70,9 +59,6 @@ public class SubmitAndPayCheckerTest {
     ChildChecker childChecker;
 
     @Mock
-    ChildDetailsRevisedChecker childDetailsRevisedChecker;
-
-    @Mock
     RespondentsChecker respondentsChecker;
 
     @Mock
@@ -83,12 +69,6 @@ public class SubmitAndPayCheckerTest {
 
     @Mock
     OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
-
-    @Mock
-    OtherPeopleInTheCaseRevisedChecker otherPeopleInTheCaseRevisedChecker;
-
-    @Mock
-    OtherChildrenNotPartOfTheApplicationChecker otherChildrenNotPartOfTheApplicationChecker;
 
     @Mock
     OtherProceedingsChecker otherProceedingsChecker;
@@ -110,16 +90,12 @@ public class SubmitAndPayCheckerTest {
     private Organisation organisation;
     private PartyDetails applicant;
     private Child child;
-
-    private ChildDetailsRevised childDetailsRevised;
     private PartyDetails respondents;
 
     private Element<PartyDetails> wrappedApplicant;
     private List<Element<PartyDetails>> applicantList;
     private Element<Child> wrappedChildren;
     private List<Element<Child>> listOfChildren;
-    private Element<ChildDetailsRevised> wrappedChildDetailsRevised;
-    private List<Element<ChildDetailsRevised>> listOfChildDetailsRevised;
     private Element<PartyDetails> wrappedRespondents;
     private List<Element<PartyDetails>> respondentsList;
 
@@ -171,15 +147,6 @@ public class SubmitAndPayCheckerTest {
             .parentalResponsibilityDetails("test")
             .build();
 
-        childDetailsRevised = ChildDetailsRevised.builder()
-            .firstName("Test")
-            .lastName("Name")
-            .dateOfBirth(LocalDate.of(2000, 12, 22))
-            .gender(female)
-            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .parentalResponsibilityDetails("test")
-            .build();
-
         respondents = PartyDetails.builder()
             .firstName("TestingName")
             .lastName("TestLastName")
@@ -199,14 +166,8 @@ public class SubmitAndPayCheckerTest {
         wrappedChildren = Element.<Child>builder().value(child).build();
         listOfChildren = Collections.singletonList(wrappedChildren);
 
-        wrappedChildDetailsRevised = Element.<ChildDetailsRevised>builder().value(childDetailsRevised).build();
-        listOfChildDetailsRevised = Collections.singletonList(wrappedChildDetailsRevised);
-
-
         wrappedRespondents = Element.<PartyDetails>builder().value(respondents).build();
         respondentsList = Collections.singletonList(wrappedRespondents);
-
-
 
     }
 
@@ -373,8 +334,6 @@ public class SubmitAndPayCheckerTest {
         when(applicantsChecker.isFinished(caseData)).thenReturn(true);
         when(childChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(childChecker.isFinished(caseData)).thenReturn(true);
-        when(childDetailsRevisedChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(childDetailsRevisedChecker.isFinished(caseData)).thenReturn(true);
         when(respondentsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(respondentsChecker.isFinished(caseData)).thenReturn(true);
         when(miamChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
@@ -385,8 +344,6 @@ public class SubmitAndPayCheckerTest {
         when(otherPeopleInTheCaseChecker.isFinished(caseData)).thenReturn(true);
         when(otherProceedingsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(otherProceedingsChecker.isFinished(caseData)).thenReturn(true);
-        when(otherChildrenNotPartOfTheApplicationChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(otherChildrenNotPartOfTheApplicationChecker.isFinished(caseData)).thenReturn(true);
         when(attendingTheHearingChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(attendingTheHearingChecker.isFinished(caseData)).thenReturn(true);
         when(internationalElementChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
@@ -401,11 +358,9 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
         when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
         when(eventsChecker.getChildChecker()).thenReturn(childChecker);
-        when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
         when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
         when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
         when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
-        when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
         when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
         when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
         when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
@@ -515,8 +470,6 @@ public class SubmitAndPayCheckerTest {
         when(applicantsChecker.isFinished(caseData)).thenReturn(true);
         when(childChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(childChecker.isFinished(caseData)).thenReturn(true);
-        when(childDetailsRevisedChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(childDetailsRevisedChecker.isFinished(caseData)).thenReturn(true);
         when(respondentsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(respondentsChecker.isFinished(caseData)).thenReturn(true);
         when(miamChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
@@ -527,8 +480,6 @@ public class SubmitAndPayCheckerTest {
         when(otherPeopleInTheCaseChecker.isFinished(caseData)).thenReturn(true);
         when(otherProceedingsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(otherProceedingsChecker.isFinished(caseData)).thenReturn(true);
-        when(otherChildrenNotPartOfTheApplicationChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(otherChildrenNotPartOfTheApplicationChecker.isFinished(caseData)).thenReturn(true);
         when(attendingTheHearingChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(attendingTheHearingChecker.isFinished(caseData)).thenReturn(true);
         when(internationalElementChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
@@ -543,11 +494,9 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
         when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
         when(eventsChecker.getChildChecker()).thenReturn(childChecker);
-        when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
         when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
         when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
         when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
-        when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
         when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
         when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
         when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
@@ -557,114 +506,5 @@ public class SubmitAndPayCheckerTest {
 
         assertTrue(submitAndPayChecker.hasMandatoryCompleted(caseData));
     }
-
-
-    @Test
-    public void whenAllMandatoryCaseDataPresentThenHasMandatoryCompletedReturnTrueForV2() {
-        caseData = CaseData.builder()
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .applicantCaseName("testing")
-            .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
-            .natureOfOrder("Test")
-            .consentOrder(Yes)
-            .applicationPermissionRequired(noNotRequired)
-            .applicationDetails("Test details")
-            .isCaseUrgent(Yes)
-            .taskListVersion(TASK_LIST_VERSION_V2)
-            .doYouNeedAWithoutNoticeHearing(Yes)
-            .caseUrgencyTimeAndReason("reason")
-            .effortsMadeWithRespondents("efforts")
-            .reasonsForApplicationWithoutNotice("test")
-            .setOutReasonsBelow("test")
-            .consentOrder(Yes)
-            .areRespondentsAwareOfProceedings(No)
-            .doYouRequireAHearingWithReducedNotice(No)
-            .applicants(applicantList)
-            .newChildDetails(listOfChildDetailsRevised)
-            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
-            .childrenKnownToLocalAuthorityTextArea("TestString")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)
-            .respondents(respondentsList)
-            .miamDetails(MiamDetails.builder()
-                             .applicantAttendedMiam(Yes)
-                             .mediatorRegistrationNumber("123456")
-                             .familyMediatorServiceName("Test Name")
-                             .soleTraderName("Trade Sole")
-                             .miamCertificationDocumentUpload(Document.builder().build())
-                             .build())
-            .allegationOfHarm(AllegationOfHarm.builder()
-                                  .allegationsOfHarmYesNo(No).build())
-            .build();
-
-        when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(caseNameChecker.isFinished(caseData)).thenReturn(true);
-        when(applicationTypeChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(applicationTypeChecker.isFinished(caseData)).thenReturn(true);
-        when(hearingUrgencyChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(hearingUrgencyChecker.isFinished(caseData)).thenReturn(true);
-        when(applicantsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(applicantsChecker.isFinished(caseData)).thenReturn(true);
-        when(childChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(childChecker.isFinished(caseData)).thenReturn(true);
-        when(childDetailsRevisedChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(childDetailsRevisedChecker.isFinished(caseData)).thenReturn(true);
-        when(childrenAndApplicantsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(childrenAndApplicantsChecker.isFinished(caseData)).thenReturn(true);
-        when(childrenAndRespondentsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(childrenAndRespondentsChecker.isFinished(caseData)).thenReturn(true);
-        when(childrenAndOtherPeopleInThisApplicationChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(childrenAndOtherPeopleInThisApplicationChecker.isFinished(caseData)).thenReturn(true);
-        when(respondentsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(respondentsChecker.isFinished(caseData)).thenReturn(true);
-        when(miamChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(miamChecker.isFinished(caseData)).thenReturn(true);
-        when(allegationsOfHarmChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(allegationsOfHarmChecker.isFinished(caseData)).thenReturn(true);
-        when(otherPeopleInTheCaseChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(otherPeopleInTheCaseChecker.isFinished(caseData)).thenReturn(true);
-        when(otherPeopleInTheCaseChecker.isFinished(caseData)).thenReturn(true);
-        when(otherPeopleInTheCaseRevisedChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(otherPeopleInTheCaseRevisedChecker.isFinished(caseData)).thenReturn(true);
-        when(otherPeopleInTheCaseRevisedChecker.isFinished(caseData)).thenReturn(true);
-        when(otherProceedingsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(otherProceedingsChecker.isFinished(caseData)).thenReturn(true);
-        when(otherChildrenNotPartOfTheApplicationChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(otherChildrenNotPartOfTheApplicationChecker.isFinished(caseData)).thenReturn(true);
-        when(attendingTheHearingChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(attendingTheHearingChecker.isFinished(caseData)).thenReturn(true);
-        when(internationalElementChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(internationalElementChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(litigationCapacityChecker.isFinished(caseData)).thenReturn(true);
-        when(welshLanguageRequirementsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(welshLanguageRequirementsChecker.isFinished(caseData)).thenReturn(true);
-        when(eventsChecker.getChildrenAndApplicantsChecker()).thenReturn(childrenAndApplicantsChecker);
-        when(eventsChecker.getChildrenAndRespondentsChecker()).thenReturn(childrenAndRespondentsChecker);
-        when(eventsChecker.getChildrenAndOtherPeopleInThisApplicationChecker()).thenReturn(childrenAndOtherPeopleInThisApplicationChecker);
-        when(eventsChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
-        when(eventsChecker.getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
-        when(eventsChecker.getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
-        when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
-        when(eventsChecker.getChildChecker()).thenReturn(childChecker);
-        when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
-        when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
-        when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
-        when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
-        when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
-        when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
-        when(eventsChecker.getOtherPeopleInTheCaseRevisedChecker()).thenReturn(otherPeopleInTheCaseRevisedChecker);
-        when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
-        when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
-        when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);
-        when(eventsChecker.getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
-        when(eventsChecker.getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
-
-        assertTrue(submitAndPayChecker.hasMandatoryCompleted(caseData));
-    }
-
-    @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(submitAndPayChecker.getDefaultTaskState(CaseData.builder().build()));
-    }
-
 
 }

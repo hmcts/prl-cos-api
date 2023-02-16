@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import static org.junit.Assert.assertFalse;
-import static org.testng.AssertJUnit.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WelshLanguageRequirementsCheckerTest {
@@ -32,10 +31,5 @@ public class WelshLanguageRequirementsCheckerTest {
         CaseData caseData = CaseData.builder().build();
 
         assertFalse(welshLanguageRequirementsChecker.isFinished(caseData));
-    }
-
-    @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(welshLanguageRequirementsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

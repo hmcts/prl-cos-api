@@ -99,13 +99,23 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RequiredArgsConstructor
 public class DocumentGenService {
 
-
+    @Value("${document.templates.c100.c100_final_template}")
+    protected String c100FinalTemplate;
 
     @Value("${document.templates.c100.c100_final_filename}")
     protected String c100FinalFilename;
 
+    @Value("${document.templates.c100.c100_draft_template}")
+    protected String c100DraftTemplate;
+
     @Value("${document.templates.c100.c100_draft_filename}")
     protected String c100DraftFilename;
+
+    @Value("${document.templates.c100.c100_c8_template}")
+    protected String c100C8Template;
+
+    @Value("${document.templates.c100.c100_c8_draft_template}")
+    protected String c100C8DraftTemplate;
 
     @Value("${document.templates.c100.c100_c8_filename}")
     protected String c100C8Filename;
@@ -125,11 +135,23 @@ public class DocumentGenService {
     @Value("${document.templates.c100.c100_c1a_draft_filename}")
     protected String c100C1aDraftFilename;
 
+    @Value("${document.templates.c100.c100_final_welsh_template}")
+    protected String c100FinalWelshTemplate;
+
     @Value("${document.templates.c100.c100_final_welsh_filename}")
     protected String c100FinalWelshFilename;
 
+    @Value("${document.templates.c100.c100_draft_welsh_template}")
+    protected String c100DraftWelshTemplate;
+
     @Value("${document.templates.c100.c100_draft_welsh_filename}")
     protected String c100DraftWelshFilename;
+
+    @Value("${document.templates.c100.c100_c8_welsh_template}")
+    protected String c100C8WelshTemplate;
+
+    @Value("${document.templates.c100.c100_c8_draft_welsh_template}")
+    protected String c100C8DraftWelshTemplate;
 
     @Value("${document.templates.c100.c100_c8_welsh_filename}")
     protected String c100C8WelshFilename;
@@ -253,9 +275,6 @@ public class DocumentGenService {
 
     @Autowired
     IdamClient idamClient;
-
-    @Autowired
-    C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
 
     private CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
@@ -694,14 +713,15 @@ public class DocumentGenService {
     }
 
     private String getTemplate(CaseData caseData, String docGenFor, boolean isWelsh) {
+        String caseTypeOfApp = caseData.getCaseTypeOfApplication();
         String template = "";
 
         switch (docGenFor) {
             case C8_HINT:
-                template = findC8Template(isWelsh, caseData);
+                template = findC8Template(isWelsh, caseTypeOfApp);
                 break;
             case C8_DRAFT_HINT:
-                template = c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData);
+                template = !isWelsh ? c100C8DraftTemplate : c100C8DraftWelshTemplate;
                 break;
             case C1A_HINT:
                 template = !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
@@ -710,10 +730,10 @@ public class DocumentGenService {
                 template = !isWelsh ? c100C1aDraftTemplate : c100C1aDraftWelshTemplate;
                 break;
             case FINAL_HINT:
-                template = findFinalTemplate(isWelsh, caseData);
+                template = findFinalTemplate(isWelsh, caseTypeOfApp);
                 break;
             case DRAFT_HINT:
-                template = findDraftTemplate(isWelsh, caseData);
+                template = findDraftTemplate(isWelsh, caseTypeOfApp);
                 break;
             case DOCUMENT_COVER_SHEET_HINT:
                 template = findDocCoverSheetTemplate(isWelsh);
@@ -745,28 +765,30 @@ public class DocumentGenService {
         return template;
     }
 
-    private String findDraftTemplate(boolean isWelsh, CaseData caseData) {
-
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate((caseData));
-        }
-        return !isWelsh ? fl401DraftTemplate : fl401DraftWelshTemplate;
-
-    }
-
-    private String findFinalTemplate(boolean isWelsh, CaseData caseData) {
-
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData);
-        }
-        return !isWelsh ? fl401FinalTemplate : fl401FinalWelshTemplate;
-
-    }
-
-    private String findC8Template(boolean isWelsh, CaseData caseData) {
+    private String findDraftTemplate(boolean isWelsh, String caseTypeOfApp) {
         String template;
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            template = !isWelsh ? c100DraftTemplate : c100DraftWelshTemplate;
+        } else {
+            template = !isWelsh ? fl401DraftTemplate : fl401DraftWelshTemplate;
+        }
+        return template;
+    }
+
+    private String findFinalTemplate(boolean isWelsh, String caseTypeOfApp) {
+        String template;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            template = !isWelsh ? c100FinalTemplate : c100FinalWelshTemplate;
+        } else {
+            template = !isWelsh ? fl401FinalTemplate : fl401FinalWelshTemplate;
+        }
+        return template;
+    }
+
+    private String findC8Template(boolean isWelsh, String caseTypeOfApp) {
+        String template;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            template = !isWelsh ? c100C8Template : c100C8WelshTemplate;
         } else {
             template = !isWelsh ? fl401C8Template : fl401C8WelshTemplate;
         }

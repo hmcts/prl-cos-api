@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
@@ -561,31 +560,16 @@ public class ManageOrderService {
     private String getChildInfoFromCaseData(CaseData caseData) {
         String childNames = "";
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
-                Optional<List<Element<ChildDetailsRevised>>> newChildDetails =
-                    ofNullable(caseData.getNewChildDetails());
-                List<ChildDetailsRevised> children = new ArrayList<>();
-                if (newChildDetails.isPresent()) {
-                    children = caseData.getNewChildDetails().stream()
-                        .map(Element::getValue)
-                        .collect(Collectors.toList());
-                }
-                List<String> childList = children.stream()
-                    .map(element -> element.getFirstName() + " " + element.getLastName())
+            List<Child> children = new ArrayList<>();
+            if (caseData.getChildren() != null) {
+                children = caseData.getChildren().stream()
+                    .map(Element::getValue)
                     .collect(Collectors.toList());
-                childNames = String.join(", ", childList);
-            } else {
-                List<Child> children = new ArrayList<>();
-                if (caseData.getChildren() != null) {
-                    children = caseData.getChildren().stream()
-                        .map(Element::getValue)
-                        .collect(Collectors.toList());
-                }
-                List<String> childList = children.stream()
-                    .map(element -> element.getFirstName() + " " + element.getLastName())
-                    .collect(Collectors.toList());
-                childNames = String.join(", ", childList);
             }
+            List<String> childList = children.stream()
+                .map(element -> element.getFirstName() + " " + element.getLastName())
+                .collect(Collectors.toList());
+            childNames = String.join(", ", childList);
 
         } else {
             Optional<List<Element<ApplicantChild>>> applicantChildDetails =

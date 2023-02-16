@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
@@ -158,8 +157,4 @@ public class ChildChecker implements EventChecker {
         return  fields.stream().anyMatch(Optional::isPresent);
     }
 
-    @Override
-    public TaskState getDefaultTaskState(CaseData caseData) {
-        return TaskState.NOT_STARTED;
-    }
 }

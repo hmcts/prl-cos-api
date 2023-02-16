@@ -218,34 +218,26 @@ document:
   templates:
     c100:
       c100_final_template: PRL-C100-R1-Final-Document.docx
-      c100_final_template_v2: PRL-C100-R1-Final-Document-V2.docx
       c100_final_filename: C100FinalDocument.pdf
       c100_draft_template: PRL-C100-R1-Draft-Document.docx
-      c100_draft_template_v2: PRL-C100-R1-Draft-Document-V2.docx
       c100_draft_filename: Draft_C100_application.pdf
       c100_c8_template: PRL-C8-Final-Changes.docx
-      c100_c8_template_v2: FL-PRL-CON-ENG-01118-V2.docx
       c100_c8_filename: C8Document.pdf
       c100_c1a_template: PRL-C1A.docx
       c100_c1a_filename: C1A_Document.pdf
+      c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
       c100_c8_draft_template: FL-PRL-CON-ENG-01118.docx
-      c100_c8_draft_template_v2: FL-PRL-CON-ENG-DRAFT-01118-V2.docx
       c100_c8_draft_filename: C8DocumentDraft.pdf
       c100_c1a_draft_template: FL-PRL-APP-ENG-01119.docx
       c100_c1a_draft_filename: C1A_DocumentDraft.pdf
       c100_c8_draft_welsh_template: FL-PRL-CON-WEL-01122.docx
-      c100_c8_draft_welsh_template_v2: FL-PRL-CON-WEL-DRAFT-01122-V2.docx
       c100_c8_draft_welsh_filename: C8Document_Draft_Welsh.pdf
       c100_c1a_draft_welsh_template: FL-PRL-APP-WEL-01121.docx
       c100_c1a_draft_welsh_filename: C1A_Document_Draft_Welsh.pdf
-      c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
-      c100_final_welsh_template_v2: PRL-C100-R1-Final-WelshLang-V2.docx
       c100_final_welsh_filename: C100FinalDocumentWelsh.pdf
       c100_draft_welsh_template: PRL-C100-R1-Draft-WelshLang.docx
-      c100_draft_welsh_template_v2: PRL-C100-R1-Draft-WelshLang-V2.docx
       c100_draft_welsh_filename: Draft_C100_application_welsh.pdf
       c100_c8_welsh_template: PRL-C8-WelshLang.docx
-      c100_c8_welsh_template_v2: FL-PRL-CON-WEL-01122-V2.docx
       c100_c8_welsh_filename: C8Document_Welsh.pdf
       c100_c1a_welsh_template: PRL-C1A-WelshLang.docx
       c100_c1a_welsh_filename: C1A_Document_Welsh.pdf
@@ -262,14 +254,14 @@ document:
       fl401_draft_welsh_filename: Draft_DA_Welsh_application
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
-      fl401_fl406_draft_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Draft.docx
-      fl401_fl406_draft_filename: Power_of_arrest_draft.pdf
-      fl401_fl406_english_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Final.docx
-      fl401_fl406_engllish_filename: Power_of_arrest.pdf
       fl401_fl406_welsh_draft_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Draft.docx
       fl401_fl406_welsh_draft_filename: Welsh_Power_of_arrest_draft.pdf
       fl401_fl406_welsh_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Final.docx
       fl401_fl406_welsh_filename: Welsh_Power_of_arrest.pdf
+      fl401_fl406_draft_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Draft.docx
+      fl401_fl406_draft_filename: Power_of_arrest.pdf
+      fl401_fl406_english_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Final.docx
+      fl401_fl406_engllish_filename: Power_of_arrest.pdf
     common:
       doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
       doc_cover_sheet_welsh_template: not_implemented
@@ -291,10 +283,6 @@ document:
       prl_fl404_filename: occupation_order_FL404_final.pdf
       prl_fl404_draft_template: PRL-GOR-ENG-FL404-Occupation-Order-Draft.docx
       prl_fl404_draft_filename: occupation_order_FL404_draft.pdf
-      prl_fl404_welsh_template: PRL-GOR-WEL-FL404-Occupation-Order-Final.docx
-      prl_fl404_welsh_filename: welsh_occupation_order_FL404_final.pdf
-      prl_fl404_welsh_draft_template: PRL-GOR-WEL-FL404-Occupation-Order-Draft.docx
-      prl_fl404_welsh_draft_filename: welsh_occupation_order_FL404_draft.pdf
       prl_c49_draft_template: PRL-GOR-ENG-C49-Transfer-Of-Case-Draft.docx
       prl_c49_draft_filename: C49ADraftCreateOrder.pdf
       prl_c49_template: PRL-GOR-ENG-C49-Transfer-Of-Case-Final.docx
@@ -304,10 +292,6 @@ document:
       prl_c43_draft_template: PRL-GOR-ENG-C43-Child-Arrangements-Draft.docx
       prl_c43_draft_filename: ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
       prl_c47a_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Final.docx
-      C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
-      C43A_draft_filename: C43ADraftCreateOrder.pdf
-      C43A_final_template: PRL-ORDER-C43A-FINAL.docx
-      C43A_final_filename: C43AFinalCreateOrder.pdf
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Draft.docx
       prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
@@ -335,20 +319,14 @@ document:
       prl_c7_final_filename_eng: C7_Document.pdf
       prl_c7_final_template_wel: FL-PRL-GOR-WEL-C7R-Final.docx
       prl_c7_final_filename_wel: C7_Document_Welsh.pdf
-      prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
-      prl_c8_blank_filename: C8BlankDocument.pdf
       prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
       prl_c1a_blank_filename: C1ABlankDocument.pdf
-      prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
-      prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
+      prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
+      prl_c8_blank_filename: C8BlankDocument.pdf
       prl_fl404a_final_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Final.docx
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
       prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
-      prl_fl404a_welsh_final_template: PRL-GOR-WEL-FL404A-Non-Molestation-Order-Final.docx
-      prl_fl404a_welsh_final_filename: welsh_non_molestation_order_fl404a_final.pdf
-      prl_fl404a_welsh_draft_template: PRL-GOR-WEL-FL404A-Non-Molestation-Order-Draft.docx
-      prl_fl404a_welsh_draft_filename: welsh_non_molestation_order_fl404a_draft.pdf
       prl_fl402_draft_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
       prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
       prl_fl402_final_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
@@ -357,6 +335,14 @@ document:
       prl_fl402_welsh_draft_filename: Welsh_NoticeOfProceedings(FL402)Draft.pdf
       prl_fl402_welsh_final_template: PRL-HNO-WEL-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_welsh_final_filename: Welsh_NoticeOfProceedings(FL402).pdf
+      prl_fl404_welsh_template: PRL-GOR-WEL-FL404-Occupation-Order-Final.docx
+      prl_fl404_welsh_filename: welsh_occupation_order_FL404_final.pdf
+      prl_fl404_welsh_draft_template: PRL-GOR-WEL-FL404-Occupation-Order-Draft.docx
+      prl_fl404_welsh_draft_filename: welsh_occupation_order_FL404_draft.pdf
+      prl_fl404a_welsh_final_template: PRL-GOR-WEL-FL404A-Non-Molestation-Order-Final.docx
+      prl_fl404a_welsh_final_filename: welsh_non_molestation_order_fl404a_final.pdf
+      prl_fl404a_welsh_draft_template: PRL-GOR-WEL-FL404A-Non-Molestation-Order-Draft.docx
+      prl_fl404a_welsh_draft_filename: welsh_non_molestation_order_fl404a_draft.pdf
       prl_n117_welsh_draft_template: PRL-GOR-WEL-N117-General-Undertaking-Form-Draft.docx
       prl_n117_welsh_draft_filename: Welsh_N117CreateOrderDraft.pdf
       prl_n117_welsh_template: PRL-GOR-WEL-N117-General-Undertaking-Form-Final.docx
@@ -377,6 +363,8 @@ document:
       prl_c45a_welsh_filename: Welsh_Parental_Responsibility_Order_C45A.pdf
       prl_c45a_welsh_draft_template: PRL-GOR-WEL-C45A-Parental-Responsibility-Order-Draft.docx
       prl_c45a_welsh_draft_filename: Welsh_Parental_Responsibility_Order_C45A_draft.pdfR
+      prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
+      prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf

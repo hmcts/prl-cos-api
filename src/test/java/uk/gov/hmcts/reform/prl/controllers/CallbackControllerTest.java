@@ -111,7 +111,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -1429,7 +1428,7 @@ public class CallbackControllerTest {
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(confidentialityTabService.getConfidentialApplicantDetails(Mockito.any())).thenReturn(applicants);
-        when(confidentialityTabService.getChildrenConfidentialDetails(caseData)).thenReturn(
+        when(confidentialityTabService.getChildrenConfidentialDetails(Mockito.any())).thenReturn(
             childConfidentialityDetails);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
@@ -1603,7 +1602,7 @@ public class CallbackControllerTest {
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(confidentialityTabService.getConfidentialApplicantDetails(Mockito.any())).thenReturn(applicants);
-        when(confidentialityTabService.getChildrenConfidentialDetails(caseData)).thenReturn(childConfidentialityDetails);
+        when(confidentialityTabService.getChildrenConfidentialDetails(Mockito.any())).thenReturn(childConfidentialityDetails);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             Map.of("c1ADocument", "document",
                    "c1AWelshDocument", "document",
@@ -1739,37 +1738,4 @@ public class CallbackControllerTest {
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("caseNameHmctsInternal"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantOrRespondentCaseName"));
     }
-
-
-    @Test
-    public void testCopyFL401CasenameToC100CaseNameForChildDetailsRevised() throws Exception {
-
-        Map<String, Object> caseDetails = new HashMap<>();
-        caseDetails.put("applicantOrRespondentCaseName", "test");
-        caseDetails.put("caseTypeOfApplication", "C100");
-        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
-            .orgPolicyReference("jfljsd")
-            .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
-        caseDetails.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
-        when(organisationService.findUserOrganisation(Mockito.anyString()))
-            .thenReturn(Optional.of(org));
-        CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd").taskListVersion(TASK_LIST_VERSION_V2)
-            .applicantOrganisationPolicy(applicantOrganisationPolicy).build();
-        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(1L)
-                             .data(caseDetails).build()).build();
-        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .aboutToSubmitCaseCreation(authToken, callbackRequest);
-        assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
-    }
-
-
 }

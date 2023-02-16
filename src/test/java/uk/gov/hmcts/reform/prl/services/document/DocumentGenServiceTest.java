@@ -143,9 +143,6 @@ public class DocumentGenServiceTest {
     @Mock
     UploadDocumentService uploadService;
 
-    @Mock
-    C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
-
     public static final String authToken = "Bearer TestAuthToken";
 
     CaseData c100CaseData;

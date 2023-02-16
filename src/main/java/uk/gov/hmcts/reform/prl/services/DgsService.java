@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.launchdarkly.shaded.com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,6 @@ public class DgsService {
 
         Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put(CASE_DETAILS_STRING, AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
-        log.info("case data : {}",new Gson().toJson(tempCaseDetails));
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =

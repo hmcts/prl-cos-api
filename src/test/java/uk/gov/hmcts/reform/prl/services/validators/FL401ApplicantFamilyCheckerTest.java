@@ -18,7 +18,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -210,10 +209,5 @@ public class FL401ApplicantFamilyCheckerTest {
             .build();
 
         assertTrue(fl401ApplicantFamilyChecker.validateMandatoryFieldsCompleted(applicantChild));
-    }
-
-    @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(fl401ApplicantFamilyChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

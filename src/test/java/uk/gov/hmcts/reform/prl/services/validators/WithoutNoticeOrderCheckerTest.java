@@ -20,7 +20,6 @@ import java.util.Arrays;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WithoutNoticeOrderCheckerTest {
@@ -116,21 +115,6 @@ public class WithoutNoticeOrderCheckerTest {
             .bailDetails(respondentBailConditionDetails).anyOtherDtailsForWithoutNoticeOrder(otherDetailsOfWithoutNoticeOrder).build();
         assertTrue(withoutNoticeOrderChecker
                        .isFinished(caseData));
-    }
-
-    @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(withoutNoticeOrderChecker.getDefaultTaskState(CaseData.builder().build()));
-    }
-
-
-    @Test
-    public void whenWithoutOrderDetailsProvidedShouldReturnsFalse() {
-        withoutNoticeOrderDetails = withoutNoticeOrderDetails.toBuilder().orderWithoutGivingNotice(null).build();
-        caseData = caseData.toBuilder().orderWithoutGivingNoticeToRespondent(
-            withoutNoticeOrderDetails).build();
-        assertTrue(!withoutNoticeOrderChecker
-                       .isStarted(caseData));
     }
 
 }

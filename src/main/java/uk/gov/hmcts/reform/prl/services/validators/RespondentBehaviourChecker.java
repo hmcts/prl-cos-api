@@ -6,7 +6,6 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.List;
@@ -78,11 +77,6 @@ public class RespondentBehaviourChecker implements EventChecker {
         Optional<List<ApplicantStopFromRespondentDoingEnum>> applicantStopRespondentList
             = ofNullable(respondentBehaviourData.getApplicantWantToStopFromRespondentDoing());
         return otherReason.isPresent() && applicantStopRespondentList.isPresent();
-    }
-
-    @Override
-    public TaskState getDefaultTaskState(CaseData caseData) {
-        return TaskState.NOT_STARTED;
     }
 
 }

@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.document.C100DocumentTemplateFinderService;
 import uk.gov.hmcts.reform.prl.services.validators.SubmitAndPayChecker;
 
 import java.math.BigDecimal;
@@ -105,9 +104,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     @Mock
     private DocumentLanguageService documentLanguageService;
-
-    @Mock
-    private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
 
     @Value("${document.templates.c100.c100_draft_template}")
     protected String c100DraftTemplate;

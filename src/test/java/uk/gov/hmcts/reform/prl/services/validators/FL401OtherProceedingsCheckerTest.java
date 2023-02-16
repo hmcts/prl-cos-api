@@ -17,7 +17,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FL401OtherProceedingsCheckerTest {
@@ -134,10 +133,5 @@ public class FL401OtherProceedingsCheckerTest {
             .build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);
         assertFalse(isFinished);
-    }
-
-    @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(otherProceedingsChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

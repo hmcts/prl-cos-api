@@ -106,9 +106,6 @@ public class ApplicationsTabService implements TabService {
     @Autowired
     ObjectMapper objectMapper;
 
-    @Autowired
-    ApplicationsTabServiceHelper applicationsTabServiceHelper;
-
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {
 
@@ -133,20 +130,8 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("allegationsOfHarmDomesticAbuseTable", getDomesticAbuseTable(caseData));
             applicationTab.put("allegationsOfHarmChildAbductionTable", getChildAbductionTable(caseData));
             applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
-            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
-                applicationTab.put("childDetailsRevisedTable", applicationsTabServiceHelper.getChildRevisedDetails(caseData));
-                applicationTab.put("childDetailsRevisedExtraTable", getExtraChildDetailsTable(caseData));
-                applicationTab.put("otherPeopleInTheCaseRevisedTable", applicationsTabServiceHelper.getOtherPeopleInTheCaseRevisedTable(caseData));
-                applicationTab.put("otherChildNotInTheCaseTable", applicationsTabServiceHelper.getOtherChildNotInTheCaseTable(caseData));
-                applicationTab.put("childAndApplicantsRelationTable", applicationsTabServiceHelper.getChildAndApplicantsRelationTable(caseData));
-                applicationTab.put("childAndRespondentRelationsTable", applicationsTabServiceHelper.getChildAndRespondentRelationsTable(caseData));
-                applicationTab.put("childAndOtherPeopleRelationsTable",
-                                   applicationsTabServiceHelper.getChildAndOtherPeopleRelationsTable(caseData));
-            } else {
-                applicationTab.put("childDetailsTable", getChildDetails(caseData));
-                applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
-                applicationTab.put("otherPeopleInTheCaseTable", getOtherPeopleInTheCaseTable(caseData));
-            }
+            applicationTab.put("childDetailsTable", getChildDetails(caseData));
+            applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
             applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));

@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -79,8 +78,4 @@ public class InternationalElementCheckerTest {
         assertFalse(isStarted);
     }
 
-    @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(internationalElementChecker.getDefaultTaskState(CaseData.builder().build()));
-    }
 }

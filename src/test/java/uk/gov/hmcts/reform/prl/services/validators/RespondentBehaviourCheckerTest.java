@@ -15,7 +15,6 @@ import java.util.Collections;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
 
@@ -214,11 +213,6 @@ public class RespondentBehaviourCheckerTest {
             .respondentBehaviourData(respondentBehaviour).build();
 
         assertTrue(respondentBehaviourChecker.isFinished(caseData));
-    }
-
-    @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(respondentBehaviourChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 
 }
