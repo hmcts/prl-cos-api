@@ -248,12 +248,6 @@ public class DraftAnOrderService {
                             PrlAppsConstants.D_MMMM_YYYY,
                             Locale.UK
                         )))
-                    .orderServedDate(YesOrNo.Yes.equals(caseData.getServeOrderData()
-                                                            .getDoYouWantToServeOrder()) ? LocalDate.now()
-                        .format(DateTimeFormatter.ofPattern(
-                            PrlAppsConstants.D_MMMM_YYYY,
-                            Locale.UK
-                        )) : null)
                     .orderRecipients(manageOrderService.getAllRecipients(caseData)).build())
             .build();
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
