@@ -256,7 +256,7 @@ public class DraftAnOrderService {
                         )) : null)
                     .orderRecipients(manageOrderService.getAllRecipients(caseData)).build())
             .build();
-        if (Yes.equals(caseData.getManageOrders().getOrderUploadedAsDraftFlag())) {
+        if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             log.info("entering into if loop");
             orderDetails = orderDetails.toBuilder()
                 .orderDocument(draftOrder.getOrderDocument())
