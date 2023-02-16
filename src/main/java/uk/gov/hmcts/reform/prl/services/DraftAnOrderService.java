@@ -166,6 +166,7 @@ public class DraftAnOrderService {
             .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
             .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
             .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
+            .isOrderUploadedByJudgeOrAdmin(No)
             .build();
     }
 
@@ -260,8 +261,7 @@ public class DraftAnOrderService {
                         )) : null)
                     .orderRecipients(manageOrderService.getAllRecipients(caseData)).build())
             .build();
-        if (!Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())
-            && !Yes.equals(caseData.getManageOrders().getOrderUploadedAsDraftFlag())) {
+        if (!Yes.equals(caseData.getManageOrders().getOrderUploadedAsDraftFlag())) {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             try {
@@ -294,13 +294,13 @@ public class DraftAnOrderService {
                     draftOrder.getOrderType()
                 );
             }
-        } else  if (Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())
-            && Yes.equals(caseData.getManageOrders().getOrderUploadedAsDraftFlag())) {
+        } else {
+            log.info("entering into if loop");
             orderDetails = orderDetails.toBuilder()
                 .orderDocument(draftOrder.getOrderDocument())
                 .build();
+            log.info("settong order document:  {} :", orderDetails.getOrderDocument());
         }
-
         return element(orderDetails);
 
     }
