@@ -325,6 +325,8 @@ public class ManageOrdersController {
                 dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(modifiedCaseData, servedSavedOrders.getDisplayedValue())
             );
             log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
+        } else {
+            caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.No);
         }
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
