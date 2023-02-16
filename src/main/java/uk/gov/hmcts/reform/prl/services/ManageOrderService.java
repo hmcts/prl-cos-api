@@ -857,8 +857,8 @@ public class ManageOrderService {
         return DraftOrder.builder()
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderTypeId(flagSelectedOrderId)
-            .orderDocument(caseData.getManageOrdersOptions().equals(createAnOrder) ? caseData.getAppointmentOfGuardian()
-                : caseData.getPreviewOrderDoc())
+            .orderDocument(caseData.getManageOrdersOptions().equals(createAnOrder) ? caseData.getPreviewOrderDoc()
+                : caseData.getAppointmentOfGuardian())
             .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .childrenList(caseData.getManageOrders() != null
                               ? getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()) : null)
