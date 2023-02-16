@@ -192,9 +192,11 @@ public class DraftAnOrderService {
                 || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
                 .equalsIgnoreCase(selectedOrder.getOrderDocumentWelsh().getDocumentFileName()))) {
                 updatedCaseData.put("orderCollection", getFinalOrderCollection(authorisation, caseData, draftOrder));
+                log.info("before removing from draft orders::{}::", draftOrderCollection.size());
                 draftOrderCollection.remove(
                     draftOrderCollection.indexOf(e)
                 );
+                log.info("after removing from draft orders::{}::", draftOrderCollection.size());
                 break;
             }
         }
@@ -216,8 +218,11 @@ public class DraftAnOrderService {
         } else {
             orderCollection = new ArrayList<>();
         }
+        log.info("before order collection after adding from draft orders::{}::", orderCollection.size());
+
         orderCollection.add(convertDraftOrderToFinal(auth, caseData, draftOrder));
         orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
+        log.info(" after order collection after adding from draft orders::{}::", orderCollection.size());
         return orderCollection;
     }
 
@@ -564,9 +569,7 @@ public class DraftAnOrderService {
         Document orderDocumentEng;
         Document orderDocumentWelsh;
         if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
-            log.info("entering if loop for upload...");
             orderDocumentEng = caseData.getManageOrders().getEditedUploadOrderDoc();
-            log.info("upload.order doc....{}", orderDocumentEng);
         }
         if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
             orderDocumentEng = caseData.getPreviewOrderDoc();
@@ -576,9 +579,10 @@ public class DraftAnOrderService {
             orderDocumentWelsh = draftOrder.getOrderDocumentWelsh();
         }
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
-            .typeOfOrder(draftOrder.getOrderType() != null
-                             ? draftOrder.getOrderType().getDisplayedValue() : null)
-            .orderTypeId(draftOrder.getOrderType().getDisplayedValue())
+            .typeOfOrder(null != draftOrder.getOrderType()
+                             ? draftOrder.getOrderType().getDisplayedValue() : manageOrderService.getSelectedOrderInfoForUpload(caseData))
+            .orderTypeId(null != draftOrder.getOrderType()
+                              ? draftOrder.getOrderType().getDisplayedValue() : manageOrderService.getSelectedOrderInfoForUpload(caseData))
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()
