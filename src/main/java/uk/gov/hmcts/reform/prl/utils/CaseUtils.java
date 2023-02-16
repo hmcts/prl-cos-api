@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -10,6 +11,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+@Slf4j
 public class CaseUtils {
 
     private CaseUtils() {
@@ -47,6 +49,7 @@ public class CaseUtils {
     }
 
     public static String getCaseTypeOfApplication(CaseData caseData) {
+        log.info("Manage order CaseTypeOfApplication ==> " +  caseData.getCaseTypeOfApplication());
         return caseData.getCaseTypeOfApplication() != null
             ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
     }
