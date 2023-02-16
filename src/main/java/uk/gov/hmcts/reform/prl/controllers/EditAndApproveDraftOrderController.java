@@ -131,6 +131,7 @@ public class EditAndApproveDraftOrderController {
         @ApiResponse(responseCode = "200", description = "Callback to populate draft order dropdown"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse saveServeOrderDetails(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
@@ -138,8 +139,24 @@ public class EditAndApproveDraftOrderController {
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
-        caseDataUpdated.put("orderCollection", manageOrderService.serveOrder(caseData, orderCollection));
+        if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
+            && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
+            .equals(caseData.getServeOrderData().getWhatDoWithOrder())
+            || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
+
+            caseDataUpdated.putAll(draftAnOrderService.removeDraftOrderAndAddToFinalOrder(authorisation, caseData));
+            if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+                CaseData modifiedCaseData = objectMapper.convertValue(
+                    caseDataUpdated,
+                    CaseData.class
+                );
+                List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
+                caseDataUpdated.put(
+                    "orderCollection",
+                    manageOrderService.serveOrder(modifiedCaseData, orderCollection)
+                );
+            }
+        }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
