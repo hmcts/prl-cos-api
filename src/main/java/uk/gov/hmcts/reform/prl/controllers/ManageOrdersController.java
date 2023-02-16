@@ -83,7 +83,10 @@ public class ManageOrdersController {
                                                                     "amendOrderDynamicList",
                                                                     "serveOrderDynamicList",
                                                                     "ordersNeedToBeServed",
-                                                                    "isJudgeOrLa"
+                                                                    "isJudgeOrLa",
+                                                                    "doYouWantToServeOrder",
+                                                                    "whatDoWithOrder",
+                                                                    "currentOrderCreatedDateTime"
     );
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -319,7 +322,7 @@ public class ManageOrdersController {
             log.info("modifiedCaseData ===> " + modifiedCaseData);
             caseDataUpdated.put(
                 "serveOrderDynamicList",
-                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, servedSavedOrders.getDisplayedValue())
+                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(modifiedCaseData, servedSavedOrders.getDisplayedValue())
             );
             log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
         }
