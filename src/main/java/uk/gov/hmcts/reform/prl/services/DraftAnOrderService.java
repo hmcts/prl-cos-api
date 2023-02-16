@@ -194,11 +194,9 @@ public class DraftAnOrderService {
                 .equalsIgnoreCase(selectedOrder.getOrderDocumentWelsh().getDocumentFileName()))) {
                 updatedCaseData.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
                 updatedCaseData.put("orderCollection", getFinalOrderCollection(authorisation, caseData, draftOrder));
-                log.info("before removing from draft orders::{}::", draftOrderCollection.size());
                 draftOrderCollection.remove(
                     draftOrderCollection.indexOf(e)
                 );
-                log.info("after removing from draft orders::{}::", draftOrderCollection.size());
                 break;
             }
         }
@@ -220,11 +218,8 @@ public class DraftAnOrderService {
         } else {
             orderCollection = new ArrayList<>();
         }
-        log.info("before order collection after adding from draft orders::{}::", orderCollection.size());
-
         orderCollection.add(convertDraftOrderToFinal(auth, caseData, draftOrder));
         orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
-        log.info(" after order collection after adding from draft orders::{}::", orderCollection.size());
         return orderCollection;
     }
 
@@ -261,7 +256,13 @@ public class DraftAnOrderService {
                         )) : null)
                     .orderRecipients(manageOrderService.getAllRecipients(caseData)).build())
             .build();
-        if (!Yes.equals(caseData.getManageOrders().getOrderUploadedAsDraftFlag())) {
+        if (Yes.equals(caseData.getManageOrders().getOrderUploadedAsDraftFlag())) {
+            log.info("entering into if loop");
+            orderDetails = orderDetails.toBuilder()
+                .orderDocument(draftOrder.getOrderDocument())
+                .build();
+            log.info("setting order document:  {} :", orderDetails.getOrderDocument());
+        } else {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             try {
@@ -294,12 +295,6 @@ public class DraftAnOrderService {
                     draftOrder.getOrderType()
                 );
             }
-        } else {
-            log.info("entering into if loop");
-            orderDetails = orderDetails.toBuilder()
-                .orderDocument(draftOrder.getOrderDocument())
-                .build();
-            log.info("settong order document:  {} :", orderDetails.getOrderDocument());
         }
         return element(orderDetails);
 
