@@ -12,6 +12,7 @@ import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -105,7 +106,7 @@ public class EditAndApproveDraftOrderControllerTest {
 
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(),
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(), Yes,
                                                           C100_CASE_TYPE)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.generateDraftOrderDropDown(callbackRequest);
         Assert.assertNotNull(response);
@@ -155,7 +156,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(), C100_CASE_TYPE)).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(), Yes, C100_CASE_TYPE)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.populateJudgeOrAdminDraftOrder(callbackRequest);
         Assert.assertNotNull(response);
     }
@@ -208,7 +209,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(), C100_CASE_TYPE)).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(), No, C100_CASE_TYPE)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .prepareDraftOrderCollection("test",callbackRequest);
         Assert.assertNotNull(response);
@@ -262,7 +263,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(),C100_CASE_TYPE)).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(),Yes, C100_CASE_TYPE)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .prepareDraftOrderCollection("test",callbackRequest);
         Assert.assertNotNull(response);
@@ -313,7 +314,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(), C100_CASE_TYPE)).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(), No, C100_CASE_TYPE)).thenReturn(caseDataMap);
         when(draftAnOrderService.getDraftOrderInfo("test", caseData)).thenReturn(caseDataMap);
         when(draftAnOrderService
                  .getSelectedDraftOrderDetails(caseData))
