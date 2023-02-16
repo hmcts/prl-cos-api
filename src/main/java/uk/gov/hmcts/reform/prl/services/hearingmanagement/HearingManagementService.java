@@ -93,7 +93,6 @@ public class HearingManagementService {
             hearingRequest.getCaseRef()
         );
 
-        log.info("HHHHHHHH {}",caseDetails.getData());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         String hmcStatus = hearingRequest.getHearingUpdate().getHmcStatus();
