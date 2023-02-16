@@ -67,6 +67,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
@@ -813,18 +814,24 @@ public class ManageOrderService {
 
                 return setDraftOrderCollection(caseData, isLoggedIsAsJudgeOrLa);
             } else {
-                List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
-                orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
-                orderCollection.addAll(orderDetails);
-                orderCollection.sort(Comparator.comparing(
-                    m -> m.getValue().getDateCreated(),
-                    Comparator.reverseOrder()
-                ));
-                if (caseData.getManageOrdersOptions().equals(uploadAnOrder) && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
-                    orderCollection = serveOrder(caseData, orderCollection);
+                if (caseData.getManageOrdersOptions().equals(createAnOrder) && caseData.getServeOrderData() != null
+                    && (YesOrNo.No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+                    && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder()))) {
+                    return setDraftOrderCollection(caseData, isLoggedIsAsJudgeOrLa);
+                } else {
+                    List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
+                    orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
+                    orderCollection.addAll(orderDetails);
+                    orderCollection.sort(Comparator.comparing(
+                        m -> m.getValue().getDateCreated(),
+                        Comparator.reverseOrder()
+                    ));
+                    if (caseData.getManageOrdersOptions().equals(uploadAnOrder) && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                        orderCollection = serveOrder(caseData, orderCollection);
+                    }
+                    LocalDateTime currentOrderCreatedDateTime = orderDetails.get(0).getValue().getDateCreated();
+                    orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
                 }
-                LocalDateTime currentOrderCreatedDateTime = orderDetails.get(0).getValue().getDateCreated();
-                orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
             }
         } else {
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
@@ -835,7 +842,12 @@ public class ManageOrderService {
 
     public Map<String, Object> setDraftOrderCollection(CaseData caseData, boolean isLoggedIsAsJudgeOrLa) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
-        Element<DraftOrder> draftOrderElement = element(getCurrentDraftOrderDetails(caseData, isLoggedIsAsJudgeOrLa));
+        Element<DraftOrder> draftOrderElement = null;
+        if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
+            draftOrderElement = element(getCurrentDraftOrderDetails(caseData, isLoggedIsAsJudgeOrLa));
+        } else {
+            draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData));
+        }
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(draftOrderElement);
@@ -848,6 +860,65 @@ public class ManageOrderService {
         ));
         return Map.of("draftOrderCollection", draftOrderList
         );
+    }
+
+    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData) {
+        return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
+            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
+                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
+            .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
+            .orderDocument(caseData.getPreviewOrderDoc())
+            .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .dateCreated(dateTime.now())
+                              .status("Draft").build())
+            .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
+            .dateOrderMade(caseData.getDateOrderMade())
+            .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
+            .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+            .judgeOrMagistratesLastName(caseData.getJudgeOrMagistratesLastName())
+            .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
+            .magistrateLastName(caseData.getMagistrateLastName())
+            .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
+            .isTheOrderAboutAllChildren(caseData.getIsTheOrderAboutAllChildren())
+            .orderDirections(caseData.getManageOrders().getOrderDirections())
+            .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
+            .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
+            .parentName(caseData.getManageOrders().getParentName())
+            .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
+            .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
+            .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
+            .appointedGuardianName(caseData.getAppointedGuardianName())
+            .fl402HearingCourtAddress(caseData.getManageOrders().getFl402HearingCourtAddress())
+            .fl402HearingCourtname(caseData.getManageOrders().getFl402HearingCourtname())
+            .manageOrdersFl402CourtName(caseData.getManageOrders().getManageOrdersFl402CourtName())
+            .manageOrdersFl402Applicant(caseData.getManageOrders().getManageOrdersFl402Applicant())
+            .manageOrdersFl402CaseNo(caseData.getManageOrders().getManageOrdersFl402CaseNo())
+            .manageOrdersFl402CourtAddress(caseData.getManageOrders().getManageOrdersFl402CourtAddress())
+            .manageOrdersFl402ApplicantRef(caseData.getManageOrders().getManageOrdersFl402ApplicantRef())
+            .dateOfHearingTime(caseData.getManageOrders().getDateOfHearingTime())
+            .dateOfHearingTimeEstimate(caseData.getManageOrders().getDateOfHearingTimeEstimate())
+            .manageOrdersDateOfhearing(caseData.getManageOrders().getManageOrdersDateOfhearing())
+            .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
+            .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
+            .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
+            .manageOrdersApplicant(caseData.getManageOrders().getManageOrdersApplicant())
+            .manageOrdersApplicantReference(caseData.getManageOrders().getManageOrdersApplicantReference())
+            .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
+            .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
+            .manageOrdersRespondentDob(caseData.getManageOrders().getManageOrdersRespondentDob())
+            .manageOrdersRespondentAddress(caseData.getManageOrders().getManageOrdersRespondentAddress())
+            .manageOrdersUnderTakingRepr(caseData.getManageOrders().getManageOrdersUnderTakingRepr())
+            .underTakingSolicitorCounsel(caseData.getManageOrders().getUnderTakingSolicitorCounsel())
+            .manageOrdersUnderTakingPerson(caseData.getManageOrders().getManageOrdersUnderTakingPerson())
+            .manageOrdersUnderTakingAddress(caseData.getManageOrders().getManageOrdersUnderTakingAddress())
+            .manageOrdersUnderTakingTerms(caseData.getManageOrders().getManageOrdersUnderTakingTerms())
+            .manageOrdersDateOfUnderTaking(caseData.getManageOrders().getManageOrdersDateOfUnderTaking())
+            .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
+            .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
+            .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
+            .build();
     }
 
     private DraftOrder getCurrentDraftOrderDetails(CaseData caseData, boolean isLoggedIsAsJudgeOrLa) {
