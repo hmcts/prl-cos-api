@@ -191,6 +191,7 @@ public class DraftAnOrderService {
                 .equalsIgnoreCase(selectedOrder.getOrderDocument().getDocumentFileName()))
                 || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
                 .equalsIgnoreCase(selectedOrder.getOrderDocumentWelsh().getDocumentFileName()))) {
+                updatedCaseData.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
                 updatedCaseData.put("orderCollection", getFinalOrderCollection(authorisation, caseData, draftOrder));
                 log.info("before removing from draft orders::{}::", draftOrderCollection.size());
                 draftOrderCollection.remove(
