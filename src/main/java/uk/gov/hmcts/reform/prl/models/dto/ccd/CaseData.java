@@ -761,8 +761,8 @@ public class CaseData implements MappableObject {
     @JsonProperty("gatekeepingDetails")
     private GatekeepingDetails gatekeepingDetails;
 
+    @JsonUnwrapped
+    @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
-
-    private final List<Element<HearingData>> hearingData;
 }
 
