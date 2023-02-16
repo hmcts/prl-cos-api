@@ -68,12 +68,11 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("selectedOrder", caseData.getCreateSelectOrderOptions() != null
+            ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseData.toBuilder()
-                      .selectedOrder(caseData.getCreateSelectOrderOptions() != null
-                                         ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
-                      .build().toMap(CcdObjectMapper.getObjectMapper())).build();
-
+            .data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/populate-draft-order-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -89,8 +88,8 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("*** Case type of application in draft orders populate-draft-order-fields: {}", caseData);
-
+        log.info("*** Case type in draft orders populate-draft-order-fields: {}", caseData.getCaseTypeOfApplication());
+        log.info("*** getSelectedCaseTypeID populate-draft-order-fields: {}", caseData.getSelectedCaseTypeID());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
 
@@ -206,7 +205,8 @@ public class DraftAnOrderController {
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("*** Case type of application in draft orders submission before: {}", caseData);
+        log.info("*** Case type of application in draft orders submission before: {}", caseData.getCaseTypeOfApplication());
+        log.info("*** getSelectedCaseTypeID in draft orders submission before: {}", caseData.getSelectedCaseTypeID());
         caseDataUpdated.put("caseTypeOfApplication", caseData.getSelectedCaseTypeID());
         caseDataUpdated.putAll(draftAnOrderService.generateDraftOrderCollection(caseData));
         log.info("*** Case type of application in draft orders submission : {}", caseDataUpdated.get("caseTypeOfApplication"));

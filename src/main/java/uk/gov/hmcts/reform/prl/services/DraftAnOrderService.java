@@ -435,6 +435,8 @@ public class DraftAnOrderService {
         if (selectedOrder.getJudgeNotes() != null) {
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
         }
+        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        log.info("Case type of application in populateDraftOrderDocument {}", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
 
@@ -475,6 +477,8 @@ public class DraftAnOrderService {
         caseDataMap.put("underTakingDateExpiry", selectedOrder.getUnderTakingDateExpiry());
         caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
         caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
+        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        log.info("Case typ of application in populateDraftOrderCustomFields {}", caseData.getCaseTypeOfApplication());
         log.info("Selected order type is ********   from    populateDraftOrderCustomField",selectedOrder.getOrderType());
         return caseDataMap;
     }
