@@ -185,6 +185,7 @@ public class DraftAnOrderService {
         Map<String, Object> updatedCaseData = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        updatedCaseData.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if ((draftOrder.getOrderDocument() != null && draftOrder.getOrderDocument().getDocumentFileName()
