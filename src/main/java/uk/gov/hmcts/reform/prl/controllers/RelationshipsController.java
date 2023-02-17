@@ -133,7 +133,7 @@ public class RelationshipsController {
         log.info("caseData {}",new Gson().toJson(caseData));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("buffChildAndRespondentRelations", null);
-        caseDataUpdated.put("childAndRespondentRelations", caseData.getBuffChildAndApplicantRelations());
+        caseDataUpdated.put("childAndRespondentRelations", caseData.getBuffChildAndRespondentRelations());
         log.info("PopulateRespondentData {}",new Gson().toJson(caseDataUpdated));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

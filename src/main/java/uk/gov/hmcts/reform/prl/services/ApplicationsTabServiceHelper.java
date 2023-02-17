@@ -62,8 +62,6 @@ public class ApplicationsTabServiceHelper {
     }
 
 
-
-
     public List<Element<ChildDetailsRevised>> getChildRevisedDetails(CaseData caseData) {
         log.info("-->getChildRevisedDetails()--->start");
         Optional<List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised>>> childElementsCheck =
@@ -105,73 +103,93 @@ public class ApplicationsTabServiceHelper {
     }
 
     public List<Element<ChildAndApplicantRelation>> getChildAndApplicantsRelationTable(CaseData caseData) {
+        log.info("-->getChildAndApplicantsRelationTable()--->start");
         List<Element<ChildAndApplicantRelation>> applicants = new ArrayList<>();
-        Optional<List<Element<ChildrenAndApplicantRelation>>> checkApplicants = ofNullable(caseData.getChildAndApplicantRelations());
-
-        if (checkApplicants.isEmpty()) {
-            ChildAndApplicantRelation a = ChildAndApplicantRelation.builder().build();
-            Element<ChildAndApplicantRelation> app = Element.<ChildAndApplicantRelation>builder().value(a).build();
-            applicants.add(app);
-            return applicants;
+        try {
+            Optional<List<Element<ChildrenAndApplicantRelation>>> checkApplicants = ofNullable(caseData.getChildAndApplicantRelations());
+            if (checkApplicants.isEmpty()) {
+                ChildAndApplicantRelation a = ChildAndApplicantRelation.builder().build();
+                Element<ChildAndApplicantRelation> app = Element.<ChildAndApplicantRelation>builder().value(a).build();
+                applicants.add(app);
+                return applicants;
+            }
+            List<ChildrenAndApplicantRelation> currentApplicants = caseData.getChildAndApplicantRelations().stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            log.info("-->currentApplicants before --->{}", currentApplicants);
+            for (ChildrenAndApplicantRelation applicant : currentApplicants) {
+                ChildAndApplicantRelation a = objectMapper.convertValue(applicant, ChildAndApplicantRelation.class);
+                Element<ChildAndApplicantRelation> app = Element.<ChildAndApplicantRelation>builder().value(a).build();
+                applicants.add(app);
+            }
+        } catch(Exception exception) {
+            exception.printStackTrace();
         }
-        List<ChildrenAndApplicantRelation> currentApplicants = caseData.getChildAndApplicantRelations().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
-        for (ChildrenAndApplicantRelation applicant : currentApplicants) {
-            ChildAndApplicantRelation a = objectMapper.convertValue(applicant, ChildAndApplicantRelation.class);
-            Element<ChildAndApplicantRelation> app = Element.<ChildAndApplicantRelation>builder().value(a).build();
-            applicants.add(app);
-        }
+        log.info("-->currentApplicants final --->{}", applicants);
+        log.info("-->getChildAndApplicantsRelationTable()--->end");
         return applicants;
     }
 
 
     public List<Element<ChildAndRespondentRelation>> getChildAndRespondentRelationsTable(CaseData caseData) {
-        log.info("-->getChildRevisedDetails()--->start");
+        log.info("-->getChildAndRespondentRelationsTable()--->start");
         List<Element<ChildAndRespondentRelation>> respondents = new ArrayList<>();
-        Optional<List<Element<ChildrenAndRespondentRelation>>> checkRespondents = ofNullable(caseData.getChildAndRespondentRelations());
+        try {
+            Optional<List<Element<ChildrenAndRespondentRelation>>> checkRespondents = ofNullable(caseData.getChildAndRespondentRelations());
 
-        if (!checkRespondents.isPresent()) {
-            ChildAndRespondentRelation a = ChildAndRespondentRelation.builder().build();
-            Element<ChildAndRespondentRelation> app = Element.<ChildAndRespondentRelation>builder().value(a).build();
-            respondents.add(app);
-            return respondents;
+            if (!checkRespondents.isPresent()) {
+                ChildAndRespondentRelation a = ChildAndRespondentRelation.builder().build();
+                Element<ChildAndRespondentRelation> app = Element.<ChildAndRespondentRelation>builder().value(a).build();
+                respondents.add(app);
+                return respondents;
+            }
+            List<ChildrenAndRespondentRelation> currentApplicants = caseData.getChildAndRespondentRelations().stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            log.info("-->currentRelations before --->{}", currentApplicants);
+            for (ChildrenAndRespondentRelation respondent : currentApplicants) {
+                ChildAndRespondentRelation a = objectMapper.convertValue(respondent, ChildAndRespondentRelation.class);
+                Element<ChildAndRespondentRelation> app = Element.<ChildAndRespondentRelation>builder().value(a).build();
+                respondents.add(app);
+            }
+        } catch(Exception exception) {
+              exception.printStackTrace();
         }
-        List<ChildrenAndRespondentRelation> currentApplicants = caseData.getChildAndRespondentRelations().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-        log.info("-->currentApplicants before --->{}",currentApplicants);
-        for (ChildrenAndRespondentRelation respondent : currentApplicants) {
-            ChildAndRespondentRelation a = objectMapper.convertValue(respondent, ChildAndRespondentRelation.class);
-            Element<ChildAndRespondentRelation> app = Element.<ChildAndRespondentRelation>builder().value(a).build();
-            respondents.add(app);
-        }
-        log.info("-->respondents final List--->{}",respondents);
-        log.info("-->getChildRevisedDetails()--->start");
+        log.info("-->currentRelations final List--->{}",respondents);
+        log.info("-->getChildAndRespondentRelationsTable()--->end");
         return respondents;
     }
 
 
     public List<Element<ChildAndOtherPeopleRelation>> getChildAndOtherPeopleRelationsTable(CaseData caseData) {
+        log.info("-->getChildAndOtherPeopleRelationsTable()--->start");
         List<Element<ChildAndOtherPeopleRelation>> otherPeopleRelations = new ArrayList<>();
-        Optional<List<Element<ChildrenAndOtherPeopleRelation>>> checkRespondents = ofNullable(caseData.getChildAndOtherPeopleRelations());
+        try {
+            Optional<List<Element<ChildrenAndOtherPeopleRelation>>> checkRespondents = ofNullable(caseData.getChildAndOtherPeopleRelations());
 
-        if (checkRespondents.isEmpty()) {
-            ChildAndOtherPeopleRelation a = ChildAndOtherPeopleRelation.builder().build();
-            Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(a).build();
-            otherPeopleRelations.add(app);
-            return otherPeopleRelations;
+            if (checkRespondents.isEmpty()) {
+                ChildAndOtherPeopleRelation a = ChildAndOtherPeopleRelation.builder().build();
+                Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(a).build();
+                otherPeopleRelations.add(app);
+                return otherPeopleRelations;
+            }
+            List<ChildrenAndOtherPeopleRelation> currentApplicants = caseData.getChildAndOtherPeopleRelations().stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            log.info("-->otherPeopleRelations before List--->{}",currentApplicants);
+            for (ChildrenAndOtherPeopleRelation otherPeople : currentApplicants) {
+                ChildAndOtherPeopleRelation a = objectMapper.convertValue(
+                    otherPeople,
+                    ChildAndOtherPeopleRelation.class
+                );
+                Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(a).build();
+                otherPeopleRelations.add(app);
+            }
+        } catch(Exception exception) {
+            exception.printStackTrace();
         }
-        List<ChildrenAndOtherPeopleRelation> currentApplicants = caseData.getChildAndOtherPeopleRelations().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
-        for (ChildrenAndOtherPeopleRelation otherPeople : currentApplicants) {
-            ChildAndOtherPeopleRelation a = objectMapper.convertValue(otherPeople, ChildAndOtherPeopleRelation.class);
-            Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(a).build();
-            otherPeopleRelations.add(app);
-        }
+        log.info("-->otherPeopleRelations final List--->{}",otherPeopleRelations);
+        log.info("-->getChildAndOtherPeopleRelationsTable()--->end");
         return otherPeopleRelations;
     }
 
