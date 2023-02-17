@@ -51,6 +51,10 @@ public class C100JsonMapperTest {
     InternationalElementMapper internationalElementMapper;
     @Mock
     LitigationCapacityMapper litigationCapacityMapper;
+    @Mock
+    ChildrenAndApplicantsMapper childrenAndApplicantsMapper;
+    @Mock
+    ChildrenAndRespondentsMapper childrenAndRespondentsMapper;
 
 
     @Test
