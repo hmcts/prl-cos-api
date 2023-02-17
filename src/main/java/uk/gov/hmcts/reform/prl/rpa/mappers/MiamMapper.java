@@ -17,45 +17,45 @@ public class MiamMapper {
     public JsonObject map(CaseData caseData) {
 
         return new NullAwareJsonObjectBuilder()
-            .add("applicantAttendedMiam", CommonUtils.getYesOrNoValue(caseData.getApplicantAttendedMiam()))
-            .add("claimingExemptionMiam", CommonUtils.getYesOrNoValue(caseData.getClaimingExemptionMiam()))
-            .add("familyMediatorMiam", CommonUtils.getYesOrNoValue(caseData.getFamilyMediatorMiam()))
+            .add("applicantAttendedMiam", CommonUtils.getYesOrNoValue(caseData.getMiamDetails().getApplicantAttendedMiam()))
+            .add("claimingExemptionMiam", CommonUtils.getYesOrNoValue(caseData.getMiamDetails().getClaimingExemptionMiam()))
+            .add("familyMediatorMiam", CommonUtils.getYesOrNoValue(caseData.getMiamDetails().getFamilyMediatorMiam()))
             .add(
                 "miamExemptionsChecklist",
-                caseData.getMiamExemptionsChecklist() != null ? caseData.getMiamExemptionsChecklist().stream()
+                caseData.getMiamDetails().getMiamExemptionsChecklist() != null ? caseData.getMiamDetails().getMiamExemptionsChecklist().stream()
                     .map(MiamExemptionsChecklistEnum::getDisplayedValue).collect(Collectors.joining(", "))
                     : null
             )
             .add(
                 "miamDomesticViolenceChecklist",
-                caseData.getMiamDomesticViolenceChecklist() != null
-                    ? caseData.getMiamDomesticViolenceChecklist().stream()
+                caseData.getMiamDetails().getMiamDomesticViolenceChecklist() != null
+                    ? caseData.getMiamDetails().getMiamDomesticViolenceChecklist().stream()
                         .map(MiamDomesticViolenceChecklistEnum::getDisplayedValue)
                         .collect(Collectors.joining(", ")) : null
             )
             .add(
                 "miamUrgencyReasonChecklist",
-                caseData.getMiamUrgencyReasonChecklist() != null
-                    ? caseData.getMiamUrgencyReasonChecklist().stream()
+                caseData.getMiamDetails().getMiamUrgencyReasonChecklist() != null
+                    ? caseData.getMiamDetails().getMiamUrgencyReasonChecklist().stream()
                         .map(MiamUrgencyReasonChecklistEnum::getDisplayedValue)
                         .collect(Collectors.joining(", ")) : null
             )
             .add(
                 "miamPreviousAttendanceChecklist",
-                caseData.getMiamPreviousAttendanceChecklist() != null
-                    ? caseData.getMiamPreviousAttendanceChecklist().getDisplayedValue() : null
+                caseData.getMiamDetails().getMiamPreviousAttendanceChecklist() != null
+                    ? caseData.getMiamDetails().getMiamPreviousAttendanceChecklist().getDisplayedValue() : null
             )
             .add(
                 "miamOtherGroundsChecklist",
-                caseData.getMiamOtherGroundsChecklist() != null
-                    ? caseData.getMiamOtherGroundsChecklist().getDisplayedValue() : null
+                caseData.getMiamDetails().getMiamOtherGroundsChecklist() != null
+                    ? caseData.getMiamDetails().getMiamOtherGroundsChecklist().getDisplayedValue() : null
             )
-            .add("mediatorRegistrationNumber", caseData.getMediatorRegistrationNumber())
-            .add("familyMediatorServiceName", caseData.getFamilyMediatorServiceName())
-            .add("soleTraderName", caseData.getSoleTraderName())
-            .add("mediatorRegistrationNumber1", caseData.getMediatorRegistrationNumber1())
-            .add("familyMediatorServiceName1", caseData.getFamilyMediatorServiceName1())
-            .add("soleTraderName1", caseData.getSoleTraderName1())
+            .add("mediatorRegistrationNumber", caseData.getMiamDetails().getMediatorRegistrationNumber())
+            .add("familyMediatorServiceName", caseData.getMiamDetails().getFamilyMediatorServiceName())
+            .add("soleTraderName", caseData.getMiamDetails().getSoleTraderName())
+            .add("mediatorRegistrationNumber1", caseData.getMiamDetails().getMediatorRegistrationNumber1())
+            .add("familyMediatorServiceName1", caseData.getMiamDetails().getFamilyMediatorServiceName1())
+            .add("soleTraderName1", caseData.getMiamDetails().getSoleTraderName1())
             .build();
     }
 }
