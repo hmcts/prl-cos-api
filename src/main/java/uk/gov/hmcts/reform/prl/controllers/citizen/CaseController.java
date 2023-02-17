@@ -66,15 +66,15 @@ public class CaseController {
         CaseDetails caseDetails = null;
         if (isAuthorized(userToken, s2sToken)) {
             caseDetails = caseService.getCase(userToken, caseId);
+            if (null == caseDetails) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "case not found");
+            } else {
+                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                return caseData.toBuilder().noOfDaysRemainingToSubmitCase(
+                    CaseUtils.getRemainingDaysSubmitCase(caseData)).build();
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
-        }
-        if (null == caseDetails) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "case not found");
-        } else {
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            return caseData.toBuilder().noOfDaysRemainingToSubmitCase(
-                CaseUtils.getRemainingDaysSubmitCase(caseData)).build();
         }
     }
 

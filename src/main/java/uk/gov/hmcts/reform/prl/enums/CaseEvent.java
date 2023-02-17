@@ -16,7 +16,7 @@ public enum CaseEvent {
     LEGAL_REPRESENTATION("legalRepresentation"),
     SUPPORT_YOU_NEED("support-you-need"),
     REVIEW_AND_SUBMIT("reviewAndSubmit"),
-    CITIZEN_CASE_SUBMIT_WITH_HWF("citizen-case-submit-with-hwf");
+    CITIZEN_CASE_SUBMIT_WITH_HWF("citizenCaseSubmitWithHWF");
 
     private final String value;
 
