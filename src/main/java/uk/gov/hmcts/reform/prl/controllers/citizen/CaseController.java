@@ -10,12 +10,14 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -63,11 +66,16 @@ public class CaseController {
         CaseDetails caseDetails = null;
         if (isAuthorized(userToken, s2sToken)) {
             caseDetails = caseService.getCase(userToken, caseId);
+            if (null == caseDetails) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "case not found");
+            } else {
+                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                return caseData.toBuilder().noOfDaysRemainingToSubmitCase(
+                    CaseUtils.getRemainingDaysSubmitCase(caseData)).build();
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-            .toBuilder().id(caseDetails.getId()).build();
     }
 
     private boolean isAuthorized(String authorisation, String s2sToken) {
