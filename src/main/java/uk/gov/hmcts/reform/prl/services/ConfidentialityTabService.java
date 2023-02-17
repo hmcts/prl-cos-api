@@ -183,7 +183,7 @@ public class ConfidentialityTabService {
                                        .firstName(partyDetails.get().getFirstName())
                                        .lastName(partyDetails.get().getLastName())
                                        .email(partyDetails.get().getEmail().isEmpty() ? "" : partyDetails.get().getEmail())
-                                       .phoneNumber(partyDetails.get().getPhoneNumber().isEmpty() ? "": partyDetails.get().getPhoneNumber())
+                                       .phoneNumber(partyDetails.get().getPhoneNumber().isEmpty() ? "" : partyDetails.get().getPhoneNumber())
                                        .relationshipToChildDetails(childrenAndOtherPeopleRelation
                                                                        .getChildAndOtherPeopleRelation().getDisplayedValue())
                                        .address(partyDetails.get().getAddress()).build()).build();
