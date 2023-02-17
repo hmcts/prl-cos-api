@@ -430,6 +430,3 @@ ccd:
   elastic-search-api:
     result-size: 100
     boost: 2.0
-fis_hearing:
-  api:
-    url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
