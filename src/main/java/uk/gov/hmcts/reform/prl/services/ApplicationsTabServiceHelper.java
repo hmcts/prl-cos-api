@@ -124,7 +124,6 @@ public class ApplicationsTabServiceHelper {
             }
         } catch (Exception exception) {
             log.error("exception :",exception.getMessage());
-            exception.printStackTrace();
         }
         log.info("-->currentApplicants final --->{}", applicants);
         log.info("-->getChildAndApplicantsRelationTable()--->end");
@@ -155,7 +154,6 @@ public class ApplicationsTabServiceHelper {
             }
         } catch (Exception exception) {
             log.error("exception :",exception.getMessage());
-            exception.printStackTrace();
         }
         log.info("-->currentRelations final List--->{}",respondents);
         log.info("-->getChildAndRespondentRelationsTable()--->end");
@@ -189,7 +187,6 @@ public class ApplicationsTabServiceHelper {
             }
         } catch (Exception exception) {
             log.error("exception :",exception.getMessage());
-            exception.printStackTrace();
         }
         log.info("-->otherPeopleRelations final List--->{}",otherPeopleRelations);
         log.info("-->getChildAndOtherPeopleRelationsTable()--->end");
