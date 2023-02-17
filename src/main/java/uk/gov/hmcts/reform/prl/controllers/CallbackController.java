@@ -662,22 +662,5 @@ public class CallbackController {
 
     }
 
-    @PostMapping(path = "/pre-populate-hearing-type", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to populate Hearing type details")
-    public AboutToStartOrSubmitCallbackResponse prePopulateHearingType(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-
-        ArrayList hearingType = new ArrayList<>();
-        hearingType.add("Test1");
-        hearingType.add("Test2");
-        hearingType.add("Test3");
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("listWithoutNoticeHearingDetails",HearingData.builder()
-                                .hearingTypes(DynamicList.builder().value(DynamicListElement.EMPTY).listItems(hearingType).build()));
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
 }
 
