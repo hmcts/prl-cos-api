@@ -46,6 +46,8 @@ public class C100JsonMapperTest {
     @Mock
     OtherChildrenNotInTheCaseMapper otherChildrenNotInTheCaseMapper;
     @Mock
+    OtherPeopleInTheCaseRevisedMapper otherPeopleInTheCaseRevisedMapper;
+    @Mock
     AttendingTheHearingMapper attendingTheHearingMapper;
     @Mock
     InternationalElementMapper internationalElementMapper;

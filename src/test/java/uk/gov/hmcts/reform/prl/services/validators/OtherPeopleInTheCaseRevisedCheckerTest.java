@@ -66,7 +66,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
         List<Element<PartyDetails>> otherList = Collections.singletonList(wrappedOther);
 
         CaseData caseData = CaseData.builder()
-            .othersToNotify(otherList)
+            .otherPartyInTheCaseRevised(otherList)
             .build();
 
         assertTrue(otherPeopleInTheCaseChecker.isStarted(caseData));
@@ -79,7 +79,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
         List<Element<PartyDetails>> otherList = Collections.singletonList(wrappedOther);
 
         CaseData caseData = CaseData.builder()
-            .othersToNotify(otherList)
+            .otherPartyInTheCaseRevised(otherList)
             .build();
 
         assertFalse(otherPeopleInTheCaseChecker.isStarted(caseData));
@@ -188,7 +188,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
         Element<PartyDetails> partyWrapped = Element.<PartyDetails>builder().value(partyDetails).build();
         List<Element<PartyDetails>> listOfParty = Collections.singletonList(partyWrapped);
 
-        CaseData caseData = CaseData.builder().othersToNotify(listOfParty)
+        CaseData caseData = CaseData.builder().otherPartyInTheCaseRevised(listOfParty)
             .build();
 
         assertFalse(otherPeopleInTheCaseChecker.isFinished(caseData));
@@ -199,7 +199,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
     public void ifEmptyListOfPartyDetailsThenFinishedReturnsFalse() {
 
         CaseData caseData = CaseData.builder()
-            .othersToNotify(Collections.emptyList())
+            .otherPartyInTheCaseRevised(Collections.emptyList())
             .build();
 
         assertFalse(otherPeopleInTheCaseChecker.isFinished(caseData));
@@ -237,7 +237,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .othersToNotify(List.of(element(partyDetails)))
+            .otherPartyInTheCaseRevised(List.of(element(partyDetails)))
             .build();
 
         assertTrue(otherPeopleInTheCaseChecker.isFinished(caseData));

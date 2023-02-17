@@ -32,6 +32,7 @@ public class C100JsonMapper {
     private final MiamMapper miamMapper;
     private final AllegationsOfHarmMapper allegationOfHarmMapper;
     private final OtherPeopleInTheCaseMapper otherPeopleInTheCaseMapper;
+    private final OtherPeopleInTheCaseRevisedMapper otherPeopleInTheCaseRevisedMapper;
     private final OtherChildrenNotInTheCaseMapper otherChildrenNotInTheCaseMapper;
     private final OtherProceedingsMapper otherproceedingsMapper;
     private final AttendingTheHearingMapper attendingTheHearingMapper;
@@ -58,7 +59,9 @@ public class C100JsonMapper {
             .add("hearingUrgency", hearingUrgencyMapper.map(caseData))
             .add("miam", miamMapper.map(caseData))
             .add("allegationsOfHarm", allegationOfHarmMapper.map(caseData))
-            .add("otherPeopleInTheCase", otherPeopleInTheCaseMapper.map(caseData.getOthersToNotify()))
+            .add("otherPeopleInTheCase", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                ? otherPeopleInTheCaseRevisedMapper.map(caseData.getOtherPartyInTheCaseRevised())
+                : otherPeopleInTheCaseMapper.map(caseData.getOthersToNotify()))
             .add("otherChildrenNotPartOfTheApplication", otherChildrenNotInTheCaseMapper.map(caseData.getChildrenNotInTheCase()))
             .add("otherProceedings", otherproceedingsMapper.map(caseData))
             .add("attendingTheHearing", attendingTheHearingMapper.map(caseData))

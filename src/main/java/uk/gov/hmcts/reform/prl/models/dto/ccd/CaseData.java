@@ -308,6 +308,13 @@ public class CaseData implements MappableObject {
      */
     private final List<Element<PartyDetails>> othersToNotify;
 
+
+    /**
+     * Other people in the case revised.
+     */
+    private final List<Element<PartyDetails>> otherPartyInTheCaseRevised;
+
+
     /**
      * Other proceedings.
      */
