@@ -815,12 +815,12 @@ public class ManageOrderService {
 
                 return setDraftOrderCollection(caseData, isLoggedIsAsJudgeOrLa);
             } else {
-                if (caseData.getManageOrdersOptions().equals(createAnOrder) &&
-                    ((caseData.getServeOrderData() != null
-                        && (YesOrNo.No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
-                        && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder()))) ||
-                        (caseData.getManageOrders() != null &&
-                            !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())))) {
+                if (caseData.getManageOrdersOptions().equals(createAnOrder)
+                    && ((caseData.getServeOrderData() != null
+                    && (YesOrNo.No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+                    && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))
+                    || (caseData.getManageOrders() != null
+                    && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())))) {
                     return setDraftOrderCollection(caseData, isLoggedIsAsJudgeOrLa);
                 } else {
                     List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
