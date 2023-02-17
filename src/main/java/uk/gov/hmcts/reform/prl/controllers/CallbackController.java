@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
@@ -56,15 +59,16 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
@@ -98,6 +102,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
 @Slf4j
 @RestController
@@ -132,6 +137,15 @@ public class CallbackController {
     private final LaunchDarklyClient launchDarklyClient;
 
     private final ApplicantsListGenerator applicantsListGenerator;
+
+    @Autowired
+    @Qualifier("caseSummaryTab")
+    private CaseSummaryTabService caseSummaryTabService;
+    @Autowired
+    RefDataUserService refDataUserService;
+
+    @Autowired
+    private GatekeepingDetailsService gatekeepingDetailsService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -177,7 +191,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody @Parameter(name = "CaseData") CallbackRequest request
     ) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
+        CaseData caseData = getCaseData(request.getCaseDetails(), objectMapper);
 
         if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = buildTypeOfApplicationCaseData(caseData);
@@ -214,7 +228,7 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse prePopulateCourtDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Court closestChildArrangementsCourt = courtLocatorService
             .getNearestFamilyCourt(caseData);
@@ -242,7 +256,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -312,7 +326,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
 
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String baseLocationId = caseData.getCourtList().getValue().getCode();
@@ -336,7 +350,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
 
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         allTabsService.updateAllTabs(caseData);
     }
 
@@ -351,7 +365,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
 
         Optional<String> previousState = eventsForCase.stream().map(CaseEventDetail::getStateId)
@@ -361,8 +375,8 @@ public class CallbackController {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         List<String> stateList = List.of(DRAFT_STATE, "CLOSED",
-            PENDING_STATE,
-            SUBMITTED_STATE, RETURN_STATE
+                                         PENDING_STATE,
+                                         SUBMITTED_STATE, RETURN_STATE
         );
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
@@ -413,16 +427,23 @@ public class CallbackController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse sendEmailForSendToGatekeeper(
+    public AboutToStartOrSubmitCallbackResponse sendToGatekeeper(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("Gatekeeping details for the case id : {}", caseData.getId());
 
-        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseWorkerEmailService.sendEmailToGateKeeper(caseDetails);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
+        GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(caseDataUpdated,
+                                                                                                caseData.getLegalAdviserList(), refDataUserService);
+        caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
+        log.info("Gatekeeping caseData: {}", caseData.getGatekeepingDetails());
+
+        caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
+
+        log.info("Gatekeeping caseDataUpdated: {}", caseDataUpdated.get("gatekeepingDetails"));
 
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
@@ -441,7 +462,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws IOException {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         requireNonNull(caseData);
         sendgridService.sendEmail(c100JsonMapper.map(caseData));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -482,7 +503,7 @@ public class CallbackController {
         if (caseDataUpdated.get(APPLICANT_CASE_NAME) != null) {
             caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(APPLICANT_CASE_NAME));
         }
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         // Updating the case name for FL401
         if (caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME) != null) {
@@ -536,7 +557,7 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Element<FurtherEvidence>> furtherEvidencesList = caseData.getFurtherEvidences();
         List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
         List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
@@ -611,3 +632,4 @@ public class CallbackController {
     }
 
 }
+
