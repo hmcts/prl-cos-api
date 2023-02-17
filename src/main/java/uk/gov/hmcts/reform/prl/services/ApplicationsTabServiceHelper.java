@@ -122,7 +122,8 @@ public class ApplicationsTabServiceHelper {
                 Element<ChildAndApplicantRelation> app = Element.<ChildAndApplicantRelation>builder().value(a).build();
                 applicants.add(app);
             }
-        } catch(Exception exception) {
+        } catch (Exception exception) {
+            log.error("exception :",exception.getMessage());
             exception.printStackTrace();
         }
         log.info("-->currentApplicants final --->{}", applicants);
@@ -152,8 +153,9 @@ public class ApplicationsTabServiceHelper {
                 Element<ChildAndRespondentRelation> app = Element.<ChildAndRespondentRelation>builder().value(a).build();
                 respondents.add(app);
             }
-        } catch(Exception exception) {
-              exception.printStackTrace();
+        } catch (Exception exception) {
+            log.error("exception :",exception.getMessage());
+            exception.printStackTrace();
         }
         log.info("-->currentRelations final List--->{}",respondents);
         log.info("-->getChildAndRespondentRelationsTable()--->end");
@@ -185,7 +187,8 @@ public class ApplicationsTabServiceHelper {
                 Element<ChildAndOtherPeopleRelation> app = Element.<ChildAndOtherPeopleRelation>builder().value(a).build();
                 otherPeopleRelations.add(app);
             }
-        } catch(Exception exception) {
+        } catch (Exception exception) {
+            log.error("exception :",exception.getMessage());
             exception.printStackTrace();
         }
         log.info("-->otherPeopleRelations final List--->{}",otherPeopleRelations);
