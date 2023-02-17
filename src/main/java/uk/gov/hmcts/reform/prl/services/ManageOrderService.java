@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
@@ -814,9 +815,12 @@ public class ManageOrderService {
 
                 return setDraftOrderCollection(caseData, isLoggedIsAsJudgeOrLa);
             } else {
-                if (caseData.getManageOrdersOptions().equals(createAnOrder) && caseData.getServeOrderData() != null
-                    && (YesOrNo.No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
-                    && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder()))) {
+                if (caseData.getManageOrdersOptions().equals(createAnOrder) &&
+                    ((caseData.getServeOrderData() != null
+                        && (YesOrNo.No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+                        && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))||
+                        (caseData.getManageOrders() != null &&
+                            !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())))) {
                     return setDraftOrderCollection(caseData, isLoggedIsAsJudgeOrLa);
                 } else {
                     List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
