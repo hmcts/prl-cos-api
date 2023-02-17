@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -24,28 +25,38 @@ public class AttendingTheHearingCheckerTest {
 
     @Test
     public void whenNoCaseDataThenIsStartedFalse() {
-        CaseData caseData = CaseData.builder().build();
+        CaseData caseData = CaseData.builder()
+            .attendHearing(
+                AttendHearing.builder().build()
+            ).build();
         assertFalse(attendingTheHearingChecker.isStarted(caseData));
     }
 
     @Test
     public void whenPartialCaseDataThenIsStartedTrue() {
-        CaseData caseData = CaseData.builder().isDisabilityPresent(Yes).build();
+        CaseData caseData = CaseData.builder()
+            .attendHearing(AttendHearing.builder()
+                               .isDisabilityPresent(Yes)
+                               .build())
+            .build();
         assertTrue(attendingTheHearingChecker.isStarted(caseData));
     }
 
     @Test
     public void whenNoCaseDataThenIsFinishedFalse() {
-        CaseData caseData = CaseData.builder().build();
+        CaseData caseData = CaseData.builder()
+            .attendHearing(AttendHearing.builder().build()).build();
         assertFalse(attendingTheHearingChecker.isFinished(caseData));
     }
 
     @Test
     public void whenPartialCaseDataThenIsFinishedFalse() {
         CaseData caseData = CaseData.builder()
-            .isWelshNeeded(No)
-            .isDisabilityPresent(Yes)
-            .isInterpreterNeeded(Yes)
+            .attendHearing(AttendHearing.builder()
+                               .isWelshNeeded(No)
+                               .isDisabilityPresent(Yes)
+                               .isInterpreterNeeded(Yes)
+                               .build())
             .build();
         assertFalse(attendingTheHearingChecker.isFinished(caseData));
     }
@@ -53,11 +64,13 @@ public class AttendingTheHearingCheckerTest {
     @Test
     public void whenFullCaseDataWithNoComplexTypesThenIsFinishedTrue() {
         CaseData caseData = CaseData.builder()
-            .isWelshNeeded(No)
-            .isInterpreterNeeded(No)
-            .isDisabilityPresent(No)
-            .isSpecialArrangementsRequired(No)
-            .isIntermediaryNeeded(No)
+            .attendHearing(AttendHearing.builder()
+                               .isWelshNeeded(No)
+                               .isInterpreterNeeded(No)
+                               .isDisabilityPresent(No)
+                               .isSpecialArrangementsRequired(No)
+                               .isIntermediaryNeeded(No)
+                               .build())
             .build();
 
         assertTrue(attendingTheHearingChecker.isFinished(caseData));
@@ -73,11 +86,13 @@ public class AttendingTheHearingCheckerTest {
     @Test
     public void whenFullCaseDataHasMandatoryReturnsFalse() {
         CaseData caseData = CaseData.builder()
-            .isWelshNeeded(No)
-            .isInterpreterNeeded(No)
-            .isDisabilityPresent(No)
-            .isSpecialArrangementsRequired(No)
-            .isIntermediaryNeeded(No)
+            .attendHearing(AttendHearing.builder()
+                               .isWelshNeeded(No)
+                               .isInterpreterNeeded(No)
+                               .isDisabilityPresent(No)
+                               .isSpecialArrangementsRequired(No)
+                               .isIntermediaryNeeded(No)
+                               .build())
             .build();
 
         assertFalse(attendingTheHearingChecker.hasMandatoryCompleted(caseData));

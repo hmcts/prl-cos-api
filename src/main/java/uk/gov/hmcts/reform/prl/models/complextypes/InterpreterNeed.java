@@ -10,9 +10,9 @@ import java.util.List;
 @Builder
 public class InterpreterNeed {
 
-    private final List<PartyEnum> party;
-    private final String name;
-    private final String language;
-    private final String otherAssistance;
+    private List<PartyEnum> party;
+    private String name;
+    private String language;
+    private String otherAssistance;
 
 }
