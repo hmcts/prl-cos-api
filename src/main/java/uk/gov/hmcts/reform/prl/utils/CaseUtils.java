@@ -53,4 +53,17 @@ public class CaseUtils {
         return caseData.getCaseTypeOfApplication() != null
             ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
     }
+
+    public static String getOrderSelectionType(CaseData caseData) {
+        String orderSelectionType = null;
+        if (caseData.getManageOrdersOptions() != null) {
+            orderSelectionType = caseData.getManageOrdersOptions().toString();
+        } else if (caseData.getCreateSelectOrderOptions() != null) {
+            orderSelectionType = caseData.getCreateSelectOrderOptions().toString();
+        } else {
+            orderSelectionType = "";
+        }
+
+        return orderSelectionType;
+    }
 }

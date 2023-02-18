@@ -18,5 +18,6 @@ public class OtherOrderDetails {
     private final String orderRecipients;
     private final String orderServedDate;
     private final String approvalDate;
+    private final String status;
 
 }
