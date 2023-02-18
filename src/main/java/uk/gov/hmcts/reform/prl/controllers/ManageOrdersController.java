@@ -86,7 +86,8 @@ public class ManageOrdersController {
                                                                     "isJudgeOrLa",
                                                                     "doYouWantToServeOrder",
                                                                     "whatDoWithOrder",
-                                                                    "currentOrderCreatedDateTime"
+                                                                    "currentOrderCreatedDateTime",
+                                                                    "approvalDate"
     );
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
