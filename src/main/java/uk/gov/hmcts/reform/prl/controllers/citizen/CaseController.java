@@ -183,10 +183,15 @@ public class CaseController {
 
         if (isAuthorized(authorisation, s2sToken)) {
             caseDetails = caseService.createCase(caseData, authorisation);
+            if (null == caseDetails) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "case could not be created");
+            } else {
+                CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
+                    CaseUtils.getRemainingDaysSubmitCase(createdCaseData)).build();
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-            .toBuilder().id(caseDetails.getId()).build();
     }
 }
