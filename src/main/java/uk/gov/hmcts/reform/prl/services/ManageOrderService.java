@@ -683,7 +683,9 @@ public class ManageOrderService {
             } else {
                 serveOrderData = ServeOrderData.builder().build();
             }
+            String loggedInUserType = getLoggedInUserType(authorisation);
             SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+            String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
 
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                                        .orderTypeId(flagSelectedOrderId)
@@ -709,6 +711,7 @@ public class ManageOrderService {
                                                          .orderRecipients(caseData.getManageOrdersOptions().equals(
                                                              ManageOrdersOptionsEnum.createAnOrder) ? getAllRecipients(
                                                              caseData) : null)
+                                                         .status(getOrderStatus(orderSelectionType,loggedInUserType))
                                                          .build())
                                        .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                                         ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
@@ -875,14 +878,7 @@ public class ManageOrderService {
     }
 
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType) {
-        String orderSelectionType = null;
-        if (caseData.getManageOrdersOptions() != null) {
-            orderSelectionType = caseData.getManageOrdersOptions().toString();
-        } else if (caseData.getCreateSelectOrderOptions() != null) {
-            orderSelectionType = caseData.getCreateSelectOrderOptions().toString();
-        } else {
-            orderSelectionType = "";
-        }
+        String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
@@ -892,7 +888,7 @@ public class ManageOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
-                              .status(getDraftOrderStatus(orderSelectionType, loggedInUserType))
+                              .status(getOrderStatus(orderSelectionType, loggedInUserType))
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
@@ -951,6 +947,7 @@ public class ManageOrderService {
     private DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType) {
         String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
 
         return DraftOrder.builder()
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
@@ -961,18 +958,18 @@ public class ManageOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
-                              .status(getDraftOrderStatus(caseData.getManageOrdersOptions().toString(), loggedInUserType))
+                              .status(getOrderStatus(orderSelectionType, loggedInUserType))
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())
             .judgeNotes(caseData.getManageOrders() != null
                         ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
-            .orderSelectionType(caseData.getManageOrdersOptions() != null ? caseData.getManageOrdersOptions().toString() : null)
+            .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
             .build();
     }
 
-    public String getDraftOrderStatus(String orderSelectionType, String loggedInUserType) {
+    public String getOrderStatus(String orderSelectionType, String loggedInUserType) {
         String status = null;
         if (createAnOrder.getDisplayedValue().equals(orderSelectionType) || uploadAnOrder.getDisplayedValue().equals(orderSelectionType)) {
             if (JUDGE_OR_LA.equals(loggedInUserType)) {
@@ -1147,6 +1144,7 @@ public class ManageOrderService {
                 PrlAppsConstants.D_MMMM_YYYY,
                 Locale.UK
             )))
+            .status(otherDetails.getStatus())
             .build();
     }
 
@@ -1391,7 +1389,9 @@ public class ManageOrderService {
                 template
             );
         }
+        String loggedInUserType = getLoggedInUserType(authorisation);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         return element(OrderDetails.builder().orderType(flagSelectedOrder)
                            .orderTypeId(flagSelectedOrderId)
                            .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
@@ -1423,7 +1423,9 @@ public class ManageOrderService {
                                                                     PrlAppsConstants.D_MMMM_YYYY,
                                                                     Locale.UK
                                                                 )))
-                                             .orderRecipients(getAllRecipients(caseData)).build())
+                                             .orderRecipients(getAllRecipients(caseData))
+                                             .status(getOrderStatus(orderSelectionType, loggedInUserType))
+                                             .build())
                            .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                             ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
                            .build());
