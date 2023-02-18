@@ -93,9 +93,10 @@ public class DraftAnOrderService {
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
 
 
-    public Map<String, Object> generateDraftOrderCollection(CaseData caseData) {
+    public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
+        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
-        Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData));
+        Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType));
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(orderDetails);
@@ -110,8 +111,8 @@ public class DraftAnOrderService {
         );
     }
 
-    private DraftOrder getCurrentOrderDetails(CaseData caseData) {
-        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData);
+    private DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType) {
+        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
     }
 
     public Map<String, Object> getDraftOrderDynamicList(List<Element<DraftOrder>> draftOrderCollection, String caseTypeOfApplication) {

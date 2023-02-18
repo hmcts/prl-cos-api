@@ -361,9 +361,10 @@ public class DraftAnOrderServiceTest {
             .build();
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-        when(manageOrderService.getCurrentCreateDraftOrderDetails(caseData)).thenReturn(draftOrder);
+        when(manageOrderService.getCurrentCreateDraftOrderDetails(caseData, "Solicitor")).thenReturn(draftOrder);
+        when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
         Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap = draftAnOrderService.generateDraftOrderCollection(caseData);
+        stringObjectMap = draftAnOrderService.generateDraftOrderCollection(caseData, "auth-token");
         assertNotNull(stringObjectMap.get("draftOrderCollection"));
     }
 
@@ -1147,7 +1148,7 @@ public class DraftAnOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap = draftAnOrderService.generateDraftOrderCollection(caseData);
+        stringObjectMap = draftAnOrderService.generateDraftOrderCollection(caseData, "auth-token");
         assertNotNull(stringObjectMap.get("draftOrderCollection"));
     }
 

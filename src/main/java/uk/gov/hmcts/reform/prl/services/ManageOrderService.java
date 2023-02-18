@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
@@ -63,9 +64,14 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_OR_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_JUDGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
@@ -805,17 +811,17 @@ public class ManageOrderService {
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
         throws Exception {
         List<Element<OrderDetails>> orderCollection;
-        boolean isLoggedIsAsJudgeOrLa = isLoggedInAsJudgeOrLa(authorisation);
+        String loggedInUserType = getLoggedInUserType(authorisation);
 
         Map<String, Object> orderMap = new HashMap<>();
 
         if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             log.info("value of orderCollection  ----> " + caseData.getOrderCollection());
             if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
-                && (isLoggedIsAsJudgeOrLa || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+                && (PrlAppsConstants.JUDGE_OR_LA.equals(loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
 
-                return setDraftOrderCollection(caseData, isLoggedIsAsJudgeOrLa);
+                return setDraftOrderCollection(caseData, loggedInUserType);
             } else {
                 if (caseData.getManageOrdersOptions().equals(createAnOrder)
                     && ((caseData.getServeOrderData() != null
@@ -823,7 +829,7 @@ public class ManageOrderService {
                     && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))
                     || (caseData.getManageOrders() != null
                     && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())))) {
-                    return setDraftOrderCollection(caseData, isLoggedIsAsJudgeOrLa);
+                    return setDraftOrderCollection(caseData, loggedInUserType);
                 } else {
                     List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
                     orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
@@ -846,13 +852,13 @@ public class ManageOrderService {
         return orderMap;
     }
 
-    public Map<String, Object> setDraftOrderCollection(CaseData caseData, boolean isLoggedIsAsJudgeOrLa) {
+    public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> draftOrderElement = null;
         if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-            draftOrderElement = element(getCurrentDraftOrderDetails(caseData, isLoggedIsAsJudgeOrLa));
+            draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType));
         } else {
-            draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData));
+            draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType));
         }
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
@@ -868,7 +874,15 @@ public class ManageOrderService {
         );
     }
 
-    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData) {
+    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType) {
+        String orderSelectionType = null;
+        if (caseData.getManageOrdersOptions() != null) {
+            orderSelectionType = caseData.getManageOrdersOptions().toString();
+        } else if (caseData.getCreateSelectOrderOptions() != null) {
+            orderSelectionType = caseData.getCreateSelectOrderOptions().toString();
+        } else {
+            orderSelectionType = "";
+        }
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
@@ -878,7 +892,11 @@ public class ManageOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
-                              .status("Draft").build())
+                              .status(getDraftOrderStatus(orderSelectionType, loggedInUserType))
+                              .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                              .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
+                              .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
+                              .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())
@@ -925,10 +943,12 @@ public class ManageOrderService {
             .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
             .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
             .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
+            .orderSelectionType(orderSelectionType)
+            .orderCreatedBy(loggedInUserType)
             .build();
     }
 
-    private DraftOrder getCurrentDraftOrderDetails(CaseData caseData, boolean isLoggedIsAsJudgeOrLa) {
+    private DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType) {
         String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
 
@@ -941,14 +961,29 @@ public class ManageOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
-                              .status(isLoggedIsAsJudgeOrLa ? "Judge reviewed" : "Draft")
+                              .status(getDraftOrderStatus(caseData.getManageOrdersOptions().toString(), loggedInUserType))
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())
             .judgeNotes(caseData.getManageOrders() != null
                         ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
-            .orderSelectionType(caseData.getManageOrdersOptions())
+            .orderSelectionType(caseData.getManageOrdersOptions() != null ? caseData.getManageOrdersOptions().toString() : null)
+            .orderCreatedBy(loggedInUserType)
             .build();
+    }
+
+    public String getDraftOrderStatus(String orderSelectionType, String loggedInUserType) {
+        String status = null;
+        if (createAnOrder.getDisplayedValue().equals(orderSelectionType) || uploadAnOrder.getDisplayedValue().equals(orderSelectionType)) {
+            if (JUDGE_OR_LA.equals(loggedInUserType)) {
+                status = OrderStatusEnum.createdByJudge.getDisplayedValue();
+            } else if (COURT_ADMIN.equals(loggedInUserType)) {
+                status = OrderStatusEnum.createdByCA.getDisplayedValue();
+            } else if (SOLICITOR.equals(loggedInUserType)) {
+                status = OrderStatusEnum.draftedByLR.getDisplayedValue();
+            }
+        }
+        return status;
     }
 
     public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
@@ -1405,11 +1440,22 @@ public class ManageOrderService {
         return withdrawApproved;
     }
 
-    public boolean isLoggedInAsJudgeOrLa(String authorisation) {
+    public String getLoggedInUserType(String authorisation) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
+        String loggedInUserType;
         List<String> roles = userDetails.getRoles();
-        boolean isJudgeOrLa = roles.stream().anyMatch(ROLES_JUDGE::contains);
-        return isJudgeOrLa;
+        if (roles.stream().anyMatch(ROLES_JUDGE::contains)) {
+            loggedInUserType = PrlAppsConstants.JUDGE_OR_LA;
+        } else if (roles.stream().anyMatch(ROLES_COURT_ADMIN::contains)) {
+            loggedInUserType = PrlAppsConstants.COURT_ADMIN;
+        } else if (roles.stream().anyMatch(ROLES_SOLICITOR::contains)) {
+            loggedInUserType = PrlAppsConstants.SOLICITOR;
+        } else {
+            loggedInUserType = "";
+        }
+        log.info("loggedInUserType ===> " + loggedInUserType);
+
+        return loggedInUserType;
     }
 
 }
