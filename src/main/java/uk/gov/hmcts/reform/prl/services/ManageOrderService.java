@@ -971,7 +971,9 @@ public class ManageOrderService {
 
     public String getOrderStatus(String orderSelectionType, String loggedInUserType) {
         String status = null;
-        if (createAnOrder.getDisplayedValue().equals(orderSelectionType) || uploadAnOrder.getDisplayedValue().equals(orderSelectionType)) {
+        log.info("Order status orderSelectionType ====> " + orderSelectionType);
+        log.info("Order status loggedInUserType ====> " + loggedInUserType);
+        if (createAnOrder.toString().equals(orderSelectionType) || uploadAnOrder.toString().equals(orderSelectionType)) {
             if (JUDGE_OR_LA.equals(loggedInUserType)) {
                 status = OrderStatusEnum.createdByJudge.getDisplayedValue();
             } else if (COURT_ADMIN.equals(loggedInUserType)) {
@@ -980,6 +982,7 @@ public class ManageOrderService {
                 status = OrderStatusEnum.draftedByLR.getDisplayedValue();
             }
         }
+        log.info("Order status ====> " + status);
         return status;
     }
 
