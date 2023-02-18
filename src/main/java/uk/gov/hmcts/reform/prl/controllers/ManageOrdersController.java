@@ -83,7 +83,7 @@ public class ManageOrdersController {
                                                                     "amendOrderDynamicList",
                                                                     "serveOrderDynamicList",
                                                                     "ordersNeedToBeServed",
-                                                                    "isJudgeOrLa",
+                                                                    "loggedInUserType",
                                                                     "doYouWantToServeOrder",
                                                                     "whatDoWithOrder",
                                                                     "currentOrderCreatedDateTime",
@@ -160,14 +160,11 @@ public class ManageOrdersController {
             && !caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
-        boolean isJudgeOrLa = manageOrderService.isLoggedInAsJudgeOrLa(authorisation);
-
-        log.info("isJudgeOrLa {}", isJudgeOrLa);
 
         ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
             .childOption(DynamicMultiSelectList.builder()
                              .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
-            .isJudgeOrLa(isJudgeOrLa ? PrlAppsConstants.JUDGE : PrlAppsConstants.CASEWORKER)
+            .loggedInUserType(manageOrderService.getLoggedInUserType(authorisation))
             .build();
         log.info("**Manage orders with child list {}", manageOrders);
 
@@ -279,14 +276,12 @@ public class ManageOrdersController {
         log.info("/amend-order/mid-event before" + callbackRequest.getCaseDetails());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        boolean isJudgeOrLa = manageOrderService.isLoggedInAsJudgeOrLa(authorisation);
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
         }
 
-        log.info("isJudgeOrLa {}", isJudgeOrLa);
-        caseDataUpdated.put("isJudgeOrLa", isJudgeOrLa ? PrlAppsConstants.JUDGE : PrlAppsConstants.CASEWORKER);
+        caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
 
         log.info("/amend-order/mid-event after" + caseDataUpdated);
 
