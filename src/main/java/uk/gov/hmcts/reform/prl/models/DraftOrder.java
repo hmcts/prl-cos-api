@@ -49,6 +49,8 @@ public class DraftOrder {
     private final List<Element<MagistrateLastName>> magistrateLastName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate approvalDate;
     private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     private final String recitalsOrPreamble;
     @JsonProperty("orderDirections")

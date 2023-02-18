@@ -203,7 +203,8 @@ public class DraftAnOrderController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(draftAnOrderService.generateDraftOrderCollection(caseData));
-        caseDataUpdated.put("previewOrderDoc",null);
+        caseDataUpdated.put("previewOrderDoc", null);
+        log.info("caseDataUpdated after submit draft order ====> " + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

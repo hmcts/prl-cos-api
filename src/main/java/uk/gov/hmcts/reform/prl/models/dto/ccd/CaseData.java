@@ -546,6 +546,7 @@ public class CaseData implements MappableObject {
      */
     private final List<Element<OrderDetails>> orderCollection;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate approvalDate;
     private Document appointmentOfGuardian;
     private Document previewOrderDoc;
