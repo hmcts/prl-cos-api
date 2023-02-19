@@ -114,6 +114,8 @@ public class DraftOrder {
 
     private final String orderSelectionType;
     private final String orderCreatedBy;
+    @JsonProperty("isOrderUploadedByJudgeOrAdmin")
+    private final YesOrNo isOrderUploadedByJudgeOrAdmin;
     private final String childrenList;
 
     @JsonIgnore

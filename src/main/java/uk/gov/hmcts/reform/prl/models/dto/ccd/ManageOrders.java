@@ -220,6 +220,15 @@ public class ManageOrders {
     @JsonProperty("nameOfLaAmendOrder")
     private final String nameOfLaAmendOrder;
 
+    @JsonProperty("previewUploadedOrder")
+    private Document previewUploadedOrder;
+    @JsonProperty("orderUploadedAsDraftFlag")
+    private YesOrNo orderUploadedAsDraftFlag;
+    @JsonProperty("makeChangesToUploadedOrder")
+    private YesOrNo makeChangesToUploadedOrder;
+    @JsonProperty("editedUploadOrderDoc")
+    private Document editedUploadOrderDoc;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime currentOrderCreatedDateTime;
 

@@ -107,7 +107,7 @@ public class ManageOrdersController {
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         } else {
-            caseDataUpdated.put("previewOrderDoc", caseData.getAppointmentOfGuardian());
+            caseDataUpdated.put("previewOrderDoc", caseData.getUploadOrderDoc());
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
@@ -246,8 +246,10 @@ public class ManageOrdersController {
             ));
         }
         cleanUpSelectedManageOrderOptions(caseDataUpdated);
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
 
     @PostMapping(path = "/show-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order for special guardianship create order")

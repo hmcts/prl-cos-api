@@ -41,7 +41,6 @@ import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.PartiesListGenerator;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -123,7 +122,9 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
+        log.info("before case type of application in about to start::: {} :::", caseTypeOfApplication);
         caseDataMap.put("caseTypeOfApplication", caseTypeOfApplication);
+        log.info("after setting case type of application::: {} :::", caseDataMap.get("caseTypeOfApplication"));
         return caseDataMap;
     }
 
@@ -131,12 +132,14 @@ public class DraftAnOrderService {
         Map<String, Object> updatedCaseData = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        updatedCaseData.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if ((draftOrder.getOrderDocument() != null && draftOrder.getOrderDocument().getDocumentFileName()
                 .equalsIgnoreCase(selectedOrder.getOrderDocument().getDocumentFileName()))
                 || (draftOrder.getOrderDocumentWelsh() != null && draftOrder.getOrderDocumentWelsh().getDocumentFileName()
                 .equalsIgnoreCase(selectedOrder.getOrderDocumentWelsh().getDocumentFileName()))) {
+                updatedCaseData.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
                 updatedCaseData.put("orderCollection", getFinalOrderCollection(authorisation, caseData, draftOrder));
                 draftOrderCollection.remove(
                     draftOrderCollection.indexOf(e)
@@ -169,67 +172,72 @@ public class DraftAnOrderService {
 
     private Element<OrderDetails> convertDraftOrderToFinal(String auth, CaseData caseData, DraftOrder draftOrder) {
         log.info("draftOrder.getOrderType************ {}", draftOrder.getOrderType());
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
+
         GeneratedDocumentInfo generatedDocumentInfo = null;
         GeneratedDocumentInfo generatedDocumentInfoWelsh = null;
-        ServeOrderDetails serveOrderDetails = null;
-        if (YesOrNo.Yes.equals(caseData.getServeOrderData()
-                                  .getDoYouWantToServeOrder())) {
-            serveOrderDetails = getServeOrderDetailsFromCaseData(caseData);
-        }
-        try {
-            if (documentLanguage.isGenEng()) {
-                generatedDocumentInfo = dgsService.generateDocument(
-                    auth,
-                    CaseDetails.builder().caseData(caseData).build(),
-                    fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
-                );
-            }
-            if (documentLanguage.isGenWelsh()) {
-                generatedDocumentInfoWelsh = dgsService.generateDocument(
-                    auth,
-                    CaseDetails.builder().caseData(caseData).build(),
-                    fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH)
-                );
-            }
-        } catch (Exception e) {
-            log.error(
-                "Error while generating the final document for case {} and  order {}",
-                caseData.getId(),
-                draftOrder.getOrderType()
-            );
-        }
 
-        return element(OrderDetails.builder()
-                           .orderType(draftOrder.getOrderTypeId())
-                           .typeOfOrder(draftOrder.getOrderType() != null
-                                            ? draftOrder.getOrderType().getDisplayedValue() : null)
-                           .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
-                           .orderDocument(getGeneratedDocument(generatedDocumentInfo,false,fieldMap))
-                           .orderDocumentWelsh(getGeneratedDocument(generatedDocumentInfoWelsh,documentLanguage.isGenWelsh(),fieldMap))
-                           .adminNotes(caseData.getCourtAdminNotes())
-                           .dateCreated(draftOrder.getOtherDetails().getDateCreated())
-                           .judgeNotes(draftOrder.getJudgeNotes())
-                           .otherDetails(
-                               OtherOrderDetails.builder().createdBy(draftOrder.getOtherDetails().getCreatedBy())
-                                   .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                       PrlAppsConstants.D_MMMM_YYYY,
-                                       Locale.UK
-                                   )))
-                                   .orderMadeDate(draftOrder.getOtherDetails().getDateCreated().format(
-                                       DateTimeFormatter.ofPattern(
-                                           PrlAppsConstants.D_MMMM_YYYY,
-                                           Locale.UK
-                                       )))
-                                   .orderServedDate(YesOrNo.Yes.equals(caseData.getServeOrderData()
-                                                                           .getDoYouWantToServeOrder()) ? LocalDate.now()
-                                       .format(DateTimeFormatter.ofPattern(
-                                           PrlAppsConstants.D_MMMM_YYYY,
-                                           Locale.UK
-                                       )) : null)
-                                   .orderRecipients(manageOrderService.getAllRecipients(caseData)).build())
-                           .serveOrderDetails(serveOrderDetails).build());
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderType(draftOrder.getOrderTypeId())
+            .typeOfOrder(draftOrder.getOrderType() != null
+                             ? draftOrder.getOrderType().getDisplayedValue() : null)
+            .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
+            .adminNotes(caseData.getCourtAdminNotes())
+            .dateCreated(draftOrder.getOtherDetails().getDateCreated())
+            .judgeNotes(draftOrder.getJudgeNotes())
+            .otherDetails(
+                OtherOrderDetails.builder().createdBy(draftOrder.getOtherDetails().getCreatedBy())
+                    .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
+                        PrlAppsConstants.D_MMMM_YYYY,
+                        Locale.UK
+                    )))
+                    .orderMadeDate(draftOrder.getOtherDetails().getDateCreated().format(
+                        DateTimeFormatter.ofPattern(
+                            PrlAppsConstants.D_MMMM_YYYY,
+                            Locale.UK
+                        )))
+                    .orderRecipients(manageOrderService.getAllRecipients(caseData)).build())
+            .build();
+        if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
+            log.info("entering into if loop");
+            orderDetails = orderDetails.toBuilder()
+                .orderDocument(draftOrder.getOrderDocument())
+                .build();
+            log.info("setting order document:  {} :", orderDetails.getOrderDocument());
+        } else {
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
+            try {
+                if (documentLanguage.isGenEng()) {
+                    generatedDocumentInfo = dgsService.generateDocument(
+                        auth,
+                        CaseDetails.builder().caseData(caseData).build(),
+                        fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
+                    );
+                }
+                if (documentLanguage.isGenWelsh()) {
+                    generatedDocumentInfoWelsh = dgsService.generateDocument(
+                        auth,
+                        CaseDetails.builder().caseData(caseData).build(),
+                        fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH)
+                    );
+                }
+                orderDetails = orderDetails.toBuilder()
+                    .orderDocument(getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
+                    .orderDocumentWelsh(getGeneratedDocument(
+                        generatedDocumentInfoWelsh,
+                        documentLanguage.isGenWelsh(),
+                        fieldMap
+                    ))
+                    .build();
+            } catch (Exception e) {
+                log.error(
+                    "Error while generating the final document for case {} and  order {}",
+                    caseData.getId(),
+                    draftOrder.getOrderType()
+                );
+            }
+        }
+        return element(orderDetails);
 
     }
 
@@ -371,7 +379,11 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderDocument(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
+        caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
+        caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
         DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
+
         if (language.isGenEng()) {
             caseDataMap.put("previewDraftOrder", selectedOrder.getOrderDocument());
         }
@@ -455,13 +467,16 @@ public class DraftAnOrderService {
         UUID orderId = elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper);
         log.info("inside getDraftOrderDocument orderId {}", orderId);
+        log.info("Draft Order Collection list *****{}*****", caseData.getDraftOrderCollection());
         return caseData.getDraftOrderCollection().stream()
-            .filter(element -> element.getId().equals(orderId))
+            .filter(element -> {
+                log.info("Order collection id:: {}", element.getId());
+                return element.getId().equals(orderId);
+            })
             .map(Element::getValue)
             .findFirst()
             .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
     }
-
 
     public Map<String, Object> updateDraftOrderCollection(CaseData caseData) {
 
@@ -490,6 +505,9 @@ public class DraftAnOrderService {
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData) {
         Document orderDocumentEng;
         Document orderDocumentWelsh;
+        if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
+            orderDocumentEng = caseData.getManageOrders().getEditedUploadOrderDoc();
+        }
         if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
             orderDocumentEng = caseData.getPreviewOrderDoc();
             orderDocumentWelsh = caseData.getPreviewOrderDocWelsh();
@@ -498,9 +516,10 @@ public class DraftAnOrderService {
             orderDocumentWelsh = draftOrder.getOrderDocumentWelsh();
         }
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
-            .typeOfOrder(draftOrder.getOrderType() != null
-                             ? draftOrder.getOrderType().getDisplayedValue() : null)
-            .orderTypeId(draftOrder.getOrderType().getDisplayedValue())
+            .typeOfOrder(null != draftOrder.getOrderType()
+                             ? draftOrder.getOrderType().getDisplayedValue() : manageOrderService.getSelectedOrderInfoForUpload(caseData))
+            .orderTypeId(null != draftOrder.getOrderType()
+                              ? draftOrder.getOrderType().getDisplayedValue() : manageOrderService.getSelectedOrderInfoForUpload(caseData))
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()

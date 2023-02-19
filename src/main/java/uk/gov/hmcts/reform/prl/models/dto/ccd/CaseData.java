@@ -549,7 +549,7 @@ public class CaseData implements MappableObject {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate approvalDate;
-    private Document appointmentOfGuardian;
+    private Document uploadOrderDoc;
     private Document previewOrderDoc;
     private Document previewOrderDocWelsh;
 
@@ -557,7 +557,6 @@ public class CaseData implements MappableObject {
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
     private final List<OrderRecipientsEnum> orderRecipients;
     private final SelectTypeOfOrderEnum selectTypeOfOrder;
-
 
     @JsonProperty("doesOrderClosesCase")
     private final YesOrNo doesOrderClosesCase;
@@ -742,6 +741,8 @@ public class CaseData implements MappableObject {
     private YesOrNo doYouWantToEditTheOrder;
     private YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     private String courtAdminNotes;
+
+
 
     @JsonUnwrapped
     @Builder.Default
