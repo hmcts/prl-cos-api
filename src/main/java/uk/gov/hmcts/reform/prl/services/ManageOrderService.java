@@ -690,7 +690,7 @@ public class ManageOrderService {
 
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                                        .orderTypeId(flagSelectedOrderId)
-                                       .orderDocument(caseData.getAppointmentOfGuardian())
+                                       .orderDocument(caseData.getUploadOrderDoc())
                                        .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
                                        .otherDetails(OtherOrderDetails.builder()
                                                          .createdBy(caseData.getJudgeOrMagistratesLastName())
@@ -819,9 +819,9 @@ public class ManageOrderService {
 
         Map<String, Object> orderMap = new HashMap<>();
 
-        if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+        if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
             log.info("value of orderCollection  ----> " + caseData.getOrderCollection());
-            if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
+            if (uploadAnOrder.equals(caseData.getManageOrdersOptions())
                 && (PrlAppsConstants.JUDGE_OR_LA.equals(loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
 
@@ -953,7 +953,7 @@ public class ManageOrderService {
         return DraftOrder.builder()
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderTypeId(flagSelectedOrderId)
-            .orderDocument(caseData.getAppointmentOfGuardian())
+            .orderDocument(caseData.getUploadOrderDoc())
             .childrenList(caseData.getManageOrders() != null
                               ? getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()) : null)
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -967,6 +967,9 @@ public class ManageOrderService {
                         ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
             .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
+            .isOrderUploadedByJudgeOrAdmin(null != caseData.getManageOrdersOptions()
+                                               && caseData.getManageOrdersOptions().equals(uploadAnOrder)
+                                               ? Yes : No)
             .build();
     }
 
