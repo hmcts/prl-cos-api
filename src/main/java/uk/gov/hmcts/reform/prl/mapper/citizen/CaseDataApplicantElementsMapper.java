@@ -1,22 +1,32 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ApplicantDto;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildDetail;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 public class CaseDataApplicantElementsMapper {
@@ -29,9 +39,50 @@ public class CaseDataApplicantElementsMapper {
     private static final String TELEPHONE_FIELD = "telephone";
 
     public static void updateApplicantElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
-                                                      C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements) {
+                                                          C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
+                                                          C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
         caseDataBuilder
                 .applicants(buildApplicants(c100RebuildApplicantDetailsElements));
+        caseDataBuilder.childAndApplicantRelations(buildChildAndApplicantRelation(c100RebuildApplicantDetailsElements,
+                                                                                  c100RebuildChildDetailsElements));
+    }
+
+    private static List<Element<ChildrenAndApplicantRelation>> buildChildAndApplicantRelation(
+        C100RebuildApplicantDetailsElements
+            c100RebuildApplicantDetailsElements, C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
+
+        List<ChildDetail> childDetailList = new ArrayList<>(c100RebuildChildDetailsElements.getChildDetails());
+
+        List<ApplicantDto> applicantDtoList = new ArrayList<>(c100RebuildApplicantDetailsElements.getApplicants());
+
+        return applicantDtoList.stream()
+            .map(applicantDto ->
+                 applicantDto.getRelationshipDetails().getRelationshipToChildren().stream()
+                     .map(childRelationship -> {
+                         Optional<ChildDetail> childDetails = childDetailList.stream().filter(childDetail -> childDetail.getId().equals(
+                             childRelationship.getChildId())).findFirst();
+                         if (childDetails.isPresent()) {
+                             ChildDetail childDetail = childDetails.get();
+
+                             return Element.<ChildrenAndApplicantRelation>builder()
+                                 .id(UUID.fromString(childRelationship.getChildId()))
+                                 .value(ChildrenAndApplicantRelation.builder()
+                                    .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
+                                    .childLivesWith(childDetail.getChildLiveWith().stream()
+                                                        .anyMatch(c -> c.getPartyType().equals("applicant")) ? Yes : No)
+                                    .applicantFullName(applicantDto.getApplicantFirstName() + " " + applicantDto.getApplicantLastName())
+                                    .childAndApplicantRelation(RelationshipsEnum.getEnumForDisplayedValue(
+                                        childRelationship.getRelationshipType()))
+                                    .childAndApplicantRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
+                                    .build()).build();
+                         }
+                         return null;
+                     })
+                     .filter(Objects::nonNull)
+                    .collect(Collectors.toList())
+            )
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
     }
 
     private static List<Element<PartyDetails>> buildApplicants(C100RebuildApplicantDetailsElements
