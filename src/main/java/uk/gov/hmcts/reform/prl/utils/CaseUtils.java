@@ -58,8 +58,8 @@ public class CaseUtils {
         String orderSelectionType = null;
         if (caseData.getManageOrdersOptions() != null) {
             orderSelectionType = caseData.getManageOrdersOptions().toString();
-        } else if (caseData.getCreateSelectOrderOptions() != null) {
-            orderSelectionType = caseData.getCreateSelectOrderOptions().toString();
+        } else if (caseData.getDraftOrderOptions() != null) {
+            orderSelectionType = caseData.getDraftOrderOptions().toString();
         } else {
             orderSelectionType = "";
         }
