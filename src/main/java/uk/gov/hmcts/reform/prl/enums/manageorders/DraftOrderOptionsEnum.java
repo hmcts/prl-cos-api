@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum DraftOrderOptionsEnum {
 
-    @JsonProperty("createAnOrder")
-    createAnOrder("createAnOrder", "Create an order"),
+    @JsonProperty("draftAnOrder")
+    draftAnOrder("draftAnOrder", "Draft an order"),
     @JsonProperty("uploadAnOrder")
     uploadAnOrder("uploadAnOrder", "Upload an order");
 
