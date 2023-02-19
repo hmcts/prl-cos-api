@@ -1416,16 +1416,16 @@ public class ManageOrderService {
                                                  PrlAppsConstants.D_MMMM_YYYY,
                                                  Locale.UK
                                              )))
-                                             .orderMadeDate(caseData.getDateOrderMade()
-                                                                .format(DateTimeFormatter.ofPattern(
-                                                                    PrlAppsConstants.D_MMMM_YYYY,
-                                                                    Locale.UK
-                                                                )))
-                                             .approvalDate(caseData.getApprovalDate()
-                                                                .format(DateTimeFormatter.ofPattern(
-                                                                    PrlAppsConstants.D_MMMM_YYYY,
-                                                                    Locale.UK
-                                                                )))
+                                             .orderMadeDate(caseData.getDateOrderMade() != null ? caseData.getDateOrderMade()
+                                                 .format(DateTimeFormatter.ofPattern(
+                                                     PrlAppsConstants.D_MMMM_YYYY,
+                                                     Locale.UK
+                                                 )) : null)
+                                             .approvalDate(caseData.getApprovalDate() != null ? caseData.getApprovalDate()
+                                                 .format(DateTimeFormatter.ofPattern(
+                                                     PrlAppsConstants.D_MMMM_YYYY,
+                                                     Locale.UK
+                                                 )) : null)
                                              .orderRecipients(getAllRecipients(caseData))
                                              .status(getOrderStatus(orderSelectionType, loggedInUserType))
                                              .build())
