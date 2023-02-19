@@ -74,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_SOLICITOR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum.draftAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
@@ -973,7 +974,8 @@ public class ManageOrderService {
         String status = null;
         log.info("Order status orderSelectionType ====> " + orderSelectionType);
         log.info("Order status loggedInUserType ====> " + loggedInUserType);
-        if (createAnOrder.toString().equals(orderSelectionType) || uploadAnOrder.toString().equals(orderSelectionType)) {
+        if (createAnOrder.toString().equals(orderSelectionType) || uploadAnOrder.toString().equals(orderSelectionType)
+            || draftAnOrder.toString().equals(orderSelectionType)) {
             if (JUDGE_OR_LA.equals(loggedInUserType)) {
                 status = OrderStatusEnum.createdByJudge.getDisplayedValue();
             } else if (COURT_ADMIN.equals(loggedInUserType)) {
