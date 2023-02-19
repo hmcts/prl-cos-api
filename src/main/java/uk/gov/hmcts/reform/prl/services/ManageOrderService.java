@@ -942,6 +942,7 @@ public class ManageOrderService {
             .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
             .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
+            .isOrderUploadedByJudgeOrAdmin(No)
             .build();
     }
 
