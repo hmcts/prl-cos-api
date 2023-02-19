@@ -208,10 +208,10 @@ public class EditAndApproveDraftOrderController {
         Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(caseData);
         String orderStatus = (String) response.remove("status");
         log.info("** Order status {}", orderStatus);
-//        if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
-//            && !("Judge reviewed".equalsIgnoreCase(orderStatus))) {
-//            return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("Selected order is not reviewed by Judge.")).build();
-//        }
+        //        if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
+        //            && !("Judge reviewed".equalsIgnoreCase(orderStatus))) {
+        //            return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("Selected order is not reviewed by Judge.")).build();
+        //        }
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(response).build();
     }
