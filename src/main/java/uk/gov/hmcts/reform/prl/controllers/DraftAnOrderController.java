@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -153,6 +154,9 @@ public class DraftAnOrderController {
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (DraftAnOrderService.checkDirectionOnIssueOptionsSelected(caseData)) {
+            if (!caseData.getDirectionOnIssue().getDioHearingsAndNextStepsList().isEmpty()) {
+                caseDataUpdated.put("isHearingsAndNextStepsSelected", YesOrNo.Yes);
+            }
             draftAnOrderService.populateDirectionOnIssueFields(authorisation, caseData, caseDataUpdated);
         } else {
             List<String> errorList = new ArrayList<>();
