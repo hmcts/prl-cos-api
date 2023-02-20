@@ -535,8 +535,8 @@ public class DraftAnOrderService {
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
-            .orderTypeId(null != draftOrder.getOrderType()
-                              ? draftOrder.getOrderType().getDisplayedValue() : manageOrderService.getSelectedOrderInfoForUpload(caseData))
+            .orderTypeId(null != draftOrder.getOrderTypeId()
+                              ? draftOrder.getOrderTypeId() : manageOrderService.getSelectedOrderInfoForUpload(caseData))
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -574,7 +574,7 @@ public class DraftAnOrderService {
             .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
             .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .parentName(caseData.getManageOrders().getParentName())
-            .dateOrderMade(caseData.getDateOrderMade())
+            .dateOrderMade(caseData.getDateOrderMade() != null ? caseData.getDateOrderMade() : draftOrder.getDateOrderMade())
             .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
             .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
             .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
@@ -592,6 +592,7 @@ public class DraftAnOrderService {
             .orderSelectionType(draftOrder.getOrderSelectionType())
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
+            .approvalDate(draftOrder.getApprovalDate())
             .build();
     }
 
