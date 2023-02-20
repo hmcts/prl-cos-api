@@ -712,7 +712,7 @@ public class ManageOrderService {
                                                          .orderRecipients(caseData.getManageOrdersOptions().equals(
                                                              ManageOrdersOptionsEnum.createAnOrder) ? getAllRecipients(
                                                              caseData) : null)
-                                                         .status(getOrderStatus(orderSelectionType,loggedInUserType))
+                                                         .status(getOrderStatus(orderSelectionType,loggedInUserType, null))
                                                          .build())
                                        .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                                         ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
@@ -889,7 +889,7 @@ public class ManageOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
-                              .status(getOrderStatus(orderSelectionType, loggedInUserType))
+                              .status(getOrderStatus(orderSelectionType, loggedInUserType, null))
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
@@ -960,7 +960,7 @@ public class ManageOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
-                              .status(getOrderStatus(orderSelectionType, loggedInUserType))
+                              .status(getOrderStatus(orderSelectionType, loggedInUserType, null))
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())
@@ -974,7 +974,7 @@ public class ManageOrderService {
             .build();
     }
 
-    public String getOrderStatus(String orderSelectionType, String loggedInUserType) {
+    public String getOrderStatus(String orderSelectionType, String loggedInUserType, String eventId) {
         String status = null;
         log.info("Order status orderSelectionType ====> " + orderSelectionType);
         log.info("Order status loggedInUserType ====> " + loggedInUserType);
@@ -987,6 +987,12 @@ public class ManageOrderService {
             } else if (SOLICITOR.equals(loggedInUserType)) {
                 status = OrderStatusEnum.draftedByLR.getDisplayedValue();
             }
+        } else if ("adminEditAndApproveAnOrder".equals(eventId)) {
+            status = OrderStatusEnum.reviewedByCA.getDisplayedValue();
+        } else if ("editAndApproveAnOrder".equals(eventId)) {
+            status = OrderStatusEnum.reviewedByJudge.getDisplayedValue();
+        } else {
+            status = "";
         }
         log.info("Order status ====> " + status);
         return status;
@@ -1433,7 +1439,7 @@ public class ManageOrderService {
                                                      Locale.UK
                                                  )) : null)
                                              .orderRecipients(getAllRecipients(caseData))
-                                             .status(getOrderStatus(orderSelectionType, loggedInUserType))
+                                             .status(getOrderStatus(orderSelectionType, loggedInUserType, null))
                                              .build())
                            .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                             ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
