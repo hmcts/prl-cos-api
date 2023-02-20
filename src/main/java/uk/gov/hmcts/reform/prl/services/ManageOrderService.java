@@ -978,7 +978,12 @@ public class ManageOrderService {
         String status = null;
         log.info("Order status orderSelectionType ====> " + orderSelectionType);
         log.info("Order status loggedInUserType ====> " + loggedInUserType);
-        if (createAnOrder.toString().equals(orderSelectionType) || uploadAnOrder.toString().equals(orderSelectionType)
+        if ("adminEditAndApproveAnOrder".equals(eventId)) {
+            status = OrderStatusEnum.reviewedByCA.getDisplayedValue();
+        } else if ("editAndApproveAnOrder".equals(eventId)) {
+            status = OrderStatusEnum.reviewedByJudge.getDisplayedValue();
+        } else if (createAnOrder.toString().equals(orderSelectionType) || uploadAnOrder.toString().equals(
+            orderSelectionType)
             || draftAnOrder.toString().equals(orderSelectionType)) {
             if (JUDGE_OR_LA.equals(loggedInUserType)) {
                 status = OrderStatusEnum.createdByJudge.getDisplayedValue();
@@ -987,10 +992,6 @@ public class ManageOrderService {
             } else if (SOLICITOR.equals(loggedInUserType)) {
                 status = OrderStatusEnum.draftedByLR.getDisplayedValue();
             }
-        } else if ("adminEditAndApproveAnOrder".equals(eventId)) {
-            status = OrderStatusEnum.reviewedByCA.getDisplayedValue();
-        } else if ("editAndApproveAnOrder".equals(eventId)) {
-            status = OrderStatusEnum.reviewedByJudge.getDisplayedValue();
         } else {
             status = "";
         }
