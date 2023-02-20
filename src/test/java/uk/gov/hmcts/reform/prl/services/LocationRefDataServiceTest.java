@@ -45,7 +45,7 @@ public class LocationRefDataServiceTest {
     public void setUp() {
         when(authTokenGenerator.generate()).thenReturn("");
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2:email,3:email,4:email");
-        ReflectionTestUtils.setField(locationRefDataService,"dacourtsToFilter", "1:email,2:email,3:email,4:email");
+        ReflectionTestUtils.setField(locationRefDataService,"daCourtsToFilter", "1:email,2:email,3:email,4:email");
     }
 
     @Test
@@ -130,7 +130,7 @@ public class LocationRefDataServiceTest {
                                                      .courtEpimmsId("2")
                                                      .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
                             .build());
-        ReflectionTestUtils.setField(locationRefDataService,"dacourtsToFilter", "");
+        ReflectionTestUtils.setField(locationRefDataService,"daCourtsToFilter", "");
         List<DynamicListElement> courtLocations = locationRefDataService.getDaCourtLocations("test");
         assertFalse(courtLocations.isEmpty());
     }
