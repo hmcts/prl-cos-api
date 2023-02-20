@@ -17,7 +17,9 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -41,9 +43,12 @@ public class ListWithoutNoticeController {
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
         log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}",callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("data.listWithoutNoticeHearingDetails[0].value.hearingTypes",
-                            DynamicList.builder().value(DynamicListElement.EMPTY).listItems(prePopulateHearingType(authorisation))
-            .build());
+        caseDataUpdated.put("listWithoutNoticeHearingDetails",
+                            ElementUtils.wrapElements(HearingData.builder()
+                                                          .hearingTypes(DynamicList.builder()
+                                                                            .value(DynamicListElement.EMPTY)
+                                                                            .listItems(prePopulateHearingType(authorisation)).build())));
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -55,7 +60,7 @@ public class ListWithoutNoticeController {
     @PostMapping(path = "/listWithoutNotice", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "List Without Notice")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Hearing page is Success ."),
+        @ApiResponse(responseCode = "200", description = "List Without notice is successful"),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse listWithoutNotice(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
