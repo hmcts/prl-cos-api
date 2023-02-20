@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -73,6 +74,7 @@ public class CaseDataApplicantElementsMapper {
                 .isAddressConfidential(buildConfidentialField(contactDetailsPrivateList, ADDRESS_FIELD))
                 .isEmailAddressConfidential(buildConfidentialField(contactDetailsPrivateList, EMAIL_FIELD))
                 .isPhoneNumberConfidential(buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                 .build();
     }
 
