@@ -41,6 +41,7 @@ public enum Event {
     FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings"),
     FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents");
 
+
     private final String id;
     private final String name;
 

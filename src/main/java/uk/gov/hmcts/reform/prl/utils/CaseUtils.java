@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -10,9 +11,14 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class CaseUtils {
-
     private CaseUtils() {
 
+    }
+
+    public static CaseData getCaseDataFromStartUpdateEventResponse(StartEventResponse startEventResponse, ObjectMapper objectMapper) {
+        CaseDetails caseDetails = startEventResponse.getCaseDetails();
+
+        return getCaseData(caseDetails, objectMapper);
     }
 
     public static CaseData getCaseData(CaseDetails caseDetails, ObjectMapper objectMapper) {

@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -30,6 +32,9 @@ public class AllTabServiceImpl implements AllTabsService {
 
     @Autowired
     CoreCaseDataService coreCaseDataService;
+
+    @Autowired
+    uk.gov.hmcts.reform.prl.clients.ccd.CoreCaseDataService coreCaseDataServiceCcdClient;
 
     @Autowired
     @Qualifier("caseSummaryTab")
@@ -78,9 +83,41 @@ public class AllTabServiceImpl implements AllTabsService {
         if (caseData.getCourtId() != null) {
             combinedFieldsMap.put("courtId", caseData.getCourtId());
         }
-        getDocumentsMap(caseData,combinedFieldsMap);
+        getDocumentsMap(caseData, combinedFieldsMap);
         // Calling event to refresh the page.
         refreshCcdUsingEvent(caseData, combinedFieldsMap);
+    }
+
+    public void updateAllTabsIncludingConfTabRefactored(String authorisation,
+                                                        String caseId,
+                                                        StartEventResponse startEventResponse,
+                                                        EventRequestData allTabsUpdateEventRequestData,
+                                                        CaseData caseData) {
+        Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(caseData);
+        Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
+        combinedFieldsMap.putAll(confidentialDetails);
+
+        if (caseData.getDateSubmitted() != null) {
+            combinedFieldsMap.put("dateSubmitted", caseData.getDateSubmitted());
+        }
+        if (caseData.getCourtName() != null) {
+            combinedFieldsMap.put("courtName", caseData.getCourtName());
+        }
+        if (caseData.getCourtId() != null) {
+            combinedFieldsMap.put("courtId", caseData.getCourtId());
+        }
+        getDocumentsMap(caseData, combinedFieldsMap);
+
+        coreCaseDataServiceCcdClient.submitUpdate(
+            authorisation,
+            allTabsUpdateEventRequestData,
+            coreCaseDataServiceCcdClient.createCaseDataContent(
+                startEventResponse,
+                combinedFieldsMap
+            ),
+            caseId,
+            true
+        );
     }
 
     private Map<String, Object> getDocumentsMap(CaseData caseData, Map<String, Object> documentMap) {
@@ -104,9 +141,9 @@ public class AllTabServiceImpl implements AllTabsService {
         Map<String, Object> summaryTabFields = caseSummaryTabService.updateTab(caseData);
 
         return Stream.concat(
-                applicationTabFields.entrySet().stream(),
-                summaryTabFields.entrySet().stream()
-            ).collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue()), HashMap::putAll);
+            applicationTabFields.entrySet().stream(),
+            summaryTabFields.entrySet().stream()
+        ).collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue()), HashMap::putAll);
 
     }
 
