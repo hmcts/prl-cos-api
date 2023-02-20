@@ -69,6 +69,7 @@ public class AllTabServiceImpl implements AllTabsService {
         );
     }
 
+    //TODO: Once the updateAllTabsIncludingConfTabRefactored is ready remove this method
     public void updateAllTabsIncludingConfTab(CaseData caseData) {
         Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(caseData);
         Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);

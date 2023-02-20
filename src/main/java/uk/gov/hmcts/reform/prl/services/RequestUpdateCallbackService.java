@@ -50,8 +50,8 @@ public class RequestUpdateCallbackService {
         log.info("Processing the callback for the caseId {} with status {}", serviceRequestUpdateDto.getCcdCaseNumber(),
                  serviceRequestUpdateDto.getServiceRequestStatus()
         );
-        String userToken = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(userToken);
+        String authorisation = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(authorisation);
         log.info("Starting update processing for caseId {}", serviceRequestUpdateDto.getCcdCaseNumber());
 
         CaseEvent caseEvent = PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())
@@ -62,7 +62,7 @@ public class RequestUpdateCallbackService {
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
         StartEventResponse startEventResponse =
             coreCaseDataService.startUpdate(
-                userToken,
+                authorisation,
                 eventRequestData,
                 serviceRequestUpdateDto.getCcdCaseNumber(),
                 true
@@ -80,7 +80,7 @@ public class RequestUpdateCallbackService {
         );
 
         coreCaseDataService.submitUpdate(
-            userToken,
+            authorisation,
             eventRequestData,
             caseDataContent,
             serviceRequestUpdateDto.getCcdCaseNumber(),
@@ -93,7 +93,7 @@ public class RequestUpdateCallbackService {
         );
         StartEventResponse allTabsUpdateStartEventResponse =
             coreCaseDataService.startUpdate(
-                userToken,
+                authorisation,
                 allTabsUpdateEventRequestData,
                 serviceRequestUpdateDto.getCcdCaseNumber(),
                 true
@@ -123,7 +123,7 @@ public class RequestUpdateCallbackService {
         log.info("Court details: " + caseData.getCourtName() + "  , ID:" + caseData.getCourtId());
 
         allTabService.updateAllTabsIncludingConfTabRefactored(
-            userToken,
+            authorisation,
             serviceRequestUpdateDto.getCcdCaseNumber(),
             allTabsUpdateStartEventResponse,
             allTabsUpdateEventRequestData,
