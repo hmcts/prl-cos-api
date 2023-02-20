@@ -411,7 +411,8 @@ public class DraftAnOrderServiceTest {
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
         Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
-            caseData
+            caseData,
+            "eventId"
         );
 
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
@@ -450,7 +451,8 @@ public class DraftAnOrderServiceTest {
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
         Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
-            caseData
+            caseData,
+            "eventId"
         );
 
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
@@ -489,7 +491,8 @@ public class DraftAnOrderServiceTest {
         try {
             draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
                 "test token",
-                caseData
+                caseData,
+                null
             );
         } catch (Exception ex) {
             flag = false;
@@ -634,7 +637,9 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
-            caseData
+            caseData,
+            "test-auth",
+            null
         );
 
         assertEquals(
@@ -1071,7 +1076,8 @@ public class DraftAnOrderServiceTest {
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
         Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
-            caseData
+            caseData,
+            "testevent"
         );
 
         assertEquals(2, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
