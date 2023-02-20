@@ -178,6 +178,7 @@ public class DraftAnOrderController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("generateDoc before caseDataUpdated ===> " + caseDataUpdated);
         if (caseData.getCreateSelectOrderOptions() != null
             && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
             List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
@@ -191,6 +192,8 @@ public class DraftAnOrderController {
         } else {
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
+
+        log.info("generateDoc after caseDataUpdated ===> " + caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
