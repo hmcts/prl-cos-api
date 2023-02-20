@@ -110,6 +110,9 @@ public class DraftOrder {
     private final String underTakingExpiryTime;
     private final YesOrNo underTakingFormSign;
 
+    @JsonProperty("isHearingsAndNextStepsSelected")
+    private final YesOrNo isHearingsAndNextStepsSelected;
+
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
         log.info("orderTypeId {},orderTypeId {}", this.orderType, this.orderTypeId);
