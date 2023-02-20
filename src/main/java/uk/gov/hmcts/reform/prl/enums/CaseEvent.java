@@ -18,7 +18,11 @@ public enum CaseEvent {
     REVIEW_AND_SUBMIT("reviewAndSubmit"),
     PAYMENT_SUCCESS_CALLBACK("paymentSuccessCallback"),
     PAYMENT_FAILURE_CALLBACK("paymentFailureCallback"),
-    UPDATE_ALL_TABS("internal-update-all-tabs");
+    UPDATE_ALL_TABS("internal-update-all-tabs"),
+
+    COURTNAV_CASE_CREATION("courtnav-case-creation"),
+
+    COURTNAV_DOCUMENT_UPLOAD_EVENT_ID("courtnav-document-upload");
 
     private final String value;
 
