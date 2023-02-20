@@ -30,8 +30,8 @@ public class LocationRefDataService {
     @Value("${courts.filter}")
     protected String courtsToFilter;
 
-    @Value("${courts.filter.daFilter}")
-    protected String dacourtsToFilter;
+    @Value("${courts.daFilter}")
+    protected String daCourtsToFilter;
 
     public List<DynamicListElement> getCourtLocations(String authToken) {
         try {
@@ -58,7 +58,7 @@ public class LocationRefDataService {
     }
 
     private List<DynamicListElement> daOnlyEnglandAndWalesLocations(CourtDetails locationRefData, String caseType) {
-        String[] courtList = dacourtsToFilter.split(",");
+        String[] courtList = daCourtsToFilter.split(",");
 
         return (locationRefData == null
             ? new ArrayList<>()
@@ -80,8 +80,8 @@ public class LocationRefDataService {
         String value = concat(concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
                               location.getPostcode());
         String key = location.getCourtEpimmsId() + ":";
-        if (dacourtsToFilter.length() > 1) {
-            Optional<String> code = Arrays.stream(dacourtsToFilter.split(",")).filter(ele -> Arrays.stream(ele.split(":")).toArray()[0]
+        if (daCourtsToFilter.length() > 1) {
+            Optional<String> code = Arrays.stream(daCourtsToFilter.split(",")).filter(ele -> Arrays.stream(ele.split(":")).toArray()[0]
                 .toString().equalsIgnoreCase(location.getCourtEpimmsId())).findFirst();
             if (code.isPresent()) {
                 key += Arrays.stream(code.get().split(":")).toArray().length > 1
