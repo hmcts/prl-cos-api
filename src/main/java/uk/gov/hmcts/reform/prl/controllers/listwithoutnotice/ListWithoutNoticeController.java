@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 
 @Slf4j
