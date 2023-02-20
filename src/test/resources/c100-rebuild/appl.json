@@ -47,7 +47,8 @@
         "canProvideTelephoneNumber":"Yes",
         "telephoneNumber":"07438408341",
         "canNotProvideTelephoneNumberReason":"",
-        "canLeaveVoiceMail":"Yes"
+        "canLeaveVoiceMail":"Yes",
+        "applicantContactPreferences":"Digital"
       },
       "applicantAddressPostcode":"CV3 2ND",
       "applicantAddress1":"app1 adrs line 1",
@@ -102,7 +103,8 @@
         "canProvideTelephoneNumber":"No",
         "telephoneNumber":"",
         "canNotProvideTelephoneNumberReason":"app2 can't provide telephone",
-        "canLeaveVoiceMail":"No"
+        "canLeaveVoiceMail":"No",
+        "applicantContactPreferences":"Post"
       },
       "applicantAddressPostcode":"CV34BA",
       "applicantAddress1":"app2 adrs line 1",
