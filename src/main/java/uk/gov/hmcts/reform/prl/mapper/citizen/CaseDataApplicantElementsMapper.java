@@ -48,8 +48,8 @@ public class CaseDataApplicantElementsMapper {
     }
 
     private static List<Element<ChildrenAndApplicantRelation>> buildChildAndApplicantRelation(
-        C100RebuildApplicantDetailsElements
-            c100RebuildApplicantDetailsElements, C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
+        C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
+        C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
 
         List<ChildDetail> childDetailList = new ArrayList<>(c100RebuildChildDetailsElements.getChildDetails());
 
@@ -69,7 +69,8 @@ public class CaseDataApplicantElementsMapper {
                                  .value(ChildrenAndApplicantRelation.builder()
                                     .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
                                     .childLivesWith(childDetail.getChildLiveWith().stream()
-                                                        .anyMatch(c -> c.getPartyType().equals("applicant")) ? Yes : No)
+                                                        .anyMatch(c -> c.getPartyType().equals("applicant")
+                                                            && c.getId().equals(applicantDto.getId())) ? Yes : No)
                                     .applicantFullName(applicantDto.getApplicantFirstName() + " " + applicantDto.getApplicantLastName())
                                     .childAndApplicantRelation(RelationshipsEnum.getEnumForDisplayedValue(
                                         childRelationship.getRelationshipType()))
