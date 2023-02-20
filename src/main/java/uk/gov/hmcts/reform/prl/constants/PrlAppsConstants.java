@@ -352,4 +352,6 @@ public class PrlAppsConstants {
     public static final String JUDGE_NAME = "judgeName";
     public static final long CASE_SUBMISSION_THRESHOLD = 28;
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+    public static final String HEARINGTYPE = "HearingType";
+    public static final String HEARINGCHILDREQUIRED = "Y";
 }
