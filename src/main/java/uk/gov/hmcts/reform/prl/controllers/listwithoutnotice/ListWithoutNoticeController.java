@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 
 @Slf4j
@@ -47,17 +48,16 @@ public class ListWithoutNoticeController {
     }
 
     private List<DynamicListElement> prePopulateHearingType(String authorisation) {
-
         return refDataUserService.retrieveCategoryValues(authorisation, HEARINGTYPE);
 
     }
 
     @PostMapping(path = "/listWithoutNotice", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "allocatedJudgeDetails. ")
+    @Operation(description = "List Without Notice")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Allocated Judge Successfully ."),
+        @ApiResponse(responseCode = "200", description = "Hearing page is Success ."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse allocateJudge(
+    public AboutToStartOrSubmitCallbackResponse listWithoutNotice(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
