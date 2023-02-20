@@ -560,7 +560,7 @@ public class DraftAnOrderService {
             .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
-                              .dateCreated(dateTime.now())
+                              .dateCreated(draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getDateCreated() : dateTime.now())
                               .status(manageOrderService.getOrderStatus(draftOrder.getOrderSelectionType(), loggedInUserType, eventId)).build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
