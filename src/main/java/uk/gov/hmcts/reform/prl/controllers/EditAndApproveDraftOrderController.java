@@ -156,6 +156,8 @@ public class EditAndApproveDraftOrderController {
                     manageOrderService.serveOrder(modifiedCaseData, orderCollection)
                 );
             }
+        } else {
+            caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData, authorisation, eventId));
         }
         log.info("orderCollection after cleanup ===> " + caseDataUpdated.get("orderCollection"));
         log.info("draftOrderCollection after cleanup ===> " + caseDataUpdated.get("draftOrderCollection"));
