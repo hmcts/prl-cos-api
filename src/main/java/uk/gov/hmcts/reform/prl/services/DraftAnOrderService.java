@@ -177,9 +177,7 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
-        log.info("before case type of application in about to start::: {} :::", caseTypeOfApplication);
         caseDataMap.put("caseTypeOfApplication", caseTypeOfApplication);
-        log.info("after setting case type of application::: {} :::", caseDataMap.get("caseTypeOfApplication"));
         return caseDataMap;
     }
 
@@ -226,7 +224,6 @@ public class DraftAnOrderService {
     }
 
     private Element<OrderDetails> convertDraftOrderToFinal(String auth, CaseData caseData, DraftOrder draftOrder) {
-        log.info("draftOrder.getOrderType************ {}", draftOrder.getOrderType());
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
         GeneratedDocumentInfo generatedDocumentInfoWelsh = null;
@@ -253,11 +250,9 @@ public class DraftAnOrderService {
                     .orderRecipients(manageOrderService.getAllRecipients(caseData)).build())
             .build();
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
-            log.info("entering into if loop");
             orderDetails = orderDetails.toBuilder()
                 .orderDocument(draftOrder.getOrderDocument())
                 .build();
-            log.info("setting order document:  {} :", orderDetails.getOrderDocument());
         } else {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
@@ -488,7 +483,7 @@ public class DraftAnOrderService {
         caseDataMap.put("underTakingDateExpiry", selectedOrder.getUnderTakingDateExpiry());
         caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
         caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
-        log.info("Selected order type is ********   from    populateDraftOrderCustomField",selectedOrder.getOrderType());
+        log.info("Selected order type is ********   from    populateDraftOrderCustomField {}",selectedOrder.getOrderType());
         return caseDataMap;
     }
 
@@ -512,7 +507,7 @@ public class DraftAnOrderService {
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
         caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
-        log.info("Selected order type is ********   from    populateCommonDraftOrderFields",selectedOrder.getOrderType());
+        log.info("Selected order type is ********   from    populateCommonDraftOrderFields {}",selectedOrder.getOrderType());
         log.info("Case typ of application {}", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
@@ -521,8 +516,6 @@ public class DraftAnOrderService {
     public DraftOrder getSelectedDraftOrderDetails(CaseData caseData) {
         UUID orderId = elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper);
-        log.info("inside getDraftOrderDocument orderId {}", orderId);
-        log.info("Draft Order Collection list *****{}*****", caseData.getDraftOrderCollection());
         return caseData.getDraftOrderCollection().stream()
             .filter(element -> {
                 log.info("Order collection id:: {}", element.getId());

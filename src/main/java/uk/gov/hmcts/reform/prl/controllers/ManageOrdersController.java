@@ -248,7 +248,7 @@ public class ManageOrdersController {
             ));
         }
         cleanUpSelectedManageOrderOptions(caseDataUpdated);
-
+        caseDataUpdated.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

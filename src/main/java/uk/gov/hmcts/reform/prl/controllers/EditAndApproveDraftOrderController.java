@@ -79,7 +79,6 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("before entering into populateDraftOrderDocument...");
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(draftAnOrderService.populateDraftOrderDocument(
                 caseData)).build();
@@ -94,10 +93,6 @@ public class EditAndApproveDraftOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info(
-            "********caseData.getDoYouWantCourtAdminToAddAnything***** {}",
-            caseData.getJudgeDirectionsToAdmin()
-        );
 
         if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
             && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
@@ -113,7 +108,6 @@ public class EditAndApproveDraftOrderController {
                 caseDataUpdated,
                 CaseData.class
             );
-            log.info("modifiedCaseData ===> " + modifiedCaseData);
             caseDataUpdated.put(
                 "serveOrderDynamicList",
                 dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(modifiedCaseData, servedSavedOrders.getDisplayedValue())
@@ -207,7 +201,6 @@ public class EditAndApproveDraftOrderController {
         );
         Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(caseData);
         String orderStatus = (String) response.remove("status");
-        log.info("** Order status {}", orderStatus);
         if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
             && !("Judge reviewed".equalsIgnoreCase(orderStatus))) {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("Selected order is not reviewed by Judge.")).build();
