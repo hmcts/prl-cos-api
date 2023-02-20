@@ -107,7 +107,7 @@ public class FL401SubmitApplicationController {
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
-            .listItems(locationRefDataService.getCourtLocations(authorisation))
+            .listItems(locationRefDataService.getDaCourtLocations(authorisation))
             .build());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
