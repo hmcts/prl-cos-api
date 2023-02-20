@@ -28,9 +28,12 @@ public class OtherPersonInTheCase {
     private final YesOrNo isCurrentAddressKnown;
     private final Address address;
     private final YesOrNo canYouProvideEmailAddress;
+    private final YesOrNo isAddressConfidential;
     private final String email;
     private final YesOrNo canYouProvidePhoneNumber;
     private final String phoneNumber;
+    private final YesOrNo isEmailAddressConfidential;
+    private final YesOrNo isPhoneNumberConfidential;
     private  List<Element<OtherPersonRelationshipToChild>> relationshipToChild;
 
 
