@@ -1175,6 +1175,8 @@ public class ManageOrderService {
             .fl404bRespondentName(String.format(PrlAppsConstants.FORMAT, caseData.getRespondentsFL401().getFirstName(),
                                                 caseData.getRespondentsFL401().getLastName()
             ))
+            .fl404bApplicantReference(caseData.getApplicantsFL401().getSolicitorReference())
+            .fl404bRespondentReference(caseData.getRespondentsFL401().getSolicitorReference())
             .build();
 
         log.info("FL404b court name: {}", orderData.getFl404bCourtName());
