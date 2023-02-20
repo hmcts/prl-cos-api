@@ -47,7 +47,7 @@ public class ListWithoutNoticeController {
                             ElementUtils.wrapElements(HearingData.builder()
                                                           .hearingTypes(DynamicList.builder()
                                                                             .value(DynamicListElement.EMPTY)
-                                                                            .listItems(prePopulateHearingType(authorisation)).build())));
+                                                                            .listItems(prePopulateHearingType(authorisation)).build()).build()));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
