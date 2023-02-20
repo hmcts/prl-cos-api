@@ -150,7 +150,7 @@ public class EditAndApproveDraftOrderController {
                     caseDataUpdated,
                     CaseData.class
                 );
-                List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
+                List<Element<OrderDetails>> orderCollection = modifiedCaseData.getOrderCollection();
                 caseDataUpdated.put(
                     "orderCollection",
                     manageOrderService.serveOrder(modifiedCaseData, orderCollection)
