@@ -517,10 +517,7 @@ public class DraftAnOrderService {
         UUID orderId = elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper);
         return caseData.getDraftOrderCollection().stream()
-            .filter(element -> {
-                log.info("Order collection id:: {}", element.getId());
-                return element.getId().equals(orderId);
-            })
+            .filter(element -> element.getId().equals(orderId))
             .map(Element::getValue)
             .findFirst()
             .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
@@ -553,9 +550,6 @@ public class DraftAnOrderService {
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData) {
         Document orderDocumentEng;
         Document orderDocumentWelsh;
-        if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
-            orderDocumentEng = caseData.getManageOrders().getEditedUploadOrderDoc();
-        }
         if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
             orderDocumentEng = caseData.getPreviewOrderDoc();
             orderDocumentWelsh = caseData.getPreviewOrderDocWelsh();
@@ -564,10 +558,9 @@ public class DraftAnOrderService {
             orderDocumentWelsh = draftOrder.getOrderDocumentWelsh();
         }
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
-            .typeOfOrder(null != draftOrder.getOrderType()
-                             ? draftOrder.getOrderType().getDisplayedValue() : manageOrderService.getSelectedOrderInfoForUpload(caseData))
-            .orderTypeId(null != draftOrder.getOrderType()
-                              ? draftOrder.getOrderType().getDisplayedValue() : manageOrderService.getSelectedOrderInfoForUpload(caseData))
+            .typeOfOrder(draftOrder.getOrderType() != null
+                             ? draftOrder.getOrderType().getDisplayedValue() : null)
+            .orderTypeId(draftOrder.getOrderType().getDisplayedValue())
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()
