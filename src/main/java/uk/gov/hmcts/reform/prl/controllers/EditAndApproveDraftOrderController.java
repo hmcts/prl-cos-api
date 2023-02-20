@@ -157,7 +157,8 @@ public class EditAndApproveDraftOrderController {
                 );
             }
         }
-
+        log.info("orderCollection after cleanup ===> " + caseDataUpdated.get("orderCollection"));
+        log.info("draftOrderCollection after cleanup ===> " + caseDataUpdated.get("draftOrderCollection"));
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
 
