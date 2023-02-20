@@ -144,6 +144,8 @@ public class DraftAnOrderService {
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
                     draftOrder =  getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
+                } else {
+                    draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
                 updatedCaseData.put("orderCollection", getFinalOrderCollection(authorisation, caseData, draftOrder, eventId));
                 draftOrderCollection.remove(
@@ -497,17 +499,20 @@ public class DraftAnOrderService {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper);
-        if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
-            && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
-            for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
-                DraftOrder draftOrder = e.getValue();
-                if (e.getId().equals(selectedOrderId)) {
-                    draftOrderCollection.set(
-                        draftOrderCollection.indexOf(e),
-                        element(getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId))
-                    );
-                    break;
+        for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
+            DraftOrder draftOrder = e.getValue();
+            if (e.getId().equals(selectedOrderId)) {
+                if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
+                    && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
+                    draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
+                } else {
+                    draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
+                draftOrderCollection.set(
+                    draftOrderCollection.indexOf(e),
+                    element(draftOrder)
+                );
+                break;
             }
         }
         draftOrderCollection.sort(Comparator.comparing(
@@ -516,6 +521,20 @@ public class DraftAnOrderService {
         ));
         return Map.of(DRAFT_ORDER_COLLECTION, draftOrderCollection
         );
+    }
+
+    private DraftOrder getDraftOrderWithUpdatedStatus(CaseData caseData, String eventId, String loggedInUserType, DraftOrder draftOrder) {
+        return draftOrder.toBuilder()
+            .judgeNotes(caseData.getJudgeDirectionsToAdmin())
+            .adminNotes(caseData.getCourtAdminNotes())
+            .otherDetails(draftOrder.getOtherDetails().toBuilder()
+                              .status(manageOrderService.getOrderStatus(
+                                  draftOrder.getOrderSelectionType(),
+                                  loggedInUserType,
+                                  eventId
+                              ))
+                              .build())
+            .build();
     }
 
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData, String loggedInUserType, String eventId) {
