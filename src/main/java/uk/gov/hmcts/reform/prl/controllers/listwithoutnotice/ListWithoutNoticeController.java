@@ -41,7 +41,8 @@ public class ListWithoutNoticeController {
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
         log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}",callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("hearingTypes", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(prePopulateHearingType(authorisation))
+        caseDataUpdated.put("data.listWithoutNoticeHearingDetails[0].value.hearingTypes",
+                            DynamicList.builder().value(DynamicListElement.EMPTY).listItems(prePopulateHearingType(authorisation))
             .build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
