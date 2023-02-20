@@ -28,6 +28,4 @@ public class CategoryValues {
     @JsonProperty("value_cy")
     private String valueCy;
 
-    @JsonProperty("child_nodes")
-    private List<CategoryValues> childNodes;
 }
