@@ -100,6 +100,7 @@ public class RefDataUserService {
     }
 
     public List<DynamicListElement> retrieveCategoryValues(String authorization, String categoryId) {
+        log.info("retrieveCategoryValues {}", categoryId);
         try {
             CommonDataResponse commonDataResponse = commonDataRefApi.getAllCategoryValuesByCategoryId(
                 authorization,
@@ -118,6 +119,7 @@ public class RefDataUserService {
     }
 
     private List<DynamicListElement> categoryValuesByCategoryId(CommonDataResponse commonDataResponse,String categoryId) {
+        log.info("categoryValuesByCategoryId {},{}", commonDataResponse,categoryId);
         if (null != commonDataResponse) {
             listOfCategoryValues = commonDataResponse.getListOfValues().stream()
                 .filter(response -> response.getCategoryKey().equalsIgnoreCase(categoryId))
