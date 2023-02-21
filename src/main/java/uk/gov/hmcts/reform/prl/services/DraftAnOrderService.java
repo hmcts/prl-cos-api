@@ -257,8 +257,7 @@ public class DraftAnOrderService {
 
         return element(OrderDetails.builder()
                            .orderType(draftOrder.getOrderTypeId())
-                           .typeOfOrder(draftOrder.getOrderType() != null
-                                            ? draftOrder.getOrderType().getDisplayedValue() : null)
+                           .typeOfOrder(draftOrder.getTypeOfOrder())
                            .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
                            .orderDocument(getGeneratedDocument(generatedDocumentInfo,false,fieldMap))
                            .orderDocumentWelsh(getGeneratedDocument(generatedDocumentInfoWelsh,documentLanguage.isGenWelsh(),fieldMap))
@@ -552,8 +551,7 @@ public class DraftAnOrderService {
             orderDocumentWelsh = draftOrder.getOrderDocumentWelsh();
         }
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
-            .typeOfOrder(draftOrder.getOrderType() != null
-                             ? draftOrder.getOrderType().getDisplayedValue() : null)
+            .typeOfOrder(draftOrder.getTypeOfOrder())
             .orderTypeId(draftOrder.getOrderType().getDisplayedValue())
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
