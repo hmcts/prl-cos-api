@@ -182,7 +182,7 @@ public class RefDataUserServiceTest {
                                                                SERVICE_ID,
                                                                HEARINGCHILDREQUIRED)).thenReturn(commonDataResponse);
         List<DynamicListElement> expectedRespose = refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE);
-        assertEquals(expectedRespose.get(0).getLabel(),"Other");
+        assertEquals(expectedRespose.size(),0);
     }
 
     @Test ()

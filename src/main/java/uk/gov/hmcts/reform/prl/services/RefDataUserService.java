@@ -124,7 +124,6 @@ public class RefDataUserService {
             listOfCategoryValues = commonDataResponse.getListOfValues().stream()
                 .filter(response -> response.getCategoryKey().equalsIgnoreCase(categoryId))
                 .map(this::getDisplayCategoryEntry).collect(Collectors.toList());
-            listOfCategoryValues.add(DynamicListElement.builder().code("Other").label("Other").build());
             return listOfCategoryValues;
         }
 
@@ -134,6 +133,7 @@ public class RefDataUserService {
 
     private DynamicListElement getDisplayCategoryEntry(CategoryValues categoryValues) {
         String value = categoryValues.getValueEn();
-        return DynamicListElement.builder().code(value).label(value).build();
+        String key = categoryValues.getKey();
+        return DynamicListElement.builder().code(key).label(value).build();
     }
 }
