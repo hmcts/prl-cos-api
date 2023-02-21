@@ -61,7 +61,6 @@ public class CaseDataApplicantElementsMapper {
                              ChildDetail childDetail = childDetails.get();
 
                              return Element.<ChildrenAndApplicantRelation>builder()
-                                 .id(UUID.fromString(childRelationship.getChildId()))
                                  .value(ChildrenAndApplicantRelation.builder()
                                     .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
                                     .childLivesWith(childDetail.getChildLiveWith().stream()

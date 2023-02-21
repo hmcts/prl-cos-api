@@ -60,7 +60,6 @@ public class CaseDataOtherPersonsElementsMapper {
                              ChildDetail childDetail = childDetails.get();
 
                              return Element.<ChildrenAndOtherPeopleRelation>builder()
-                                 .id(UUID.fromString(childRelationship.getChildId()))
                                  .value(ChildrenAndOtherPeopleRelation.builder()
                                     .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
                                     .childLivesWith(childDetail.getChildLiveWith().stream()

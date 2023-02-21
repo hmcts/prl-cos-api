@@ -57,7 +57,6 @@ public class CaseDataRespondentDetailsElementsMapper {
                          ChildDetail childDetail = childDetails.get();
 
                          return Element.<ChildrenAndRespondentRelation>builder()
-                             .id(UUID.fromString(childRelationship.getChildId()))
                              .value(ChildrenAndRespondentRelation.builder()
                                 .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
                                 .childLivesWith(childDetail.getChildLiveWith().stream()
