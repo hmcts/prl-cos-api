@@ -41,7 +41,7 @@ public class ApplicationsTabServiceHelper {
 
     public List<Element<OtherPersonInTheCaseRevised>> getOtherPeopleInTheCaseRevisedTable(CaseData caseData) {
         log.info("-->getOtherPeopleInTheCaseRevisedTable()--->start");
-        Optional<List<Element<PartyDetails>>> otherPeopleCheck = ofNullable(caseData.getOthersToNotify());
+        Optional<List<Element<PartyDetails>>> otherPeopleCheck = ofNullable(caseData.getOtherPartyInTheCaseRevised());
         List<Element<OtherPersonInTheCaseRevised>> otherPersonsInTheCase = new ArrayList<>();
 
         if (otherPeopleCheck.isEmpty() || otherPeopleCheck.get().isEmpty()) {
@@ -50,7 +50,7 @@ public class ApplicationsTabServiceHelper {
             otherPersonsInTheCase.add(other);
             return otherPersonsInTheCase;
         }
-        List<PartyDetails> otherPeople = caseData.getOthersToNotify().stream().map(Element::getValue).collect(Collectors.toList());
+        List<PartyDetails> otherPeople = caseData.getOtherPartyInTheCaseRevised().stream().map(Element::getValue).collect(Collectors.toList());
         otherPeople = maskConfidentialDetails(otherPeople);
         for (PartyDetails p : otherPeople) {
             OtherPersonInTheCaseRevised other = objectMapper.convertValue(p, OtherPersonInTheCaseRevised.class);

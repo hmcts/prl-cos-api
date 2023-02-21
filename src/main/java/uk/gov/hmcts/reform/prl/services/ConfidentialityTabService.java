@@ -140,7 +140,7 @@ public class ConfidentialityTabService {
         List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
         Optional<List<Element<ChildrenAndOtherPeopleRelation>>> childrenAndOtherPeopleRelations =
             ofNullable(caseData.getChildAndOtherPeopleRelations());
-        Optional<List<Element<PartyDetails>>> otherPersons = ofNullable(caseData.getOthersToNotify());
+        Optional<List<Element<PartyDetails>>> otherPersons = ofNullable(caseData.getOtherPartyInTheCaseRevised());
         Map<Object, PartyDetails> objectPartyDetailsMap = new HashMap<>();
         if (otherPersons.isPresent()) {
             List<PartyDetails> partyDetailsList =
@@ -197,8 +197,9 @@ public class ConfidentialityTabService {
                     .value(OtherPersonConfidentialityDetails.builder()
                                .firstName(partyDetails.get().getFirstName())
                                .lastName(partyDetails.get().getLastName())
-                               .email(partyDetails.get().getEmail().isEmpty() ? "" : partyDetails.get().getEmail())
-                               .phoneNumber(partyDetails.get().getPhoneNumber().isEmpty() ? "" : partyDetails.get().getPhoneNumber())
+                               .email(YesOrNo.Yes.equals(partyDetails.get().getIsEmailAddressConfidential()) ? "" : partyDetails.get().getEmail())
+                               .phoneNumber(YesOrNo.Yes.equals(partyDetails.get().getIsPhoneNumberConfidential())
+                                                ? "" : partyDetails.get().getPhoneNumber())
                                .relationshipToChildDetails(childrenAndOtherPeopleRelation
                                                                .getChildAndOtherPeopleRelation().getDisplayedValue())
                                .address(partyDetails.get().getAddress()).build()).build();
