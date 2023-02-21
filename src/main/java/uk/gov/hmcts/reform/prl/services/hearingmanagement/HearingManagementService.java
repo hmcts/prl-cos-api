@@ -213,7 +213,7 @@ public class HearingManagementService {
             coreCaseDataService.startUpdate(
                 userToken,
                 allTabsUpdateEventRequestData,
-                id.toString(),
+                String.valueOf(id),
                 true
             );
 
@@ -224,7 +224,7 @@ public class HearingManagementService {
 
         allTabService.updateAllTabsIncludingConfTabRefactored(
             userToken,
-            id.toString(),
+            String.valueOf(id),
             allTabsUpdateStartEventResponse,
             allTabsUpdateEventRequestData,
             allTabsUpdateCaseData
@@ -232,7 +232,7 @@ public class HearingManagementService {
 
         log.info(
             "Refreshed the tab for caseid {} ",
-            id.toString()
+            String.valueOf(id)
         );
 
     }
