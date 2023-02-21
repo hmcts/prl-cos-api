@@ -53,7 +53,11 @@ public class ListWithoutNoticeController {
     }
 
     private List<DynamicListElement> prePopulateHearingType(String authorisation) {
-        return refDataUserService.retrieveCategoryValues(authorisation, HEARINGTYPE);
+        List<DynamicListElement> listOfHearingType = refDataUserService.retrieveCategoryValues(authorisation, HEARINGTYPE);
+        if (null != listOfHearingType.get(0).getCode()) {
+            listOfHearingType.add(DynamicListElement.builder().code("Other").label("Other").build());
+        }
+        return listOfHearingType;
 
     }
 

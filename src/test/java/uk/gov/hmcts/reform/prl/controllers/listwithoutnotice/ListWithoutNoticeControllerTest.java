@@ -58,7 +58,7 @@ public class ListWithoutNoticeControllerTest {
             .build();
 
         when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE)).thenReturn(List.of(DynamicListElement.builder()
-                                                                                                      .code("Other").label("Other").build()));
+                                                                                                      .build()));
 
         AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController.prePopulateHearingPageData(authToken,callbackRequest);
         assertNotNull(response.getData().containsKey("listWithoutNoticeHearingDetails"));
