@@ -8,9 +8,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
+import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffProfile;
@@ -23,8 +26,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHILDREQUIRED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGALOFFICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFORDERASC;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFSORTCOLUMN;
 
@@ -55,6 +61,9 @@ public class RefDataUserServiceTest {
 
     @Mock
     JudicialUsersApiRequest judicialUsersApiRequest;
+
+    @Mock
+    CommonDataRefApi commonDataRefApi;
 
     @Value("${prl.refdata.username}")
     private String refDataIdamUsername;
@@ -140,4 +149,56 @@ public class RefDataUserServiceTest {
         assertNotNull(expectedRespose);
         assertEquals(expectedRespose.get(0).getSurname(),"lastName1");
     }
+
+    @Test
+    public void testGetHearingTypeWithData() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+
+        List<CategoryValues> listOfCategoryValues = new ArrayList<>();
+        CategoryValues categoryValues1 = CategoryValues.builder().categoryKey("HearingType").valueEn("Celebration hearing").build();
+        CategoryValues categoryValues2 = CategoryValues.builder().categoryKey("HearingType").valueEn("Case Management Conference").build();
+        listOfCategoryValues.add(categoryValues1);
+        listOfCategoryValues.add(categoryValues2);
+        CommonDataResponse commonDataResponse = CommonDataResponse.builder().listOfValues(listOfCategoryValues).build();
+        when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
+                                                               authTokenGenerator.generate(),
+                                                               "hearingType",
+                                                               SERVICE_ID,
+                                                               HEARINGCHILDREQUIRED)).thenReturn(commonDataResponse);
+        List<DynamicListElement> expectedRespose = refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE);
+        assertNotNull(expectedRespose);
+        assertEquals(expectedRespose.get(0).getLabel(),"Celebration hearing");
+    }
+
+    @Test
+    public void testGetHearingTypeNullData() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+
+        List<CategoryValues> listOfCategoryValues = new ArrayList<>();
+        CommonDataResponse commonDataResponse = CommonDataResponse.builder().listOfValues(listOfCategoryValues).build();
+        when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
+                                                               authTokenGenerator.generate(),
+                                                               "hearingType",
+                                                               SERVICE_ID,
+                                                               HEARINGCHILDREQUIRED)).thenReturn(commonDataResponse);
+        List<DynamicListElement> expectedRespose = refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE);
+        assertEquals(expectedRespose.get(0).getLabel(),"Other");
+    }
+
+    @Test ()
+    public void testGetHearingTypeWithExceptionData() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+
+        List<CategoryValues> listOfCategoryValues = new ArrayList<>();
+        CommonDataResponse commonDataResponse = CommonDataResponse.builder().listOfValues(listOfCategoryValues).build();
+        when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
+                                                               authTokenGenerator.generate(),
+                                                               "hearingType",
+                                                               SERVICE_ID,
+                                                               HEARINGCHILDREQUIRED)).thenThrow(NullPointerException.class);
+        List<DynamicListElement> expectedRespose = refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE);
+        assertNull(expectedRespose.get(0).getLabel());
+    }
+
+
 }
