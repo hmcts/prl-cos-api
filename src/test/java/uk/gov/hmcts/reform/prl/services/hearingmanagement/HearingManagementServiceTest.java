@@ -106,7 +106,7 @@ public class HearingManagementServiceTest {
                                .nextHearingDate(LocalDate.parse("2022-11-27"))
                                .hearingVenueId("MRD-CRT-0817")
                                .hearingVenueName("Aldershot")
-                               .hmcStatus("LISTED")
+                               .hmcStatus("COMPLETED")
                                .build())
             .build();
 
@@ -233,7 +233,7 @@ public class HearingManagementServiceTest {
                                             EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
                                             respondentSolicitorEmailvars,
                                             LanguagePreference.english);
-        String caseState = "testState";
+        String caseState = String.valueOf(State.DECISION_OUTCOME);
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,caseState);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
@@ -289,7 +289,7 @@ public class HearingManagementServiceTest {
                                             EmailTemplateNames.HEARING_CHANGES,
                                             respondentEmailVars,
                                             LanguagePreference.english);
-        String caseState = "testState";
+        String caseState = String.valueOf(State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1,caseState);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
@@ -345,7 +345,7 @@ public class HearingManagementServiceTest {
                                             EmailTemplateNames.HEARING_CANCELLED,
                                             respondentEmailVars,
                                             LanguagePreference.english);
-        String caseState = "testState";
+        String caseState = String.valueOf(State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, caseState);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
@@ -490,7 +490,7 @@ public class HearingManagementServiceTest {
                                             respondentEmailVars,
                                             LanguagePreference.english);
 
-        String caseState="testState";
+        String caseState = String.valueOf(State.DECISION_OUTCOME);
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, caseState);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
@@ -585,7 +585,7 @@ public class HearingManagementServiceTest {
                                             EmailTemplateNames.HEARING_CHANGES,
                                             respondentEmailVars,
                                             LanguagePreference.english);
-        String caseState="testState";
+        String caseState = String.valueOf(State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, caseState);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
@@ -679,7 +679,7 @@ public class HearingManagementServiceTest {
                                             EmailTemplateNames.HEARING_CANCELLED,
                                             respondentEmailVars,
                                             LanguagePreference.english);
-        String caseState="testState";
+        String caseState = String.valueOf(State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, caseState);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
