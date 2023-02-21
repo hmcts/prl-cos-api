@@ -11,8 +11,10 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -31,7 +33,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,9 +41,7 @@ import java.util.stream.Collectors;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADJOURNED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSTPONED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WAITING_TO_BE_LISTED;
@@ -54,9 +53,6 @@ import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HE
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HearingManagementService {
-
-    public static final String HEARING_STATE_CHANGE_SUCCESS = "hmcCaseUpdateSuccess";
-    public static final String HEARING_STATE_CHANGE_FAILURE = "hmcCaseUpdateFailure";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
 
     private final AuthorisationService authorisationService;
@@ -67,105 +63,181 @@ public class HearingManagementService {
     private final EmailService emailService;
     private final AllTabServiceImpl allTabService;
 
+    private final CoreCaseDataService coreCaseDataService;
+
     @Value("${xui.url}")
     private String manageCaseUrl;
 
     @Value("${citizen.url}")
     private String dashboardUrl;
+    private String userToken = systemUserService.getSysUserToken();
+    private String systemUpdateUserId = systemUserService.getUserId(userToken);
 
     public void caseStateChangeForHearingManagement(HearingRequest hearingRequest) throws Exception {
 
         log.info("Processing the callback for the caseId {} with HMC status {}", hearingRequest.getCaseRef(),
                      hearingRequest.getHearingUpdate().getHmcStatus());
 
-        String userToken = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(userToken);
         log.info("Fetching the Case details based on caseId {}", hearingRequest.getCaseRef()
         );
-
-        CaseDetails caseDetails = coreCaseDataApi.getCase(
-            userToken,
-            authTokenGenerator.generate(),
-            hearingRequest.getCaseRef()
-        );
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         String hmcStatus = hearingRequest.getHearingUpdate().getHmcStatus();
         switch (hmcStatus) {
             case LISTED:
-                CaseDetails listedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                            DECISION_OUTCOME, HEARING_STATE_CHANGE_SUCCESS
+                CaseEvent caseEvent = CaseEvent.HEARING_STATE_CHANGE_SUCCESS;
+                State state = DECISION_OUTCOME;
+                EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
+
+                StartEventResponse startEventResponse =
+                    coreCaseDataService.startUpdate(
+                        userToken,
+                        eventRequestData,
+                        hearingRequest.getCaseRef(),
+                        true
+                    );
+                //updating State in CaseData
+                startEventResponse.getCaseDetails().getData().put("state",state.getValue());
+
+                CaseData caseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
+                CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
+                    startEventResponse,
+                    caseData
+                );
+
+                CaseDetails listedCaseDetails = coreCaseDataService.submitUpdate(
+                    userToken,
+                    eventRequestData,
+                    caseDataContent,
+                    hearingRequest.getCaseRef(),
+                    true
                 );
                 updateTabsAfterStateChange(listedCaseDetails.getData(), listedCaseDetails.getId());
-                sendHearingDetailsEmail(caseData, hearingRequest);
+
+                //retrieving  latest case data received from submitUpdate response
+                CaseData caseDataUpdated = CaseUtils.getCaseData(listedCaseDetails, objectMapper);
+
+                sendHearingDetailsEmail(caseDataUpdated, hearingRequest);
                 break;
 
             case CANCELLED:
-                CaseDetails cancelledCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                               PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE
+                caseEvent = CaseEvent.HEARING_STATE_CHANGE_FAILURE;
+                state = PREPARE_FOR_HEARING_CONDUCT_HEARING;
+                eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
+
+                startEventResponse =
+                    coreCaseDataService.startUpdate(
+                        userToken,
+                        eventRequestData,
+                        hearingRequest.getCaseRef(),
+                        true
+                    );
+
+                //updating State in CaseData
+                startEventResponse.getCaseDetails().getData().put("state",state.getValue());
+
+                caseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
+                caseDataContent = coreCaseDataService.createCaseDataContent(
+                    startEventResponse,
+                    caseData
                 );
+
+                CaseDetails cancelledCaseDetails = coreCaseDataService.submitUpdate(
+                    userToken,
+                    eventRequestData,
+                    caseDataContent,
+                    hearingRequest.getCaseRef(),
+                    true
+                );
+
                 updateTabsAfterStateChange(cancelledCaseDetails.getData(), cancelledCaseDetails.getId());
-                sendHearingCancelledEmail(caseData);
+
+                //retrieving  latest case data received from submitUpdate response
+                caseDataUpdated = CaseUtils.getCaseData(cancelledCaseDetails, objectMapper);
+
+                sendHearingCancelledEmail(caseDataUpdated);
                 break;
             case WAITING_TO_BE_LISTED:
             case COMPLETED:
             case POSTPONED:
             case ADJOURNED:
-                CaseDetails completedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                               PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE
+                caseEvent = CaseEvent.HEARING_STATE_CHANGE_FAILURE;
+                state = PREPARE_FOR_HEARING_CONDUCT_HEARING;
+                eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
+
+                startEventResponse =
+                    coreCaseDataService.startUpdate(
+                        userToken,
+                        eventRequestData,
+                        hearingRequest.getCaseRef(),
+                        true
+                    );
+
+                //updating State in CaseData
+                startEventResponse.getCaseDetails().getData().put("state",state.getValue());
+
+                caseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
+                caseDataContent = coreCaseDataService.createCaseDataContent(
+                    startEventResponse,
+                    caseData
                 );
+
+                CaseDetails completedCaseDetails = coreCaseDataService.submitUpdate(
+                    userToken,
+                    eventRequestData,
+                    caseDataContent,
+                    hearingRequest.getCaseRef(),
+                    true
+                );
+
                 updateTabsAfterStateChange(completedCaseDetails.getData(), completedCaseDetails.getId());
-                sendHearingChangeDetailsEmail(caseData);
+
+                //retrieving  latest case data received from submitUpdate response
+                caseDataUpdated = CaseUtils.getCaseData(completedCaseDetails, objectMapper);
+
+                sendHearingChangeDetailsEmail(caseDataUpdated);
                 break;
             default:
                 break;
         }
     }
 
-    private CaseDetails createEvent(HearingRequest hearingRequest, String userToken,
-                                    String systemUpdateUserId, State state, String eventId) {
-
-        StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
-            userToken,
-            authTokenGenerator.generate(),
-            systemUpdateUserId,
-            JURISDICTION,
-            CASE_TYPE,
-            hearingRequest.getCaseRef(),
-            eventId
-        );
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("state", state);
-
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .eventToken(startEventResponse.getToken())
-            .event(Event.builder()
-                       .id(startEventResponse.getEventId())
-                       .build())
-            .data(caseDataMap)
-            .build();
-
-        return  coreCaseDataApi.submitEventForCaseWorker(
-            userToken,
-            authTokenGenerator.generate(),
-            systemUpdateUserId,
-            JURISDICTION,
-            CASE_TYPE,
-            hearingRequest.getCaseRef(),
-            true,
-            caseDataContent
-        );
-    }
-
     private void updateTabsAfterStateChange(Map<String, Object> data, Long id) {
         data.put("id", String.valueOf(id));
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
-        allTabService.updateAllTabsIncludingConfTab(caseData);
+
+        EventRequestData allTabsUpdateEventRequestData = coreCaseDataService.eventRequest(
+            CaseEvent.UPDATE_ALL_TABS,
+            systemUpdateUserId
+        );
+        StartEventResponse allTabsUpdateStartEventResponse =
+            coreCaseDataService.startUpdate(
+                userToken,
+                allTabsUpdateEventRequestData,
+                id.toString(),
+                true
+            );
+
+        CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
+            allTabsUpdateStartEventResponse,
+            objectMapper
+        );
+
+        allTabService.updateAllTabsIncludingConfTabRefactored(
+            userToken,
+            id.toString(),
+            allTabsUpdateStartEventResponse,
+            allTabsUpdateEventRequestData,
+            allTabsUpdateCaseData
+        );
+
+        log.info(
+            "Refreshed the tab for caseid {} ",
+            id.toString()
+        );
+
     }
 
     private void sendHearingChangeDetailsEmail(CaseData caseData) {
-
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             sendHearingChangeDetailsEmailForCA(caseData);
 
@@ -256,7 +328,6 @@ public class HearingManagementService {
     }
 
     private void sendHearingCancelledEmail(CaseData caseData) {
-
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             sendHearingCancelledEmailForCA(caseData);
 
@@ -515,4 +586,5 @@ public class HearingManagementService {
                 .hearingDetailsPageLink(dashboardUrl + "/dashboard")
                 .build();
     }
+
 }

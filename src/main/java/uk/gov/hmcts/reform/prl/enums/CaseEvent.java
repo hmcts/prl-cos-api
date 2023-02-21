@@ -21,8 +21,9 @@ public enum CaseEvent {
     UPDATE_ALL_TABS("internal-update-all-tabs"),
 
     COURTNAV_CASE_CREATION("courtnav-case-creation"),
-
-    COURTNAV_DOCUMENT_UPLOAD_EVENT_ID("courtnav-document-upload");
+    COURTNAV_DOCUMENT_UPLOAD_EVENT_ID("courtnav-document-upload"),
+    HEARING_STATE_CHANGE_SUCCESS("hmcCaseUpdateSuccess"),
+    HEARING_STATE_CHANGE_FAILURE("hmcCaseUpdateFailure");
 
     private final String value;
 
