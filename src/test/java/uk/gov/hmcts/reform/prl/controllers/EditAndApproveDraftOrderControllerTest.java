@@ -425,7 +425,7 @@ public class EditAndApproveDraftOrderControllerTest {
     @Test
     public void testSaveServeOrderDetails() {
 
-        String authorisation = "Bearer someAuthorisationToken";
+        final String authorisation = "Bearer someAuthorisationToken";
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -485,7 +485,7 @@ public class EditAndApproveDraftOrderControllerTest {
     @Test
     public void testSaveServeOrderDetailsUpdateDraftOrders() {
 
-        final String AUTHORISATION_TOKEN = "Bearer someAuthorisationToken";
+        final String authorisation = "Bearer someAuthorisationToken";
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -537,7 +537,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .saveServeOrderDetails(AUTHORISATION_TOKEN, callbackRequest);
+            .saveServeOrderDetails(authorisation, callbackRequest);
         Assert.assertNotNull(response);
 
     }
