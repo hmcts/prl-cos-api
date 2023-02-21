@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.exception.HearingManagementValidationException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
@@ -25,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class HearingsManagementControllerTest {
@@ -77,7 +79,7 @@ public class HearingsManagementControllerTest {
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
-        String caseState = "test";
+        State caseState = DECISION_OUTCOME;
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest,caseState);
@@ -93,7 +95,7 @@ public class HearingsManagementControllerTest {
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
-        String caseState = "test";
+        State caseState = DECISION_OUTCOME;
         when(authorisationService.authoriseService(any())).thenReturn(false);
         doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest,caseState);
         assertThrows(

@@ -71,7 +71,7 @@ public class HearingManagementService {
     @Value("${citizen.url}")
     private String dashboardUrl;
 
-    public void caseStateChangeForHearingManagement(HearingRequest hearingRequest, String state) throws Exception {
+    public void caseStateChangeForHearingManagement(HearingRequest hearingRequest, State caseState) throws Exception {
 
         log.info("Processing the callback for the caseId {} with HMC status {}", hearingRequest.getCaseRef(),
                      hearingRequest.getHearingUpdate().getHmcStatus());
@@ -89,8 +89,8 @@ public class HearingManagementService {
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        State caseState = State.valueOf(state);
-
+        log.info("State being sent....{}",caseState);
+        log.info("prepare State being sent....{}",PREPARE_FOR_HEARING_CONDUCT_HEARING);
         switch (caseState) {
             case PREPARE_FOR_HEARING_CONDUCT_HEARING:
                 CaseDetails listedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
