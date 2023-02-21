@@ -162,7 +162,7 @@ public class RefDataUserServiceTest {
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().listOfValues(listOfCategoryValues).build();
         when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
                                                                authTokenGenerator.generate(),
-                                                               "hearingType",
+                                                               HEARINGTYPE,
                                                                SERVICE_ID,
                                                                HEARINGCHILDREQUIRED)).thenReturn(commonDataResponse);
         List<DynamicListElement> expectedRespose = refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE);
@@ -178,7 +178,7 @@ public class RefDataUserServiceTest {
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().listOfValues(listOfCategoryValues).build();
         when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
                                                                authTokenGenerator.generate(),
-                                                               "hearingType",
+                                                               HEARINGTYPE,
                                                                SERVICE_ID,
                                                                HEARINGCHILDREQUIRED)).thenReturn(commonDataResponse);
         List<DynamicListElement> expectedRespose = refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE);
@@ -190,10 +190,9 @@ public class RefDataUserServiceTest {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
         List<CategoryValues> listOfCategoryValues = new ArrayList<>();
-        CommonDataResponse commonDataResponse = CommonDataResponse.builder().listOfValues(listOfCategoryValues).build();
         when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
                                                                authTokenGenerator.generate(),
-                                                               "hearingType",
+                                                               HEARINGTYPE,
                                                                SERVICE_ID,
                                                                HEARINGCHILDREQUIRED)).thenThrow(NullPointerException.class);
         List<DynamicListElement> expectedRespose = refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE);
