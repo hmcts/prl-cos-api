@@ -115,6 +115,7 @@ public class EditAndApproveDraftOrderControllerTest {
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.generateDraftOrderDropDown(callbackRequest);
         Assert.assertNotNull(response);
     }
+
     @Test
     public void shouldGenerateDraftOrderDropdownNoDraftOrders() {
 
@@ -424,7 +425,7 @@ public class EditAndApproveDraftOrderControllerTest {
     @Test
     public void testSaveServeOrderDetails() {
 
-        final String AUTHORISATION_TOKEN = "Bearer someAuthorisationToken";
+        String authorisation = "Bearer someAuthorisationToken";
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -476,7 +477,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .saveServeOrderDetails(AUTHORISATION_TOKEN, callbackRequest);
+            .saveServeOrderDetails(authorisation, callbackRequest);
         Assert.assertNotNull(response);
 
     }
