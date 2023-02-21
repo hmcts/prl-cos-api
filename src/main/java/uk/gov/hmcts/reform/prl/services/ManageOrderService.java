@@ -1104,6 +1104,7 @@ public class ManageOrderService {
         log.info("Court name before N117 order {}", caseData.getCourtName());
 
         ManageOrders orderData = ManageOrders.builder()
+            .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
             .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
@@ -1111,6 +1112,22 @@ public class ManageOrderService {
             .isOrderDrawnForCafcass(caseData.getManageOrders().getIsOrderDrawnForCafcass())
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
+            .manageOrdersCourtName(null != caseData.getCourtName() ? caseData.getCourtName() : null)
+            .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
+                                                 caseData.getApplicantsFL401().getLastName()
+            ))
+            .manageOrdersRespondent(String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getRespondentsFL401().getFirstName(),
+                caseData.getRespondentsFL401().getLastName(),
+                caseData.getRespondentsFL401().getAddress(),
+                caseData.getRespondentsFL401().getDateOfBirth()
+            ))
+            .manageOrdersApplicantReference(String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                caseData.getApplicantsFL401().getRepresentativeLastName()
+            ))
             .build();
 
         log.info("Court name after N117 order set{}", orderData.getManageOrdersCourtName());
