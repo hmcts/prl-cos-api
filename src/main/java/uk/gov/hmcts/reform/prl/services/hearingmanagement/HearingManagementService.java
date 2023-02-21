@@ -75,6 +75,8 @@ public class HearingManagementService {
 
         log.info("Processing the callback for the caseId {} with HMC status {}", hearingRequest.getCaseRef(),
                      hearingRequest.getHearingUpdate().getHmcStatus());
+        log.info("State being sent....{}",caseState);
+        log.info("prepare State being sent....{}",PREPARE_FOR_HEARING_CONDUCT_HEARING);
 
         String userToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(userToken);
@@ -89,8 +91,7 @@ public class HearingManagementService {
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        log.info("State being sent....{}",caseState);
-        log.info("prepare State being sent....{}",PREPARE_FOR_HEARING_CONDUCT_HEARING);
+
         switch (caseState) {
             case PREPARE_FOR_HEARING_CONDUCT_HEARING:
                 CaseDetails listedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
