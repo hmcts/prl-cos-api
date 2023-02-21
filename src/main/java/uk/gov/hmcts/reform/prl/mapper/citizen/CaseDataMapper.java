@@ -115,13 +115,15 @@ public class CaseDataMapper {
         if (isNotEmpty(c100RebuildData.getC100RebuildOtherPersonsDetails())) {
             C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements = mapper
                     .readValue(c100RebuildData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
-            updateOtherPersonDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherPersonDetailsElements);
+            updateOtherPersonDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherPersonDetailsElements,
+                                                        c100RebuildChildDetailsElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
             C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = mapper
                     .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
-            updateRespondentDetailsElementsForCaseData(caseDataBuilder, c100RebuildRespondentDetailsElements);
+            updateRespondentDetailsElementsForCaseData(caseDataBuilder, c100RebuildRespondentDetailsElements,
+                                                       c100RebuildChildDetailsElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildConsentOrderDetails())) {

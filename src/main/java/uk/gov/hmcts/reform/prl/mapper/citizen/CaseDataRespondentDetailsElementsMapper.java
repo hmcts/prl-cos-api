@@ -2,23 +2,32 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100Address;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildDetail;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.PersonalDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.RespondentDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 public class CaseDataRespondentDetailsElementsMapper {
 
@@ -26,8 +35,48 @@ public class CaseDataRespondentDetailsElementsMapper {
     }
 
     public static void updateRespondentDetailsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
-                                                                  C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
+                                                                  C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements,
+                                                                  C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
         caseDataBuilder.respondents(buildRespondentDetails(c100RebuildRespondentDetailsElements));
+        caseDataBuilder.childAndRespondentRelations(buildChildAndRespondentRelation(c100RebuildRespondentDetailsElements,
+                                                                                   c100RebuildChildDetailsElements));
+    }
+
+    private static List<Element<ChildrenAndRespondentRelation>> buildChildAndRespondentRelation(
+        C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements,
+        C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
+
+        return c100RebuildRespondentDetailsElements.getRespondentDetails().stream()
+            .map(respondentDetails ->
+             respondentDetails.getRelationshipDetails().getRelationshipToChildren().stream()
+                 .map(childRelationship -> {
+                     Optional<ChildDetail> childDetails = c100RebuildChildDetailsElements.getChildDetails().stream()
+                         .filter(childDetail -> childDetail.getId().equals(
+                         childRelationship.getChildId())).findFirst();
+                     if (childDetails.isPresent()) {
+                         ChildDetail childDetail = childDetails.get();
+
+                         return Element.<ChildrenAndRespondentRelation>builder()
+                             .id(UUID.fromString(childRelationship.getChildId()))
+                             .value(ChildrenAndRespondentRelation.builder()
+                                .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
+                                .childLivesWith(childDetail.getChildLiveWith().stream()
+                                                    .anyMatch(c -> c.getPartyType().equals("respondent")
+                                                        && c.getId().equals(respondentDetails.getId())) ? Yes : No)
+                                .respondentFullName(respondentDetails.getFirstName() + " " + respondentDetails.getLastName())
+                                .childAndRespondentRelation(RelationshipsEnum.getEnumForDisplayedValue(
+                                    childRelationship.getRelationshipType()))
+                                .childAndRespondentRelationOtherDetails(childRelationship.getOtherRelationshipTypeDetails())
+                                .build()).build();
+                     }
+                     return null;
+                 })
+                 .filter(Objects::nonNull)
+                 .collect(Collectors.toList())
+            )
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+
     }
 
     private static List<Element<PartyDetails>> buildRespondentDetails(C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {

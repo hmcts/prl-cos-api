@@ -98,7 +98,13 @@
         "user":null,
         "response":null,
         "currentRespondent":null,
-        "applicantPreferredContact":null
+        "applicantPreferredContact":null,
+        "ChildrenAndApplicantRelation": {
+          "applicantFullName":"applicantFN1 applicantLN1",
+          "childFullName":"childFN1 childLN1",
+          "childAndApplicantRelation":"father",
+          "childAndApplicantRelationOtherDetails":null,
+          "childLivesWith":"Yes"}
       }
     },
     {
@@ -153,7 +159,13 @@
         "user":null,
         "response":null,
         "currentRespondent":null,
-        "applicantPreferredContact":null
+        "applicantPreferredContact":null,
+        "ChildrenAndApplicantRelation": {
+          "applicantFullName":"applicantFN1 applicantLN1",
+          "childFullName":"childFN1 childLN1",
+          "childAndApplicantRelation":"father",
+          "childAndApplicantRelationOtherDetails":null,
+          "childLivesWith":"Yes"}
       }
     }
   ],
@@ -176,11 +188,17 @@
         "otherApplicantsRelationshipToChild":null,
         "respondentsRelationshipToChild":null,
         "otherRespondentsRelationshipToChild":null,
-        "childLiveWith":"Yes",
+        "childLiveWith":null,
         "personWhoLivesWithChild":[
 
         ],
-        "parentalResponsibilityDetails":"childFN1 childLN1"
+        "parentalResponsibilityDetails":"childFN1 childLN1",
+        "ChildrenAndApplicantRelation": {
+          "applicantFullName":"applicantFN1 applicantLN1",
+          "childFullName":"childFN1 childLN1",
+          "childAndApplicantRelation":"father",
+          "childAndApplicantRelationOtherDetails":null,
+          "childLivesWith":"Yes"}
       }
     },
     {
@@ -199,11 +217,17 @@
         "otherApplicantsRelationshipToChild":null,
         "respondentsRelationshipToChild":null,
         "otherRespondentsRelationshipToChild":null,
-        "childLiveWith":"Yes",
+        "childLiveWith":null,
         "personWhoLivesWithChild":[
 
         ],
-        "parentalResponsibilityDetails":"childFN2 childLN2"
+        "parentalResponsibilityDetails":"childFN2 childLN2",
+        "ChildrenAndApplicantRelation": {
+          "applicantFullName":"applicantFN1 applicantLN1",
+          "childFullName":"childFN1 childLN1",
+          "childAndApplicantRelation":"father",
+          "childAndApplicantRelationOtherDetails":null,
+          "childLivesWith":"Yes"}
       }
     }
   ],

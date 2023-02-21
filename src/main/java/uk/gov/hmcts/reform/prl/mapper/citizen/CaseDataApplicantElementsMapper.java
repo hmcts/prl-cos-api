@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -51,15 +50,12 @@ public class CaseDataApplicantElementsMapper {
         C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
         C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
 
-        List<ChildDetail> childDetailList = new ArrayList<>(c100RebuildChildDetailsElements.getChildDetails());
-
-        List<ApplicantDto> applicantDtoList = new ArrayList<>(c100RebuildApplicantDetailsElements.getApplicants());
-
-        return applicantDtoList.stream()
+        return c100RebuildApplicantDetailsElements.getApplicants().stream()
             .map(applicantDto ->
                  applicantDto.getRelationshipDetails().getRelationshipToChildren().stream()
                      .map(childRelationship -> {
-                         Optional<ChildDetail> childDetails = childDetailList.stream().filter(childDetail -> childDetail.getId().equals(
+                         Optional<ChildDetail> childDetails = c100RebuildChildDetailsElements.getChildDetails().stream()
+                             .filter(childDetail -> childDetail.getId().equals(
                              childRelationship.getChildId())).findFirst();
                          if (childDetails.isPresent()) {
                              ChildDetail childDetail = childDetails.get();
