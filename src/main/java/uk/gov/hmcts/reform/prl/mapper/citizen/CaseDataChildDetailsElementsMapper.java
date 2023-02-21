@@ -83,7 +83,8 @@ public class CaseDataChildDetailsElementsMapper {
                    .personWhoLivesWithChild(Collections.emptyList())
                    .orderAppliedFor(buildOrdersApplyingFor(childDetail.getChildMatters()))
                    .childLiveWith(childDetail.getChildLiveWith().stream()
-                                      .map(c -> LiveWithEnum.valueOf(c.getPartyType())).collect(Collectors.toList()))
+                                      .map(c -> LiveWithEnum.valueOf(c.getPartyType()))
+                                      .collect(Collectors.toList()))
                    .build()
             ).build();
     }
