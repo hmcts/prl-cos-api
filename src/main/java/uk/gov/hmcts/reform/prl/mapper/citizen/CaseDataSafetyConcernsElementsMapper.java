@@ -60,7 +60,7 @@ public class CaseDataSafetyConcernsElementsMapper {
             .domesticBehaviours(buildDomesticAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
             .childAbuseBehaviours(buildChildAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
             .newPreviousAbductionThreats(isNotEmpty(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc())
-                                             ? uk.gov.hmcts.reform.prl.enums.YesOrNo.No : Yes)
+             ? uk.gov.hmcts.reform.prl.enums.YesOrNo.No : Yes)
             .newPreviousAbductionThreatsDetails(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc())
             .newChildrenLocationNow(c100RebuildSafetyConcernsElements.getC1AChildsCurrentLocation())
             .newAbductionPassportOfficeNotified(c100RebuildSafetyConcernsElements.getC1AAbductionPassportOfficeNotified())
@@ -109,7 +109,7 @@ public class CaseDataSafetyConcernsElementsMapper {
         }
         return ChildPassportDetails.builder().newChildPassportPossession(possessionChildrenPassport)
             .newChildPassportPossessionOtherDetails(isNotEmpty(c100RebuildSafetyConcernsElements.getC1AProvideOtherDetails())
-                                                        ? c100RebuildSafetyConcernsElements.getC1AProvideOtherDetails() : null)
+             ? c100RebuildSafetyConcernsElements.getC1AProvideOtherDetails() : null)
             .newChildHasMultiplePassports(c100RebuildSafetyConcernsElements.getC1AChildrenMoreThanOnePassport())
             .build();
 
@@ -171,7 +171,7 @@ public class CaseDataSafetyConcernsElementsMapper {
 
         YesOrNo allChildrenAreRisk = All_Children
             .equalsIgnoreCase(String.valueOf(abuseDto.getChildrenConcernedAbout()))
-            ? YesOrNo.Yes : YesOrNo.No;
+                                  ? YesOrNo.Yes : YesOrNo.No;
         String whichChildrenAreRisk = (allChildrenAreRisk == YesOrNo.No)
             ? StringUtils.join(abuseDto.getChildrenConcernedAbout(), ",") : null;
 
