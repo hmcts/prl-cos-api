@@ -199,7 +199,7 @@
         "otherApplicantsRelationshipToChild":null,
         "respondentsRelationshipToChild":null,
         "otherRespondentsRelationshipToChild":null,
-        "childLiveWith":["applicant", "respondent", "otherPerson"],
+        "childLiveWith":["applicant", "respondent", "anotherPerson"],
         "personWhoLivesWithChild":[
 
         ],
