@@ -302,6 +302,36 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
 
     @Test
+    public void whenCaseDataPresentThenAbductionSectionReturnFalse() {
+
+        List<NewPassportPossessionEnum> abductionChildPassportPosessionList =
+            new ArrayList<>();
+        abductionChildPassportPosessionList.add(NewPassportPossessionEnum.mother);
+        ChildPassportDetails childPassportDetails = ChildPassportDetails.builder()
+            .newChildPassportPossession(abductionChildPassportPosessionList)
+            .newChildHasMultiplePassports(Yes)
+            .newChildPassportPossessionOtherDetails("Test")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                         .newAllegationsOfHarmChildAbductionYesNo(Yes)
+                                         .newChildAbductionReasons("testing")
+                                         .newPreviousAbductionThreats(Yes)
+                                         .newPreviousAbductionThreatsDetails("Details")
+                                         .newAbductionPassportOfficeNotified(No)
+                                         .newAbductionChildHasPassport(Yes)
+                                         .childPassportDetails(childPassportDetails)
+                                         .newAbductionPreviousPoliceInvolvement(Yes)
+                                         .newAbductionPreviousPoliceInvolvementDetails("Details")
+                                         .build())
+            .build();
+
+        assertTrue(allegationsOfHarmChecker.validateAbductionSection(caseData));
+    }
+
+
+
+    @Test
     public void whenCaseDataPresentThenAbductionSectionReturnTrueWithNoPassport() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
@@ -382,17 +412,36 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
 
     @Test
-    public void whenCompleteBehaviourReturnTrue() {
+    public void whenCompleteChildAbuseBehaviourReturnTrue() {
 
-        DomesticAbuseBehaviours behaviour = DomesticAbuseBehaviours.builder()
+        ChildAbuseBehaviours behaviour = ChildAbuseBehaviours.builder()
             .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
             .newAbuseNatureDescription("Test")
             .newBehavioursStartDateAndLength("5 days")
             .newBehavioursApplicantSoughtHelp(Yes)
+            .allChildrenAreRisk(Yes)
+            .whichChildrenAreRisk("test")
             .newBehavioursApplicantHelpSoughtWho("Who from")
             .build();
 
-        assertTrue(allegationsOfHarmChecker.validateDomesticAbuseBehaviours(behaviour));
+        assertTrue(allegationsOfHarmChecker.validateChildAbuseBehaviours(behaviour));
+    }
+
+
+
+    @Test
+    public void whenCompleteChildAbuseBehaviourReturnFalse() {
+
+        ChildAbuseBehaviours behaviour = ChildAbuseBehaviours.builder()
+            .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
+            .newAbuseNatureDescription("Test")
+            .newBehavioursStartDateAndLength("5 days")
+            .newBehavioursApplicantSoughtHelp(Yes)
+            .allChildrenAreRisk(Yes)
+            .newBehavioursApplicantHelpSoughtWho("Who from")
+            .build();
+
+        assertTrue(allegationsOfHarmChecker.validateChildAbuseBehaviours(behaviour));
     }
 
     @Test
@@ -440,6 +489,13 @@ public class AllegationsOfHarmRevisedCheckerTest {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
             .build();
         assertFalse(allegationsOfHarmChecker.isSectionsFinished(caseData,false,false,false));
+    }
+
+    @Test
+    public void whenIsSectionsFinishedTrue() {
+        CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
+            .build();
+        assertFalse(allegationsOfHarmChecker.isSectionsFinished(caseData,true,true,true));
     }
 
     @Test

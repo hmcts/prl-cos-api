@@ -42,8 +42,7 @@ public class BundlingController extends AbstractCallbackController {
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse createBundle(@RequestHeader("authorization") @Parameter(hidden = true)
                                                              String authorization,
-                                                             @RequestBody CallbackRequest callbackRequest)
-        throws Exception {
+                                                             @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         moveExistingCaseBundlesToHistoricalBundles(caseData);

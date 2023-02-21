@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
@@ -69,9 +71,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGDOCGEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH_DOC_GEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
@@ -306,7 +310,7 @@ public class DocumentGenService {
 
         caseData = fillOrgDetails(caseData);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        updatedCaseData.put("isEngDocGen", Yes.toString());
+        updatedCaseData.put(ENGDOCGEN, Yes.toString());
         updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
         if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
             updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, null);
@@ -322,87 +326,8 @@ public class DocumentGenService {
         caseData = fillOrgDetails(caseData);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
-        if (documentLanguage.isGenEng()) {
-            updatedCaseData.put("isEngDocGen", Yes.toString());
-            if (isConfidentialInformationPresentForC100(caseData)) {
-                if (State.CASE_ISSUE.equals(caseData.getState())) {
-                    updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
-                } else {
-                    updatedCaseData.put(
-                        DOCUMENT_FIELD_DRAFT_C8,
-                        getDocument(authorisation, caseData, C8_DRAFT_HINT, false)
-                    );
-                }
-            } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                && isApplicantOrChildDetailsConfidential(caseData)) {
-                updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
-            } else {
-                updatedCaseData.put(DOCUMENT_FIELD_C8, null);
-            }
-            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                    && (caseData.getAllegationOfHarm() != null
-                    && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
-                    || (caseData.getAllegationOfHarmRevised() != null
-                    && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
-                if (State.CASE_ISSUE.equals(caseData.getState())) {
-                    updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
-                } else {
-                    updatedCaseData.put(
-                        DOCUMENT_FIELD_DRAFT_C1A,
-                        getDocument(authorisation, caseData, C1A_DRAFT_HINT, false)
-                    );
-
-                }
-            } else {
-                updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
-            }
-            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUE.equals(
-                caseData.getState())) {
-                updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
-            }
-        }
-        if (documentLanguage.isGenWelsh()) {
-            updatedCaseData.put("isWelshDocGen", Yes.toString());
-            if (isConfidentialInformationPresentForC100(caseData)) {
-                if (State.CASE_ISSUE.equals(caseData.getState())) {
-                    updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
-                } else {
-                    updatedCaseData.put(
-                        DOCUMENT_FIELD_C8_DRAFT_WELSH,
-                        getDocument(authorisation, caseData, C8_DRAFT_HINT, true)
-                    );
-                }
-            } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                && isApplicantOrChildDetailsConfidential(caseData)) {
-                updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
-            } else {
-                updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, null);
-            }
-
-
-            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                && (caseData.getAllegationOfHarm() != null
-                && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) || (caseData.getAllegationOfHarmRevised() != null
-                    && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
-                if (State.CASE_ISSUE.equals(caseData.getState())) {
-                    updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, getDocument(authorisation, caseData, C1A_HINT, true));
-                } else {
-                    updatedCaseData.put(
-                        DOCUMENT_FIELD_C1A_DRAFT_WELSH,
-                        getDocument(authorisation, caseData, C1A_DRAFT_HINT, true)
-                    );
-                }
-            } else {
-                updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, null);
-            }
-            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUE.equals(
-                caseData.getState())) {
-                updatedCaseData.put(
-                    DOCUMENT_FIELD_FINAL_WELSH,
-                    getDocument(authorisation, caseData, FINAL_HINT, true)
-                );
-            }
-        }
+        documentLanguageIsEng(authorisation, caseData, updatedCaseData, documentLanguage);
+        documentLanguageIsWelsh(authorisation, caseData, updatedCaseData, documentLanguage);
         if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
             updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, null);
             updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, null);
@@ -413,6 +338,112 @@ public class DocumentGenService {
             updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
         }
         return updatedCaseData;
+    }
+
+    private void documentLanguageIsWelsh(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData,
+                                         DocumentLanguage documentLanguage) throws Exception {
+        if (documentLanguage.isGenWelsh()) {
+            updatedCaseData.put("isWelshDocGen", Yes.toString());
+            isConfidentialInformationPresentForC100Welsh(authorisation, caseData, updatedCaseData);
+            isC100CaseTypeWelsh(authorisation, caseData, updatedCaseData);
+            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUE.equals(
+                caseData.getState())) {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_FINAL_WELSH,
+                    getDocument(authorisation, caseData, FINAL_HINT, true)
+                );
+            }
+        }
+    }
+
+    private void isC100CaseTypeWelsh(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                && (caseData.getAllegationOfHarm() != null
+                && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
+                || (caseData.getAllegationOfHarmRevised() != null
+                && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
+            if (State.CASE_ISSUE.equals(caseData.getState())) {
+                updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, getDocument(authorisation, caseData, C1A_HINT, true));
+            } else {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_C1A_DRAFT_WELSH,
+                    getDocument(authorisation, caseData, C1A_DRAFT_HINT, true)
+                );
+            }
+        } else {
+            updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, null);
+        }
+    }
+
+    private void isConfidentialInformationPresentForC100Welsh(String authorisation, CaseData caseData,
+                                                              Map<String, Object> updatedCaseData) throws Exception {
+        if (isConfidentialInformationPresentForC100(caseData)) {
+            if (State.CASE_ISSUE.equals(caseData.getState())) {
+                updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
+            } else {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_C8_DRAFT_WELSH,
+                    getDocument(authorisation, caseData, C8_DRAFT_HINT, true)
+                );
+            }
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && isApplicantOrChildDetailsConfidential(caseData)) {
+            updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
+        } else {
+            updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, null);
+        }
+    }
+
+    private void documentLanguageIsEng(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData,
+                                       DocumentLanguage documentLanguage) throws Exception {
+        if (documentLanguage.isGenEng()) {
+            updatedCaseData.put(ENGDOCGEN, Yes.toString());
+            isConfidentialInformationPresentForC100Eng(authorisation, caseData, updatedCaseData);
+            isC100CaseTypeEng(authorisation, caseData, updatedCaseData);
+            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUE.equals(
+                caseData.getState())) {
+                updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
+            }
+        }
+    }
+
+    private void isC100CaseTypeEng(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                && (caseData.getAllegationOfHarm() != null
+                && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
+                || (caseData.getAllegationOfHarmRevised() != null
+                && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
+            if (State.CASE_ISSUE.equals(caseData.getState())) {
+                updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
+            } else {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_DRAFT_C1A,
+                    getDocument(authorisation, caseData, C1A_DRAFT_HINT, false)
+                );
+
+            }
+        } else {
+            updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
+        }
+    }
+
+    private void isConfidentialInformationPresentForC100Eng(String authorisation, CaseData caseData,
+                                                            Map<String, Object> updatedCaseData) throws Exception {
+        if (isConfidentialInformationPresentForC100(caseData)) {
+            if (State.CASE_ISSUE.equals(caseData.getState())) {
+                updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
+            } else {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_DRAFT_C8,
+                    getDocument(authorisation, caseData, C8_DRAFT_HINT, false)
+                );
+            }
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && isApplicantOrChildDetailsConfidential(caseData)) {
+            updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
+        } else {
+            updatedCaseData.put(DOCUMENT_FIELD_C8, null);
+        }
     }
 
 
@@ -436,11 +467,11 @@ public class DocumentGenService {
             documentLanguage.isGenWelsh()
         );
         if (documentLanguage.isGenEng()) {
-            updatedCaseData.put("isEngDocGen", Yes.toString());
+            updatedCaseData.put(ENGDOCGEN, Yes.toString());
             updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
         }
         if (documentLanguage.isGenWelsh()) {
-            updatedCaseData.put("isWelshDocGen", Yes.toString());
+            updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
             updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
         }
 
@@ -945,6 +976,19 @@ public class DocumentGenService {
 
         } catch (Exception e) {
             log.error("Error while deleting  document ." + e.getMessage());
+            throw e;
+        }
+    }
+
+    public ResponseEntity<Resource> downloadDocument(String authorization, String documentId) {
+        try {
+            return uploadService.downloadDocument(
+                authorization,
+                documentId
+            );
+
+        } catch (Exception e) {
+            log.error("Error while downloading  document ." + e.getMessage());
             throw e;
         }
     }

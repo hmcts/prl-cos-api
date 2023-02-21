@@ -1,12 +1,13 @@
-package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
+package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildConsentOrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherProceedingsElementsMapper.buildDocument;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherProceedingsElementsMapper.buildDocument;
+
 
 public class CaseDataConsentOrderDetailsElementsMapper {
 

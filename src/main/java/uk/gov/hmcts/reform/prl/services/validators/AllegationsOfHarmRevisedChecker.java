@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
@@ -71,46 +70,14 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
             boolean domesticBehavioursCompleted = true;
             boolean childBehavioursCompleted = true;
 
-            if (ofNullable(caseData.getAllegationOfHarmRevised().getDomesticBehaviours()).isPresent()) {
-                Optional<List<Element<DomesticAbuseBehaviours>>> domesticBehavioursWrapped =
-                    ofNullable(caseData.getAllegationOfHarmRevised().getDomesticBehaviours());
-                if (domesticBehavioursWrapped.isPresent()
-                    && !domesticBehavioursWrapped.get().isEmpty()) {
-                    List<DomesticAbuseBehaviours> behaviours = domesticBehavioursWrapped.get()
-                        .stream()
-                        .map(Element::getValue)
-                        .collect(Collectors.toList());
-
-                    for (DomesticAbuseBehaviours behaviour : behaviours) {
-                        domesticBehavioursCompleted = validateDomesticAbuseBehaviours(behaviour);
-                        log.debug("domesticBehavioursCompleted  :{} ",domesticBehavioursCompleted);
-                        if (!domesticBehavioursCompleted) {
-                            return false;
-                        }
-                    }
-                }
+            domesticBehavioursCompleted =  validateDomesticAbuse(caseData);
+            if (!domesticBehavioursCompleted) {
+                return false;
             }
-
-            if (ofNullable(caseData.getAllegationOfHarmRevised().getChildAbuseBehaviours()).isPresent()) {
-                Optional<List<Element<ChildAbuseBehaviours>>> childBehavioursWrapped =
-                    ofNullable(caseData.getAllegationOfHarmRevised().getChildAbuseBehaviours());
-                if (childBehavioursWrapped.isPresent()
-                    && !childBehavioursWrapped.get().isEmpty()) {
-                    List<ChildAbuseBehaviours> behaviours = childBehavioursWrapped.get()
-                        .stream()
-                        .map(Element::getValue)
-                        .collect(Collectors.toList());
-
-                    for (ChildAbuseBehaviours behaviour : behaviours) {
-                        childBehavioursCompleted = validateChildAbuseBehaviours(behaviour);
-                        log.debug("childBehavioursCompleted  :{} ",childBehavioursCompleted);
-                        if (!childBehavioursCompleted) {
-                            return false;
-                        }
-                    }
-                }
+            childBehavioursCompleted = validateChildAbuse(caseData);
+            if (!childBehavioursCompleted) {
+                return false;
             }
-
             Optional<YesOrNo> ordersNonMolestation =
                 ofNullable(caseData.getAllegationOfHarmRevised().getNewOrdersNonMolestation());
             Optional<YesOrNo> ordersOccupation =
@@ -137,6 +104,35 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         }
 
         return isFinished;
+    }
+
+    public boolean validateDomesticAbuse(CaseData caseData) {
+        boolean domesticBehavioursCompleted = true;
+        if (ofNullable(caseData.getAllegationOfHarmRevised().getChildAbuseBehaviours()).isPresent()) {
+            Optional<List<Element<ChildAbuseBehaviours>>> childBehavioursWrapped =
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildAbuseBehaviours());
+            if (childBehavioursWrapped.isPresent()
+                && !childBehavioursWrapped.get().isEmpty()) {
+                domesticBehavioursCompleted =  childBehavioursWrapped.get()
+                    .stream().allMatch(behavioursElement -> validateChildAbuseBehaviours((behavioursElement.getValue())));
+
+            }
+        }
+        return domesticBehavioursCompleted;
+    }
+
+    public boolean validateChildAbuse(CaseData caseData) {
+        boolean childBehavioursCompleted = true;
+        if (ofNullable(caseData.getAllegationOfHarmRevised().getChildAbuseBehaviours()).isPresent()) {
+            Optional<List<Element<ChildAbuseBehaviours>>> childBehavioursWrapped =
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildAbuseBehaviours());
+            if (childBehavioursWrapped.isPresent()
+                && !childBehavioursWrapped.get().isEmpty()) {
+                childBehavioursCompleted =  childBehavioursWrapped.get()
+                    .stream().allMatch(behavioursElement -> validateChildAbuseBehaviours((behavioursElement.getValue())));
+            }
+        }
+        return childBehavioursCompleted;
     }
 
     public boolean isPreviousOrdersFinished(Optional<YesOrNo> ordersNonMolestation,
@@ -253,8 +249,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         Optional<String> abductionPreviousPoliceInvolvementDetails) {
         boolean policeCompleted = true;
         if (abductionPreviousPoliceInvolvement.isPresent()) {
-            if (!abductionPreviousPoliceInvolvement.isEmpty()
-                && Yes.equals(abductionPreviousPoliceInvolvement.get())) {
+            if (Yes.equals(abductionPreviousPoliceInvolvement.get())) {
                 policeCompleted = abductionPreviousPoliceInvolvementDetails.isPresent();
             } else {
                 policeCompleted = true;
@@ -268,8 +263,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         Optional<String> abductionChildPassportPossessionOtherDetail) {
         boolean passportPossessionCompleted = false;
         if (abductionChildPassportPossession.isPresent()) {
-            if (!abductionChildPassportPossession.isEmpty()
-                && abductionChildPassportPossession.get().contains(NewPassportPossessionEnum.otherPerson)) {
+            if (abductionChildPassportPossession.get().contains(NewPassportPossessionEnum.otherPerson)) {
                 passportPossessionCompleted = abductionChildPassportPossessionOtherDetail.isPresent();
             } else {
                 passportPossessionCompleted = true;
@@ -283,8 +277,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         Optional<String> previousAbductionThreatsDetails) {
         boolean previousThreatSectionComplete = true;
         if (previousAbductionThreats.isPresent() && Yes.equals(previousAbductionThreats.get())) {
-            if (!previousAbductionThreats.isEmpty()
-                && Yes.equals(previousAbductionThreats.get())) {
+            if (Yes.equals(previousAbductionThreats.get())) {
                 previousThreatSectionComplete = previousAbductionThreatsDetails.isPresent();
             } else {
                 previousThreatSectionComplete = true;

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
+package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
@@ -56,22 +56,9 @@ public class CaseDataOtherPersonsElementsMapper {
                         : buildDateOfBirth(personalDetails.getDateOfBirth()))
                 .isDateOfBirthUnknown(PrlAppsConstants.YES.equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null)
                 .address(buildAddress(otherPersonDetail.getOtherPersonAddress()))
-        //TODO Needs to updated once solictior mapping is finalized
         //.relationshipToChildren(buildChildRelationship(otherPersonDetail.getRelationshipDetails()))
         .build();
     }
-
-    //    public static String buildChildRelationship(RelationshipDetails relationshipDetails) {
-    //        Optional<ChildRelationship> childRelationship = relationshipDetails.getRelationshipToChildren().stream().findFirst();
-    //        if (childRelationship.isPresent()) {
-    //            ChildRelationship relationship = childRelationship.get();
-    //            if (PrlAppsConstants.OTHER.equalsIgnoreCase(relationship.getRelationshipType())) {
-    //                return relationship.getOtherRelationshipTypeDetails();
-    //            }
-    //            return relationship.getRelationshipType();
-    //        }
-    //        return null;
-    //    }
 
     private static Address buildAddress(OtherPersonAddress address) {
         return Address

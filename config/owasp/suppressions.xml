@@ -12,6 +12,13 @@
   <suppress>
     <notes>Temporary Suppression</notes>
     <cve>CVE-2021-37533</cve>
+
+  </suppress>
+  <suppress>
+    <notes>Temporary Suppression</notes>
+    <cve>CVE-2021-4277</cve>
+    <cve>CVE-2021-4235</cve>
+    <cve>CVE-2022-3064</cve>
   </suppress>
     <suppress>
         <notes><![CDATA[
@@ -27,11 +34,12 @@
         <cve>CVE-2022-38749</cve>
         <cve>CVE-2022-38752</cve>
         <cve>CVE-2022-42252</cve>
+        <cve>CVE-2021-4277</cve>
+        <cve>CVE-2021-4235</cve>
+        <cve>CVE-2022-3064</cve>
+        <cve>CVE-2021-37533</cve>
+        <cve>CVE-2022-45143</cve>
     </suppress>
-  <suppress>
-    <notes>Temporary Suppression</notes>
-    <cve>CVE-2021-37533</cve>
-  </suppress>
   <suppress>
     <notes><![CDATA[
       jackson-databind-2.13.3.jar ]]></notes>
@@ -47,9 +55,12 @@
       jackson-databind-2.13.3.jar ]]></notes>
     <cve>CVE-2022-38752</cve>
   </suppress>
-    <suppress>
-        <notes><![CDATA[
-      apache:commons_net ]]></notes>
-        <cve>CVE-2021-37533</cve>
-    </suppress>
+  <suppress>
+    <packageUrl regex="true">^pkg:maven/.*/.*@.*$</packageUrl>
+    <cve>CVE-2021-4277</cve>
+  </suppress>
+  <suppress base="true">
+    <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml@.*$</packageUrl>
+    <cpe>cpe:/a:yaml_project:yaml</cpe>
+  </suppress>
 </suppressions>

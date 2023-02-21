@@ -585,6 +585,10 @@ public class FL401SubmitApplicationControllerTest {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
+        verify(documentGenService, times(1)).generateDocuments(
+            Mockito.anyString(),
+            any(CaseData.class)
+        );
     }
 
 
