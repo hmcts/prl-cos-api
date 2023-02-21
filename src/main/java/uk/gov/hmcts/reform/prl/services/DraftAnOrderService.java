@@ -550,8 +550,6 @@ public class DraftAnOrderService {
             orderDocumentWelsh = draftOrder.getOrderDocumentWelsh();
         }
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
-            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
-                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
             .orderTypeId(draftOrder.getOrderType().getDisplayedValue())
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
