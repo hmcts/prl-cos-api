@@ -327,7 +327,7 @@ public class RelationshipsControllerTest {
         List<Element<PartyDetails>> listOfPartyDetails = Collections.singletonList(wrappedPartyDetails);
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .othersToNotify(listOfPartyDetails)
+            .otherPartyInTheCaseRevised(listOfPartyDetails)
             .newChildDetails(listOfChildren)
             .build();
 

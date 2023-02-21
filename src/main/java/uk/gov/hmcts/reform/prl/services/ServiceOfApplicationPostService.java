@@ -24,6 +24,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -69,7 +70,8 @@ public class ServiceOfApplicationPostService {
         // Sends post to other parties
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         CaseData blankCaseData = CaseData.builder().build();
-        Optional<List<Element<PartyDetails>>> otherPeopleToNotify = Optional.ofNullable(caseData.getOthersToNotify());
+        Optional<List<Element<PartyDetails>>> otherPeopleToNotify = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            ? Optional.ofNullable(caseData.getOtherPartyInTheCaseRevised()) : Optional.ofNullable(caseData.getOthersToNotify());
         otherPeopleToNotify.ifPresent(elements -> elements
             .stream()
             .map(Element::getValue)
