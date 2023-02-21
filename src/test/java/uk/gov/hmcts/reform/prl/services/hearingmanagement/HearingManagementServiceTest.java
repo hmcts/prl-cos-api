@@ -112,7 +112,7 @@ public class HearingManagementServiceTest {
 
         nextHearingDateRequest = NextHearingDateRequest.builder()
             .caseRef("1669565933090179")
-            .nextHearingDetails(NextHearingDetails.builder().hearingID("123").nextHearingDate(testNextHearingDate)
+            .nextHearingDetails(NextHearingDetails.builder().hearingId("123").nextHearingDate(testNextHearingDate)
                                .build())
             .build();
 
@@ -233,8 +233,8 @@ public class HearingManagementServiceTest {
                                             EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
                                             respondentSolicitorEmailvars,
                                             LanguagePreference.english);
-
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest);
+        String caseState = "testState";
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,caseState);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest.getCaseRef(), "hmcCaseUpdateSuccess"
@@ -289,8 +289,8 @@ public class HearingManagementServiceTest {
                                             EmailTemplateNames.HEARING_CHANGES,
                                             respondentEmailVars,
                                             LanguagePreference.english);
-
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1);
+        String caseState = "testState";
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1,caseState);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
@@ -345,8 +345,8 @@ public class HearingManagementServiceTest {
                                             EmailTemplateNames.HEARING_CANCELLED,
                                             respondentEmailVars,
                                             LanguagePreference.english);
-
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1);
+        String caseState = "testState";
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, caseState);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
@@ -490,7 +490,8 @@ public class HearingManagementServiceTest {
                                             respondentEmailVars,
                                             LanguagePreference.english);
 
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1);
+        String caseState="testState";
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, caseState);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateSuccess"
@@ -584,8 +585,8 @@ public class HearingManagementServiceTest {
                                             EmailTemplateNames.HEARING_CHANGES,
                                             respondentEmailVars,
                                             LanguagePreference.english);
-
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1);
+        String caseState="testState";
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, caseState);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
@@ -678,8 +679,8 @@ public class HearingManagementServiceTest {
                                             EmailTemplateNames.HEARING_CANCELLED,
                                             respondentEmailVars,
                                             LanguagePreference.english);
-
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1);
+        String caseState="testState";
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, caseState);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
@@ -702,7 +703,7 @@ public class HearingManagementServiceTest {
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, nextHearingDateRequest.getCaseRef(), "updateNextHearingDate"))
             .thenReturn(buildStartEventResponse("updateNextHearingDate", eventToken));
-        NextHearingDetails nextHearingDetails = NextHearingDetails.builder().hearingID("123").nextHearingDate(testNextHearingDate).build();
+        NextHearingDetails nextHearingDetails = NextHearingDetails.builder().hearingId("123").nextHearingDate(testNextHearingDate).build();
         when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                       caseType, nextHearingDateRequest.getCaseRef(), true,
                                                       buildCaseDataContentForNhd("updateNextHearingDate", eventToken,nextHearingDetails)))

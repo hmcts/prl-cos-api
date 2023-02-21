@@ -20,6 +20,4 @@ public class HearingRequest {
     private final String hearingId;
     private final HearingsUpdate hearingUpdate;
 
-
-
 }

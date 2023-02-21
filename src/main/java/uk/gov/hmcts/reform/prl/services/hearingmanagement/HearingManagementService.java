@@ -77,7 +77,7 @@ public class HearingManagementService {
     @Value("${citizen.url}")
     private String dashboardUrl;
 
-    public void caseStateChangeForHearingManagement(HearingRequest hearingRequest) throws Exception {
+    public void caseStateChangeForHearingManagement(HearingRequest hearingRequest, String state) throws Exception {
 
         log.info("Processing the callback for the caseId {} with HMC status {}", hearingRequest.getCaseRef(),
                      hearingRequest.getHearingUpdate().getHmcStatus());
@@ -95,32 +95,23 @@ public class HearingManagementService {
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        String hmcStatus = hearingRequest.getHearingUpdate().getHmcStatus();
-        switch (hmcStatus) {
-            case LISTED:
+        State caseState = State.valueOf(state);
+
+        switch (caseState) {
+            case PREPARE_FOR_HEARING_CONDUCT_HEARING:
                 CaseDetails listedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                            DECISION_OUTCOME, HEARING_STATE_CHANGE_SUCCESS
+                                                            PREPARE_FOR_HEARING_CONDUCT_HEARING, HEARING_STATE_CHANGE_SUCCESS
                 );
                 updateTabsAfterStateChange(listedCaseDetails.getData(), listedCaseDetails.getId());
                 sendHearingDetailsEmail(caseData, hearingRequest);
                 break;
 
-            case CANCELLED:
+            case DECISION_OUTCOME:
                 CaseDetails cancelledCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                               PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE
+                                                               DECISION_OUTCOME,HEARING_STATE_CHANGE_FAILURE
                 );
                 updateTabsAfterStateChange(cancelledCaseDetails.getData(), cancelledCaseDetails.getId());
                 sendHearingCancelledEmail(caseData);
-                break;
-            case WAITING_TO_BE_LISTED:
-            case COMPLETED:
-            case POSTPONED:
-            case ADJOURNED:
-                CaseDetails completedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                               PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE
-                );
-                updateTabsAfterStateChange(completedCaseDetails.getData(), completedCaseDetails.getId());
-                sendHearingChangeDetailsEmail(caseData);
                 break;
             default:
                 break;

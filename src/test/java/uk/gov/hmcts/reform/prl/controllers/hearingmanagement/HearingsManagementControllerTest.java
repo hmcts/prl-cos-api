@@ -65,7 +65,7 @@ public class HearingsManagementControllerTest {
             .caseRef("1669565933090179")
             .nextHearingDetails(NextHearingDetails.builder()
                                .nextHearingDate(LocalDateTime.parse("2023-04-13T09:00:00"))
-                               .hearingID("2000004862")
+                               .hearingId("2000004862")
                                .build())
             .build();
     }
@@ -77,11 +77,11 @@ public class HearingsManagementControllerTest {
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
+        String caseState = "test";
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest);
-
-        hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest);
+        doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest,caseState);
+        hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest, caseState);
         assertTrue(true);
 
     }
@@ -93,11 +93,12 @@ public class HearingsManagementControllerTest {
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
+        String caseState = "test";
         when(authorisationService.authoriseService(any())).thenReturn(false);
-        doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest);
+        doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest,caseState);
         assertThrows(
             HearingManagementValidationException.class,
-            () -> hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest)
+            () ->  hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest, caseState)
         );
     }
 

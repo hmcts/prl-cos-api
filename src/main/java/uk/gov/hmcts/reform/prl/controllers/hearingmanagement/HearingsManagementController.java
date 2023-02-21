@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
@@ -60,19 +61,20 @@ public class HearingsManagementController {
     @Value("${citizen.url}")
     private String hearingDetailsUrl;
 
-    @PutMapping(path = "/hearing-management-state-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PutMapping(path = "/hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Ways to pay will call this API and send the status of payment with other details")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public void caseStateUpdateByHearingManagement(@RequestHeader("serviceAuthorization") String s2sToken,
-                                     @RequestBody HearingRequest hearingRequest) throws Exception {
+                                                   @RequestBody HearingRequest hearingRequest,
+                                                   @PathVariable("caseState") String caseState) throws Exception {
 
         if (Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
             throw new HearingManagementValidationException("Provide a valid s2s token");
         } else {
-            hearingManagementService.caseStateChangeForHearingManagement(hearingRequest);
+            hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,caseState);
         }
     }
 
