@@ -1177,16 +1177,16 @@ public class ManageOrderService {
             .fl404bRespondentName(String.format(PrlAppsConstants.FORMAT, caseData.getRespondentsFL401().getFirstName(),
                                                 caseData.getRespondentsFL401().getLastName()
             ))
-            .fl404bApplicantReference((String.format(
+            .fl404bApplicantReference(caseData.getApplicantsFL401().getRepresentativeFirstName() != null ? (String.format(
                 PrlAppsConstants.FORMAT,
                 caseData.getApplicantsFL401().getRepresentativeFirstName(),
                 caseData.getApplicantsFL401().getRepresentativeLastName()
-            )))
-            .fl404bRespondentReference(String.format(
+            )) : "")
+            .fl404bRespondentReference(caseData.getRespondentsFL401().getRepresentativeFirstName() != null ? String.format(
                 PrlAppsConstants.FORMAT,
                 caseData.getRespondentsFL401().getRepresentativeFirstName(),
                 caseData.getRespondentsFL401().getRepresentativeLastName()
-            ))
+            ) : "")
             .build();
 
         log.info("FL404b court name: {}", orderData.getFl404bCourtName());
