@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -17,7 +19,9 @@ public class CaseUtils {
 
     public static CaseData getCaseDataFromStartUpdateEventResponse(StartEventResponse startEventResponse, ObjectMapper objectMapper) {
         CaseDetails caseDetails = startEventResponse.getCaseDetails();
-
+        if (caseDetails == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
         return getCaseData(caseDetails, objectMapper);
     }
 
