@@ -25,4 +25,13 @@ public class HearingData {
     @JsonProperty("hearingDateConfirmOptionEnum")
     private HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum;
 
+    @JsonProperty("confirmedHearingDates")
+    private final DynamicList confirmedHearingDates;
+
+    @JsonProperty("additionalHearingDetails")
+    private String additionalHearingDetails;
+
+    @JsonProperty("instructionsForRemoteHearing")
+    private String instructionsForRemoteHearing;
+
 }
