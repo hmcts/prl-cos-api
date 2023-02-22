@@ -28,11 +28,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.Event;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.ccd.client.model.*;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.clients.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -47,6 +46,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.UploadDocumentEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -104,6 +104,12 @@ public class CaseDocumentController {
 
     @Value("${citizen.url}")
     private String dashboardUrl;
+
+    @Autowired
+    private CoreCaseDataService coreCaseDataService;
+
+    @Autowired
+    private SystemUserService systemUserService;
 
     @PostMapping(path = "/generate-citizen-statement-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Generate a PDF for citizen as part of upload documents")
@@ -244,8 +250,21 @@ public class CaseDocumentController {
                                                          @ModelAttribute UploadedDocumentRequest uploadedDocumentRequest) {
 
         String caseId = uploadedDocumentRequest.getCaseId();
-        CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
-        CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        String userToken = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(userToken);
+        CaseEvent caseEvent = CaseEvent.CITIZEN_UPLOADED_DOCUMENT;
+
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
+
+        StartEventResponse startEventResponse =
+            coreCaseDataService.startUpdate(
+                userToken,
+                eventRequestData,
+                caseId,
+                false
+            );
+        CaseData tempCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
 
         UploadedDocuments uploadedDocuments = uploadService.uploadCitizenDocument(
             authorisation,
@@ -263,38 +282,21 @@ public class CaseDocumentController {
                 uploadedDocumentsList = new ArrayList<>();
                 uploadedDocumentsList.add(uploadedDocsElement);
             }
-            CaseData caseData = CaseData.builder()
-                .id(Long.parseLong(caseId))
+            tempCaseData = tempCaseData.builder()
                 .citizenUploadedDocumentList(uploadedDocumentsList)
                 .build();
 
-            StartEventResponse startEventResponse =
-                coreCaseDataApi.startEventForCitizen(
-                    authorisation,
-                    s2sToken,
-                    idamClient.getUserInfo(authorisation).getUid(),
-                    JURISDICTION,
-                    CASE_TYPE,
-                    caseId,
-                    CITIZEN_UPLOADED_DOCUMENT
-                );
+            CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
+                startEventResponse,
+                tempCaseData
+            );
 
-            CaseDataContent caseDataContent = CaseDataContent.builder()
-                .eventToken(startEventResponse.getToken())
-                .event(Event.builder()
-                           .id(startEventResponse.getEventId())
-                           .build())
-                .data(caseData).build();
-
-            coreCaseDataApi.submitEventForCitizen(
-                authorisation,
-                s2sToken,
-                idamClient.getUserInfo(authorisation).getUid(),
-                JURISDICTION,
-                CASE_TYPE,
+            coreCaseDataService.submitUpdate(
+                userToken,
+                eventRequestData,
+                caseDataContent,
                 caseId,
-                true,
-                caseDataContent
+                false
             );
 
             final String partyId = uploadedDocumentRequest.getPartyId();
