@@ -110,8 +110,7 @@ public class EditAndApproveDraftOrderControllerTest {
 
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(),
-                                                          C100_CASE_TYPE)).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.generateDraftOrderDropDown(callbackRequest);
         Assert.assertNotNull(response);
     }
