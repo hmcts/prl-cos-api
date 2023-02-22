@@ -119,6 +119,13 @@ public class DocumentGenService {
     @Value("${document.templates.c100.c100_c1a_draft_template}")
     protected String c100C1aDraftTemplate;
 
+    @Value("${document.templates.c100.c100_c1a_revised_template}")
+    protected String c100C1aRevisedTemplate;
+
+    @Value("${document.templates.c100.c100_c1a_revised_draft_template}")
+    protected String c100C1aRevisedDraftTemplate;
+
+
     @Value("${document.templates.c100.c100_c1a_filename}")
     protected String c100C1aFilename;
 
@@ -140,11 +147,17 @@ public class DocumentGenService {
     @Value("${document.templates.c100.c100_c1a_welsh_template}")
     protected String c100C1aWelshTemplate;
 
+    @Value("${document.templates.c100.c100_c1a_revised_welsh_template}")
+    protected String c100C1aRevisedWelshTemplate;
+
     @Value("${document.templates.c100.c100_c1a_welsh_filename}")
     protected String c100C1aWelshFilename;
 
     @Value("${document.templates.c100.c100_c1a_draft_welsh_template}")
     protected String c100C1aDraftWelshTemplate;
+
+    @Value("${document.templates.c100.c100_c1a_revised_draft_welsh_template}")
+    protected String c100C1aRevisedDraftWelshTemplate;
 
     @Value("${document.templates.c100.c100_c1a_draft_welsh_filename}")
     protected String c100C1aDraftWelshFilename;
@@ -326,8 +339,10 @@ public class DocumentGenService {
 
     private void isC100CaseTypeWelsh(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            && caseData.getAllegationOfHarm() != null
-            && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
+                && (caseData.getAllegationOfHarm() != null
+                && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
+                || (caseData.getAllegationOfHarmRevised() != null
+                && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
             if (State.CASE_ISSUE.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, getDocument(authorisation, caseData, C1A_HINT, true));
             } else {
@@ -375,8 +390,10 @@ public class DocumentGenService {
 
     private void isC100CaseTypeEng(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            && caseData.getAllegationOfHarm() != null
-            && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
+                && (caseData.getAllegationOfHarm() != null
+                && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
+                || (caseData.getAllegationOfHarmRevised() != null
+                && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
             if (State.CASE_ISSUE.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
             } else {
@@ -704,10 +721,10 @@ public class DocumentGenService {
                 template = c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData);
                 break;
             case C1A_HINT:
-                template = !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
+                template = findC1ATemplate(isWelsh, caseData.getIsNewCaseCreated());
                 break;
             case C1A_DRAFT_HINT:
-                template = !isWelsh ? c100C1aDraftTemplate : c100C1aDraftWelshTemplate;
+                template = findDraftC1ATemplate(isWelsh, caseData.getIsNewCaseCreated());
                 break;
             case FINAL_HINT:
                 template = findFinalTemplate(isWelsh, caseData);
@@ -769,6 +786,26 @@ public class DocumentGenService {
             return c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData);
         } else {
             template = !isWelsh ? fl401C8Template : fl401C8WelshTemplate;
+        }
+        return template;
+    }
+
+    private String findC1ATemplate(boolean isWelsh, YesOrNo newCaseCreated) {
+        String template;
+        if (Yes.equals(newCaseCreated)) {
+            template = !isWelsh ? c100C1aRevisedTemplate : c100C1aRevisedWelshTemplate;
+        } else {
+            template = !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
+        }
+        return template;
+    }
+
+    private String findDraftC1ATemplate(boolean isWelsh, YesOrNo newCaseCreated) {
+        String template;
+        if (Yes.equals(newCaseCreated)) {
+            template = !isWelsh ? c100C1aRevisedDraftTemplate : c100C1aRevisedDraftWelshTemplate;
+        } else {
+            template = !isWelsh ? c100C1aDraftTemplate : c100C1aDraftWelshTemplate;
         }
         return template;
     }

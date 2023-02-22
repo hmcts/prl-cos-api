@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
+import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
@@ -82,10 +83,15 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofh
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOverview;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.ChildAbductionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.DomesticAbuseVictim;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.AllegationsOfHarmRevisedOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.OrderRevised;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.RevisedChildAbductionDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -120,6 +126,8 @@ public class ApplicationsTabServiceTest {
     List<Element<PartyDetails>> partyList;
     PartyDetails partyDetails;
     Order order;
+    OrderRevised orderRevised;
+    AllegationsOfHarmRevisedOrders allegationsOfHarmRevisedOrders;
     AllegationsOfHarmOrders allegationsOfHarmOrders;
     AllegationsOfHarmOrders emptyAllegationOfHarmOrder;
 
@@ -507,6 +515,48 @@ public class ApplicationsTabServiceTest {
             .thenReturn(AllegationsOfHarmOtherConcerns.builder().build());
 
         assertNotNull(applicationsTabService.updateTab(caseDataWithParties));
+    }
+
+    @Test
+    public void testUpdateTabWithAllegationOfHarmRevised() {
+
+        orderRevised = OrderRevised.builder()
+                .dateIssued(LocalDate.of(1990, 8, 1))
+                .endDate(LocalDate.of(1991, 8, 1))
+                .orderCurrent(YesOrNo.Yes)
+                .courtName("Court name")
+                .build();
+
+        allegationsOfHarmRevisedOrders = AllegationsOfHarmRevisedOrders.builder()
+                .newOrdersNonMolestation(YesOrNo.Yes)
+                .nonMolestationOrder(orderRevised)
+                .newOrdersOccupation(YesOrNo.Yes)
+                .occupationOrder(orderRevised)
+                .newOrdersForcedMarriageProtection(YesOrNo.Yes)
+                .forcedMarriageProtectionOrder(orderRevised)
+                .newOrdersRestraining(YesOrNo.Yes)
+                .restrainingOrder(orderRevised)
+                .newOrdersOtherInjunctive(YesOrNo.Yes)
+                .otherInjunctiveOrder(orderRevised)
+                .newOrdersUndertakingInPlace(YesOrNo.Yes)
+                .undertakingInPlaceOrder(orderRevised)
+                .build();
+
+        RevisedChildAbductionDetails revisedChildAbductionDetails = RevisedChildAbductionDetails.builder()
+                .newAbductionChildHasPassport(Yes).build();
+        CaseData caseData = caseDataWithParties.toBuilder().isNewCaseCreated(Yes)
+                .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                        .childPassportDetails(ChildPassportDetails.builder().newChildPassportPossession(List
+                                .of(NewPassportPossessionEnum.father)).build())
+                        .newAllegationsOfHarmYesNo(Yes).build()).build();
+
+        when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class))
+                .thenReturn(OtherPersonInTheCase.builder().build());
+        when(objectMapper.convertValue(caseData, AllegationsOfHarmRevisedOrders.class))
+                .thenReturn(allegationsOfHarmRevisedOrders);
+        when(objectMapper.convertValue(caseData, RevisedChildAbductionDetails.class))
+                .thenReturn(revisedChildAbductionDetails);
+        assertNotNull(applicationsTabService.updateTab(caseData));
     }
 
     private List<Element<OtherPersonWhoLivesWithChild>> getOtherPersonList() {

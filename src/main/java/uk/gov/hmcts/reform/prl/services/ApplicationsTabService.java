@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
+import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
@@ -31,7 +32,9 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
+import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.Landlord;
@@ -76,7 +79,16 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofh
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOverview;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.ChildAbductionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.DomesticAbuseVictim;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.AllegationsOfHarmRevisedChildContact;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.AllegationsOfHarmRevisedOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.AllegationsOfHarmRevisedOtherConcerns;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.AllegationsOfHarmRevisedOverview;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.ChildAbuseBehaviour;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.DomesticAbuseBehaviour;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.OrderRevised;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.RevisedChildAbductionDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.services.tab.TabService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.FieldGenerator;
@@ -93,6 +105,7 @@ import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 
 
 @Slf4j
@@ -119,7 +132,21 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("respondentTable", getRespondentsTable(caseData));
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
             applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
-            applicationTab.put("allegationsOfHarmOverviewTable", getAllegationsOfHarmOverviewTable(caseData));
+            if (YesOrNo.Yes.equals(caseData.getIsNewCaseCreated())) {
+                applicationTab.put("allegationsOfHarmRevisedOverviewTable", getAllegationsOfHarmRevisedOverviewTable(caseData));
+                applicationTab.put("allegationsOfHarmRevisedDATable", getAllegationsOfHarmRevisedDaTable(caseData));
+                applicationTab.put("allegationsOfHarmRevisedCATable", getAllegationsOfHarmRevisedCaTable(caseData));
+                applicationTab.put("allegationsOfHarmRevisedOrdersTable", getAllegationsOfHarmRevisedOrdersTable(caseData));
+                applicationTab.put("allegationsOfHarmRevisedChildAbductionTable", getRevisedChildAbductionTable(caseData));
+                applicationTab.put("allegationsOfHarmRevisedOtherConcernsTable", getAllegationsOfHarmRevisedOtherConcerns(caseData));
+                applicationTab.put("allegationsOfHarmRevisedChildContactTable", getAllegationsOfHarmRevisedChildContact(caseData));
+            } else {
+                applicationTab.put("allegationsOfHarmOrdersTable", getAllegationsOfHarmOrdersTable(caseData));
+                applicationTab.put("allegationsOfHarmOverviewTable", getAllegationsOfHarmOverviewTable(caseData));
+                applicationTab.put("allegationsOfHarmDomesticAbuseTable", getDomesticAbuseTable(caseData));
+                applicationTab.put("allegationsOfHarmChildAbductionTable", getChildAbductionTable(caseData));
+                applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
+            }
             applicationTab.put("miamTable", getMiamTable(caseData));
             applicationTab.put("miamExemptionsTable", getMiamExemptionsTable(caseData));
             applicationTab.put("otherProceedingsTable", getOtherProceedingsTable(caseData));
@@ -172,6 +199,66 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
         }
         return applicationTab;
+    }
+
+    private List<Element<DomesticAbuseBehaviour>> getAllegationsOfHarmRevisedDaTable(CaseData caseData) {
+
+        List<Element<DomesticAbuseBehaviour>> domesticAbuseBehaviourList = new ArrayList<>();
+        if (YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmDomesticAbuseYesNo())) {
+            Optional<List<Element<DomesticAbuseBehaviours>>> domesticBehaviours = ofNullable(caseData.getAllegationOfHarmRevised()
+                    .getDomesticBehaviours());
+
+            if (domesticBehaviours.isPresent()) {
+                domesticBehaviours.get().forEach(each -> {
+                    DomesticAbuseBehaviour domesticAbuseBehaviour = DomesticAbuseBehaviour
+                                    .builder().newAbuseNatureDescription(each.getValue().getNewAbuseNatureDescription())
+                                    .typeOfAbuse(each.getValue().getTypeOfAbuse().getDisplayedValue())
+                                    .newBehavioursApplicantHelpSoughtWho(each.getValue().getNewBehavioursApplicantHelpSoughtWho())
+                                    .newBehavioursApplicantSoughtHelp(each.getValue().getNewBehavioursApplicantSoughtHelp())
+                                    .newBehavioursStartDateAndLength(each.getValue().getNewBehavioursStartDateAndLength())
+                                    .build();
+                    Element<DomesticAbuseBehaviour> app = Element.<DomesticAbuseBehaviour>builder().value(domesticAbuseBehaviour).build();
+                    domesticAbuseBehaviourList.add(app);
+                }
+                );
+                return domesticAbuseBehaviourList;
+            }
+        }
+        DomesticAbuseBehaviour domesticAbuseBehaviour = DomesticAbuseBehaviour.builder().build();
+        Element<DomesticAbuseBehaviour> app = Element.<DomesticAbuseBehaviour>builder().value(domesticAbuseBehaviour).build();
+        domesticAbuseBehaviourList.add(app);
+        return domesticAbuseBehaviourList;
+    }
+
+    private List<Element<ChildAbuseBehaviour>> getAllegationsOfHarmRevisedCaTable(CaseData caseData) {
+
+        List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
+        if (YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmDomesticAbuseYesNo())) {
+            Optional<List<Element<ChildAbuseBehaviours>>> childAbuseBehaviours = ofNullable(caseData.getAllegationOfHarmRevised()
+                    .getChildAbuseBehaviours());
+
+            if (childAbuseBehaviours.isPresent()) {
+                childAbuseBehaviours.get().forEach(each -> {
+                    ChildAbuseBehaviour childAbuseBehaviour = ChildAbuseBehaviour
+                                    .builder().newAbuseNatureDescription(each.getValue().getNewAbuseNatureDescription())
+                                    .typeOfAbuse(each.getValue().getTypeOfAbuse().getDisplayedValue())
+                                    .newBehavioursApplicantHelpSoughtWho(each.getValue().getNewBehavioursApplicantHelpSoughtWho())
+                                    .newBehavioursApplicantSoughtHelp(each.getValue().getNewBehavioursApplicantSoughtHelp())
+                                    .newBehavioursStartDateAndLength(each.getValue().getNewBehavioursStartDateAndLength())
+                                    .allChildrenAreRisk(each.getValue().getAllChildrenAreRisk())
+                                    .whichChildrenAreRisk(each.getValue().getWhichChildrenAreRisk())
+                                    .build();
+                    Element<ChildAbuseBehaviour> app = Element.<ChildAbuseBehaviour>builder().value(childAbuseBehaviour).build();
+                    childAbuseBehaviourList.add(app);
+                }
+                );
+                return childAbuseBehaviourList;
+            }
+        }
+        ChildAbuseBehaviour childAbuseBehaviour = ChildAbuseBehaviour.builder().build();
+        Element<ChildAbuseBehaviour> app = Element.<ChildAbuseBehaviour>builder().value(childAbuseBehaviour).build();
+        childAbuseBehaviourList.add(app);
+        return childAbuseBehaviourList;
     }
 
     @Override
@@ -416,6 +503,13 @@ public class ApplicationsTabService implements TabService {
 
     }
 
+    public Map<String, Object> getAllegationsOfHarmRevisedOverviewTable(CaseData caseData) {
+        AllegationsOfHarmRevisedOverview allegationsOfHarmRevisedOverview = objectMapper
+                .convertValue(caseData, AllegationsOfHarmRevisedOverview.class);
+        return toMap(allegationsOfHarmRevisedOverview);
+
+    }
+
     public Map<String, Object> getMiamTable(CaseData caseData) {
         Miam miam = objectMapper.convertValue(caseData, Miam.class);
         return toMap(miam);
@@ -621,6 +715,91 @@ public class ApplicationsTabService implements TabService {
         return toMap(allegationsOfHarmOrders);
     }
 
+    public Map<String, Object> getAllegationsOfHarmRevisedOrdersTable(CaseData caseData) {
+        AllegationsOfHarmRevisedOrders allegationsOfHarmRevisedOrders = objectMapper
+                .convertValue(caseData, AllegationsOfHarmRevisedOrders.class);
+        getSpecificOrderRevisedDetails(allegationsOfHarmRevisedOrders, caseData);
+        return toMap(allegationsOfHarmRevisedOrders);
+    }
+
+    public AllegationsOfHarmRevisedOrders getSpecificOrderRevisedDetails(
+             AllegationsOfHarmRevisedOrders allegationsOfHarmRevisedOrders, CaseData caseData) {
+
+        Optional<YesOrNo> nonMolYesNo = ofNullable(allegationsOfHarmRevisedOrders.getNewOrdersNonMolestation());
+        if (nonMolYesNo.isPresent() && nonMolYesNo.get().equals(YesOrNo.Yes)) {
+            OrderRevised nonMolOrder = OrderRevised.builder()
+                    .dateIssued(caseData.getAllegationOfHarmRevised().getNewOrdersNonMolestationDateIssued())
+                    .endDate(caseData.getAllegationOfHarmRevised().getNewOrdersNonMolestationEndDate())
+                    .orderCurrent(caseData.getAllegationOfHarmRevised().getNewOrdersNonMolestationCurrent())
+                    .courtName(caseData.getAllegationOfHarmRevised().getNewOrdersNonMolestationCourtName())
+                    .caseNumber(caseData.getAllegationOfHarmRevised().getNewOrdersNonMolestationCaseNumber())
+                    .build();
+            allegationsOfHarmRevisedOrders.setNonMolestationOrder(nonMolOrder);
+        }
+
+        Optional<YesOrNo> occYesNo = ofNullable(allegationsOfHarmRevisedOrders.getNewOrdersOccupation());
+        if (occYesNo.isPresent() && occYesNo.get().equals(YesOrNo.Yes)) {
+            OrderRevised occOrder = OrderRevised.builder()
+                    .dateIssued(caseData.getAllegationOfHarmRevised().getNewOrdersOccupationDateIssued())
+                    .endDate(caseData.getAllegationOfHarmRevised().getNewOrdersOccupationEndDate())
+                    .orderCurrent(caseData.getAllegationOfHarmRevised().getNewOrdersOccupationCurrent())
+                    .courtName(caseData.getAllegationOfHarmRevised().getNewOrdersOccupationCourtName())
+                    .caseNumber(caseData.getAllegationOfHarmRevised().getNewOrdersOccupationCaseNumber())
+                    .build();
+            allegationsOfHarmRevisedOrders.setOccupationOrder(occOrder);
+        }
+
+        Optional<YesOrNo> forcedYesNo = ofNullable(allegationsOfHarmRevisedOrders.getNewOrdersForcedMarriageProtection());
+        if (forcedYesNo.isPresent() && forcedYesNo.get().equals(YesOrNo.Yes)) {
+            OrderRevised forOrder = OrderRevised.builder()
+                    .dateIssued(caseData.getAllegationOfHarmRevised().getNewOrdersForcedMarriageProtectionDateIssued())
+                    .endDate(caseData.getAllegationOfHarmRevised().getNewOrdersForcedMarriageProtectionEndDate())
+                    .orderCurrent(caseData.getAllegationOfHarmRevised().getNewOrdersForcedMarriageProtectionCurrent())
+                    .courtName(caseData.getAllegationOfHarmRevised().getNewOrdersForcedMarriageProtectionCourtName())
+                    .caseNumber(caseData.getAllegationOfHarmRevised().getNewOrdersForcedMarriageProtectionCaseNumber())
+                    .build();
+            allegationsOfHarmRevisedOrders.setForcedMarriageProtectionOrder(forOrder);
+        }
+
+        Optional<YesOrNo> resYesNo = ofNullable(allegationsOfHarmRevisedOrders.getNewOrdersRestraining());
+        if (resYesNo.isPresent() && resYesNo.get().equals(YesOrNo.Yes)) {
+            OrderRevised resOrder = OrderRevised.builder()
+                    .dateIssued(caseData.getAllegationOfHarmRevised().getNewOrdersRestrainingDateIssued())
+                    .endDate(caseData.getAllegationOfHarmRevised().getNewOrdersRestrainingEndDate())
+                    .orderCurrent(caseData.getAllegationOfHarmRevised().getNewOrdersRestrainingCurrent())
+                    .courtName(caseData.getAllegationOfHarmRevised().getNewOrdersRestrainingCourtName())
+                    .caseNumber(caseData.getAllegationOfHarmRevised().getNewOrdersRestrainingCaseNumber())
+                    .build();
+            allegationsOfHarmRevisedOrders.setRestrainingOrder(resOrder);
+        }
+
+        Optional<YesOrNo> othYesNo = ofNullable(allegationsOfHarmRevisedOrders.getNewOrdersOtherInjunctive());
+        if (othYesNo.isPresent() && othYesNo.get().equals(YesOrNo.Yes)) {
+            OrderRevised othOrder = OrderRevised.builder()
+                    .dateIssued(caseData.getAllegationOfHarmRevised().getNewOrdersOtherInjunctiveDateIssued())
+                    .endDate(caseData.getAllegationOfHarmRevised().getNewOrdersOtherInjunctiveEndDate())
+                    .orderCurrent(caseData.getAllegationOfHarmRevised().getNewOrdersOtherInjunctiveCurrent())
+                    .courtName(caseData.getAllegationOfHarmRevised().getNewOrdersOtherInjunctiveCourtName())
+                    .caseNumber(caseData.getAllegationOfHarmRevised().getNewOrdersOtherInjunctiveCaseNumber())
+                    .build();
+            allegationsOfHarmRevisedOrders.setOtherInjunctiveOrder(othOrder);
+        }
+
+        Optional<YesOrNo> undYesNo = ofNullable(allegationsOfHarmRevisedOrders.getNewOrdersUndertakingInPlace());
+        if (undYesNo.isPresent() && undYesNo.get().equals(YesOrNo.Yes)) {
+            OrderRevised undOrder = OrderRevised.builder()
+                    .dateIssued(caseData.getAllegationOfHarmRevised().getNewOrdersUndertakingInPlaceDateIssued())
+                    .endDate(caseData.getAllegationOfHarmRevised().getNewOrdersUndertakingInPlaceEndDate())
+                    .orderCurrent(caseData.getAllegationOfHarmRevised().getNewOrdersUndertakingInPlaceCurrent())
+                    .courtName(caseData.getAllegationOfHarmRevised().getNewOrdersUndertakingInPlaceCourtName())
+                    .caseNumber(caseData.getAllegationOfHarmRevised().getNewOrdersUndertakingInPlaceCaseNumber())
+                    .build();
+            allegationsOfHarmRevisedOrders.setUndertakingInPlaceOrder(undOrder);
+        }
+
+        return allegationsOfHarmRevisedOrders;
+    }
+
     public AllegationsOfHarmOrders getSpecificOrderDetails(AllegationsOfHarmOrders allegationsOfHarmOrders, CaseData caseData) {
 
         Optional<YesOrNo> nonMolYesNo = ofNullable(allegationsOfHarmOrders.getOrdersNonMolestation());
@@ -751,11 +930,35 @@ public class ApplicationsTabService implements TabService {
         return toMap(childAbductionDetails);
     }
 
+    public Map<String, Object> getRevisedChildAbductionTable(CaseData caseData) {
+        RevisedChildAbductionDetails revisedChildAbductionDetails = objectMapper.convertValue(caseData, RevisedChildAbductionDetails.class);
+        Optional<ChildPassportDetails> childPassportDetails = Optional.ofNullable(caseData.getAllegationOfHarmRevised().getChildPassportDetails());
+        if (YesOrNo.Yes.equals(revisedChildAbductionDetails.getNewAbductionChildHasPassport()) && childPassportDetails.isPresent()) {
+            revisedChildAbductionDetails.setNewChildHasMultiplePassports(childPassportDetails.get().getNewChildHasMultiplePassports());
+            revisedChildAbductionDetails.setNewChildPassportPossession(childPassportDetails.get().getNewChildPassportPossession().stream()
+                    .map(NewPassportPossessionEnum::getDisplayedValue).collect(Collectors.joining(COMMA_SEPARATOR)));
+        }
+        return toMap(revisedChildAbductionDetails);
+    }
+
 
     public Map<String, Object> getAllegationsOfHarmOtherConcerns(CaseData caseData) {
         AllegationsOfHarmOtherConcerns allegationsOfHarmOtherConcerns = objectMapper
             .convertValue(caseData, AllegationsOfHarmOtherConcerns.class);
         return toMap(allegationsOfHarmOtherConcerns);
+    }
+
+    public Map<String, Object> getAllegationsOfHarmRevisedOtherConcerns(CaseData caseData) {
+        AllegationsOfHarmRevisedOtherConcerns allegationsOfHarmRevisedOtherConcerns = AllegationsOfHarmRevisedOtherConcerns
+                .builder().newAllegationsOfHarmOtherConcernsCourtActions(caseData.getAllegationOfHarmRevised()
+                        .getNewAllegationsOfHarmOtherConcernsCourtActions()).build();
+        return toMap(allegationsOfHarmRevisedOtherConcerns);
+    }
+
+    public Map<String, Object> getAllegationsOfHarmRevisedChildContact(CaseData caseData) {
+        AllegationsOfHarmRevisedChildContact allegationsOfHarmRevisedChildContact = objectMapper
+                .convertValue(caseData, AllegationsOfHarmRevisedChildContact.class);
+        return toMap(allegationsOfHarmRevisedChildContact);
     }
 
     public List<Element<OtherPersonInTheCase>> getOtherPeopleInTheCaseTable(CaseData caseData) {
