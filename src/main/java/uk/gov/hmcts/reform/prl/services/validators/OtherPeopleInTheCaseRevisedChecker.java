@@ -34,10 +34,10 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
     @Override
     public boolean isFinished(CaseData caseData) {
 
-        Optional<List<Element<PartyDetails>>> othersToNotify = ofNullable(caseData.getOthersToNotify());
+        Optional<List<Element<PartyDetails>>> othersToNotify = ofNullable(caseData.getOtherPartyInTheCaseRevised());
 
         if (othersToNotify.isPresent()) {
-            List<PartyDetails> others = caseData.getOthersToNotify()
+            List<PartyDetails> others = caseData.getOtherPartyInTheCaseRevised()
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
 
@@ -61,10 +61,10 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
 
-        Optional<List<Element<PartyDetails>>> othersToNotify = ofNullable(caseData.getOthersToNotify());
+        Optional<List<Element<PartyDetails>>> othersToNotify = ofNullable(caseData.getOtherPartyInTheCaseRevised());
 
         if (othersToNotify.isPresent()) {
-            List<PartyDetails> others = caseData.getOthersToNotify()
+            List<PartyDetails> others = caseData.getOtherPartyInTheCaseRevised()
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
 

@@ -89,7 +89,7 @@ public class CourtFinderService {
             throw new NotFoundException("No child details found");
         }
 
-        List<Element<PartyDetails>> othersPersion = caseData.getOthersToNotify();
+        List<Element<PartyDetails>> othersPersion = caseData.getOtherPartyInTheCaseRevised();
 
         Optional<PartyDetails> partyDetails = othersPersion
                 .stream()
