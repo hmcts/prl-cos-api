@@ -110,18 +110,19 @@ public class HearingsManagementControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         doNothing().when(hearingManagementService).caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
 
-        hearingsManagementController.nextHearingDateUpdateByHearingManagement("s2s token", nextHearingDateRequest);
+        hearingsManagementController.nextHearingDateUpdateByHearingManagement("auth","s2s token", nextHearingDateRequest);
         assertTrue(true);
 
     }
 
     @Test
     public void shouldReturnErrorIfInvalidAuthTokenIsProvidedForNextHearing() throws Exception {
+        when(authorisationService.authoriseUser(any())).thenReturn(false);
         when(authorisationService.authoriseService(any())).thenReturn(false);
         doNothing().when(hearingManagementService).caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
         assertThrows(
             HearingManagementValidationException.class,
-            () -> hearingsManagementController.nextHearingDateUpdateByHearingManagement("s2s token", nextHearingDateRequest)
+            () -> hearingsManagementController.nextHearingDateUpdateByHearingManagement("auth","s2s token", nextHearingDateRequest)
         );
     }
 

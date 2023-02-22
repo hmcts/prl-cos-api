@@ -85,9 +85,10 @@ public class HearingsManagementController {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public void nextHearingDateUpdateByHearingManagement(@RequestHeader("serviceAuthorization") String s2sToken,
-                                                   @RequestBody NextHearingDateRequest nextHearingDateRequest) throws Exception {
-        if (Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
+    public void nextHearingDateUpdateByHearingManagement(@RequestHeader("authorization") String authorization,
+                                                         @RequestHeader("serviceAuthorization") String s2sToken,
+                                                         @RequestBody NextHearingDateRequest nextHearingDateRequest) throws Exception {
+        if (Boolean.FALSE.equals(authorisationService.authoriseUser(authorization)) && Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
             throw new HearingManagementValidationException("Provide a valid s2s token");
         } else {
             hearingManagementService.caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);

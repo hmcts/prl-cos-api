@@ -50,9 +50,9 @@ public class HearingManagementControllerFunctionalTest {
     public void givenRequestBody_whenHearing_management_state_update_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_HEARING_MANAGEMENT_REQUEST_BODY);
         when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
-        mockMvc.perform(put("/hearing-management-state-update")
+        mockMvc.perform(put("/hearing-management-state-update/{caseState}","DECISION_OUTCOME")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("serviceAuthorization", "auth")
+                            .header("serviceAuthorization", "sauth")
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
