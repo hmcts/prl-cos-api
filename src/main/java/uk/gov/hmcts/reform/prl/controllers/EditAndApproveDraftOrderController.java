@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 
 @Slf4j
 @RestController
@@ -111,10 +110,7 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             log.info("modifiedCaseData ===> " + modifiedCaseData);
-            caseDataUpdated.put(
-                "serveOrderDynamicList",
-                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(modifiedCaseData, servedSavedOrders.getDisplayedValue())
-            );
+            manageOrderService.populateServeOrderDynamicList(modifiedCaseData, caseDataUpdated);
         } else {
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData, authorisation, eventId));
         }

@@ -182,6 +182,8 @@ public class ManageOrders {
 
     private final YesOrNo serveToRespondentOptions;
     private final ServingRespondentsEnum servingRespondentsOptionsCA;
+    private final DynamicMultiSelectList recipientsOptions;
+    private final DynamicMultiSelectList otherParties;
     private final YesOrNo cafcassServedOptions;
     private final YesOrNo cafcassCymruServedOptions;
     private final String cafcassCymruEmail;
