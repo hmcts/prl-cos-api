@@ -515,7 +515,6 @@ public class HearingManagementService {
 
         String userToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(userToken);
-        log.info("Fetching the Case details based on caseId {}", nextHearingDateRequest.getCaseRef());
         createEventForNextHearingDate(nextHearingDateRequest, userToken, systemUpdateUserId,
                                                                       NEXT_HEARING_DATE_UPDATE_SUCCESS);
     }

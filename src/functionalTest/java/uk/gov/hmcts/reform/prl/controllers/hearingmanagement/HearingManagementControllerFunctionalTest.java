@@ -48,7 +48,6 @@ public class HearingManagementControllerFunctionalTest {
     private AuthorisationService authorisationService;
 
     @Test
-    @Disabled
     public void givenRequestBody_whenHearing_management_state_update_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_HEARING_MANAGEMENT_REQUEST_BODY);
         when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
