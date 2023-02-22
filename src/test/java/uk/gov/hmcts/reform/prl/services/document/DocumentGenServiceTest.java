@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -75,6 +76,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
@@ -151,6 +153,7 @@ public class DocumentGenServiceTest {
     CaseData c100CaseData;
     CaseData c100CaseDataFinal;
     CaseData c100CaseDataC1A;
+
     CaseData fl401CaseData;
     CaseData fl401CaseData1;
     CaseData c100CaseDataNotIssued;
@@ -244,7 +247,8 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .allegationOfHarm(allegationOfHarmYes)
+            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(Yes).build())
+            .isNewCaseCreated(YesOrNo.No)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
             //.allegationsOfHarmYesNo(No)
@@ -272,6 +276,8 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.No).build())
+            .isNewCaseCreated(YesOrNo.No)
             //.allegationsOfHarmYesNo(Yes)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
@@ -286,13 +292,15 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
+            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
+            .isNewCaseCreated(YesOrNo.No)
             //.allegationsOfHarmYesNo(Yes)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
+
 
         ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
             .keepChildrenInfoConfidential(Yes)
@@ -381,6 +389,8 @@ public class DocumentGenServiceTest {
             Mockito.any(CaseDetails.class),
             Mockito.any()
         );
+        c100CaseData = c100CaseData.toBuilder().allegationOfHarmRevised(AllegationOfHarmRevised
+                .builder().newAllegationsOfHarmYesNo(Yes).build()).allegationOfHarm(null).build();
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
 
@@ -443,6 +453,7 @@ public class DocumentGenServiceTest {
         );
         verifyNoMoreInteractions(dgsService);
     }
+
 
 
     @Test
@@ -1258,6 +1269,13 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGeneration() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_COVER_SHEET_HINT, false);
+        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+    }
+
+    @Test
+    public void testSingleDocGenerationC1A() throws Exception {
+        c100CaseData = c100CaseData.toBuilder().isNewCaseCreated(Yes).build();
+        documentGenService.generateSingleDocument("auth", c100CaseData, C1A_HINT, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 

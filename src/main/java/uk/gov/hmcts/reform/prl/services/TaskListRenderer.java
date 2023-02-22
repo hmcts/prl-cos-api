@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -33,6 +34,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_PEOPLE_TO_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ONLY_COMPLETE_IF_RELEVANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
@@ -194,9 +196,15 @@ public class TaskListRenderer {
             .withTask(tasks.get(APPLICANT_DETAILS))
             .withTask(tasks.get(CHILD_DETAILS))
             .withTask(tasks.get(RESPONDENT_DETAILS));
+        TaskSection requiredDetails = null;
+        if (YesOrNo.Yes.equals(caseData.getIsNewCaseCreated())) {
+            requiredDetails = newSection("Add required details")
+                .withTask(tasks.get(ALLEGATIONS_OF_HARM_REVISED));
+        } else {
+            requiredDetails = newSection("Add required details")
+                .withTask(tasks.get(ALLEGATIONS_OF_HARM));
+        }
 
-        final TaskSection requiredDetails = newSection("Add required details")
-            .withTask(tasks.get(ALLEGATIONS_OF_HARM));
 
         final TaskSection miamDetails = newSection("MIAM details")
             .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")

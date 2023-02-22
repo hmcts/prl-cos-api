@@ -82,6 +82,9 @@ public class SubmitAndPayCheckerTest {
     AllegationsOfHarmChecker allegationsOfHarmChecker;
 
     @Mock
+    AllegationsOfHarmRevisedChecker allegationsOfHarmRevisedChecker;
+
+    @Mock
     OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
 
     @Mock
@@ -218,7 +221,7 @@ public class SubmitAndPayCheckerTest {
 
     @Test
     public void whenNoDataEnteredThenIsFinishedReturnFalse() {
-        caseData = CaseData.builder().build();
+        caseData = CaseData.builder().isNewCaseCreated(Yes).build();
 
         when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
         when(caseNameChecker.isFinished(caseData)).thenReturn(false);
@@ -234,8 +237,8 @@ public class SubmitAndPayCheckerTest {
         when(respondentsChecker.isFinished(caseData)).thenReturn(false);
         when(miamChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
         when(miamChecker.isFinished(caseData)).thenReturn(false);
-        when(allegationsOfHarmChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
-        when(allegationsOfHarmChecker.isFinished(caseData)).thenReturn(false);
+        when(allegationsOfHarmRevisedChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
+        when(allegationsOfHarmRevisedChecker.isFinished(caseData)).thenReturn(false);
         when(otherPeopleInTheCaseChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
         when(otherPeopleInTheCaseChecker.isFinished(caseData)).thenReturn(false);
         when(otherProceedingsChecker.hasMandatoryCompleted(caseData)).thenReturn(false);

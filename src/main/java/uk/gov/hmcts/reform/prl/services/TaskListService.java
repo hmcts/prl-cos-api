@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
@@ -23,6 +24,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
@@ -122,7 +124,7 @@ public class TaskListService {
                     CHILDREN_AND_APPLICANTS,
                     CHILDREN_AND_RESPONDENTS,
                     CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION,
-                    ALLEGATIONS_OF_HARM,
+                    ALLEGATIONS_OF_HARM_REVISED,
                     MIAM,
                     OTHER_PROCEEDINGS,
                     ATTENDING_THE_HEARING,
@@ -143,7 +145,6 @@ public class TaskListService {
             CHILD_DETAILS,
             RESPONDENT_DETAILS,
             MIAM,
-            ALLEGATIONS_OF_HARM,
             OTHER_PEOPLE_IN_THE_CASE,
             OTHER_PROCEEDINGS,
             ATTENDING_THE_HEARING,
@@ -154,7 +155,6 @@ public class TaskListService {
             SUBMIT_AND_PAY,
             SUBMIT
         ));
-
     }
 
     public List<Event> getFL401Events(CaseData caseData) {
