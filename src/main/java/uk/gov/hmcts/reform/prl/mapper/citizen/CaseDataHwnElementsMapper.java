@@ -3,9 +3,9 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildHearingWithoutNoticeElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.HYPHEN_SEPARATOR;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 
 public class CaseDataHwnElementsMapper {
