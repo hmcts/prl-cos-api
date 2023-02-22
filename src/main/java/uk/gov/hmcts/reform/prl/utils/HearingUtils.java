@@ -26,7 +26,7 @@ public class HearingUtils {
 
     public   List<DynamicListElement> getHearingStartDate(String authorization,CaseData caseData) {
         try {
-            Hearings hearingDetails = hearingService.getHearings(authorization, String.valueOf(caseData.getId()));
+            Hearings hearingDetails = hearingService.getHearings(authorization, "1675335865166401");
 
             if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
                 List<CaseHearing> listedCaseHearings = hearingDetails.getCaseHearings().stream()
