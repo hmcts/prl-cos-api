@@ -1327,6 +1327,13 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    public void testpopulateCustomOrderFieldsDefault() {
+        CaseData caseData = CaseData.builder()
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder).build();
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData));
+    }
+
+    @Test
     public void testServeOrderCA() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1336,6 +1343,7 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(YesOrNo.No)
+            .ordersNeedToBeServed(YesOrNo.Yes)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
@@ -1523,6 +1531,13 @@ public class ManageOrderServiceTest {
         Map<String, String> fieldsMap = manageOrderService.getOrderTemplateAndFile(CreateSelectOrderOptionsEnum.directionOnIssue);
         assertTrue(fieldsMap.containsKey(PrlAppsConstants.FILE_NAME));
     }
+
+    @Test
+    public void testgetOrderTemplateAndFileForOcupation() {
+        Map<String, String> fieldsMap = manageOrderService.getOrderTemplateAndFile(CreateSelectOrderOptionsEnum.occupation);
+        assertTrue(fieldsMap.containsKey(PrlAppsConstants.FILE_NAME));
+    }
+
 
     @Test
     public void testpopulateCustomOrderFieldsForUploadAnOrder() {
