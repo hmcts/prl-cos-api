@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.listwithoutnotice;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,9 +18,11 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.HearingUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -36,6 +39,12 @@ public class ListWithoutNoticeController {
     @Autowired
     RefDataUserService refDataUserService;
 
+    @Autowired
+    HearingUtils hearingUtils;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate Hearing type details")
     public AboutToStartOrSubmitCallbackResponse prePopulateHearingPageData(
@@ -43,11 +52,20 @@ public class ListWithoutNoticeController {
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
         log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}",callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)
+            .toBuilder()
+            .id(callbackRequest.getCaseDetails().getId())
+            .build();
+
         caseDataUpdated.put("listWithoutNoticeHearingDetails",
                             ElementUtils.wrapElements(HearingData.builder()
                                                           .hearingTypes(DynamicList.builder()
                                                                             .value(DynamicListElement.EMPTY)
-                                                                            .listItems(prePopulateHearingType(authorisation)).build()).build()));
+                                                                            .listItems(prePopulateHearingType(authorisation)).build())
+                                                          .confirmedHearingDates(DynamicList.builder()
+                                                                             .value(DynamicListElement.EMPTY)
+                                                                             .listItems(prePopulateConfirmedHearingDate(authorisation,caseData))
+                                                                             .build()).build()));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -60,6 +78,11 @@ public class ListWithoutNoticeController {
         return listOfHearingType;
 
     }
+
+    private List<DynamicListElement> prePopulateConfirmedHearingDate(String authorisation, CaseData caseData) {
+        return hearingUtils.getHearingStartDate(authorisation,caseData);
+    }
+
 
     @PostMapping(path = "/listWithoutNotice", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "List Without Notice")

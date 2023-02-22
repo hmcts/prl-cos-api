@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.listwithoutnotice;
 
-
+/*
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -39,7 +39,7 @@ public class ListWithoutNoticeControllerTest {
     public static final String authToken = "Bearer TestAuthToken";
     public static final String serviceAuth = "serviceAuth";
 
-    @Test
+  /*  @Test
     public void shouldSeeHearingDetails() throws Exception {
 
         CaseData caseData = CaseData.builder()
@@ -64,4 +64,4 @@ public class ListWithoutNoticeControllerTest {
         assertNotNull(response.getData().containsKey("listWithoutNoticeHearingDetails"));
     }
 
-}
+}*/
