@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
@@ -87,5 +88,18 @@ public class LocationRefDataService {
         return courtVenue.map(venue -> venue.getCourtEpimmsId() + "-" + venue.getRegionId()
             + "-" + venue.getCourtName() + "-" + venue.getPostcode() + "-" + venue.getRegion()
             + "-" + venue.getSiteName()).orElse("");
+    }
+
+    public YesOrNo cafcassFlag(String regionId) {
+
+        YesOrNo cafcassFlag = YesOrNo.No; //wales
+
+        int intRegionId = Integer.parseInt(regionId);
+
+        if (intRegionId > 0 && intRegionId < 7) {
+            cafcassFlag = YesOrNo.Yes; //english regions
+        }
+
+        return cafcassFlag;
     }
 }

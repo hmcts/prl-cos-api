@@ -53,11 +53,11 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("isCAfcass inside /populate-draft-order-dropdown {}", caseData.getIsCafcass());
         if (caseData.getDraftOrderCollection() != null
             && !caseData.getDraftOrderCollection().isEmpty()) {
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.getDraftOrderDynamicList(
-                    caseData.getDraftOrderCollection(), caseData.getCaseTypeOfApplication())).build();
+                .data(draftAnOrderService.getDraftOrderDynamicList(caseData)).build();
         } else {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
         }
@@ -76,6 +76,7 @@ public class EditAndApproveDraftOrderController {
             CaseData.class
         );
         log.info("before entering into populateDraftOrderDocument...");
+        log.info("isCAfcass inside /judge-or-admin-populate-draft-order {}", caseData.getIsCafcass());
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(draftAnOrderService.populateDraftOrderDocument(
                 caseData)).build();
@@ -204,6 +205,7 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("isCAfcass inside /judge-or-admin-populate-draft-order {}", caseData.getIsCafcass());
         Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(caseData);
         String orderStatus = (String) response.remove("status");
         log.info("** Order status {}", orderStatus);

@@ -87,6 +87,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class ManageOrderService {
 
+    @Autowired
+    LocationRefDataService locationRefDataService;
+
     public static final String CAFCASS_SERVED = "cafcassServed";
     public static final String SERVE_ON_RESPONDENT = "serveOnRespondent";
     public static final String OTHER_PARTIES_SERVED = "otherPartiesServed";

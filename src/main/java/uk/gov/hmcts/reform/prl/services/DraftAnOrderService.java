@@ -116,17 +116,17 @@ public class DraftAnOrderService {
         return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
     }
 
-    public Map<String, Object> getDraftOrderDynamicList(List<Element<DraftOrder>> draftOrderCollection, String caseTypeOfApplication) {
+    public Map<String, Object> getDraftOrderDynamicList(CaseData caseData) {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
+            caseData.getDraftOrderCollection(),
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
-        log.info("before case type of application in about to start::: {} :::", caseTypeOfApplication);
-        caseDataMap.put("caseTypeOfApplication", caseTypeOfApplication);
-        log.info("after setting case type of application::: {} :::", caseDataMap.get("caseTypeOfApplication"));
+        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        caseDataMap.put("isCafcass", caseData.getIsCafcass());
+        log.info("isCAfcass inside service {}", caseData.getIsCafcass());
         return caseDataMap;
     }
 
@@ -398,7 +398,6 @@ public class DraftAnOrderService {
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
         DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
-
         if (language.isGenEng()) {
             caseDataMap.put("previewDraftOrder", selectedOrder.getOrderDocument());
         }
@@ -408,6 +407,8 @@ public class DraftAnOrderService {
         if (selectedOrder.getJudgeNotes() != null) {
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
         }
+        caseDataMap.put("isCafcass", caseData.getIsCafcass());
+        log.info("isCAfcass inside populateDraftOrderDocument {}", caseData.getIsCafcass());
         return caseDataMap;
     }
 
@@ -472,11 +473,12 @@ public class DraftAnOrderService {
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
         caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
+        caseDataMap.put("isCafcass", caseData.getIsCafcass());
+        log.info("isCafcass inside populateCommonDraftOrderFields {}", caseData.getIsCafcass());
         log.info("Selected order type is ********   from    populateCommonDraftOrderFields",selectedOrder.getOrderType());
         log.info("Case typ of application {}", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
-
 
     public DraftOrder getSelectedDraftOrderDetails(CaseData caseData) {
         UUID orderId = elementUtils.getDynamicListSelectedValue(
