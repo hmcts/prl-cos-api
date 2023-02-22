@@ -94,6 +94,11 @@ public class ManageOrderService {
     public static final String SERVE_ON_RESPONDENT = "serveOnRespondent";
     public static final String OTHER_PARTIES_SERVED = "otherPartiesServed";
     public static final String SERVING_RESPONDENTS_OPTIONS = "servingRespondentsOptions";
+
+    public static final String RECIPIENTS_OPTIONS = "recipientsOptions";
+
+    public static final String OTHER_PARTIES = "otherParties";
+
     @Value("${document.templates.common.prl_c21_draft_template}")
     protected String sdoDraftTemplate;
 
@@ -409,10 +414,7 @@ public class ManageOrderService {
         Map<String, Object> headerMap = new HashMap<>();
         if (caseData.getOrderCollection() != null) {
             headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
-            headerMap.put(
-                "serveOrderDynamicList",
-                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, servedSavedOrders.getDisplayedValue())
-            );
+            populateServeOrderDynamicList(caseData, headerMap);
             log.info("OrderCollection ===> " + caseData.getOrderCollection());
         }
         headerMap.put(
@@ -421,6 +423,51 @@ public class ManageOrderService {
         );
         log.info("after populate-header map ===> " + headerMap);
         return headerMap;
+    }
+
+    public void populateServeOrderDynamicList(CaseData caseData, Map<String, Object> headerMap) {
+        headerMap.put(
+            "serveOrderDynamicList",
+            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(
+                caseData,
+                servedSavedOrders.getDisplayedValue()
+            )
+        );
+        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
+            setRecipientsOptions(caseData, headerMap);
+            setOtherParties(caseData, headerMap);
+        }
+    }
+
+    private void setRecipientsOptions(CaseData caseData, Map<String, Object> headerMap) {
+
+        Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
+            .getApplicantsMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> applicantRespondentList = new ArrayList<>();
+        List<DynamicMultiselectListElement> applicantList = applicantDetails.get("applicants");
+        if (applicantList != null) {
+            applicantRespondentList.addAll(applicantList);
+        }
+        Map<String, List<DynamicMultiselectListElement>> respondentDetails = dynamicMultiSelectListService
+            .getRespondentsMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> respondentList = respondentDetails.get("respondents");
+        if (respondentList != null) {
+            applicantRespondentList.addAll(respondentList);
+        }
+        headerMap.put(
+            "recipientsOptions", DynamicMultiSelectList.builder()
+                .listItems(applicantRespondentList)
+                .build());
+
+    }
+
+    private void setOtherParties(CaseData caseData, Map<String, Object> headerMap) {
+        List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService
+            .getOtherPeopleMultiSelectList(caseData);
+        headerMap.put(
+            "otherParties", DynamicMultiSelectList.builder()
+                .listItems(otherPeopleList)
+                .build());
     }
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
@@ -1053,10 +1100,35 @@ public class ManageOrderService {
     private static void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
         ServingRespondentsEnum servingRespondentsOptions = null;
+        String recipients = null;
+        String otherParties = null;
         if (serveOnRespondent.equals(Yes)) {
             servingRespondentsOptions = caseData.getManageOrders()
                 .getServingRespondentsOptionsCA();
+        } else {
+            if (caseData.getManageOrders()
+                .getRecipientsOptions() != null && caseData.getManageOrders()
+                .getRecipientsOptions().getValue() != null) {
+                List recipientList = new ArrayList<>();
+                for (DynamicMultiselectListElement dynamicMultiselectChildElement : caseData.getManageOrders()
+                    .getRecipientsOptions().getValue()) {
+                    recipientList.add(dynamicMultiselectChildElement.getLabel());
+                }
+                recipients = String.join(",", recipientList);
+            }
         }
+
+        if (caseData.getManageOrders()
+            .getOtherParties() != null && caseData.getManageOrders()
+            .getOtherParties().getValue() != null) {
+            List otherPartiesList = new ArrayList<>();
+            for (DynamicMultiselectListElement dynamicMultiselectChildElement : caseData.getManageOrders()
+                .getOtherParties().getValue()) {
+                otherPartiesList.add(dynamicMultiselectChildElement.getLabel());
+            }
+            otherParties = String.join(",", otherPartiesList);
+        }
+
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
@@ -1087,6 +1159,8 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
+        servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
+        servedOrderDetails.put(OTHER_PARTIES, otherParties);
 
         updateServedOrderDetails(
             servedOrderDetails,
@@ -1107,6 +1181,8 @@ public class ManageOrderService {
         YesOrNo serveOnRespondent = null;
         YesOrNo otherPartiesServed = null;
         ServingRespondentsEnum servingRespondentsOptions = null;
+        String recipients = null;
+        String otherParties = null;
 
         if (servedOrderDetails.containsKey(CAFCASS_SERVED)) {
             cafcassServed = (YesOrNo) servedOrderDetails.get(CAFCASS_SERVED);
@@ -1120,6 +1196,12 @@ public class ManageOrderService {
         if (servedOrderDetails.containsKey(SERVING_RESPONDENTS_OPTIONS)) {
             servingRespondentsOptions = (ServingRespondentsEnum) servedOrderDetails.get(SERVING_RESPONDENTS_OPTIONS);
         }
+        if (servedOrderDetails.containsKey(RECIPIENTS_OPTIONS)) {
+            recipients = (String) servedOrderDetails.get(RECIPIENTS_OPTIONS);
+        }
+        if (servedOrderDetails.containsKey(OTHER_PARTIES)) {
+            otherParties = (String) servedOrderDetails.get(OTHER_PARTIES);
+        }
 
         ServeOrderDetails tempServeOrderDetails;
         if (order.getValue().getServeOrderDetails() != null) {
@@ -1130,6 +1212,8 @@ public class ManageOrderService {
 
         ServeOrderDetails serveOrderDetails = tempServeOrderDetails.toBuilder().serveOnRespondent(serveOnRespondent)
             .servingRespondent(servingRespondentsOptions)
+            .recipientsOptions(recipients)
+            .otherParties(otherParties)
             .cafcassServed(cafcassServed)
             .cafcassEmail(cafCassEmail)
             .otherPartiesServed(otherPartiesServed)

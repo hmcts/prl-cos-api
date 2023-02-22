@@ -318,10 +318,7 @@ public class ManageOrdersController {
                 CaseData.class
             );
             log.info("modifiedCaseData ===> " + modifiedCaseData);
-            caseDataUpdated.put(
-                "serveOrderDynamicList",
-                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(modifiedCaseData, servedSavedOrders.getDisplayedValue())
-            );
+            manageOrderService.populateServeOrderDynamicList(modifiedCaseData, caseDataUpdated);
             log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
         } else {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.No);
