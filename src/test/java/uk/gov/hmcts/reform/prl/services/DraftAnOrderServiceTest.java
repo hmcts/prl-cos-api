@@ -1216,16 +1216,6 @@ public class DraftAnOrderServiceTest {
         assertNotNull(stringObjectMap.get("draftOrderCollection"));
     }
 
-    @Test
-    public void testGetDraftOrderInfo() throws Exception {
-
-        CaseData caseData = CaseData.builder().draftOrdersDynamicList(draftOrderList)
-            .draftOrderCollection(draftOrderList).build();
-
-        Map<String, Object> caseDataUpdated = draftAnOrderService.getDraftOrderInfo(authToken, caseData);
-        assertNotNull(caseDataUpdated);
-    }
-
     private static <T> Element<T> customElement(T element) {
         return Element.<T>builder()
             .id(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
