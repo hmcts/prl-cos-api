@@ -52,8 +52,8 @@ public class CaseUtils {
     public static String getCaseTypeOfApplication(CaseData caseData) {
         return caseData.getCaseTypeOfApplication() != null
             ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
-     }
-     
+    }
+
     public static Long getRemainingDaysSubmitCase(CaseData caseData) {
         Long noOfDaysRemaining = null;
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
