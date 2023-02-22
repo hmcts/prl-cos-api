@@ -70,8 +70,8 @@ public class CaseUtils {
 
         return orderSelectionType;
 
-  }
-    
+    }
+
     public static Long getRemainingDaysSubmitCase(CaseData caseData) {
         Long noOfDaysRemaining = null;
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
@@ -81,6 +81,5 @@ public class CaseUtils {
             noOfDaysRemaining = PrlAppsConstants.CASE_SUBMISSION_THRESHOLD - noDaysPassed;
         }
         return noOfDaysRemaining;
-
     }
 }
