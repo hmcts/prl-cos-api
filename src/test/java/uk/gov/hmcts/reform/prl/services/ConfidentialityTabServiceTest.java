@@ -196,6 +196,8 @@ public class ConfidentialityTabServiceTest {
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .dxNumber("123456")
             .gender(Gender.female)
+            .email("rame@gmail.com")
+            .phoneNumber("07776817131")
             .previousName("testPreviousname")
             .isDateOfBirthKnown(YesOrNo.Yes)
             .isCurrentAddressKnown(YesOrNo.No)

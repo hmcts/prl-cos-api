@@ -154,7 +154,7 @@ public class RelationshipsController {
         List<Element<ChildrenAndOtherPeopleRelation>> otherPeopleChildRelationsList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("case Data : {}",caseData);
-        caseData.getOthersToNotify().forEach(eachPeople ->
+        caseData.getOtherPartyInTheCaseRevised().forEach(eachPeople ->
                   caseData.getNewChildDetails().forEach(eachChild -> {
                       ChildrenAndOtherPeopleRelation otherPeopleChildRelations = ChildrenAndOtherPeopleRelation.builder()
                            .childFullName(String.format(PrlAppsConstants.FORMAT, eachChild.getValue().getFirstName(),
