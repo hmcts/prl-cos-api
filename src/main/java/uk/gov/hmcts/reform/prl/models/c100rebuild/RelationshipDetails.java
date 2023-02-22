@@ -16,5 +16,7 @@ public class RelationshipDetails {
 
     @JsonProperty("relationshipToChildren")
     private List<ChildRelationship> relationshipToChildren;
+    @JsonProperty("relationshipDetails")
+    private RelationshipDetails relationshipDetails;
 
 }

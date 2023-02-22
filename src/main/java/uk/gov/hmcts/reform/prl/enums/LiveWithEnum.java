@@ -14,6 +14,8 @@ public enum LiveWithEnum {
     applicant("applicant", "Applicant"),
     @JsonProperty("respondent")
     respondent("respondent", "Respondent"),
+    @JsonProperty("otherPerson")
+    otherPerson("otherPerson", "OtherPerson"),
     @JsonProperty("anotherPerson")
     anotherPerson("anotherPerson", "Another person not listed");
 

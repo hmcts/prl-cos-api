@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
+
 @Getter
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
@@ -29,5 +31,12 @@ public enum RelationshipsEnum {
 
     private final String id;
     private final String displayedValue;
+
+    public static RelationshipsEnum getEnumForDisplayedValue(String displayedValue) {
+        return Arrays.stream(RelationshipsEnum.values())
+            .filter(relation -> relation.getDisplayedValue().equals(displayedValue))
+            .findFirst()
+            .orElse(other);
+    }
 
 }
