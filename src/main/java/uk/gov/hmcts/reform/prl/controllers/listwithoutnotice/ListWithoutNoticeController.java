@@ -80,7 +80,9 @@ public class ListWithoutNoticeController {
     }
 
     private List<DynamicListElement> prePopulateConfirmedHearingDate(String authorisation, CaseData caseData) {
-        return hearingUtils.getHearingStartDate(authorisation,caseData);
+        List<DynamicListElement> hearingStartDate = hearingUtils.getHearingStartDate(authorisation, caseData);
+        log.info("Prepopulate confirmedHearingDate {} for the case reference number {} ",hearingStartDate,String.valueOf(caseData.getId()));
+        return hearingStartDate;
     }
 
 
