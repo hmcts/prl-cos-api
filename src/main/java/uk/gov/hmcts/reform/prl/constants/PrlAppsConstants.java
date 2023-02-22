@@ -340,4 +340,6 @@ public class PrlAppsConstants {
     public static final String COURT_ADMIN = "Court Admin";
 
     public static final String SOLICITOR = "Solicitor";
+
+    public static final long CASE_SUBMISSION_THRESHOLD = 28;
 }
