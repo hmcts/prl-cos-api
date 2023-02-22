@@ -331,8 +331,7 @@ public class PrlAppsConstants {
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
-
     public static final String JUDGE = "Judge";
-
     public static final String CASEWORKER = "CaseWorker";
+    public static final long CASE_SUBMISSION_THRESHOLD = 28;
 }
