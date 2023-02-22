@@ -63,8 +63,7 @@ public class CaseDataOtherPersonsElementsMapper {
                                      .value(ChildrenAndOtherPeopleRelation.builder()
                                         .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
                                         .childLivesWith(childDetail.getChildLiveWith().stream()
-                                                            .anyMatch(c -> c.getPartyType().equals("otherPerson")
-                                                                && c.getId().equals(otherPeopleDetails.getId())) ? Yes : No)
+                                                            .anyMatch(c -> c.getId().equals(otherPeopleDetails.getId())) ? Yes : No)
                                         .otherPeopleFullName(otherPeopleDetails.getFirstName() + " " + otherPeopleDetails.getLastName())
                                         .childAndOtherPeopleRelation(RelationshipsEnum.getEnumForDisplayedValue(
                                             childRelationship.getRelationshipType()))

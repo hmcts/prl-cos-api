@@ -59,8 +59,7 @@ public class CaseDataRespondentDetailsElementsMapper {
                                      .value(ChildrenAndRespondentRelation.builder()
                                         .childFullName(childDetail.getFirstName() + " " + childDetail.getLastName())
                                         .childLivesWith(childDetail.getChildLiveWith().stream()
-                                                            .anyMatch(c -> c.getPartyType().equals("respondent")
-                                                                && c.getId().equals(respondentDetails.getId())) ? Yes : No)
+                                                            .anyMatch(c -> c.getId().equals(respondentDetails.getId())) ? Yes : No)
                                         .respondentFullName(respondentDetails.getFirstName() + " " + respondentDetails.getLastName())
                                         .childAndRespondentRelation(RelationshipsEnum.getEnumForDisplayedValue(
                                             childRelationship.getRelationshipType()))

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
@@ -83,7 +84,7 @@ public class CaseDataChildDetailsElementsMapper {
                    .personWhoLivesWithChild(Collections.emptyList())
                    .orderAppliedFor(buildOrdersApplyingFor(childDetail.getChildMatters()))
                    .childLiveWith(childDetail.getChildLiveWith().stream()
-                             .map(c -> LiveWithEnum.otherPerson.toString().equals(c.getPartyType())
+                             .map(c -> PrlAppsConstants.OTHER_PERSON.equals(c.getPartyType())
                                  ? LiveWithEnum.anotherPerson : LiveWithEnum.valueOf(c.getPartyType()))
                              .collect(Collectors.toList()))
                    .build()

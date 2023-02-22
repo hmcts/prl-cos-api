@@ -336,4 +336,6 @@ public class PrlAppsConstants {
     public static final String  ADD_ADDITIONAL_INFORMATION = "Add additional information";
 
     public static final String  TASK_LIST_VERSION_V2 = "v2";
+
+    public static final String  OTHER_PERSON = "otherPerson";
 }
