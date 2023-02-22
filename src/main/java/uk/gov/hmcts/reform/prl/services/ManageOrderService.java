@@ -1118,21 +1118,13 @@ public class ManageOrderService {
             ))
             .manageOrdersRespondent(String.format(
                 PrlAppsConstants.FORMAT,
-                caseData.getRespondentName(),
                 caseData.getRespondentsFL401().getFirstName(),
-                caseData.getRespondentsFL401().getLastName(),
-                caseData.getRespondentsFL401().getAddress(),
-                caseData.getRespondentsFL401().getDateOfBirth(),
-                caseData.getRespondentsFL401().getSolicitorReference()
+                caseData.getRespondentsFL401().getLastName()
             ))
             .manageOrdersApplicantReference(String.format(
                 PrlAppsConstants.FORMAT,
-                caseData.getApplicantName(),
-                caseData.getApplicantsFL401().getFirstName(),
-                caseData.getApplicantsFL401().getLastName(),
                 caseData.getApplicantsFL401().getRepresentativeFirstName(),
-                caseData.getApplicantsFL401().getRepresentativeLastName(),
-                caseData.getApplicantsFL401().getSolicitorReference()
+                caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
             .build();
 
