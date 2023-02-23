@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.ManageOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -1025,9 +1027,9 @@ public class ManageOrderService {
         String status = null;
         log.info("Order status orderSelectionType ====> " + orderSelectionType);
         log.info("Order status loggedInUserType ====> " + loggedInUserType);
-        if ("adminEditAndApproveAnOrder".equals(eventId)) {
+        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
             status = OrderStatusEnum.reviewedByCA.getDisplayedValue();
-        } else if ("editAndApproveAnOrder".equals(eventId)) {
+        } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
             status = OrderStatusEnum.reviewedByJudge.getDisplayedValue();
         } else if (createAnOrder.toString().equals(orderSelectionType) || uploadAnOrder.toString().equals(
             orderSelectionType)
@@ -1562,6 +1564,15 @@ public class ManageOrderService {
         log.info("loggedInUserType ===> " + loggedInUserType);
 
         return loggedInUserType;
+    }
+
+    public static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
+        log.info("caseDataUpdated before cleanup ===> " + caseDataUpdated);
+        for (ManageOrderFieldsEnum field : ManageOrderFieldsEnum.values()) {
+            if (caseDataUpdated.containsKey(field.getValue())) {
+                caseDataUpdated.remove(field);
+            }
+        }
     }
 
 }
