@@ -11,14 +11,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -100,8 +99,8 @@ public class LocationRefDataServiceTest {
                                                      .courtEpimmsId("2")
                                                      .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
                             .build());
-        String actual = locationRefDataService.getCourtDetailsFromEpimmsId("2", "test");
-        assertEquals("2-id-1-123-test-test", actual);
+        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId("2", "test");
+        assertTrue(courtVenue.isPresent());
     }
 
     @Test
@@ -116,11 +115,5 @@ public class LocationRefDataServiceTest {
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
         List<DynamicListElement> test = locationRefDataService.getCourtLocations("test");
         assertNotNull(test);
-    }
-
-    @Test
-    public void testIsCafcass() {
-        YesOrNo isCafcass = locationRefDataService.cafcassFlag("1");
-        assertEquals(YesOrNo.Yes, isCafcass);
     }
 }
