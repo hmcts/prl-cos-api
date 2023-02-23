@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
@@ -9,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.prl.models.holidaydates.UkHolidayDates;
 
 import java.io.IOException;
 
@@ -20,13 +22,14 @@ import static org.springframework.http.ResponseEntity.ok;
 public class CourtSpecificCalenderController {
 
     @GetMapping(value = "courtSpecificCalender/bank-holidays.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> bankHolidays() throws IOException {
+    public ResponseEntity<UkHolidayDates> bankHolidays() throws IOException {
         log.info("bankHolidays()---> Start");
-        Resource resource = new ClassPathResource("resources/bank-holidays.json");
+        Resource resource = new ClassPathResource("/bank-holidays.json");
         ObjectMapper mapper = new ObjectMapper();
-        String readValue = mapper.readValue(resource.getInputStream(), String.class);
+        mapper.registerModule(new JavaTimeModule());
+        UkHolidayDates ukHolidayDates = mapper.readValue(resource.getInputStream(), UkHolidayDates.class);
         log.info("bankHolidays()---> End");
-        return ok(readValue);
+        return ok(ukHolidayDates);
     }
 
 }
