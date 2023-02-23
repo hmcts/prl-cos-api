@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
@@ -28,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 
 @RestController
 @RequestMapping("/respondent-solicitor")
@@ -133,7 +136,7 @@ public class C100RespondentSolicitorController {
             .build();
     }
 
-    @PostMapping(path = "/generate-c7response-draft-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/generate-c7response-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate and store document")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse generateC7ResponseDraftDocument(
@@ -144,8 +147,20 @@ public class C100RespondentSolicitorController {
 
         Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
 
-        caseDataUpdated.putAll(documentGenService.generateC7DraftDocuments(authorisation, caseData));
-
+        Document document = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            SOLICITOR_C7_DRAFT_DOCUMENT,
+            false
+        );
+        Document documentForC1A = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            SOLICITOR_C1A_DRAFT_DOCUMENT,
+            false
+        );
+        caseDataUpdated.put("draftC7ResponseDoc", document);
+        caseDataUpdated.put("draftC1ADoc", documentForC1A);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
