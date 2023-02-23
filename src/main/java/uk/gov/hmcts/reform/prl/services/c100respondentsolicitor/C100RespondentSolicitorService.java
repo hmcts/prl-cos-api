@@ -60,7 +60,7 @@ public class C100RespondentSolicitorService {
     private final ObjectMapper objectMapper;
 
     @Autowired
-    private DocumentGenService documentGenService;
+    private final DocumentGenService documentGenService;
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
         log.info("Inside prePopulateAboutToStartCaseData");
