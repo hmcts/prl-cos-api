@@ -62,18 +62,24 @@ public class HearingManagementService {
     private final AuthTokenGenerator authTokenGenerator;
     private final EmailService emailService;
     private final AllTabServiceImpl allTabService;
-
     private final CoreCaseDataService coreCaseDataService;
+
+    private  StartEventResponse startEventResponse;
+    private  EventRequestData eventRequestData;
+    private  CaseDetails caseDetails;
+
+    private CaseDataContent caseDataContent;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
 
     @Value("${citizen.url}")
     private String dashboardUrl;
-    private String userToken = systemUserService.getSysUserToken();
-    private String systemUpdateUserId = systemUserService.getUserId(userToken);
 
     public void caseStateChangeForHearingManagement(HearingRequest hearingRequest) throws Exception {
+
+        String userToken = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(userToken);
 
         log.info("Processing the callback for the caseId {} with HMC status {}", hearingRequest.getCaseRef(),
                      hearingRequest.getHearingUpdate().getHmcStatus());
@@ -86,9 +92,9 @@ public class HearingManagementService {
             case LISTED:
                 CaseEvent caseEvent = CaseEvent.HEARING_STATE_CHANGE_SUCCESS;
                 State state = DECISION_OUTCOME;
-                EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
+                eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
 
-                StartEventResponse startEventResponse =
+                startEventResponse =
                     coreCaseDataService.startUpdate(
                         userToken,
                         eventRequestData,
@@ -99,22 +105,22 @@ public class HearingManagementService {
                 startEventResponse.getCaseDetails().getData().put("state",state.getValue());
 
                 CaseData caseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
-                CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
+                caseDataContent = coreCaseDataService.createCaseDataContent(
                     startEventResponse,
                     caseData
                 );
 
-                CaseDetails listedCaseDetails = coreCaseDataService.submitUpdate(
+                caseDetails = coreCaseDataService.submitUpdate(
                     userToken,
                     eventRequestData,
                     caseDataContent,
                     hearingRequest.getCaseRef(),
                     true
                 );
-                updateTabsAfterStateChange(listedCaseDetails.getData(), listedCaseDetails.getId());
+                updateTabsAfterStateChange(caseDetails.getData(), caseDetails.getId());
 
                 //retrieving  latest case data received from submitUpdate response
-                CaseData caseDataUpdated = CaseUtils.getCaseData(listedCaseDetails, objectMapper);
+                CaseData caseDataUpdated = CaseUtils.getCaseData(caseDetails, objectMapper);
 
                 sendHearingDetailsEmail(caseDataUpdated, hearingRequest);
                 break;
@@ -202,6 +208,9 @@ public class HearingManagementService {
     }
 
     private void updateTabsAfterStateChange(Map<String, Object> data, Long id) {
+        String userToken = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(userToken);
+
         data.put("id", String.valueOf(id));
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
 
