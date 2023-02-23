@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -89,7 +90,8 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         List<Element<HearingData>> listWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
         listWithoutNoticeHearingDetails.stream().parallel().forEach(hearingDataElement -> {
             HearingData hearingDataCreated = hearingDataElement.getValue();
-            hearingDataList.add(HearingData.builder().hearingDateConfirmOptionEnum(hearingDataCreated.getHearingDateConfirmOptionEnum())
+            hearingDataList.add(HearingData.builder().hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum
+                    .getValue(String.valueOf(hearingDataCreated.getHearingDateConfirmOptionEnum())))
                 .hearingTypeOtherDetails(hearingDataCreated.getHearingTypeOtherDetails())
                 .hearingTypes(DynamicList.builder().value(hearingDataCreated.getHearingTypes().getValue()).build()).build());
         });
