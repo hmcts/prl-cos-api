@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
-import uk.gov.hmcts.reform.prl.services.listWithoutNotice.ListWithoutNoticeService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.List;
@@ -38,8 +37,6 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
 
     @Autowired
     RefDataUserService refDataUserService;
-    @Autowired
-    ListWithoutNoticeService listWithoutNoticeService;
 
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate Hearing type details")
