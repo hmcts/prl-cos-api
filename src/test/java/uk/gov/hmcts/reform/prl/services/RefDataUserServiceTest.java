@@ -189,7 +189,6 @@ public class RefDataUserServiceTest {
     public void testGetHearingTypeWithExceptionData() {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
-        List<CategoryValues> listOfCategoryValues = new ArrayList<>();
         when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
                                                                authTokenGenerator.generate(),
                                                                HEARINGTYPE,

@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.HearingUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -71,17 +72,17 @@ public class ListWithoutNoticeController {
     }
 
     private List<DynamicListElement> prePopulateHearingType(String authorisation) {
-        List<DynamicListElement> listOfHearingType = refDataUserService.retrieveCategoryValues(authorisation, HEARINGTYPE);
-        if (null != listOfHearingType.get(0).getCode()) {
-            listOfHearingType.add(DynamicListElement.builder().code("Other").label("Other").build());
-        }
-        return listOfHearingType;
-
+        List<DynamicListElement> hearingType = refDataUserService.retrieveCategoryValues(authorisation, HEARINGTYPE);
+        return hearingType;
     }
 
     private List<DynamicListElement> prePopulateConfirmedHearingDate(String authorisation, CaseData caseData) {
         List<DynamicListElement> hearingStartDate = hearingUtils.getHearingStartDate(authorisation, caseData);
         log.info("Prepopulate confirmedHearingDate {} for the case reference number {} ",hearingStartDate,String.valueOf(caseData.getId()));
+        //TODO: need to ensure this hardcoded values has to be removed while merging into release branch. Its added to test in preview/aat environment
+        if (hearingStartDate != null && hearingStartDate.get(0).getCode() == null) {
+            return List.of(DynamicListElement.builder().code(String.valueOf(LocalDateTime.now())).label(String.valueOf(LocalDateTime.now())).build());
+        }
         return hearingStartDate;
     }
 
