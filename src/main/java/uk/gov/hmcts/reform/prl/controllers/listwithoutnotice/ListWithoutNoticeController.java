@@ -15,22 +15,27 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
-public class ListWithoutNoticeController {
+public class ListWithoutNoticeController extends AbstractCallbackController {
 
 
     @Autowired
@@ -41,13 +46,22 @@ public class ListWithoutNoticeController {
     public AboutToStartOrSubmitCallbackResponse prePopulateHearingPageData(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-        log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}",callbackRequest.getCaseDetails().getId());
+        log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("listWithoutNoticeHearingDetails",
-                            ElementUtils.wrapElements(HearingData.builder()
-                                                          .hearingTypes(DynamicList.builder()
-                                                                            .value(DynamicListElement.EMPTY)
-                                                                            .listItems(prePopulateHearingType(authorisation)).build()).build()));
+
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
+        if (null != existingListWithoutNoticeHearingDetails) {
+            caseDataUpdated.put("listWithoutNoticeHearingDetails",
+                ElementUtils.wrapElements(HearingData.builder()
+                    .hearingTypes(DynamicList.builder()
+                        .value(DynamicListElement.EMPTY)
+                        .listItems(prePopulateHearingType(authorisation)).build()).build()));
+        } else {
+            caseDataUpdated.put("listWithoutNoticeHearingDetails",
+                existingListWithoutNoticeHearingDetails);
+        }
+
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -70,7 +84,18 @@ public class ListWithoutNoticeController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        List<HearingData> hearingData = new ArrayList<>();
+        List<Element<HearingData>> listWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
+        listWithoutNoticeHearingDetails.stream().parallel().forEach(hearingDataElement -> {
+            HearingData hearingDataCreated = hearingDataElement.getValue();
+            hearingData.add(HearingData.builder().hearingDateConfirmOptionEnum(hearingDataCreated.getHearingDateConfirmOptionEnum())
+                .hearingTypeOtherDetails(hearingDataCreated.getHearingTypeOtherDetails())
+                .hearingTypes(DynamicList.builder().value(hearingDataCreated.getHearingTypes().getValue()).build()).build());
+        });
+        caseDataUpdated.put("listWithoutNoticeHearingDetails", ElementUtils.wrapElements(hearingData));
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
