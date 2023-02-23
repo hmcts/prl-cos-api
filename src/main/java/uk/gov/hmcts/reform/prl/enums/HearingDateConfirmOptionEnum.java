@@ -30,7 +30,7 @@ public enum HearingDateConfirmOptionEnum {
     }
 
     @JsonCreator
-    public static DocumentCategoryEnum getValue(String key) {
-        return DocumentCategoryEnum.valueOf(key);
+    public static HearingDateConfirmOptionEnum getValue(String key) {
+        return HearingDateConfirmOptionEnum.valueOf(key);
     }
 }
