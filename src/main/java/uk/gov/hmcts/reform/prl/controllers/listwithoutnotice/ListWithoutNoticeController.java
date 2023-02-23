@@ -53,13 +53,13 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
         if (null != existingListWithoutNoticeHearingDetails) {
             caseDataUpdated.put("listWithoutNoticeHearingDetails",
+                existingListWithoutNoticeHearingDetails);
+        } else {
+            caseDataUpdated.put("listWithoutNoticeHearingDetails",
                 ElementUtils.wrapElements(HearingData.builder()
                     .hearingTypes(DynamicList.builder()
                         .value(DynamicListElement.EMPTY)
                         .listItems(prePopulateHearingType(authorisation)).build()).build()));
-        } else {
-            caseDataUpdated.put("listWithoutNoticeHearingDetails",
-                existingListWithoutNoticeHearingDetails);
         }
 
 
