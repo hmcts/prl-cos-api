@@ -120,7 +120,7 @@ public class DraftAnOrderService {
             DraftOrder::getLabelForOrdersDynamicList
         ));
         caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
-        //caseDataMap.put("isCafcass", caseData.getIsCafcass());
+        caseDataMap.put("isCafcass", caseData.getIsCafcass());
         log.info("isCAfcass inside service {}", caseData.getIsCafcass());
         return caseDataMap;
     }
@@ -304,7 +304,7 @@ public class DraftAnOrderService {
         if (selectedOrder.getJudgeNotes() != null) {
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
         }
-        //caseDataMap.put("isCafcass", caseData.getIsCafcass());
+        caseDataMap.put("isCafcass", caseData.getIsCafcass());
         log.info("isCAfcass inside populateDraftOrderDocument {}", caseData.getIsCafcass());
         return caseDataMap;
     }
@@ -370,8 +370,8 @@ public class DraftAnOrderService {
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
         caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
-        //caseDataMap.put("isCafcass", caseData.getIsCafcass());
-        //log.info("isCafcass inside populateCommonDraftOrderFields {}", caseData.getIsCafcass());
+        caseDataMap.put("isCafcass", caseData.getIsCafcass());
+        log.info("isCafcass inside populateCommonDraftOrderFields {}", caseData.getIsCafcass());
         log.info("Selected order type is ********   from    populateCommonDraftOrderFields",selectedOrder.getOrderType());
         log.info("Case typ of application {}", caseData.getCaseTypeOfApplication());
         return caseDataMap;
