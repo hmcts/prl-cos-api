@@ -318,7 +318,7 @@ public class ManageOrdersController {
                 CaseData.class
             );
             log.info("modifiedCaseData ===> " + modifiedCaseData);
-            manageOrderService.populateServeOrderDynamicList(modifiedCaseData, caseDataUpdated);
+            manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
             log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
         } else {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.No);
