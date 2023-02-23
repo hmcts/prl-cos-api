@@ -143,6 +143,7 @@ public class CaseData implements MappableObject {
      */
     private CaseCreatedBy caseCreatedBy;
 
+    @JsonProperty("isCafcass")
     private YesOrNo isCafcass;
 
     /**
