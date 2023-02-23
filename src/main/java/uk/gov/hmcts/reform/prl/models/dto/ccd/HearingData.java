@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 @AllArgsConstructor
 public class HearingData {
 
-    @JsonProperty("hearingTypes")
     private final DynamicList hearingTypes;
 
     @JsonProperty("hearingTypeOtherDetails")

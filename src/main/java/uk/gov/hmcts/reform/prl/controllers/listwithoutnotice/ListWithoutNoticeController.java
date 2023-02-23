@@ -16,24 +16,19 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
-import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.listWithoutNotice.ListWithoutNoticeService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_CONFIRMED_BY_LISTING_TEAM;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_CONFIRMED_IN_HEARINGS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_RESERVED_WITH_LIST_ASSIST;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TO_BE_FIXED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 
 @Slf4j
@@ -41,9 +36,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 @SecurityRequirement(name = "Bearer Authentication")
 public class ListWithoutNoticeController extends AbstractCallbackController {
 
-
     @Autowired
     RefDataUserService refDataUserService;
+    @Autowired
+    ListWithoutNoticeService listWithoutNoticeService;
 
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate Hearing type details")
@@ -71,13 +67,9 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     }
 
     private List<DynamicListElement> prePopulateHearingType(String authorisation) {
-        List<DynamicListElement> listOfHearingType = refDataUserService.retrieveCategoryValues(authorisation, HEARINGTYPE);
-        if (null != listOfHearingType.get(0).getCode()) {
-            listOfHearingType.add(DynamicListElement.builder().code("Other").label("Other").build());
-        }
-        return listOfHearingType;
-
+        return refDataUserService.retrieveCategoryValues(authorisation, HEARINGTYPE);
     }
+
 
     @PostMapping(path = "/listWithoutNotice", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "List Without Notice")
@@ -88,42 +80,8 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<HearingData> hearingDataList = new ArrayList<>();
-        List<Element<HearingData>> listWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
-        listWithoutNoticeHearingDetails.stream().parallel().forEach(hearingDataElement -> {
-            HearingData hearingDataCreated = hearingDataElement.getValue();
-            hearingDataList.add(HearingData.builder()
-                .hearingDateConfirmOptionEnum(getHearingDateCreatedEnum(String.valueOf(hearingDataCreated.getHearingDateConfirmOptionEnum())))
-                .hearingTypeOtherDetails(hearingDataCreated.getHearingTypeOtherDetails())
-                .hearingTypes(DynamicList.builder().value(hearingDataCreated.getHearingTypes().getValue()).build()).build());
-        });
-        caseDataUpdated.put("listWithoutNoticeHearingDetails", ElementUtils.wrapElements(hearingDataList));
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    private HearingDateConfirmOptionEnum getHearingDateCreatedEnum(String hearingDateConfirmedOption) {
-
-        HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum = null;
-        switch (hearingDateConfirmedOption) {
-            case DATE_CONFIRMED_IN_HEARINGS:
-                hearingDateConfirmOptionEnum = HearingDateConfirmOptionEnum.dateConfirmedInHearings;
-                break;
-            case DATE_RESERVED_WITH_LIST_ASSIST:
-                hearingDateConfirmOptionEnum = HearingDateConfirmOptionEnum.dateReservedWithListAssit;
-                break;
-            case DATE_CONFIRMED_BY_LISTING_TEAM:
-                hearingDateConfirmOptionEnum = HearingDateConfirmOptionEnum.dateConfirmedByListingTeam;
-                break;
-            case DATE_TO_BE_FIXED:
-                hearingDateConfirmOptionEnum = HearingDateConfirmOptionEnum.dateToBeFixed;
-                break;
-            default:
-                break;
-        }
-        return hearingDateConfirmOptionEnum;
     }
 
 }
