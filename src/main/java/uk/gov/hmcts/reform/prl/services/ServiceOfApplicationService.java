@@ -66,11 +66,12 @@ public class ServiceOfApplicationService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("Sending service of application email notifications");
         //PRL-3156 - Skip sending emails for solicitors for c100 case created by Citizen
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            && !CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            serviceOfApplicationEmailService.sendEmailC100(caseDetails);
-        } else {
-            serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
+        if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                serviceOfApplicationEmailService.sendEmailC100(caseDetails);
+            } else {
+                serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
+            }
         }
         return caseInviteManager.generatePinAndSendNotificationEmail(caseData);
     }
