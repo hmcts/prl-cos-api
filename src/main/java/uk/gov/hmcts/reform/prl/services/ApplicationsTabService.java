@@ -80,6 +80,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.services.tab.TabService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.FieldGenerator;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -110,7 +111,7 @@ public class ApplicationsTabService implements TabService {
     public Map<String, Object> updateTab(CaseData caseData) {
 
         Map<String, Object> applicationTab = new HashMap<>();
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseType(caseData))) {
             applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
             applicationTab.put("applicantTable", getApplicantsTable(caseData));
             applicationTab.put("respondentTable", getRespondentsTable(caseData));
@@ -132,7 +133,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
             applicationTab.put("childDetailsTable", getChildDetails(caseData));
             applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
-        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseType(caseData))) {
             applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
             applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));
             applicationTab.put("fl401ApplicantTable", getFl401ApplicantsTable(caseData));
@@ -266,7 +267,7 @@ public class ApplicationsTabService implements TabService {
     public List<Element<Applicant>> getApplicantsTable(CaseData caseData) {
         List<Element<Applicant>> applicants = new ArrayList<>();
         Optional<List<Element<PartyDetails>>> checkApplicants = ofNullable(caseData.getApplicants());
-        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseType(caseData))) {
             Element<PartyDetails> fl401Applicant = Element.<PartyDetails>builder().value(caseData.getApplicantsFL401()).build();
             checkApplicants = Optional.of(List.of(fl401Applicant));
         }
