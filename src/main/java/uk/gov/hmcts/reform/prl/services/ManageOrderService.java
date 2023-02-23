@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
@@ -68,6 +69,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -1573,6 +1575,22 @@ public class ManageOrderService {
                 caseDataUpdated.remove(field);
             }
         }
+    }
+
+    public Map<String, Object> populatePreviewOrder(String authorisation, CallbackRequest callbackRequest, CaseData caseData) throws Exception {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (callbackRequest
+            .getCaseDetailsBefore() != null && callbackRequest
+            .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
+            caseData.setCourtName(callbackRequest
+                                      .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
+        }
+        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
+            caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
+        } else {
+            caseDataUpdated.put("previewOrderDoc", caseData.getUploadOrderDoc());
+        }
+        return caseDataUpdated;
     }
 
 }
