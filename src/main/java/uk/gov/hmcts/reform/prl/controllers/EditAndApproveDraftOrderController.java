@@ -110,7 +110,7 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             log.info("modifiedCaseData ===> " + modifiedCaseData);
-            manageOrderService.populateServeOrderDynamicList(modifiedCaseData, caseDataUpdated);
+            manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         } else {
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData, authorisation, eventId));
         }

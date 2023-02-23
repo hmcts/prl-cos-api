@@ -414,7 +414,7 @@ public class ManageOrderService {
         Map<String, Object> headerMap = new HashMap<>();
         if (caseData.getOrderCollection() != null) {
             headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
-            populateServeOrderDynamicList(caseData, headerMap);
+            populateServeOrderDetails(caseData, headerMap);
             log.info("OrderCollection ===> " + caseData.getOrderCollection());
         }
         headerMap.put(
@@ -425,7 +425,7 @@ public class ManageOrderService {
         return headerMap;
     }
 
-    public void populateServeOrderDynamicList(CaseData caseData, Map<String, Object> headerMap) {
+    public void populateServeOrderDetails(CaseData caseData, Map<String, Object> headerMap) {
         headerMap.put(
             "serveOrderDynamicList",
             dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(
@@ -437,6 +437,7 @@ public class ManageOrderService {
             setRecipientsOptions(caseData, headerMap);
             setOtherParties(caseData, headerMap);
         }
+        headerMap.put("isCafcass", caseData.getIsCafcass());
     }
 
     private void setRecipientsOptions(CaseData caseData, Map<String, Object> headerMap) {
