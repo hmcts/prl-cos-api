@@ -94,6 +94,5 @@ public class HearingsManagementController {
         } else {
             hearingManagementService.caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
         }
-
     }
 }

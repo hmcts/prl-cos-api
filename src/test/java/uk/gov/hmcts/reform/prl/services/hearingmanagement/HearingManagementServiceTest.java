@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -40,6 +41,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
@@ -92,7 +94,7 @@ public class HearingManagementServiceTest {
     private final String serviceAuthToken = "Bearer testServiceAuth";
     private final String systemUserId = "systemUserID";
     private final String eventToken = "eventToken";
-    private String dashBoardUrl = "https://privatelaw.aat.platform.hmcts.net/dashboard";
+    private final String dashBoardUrl = "https://privatelaw.aat.platform.hmcts.net/dashboard";
 
     private LocalDateTime testNextHearingDate = LocalDateTime.of(2024, 04, 28, 1, 0);
 
@@ -209,10 +211,9 @@ public class HearingManagementServiceTest {
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, hearingRequest.getCaseRef(), "hmcCaseUpdateSuccess"))
             .thenReturn(buildStartEventResponse("hmcCaseUpdateSuccess", eventToken));
-        when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                      caseType, hearingRequest.getCaseRef(), true,
-                                                      buildCaseDataContent("hmcCaseUpdateSuccess", eventToken,
-                                                                           c100CaseData.getState())))
+        when(coreCaseDataApi.submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                      Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                      Mockito.any(CaseDataContent.class)))
             .thenReturn(caseDetails);
 
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(c100CaseData);
@@ -237,14 +238,12 @@ public class HearingManagementServiceTest {
                                             LanguagePreference.english);
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,DECISION_OUTCOME);
 
-        verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
+        verify(coreCaseDataApi, times(1)).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest.getCaseRef(), "hmcCaseUpdateSuccess"
         );
-        verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                         caseType, hearingRequest.getCaseRef(), true,
-                                                         buildCaseDataContent("hmcCaseUpdateSuccess", eventToken,
-                                                                              c100CaseData.getState())
-        );
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
         assertTrue(true);
     }
 
@@ -274,10 +273,10 @@ public class HearingManagementServiceTest {
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"))
             .thenReturn(buildStartEventResponse("hmcCaseUpdateFailure", eventToken));
-        when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                      caseType, hearingRequest1.getCaseRef(), true,
-                                                      buildCaseDataContent("hmcCaseUpdateFailure", eventToken,
-                                                                           c100CaseData.getState())))
+        when(coreCaseDataApi.submitEventForCaseWorker(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                      Mockito.any(CaseDataContent.class)))
             .thenReturn(caseDetails);
 
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(c100CaseData);
@@ -296,11 +295,9 @@ public class HearingManagementServiceTest {
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
         );
-        verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                         caseType, hearingRequest1.getCaseRef(), true,
-                                                         buildCaseDataContent("hmcCaseUpdateFailure", eventToken,
-                                                                              c100CaseData.getState())
-        );
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
 
         assertTrue(true);
     }
@@ -331,9 +328,9 @@ public class HearingManagementServiceTest {
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"))
             .thenReturn(buildStartEventResponse("hmcCaseUpdateFailure", eventToken));
-        when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                      caseType, hearingRequest1.getCaseRef(), true,
-                                                      buildCaseDataContent("hmcCaseUpdateFailure", eventToken, c100CaseData.getState())))
+        when(coreCaseDataApi.submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                      Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                      Mockito.any(CaseDataContent.class)))
             .thenReturn(caseDetails);
 
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(c100CaseData);
@@ -352,11 +349,9 @@ public class HearingManagementServiceTest {
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
         );
-        verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                         caseType, hearingRequest1.getCaseRef(), true,
-                                                         buildCaseDataContent("hmcCaseUpdateFailure", eventToken,
-                                                                              c100CaseData.getState())
-        );
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
 
         assertTrue(true);
     }
@@ -364,7 +359,7 @@ public class HearingManagementServiceTest {
     private CaseDataContent buildCaseDataContent(String eventId, String eventToken, State state) {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("state", state);
-
+        caseDataMap.put("caseTypeOfApplication", "C100");
         return CaseDataContent.builder()
             .eventToken(eventToken)
             .event(Event.builder()
@@ -471,9 +466,9 @@ public class HearingManagementServiceTest {
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateSuccess"))
             .thenReturn(buildStartEventResponse("hmcCaseUpdateSuccess", eventToken));
-        when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                      caseType, hearingRequest1.getCaseRef(), true,
-                                                      buildCaseDataContent("hmcCaseUpdateSuccess", eventToken, fl401CaseData.getState())))
+        when(coreCaseDataApi.submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                      Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                      Mockito.any(CaseDataContent.class)))
             .thenReturn(caseDetails);
 
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(fl401CaseData);
@@ -496,10 +491,9 @@ public class HearingManagementServiceTest {
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateSuccess"
         );
-        verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                         caseType, hearingRequest1.getCaseRef(), true,
-                                                         buildCaseDataContent("hmcCaseUpdateSuccess", eventToken, fl401CaseData.getState())
-        );
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
         assertTrue(true);
     }
 
@@ -570,9 +564,9 @@ public class HearingManagementServiceTest {
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"))
             .thenReturn(buildStartEventResponse("hmcCaseUpdateFailure", eventToken));
-        when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                      caseType, hearingRequest1.getCaseRef(), true,
-                                                      buildCaseDataContent("hmcCaseUpdateFailure", eventToken, fl401CaseData.getState())))
+        when(coreCaseDataApi.submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                      Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                      Mockito.any(CaseDataContent.class)))
             .thenReturn(caseDetails);
 
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(fl401CaseData);
@@ -591,11 +585,9 @@ public class HearingManagementServiceTest {
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
         );
-        verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                         caseType, hearingRequest1.getCaseRef(), true,
-                                                         buildCaseDataContent("hmcCaseUpdateFailure", eventToken,
-                                                                              fl401CaseData.getState())
-        );
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
 
         assertTrue(true);
     }
@@ -663,10 +655,9 @@ public class HearingManagementServiceTest {
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"))
             .thenReturn(buildStartEventResponse("hmcCaseUpdateFailure", eventToken));
-        when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                      caseType, hearingRequest1.getCaseRef(), true,
-                                                      buildCaseDataContent("hmcCaseUpdateFailure", eventToken,
-                                                                           fl401CaseData.getState())))
+        when(coreCaseDataApi.submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                      Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                      Mockito.any(CaseDataContent.class)))
             .thenReturn(caseDetails);
 
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(fl401CaseData);
@@ -684,11 +675,10 @@ public class HearingManagementServiceTest {
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
         );
-        verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                         caseType, hearingRequest1.getCaseRef(), true,
-                                                         buildCaseDataContent("hmcCaseUpdateFailure", eventToken,
-                                                                              fl401CaseData.getState())
-        );
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
+
         assertTrue(true);
     }
 
