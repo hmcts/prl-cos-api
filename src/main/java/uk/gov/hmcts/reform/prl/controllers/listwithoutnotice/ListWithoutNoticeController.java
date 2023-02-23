@@ -30,6 +30,10 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_CONFIRMED_BY_LISTING_TEAM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_CONFIRMED_IN_HEARINGS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_RESERVED_WITH_LIST_ASSIST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TO_BE_FIXED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 
 @Slf4j
@@ -90,14 +94,36 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         List<Element<HearingData>> listWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
         listWithoutNoticeHearingDetails.stream().parallel().forEach(hearingDataElement -> {
             HearingData hearingDataCreated = hearingDataElement.getValue();
-            hearingDataList.add(HearingData.builder().hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum
-                    .getValue(String.valueOf(hearingDataCreated.getHearingDateConfirmOptionEnum())))
+            hearingDataList.add(HearingData.builder()
+                .hearingDateConfirmOptionEnum(getHearingDateCreatedEnum(String.valueOf(hearingDataCreated.getHearingDateConfirmOptionEnum())))
                 .hearingTypeOtherDetails(hearingDataCreated.getHearingTypeOtherDetails())
                 .hearingTypes(DynamicList.builder().value(hearingDataCreated.getHearingTypes().getValue()).build()).build());
         });
         caseDataUpdated.put("listWithoutNoticeHearingDetails", ElementUtils.wrapElements(hearingDataList));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private HearingDateConfirmOptionEnum getHearingDateCreatedEnum(String hearingDateConfirmedOption) {
+
+        HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum = null;
+        switch (hearingDateConfirmedOption) {
+            case DATE_CONFIRMED_IN_HEARINGS:
+                hearingDateConfirmOptionEnum = HearingDateConfirmOptionEnum.dateConfirmedInHearings;
+                break;
+            case DATE_RESERVED_WITH_LIST_ASSIST:
+                hearingDateConfirmOptionEnum = HearingDateConfirmOptionEnum.dateReservedWithListAssit;
+                break;
+            case DATE_CONFIRMED_BY_LISTING_TEAM:
+                hearingDateConfirmOptionEnum = HearingDateConfirmOptionEnum.dateConfirmedByListingTeam;
+                break;
+            case DATE_TO_BE_FIXED:
+                hearingDateConfirmOptionEnum = HearingDateConfirmOptionEnum.dateToBeFixed;
+                break;
+            default:
+                break;
+        }
+        return hearingDateConfirmOptionEnum;
     }
 
 }

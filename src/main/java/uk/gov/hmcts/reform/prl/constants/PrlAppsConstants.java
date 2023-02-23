@@ -354,4 +354,11 @@ public class PrlAppsConstants {
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
     public static final String HEARINGTYPE = "HearingType";
     public static final String HEARINGCHILDREQUIRED = "Y";
+
+    public static final String DATE_CONFIRMED_IN_HEARINGS = "dateConfirmed";
+
+    public static final String DATE_RESERVED_WITH_LIST_ASSIST = "dateReservedWithListAssit";
+
+    public static final String DATE_CONFIRMED_BY_LISTING_TEAM = "dateConfirmedByListingTeam";
+    public static final String DATE_TO_BE_FIXED = "dateToBeFixed";
 }
