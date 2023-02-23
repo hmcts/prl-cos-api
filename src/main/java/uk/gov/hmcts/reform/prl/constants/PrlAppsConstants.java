@@ -129,11 +129,6 @@ public class PrlAppsConstants {
                                                      "caseworker-privatelaw-judge",
                                                      "caseworker-privatelaw-la");
 
-    public static final List<String> ROLES_JUDGE = List.of("caseworker-privatelaw-judge",
-                                                     "caseworker-privatelaw-la");
-    public static final List<String> ROLES_COURT_ADMIN = List.of("caseworker-privatelaw-courtadmin");
-    public static final List<String> ROLES_SOLICITOR = List.of("caseworker-privatelaw-solicitor");
-
     public static final String PREVIOUS_OR_ONGOING_PROCEEDINGS = "previousOrOngoingProceedings";
 
     public static final String FORMAT = "%s %s";
@@ -334,12 +329,6 @@ public class PrlAppsConstants {
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
-
-    public static final String JUDGE_OR_LA = "JudgeOrLA";
-
-    public static final String COURT_ADMIN = "Court Admin";
-
-    public static final String SOLICITOR = "Solicitor";
 
     public static final long CASE_SUBMISSION_THRESHOLD = 28;
 

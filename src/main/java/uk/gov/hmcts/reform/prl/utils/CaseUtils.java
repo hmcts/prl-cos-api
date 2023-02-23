@@ -6,13 +6,27 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
+import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 
 @Slf4j
 public class CaseUtils {
@@ -81,5 +95,47 @@ public class CaseUtils {
             noOfDaysRemaining = PrlAppsConstants.CASE_SUBMISSION_THRESHOLD - noDaysPassed;
         }
         return noOfDaysRemaining;
+    }
+
+    public static void getCourtDetails(Optional<CourtVenue> courtVenue, Map<String, Object> caseDataUpdated, String baseLocationId) {
+        if (courtVenue.isPresent()) {
+            String regionId = courtVenue.get().getRegionId();
+            String courtName = courtVenue.get().getCourtName();
+            String regionName = courtVenue.get().getRegion();
+            String baseLocationName = courtVenue.get().getSiteName();
+            caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
+                .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
+                .baseLocationName(baseLocationName).build());
+            caseDataUpdated.put(PrlAppsConstants.IS_CAFCASS, CaseUtils.cafcassFlag(regionId));
+            caseDataUpdated.put(COURT_NAME_FIELD, courtName);
+            caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
+
+        }
+    }
+
+    public static void getCourtEmail(Map<String, Object> caseDataUpdated, String[] idEmail, String caseTypeOfApplication) {
+        String courtEmail = "";
+        if (idEmail.length > 1) {
+            courtEmail = Arrays.stream(idEmail).toArray()[1].toString();
+        }
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+            caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
+                                                               .value(LocalCourtAdminEmail.builder().email(courtEmail)
+                                                                          .build()).build()));
+        } else {
+            caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
+        }
+    }
+
+    public static YesOrNo cafcassFlag(String regionId) {
+
+        YesOrNo cafcassFlag = YesOrNo.No; //wales
+
+        int intRegionId = Integer.parseInt(regionId);
+
+        if (intRegionId > 0 && intRegionId < 7) {
+            cafcassFlag = YesOrNo.Yes; //english regions
+        }
+        return cafcassFlag;
     }
 }

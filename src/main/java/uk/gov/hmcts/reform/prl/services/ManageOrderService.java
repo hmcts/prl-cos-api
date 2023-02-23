@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
@@ -42,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -64,14 +66,8 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_OR_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_COURT_ADMIN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_JUDGE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_SOLICITOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum.draftAnOrder;
@@ -873,7 +869,7 @@ public class ManageOrderService {
         if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
             log.info("value of orderCollection  ----> " + caseData.getOrderCollection());
             if (uploadAnOrder.equals(caseData.getManageOrdersOptions())
-                && (PrlAppsConstants.JUDGE_OR_LA.equals(loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+                && (UserRoles.JUDGE.name().equals(loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
 
                 return setDraftOrderCollection(caseData, loggedInUserType);
@@ -1036,11 +1032,11 @@ public class ManageOrderService {
         } else if (createAnOrder.toString().equals(orderSelectionType) || uploadAnOrder.toString().equals(
             orderSelectionType)
             || draftAnOrder.toString().equals(orderSelectionType)) {
-            if (JUDGE_OR_LA.equals(loggedInUserType)) {
+            if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
                 status = OrderStatusEnum.createdByJudge.getDisplayedValue();
-            } else if (COURT_ADMIN.equals(loggedInUserType)) {
+            } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
                 status = OrderStatusEnum.createdByCA.getDisplayedValue();
-            } else if (SOLICITOR.equals(loggedInUserType)) {
+            } else if (UserRoles.SOLICITOR.name().equals(loggedInUserType)) {
                 status = OrderStatusEnum.draftedByLR.getDisplayedValue();
             }
         } else {
@@ -1550,12 +1546,16 @@ public class ManageOrderService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String loggedInUserType;
         List<String> roles = userDetails.getRoles();
-        if (roles.stream().anyMatch(ROLES_JUDGE::contains)) {
-            loggedInUserType = PrlAppsConstants.JUDGE_OR_LA;
-        } else if (roles.stream().anyMatch(ROLES_COURT_ADMIN::contains)) {
-            loggedInUserType = PrlAppsConstants.COURT_ADMIN;
-        } else if (roles.stream().anyMatch(ROLES_SOLICITOR::contains)) {
-            loggedInUserType = PrlAppsConstants.SOLICITOR;
+        if (roles.stream().anyMatch(Roles.JUDGE.getValue()::contains) || roles.stream().anyMatch(Roles.LEGAL_ADVISER.getValue()::contains)) {
+            loggedInUserType = UserRoles.JUDGE.name();
+        } else if (roles.stream().anyMatch(Roles.COURT_ADMIN.getValue()::contains)) {
+            loggedInUserType = UserRoles.COURT_ADMIN.name();
+        } else if (roles.stream().anyMatch(Roles.SOLICITOR.getValue()::contains)) {
+            loggedInUserType = UserRoles.SOLICITOR.name();
+        } else if (roles.stream().anyMatch(Roles.CITIZEN.getValue()::contains)) {
+            loggedInUserType = UserRoles.CITIZEN.name();
+        } else if (roles.stream().anyMatch(Roles.SYSTEM_UPDATE.getValue()::contains)) {
+            loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
         } else {
             loggedInUserType = "";
         }
