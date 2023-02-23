@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.listwithoutnotice;
 
-/*
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.utils.HearingUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -34,12 +35,15 @@ public class ListWithoutNoticeControllerTest {
     RefDataUserService refDataUserService;
 
     @Mock
+    HearingUtils hearingUtils;
+
+    @Mock
     private ObjectMapper objectMapper;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String serviceAuth = "serviceAuth";
 
-  /*  @Test
+    @Test
     public void shouldSeeHearingDetails() throws Exception {
 
         CaseData caseData = CaseData.builder()
@@ -59,9 +63,11 @@ public class ListWithoutNoticeControllerTest {
 
         when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE)).thenReturn(List.of(DynamicListElement.builder()
                                                                                                       .build()));
+        when(hearingUtils.getHearingStartDate(authToken,caseData)).thenReturn(List.of(DynamicListElement.builder()
+                                                                                          .build()));
 
         AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController.prePopulateHearingPageData(authToken,callbackRequest);
         assertNotNull(response.getData().containsKey("listWithoutNoticeHearingDetails"));
     }
 
-}*/
+}
