@@ -51,7 +51,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
 
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
-        if (null != existingListWithoutNoticeHearingDetails) {
+        if (caseDataUpdated.containsKey("listWithoutNoticeHearingDetails")) {
             caseDataUpdated.put("listWithoutNoticeHearingDetails",
                 existingListWithoutNoticeHearingDetails);
         } else {
@@ -86,15 +86,15 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<HearingData> hearingData = new ArrayList<>();
+        List<HearingData> hearingDataList = new ArrayList<>();
         List<Element<HearingData>> listWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
         listWithoutNoticeHearingDetails.stream().parallel().forEach(hearingDataElement -> {
             HearingData hearingDataCreated = hearingDataElement.getValue();
-            hearingData.add(HearingData.builder().hearingDateConfirmOptionEnum(hearingDataCreated.getHearingDateConfirmOptionEnum())
+            hearingDataList.add(HearingData.builder().hearingDateConfirmOptionEnum(hearingDataCreated.getHearingDateConfirmOptionEnum())
                 .hearingTypeOtherDetails(hearingDataCreated.getHearingTypeOtherDetails())
                 .hearingTypes(DynamicList.builder().value(hearingDataCreated.getHearingTypes().getValue()).build()).build());
         });
-        caseDataUpdated.put("listWithoutNoticeHearingDetails", ElementUtils.wrapElements(hearingData));
+        caseDataUpdated.put("listWithoutNoticeHearingDetails", ElementUtils.wrapElements(hearingDataList));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
