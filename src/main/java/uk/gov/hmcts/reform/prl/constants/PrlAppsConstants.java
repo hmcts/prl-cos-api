@@ -328,4 +328,28 @@ public class PrlAppsConstants {
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
+
+    public static final String DISTRICT_JUDGE = "districtJudge";
+
+    public static final String MAGISTRATES = "magistrates";
+
+    public static final String CIRCUIT_JUDGE = "circuitJudge";
+    public static final String HIGHCOURT_JUDGE = "highCourtJudge";
+
+    public static final String EMPTY_SPACE_STRING = " ";
+
+    public static final String SERVICENAME = "PRIVATELAW";
+    public static final String STAFFSORTCOLUMN = "lastName";
+    public static final String STAFFORDERASC = "ASC";
+    public static final String LEGALOFFICE = "Legal office";
+
+    public static final String TIER_OF_JUDICIARY = "tierOfJudiciary";
+
+    public static final String IS_JUDGE_OR_LEGAL_ADVISOR = "isJudgeOrLegalAdviser";
+
+    public static final String JUDGE_NAME_EMAIL = "judgeNameAndEmail";
+    public static final String IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING =  "isJudgeOrLegalAdviserGatekeeping";
+    public static final String JUDGE_NAME = "judgeName";
+    public static final String HEARINGTYPE = "HearingType";
+    public static final String HEARINGCHILDREQUIRED = "Y";
 }

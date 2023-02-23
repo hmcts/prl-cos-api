@@ -24,6 +24,9 @@ prl:
   document:
     generate:
       uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
+  refdata:
+    username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
+    password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
 
 
 management:
@@ -401,4 +404,15 @@ courts:
 fis_hearing:
   api:
     url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
+staffDetails:
+  api:
+    url: ${STAFF_DETAILS_API:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}
+
+judicialUsers:
+  api:
+    url: ${JUDICIAL_USERS_API:http://rd-judicial-api-aat.service.core-compute-aat.internal}
+
+commonData:
+  api:
+    url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
 
