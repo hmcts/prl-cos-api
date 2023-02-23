@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -823,5 +825,63 @@ public class DraftAnOrderService {
             draftOrder.getOrderType()
         );
         return caseDataUpdated;
+    }
+
+    public Map<String, Object> judgeOrAdminEditApproveDraftOrderMidEvent(String authorisation, CallbackRequest callbackRequest,
+                                                                         CaseData caseData) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info(
+            "********caseData.getDoYouWantCourtAdminToAddAnything***** {}",
+            caseData.getJudgeDirectionsToAdmin()
+        );
+        String eventId = callbackRequest.getEventId();
+        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
+            .equals(caseData.getServeOrderData().getWhatDoWithOrder())
+            || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
+
+            CaseData updatedCaseData = objectMapper.convertValue(
+                caseDataUpdated,
+                CaseData.class
+            );
+            caseDataUpdated.putAll(removeDraftOrderAndAddToFinalOrder(authorisation, updatedCaseData, eventId));
+            CaseData modifiedCaseData = objectMapper.convertValue(
+                caseDataUpdated,
+                CaseData.class
+            );
+            log.info("modifiedCaseData ===> " + modifiedCaseData);
+            manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
+        }
+        return caseDataUpdated;
+    }
+
+    public void judgeOrAdminEditApproveDraftOrderAboutToSubmit(String authorisation, CallbackRequest callbackRequest,
+                                                               CaseData caseData, Map<String, Object> caseDataUpdated) {
+        String eventId = callbackRequest.getEventId();
+        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
+            .equals(caseData.getServeOrderData().getWhatDoWithOrder())
+            || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
+
+            caseDataUpdated.putAll(removeDraftOrderAndAddToFinalOrder(
+                authorisation,
+                caseData, eventId
+            ));
+            if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+                CaseData modifiedCaseData = objectMapper.convertValue(
+                    caseDataUpdated,
+                    CaseData.class
+                );
+                List<Element<OrderDetails>> orderCollection = modifiedCaseData.getOrderCollection();
+                caseDataUpdated.put(
+                    "orderCollection",
+                    manageOrderService.serveOrder(modifiedCaseData, orderCollection)
+                );
+            }
+        } else {
+            caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));
+        }
+        log.info("orderCollection after cleanup ===> " + caseDataUpdated.get("orderCollection"));
+        log.info("draftOrderCollection after cleanup ===> " + caseDataUpdated.get("draftOrderCollection"));
     }
 }

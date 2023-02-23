@@ -15,13 +15,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.enums.Event;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -90,31 +85,15 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info(
-            "********caseData.getDoYouWantCourtAdminToAddAnything***** {}",
-            caseData.getJudgeDirectionsToAdmin()
+        Map<String, Object> caseDataUpdated = draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
+            authorisation,
+            callbackRequest,
+            caseData
         );
-        String eventId = callbackRequest.getEventId();
-        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
-            .equals(caseData.getServeOrderData().getWhatDoWithOrder())
-            || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
-
-            CaseData updatedCaseData = objectMapper.convertValue(
-                caseDataUpdated,
-                CaseData.class
-            );
-            caseDataUpdated.putAll(draftAnOrderService.removeDraftOrderAndAddToFinalOrder(authorisation, updatedCaseData, eventId));
-            CaseData modifiedCaseData = objectMapper.convertValue(
-                caseDataUpdated,
-                CaseData.class
-            );
-            log.info("modifiedCaseData ===> " + modifiedCaseData);
-            manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
-        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+
 
     @PostMapping(path = "/judge-or-admin-edit-approve/about-to-submit",
         consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -130,29 +109,12 @@ public class EditAndApproveDraftOrderController {
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        String eventId = callbackRequest.getEventId();
-        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
-            .equals(caseData.getServeOrderData().getWhatDoWithOrder())
-            || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
-
-            caseDataUpdated.putAll(draftAnOrderService.removeDraftOrderAndAddToFinalOrder(authorisation, caseData, eventId));
-            if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-                CaseData modifiedCaseData = objectMapper.convertValue(
-                    caseDataUpdated,
-                    CaseData.class
-                );
-                List<Element<OrderDetails>> orderCollection = modifiedCaseData.getOrderCollection();
-                caseDataUpdated.put(
-                    "orderCollection",
-                    manageOrderService.serveOrder(modifiedCaseData, orderCollection)
-                );
-            }
-        } else {
-            caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData, authorisation, eventId));
-        }
-        log.info("orderCollection after cleanup ===> " + caseDataUpdated.get("orderCollection"));
-        log.info("draftOrderCollection after cleanup ===> " + caseDataUpdated.get("draftOrderCollection"));
+        draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
+            authorisation,
+            callbackRequest,
+            caseData,
+            caseDataUpdated
+        );
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
 
