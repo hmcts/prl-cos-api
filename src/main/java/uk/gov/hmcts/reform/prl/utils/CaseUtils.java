@@ -2,10 +2,13 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -49,5 +52,16 @@ public class CaseUtils {
     public static String getCaseTypeOfApplication(CaseData caseData) {
         return caseData.getCaseTypeOfApplication() != null
             ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
+    }
+    
+    public static Long getRemainingDaysSubmitCase(CaseData caseData) {
+        Long noOfDaysRemaining = null;
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
+            && State.AWAITING_SUBMISSION_TO_HMCTS.equals(caseData.getState())) {
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+            Long noDaysPassed = Duration.between(caseData.getCreatedDate(), zonedDateTime).toDays();
+            noOfDaysRemaining = PrlAppsConstants.CASE_SUBMISSION_THRESHOLD - noDaysPassed;
+        }
+        return noOfDaysRemaining;
     }
 }
