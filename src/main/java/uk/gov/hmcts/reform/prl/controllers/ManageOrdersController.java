@@ -74,21 +74,6 @@ public class ManageOrdersController {
     private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
-    private static final List<String> MANAGE_ORDER_FIELDS = List.of("manageOrdersOptions",
-                                                                    "createSelectOrderOptions",
-                                                                    "childArrangementOrders",
-                                                                    "domesticAbuseOrders",
-                                                                    "fcOrders",
-                                                                    "otherOrdersOption",
-                                                                    "amendOrderDynamicList",
-                                                                    "serveOrderDynamicList",
-                                                                    "ordersNeedToBeServed",
-                                                                    "loggedInUserType",
-                                                                    "doYouWantToServeOrder",
-                                                                    "whatDoWithOrder",
-                                                                    "currentOrderCreatedDateTime",
-                                                                    "approvalDate"
-    );
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -245,7 +230,7 @@ public class ManageOrdersController {
                 caseData
             ));
         }
-        cleanUpSelectedManageOrderOptions(caseDataUpdated);
+        manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -346,16 +331,7 @@ public class ManageOrdersController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    private static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
-        log.info("caseDataUpdated before cleanup ===> " + caseDataUpdated);
-        for (String field : MANAGE_ORDER_FIELDS) {
-            if (caseDataUpdated.containsKey(field)) {
-                caseDataUpdated.remove(field);
-            }
-        }
-        log.info("orderCollection after cleanup ===> " + caseDataUpdated.get("orderCollection"));
-        log.info("draftOrderCollection after cleanup ===> " + caseDataUpdated.get("draftOrderCollection"));
-    }
+
 
     private static void resetChildOptions(CaseDetails caseDetails) {
         if (caseDetails.getData().containsKey(IS_THE_ORDER_ABOUT_ALL_CHILDREN) && caseDetails.getData().get(
