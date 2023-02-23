@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
@@ -169,7 +170,7 @@ public class FL401SubmitApplicationController {
         }
         caseData = caseData.setDateSubmittedDate();
 
-        //caseDataUpdated.put("isCafcass", YesOrNo.No);
+        caseDataUpdated.put("isCafcass", YesOrNo.No);
 
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
 
