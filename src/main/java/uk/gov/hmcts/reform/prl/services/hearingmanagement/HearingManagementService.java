@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -80,27 +81,30 @@ public class HearingManagementService {
         String systemUpdateUserId = systemUserService.getUserId(userToken);
         log.info("Fetching the Case details based on caseId {}", hearingRequest.getCaseRef()
         );
-
         CaseDetails caseDetails = coreCaseDataApi.getCase(
             userToken,
             authTokenGenerator.generate(),
             hearingRequest.getCaseRef()
         );
-
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        Map<String, String> fields = new HashMap<>();
+        fields.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
 
         switch (caseState) {
             case PREPARE_FOR_HEARING_CONDUCT_HEARING:
+                fields.put("state", PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue());
                 CaseDetails listedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                            PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE
+                                                            fields,HEARING_STATE_CHANGE_FAILURE
                 );
                 updateTabsAfterStateChange(listedCaseDetails.getData(), listedCaseDetails.getId());
                 sendHearingDetailsEmail(caseData, hearingRequest);
                 break;
 
             case DECISION_OUTCOME:
+                fields.put("state", DECISION_OUTCOME.getValue());
                 CaseDetails cancelledCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                               DECISION_OUTCOME, HEARING_STATE_CHANGE_SUCCESS
+                                                               fields, HEARING_STATE_CHANGE_SUCCESS
                 );
                 updateTabsAfterStateChange(cancelledCaseDetails.getData(), cancelledCaseDetails.getId());
                 sendHearingCancelledEmail(caseData);
