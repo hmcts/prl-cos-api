@@ -72,6 +72,8 @@ public class C100IssueCaseController {
             String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
             String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
             caseDataUpdated.put("isCafcass", locationRefDataService.cafcassFlag(regionId));
+            log.info("regionId ===> " + regionId);
+            log.info("isCafcass ===> " + locationRefDataService.cafcassFlag(regionId));
             caseDataUpdated.put("courtName", courtName);
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
                 .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
