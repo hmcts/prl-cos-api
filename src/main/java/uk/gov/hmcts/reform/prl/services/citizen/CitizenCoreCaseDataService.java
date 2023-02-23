@@ -42,10 +42,6 @@ public class CitizenCoreCaseDataService {
     private static final String CCD_UPDATE_FAILURE_MESSAGE
         = "Failed linking case in CCD store for case id %s on event %s";
 
-    private final SystemUserService systemUserService;
-
-    private final CoreCaseDataService coreCaseDataService;
-
     @Autowired
     IdamClient idamClient;
     @Autowired
@@ -54,6 +50,12 @@ public class CitizenCoreCaseDataService {
     AuthTokenGenerator authTokenGenerator;
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    SystemUserService systemUserService;
+
+    @Autowired
+    CoreCaseDataService coreCaseDataService;
 
     public CaseDetails linkDefendant(
         String anonymousUserToken,
@@ -67,7 +69,6 @@ public class CitizenCoreCaseDataService {
 
             EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
 
-            //TODO CONFIRM IF THIS IS CITIZEN
             StartEventResponse startEventResponse =
                 coreCaseDataService.startUpdate(
                     userToken,
@@ -81,6 +82,13 @@ public class CitizenCoreCaseDataService {
                 startEventResponse,
                 caseDataUpdated
             );
+
+            CaseDetails caseDetails = coreCaseDataService.submitUpdate(
+                userToken,
+                eventRequestData,
+                caseDataContent,
+                String.valueOf(caseId),
+                true);
 
             return coreCaseDataService.submitUpdate(
                 userToken,
@@ -135,7 +143,6 @@ public class CitizenCoreCaseDataService {
 
             EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
 
-            //TODO CONFIRM IF THIS IS CITIZEN
             StartEventResponse startEventResponse =
                 coreCaseDataService.startUpdate(
                     userToken,
@@ -263,4 +270,5 @@ public class CitizenCoreCaseDataService {
         String cosApis2sToken = authTokenGenerator.generate();
         return coreCaseDataApi.getCase(authorisation, cosApis2sToken, caseId);
     }
+
 }
