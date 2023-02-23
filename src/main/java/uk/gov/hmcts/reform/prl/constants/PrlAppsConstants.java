@@ -342,4 +342,7 @@ public class PrlAppsConstants {
     public static final String SOLICITOR = "Solicitor";
 
     public static final long CASE_SUBMISSION_THRESHOLD = 28;
+
+    public static final String IS_CAFCASS = "isCafcass";
+
 }

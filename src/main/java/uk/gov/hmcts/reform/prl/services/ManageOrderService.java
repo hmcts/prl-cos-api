@@ -437,7 +437,7 @@ public class ManageOrderService {
             setRecipientsOptions(caseData, headerMap);
             setOtherParties(caseData, headerMap);
         }
-        headerMap.put("isCafcass", caseData.getIsCafcass());
+        headerMap.put(PrlAppsConstants.IS_CAFCASS, caseData.getIsCafcass());
     }
 
     private void setRecipientsOptions(CaseData caseData, Map<String, Object> headerMap) {
