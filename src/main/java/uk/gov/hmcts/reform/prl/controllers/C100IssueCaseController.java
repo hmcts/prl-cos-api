@@ -68,16 +68,17 @@ public class C100IssueCaseController {
             String key = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
             String[] venueDetails = key.split("-");
             String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
-            String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
+            log.info("regionId ===> " + regionId);
             String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
             String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
-            caseDataUpdated.put("isCafcass", locationRefDataService.cafcassFlag(regionId));
-            log.info("regionId ===> " + regionId);
-            log.info("isCafcass ===> " + locationRefDataService.cafcassFlag(regionId));
-            caseDataUpdated.put("courtName", courtName);
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
                 .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
+            caseDataUpdated.put("isCafcass", locationRefDataService.cafcassFlag(regionId));
+            log.info("isCafcass ===> " + locationRefDataService.cafcassFlag(regionId));
+            String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
+            caseDataUpdated.put("courtName", courtName);
+
             String courtEmail = "";
             if (idEmail.length > 1) {
                 courtEmail = Arrays.stream(idEmail).toArray()[1].toString();
