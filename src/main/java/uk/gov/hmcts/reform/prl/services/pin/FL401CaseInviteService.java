@@ -36,7 +36,7 @@ public class FL401CaseInviteService implements CaseInviteService {
     }
 
     @Override
-    public CaseData generateAndSendRespondentCaseInvite(CaseData caseData) {
+    public CaseData generateAndSendCaseInvite(CaseData caseData) {
         PartyDetails respondent = caseData.getRespondentsFL401();
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
 

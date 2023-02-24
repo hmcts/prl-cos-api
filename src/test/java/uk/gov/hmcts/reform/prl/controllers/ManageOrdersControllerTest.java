@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -58,7 +59,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
@@ -137,7 +137,7 @@ public class ManageOrdersControllerTest {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .courtName("Horsham Court")
-            .appointmentOfGuardian(Document.builder().build())
+            .uploadOrderDoc(Document.builder().build())
             .build();
 
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
@@ -173,7 +173,7 @@ public class ManageOrdersControllerTest {
     public void testPopulatePreviewOrderWhenOrderUploaded() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
-            .appointmentOfGuardian(Document.builder().build())
+            .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .dateOrderMade(LocalDate.now())
             .build();
@@ -212,7 +212,7 @@ public class ManageOrdersControllerTest {
 
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
-            .appointmentOfGuardian(Document.builder().build())
+            .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
 
@@ -225,7 +225,7 @@ public class ManageOrdersControllerTest {
                                  .documentHash(generatedDocumentInfo.getHashToken())
                                  .documentFileName("c21DraftFilename")
                                  .build())
-            .appointmentOfGuardian(Document.builder()
+            .uploadOrderDoc(Document.builder()
                                        .documentUrl(generatedDocumentInfo.getUrl())
                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                        .documentHash(generatedDocumentInfo.getHashToken())
@@ -260,7 +260,7 @@ public class ManageOrdersControllerTest {
 
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
-            .appointmentOfGuardian(Document.builder().build())
+            .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .build();
 
@@ -273,7 +273,7 @@ public class ManageOrdersControllerTest {
                                  .documentHash(generatedDocumentInfo.getHashToken())
                                  .documentFileName("fl404bDraftFilename")
                                  .build())
-            .appointmentOfGuardian(Document.builder()
+            .uploadOrderDoc(Document.builder()
                                        .documentUrl(generatedDocumentInfo.getUrl())
                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                        .documentHash(generatedDocumentInfo.getHashToken())
@@ -475,7 +475,8 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().roles(ROLES_JUDGE).build());
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
         CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test",  callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
@@ -540,7 +541,8 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().roles(ROLES_JUDGE).build());
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
         CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test", callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
@@ -601,7 +603,8 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().roles(ROLES_JUDGE).build());
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
         CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test", callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
@@ -1307,5 +1310,101 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         assertEquals(YesOrNo.Yes,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
+    }
+
+    @Test
+    public void testAddUploadOrderDoesntAmmendSlipRule() throws Exception {
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(YesOrNo.Yes)
+            .build();
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                                 .build())
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .previewOrderDoc(Document.builder().build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .build();
+
+        List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
+            OrderDetails.builder().build()).build());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken, caseData))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
+        when(manageOrderService.populateHeader(caseData))
+            .thenReturn(stringObjectMap);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.addUploadOrder(
+            authToken,
+            callbackRequest
+        );
+        assertEquals(YesOrNo.Yes,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
+    }
+
+    @Test
+    public void testAddUploadOrderDoesntNeedServing() throws Exception {
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(YesOrNo.Yes)
+            .build();
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                                 .build())
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .previewOrderDoc(Document.builder().build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.No).build())
+            .build();
+
+        List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
+            OrderDetails.builder().build()).build());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken, caseData))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
+        when(manageOrderService.populateHeader(caseData))
+            .thenReturn(stringObjectMap);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.addUploadOrder(
+            authToken,
+            callbackRequest
+        );
+        assertEquals(YesOrNo.No,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
     }
 }

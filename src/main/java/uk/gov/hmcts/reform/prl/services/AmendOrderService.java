@@ -148,13 +148,12 @@ public class AmendOrderService {
             .typeOfOrder(orderType)
             .orderTypeId(orderType)
             .orderDocument(amendedDocument)
-            .orderSelectionType(caseData.getManageOrdersOptions())
+            .orderSelectionType(caseData.getManageOrdersOptions() != null ? caseData.getManageOrdersOptions().toString() : null)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(time.now())
                               .status("Draft").build())
             .dateOrderMade(caseData.getDateOrderMade())
-            .orderSelectionType(caseData.getManageOrdersOptions())
             .build();
     }
 }

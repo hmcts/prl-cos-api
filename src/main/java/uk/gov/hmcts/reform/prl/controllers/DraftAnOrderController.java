@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -185,12 +186,13 @@ public class DraftAnOrderController {
             caseData.setAppointedGuardianName(namesList);
         }
         log.info("Event Id  {} ", callbackRequest.getEventId());
-        if ("editAndApproveAnOrder".equalsIgnoreCase(callbackRequest.getEventId())
-            || "adminEditAndApproveAnOrder".equalsIgnoreCase(callbackRequest.getEventId())) {
+        if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
+            || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
             caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
         } else {
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
+
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -202,8 +204,9 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.putAll(draftAnOrderService.generateDraftOrderCollection(caseData));
-        caseDataUpdated.put("previewOrderDoc",null);
+        caseDataUpdated.putAll(draftAnOrderService.generateDraftOrderCollection(caseData, authorisation));
+        manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+        log.info("caseDataUpdated after submit draft order ====> " + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
