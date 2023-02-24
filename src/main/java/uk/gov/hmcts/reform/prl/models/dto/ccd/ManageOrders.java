@@ -182,6 +182,8 @@ public class ManageOrders {
 
     private final YesOrNo serveToRespondentOptions;
     private final ServingRespondentsEnum servingRespondentsOptionsCA;
+    private final DynamicMultiSelectList recipientsOptions;
+    private final DynamicMultiSelectList otherParties;
     private final YesOrNo cafcassServedOptions;
     private final YesOrNo cafcassCymruServedOptions;
     private final String cafcassCymruEmail;
@@ -206,8 +208,8 @@ public class ManageOrders {
     private final YesOrNo ordersNeedToBeServed;
     @JsonProperty("isTheOrderAboutChildren")
     private final YesOrNo isTheOrderAboutChildren;
-    @JsonProperty("isJudgeOrLa")
-    private final String isJudgeOrLa;
+    @JsonProperty("loggedInUserType")
+    private final String loggedInUserType;
     @JsonProperty("judgeDirectionsToAdminAmendOrder")
     private final String judgeDirectionsToAdminAmendOrder;
 
@@ -219,6 +221,15 @@ public class ManageOrders {
     private final String nameOfJudgeAmendOrder;
     @JsonProperty("nameOfLaAmendOrder")
     private final String nameOfLaAmendOrder;
+
+    @JsonProperty("previewUploadedOrder")
+    private Document previewUploadedOrder;
+    @JsonProperty("orderUploadedAsDraftFlag")
+    private YesOrNo orderUploadedAsDraftFlag;
+    @JsonProperty("makeChangesToUploadedOrder")
+    private YesOrNo makeChangesToUploadedOrder;
+    @JsonProperty("editedUploadOrderDoc")
+    private Document editedUploadOrderDoc;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime currentOrderCreatedDateTime;

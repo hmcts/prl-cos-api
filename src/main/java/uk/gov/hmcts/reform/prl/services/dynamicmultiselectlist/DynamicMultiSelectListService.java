@@ -26,6 +26,7 @@ import java.util.Map;
 public class DynamicMultiSelectListService {
 
     public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData, String key) {
+        log.info("Order collection list inside dynamic multiselect service **** {} ****", caseData.getOrderCollection());
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (null != orders) {
