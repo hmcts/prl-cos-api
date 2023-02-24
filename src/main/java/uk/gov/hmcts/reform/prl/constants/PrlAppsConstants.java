@@ -354,6 +354,7 @@ public class PrlAppsConstants {
     public static final String IS_HEARINGCHILDREQUIRED_Y = "Y";
     public static final String IS_HEARINGCHILDREQUIRED_N = "N";
     public static final String HEARINGCHANNEL = "HearingChannel";
-    public static final String VIDEOPLATFORM = "HearingChannel";
+    public static final String VIDEOPLATFORM = "Video";
+    public static final String TELEPHONEPLATFORM = "Telephone";
 
 }
