@@ -22,18 +22,23 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +47,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
@@ -72,6 +78,11 @@ public class ManageOrdersController {
 
     @Autowired
     private DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    @Autowired
+    private RefDataUserService refDataUserService;
+
+    private DynamicList retrievedHearingTypes;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
     private static final List<String> MANAGE_ORDER_FIELDS = List.of("manageOrdersOptions",
@@ -185,15 +196,30 @@ public class ManageOrdersController {
         @ApiResponse(responseCode = "200", description = "Populated Headers"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse populateHeader(
-        @RequestBody CallbackRequest callbackRequest
+        @RequestBody CallbackRequest callbackRequest,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation
     ) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+
+        Map<String, Object> caseDataUpdated = manageOrderService.populateHeader(caseData);
+        List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
+        if (caseDataUpdated.containsKey("listWithoutNoticeHearingDetails")) {
+            caseDataUpdated.put("listWithoutNoticeHearingDetails",
+                                mapHearingData(existingListWithoutNoticeHearingDetails,retrievedHearingTypes));
+        } else {
+            retrievedHearingTypes = DynamicList.builder()
+                .value(DynamicListElement.EMPTY)
+                .listItems(prePopulateHearingType(authorisation)).build();
+            caseDataUpdated.put("listWithoutNoticeHearingDetails",
+                                ElementUtils.wrapElements(HearingData.builder()
+                                                              .hearingTypes(retrievedHearingTypes).build()));
+        }
         log.info("caseData before populate-header ===> " + caseData);
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(manageOrderService.populateHeader(caseData))
+            .data(caseDataUpdated)
             .build();
     }
 
@@ -375,5 +401,18 @@ public class ManageOrdersController {
             caseDetails.getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
                 .listItems(List.of(DynamicMultiselectListElement.EMPTY)).build());
         }
+    }
+
+    private List<Element<HearingData>> mapHearingData(List<Element<HearingData>> hearindDatas, DynamicList hearingTypesDynamicList) {
+        List<HearingData> hearings = new ArrayList<>();
+        hearindDatas.stream().parallel().forEach(hearingDataElement -> {
+            hearingDataElement.getValue().getHearingTypes().setListItems(null != hearingTypesDynamicList
+                                                                             ? hearingTypesDynamicList.getListItems() : null);
+        });
+        return hearindDatas;
+    }
+
+    private List<DynamicListElement> prePopulateHearingType(String authorisation) {
+        return refDataUserService.retrieveCategoryValues(authorisation, HEARINGTYPE);
     }
 }

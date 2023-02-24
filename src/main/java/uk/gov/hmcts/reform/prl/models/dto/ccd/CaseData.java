@@ -755,4 +755,8 @@ public class CaseData implements MappableObject {
 
     //Added for c100 rebuild
     private Long noOfDaysRemainingToSubmitCase;
+
+    @JsonUnwrapped
+    @Builder.Default
+    private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
 }
