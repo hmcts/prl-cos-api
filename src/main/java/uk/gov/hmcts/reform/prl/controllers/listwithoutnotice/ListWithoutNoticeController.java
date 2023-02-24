@@ -47,11 +47,11 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
 
     private DynamicList retrievedHearingTypes = null;
 
-    private DynamicList retrievedHearingDates;
+    private DynamicList retrievedHearingDates = null;
 
-    private DynamicList retrievedHearingChannels;
+    private DynamicList retrievedHearingChannels = null;
 
-    private DynamicList retrievedHearingSubChannels;
+    private DynamicList retrievedHearingSubChannels = null;
 
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate Hearing page details")
@@ -71,7 +71,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         if (caseDataUpdated.containsKey("listWithoutNoticeHearingDetails")) {
             caseDataUpdated.put("listWithoutNoticeHearingDetails",
                                 hearingDataService.mapHearingData(existingListWithoutNoticeHearingDetails,
-                                                                  retrievedHearingTypes,retrievedHearingDates,retrievedHearingChannels));
+                                                                  retrievedHearingTypes,retrievedHearingDates));
         } else {
             retrievedHearingTypes = DynamicList.builder()
                 .value(DynamicListElement.EMPTY)
@@ -87,7 +87,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                 ElementUtils.wrapElements(HearingData.builder()
                     .hearingTypes(retrievedHearingTypes)
                     .confirmedHearingDates(retrievedHearingDates)
-                    .hearingChannel(retrievedHearingChannels).build()));
+                    .build()));
 
         }
 
@@ -111,7 +111,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         );
 
         caseDataUpdated.put("listWithoutNoticeHearingDetails",hearingDataService
-            .mapHearingData(caseData.getListWithoutNoticeHearingDetails(),null,null,retrievedHearingChannels));
+            .mapHearingData(caseData.getListWithoutNoticeHearingDetails(),null,null));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
