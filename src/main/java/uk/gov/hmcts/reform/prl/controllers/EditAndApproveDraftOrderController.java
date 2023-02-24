@@ -15,13 +15,15 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -49,10 +51,11 @@ public class EditAndApproveDraftOrderController {
             CaseData.class
         );
         log.info("isCAfcass inside /populate-draft-order-dropdown {}", caseData.getIsCafcass());
+        String eventId = callbackRequest.getEventId();
         if (caseData.getDraftOrderCollection() != null
             && !caseData.getDraftOrderCollection().isEmpty()) {
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.getDraftOrderDynamicList(caseData)).build();
+                .data(draftAnOrderService.getDraftOrderDynamicList(caseData, eventId)).build();
         } else {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
         }
@@ -84,11 +87,9 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
             authorisation,
-            callbackRequest,
-            caseData
+            callbackRequest
         );
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -104,16 +105,10 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse saveServeOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
+
+        Map<String, Object> caseDataUpdated = draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
             authorisation,
-            callbackRequest,
-            caseData,
-            caseDataUpdated
+            callbackRequest
         );
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
@@ -165,11 +160,16 @@ public class EditAndApproveDraftOrderController {
         log.info("isCAfcass inside /judge-or-admin-populate-draft-order {}", caseData.getIsCafcass());
         Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(caseData);
         String orderStatus = (String) response.remove("status");
+        String reviewRequiredBy = (String) response.remove("reviewRequiredBy");
         log.info("** Order status {}", orderStatus);
-        //        if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
-        //            && !("Judge reviewed".equalsIgnoreCase(orderStatus))) {
-        //            return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("Selected order is not reviewed by Judge.")).build();
-        //        }
+        log.info("** Review Required By {}", reviewRequiredBy);
+        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
+            && (OrderStatusEnum.createdByCA.getDisplayedValue().equalsIgnoreCase(orderStatus))
+            && AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.getDisplayedValue().equalsIgnoreCase(
+            reviewRequiredBy)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
+                "Selected order is not reviewed by Judge.")).build();
+        }
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(response).build();
     }
