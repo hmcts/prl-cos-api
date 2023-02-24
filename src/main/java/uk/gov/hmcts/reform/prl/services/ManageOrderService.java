@@ -1550,15 +1550,18 @@ public class ManageOrderService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String loggedInUserType;
         List<String> roles = userDetails.getRoles();
-        if (roles.stream().anyMatch(Roles.JUDGE.getValue()::contains) || roles.stream().anyMatch(Roles.LEGAL_ADVISER.getValue()::contains)) {
+        log.info("roles ===> " + roles);
+        log.info("Judge ===> " + Roles.JUDGE.getValue());
+        log.info("LEGAL_ADVISER ===> " + Roles.LEGAL_ADVISER.getValue());
+        if (roles.contains(Roles.JUDGE.getValue()) || roles.contains(Roles.LEGAL_ADVISER.getValue())) {
             loggedInUserType = UserRoles.JUDGE.name();
-        } else if (roles.stream().anyMatch(Roles.COURT_ADMIN.getValue()::contains)) {
+        } else if (roles.contains(Roles.COURT_ADMIN.getValue())) {
             loggedInUserType = UserRoles.COURT_ADMIN.name();
-        } else if (roles.stream().anyMatch(Roles.SOLICITOR.getValue()::contains)) {
+        } else if (roles.contains(Roles.SOLICITOR.getValue())) {
             loggedInUserType = UserRoles.SOLICITOR.name();
-        } else if (roles.stream().anyMatch(Roles.CITIZEN.getValue()::contains)) {
+        } else if (roles.contains(Roles.CITIZEN.getValue())) {
             loggedInUserType = UserRoles.CITIZEN.name();
-        } else if (roles.stream().anyMatch(Roles.SYSTEM_UPDATE.getValue()::contains)) {
+        } else if (roles.contains(Roles.SYSTEM_UPDATE.getValue())) {
             loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
         } else {
             loggedInUserType = "";
