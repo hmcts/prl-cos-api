@@ -119,12 +119,10 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)) {
-            for (Element<DraftOrder> draftOrderElement : draftOrderCollection) {
-                OtherDraftOrderDetails otherDraftOrderDetails = draftOrderElement.getValue().getOtherDetails();
-                if (!AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(otherDraftOrderDetails.getReviewRequiredBy())) {
-                    draftOrderCollection.remove(draftOrderCollection.indexOf(draftOrderElement));
-                }
-            }
+            draftOrderCollection.removeIf(draftOrderElement ->
+                                              draftOrderElement.getValue().getOtherDetails() != null
+                                                  && !AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(
+                                                      draftOrderElement.getValue().getOtherDetails().getReviewRequiredBy()));
         }
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
             draftOrderCollection,
