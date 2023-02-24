@@ -128,7 +128,7 @@ public class CaseUtils {
     }
 
     public static YesOrNo cafcassFlag(String regionId) {
-
+        log.info("regionId ===> " + regionId);
         YesOrNo cafcassFlag = YesOrNo.No; //wales
 
         int intRegionId = Integer.parseInt(regionId);
@@ -136,6 +136,7 @@ public class CaseUtils {
         if (intRegionId > 0 && intRegionId < 7) {
             cafcassFlag = YesOrNo.Yes; //english regions
         }
+        log.info("is cafcass flag set ===> " + cafcassFlag);
         return cafcassFlag;
     }
 }
