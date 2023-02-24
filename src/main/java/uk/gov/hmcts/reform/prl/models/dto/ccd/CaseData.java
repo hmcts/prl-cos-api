@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DomesticAbuseOrdersEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.FcOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
@@ -123,10 +124,8 @@ public class CaseData implements MappableObject {
 
     private final State state;
 
-    @JsonIgnore
     private final LocalDateTime createdDate;
 
-    @JsonIgnore
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
@@ -145,6 +144,8 @@ public class CaseData implements MappableObject {
      * Case created by.
      */
     private CaseCreatedBy caseCreatedBy;
+
+    private YesOrNo isCafcass;
 
     /**
      * Case Type Of Application.
@@ -546,8 +547,9 @@ public class CaseData implements MappableObject {
      */
     private final List<Element<OrderDetails>> orderCollection;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate approvalDate;
-    private Document appointmentOfGuardian;
+    private Document uploadOrderDoc;
     private Document previewOrderDoc;
     private Document previewOrderDocWelsh;
 
@@ -555,7 +557,6 @@ public class CaseData implements MappableObject {
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
     private final List<OrderRecipientsEnum> orderRecipients;
     private final SelectTypeOfOrderEnum selectTypeOfOrder;
-
 
     @JsonProperty("doesOrderClosesCase")
     private final YesOrNo doesOrderClosesCase;
@@ -741,6 +742,8 @@ public class CaseData implements MappableObject {
     private YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     private String courtAdminNotes;
 
+
+
     @JsonUnwrapped
     @Builder.Default
     private final ServeOrderData serveOrderData;
@@ -754,5 +757,8 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
+    private final DraftOrderOptionsEnum draftOrderOptions;
 
+    //Added for c100 rebuild
+    private Long noOfDaysRemainingToSubmitCase;
 }
