@@ -108,7 +108,6 @@ public class CaseUtils {
             caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
                 .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
-            caseDataMap.put(PrlAppsConstants.IS_CAFCASS, CaseUtils.cafcassFlag(regionId));
             caseDataMap.put(COURT_NAME_FIELD, courtName);
             caseDataMap.put(COURT_ID_FIELD, baseLocationId);
 
