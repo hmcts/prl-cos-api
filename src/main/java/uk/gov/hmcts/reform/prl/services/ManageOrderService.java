@@ -1611,6 +1611,9 @@ public class ManageOrderService {
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
+            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                caseData = populateCustomOrderFields(caseData);
+            }
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getUploadOrderDoc());
