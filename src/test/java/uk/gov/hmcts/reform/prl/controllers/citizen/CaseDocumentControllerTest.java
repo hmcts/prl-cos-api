@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -13,11 +14,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.prl.clients.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -35,12 +40,15 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.UploadDocumentEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.any;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -55,8 +64,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -87,6 +96,17 @@ public class CaseDocumentControllerTest {
 
     @Mock
     private AuthorisationService authorisationService;
+    @Mock
+    SystemUserService systemUserService;
+    @Mock
+    CoreCaseDataService coreCaseDataService;
+    private String bearerToken;
+
+    private final String userToken = "Bearer testToken";
+
+    private final String systemUpdateUserId = "systemUserID";
+
+    private EventRequestData eventRequestData;
 
     @Before
     public void setUp() {
@@ -357,34 +377,63 @@ public class CaseDocumentControllerTest {
             uploadedDocuments).build();
         List<Element<UploadedDocuments>> listOfUploadedDocuments = new ArrayList<>(List.of(
             uploadedDocumentsElement1));
+
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
         User user1 = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fa").build();
         PartyDetails respondent = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
-        CaseData casedata = CaseData.builder().id(165635049).caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE).applicantsFL401(
-                applicant).respondentsFL401(respondent).state(State.AWAITING_SUBMISSION_TO_HMCTS)
+        CaseData caseData = CaseData.builder().id(Long.parseLong("1656350492135029")).caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantsFL401(applicant).respondentsFL401(respondent).state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .citizenUploadedDocumentList(listOfUploadedDocuments)
             .build();
-        Map<String, Object> stringObjectMap = casedata.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder().id(
-            Long.parseLong("1656350492135029")).state("AWAITING_SUBMISSION_TO_HMCTS").data(stringObjectMap).build();
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
-        when(coreCaseDataApi.getCase(authToken, s2sToken, "1656350492135029")).thenReturn(
-            caseDetails);
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(Long.parseLong("1656350492135029"))
+            .data(stringObjectMap)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .createdDate(LocalDateTime.now())
+            .lastModified(LocalDateTime.now())
+            .build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(uploadService.uploadCitizenDocument(
             authToken,
             uploadedDocumentRequest
         )).thenReturn(uploadedDocuments);
-        StartEventResponse startEventResponse = StartEventResponse.builder().eventId("")
-            .token("")
-            .caseDetails(caseDetails)
-            .build();
+
         UserInfo userInfo = UserInfo.builder()
             .uid("123456")
             .build();
-        when(idamClient.getUserInfo(authToken)).thenReturn(userInfo);
-        when(coreCaseDataApi.startEventForCitizen(authToken, s2sToken, "123456", JURISDICTION, CASE_TYPE, "1656350492135029",
-                                                                                CITIZEN_UPLOADED_DOCUMENT)).thenReturn(startEventResponse);
+
+        //when(idamClient.getUserInfo(authToken)).thenReturn(userInfo);
+        eventRequestData = EventRequestData.builder()
+            .eventId(CaseEvent.CITIZEN_UPLOADED_DOCUMENT.getValue())
+            .caseTypeId(CASE_TYPE)
+            .ignoreWarning(true)
+            .jurisdictionId(JURISDICTION)
+            .userId(systemUpdateUserId)
+            .userToken(userToken)
+            .build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(userToken);
+        when(systemUserService.getUserId(userToken)).thenReturn(systemUpdateUserId);
+        when(coreCaseDataService.eventRequest(CaseEvent.CITIZEN_UPLOADED_DOCUMENT, systemUpdateUserId)).thenReturn(eventRequestData);
+
+        StartEventResponse startEventResponse = StartEventResponse.builder()
+            .caseDetails(caseDetails)
+            .token(bearerToken).build();
+        when(coreCaseDataService.startUpdate(
+            userToken,eventRequestData, String.valueOf(caseData.getId()),false))
+            .thenReturn(startEventResponse);
+        CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
+
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .data(stringObjectMap)
+            .build();
+        Mockito.lenient().when(coreCaseDataService.createCaseDataContent(startEventResponse, any(CaseData.class))).thenReturn(caseDataContent);
+        Mockito.lenient().when(coreCaseDataService.submitUpdate(userToken, eventRequestData, caseDataContent,String.valueOf(caseData.getId()), true))
+            .thenReturn(caseDetails);
+
         ResponseEntity responseEntity = caseDocumentController.uploadCitizenStatementDocument(authToken,s2sToken,uploadedDocumentRequest);
         assertNotNull(responseEntity);
     }

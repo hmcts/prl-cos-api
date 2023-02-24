@@ -107,7 +107,7 @@ public class CaseDocumentController {
     private String dashboardUrl;
 
     @Autowired
-    private CoreCaseDataService coreCaseDataService;
+    CoreCaseDataService coreCaseDataService;
 
     @Autowired
     private SystemUserService systemUserService;
@@ -283,7 +283,7 @@ public class CaseDocumentController {
                 uploadedDocumentsList = new ArrayList<>();
                 uploadedDocumentsList.add(uploadedDocsElement);
             }
-            tempCaseData = tempCaseData.builder()
+            tempCaseData = tempCaseData.toBuilder()
                 .citizenUploadedDocumentList(uploadedDocumentsList)
                 .build();
 
