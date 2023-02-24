@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
@@ -113,11 +114,20 @@ public class DraftAnOrderService {
         return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
     }
 
-    public Map<String, Object> getDraftOrderDynamicList(CaseData caseData) {
+    public Map<String, Object> getDraftOrderDynamicList(CaseData caseData, String eventId) {
 
         Map<String, Object> caseDataMap = new HashMap<>();
+        List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
+        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)) {
+            for (Element<DraftOrder> draftOrderElement : draftOrderCollection) {
+                OtherDraftOrderDetails otherDraftOrderDetails = draftOrderElement.getValue().getOtherDetails();
+                if (!AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(otherDraftOrderDetails.getReviewRequiredBy())) {
+                    draftOrderCollection.remove(draftOrderCollection.indexOf(draftOrderElement));
+                }
+            }
+        }
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            caseData.getDraftOrderCollection(),
+            draftOrderCollection,
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
@@ -372,6 +382,8 @@ public class DraftAnOrderService {
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
         caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
+        caseDataMap.put("reviewRequiredBy", selectedOrder.getOtherDetails().getReviewRequiredBy() != null
+            ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
         caseDataMap.put(PrlAppsConstants.IS_CAFCASS, caseData.getIsCafcass());
         log.info("isCafcass inside populateCommonDraftOrderFields {}", caseData.getIsCafcass());
         log.info("Selected order type is ********   from    populateCommonDraftOrderFields",selectedOrder.getOrderType());
@@ -827,8 +839,8 @@ public class DraftAnOrderService {
         return caseDataUpdated;
     }
 
-    public Map<String, Object> judgeOrAdminEditApproveDraftOrderMidEvent(String authorisation, CallbackRequest callbackRequest,
-                                                                         CaseData caseData) {
+    public Map<String, Object> judgeOrAdminEditApproveDraftOrderMidEvent(String authorisation, CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info(
             "********caseData.getDoYouWantCourtAdminToAddAnything***** {}",
@@ -855,9 +867,13 @@ public class DraftAnOrderService {
         return caseDataUpdated;
     }
 
-    public void judgeOrAdminEditApproveDraftOrderAboutToSubmit(String authorisation, CallbackRequest callbackRequest,
-                                                               CaseData caseData, Map<String, Object> caseDataUpdated) {
+    public  Map<String, Object> judgeOrAdminEditApproveDraftOrderAboutToSubmit(String authorisation, CallbackRequest callbackRequest) {
         String eventId = callbackRequest.getEventId();
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
             .equals(caseData.getServeOrderData().getWhatDoWithOrder())
@@ -883,5 +899,6 @@ public class DraftAnOrderService {
         }
         log.info("orderCollection after cleanup ===> " + caseDataUpdated.get("orderCollection"));
         log.info("draftOrderCollection after cleanup ===> " + caseDataUpdated.get("draftOrderCollection"));
+        return caseDataUpdated;
     }
 }
