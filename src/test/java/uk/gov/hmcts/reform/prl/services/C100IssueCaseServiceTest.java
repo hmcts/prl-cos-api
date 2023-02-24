@@ -313,8 +313,7 @@ public class C100IssueCaseServiceTest {
 
         Map<String, Object> objectMap = c100IssueCaseService.issueAndSendToLocalCourt(
             authToken,
-            callbackRequest,
-            caseData
+            callbackRequest
         );
         Assertions.assertNotNull(objectMap.get("c8Document"));
         Assertions.assertNotNull(objectMap.get("c1ADocument"));
@@ -344,8 +343,7 @@ public class C100IssueCaseServiceTest {
 
         Map<String, Object> objectMap = c100IssueCaseService.issueAndSendToLocalCourt(
             authToken,
-            callbackRequest,
-            caseData
+            callbackRequest
         );
         Assertions.assertNull(objectMap.get("c8Document"));
         Assertions.assertNull(objectMap.get("c1ADocument"));
@@ -435,8 +433,7 @@ public class C100IssueCaseServiceTest {
 
         Map<String, Object> objectMap = c100IssueCaseService.issueAndSendToLocalCourt(
             authToken,
-            callbackRequest,
-            caseData
+            callbackRequest
         );
         Assertions.assertNotNull(objectMap.get("c1ADocument"));
         Assertions.assertNotNull(objectMap.get("c1AWelshDocument"));
@@ -587,8 +584,7 @@ public class C100IssueCaseServiceTest {
 
         Map<String, Object> objectMap = c100IssueCaseService.issueAndSendToLocalCourt(
             authToken,
-            callbackRequest,
-            caseData
+            callbackRequest
         );
         Assertions.assertNotNull(objectMap.get("c1ADocument"));
         Assertions.assertNotNull(objectMap.get("c1AWelshDocument"));

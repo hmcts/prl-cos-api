@@ -133,8 +133,7 @@ public class C100IssueCaseControllerTest {
 
         when(c100IssueCaseService.issueAndSendToLocalCourt(
             any(String.class),
-            any(CallbackRequest.class),
-            any(CaseData.class)
+            any(CallbackRequest.class)
         )).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = c100IssueCaseController.issueAndSendToLocalCourt(authToken,

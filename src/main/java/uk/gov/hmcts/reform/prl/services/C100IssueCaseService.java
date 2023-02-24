@@ -51,8 +51,8 @@ public class C100IssueCaseService {
                 authorisation
             );
             String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
-            CaseUtils.getCourtDetails(courtVenue, caseDataUpdated, baseLocationId);
-            CaseUtils.getCourtEmail(caseDataUpdated, idEmail, caseTypeOfApplication);
+            caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
+            caseDataUpdated.putAll(CaseUtils.getCourtEmail(idEmail, caseTypeOfApplication));
             caseData.setCourtName(caseDataUpdated.get("courtName").toString());
         }
         caseData.setIssueDate();
