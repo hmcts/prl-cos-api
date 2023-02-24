@@ -83,13 +83,6 @@ public class CitizenCoreCaseDataService {
                 caseDataUpdated
             );
 
-            CaseDetails caseDetails = coreCaseDataService.submitUpdate(
-                userToken,
-                eventRequestData,
-                caseDataContent,
-                String.valueOf(caseId),
-                true);
-
             return coreCaseDataService.submitUpdate(
                 userToken,
                 eventRequestData,
