@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
@@ -145,6 +144,7 @@ public class TaskListService {
             CHILD_DETAILS,
             RESPONDENT_DETAILS,
             MIAM,
+                ALLEGATIONS_OF_HARM,
             OTHER_PEOPLE_IN_THE_CASE,
             OTHER_PROCEEDINGS,
             ATTENDING_THE_HEARING,

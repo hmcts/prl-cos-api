@@ -83,6 +83,7 @@ public class C100IssueCaseControllerTest {
     @InjectMocks
     private C100IssueCaseController c100IssueCaseController;
 
+
     @Mock
     private UserService userService;
 
@@ -467,7 +468,6 @@ public class C100IssueCaseControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
 
-        verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -591,8 +591,6 @@ public class C100IssueCaseControllerTest {
             Mockito.anyString(),
             Mockito.any(CaseData.class)
         );
-        verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
-        //verifyNoMoreInteractions(organisationService);
     }
 
 

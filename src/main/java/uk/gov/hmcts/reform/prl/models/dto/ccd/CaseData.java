@@ -52,9 +52,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelation;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
@@ -211,17 +208,9 @@ public class CaseData implements MappableObject {
     private final List<Element<Child>> otherChildren;
 
 
-    private List<Element<ChildrenAndApplicantRelation>> buffChildAndApplicantRelations;
+    @JsonUnwrapped
+    private final Relations relations;
 
-    private List<Element<ChildrenAndApplicantRelation>> childAndApplicantRelations;
-
-    private List<Element<ChildrenAndRespondentRelation>> buffChildAndRespondentRelations;
-
-    private List<Element<ChildrenAndRespondentRelation>> childAndRespondentRelations;
-
-    private List<Element<ChildrenAndOtherPeopleRelation>> buffChildAndOtherPeopleRelations;
-
-    private List<Element<ChildrenAndOtherPeopleRelation>> childAndOtherPeopleRelations;
     /**
      * Type of application.
      */
@@ -309,8 +298,6 @@ public class CaseData implements MappableObject {
 
     @JsonUnwrapped
     private final AllegationOfHarmRevised allegationOfHarmRevised;
-
-    private final String allegationOfHarmNewText;
 
     /**
      * Other people in the case.

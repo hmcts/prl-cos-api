@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -120,6 +121,7 @@ public class C100JsonMapperTest {
         List<Element<OtherChildrenNotInTheCase>> listOfOtherChildrenNotInTheCase = Collections.singletonList(wrappedOtherChildrenNotInTheCase);
 
         CaseData caseData = CaseData.builder().courtId("CourtId").id(213123).feeAmount("312312")
+                .relations(Relations.builder().build())
             .taskListVersion(TASK_LIST_VERSION_V2)
             .childrenNotInTheCase(listOfOtherChildrenNotInTheCase)
             .familymanCaseNumber("123123").dateSubmitted("2019/1/2").build();

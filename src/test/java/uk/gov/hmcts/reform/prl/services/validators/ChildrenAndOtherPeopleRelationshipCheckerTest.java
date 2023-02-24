@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
@@ -34,7 +35,8 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
-        CaseData caseData = CaseData.builder().build();
+        CaseData caseData = CaseData.builder()
+                .relations(Relations.builder().build()).build();
 
         assertTrue(!otherPeopleInTheCaseChecker.isStarted(caseData));
     }
@@ -46,7 +48,8 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
             Element.<ChildrenAndOtherPeopleRelation>builder().value(child).build();
         List<Element<ChildrenAndOtherPeopleRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        CaseData caseData = CaseData.builder().childAndOtherPeopleRelations(listOfChildren).build();
+        CaseData caseData = CaseData.builder().relations(Relations.builder()
+                .childAndOtherPeopleRelations(listOfChildren).build()).build();
 
         assertTrue(otherPeopleInTheCaseChecker.isStarted(caseData));
     }
@@ -55,6 +58,7 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
     public void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
 
         CaseData caseData = CaseData.builder()
+                .relations(Relations.builder().build())
             .build();
 
         assertTrue(!otherPeopleInTheCaseChecker.isStarted(caseData));
@@ -69,7 +73,7 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
         Element<ChildrenAndOtherPeopleRelation> wrappedChildren = Element.<ChildrenAndOtherPeopleRelation>builder().value(child).build();
         List<Element<ChildrenAndOtherPeopleRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        CaseData caseData = CaseData.builder().childAndOtherPeopleRelations(listOfChildren).build();
+        CaseData caseData = CaseData.builder().relations(Relations.builder().childAndOtherPeopleRelations(listOfChildren).build()).build();
 
         assertTrue(!otherPeopleInTheCaseChecker.isFinished(caseData));
     }
@@ -89,14 +93,14 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
         List<Element<ChildrenAndOtherPeopleRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
-            .childAndOtherPeopleRelations(listOfChildren)
+                .relations(Relations.builder().childAndOtherPeopleRelations(listOfChildren).build())
             .build();
 
         assertTrue(otherPeopleInTheCaseChecker.isFinished(caseData));
     }
 
     @Test
-    public void whenvalidateOtherChildrenNotInTheCaseReturnsTrue() {
+    public void whenValidateOtherChildrenNotInTheCaseReturnsTrue() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder()
             .otherPeopleFullName("Test")
             .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.father)
@@ -108,7 +112,8 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
         List<Element<ChildrenAndOtherPeopleRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
-            .childAndOtherPeopleRelations(listOfChildren)
+                .relations(Relations.builder()
+            .childAndOtherPeopleRelations(listOfChildren).build())
             .build();
 
         assertTrue(otherPeopleInTheCaseChecker.isFinished(caseData));
@@ -116,8 +121,9 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
 
 
     @Test
-    public void whenvalidateOtherChildrenNotInTheCaseReturnsFalse() {
+    public void whenValidateOtherChildrenNotInTheCaseReturnsFalse() {
         CaseData caseData = CaseData.builder()
+                .relations(Relations.builder().build())
             .build();
         assertTrue(!otherPeopleInTheCaseChecker.isFinished(caseData));
     }
@@ -136,9 +142,9 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
         List<Element<ChildrenAndOtherPeopleRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
+                .relations(Relations.builder()
             .childAndOtherPeopleRelations(listOfChildren)
-            .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
-            .build();
+            .build()).childrenNotPartInTheCaseYesNo(YesOrNo.Yes).build();
         assertTrue(otherPeopleInTheCaseChecker.isFinished(caseData));
     }
 
@@ -157,7 +163,8 @@ public class ChildrenAndOtherPeopleRelationshipCheckerTest {
         List<Element<ChildrenAndOtherPeopleRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
-            .childAndOtherPeopleRelations(listOfChildren)
+                .relations(Relations.builder()
+                        .childAndOtherPeopleRelations(listOfChildren).build())
             .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
             .build();
         assertTrue(otherPeopleInTheCaseChecker.isFinished(caseData));

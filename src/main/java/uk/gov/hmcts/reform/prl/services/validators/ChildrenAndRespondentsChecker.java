@@ -26,9 +26,9 @@ public class ChildrenAndRespondentsChecker implements EventChecker {
     @Override
     public boolean isFinished(CaseData caseData) {
 
-        if (caseData.getChildAndRespondentRelations() != null) {
+        if (caseData.getRelations().getChildAndRespondentRelations() != null) {
 
-            if (caseData.getChildAndRespondentRelations().stream().anyMatch(eachRelation ->
+            if (caseData.getRelations().getChildAndRespondentRelations().stream().anyMatch(eachRelation ->
                     RelationshipsEnum.other.getDisplayedValue().equalsIgnoreCase(eachRelation.getValue()
                             .getChildAndRespondentRelation().getDisplayedValue())
                             && eachRelation.getValue().getChildAndRespondentRelationOtherDetails() == null)) {
@@ -50,7 +50,7 @@ public class ChildrenAndRespondentsChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        return caseData.getChildAndRespondentRelations() != null;
+        return caseData.getRelations().getChildAndRespondentRelations() != null;
     }
 
     @Override

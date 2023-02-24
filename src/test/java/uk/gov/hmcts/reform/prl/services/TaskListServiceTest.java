@@ -90,6 +90,7 @@ public class TaskListServiceTest {
             Task.builder().event(CHILD_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(MIAM).state(NOT_STARTED).build(),
+                Task.builder().event(ALLEGATIONS_OF_HARM).state(NOT_STARTED).build(),
             Task.builder().event(OTHER_PEOPLE_IN_THE_CASE).state(NOT_STARTED).build(),
             Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
             Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
@@ -98,8 +99,7 @@ public class TaskListServiceTest {
             Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
             Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
             Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build(),
-            Task.builder().event(SUBMIT).state(NOT_STARTED).build(),
-            Task.builder().event(ALLEGATIONS_OF_HARM).state(NOT_STARTED).build());
+            Task.builder().event(SUBMIT).state(NOT_STARTED).build());
         Mockito.when(eventsChecker.getDefaultState(Mockito.any(Event.class),Mockito.any(CaseData.class))).thenReturn(NOT_STARTED);
 
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
@@ -112,28 +112,34 @@ public class TaskListServiceTest {
     public void getTasksShouldReturnListOfTasks_WithNewAllegationOfHarm() {
 
         CaseData caseData = CaseData.builder().isNewCaseCreated(YesOrNo.Yes)
-            .                            caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+                .taskListVersion(TASK_LIST_VERSION_V2).build();
 
         List<Task> expectedTasks = List.of(
-            Task.builder().event(CASE_NAME).state(NOT_STARTED).state(NOT_STARTED).build(),
-            Task.builder().event(TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
-            Task.builder().event(HEARING_URGENCY).state(NOT_STARTED).build(),
-            Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(CHILD_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(MIAM).state(NOT_STARTED).build(),
-            Task.builder().event(OTHER_PEOPLE_IN_THE_CASE).state(NOT_STARTED).build(),
-            Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
-            Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
-            Task.builder().event(INTERNATIONAL_ELEMENT).state(NOT_STARTED).build(),
-            Task.builder().event(LITIGATION_CAPACITY).state(NOT_STARTED).build(),
-            Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
-            Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-            Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build(),
-            Task.builder().event(SUBMIT).state(NOT_STARTED).build(),
-            Task.builder().event(ALLEGATIONS_OF_HARM_REVISED).state(NOT_STARTED).build());
-
-
+                Task.builder().event(CASE_NAME).build(),
+                Task.builder().event(TYPE_OF_APPLICATION).build(),
+                Task.builder().event(HEARING_URGENCY).build(),
+                Task.builder().event(CHILD_DETAILS_REVISED).build(),
+                Task.builder().event(APPLICANT_DETAILS).build(),
+                Task.builder().event(RESPONDENT_DETAILS).build(),
+                Task.builder().event(OTHER_PEOPLE_IN_THE_CASE_REVISED).build(),
+                Task.builder().event(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION).build(),
+                Task.builder().event(CHILDREN_AND_APPLICANTS).state(CANNOT_START_YET).build(),
+                Task.builder().event(CHILDREN_AND_RESPONDENTS).state(CANNOT_START_YET).build(),
+                Task.builder().event(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION).state(CANNOT_START_YET).build(),
+                Task.builder().event(ALLEGATIONS_OF_HARM_REVISED).build(),
+                Task.builder().event(MIAM).build(),
+                Task.builder().event(OTHER_PROCEEDINGS).build(),
+                Task.builder().event(ATTENDING_THE_HEARING).build(),
+                Task.builder().event(INTERNATIONAL_ELEMENT).build(),
+                Task.builder().event(LITIGATION_CAPACITY).build(),
+                Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).build(),
+                Task.builder().event(VIEW_PDF_DOCUMENT).build(),
+                Task.builder().event(SUBMIT_AND_PAY).build(),
+                Task.builder().event(SUBMIT).build());
+        when(eventsChecker.getDefaultState(CHILDREN_AND_APPLICANTS,caseData)).thenReturn(CANNOT_START_YET);
+        when(eventsChecker.getDefaultState(CHILDREN_AND_RESPONDENTS,caseData)).thenReturn(CANNOT_START_YET);
+        when(eventsChecker.getDefaultState(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION,caseData)).thenReturn(CANNOT_START_YET);
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
         assertThat(expectedTasks).isEqualTo(actualTasks);
@@ -419,7 +425,7 @@ public class TaskListServiceTest {
                 Task.builder().event(CHILDREN_AND_APPLICANTS).state(CANNOT_START_YET).build(),
                 Task.builder().event(CHILDREN_AND_RESPONDENTS).state(CANNOT_START_YET).build(),
                 Task.builder().event(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION).state(CANNOT_START_YET).build(),
-                Task.builder().event(ALLEGATIONS_OF_HARM).build(),
+                Task.builder().event(ALLEGATIONS_OF_HARM_REVISED).build(),
                 Task.builder().event(MIAM).build(),
                 Task.builder().event(OTHER_PROCEEDINGS).build(),
                 Task.builder().event(ATTENDING_THE_HEARING).build(),

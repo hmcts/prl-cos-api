@@ -117,7 +117,7 @@ public class TaskListRendererTest {
             Task.builder().event(CHILDREN_AND_APPLICANTS).state(NOT_STARTED).build(),
             Task.builder().event(CHILDREN_AND_RESPONDENTS).state(NOT_STARTED).build(),
             Task.builder().event(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION).state(NOT_STARTED).build(),
-            Task.builder().event(ALLEGATIONS_OF_HARM).state(IN_PROGRESS).build(),
+            Task.builder().event(ALLEGATIONS_OF_HARM_REVISED).state(IN_PROGRESS).build(),
             Task.builder().event(MIAM).state(NOT_STARTED).build(),
             Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
             Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),

@@ -108,7 +108,7 @@ public class ApplicationsTabServiceHelper {
     public List<Element<ChildAndApplicantRelation>> getChildAndApplicantsRelationTable(CaseData caseData) {
         log.info("getChildAndApplicantsRelationTable()--->start");
         List<Element<ChildAndApplicantRelation>> applicants = new ArrayList<>();
-        Optional<List<Element<ChildrenAndApplicantRelation>>> checkApplicants = ofNullable(caseData.getChildAndApplicantRelations());
+        Optional<List<Element<ChildrenAndApplicantRelation>>> checkApplicants = ofNullable(caseData.getRelations().getChildAndApplicantRelations());
 
         if (checkApplicants.isEmpty() || checkApplicants.get().isEmpty()) {
             ChildAndApplicantRelation a = ChildAndApplicantRelation.builder().build();
@@ -116,7 +116,7 @@ public class ApplicationsTabServiceHelper {
             applicants.add(app);
             return applicants;
         }
-        List<ChildrenAndApplicantRelation> currentApplicants = caseData.getChildAndApplicantRelations().stream()
+        List<ChildrenAndApplicantRelation> currentApplicants = caseData.getRelations().getChildAndApplicantRelations().stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
 
@@ -133,7 +133,8 @@ public class ApplicationsTabServiceHelper {
     public List<Element<ChildAndRespondentRelation>> getChildAndRespondentRelationsTable(CaseData caseData) {
         log.info("getChildAndRespondentRelationsTable()--->start");
         List<Element<ChildAndRespondentRelation>> respondents = new ArrayList<>();
-        Optional<List<Element<ChildrenAndRespondentRelation>>> checkRespondents = ofNullable(caseData.getChildAndRespondentRelations());
+        Optional<List<Element<ChildrenAndRespondentRelation>>> checkRespondents = ofNullable(caseData.getRelations()
+                .getChildAndRespondentRelations());
 
         if (checkRespondents.isEmpty() || checkRespondents.get().isEmpty()) {
             ChildAndRespondentRelation a = ChildAndRespondentRelation.builder().build();
@@ -141,7 +142,7 @@ public class ApplicationsTabServiceHelper {
             respondents.add(app);
             return respondents;
         }
-        List<ChildrenAndRespondentRelation> currentApplicants = caseData.getChildAndRespondentRelations().stream()
+        List<ChildrenAndRespondentRelation> currentApplicants = caseData.getRelations().getChildAndRespondentRelations().stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
         for (ChildrenAndRespondentRelation respondent : currentApplicants) {
@@ -157,7 +158,8 @@ public class ApplicationsTabServiceHelper {
     public List<Element<ChildAndOtherPeopleRelation>> getChildAndOtherPeopleRelationsTable(CaseData caseData) {
         log.info("-->getChildAndOtherPeopleRelationsTable()--->Start");
         List<Element<ChildAndOtherPeopleRelation>> otherPeopleRelations = new ArrayList<>();
-        Optional<List<Element<ChildrenAndOtherPeopleRelation>>> checkRespondents = ofNullable(caseData.getChildAndOtherPeopleRelations());
+        Optional<List<Element<ChildrenAndOtherPeopleRelation>>> checkRespondents = ofNullable(caseData
+                .getRelations().getChildAndOtherPeopleRelations());
 
         if (checkRespondents.isEmpty() || checkRespondents.get().isEmpty()) {
             ChildAndOtherPeopleRelation a = ChildAndOtherPeopleRelation.builder().build();
@@ -165,7 +167,7 @@ public class ApplicationsTabServiceHelper {
             otherPeopleRelations.add(app);
             return otherPeopleRelations;
         }
-        List<ChildrenAndOtherPeopleRelation> currentApplicants = caseData.getChildAndOtherPeopleRelations().stream()
+        List<ChildrenAndOtherPeopleRelation> currentApplicants = caseData.getRelations().getChildAndOtherPeopleRelations().stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
 

@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.launchdarkly.shaded.com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
@@ -72,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_RESUBMISSION_TO_HMCTS
 import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_SUBMISSION_TO_HMCTS;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskSection.newSection;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TaskListRenderer {
@@ -145,7 +148,7 @@ public class TaskListRenderer {
                             .build()));
 
             final TaskSection requiredDetails = newSection("Add required details")
-                    .withTask(tasks.get(ALLEGATIONS_OF_HARM));
+                    .withTask(tasks.get(ALLEGATIONS_OF_HARM_REVISED));
 
             final TaskSection miamDetails = newSection("MIAM details")
                     .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
@@ -254,6 +257,7 @@ public class TaskListRenderer {
 
         section.add(HORIZONTAL_LINE);
         sec.getTasks().forEach(task -> {
+            log.info("task details : {}", new Gson().toJson(task));
             section.addAll(renderTask(task));
             section.add(HORIZONTAL_LINE);
         });

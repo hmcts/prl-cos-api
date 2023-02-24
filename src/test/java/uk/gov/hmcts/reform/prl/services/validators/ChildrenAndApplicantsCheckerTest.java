@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
@@ -33,7 +34,8 @@ public class ChildrenAndApplicantsCheckerTest {
 
     @Test
     public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
-        CaseData caseData = CaseData.builder().build();
+        CaseData caseData = CaseData.builder()
+                .relations(Relations.builder().build()).build();
 
         assertTrue(!childrenAndApplicantsChecker.isStarted(caseData));
     }
@@ -51,7 +53,8 @@ public class ChildrenAndApplicantsCheckerTest {
         List<Element<ChildrenAndApplicantRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
-            .childAndApplicantRelations(listOfChildren)
+                .relations(Relations.builder()
+            .childAndApplicantRelations(listOfChildren).build())
             .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
             .build();
 
@@ -62,6 +65,7 @@ public class ChildrenAndApplicantsCheckerTest {
     public void whenSomeChildDataPresentThenIsStartedReturnsTrue() {
 
         CaseData caseData = CaseData.builder()
+                .relations(Relations.builder().build())
             .build();
 
         assertTrue(!childrenAndApplicantsChecker.isStarted(caseData));
@@ -82,7 +86,8 @@ public class ChildrenAndApplicantsCheckerTest {
         List<Element<ChildrenAndApplicantRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
-            .childAndApplicantRelations(listOfChildren)
+                .relations(Relations.builder()
+                        .childAndApplicantRelations(listOfChildren).build())
             .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
             .build();
         assertTrue(childrenAndApplicantsChecker.isFinished(caseData));
@@ -100,8 +105,8 @@ public class ChildrenAndApplicantsCheckerTest {
         List<Element<ChildrenAndApplicantRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
-            .childAndApplicantRelations(listOfChildren)
-            .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
+                .relations(Relations.builder()
+                        .childAndApplicantRelations(listOfChildren).build()).childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
             .build();
         assertTrue(!childrenAndApplicantsChecker.isFinished(caseData));
     }
@@ -119,8 +124,9 @@ public class ChildrenAndApplicantsCheckerTest {
         List<Element<ChildrenAndApplicantRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
-            .childAndApplicantRelations(listOfChildren)
-            .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
+                .relations(Relations.builder()
+                        .childAndApplicantRelations(listOfChildren).build())
+                .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
             .build();
         assertTrue(childrenAndApplicantsChecker.isFinished(caseData));
     }
@@ -129,6 +135,7 @@ public class ChildrenAndApplicantsCheckerTest {
     @Test
     public void whenAllChildDataPresentThenIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder()
+                .relations(Relations.builder().build())
             .build();
         assertTrue(!childrenAndApplicantsChecker.isFinished(caseData));
     }

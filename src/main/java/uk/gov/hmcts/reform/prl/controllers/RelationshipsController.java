@@ -84,7 +84,7 @@ public class RelationshipsController {
         log.info("ApplicantCaseData {}",new Gson().toJson(caseData));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("buffChildAndApplicantRelations", null);
-        caseDataUpdated.put("childAndApplicantRelations", caseData.getBuffChildAndApplicantRelations());
+        caseDataUpdated.put("childAndApplicantRelations", caseData.getRelations().getBuffChildAndApplicantRelations());
         log.info("PopulateApplicantData {}",new Gson().toJson(caseDataUpdated));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -133,7 +133,7 @@ public class RelationshipsController {
         log.info("caseData {}",new Gson().toJson(caseData));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("buffChildAndRespondentRelations", null);
-        caseDataUpdated.put("childAndRespondentRelations", caseData.getBuffChildAndRespondentRelations());
+        caseDataUpdated.put("childAndRespondentRelations", caseData.getRelations().getBuffChildAndRespondentRelations());
         log.info("PopulateRespondentData {}",new Gson().toJson(caseDataUpdated));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -185,7 +185,7 @@ public class RelationshipsController {
         log.info("caseData for OtherPeople: {}",new Gson().toJson(caseData));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("buffChildAndOtherPeopleRelations", null);
-        caseDataUpdated.put("childAndOtherPeopleRelations", caseData.getBuffChildAndOtherPeopleRelations());
+        caseDataUpdated.put("childAndOtherPeopleRelations", caseData.getRelations().getBuffChildAndOtherPeopleRelations());
         log.info("PopulateOtherPeopleData {}",new Gson().toJson(caseDataUpdated));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

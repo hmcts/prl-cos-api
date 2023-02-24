@@ -96,9 +96,9 @@ public class CourtFinderService {
                 .map(Element::getValue)
                 .findFirst();
 
-        List<Element<ChildrenAndApplicantRelation>> childAndApplicantRelations = caseData.getChildAndApplicantRelations();
-        List<Element<ChildrenAndRespondentRelation>> childAndRespondentRelations = caseData.getChildAndRespondentRelations();
-        List<Element<ChildrenAndOtherPeopleRelation>> childAndOtherPeopleRelations = caseData.getChildAndOtherPeopleRelations();
+        List<Element<ChildrenAndApplicantRelation>> childAndApplicantRelations = caseData.getRelations().getChildAndApplicantRelations();
+        List<Element<ChildrenAndRespondentRelation>> childAndRespondentRelations = caseData.getRelations().getChildAndRespondentRelations();
+        List<Element<ChildrenAndOtherPeopleRelation>> childAndOtherPeopleRelations = caseData.getRelations().getChildAndOtherPeopleRelations();
         Optional<ChildrenAndApplicantRelation> childrenAndApplicantRelation = childAndApplicantRelations
                 .stream()
                 .map(Element::getValue)
