@@ -1504,7 +1504,7 @@ public class ManageOrderService {
                            .typeOfOrder(typeOfOrder != null
                                             ? typeOfOrder.getDisplayedValue() : null)
                            .childrenList(getChildInfoFromCaseData(caseData))
-                           .orderClosesCase(caseData.getSelectTypeOfOrder().getDisplayedValue().equals("Final")
+                           .orderClosesCase(typeOfOrder.getDisplayedValue().equals("Final")
                                                 ? caseData.getDoesOrderClosesCase() : null)
                            .orderDocument(Document.builder()
                                               .documentUrl(generatedDocumentInfo.getUrl())
