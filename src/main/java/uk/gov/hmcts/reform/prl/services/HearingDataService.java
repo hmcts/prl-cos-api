@@ -24,6 +24,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_N;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_Y;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
 
 @Slf4j
 @Service
@@ -74,7 +75,7 @@ public class HearingDataService {
                                                                              ? hearingTypesDynamicList.getListItems() : null);
             hearingData.getConfirmedHearingDates().setListItems(null != hearingDatesDynamicList
                                                                     ? hearingDatesDynamicList.getListItems() : null);
-        
+
         });
         return hearingDatas;
     }
