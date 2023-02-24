@@ -66,7 +66,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         if (null == retrievedHearingTypes) {
             retrievedHearingTypes = DynamicList.builder()
                 .value(DynamicListElement.EMPTY)
-                .listItems(hearingPrePopulateService.prePopulateHearingType(authorisation)).build();
+                .listItems(hearingDataService.prePopulateHearingType(authorisation)).build();
         }
         if (caseDataUpdated.containsKey("listWithoutNoticeHearingDetails")) {
             caseDataUpdated.put("listWithoutNoticeHearingDetails",
