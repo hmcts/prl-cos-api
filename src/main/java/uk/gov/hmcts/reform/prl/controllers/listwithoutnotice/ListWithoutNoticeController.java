@@ -45,7 +45,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     @Autowired
     HearingPrePopulateService hearingPrePopulateService;
 
-    private DynamicList retrievedHearingTypes;
+    private DynamicList retrievedHearingTypes = null;
 
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate Hearing page details")
@@ -57,6 +57,11 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
 
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
+        if (null == retrievedHearingTypes) {
+            retrievedHearingTypes = DynamicList.builder()
+                .value(DynamicListElement.EMPTY)
+                .listItems(hearingPrePopulateService.prePopulateHearingType(authorisation)).build();
+        }
         if (caseDataUpdated.containsKey("listWithoutNoticeHearingDetails")) {
             caseDataUpdated.put("listWithoutNoticeHearingDetails",
                 hearingPrePopulateService.mapHearingData(existingListWithoutNoticeHearingDetails,retrievedHearingTypes));
