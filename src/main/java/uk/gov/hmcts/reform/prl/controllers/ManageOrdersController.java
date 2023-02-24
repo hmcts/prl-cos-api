@@ -276,7 +276,7 @@ public class ManageOrdersController {
     ) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("/manage-orders/add-upload-order before caseData ===> " + callbackRequest.getCaseDetails());
+        log.info("/manage-orders/add-upload-order before caseData ===> " + callbackRequest);
         if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
             if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
