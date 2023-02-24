@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,10 @@ public class C100IssueCaseService {
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final LocationRefDataService locationRefDataService;
 
-    public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest, CaseData caseData) throws Exception {
+    private final ObjectMapper objectMapper;
+
+    public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (YesOrNo.No.equals(caseData.getConsentOrder())) {
             requireNonNull(caseData);
             sendgridService.sendEmail(c100JsonMapper.map(caseData));
