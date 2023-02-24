@@ -51,7 +51,13 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
 
     private DynamicList retrievedHearingChannels = null;
 
-    private DynamicList retrievedHearingSubChannels = null;
+    private DynamicList retrievedVideoSubChannels = null;
+
+    private DynamicList retrievedTelephoneSubChannels = null;
+
+    private Map<String,List<DynamicListElement>> populateHearingChannel = null;
+
+
 
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate Hearing page details")
@@ -79,14 +85,25 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
             retrievedHearingDates = DynamicList.builder()
                 .value(DynamicListElement.EMPTY)
                 .listItems(hearingDataService.getHearingStartDate(authorisation,caseData)).build();
+            populateHearingChannel = hearingDataService.prePopulateHearingChannel(authorisation);
             retrievedHearingChannels = DynamicList.builder()
+                .value(DynamicListElement.EMPTY)
+                .listItems(populateHearingChannel.get("hearingChannels")).build();
+            retrievedVideoSubChannels = DynamicList.builder()
+                .value(DynamicListElement.EMPTY)
+                .listItems(populateHearingChannel.get("videoSubChannels")).build();
+            retrievedTelephoneSubChannels = DynamicList.builder()
                     .value(DynamicListElement.EMPTY)
-                        .listItems(hearingDataService.prePopulateHearingChannel(authorisation)).build();
+                        .listItems(populateHearingChannel.get("telephoneSubChannels")).build();
+
 
             caseDataUpdated.put("listWithoutNoticeHearingDetails",
                 ElementUtils.wrapElements(HearingData.builder()
                     .hearingTypes(retrievedHearingTypes)
                     .confirmedHearingDates(retrievedHearingDates)
+                                              .hearingChannel(retrievedHearingChannels)
+                                              .hearingVideoChannel(retrievedVideoSubChannels)
+                                              .hearingTelephoneChannel(retrievedTelephoneSubChannels)
                     .build()));
 
         }

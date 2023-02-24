@@ -22,6 +22,12 @@ public class HearingData {
 
     private final DynamicList confirmedHearingDates;
 
+    private final DynamicList hearingChannel;
+
+    private final DynamicList hearingVideoChannel;
+
+    private final DynamicList hearingTelephoneChannel;
+
     @JsonSerialize(using = CustomEnumSerializer.class)
     @JsonProperty("hearingDateConfirmOptionEnum")
     private HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum;
