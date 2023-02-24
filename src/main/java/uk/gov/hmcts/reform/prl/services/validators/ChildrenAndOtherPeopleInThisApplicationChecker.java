@@ -39,7 +39,8 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
     @Override
     public boolean isFinished(CaseData caseData) {
 
-        Optional<List<Element<ChildrenAndOtherPeopleRelation>>> childrenWrapped = ofNullable(caseData.getChildAndOtherPeopleRelations());
+        Optional<List<Element<ChildrenAndOtherPeopleRelation>>> childrenWrapped = ofNullable(caseData
+                .getRelations().getChildAndOtherPeopleRelations());
 
         if (!childrenWrapped.isEmpty() && !childrenWrapped.get().isEmpty()) {
             List<ChildrenAndOtherPeopleRelation> children = childrenWrapped.get()
@@ -87,7 +88,7 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        return ofNullable(caseData.getChildAndOtherPeopleRelations()).isPresent();
+        return ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations()).isPresent();
     }
 
     @Override

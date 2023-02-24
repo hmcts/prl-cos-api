@@ -96,7 +96,7 @@ Add the details about other people in the case to <a href='/cases/case-details/$
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
-<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHin-progress.png' title='In progress'/>
+<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarmRevised/allegationsOfHarmRevised1'>Allegations of harm</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHin-progress.png' title='In progress'/>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 

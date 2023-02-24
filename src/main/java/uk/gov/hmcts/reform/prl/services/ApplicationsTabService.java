@@ -156,10 +156,6 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("litigationCapacityTable", getLitigationCapacityDetails(caseData));
             applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
             applicationTab.put("otherPeopleInTheCaseTable", getOtherPeopleInTheCaseTable(caseData));
-            applicationTab.put("allegationsOfHarmOrdersTable", getAllegationsOfHarmOrdersTable(caseData));
-            applicationTab.put("allegationsOfHarmDomesticAbuseTable", getDomesticAbuseTable(caseData));
-            applicationTab.put("allegationsOfHarmChildAbductionTable", getChildAbductionTable(caseData));
-            applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
             if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
                 applicationTab.put("childDetailsRevisedTable", applicationsTabServiceHelper.getChildRevisedDetails(caseData));
                 applicationTab.put("childDetailsRevisedExtraTable", getExtraChildDetailsTable(caseData));

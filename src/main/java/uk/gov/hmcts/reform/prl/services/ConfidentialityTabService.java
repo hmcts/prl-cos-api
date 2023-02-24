@@ -139,7 +139,7 @@ public class ConfidentialityTabService {
     public List<Element<ChildConfidentialityDetails>> getChildrenConfidentialDetailsV2(CaseData caseData) {
         List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
         Optional<List<Element<ChildrenAndOtherPeopleRelation>>> childrenAndOtherPeopleRelations =
-            ofNullable(caseData.getChildAndOtherPeopleRelations());
+            ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations());
         Optional<List<Element<PartyDetails>>> otherPersons = ofNullable(caseData.getOtherPartyInTheCaseRevised());
         Map<Object, PartyDetails> objectPartyDetailsMap = new HashMap<>();
         if (otherPersons.isPresent()) {

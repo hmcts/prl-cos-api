@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfiden
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.Fl401ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -225,10 +226,11 @@ public class ConfidentialityTabServiceTest {
         CaseData caseData = CaseData.builder()
             .taskListVersion("v2")
             .newChildDetails(listOfChildren)
+                .relations(Relations.builder()
             .childAndRespondentRelations(childrenAndRespondentRelationList)
-            .childAndApplicantRelations(childrenAndApplicantRelationList)
+                        .childAndOtherPeopleRelations(listOfChildrenAndOther)
+            .childAndApplicantRelations(childrenAndApplicantRelationList).build())
             .othersToNotify(listOfParty)
-            .childAndOtherPeopleRelations(listOfChildrenAndOther)
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("TestString")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)

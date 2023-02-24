@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -536,16 +537,16 @@ public class CourtFinderServiceTest {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         CaseData caseData = CaseData.builder()
-            .applicants(Collections.singletonList(wrappedApplicant))
-            .caseTypeOfApplication("C100")
-            .taskListVersion("v2")
-            .otherPartyInTheCaseRevised(listOfParty)
-            .childAndApplicantRelations(childrenAndApplicantRelationList)
-            .childAndRespondentRelations(childrenAndRespondentRelationList)
-            .childAndOtherPeopleRelations(childrenAndOtherPeopleRelatationList)
-            .newChildDetails(listOfChildren)
-            .respondents(Collections.singletonList(wrappedRespondent))
-            .build();
+                .applicants(Collections.singletonList(wrappedApplicant))
+                .caseTypeOfApplication("C100")
+                .taskListVersion("v2")
+                .otherPartyInTheCaseRevised(listOfParty)
+                .relations(Relations.builder().childAndApplicantRelations(childrenAndApplicantRelationList)
+                                .childAndRespondentRelations(childrenAndRespondentRelationList)
+                        .childAndOtherPeopleRelations(childrenAndOtherPeopleRelatationList).build())
+                .newChildDetails(listOfChildren)
+                .respondents(Collections.singletonList(wrappedRespondent))
+                .build();
 
         assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
         Assert.assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
@@ -630,16 +631,16 @@ public class CourtFinderServiceTest {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         CaseData caseData = CaseData.builder()
-            .applicants(Collections.singletonList(wrappedApplicant))
-            .caseTypeOfApplication("C100")
-            .taskListVersion("v2")
-            .otherPartyInTheCaseRevised(listOfParty)
-            .childAndApplicantRelations(childrenAndApplicantRelationList)
-            .childAndRespondentRelations(childrenAndRespondentRelationList)
-            .childAndOtherPeopleRelations(childrenAndOtherPeopleRelatationList)
-            .newChildDetails(listOfChildren)
-            .respondents(Collections.singletonList(wrappedRespondent))
-            .build();
+                .applicants(Collections.singletonList(wrappedApplicant))
+                .caseTypeOfApplication("C100")
+                .taskListVersion("v2")
+                .otherPartyInTheCaseRevised(listOfParty)
+                .relations(Relations.builder().childAndApplicantRelations(childrenAndApplicantRelationList)
+                        .childAndRespondentRelations(childrenAndRespondentRelationList)
+                        .childAndOtherPeopleRelations(childrenAndOtherPeopleRelatationList).build())
+                .newChildDetails(listOfChildren)
+                .respondents(Collections.singletonList(wrappedRespondent))
+                .build();
 
         assertEquals("N20 0EG", courtFinderService.getCorrectPartyPostcode(caseData));
         Assert.assertEquals("N20 0EG", courtFinderService.getCorrectPartyPostcode(caseData));
@@ -725,16 +726,16 @@ public class CourtFinderServiceTest {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         CaseData caseData = CaseData.builder()
-            .applicants(Collections.singletonList(wrappedApplicant))
-            .caseTypeOfApplication("C100")
-            .taskListVersion("v2")
-            .otherPartyInTheCaseRevised(listOfParty)
-            .childAndApplicantRelations(childrenAndApplicantRelationList)
-            .childAndRespondentRelations(childrenAndRespondentRelationList)
-            .childAndOtherPeopleRelations(childrenAndOtherPeopleRelatationList)
-            .newChildDetails(listOfChildren)
-            .respondents(Collections.singletonList(wrappedRespondent))
-            .build();
+                .applicants(Collections.singletonList(wrappedApplicant))
+                .caseTypeOfApplication("C100")
+                .taskListVersion("v2")
+                .otherPartyInTheCaseRevised(listOfParty)
+                .relations(Relations.builder().childAndApplicantRelations(childrenAndApplicantRelationList)
+                        .childAndRespondentRelations(childrenAndRespondentRelationList)
+                        .childAndOtherPeopleRelations(childrenAndOtherPeopleRelatationList).build())
+                .newChildDetails(listOfChildren)
+                .respondents(Collections.singletonList(wrappedRespondent))
+                .build();
 
         assertEquals("G511TQ", courtFinderService.getCorrectPartyPostcode(caseData));
         Assert.assertEquals("G511TQ", courtFinderService.getCorrectPartyPostcode(caseData));
@@ -823,9 +824,9 @@ public class CourtFinderServiceTest {
             .caseTypeOfApplication("C100")
             .taskListVersion("v2")
             .otherPartyInTheCaseRevised(listOfParty)
-            .childAndApplicantRelations(childrenAndApplicantRelationList)
-            .childAndRespondentRelations(childrenAndRespondentRelationList)
-            .childAndOtherPeopleRelations(childrenAndOtherPeopleRelatationList)
+                .relations(Relations.builder().childAndApplicantRelations(childrenAndApplicantRelationList)
+                        .childAndRespondentRelations(childrenAndRespondentRelationList)
+                        .childAndOtherPeopleRelations(childrenAndOtherPeopleRelatationList).build())
             .newChildDetails(listOfChildren)
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();

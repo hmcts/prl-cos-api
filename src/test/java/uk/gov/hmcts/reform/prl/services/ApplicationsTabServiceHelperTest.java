@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -102,7 +103,7 @@ public class ApplicationsTabServiceHelperTest {
         List<Element<ChildrenAndApplicantRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
-            .childAndApplicantRelations(listOfChildren)
+                .relations(Relations.builder().childAndApplicantRelations(listOfChildren).build())
             .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
             .build();
 
@@ -113,6 +114,7 @@ public class ApplicationsTabServiceHelperTest {
     public void testGetChildAndApplicantsRelationTableWithoutChildRelation() {
         CaseData caseData = CaseData.builder()
             .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
+                .relations(Relations.builder().build())
             .build();
 
         assertNotNull(applicationsTabService.getChildAndApplicantsRelationTable(caseData));
@@ -131,7 +133,8 @@ public class ApplicationsTabServiceHelperTest {
         List<Element<ChildrenAndRespondentRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
-            .childAndRespondentRelations(listOfChildren)
+                .relations(Relations.builder()
+            .childAndRespondentRelations(listOfChildren).build())
             .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
             .build();
         assertNotNull(applicationsTabService.getChildAndRespondentRelationsTable(caseData));
@@ -143,6 +146,7 @@ public class ApplicationsTabServiceHelperTest {
 
         CaseData caseData = CaseData.builder()
             .childrenNotPartInTheCaseYesNo(YesOrNo.Yes)
+                .relations(Relations.builder().build())
             .build();
         assertNotNull(applicationsTabService.getChildAndRespondentRelationsTable(caseData));
     }
@@ -163,7 +167,8 @@ public class ApplicationsTabServiceHelperTest {
         List<Element<ChildrenAndOtherPeopleRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
-            .childAndOtherPeopleRelations(listOfChildren)
+                .relations(Relations.builder()
+            .childAndOtherPeopleRelations(listOfChildren).build())
             .build();
         assertNotNull(applicationsTabService.getChildAndOtherPeopleRelationsTable(caseData));
     }
@@ -183,7 +188,8 @@ public class ApplicationsTabServiceHelperTest {
         List<Element<ChildrenAndOtherPeopleRelation>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
-            .childAndOtherPeopleRelations(listOfChildren)
+                .relations(Relations.builder()
+            .childAndOtherPeopleRelations(listOfChildren).build())
             .build();
         assertNotNull(applicationsTabService.getChildAndOtherPeopleRelationsTable(caseData));
     }
@@ -194,6 +200,7 @@ public class ApplicationsTabServiceHelperTest {
     public void testGetChildAndOtherPeopleRelationsTableWithoutList() {
 
         CaseData caseData = CaseData.builder()
+                .relations(Relations.builder().build())
             .build();
         assertNotNull(applicationsTabService.getChildAndOtherPeopleRelationsTable(caseData));
     }

@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
@@ -155,7 +156,7 @@ public class RelationshipsControllerTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicants(applicantList)
             .newChildDetails(listOfChildren)
-            .childAndApplicantRelations(listOfwrappedChildrenAndApplicantRelation)
+            .relations(Relations.builder().childAndApplicantRelations(listOfwrappedChildrenAndApplicantRelation).build())
             .build();
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -260,7 +261,7 @@ public class RelationshipsControllerTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicants(applicantList)
             .newChildDetails(listOfChildren)
-            .childAndRespondentRelations(listOfwrappedChildrenAndApplicantRelation)
+                .relations(Relations.builder().childAndRespondentRelations(listOfwrappedChildrenAndApplicantRelation).build())
             .build();
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -423,7 +424,7 @@ public class RelationshipsControllerTest {
             .applicants(applicantList)
             .othersToNotify(listOfPartyDetails)
             .newChildDetails(listOfChildren)
-            .childAndOtherPeopleRelations(listOfChildrenAndOtherPeopleRelation)
+            .relations(Relations.builder().childAndOtherPeopleRelations(listOfChildrenAndOtherPeopleRelation).build())
             .build();
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
