@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,17 +12,18 @@ import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategorySubValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffResponse;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.util.Strings.concat;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHILDREQUIRED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGALOFFICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
@@ -54,6 +56,7 @@ public class RefDataUserService {
     private String refDataIdamPassword;
 
     private  List<DynamicListElement> listOfCategoryValues;
+    private CommonDataResponse commonDataResponse;
 
     public List<DynamicListElement> getLegalAdvisorList() {
         try {
@@ -99,29 +102,27 @@ public class RefDataUserService {
         return DynamicListElement.builder().code(value).label(value).build();
     }
 
-    public List<DynamicListElement> retrieveCategoryValues(String authorization, String categoryId) {
+    public CommonDataResponse retrieveCategoryValues(String authorization, String categoryId,String isHearingChildRequired) {
         log.info("retrieveCategoryValues {}", categoryId);
         try {
-            CommonDataResponse commonDataResponse = commonDataRefApi.getAllCategoryValuesByCategoryId(
+            commonDataResponse = commonDataRefApi.getAllCategoryValuesByCategoryId(
                 authorization,
                 authTokenGenerator.generate(),
                 categoryId,
                 SERVICE_ID,
-                HEARINGCHILDREQUIRED
+                isHearingChildRequired
             );
 
-            categoryValuesByCategoryId(commonDataResponse,categoryId);
-            return listOfCategoryValues;
         } catch (Exception e) {
             log.error("Category Values look up failed - " + e.getMessage(), e);
         }
-        return List.of(DynamicListElement.builder().build());
+        return commonDataResponse;
     }
 
-    private List<DynamicListElement> categoryValuesByCategoryId(CommonDataResponse commonDataResponse,String categoryId) {
+    public List<DynamicListElement> categoryValuesByCategoryId(CommonDataResponse commonDataResponse,String categoryId) {
         log.info("categoryValuesByCategoryId {},{}", commonDataResponse,categoryId);
         if (null != commonDataResponse) {
-            listOfCategoryValues = commonDataResponse.getListOfValues().stream()
+            listOfCategoryValues = commonDataResponse.getCategoryValues().stream()
                 .filter(response -> response.getCategoryKey().equalsIgnoreCase(categoryId))
                 .map(this::getDisplayCategoryEntry).collect(Collectors.toList());
             return listOfCategoryValues;
@@ -136,4 +137,29 @@ public class RefDataUserService {
         String key = categoryValues.getKey();
         return DynamicListElement.builder().code(key).label(value).build();
     }
+
+    public List<DynamicListElement> categorySubValuesByCategoryId(CommonDataResponse commonDataResponse,String hearingPlatform) {
+        log.info("categoryValuesByCategoryId {}", hearingPlatform);
+        if (null != commonDataResponse && null != commonDataResponse.getCategoryValues()) {
+            return commonDataResponse.getCategoryValues().stream()
+                .filter(categoryValues -> categoryValues.getChildNodes() != null && categoryValues.getValueEn().equalsIgnoreCase(hearingPlatform))
+                .map(CategoryValues::getChildNodes).collect(Collectors.toList()).stream()
+                .flatMap(Collection::stream)
+                .map(this::displaySubChannelEntry)
+                .collect(Collectors.toList());
+        }
+
+        return List.of(DynamicListElement.builder().build());
+
+    }
+
+    private DynamicListElement displaySubChannelEntry(CategorySubValues categorySubValues) {
+        String value = categorySubValues.getValueEn();
+        String key = categorySubValues.getKey();
+        return DynamicListElement.builder().code(key).label(value).build();
+    }
+
 }
+
+
+
