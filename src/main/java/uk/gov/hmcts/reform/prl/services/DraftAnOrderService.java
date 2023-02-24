@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
@@ -114,18 +115,11 @@ public class DraftAnOrderService {
         return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
     }
 
-    public Map<String, Object> getDraftOrderDynamicList(CaseData caseData, String eventId) {
+    public Map<String, Object> getDraftOrderDynamicList(CaseData caseData) {
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
-        if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)) {
-            draftOrderCollection.removeIf(draftOrderElement ->
-                                              draftOrderElement.getValue().getOtherDetails() != null
-                                                  && !AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(
-                                                      draftOrderElement.getValue().getOtherDetails().getReviewRequiredBy()));
-        }
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
+            caseData.getDraftOrderCollection(),
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
@@ -896,5 +890,26 @@ public class DraftAnOrderService {
         log.info("orderCollection after cleanup ===> " + caseDataUpdated.get("orderCollection"));
         log.info("draftOrderCollection after cleanup ===> " + caseDataUpdated.get("draftOrderCollection"));
         return caseDataUpdated;
+    }
+
+    public static String checkIfOrderCanReviewed(CallbackRequest callbackRequest, Map<String, Object> response) {
+        String orderStatus = (String) response.remove("status");
+        String reviewRequiredBy = (String) response.remove("reviewRequiredBy");
+        log.info("** Order status {}", orderStatus);
+        log.info("** Review Required By {}", reviewRequiredBy);
+        String errorMessage = null;
+        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
+            && ((OrderStatusEnum.createdByCA.getDisplayedValue().equalsIgnoreCase(orderStatus))
+            && AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.getDisplayedValue().equalsIgnoreCase(
+            reviewRequiredBy) || OrderStatusEnum.draftedByLR.getDisplayedValue().equalsIgnoreCase(orderStatus))) {
+            errorMessage = "Selected order is not reviewed by Judge.";
+        } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
+            && (!(((OrderStatusEnum.createdByCA.getDisplayedValue().equalsIgnoreCase(orderStatus))
+            && AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.getDisplayedValue().equalsIgnoreCase(
+            reviewRequiredBy)) || OrderStatusEnum.reviewedByJudge.getDisplayedValue().equalsIgnoreCase(orderStatus)
+            || OrderStatusEnum.draftedByLR.getDisplayedValue().equalsIgnoreCase(orderStatus)))) {
+            errorMessage = "Selected order can not be reviewed by Judge.";
+        }
+        return errorMessage;
     }
 }

@@ -247,7 +247,7 @@ public class DraftAnOrderServiceTest {
     public void testToGetDraftOrderDynamicList() {
 
         Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(caseData, "adminEditAndApproveAnOrder");
+        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(caseData);
 
         assertNotNull(stringObjectMap.get("draftOrdersDynamicList"));
         assertNotNull(stringObjectMap.get("caseTypeOfApplication"));
@@ -372,7 +372,7 @@ public class DraftAnOrderServiceTest {
     @Test
     public void testGetDraftOrderDynamicList() {
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(caseData, "adminEditAndApproveAnOrder");
+        Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(caseData);
         assertEquals("C100", caseDataMap.get("caseTypeOfApplication"));
     }
 
