@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -25,7 +24,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "Bearer Authentication")
 public class C100IssueCaseController {
-    private final ObjectMapper objectMapper;
 
     private final C100IssueCaseService c100IssueCaseService;
 
@@ -35,9 +33,7 @@ public class C100IssueCaseController {
     public AboutToStartOrSubmitCallbackResponse issueAndSendToLocalCourt(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
-
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = c100IssueCaseService.issueAndSendToLocalCourt(authorisation, callbackRequest, caseData);
+        Map<String, Object> caseDataUpdated = c100IssueCaseService.issueAndSendToLocalCourt(authorisation, callbackRequest);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }

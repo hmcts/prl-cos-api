@@ -318,6 +318,7 @@ public class CallbackController {
         String baseLocationId = Arrays.stream(idEmail).toArray()[0].toString();
         Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
         CaseUtils.getCourtDetails(courtVenue, caseDataUpdated, baseLocationId);
+        log.info("amendCourtAboutToSubmit ===> " + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
