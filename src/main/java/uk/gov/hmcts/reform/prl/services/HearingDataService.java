@@ -67,15 +67,14 @@ public class HearingDataService {
     }
 
     public List<Element<HearingData>> mapHearingData(List<Element<HearingData>> hearingDatas, DynamicList hearingTypesDynamicList,
-                                                     DynamicList hearingDatesDynamicList,DynamicList retrievedHearingChannels) {
+                                                     DynamicList hearingDatesDynamicList) {
         hearingDatas.stream().parallel().forEach(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             hearingData.getHearingTypes().setListItems(null != hearingTypesDynamicList
                                                                              ? hearingTypesDynamicList.getListItems() : null);
             hearingData.getConfirmedHearingDates().setListItems(null != hearingDatesDynamicList
                                                                     ? hearingDatesDynamicList.getListItems() : null);
-            hearingData.getHearingChannel().setListItems(null != retrievedHearingChannels
-                                                             ? retrievedHearingChannels.getListItems() : null);
+        
         });
         return hearingDatas;
     }
