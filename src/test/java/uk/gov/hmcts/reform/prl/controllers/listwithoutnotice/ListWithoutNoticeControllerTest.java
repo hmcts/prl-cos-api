@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.HearingPrePopulateService;
+import uk.gov.hmcts.reform.prl.services.HearingDataService;
 
 import java.util.List;
 import java.util.Map;
@@ -31,7 +31,7 @@ public class ListWithoutNoticeControllerTest {
     ListWithoutNoticeController listWithoutNoticeController;
 
     @Mock
-    HearingPrePopulateService hearingPrePopulateService;
+    HearingDataService hearingPrePopulateService;
 
     @Mock
     private ObjectMapper objectMapper;
