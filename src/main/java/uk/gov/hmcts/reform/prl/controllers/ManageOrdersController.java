@@ -82,24 +82,9 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (callbackRequest
-            .getCaseDetailsBefore() != null && callbackRequest
-            .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
-            caseData.setCourtName(callbackRequest
-                                      .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
-        }
-        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
-            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                caseData = manageOrderService.populateCustomOrderFields(caseData);
-            }
-            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
-        } else {
-            caseDataUpdated.put("previewOrderDoc", caseData.getAppointmentOfGuardian());
-        }
         Map<String, Object> caseDataUpdated = manageOrderService.populatePreviewOrder(authorisation, callbackRequest, caseData);
-      
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+
     }
 
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
