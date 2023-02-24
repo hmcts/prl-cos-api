@@ -19,6 +19,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -97,34 +98,39 @@ public class CaseUtils {
         return noOfDaysRemaining;
     }
 
-    public static void getCourtDetails(Optional<CourtVenue> courtVenue, Map<String, Object> caseDataUpdated, String baseLocationId) {
+    public static Map<String, Object> getCourtDetails(Optional<CourtVenue> courtVenue, String baseLocationId) {
+        Map<String, Object> caseDataMap = new HashMap<>();
         if (courtVenue.isPresent()) {
             String regionId = courtVenue.get().getRegionId();
             String courtName = courtVenue.get().getCourtName();
             String regionName = courtVenue.get().getRegion();
             String baseLocationName = courtVenue.get().getSiteName();
-            caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
+            caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
                 .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
-            caseDataUpdated.put(PrlAppsConstants.IS_CAFCASS, CaseUtils.cafcassFlag(regionId));
-            caseDataUpdated.put(COURT_NAME_FIELD, courtName);
-            caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
+            caseDataMap.put(PrlAppsConstants.IS_CAFCASS, CaseUtils.cafcassFlag(regionId));
+            caseDataMap.put(COURT_NAME_FIELD, courtName);
+            caseDataMap.put(COURT_ID_FIELD, baseLocationId);
 
         }
+        return caseDataMap;
     }
 
-    public static void getCourtEmail(Map<String, Object> caseDataUpdated, String[] idEmail, String caseTypeOfApplication) {
+    public static Map<String, Object> getCourtEmail(String[] idEmail, String caseTypeOfApplication) {
         String courtEmail = "";
+        Map<String, Object> caseDataMap = new HashMap<>();
         if (idEmail.length > 1) {
             courtEmail = Arrays.stream(idEmail).toArray()[1].toString();
         }
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
-            caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
+            caseDataMap.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
                                                                .value(LocalCourtAdminEmail.builder().email(courtEmail)
                                                                           .build()).build()));
         } else {
-            caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
+            caseDataMap.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
         }
+
+        return caseDataMap;
     }
 
     public static YesOrNo cafcassFlag(String regionId) {

@@ -143,8 +143,8 @@ public class FL401SubmitApplicationController {
         caseData = caseData.toBuilder().isCourtEmailFound("Yes").build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
-        CaseUtils.getCourtDetails(courtVenue, caseDataUpdated, baseLocationId);
-        CaseUtils.getCourtEmail(caseDataUpdated, idEmail, caseTypeOfApplication);
+        caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
+        caseDataUpdated.putAll(CaseUtils.getCourtEmail(idEmail, caseTypeOfApplication));
 
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
         if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
