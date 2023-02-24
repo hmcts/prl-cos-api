@@ -1578,6 +1578,7 @@ public class ManageOrderService {
                 caseDataUpdated.remove(field);
             }
         }
+        log.info("caseDataUpdated after cleanup ===> " + caseDataUpdated);
     }
 
     public Map<String, Object> populatePreviewOrder(String authorisation, CallbackRequest callbackRequest, CaseData caseData) throws Exception {
