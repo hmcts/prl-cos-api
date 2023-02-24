@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.listwithoutnotice;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +40,11 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     @Autowired
     RefDataUserService refDataUserService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private DynamicList retrievedHearingTypes;
+
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate Hearing type details")
     public AboutToStartOrSubmitCallbackResponse prePopulateHearingPageData(
@@ -50,13 +57,14 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
         if (caseDataUpdated.containsKey("listWithoutNoticeHearingDetails")) {
             caseDataUpdated.put("listWithoutNoticeHearingDetails",
-                existingListWithoutNoticeHearingDetails);
+                mapHearingData(existingListWithoutNoticeHearingDetails,retrievedHearingTypes));
         } else {
+            retrievedHearingTypes = DynamicList.builder()
+                .value(DynamicListElement.EMPTY)
+                .listItems(prePopulateHearingType(authorisation)).build();
             caseDataUpdated.put("listWithoutNoticeHearingDetails",
                 ElementUtils.wrapElements(HearingData.builder()
-                    .hearingTypes(DynamicList.builder()
-                        .value(DynamicListElement.EMPTY)
-                        .listItems(prePopulateHearingType(authorisation)).build()).build()));
+                    .hearingTypes(retrievedHearingTypes).build()));
         }
 
 
@@ -78,7 +86,24 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+
+        log.info("list without notice controller details {}",caseData.getListWithoutNoticeHearingDetails());
+        caseDataUpdated.put("listWithoutNoticeHearingDetails",mapHearingData(caseData.getListWithoutNoticeHearingDetails(),null));
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private List<Element<HearingData>> mapHearingData(List<Element<HearingData>> hearindDatas, DynamicList hearingTypesDynamicList) {
+        List<HearingData> hearings = new ArrayList<>();
+        hearindDatas.stream().parallel().forEach(hearingDataElement -> {
+            hearingDataElement.getValue().getHearingTypes().setListItems(null != hearingTypesDynamicList
+                ? hearingTypesDynamicList.getListItems() : null);
+        });
+        return hearindDatas;
     }
 
 }
