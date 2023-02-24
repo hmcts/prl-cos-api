@@ -16,7 +16,9 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHANNEL;
@@ -24,6 +26,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_N;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_Y;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONEPLATFORM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
 
 @Slf4j
 @Service
@@ -48,22 +52,6 @@ public class HearingDataService {
             log.error("Category Values look up failed - " + e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
-    }
-
-    public List<DynamicListElement> prePopulateHearingChannel(String authorisation) {
-        try {
-            log.info("Prepopulate HearingChannel call in HearingDataService");
-            CommonDataResponse commonDataResponse = refDataUserService.retrieveCategoryValues(
-                authorisation,
-                HEARINGCHANNEL,
-                IS_HEARINGCHILDREQUIRED_N
-            );
-            return refDataUserService.categoryValuesByCategoryId(commonDataResponse, HEARINGCHANNEL);
-        } catch (Exception e) {
-            log.error("Category Values look up failed - " + e.getMessage(), e);
-        }
-        return List.of(DynamicListElement.builder().build());
-
     }
 
     public List<Element<HearingData>> mapHearingData(List<Element<HearingData>> hearingDatas, DynamicList hearingTypesDynamicList,
@@ -115,7 +103,11 @@ public class HearingDataService {
             );
             refDataUserService.categorySubValuesByCategoryId(
                 commonDataResponse,
-                HEARINGCHANNEL
+                VIDEOPLATFORM
+            );
+            refDataUserService.categorySubValuesByCategoryId(
+                commonDataResponse,
+                TELEPHONEPLATFORM
             );
         } catch (Exception e) {
             log.error("Category Values look up failed - " + e.getMessage(), e);
@@ -123,4 +115,34 @@ public class HearingDataService {
         return List.of(DynamicListElement.builder().build());
 
     }
+
+
+    public Map<String, List<DynamicListElement>> prePopulateHearingChannel(String authorisation) {
+        try {
+            log.info("Prepopulate HearingChannel call in HearingDataService");
+            CommonDataResponse commonDataResponse = refDataUserService.retrieveCategoryValues(
+                authorisation,
+                HEARINGCHANNEL,
+                IS_HEARINGCHILDREQUIRED_Y
+            );
+
+            List<DynamicListElement> listOfHearingChannels = refDataUserService.categoryValuesByCategoryId(
+                commonDataResponse,HEARINGCHANNEL);
+            List<DynamicListElement> listOfVideoSubChannels = refDataUserService.categorySubValuesByCategoryId(
+                commonDataResponse,VIDEOPLATFORM);
+            List<DynamicListElement> listOfTelephoneSubChannels = refDataUserService.categorySubValuesByCategoryId(
+                commonDataResponse,TELEPHONEPLATFORM);
+            Map<String, List<DynamicListElement>> values = new HashMap<>();
+            values.put("hearingChannels",listOfHearingChannels);
+            values.put("videoSubChannels",listOfVideoSubChannels);
+            values.put("telephoneSubChannels", listOfTelephoneSubChannels);
+            return values;
+        } catch (Exception e) {
+            log.error("Category Values look up failed - " + e.getMessage(), e);
+        }
+        //return List.of(DynamicListElement.builder().build());
+        return null;
+
+    }
+
 }
