@@ -1575,10 +1575,9 @@ public class ManageOrderService {
         log.info("caseDataUpdated before cleanup ===> " + caseDataUpdated);
         for (ManageOrderFieldsEnum field : ManageOrderFieldsEnum.values()) {
             if (caseDataUpdated.containsKey(field.getValue())) {
-                caseDataUpdated.remove(field);
+                caseDataUpdated.remove(field.getValue());
             }
         }
-        log.info("caseDataUpdated after cleanup ===> " + caseDataUpdated);
     }
 
     public Map<String, Object> populatePreviewOrder(String authorisation, CallbackRequest callbackRequest, CaseData caseData) throws Exception {
