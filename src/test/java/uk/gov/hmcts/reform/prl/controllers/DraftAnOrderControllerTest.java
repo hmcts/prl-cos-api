@@ -188,7 +188,7 @@ public class DraftAnOrderControllerTest {
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
             .caseTypeOfApplication("fl401")
             .build();
 
