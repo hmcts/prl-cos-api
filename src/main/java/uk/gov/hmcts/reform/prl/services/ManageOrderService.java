@@ -75,6 +75,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLI
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum.draftAnOrder;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
@@ -1038,7 +1039,7 @@ public class ManageOrderService {
         } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
             status = OrderStatusEnum.reviewedByJudge.getDisplayedValue();
         } else if (createAnOrder.toString().equals(orderSelectionType) || uploadAnOrder.toString().equals(
-            orderSelectionType)
+            orderSelectionType) || amendOrderUnderSlipRule.toString().equals(orderSelectionType)
             || draftAnOrder.toString().equals(orderSelectionType)) {
             if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
                 status = OrderStatusEnum.createdByJudge.getDisplayedValue();
