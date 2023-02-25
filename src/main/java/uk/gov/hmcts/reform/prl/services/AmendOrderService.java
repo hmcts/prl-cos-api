@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -52,6 +53,7 @@ public class AmendOrderService {
         String amendedFileName = updateFileName(eventData.getManageOrdersDocumentToAmend());
         Document stampedDocument = uploadService.uploadDocument(stampedBinaries, amendedFileName, MEDIA_TYPE, authorisation);
 
+        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
 
         uk.gov.hmcts.reform.prl.models.documents.Document updatedDocument = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
             .documentFileName(stampedDocument.originalDocumentName)
@@ -60,7 +62,7 @@ public class AmendOrderService {
             .build();
 
 
-        return updateAmendedOrderDetails(caseData, updatedDocument);
+        return updateAmendedOrderDetails(caseData, updatedDocument, loggedInUserType);
 
     }
 
@@ -70,10 +72,12 @@ public class AmendOrderService {
     }
 
     private Map<String, Object> updateAmendedOrderDetails(CaseData caseData,
-                                                          uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument) {
+                                                          uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument,
+                                                          String loggedInUserType) {
         Map<String, Object> orderMap = new HashMap<>();
         UUID selectedOrderId = caseData.getManageOrders().getAmendOrderDynamicList().getValueCodeAsUuid();
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
+        String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         List<Element<OrderDetails>> updatedOrders;
         if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             || WhatToDoWithOrderEnum.finalizeSaveToServeLater
@@ -95,6 +99,11 @@ public class AmendOrderService {
                                               PrlAppsConstants.D_MMMM_YYYY,
                                               Locale.UK
                                           )))
+                                          .status(manageOrderService.getOrderStatus(
+                                              orderSelectionType,
+                                              loggedInUserType,
+                                              null
+                                          ))
                                           .build())
                         .build();
 
@@ -113,14 +122,15 @@ public class AmendOrderService {
             orderMap.put("orderCollection", updatedOrders);
             return orderMap;
         } else {
-            return  setDraftOrderCollection(caseData, amendedDocument);
+            return  setDraftOrderCollection(caseData, amendedDocument, loggedInUserType);
         }
 
     }
 
-    public Map<String, Object> setDraftOrderCollection(CaseData caseData, uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument) {
+    public Map<String, Object> setDraftOrderCollection(CaseData caseData, uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument,
+                                                       String loggedInUserType) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
-        Element<DraftOrder> draftOrderElement = element(getCurrentDraftOrderDetails(caseData,amendedDocument));
+        Element<DraftOrder> draftOrderElement = element(getCurrentDraftOrderDetails(caseData,amendedDocument, loggedInUserType));
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(draftOrderElement);
@@ -136,7 +146,8 @@ public class AmendOrderService {
     }
 
     private DraftOrder getCurrentDraftOrderDetails(CaseData caseData,
-                                                   uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument) {
+                                                   uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument,
+                                                   String loggedInUserType) {
         UUID selectedOrderId = caseData.getManageOrders().getAmendOrderDynamicList().getValueCodeAsUuid();
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         Optional<Element<OrderDetails>> orderDetails  = orders.stream()
@@ -144,15 +155,20 @@ public class AmendOrderService {
             .findFirst();
         String orderType = orderDetails.get().getValue().getOrderType();
 
+        String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         return DraftOrder.builder()
             .typeOfOrder(orderType)
             .orderTypeId(orderType)
             .orderDocument(amendedDocument)
-            .orderSelectionType(caseData.getManageOrdersOptions() != null ? caseData.getManageOrdersOptions().toString() : null)
+            .orderSelectionType(orderSelectionType)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(time.now())
-                              .status("Draft").build())
+                              .status(manageOrderService.getOrderStatus(orderSelectionType, loggedInUserType, null))
+                              .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                              .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
+                              .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
+                              .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .build();
     }
