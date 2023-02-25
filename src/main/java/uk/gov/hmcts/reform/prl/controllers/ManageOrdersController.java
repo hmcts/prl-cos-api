@@ -74,20 +74,6 @@ public class ManageOrdersController {
     private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
-    private static final List<String> MANAGE_ORDER_FIELDS = List.of("manageOrdersOptions",
-                                                                    "createSelectOrderOptions",
-                                                                    "childArrangementOrders",
-                                                                    "domesticAbuseOrders",
-                                                                    "fcOrders",
-                                                                    "otherOrdersOption",
-                                                                    "amendOrderDynamicList",
-                                                                    "serveOrderDynamicList",
-                                                                    "ordersNeedToBeServed",
-                                                                    "isJudgeOrLa",
-                                                                    "doYouWantToServeOrder",
-                                                                    "whatDoWithOrder",
-                                                                    "currentOrderCreatedDateTime"
-    );
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -96,18 +82,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (callbackRequest
-            .getCaseDetailsBefore() != null && callbackRequest
-            .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
-            caseData.setCourtName(callbackRequest
-                                      .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
-        }
-        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
-            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
-        } else {
-            caseDataUpdated.put("previewOrderDoc", caseData.getAppointmentOfGuardian());
-        }
+        Map<String, Object> caseDataUpdated = manageOrderService.populatePreviewOrder(authorisation, callbackRequest, caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
@@ -159,14 +134,11 @@ public class ManageOrdersController {
             && !caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
-        boolean isJudgeOrLa = manageOrderService.isLoggedInAsJudgeOrLa(authorisation);
-
-        log.info("isJudgeOrLa {}", isJudgeOrLa);
 
         ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
             .childOption(DynamicMultiSelectList.builder()
                              .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
-            .isJudgeOrLa(isJudgeOrLa ? PrlAppsConstants.JUDGE : PrlAppsConstants.CASEWORKER)
+            .loggedInUserType(manageOrderService.getLoggedInUserType(authorisation))
             .build();
         log.info("**Manage orders with child list {}", manageOrders);
 
@@ -247,9 +219,11 @@ public class ManageOrdersController {
                 caseData
             ));
         }
-        cleanUpSelectedManageOrderOptions(caseDataUpdated);
+        manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
 
     @PostMapping(path = "/show-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order for special guardianship create order")
@@ -278,14 +252,12 @@ public class ManageOrdersController {
         log.info("/amend-order/mid-event before" + callbackRequest.getCaseDetails());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        boolean isJudgeOrLa = manageOrderService.isLoggedInAsJudgeOrLa(authorisation);
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
         }
 
-        log.info("isJudgeOrLa {}", isJudgeOrLa);
-        caseDataUpdated.put("isJudgeOrLa", isJudgeOrLa ? PrlAppsConstants.JUDGE : PrlAppsConstants.CASEWORKER);
+        caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
 
         log.info("/amend-order/mid-event after" + caseDataUpdated);
 
@@ -304,7 +276,7 @@ public class ManageOrdersController {
     ) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("/manage-orders/add-upload-order before caseData ===> " + callbackRequest.getCaseDetails());
+        log.info("/manage-orders/add-upload-order before caseData ===> " + callbackRequest);
         if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
             if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
@@ -320,11 +292,10 @@ public class ManageOrdersController {
                 CaseData.class
             );
             log.info("modifiedCaseData ===> " + modifiedCaseData);
-            caseDataUpdated.put(
-                "serveOrderDynamicList",
-                dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(modifiedCaseData, servedSavedOrders.getDisplayedValue())
-            );
+            manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
             log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
+        } else {
+            caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.No);
         }
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
@@ -349,16 +320,7 @@ public class ManageOrdersController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    private static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
-        log.info("caseDataUpdated before cleanup ===> " + caseDataUpdated);
-        for (String field : MANAGE_ORDER_FIELDS) {
-            if (caseDataUpdated.containsKey(field)) {
-                caseDataUpdated.remove(field);
-            }
-        }
-        log.info("orderCollection after cleanup ===> " + caseDataUpdated.get("orderCollection"));
-        log.info("draftOrderCollection after cleanup ===> " + caseDataUpdated.get("draftOrderCollection"));
-    }
+
 
     private static void resetChildOptions(CaseDetails caseDetails) {
         if (caseDetails.getData().containsKey(IS_THE_ORDER_ABOUT_ALL_CHILDREN) && caseDetails.getData().get(
