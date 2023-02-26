@@ -221,6 +221,7 @@ public class CallbackController {
             .getEmailAddress(closestChildArrangementsCourt);
         if (courtEmailAddress.isPresent()) {
             log.info("Found court email for case id {}", caseData.getId());
+            log.info("Found court email {}", courtEmailAddress.get().getAddress());
             caseDataUpdated.put("localCourtAdmin", List.of(
                 Element.<LocalCourtAdminEmail>builder().value(LocalCourtAdminEmail.builder().email(courtEmailAddress.get().getAddress()).build())
                     .build()));
