@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -199,14 +198,9 @@ public class TaskListRenderer {
             .withTask(tasks.get(APPLICANT_DETAILS))
             .withTask(tasks.get(CHILD_DETAILS))
             .withTask(tasks.get(RESPONDENT_DETAILS));
-        TaskSection requiredDetails = null;
-        if (YesOrNo.Yes.equals(caseData.getIsNewCaseCreated())) {
-            requiredDetails = newSection("Add required details")
-                .withTask(tasks.get(ALLEGATIONS_OF_HARM_REVISED));
-        } else {
-            requiredDetails = newSection("Add required details")
+
+        TaskSection  requiredDetails = newSection("Add required details")
                 .withTask(tasks.get(ALLEGATIONS_OF_HARM));
-        }
 
 
         final TaskSection miamDetails = newSection("MIAM details")

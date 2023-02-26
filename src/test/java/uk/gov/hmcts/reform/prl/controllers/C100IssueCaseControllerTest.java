@@ -62,6 +62,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -376,7 +377,7 @@ public class C100IssueCaseControllerTest {
                                   .newAllegationsOfHarmDomesticAbuseYesNo(Yes)
                                   .newAllegationsOfHarmChildAbuseYesNo(Yes)
                                   .build())
-            .isNewCaseCreated(Yes)
+                .taskListVersion(TASK_LIST_VERSION_V2)
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
@@ -559,7 +560,7 @@ public class C100IssueCaseControllerTest {
                                   .newAllegationsOfHarmDomesticAbuseYesNo(Yes)
                                   .newAllegationsOfHarmChildAbuseYesNo(Yes)
                                   .build())
-            .isNewCaseCreated(Yes)
+                .taskListVersion(TASK_LIST_VERSION_V2)
             .welshLanguageRequirement(YesOrNo.Yes)
             .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(YesOrNo.Yes)

@@ -271,7 +271,7 @@ public class TaskListRendererTest {
 
         CaseData caseData = CaseData.builder()
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-                .state(State.AWAITING_SUBMISSION_TO_HMCTS).isNewCaseCreated(YesOrNo.Yes)
+                .state(State.AWAITING_SUBMISSION_TO_HMCTS).taskListVersion(TASK_LIST_VERSION_V2)
                 .build();
 
         List<String> lines = new ArrayList<>();
@@ -285,7 +285,7 @@ public class TaskListRendererTest {
         }
 
         String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(tasks, emptyErrors, true, caseData);
+        String actualTaskList = taskListRenderer.render(taskC100V2, emptyErrors, true, caseData);
 
         assertEquals(expectedTaskList, actualTaskList);
 

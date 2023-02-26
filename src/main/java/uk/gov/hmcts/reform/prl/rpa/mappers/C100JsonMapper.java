@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.rpa.mappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.EventsData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
@@ -68,7 +67,7 @@ public class C100JsonMapper {
                 ? otherPeopleInTheCaseRevisedMapper.map(caseData.getOtherPartyInTheCaseRevised())
                 : otherPeopleInTheCaseMapper.map(caseData.getOthersToNotify()))
             .add("otherChildrenNotPartOfTheApplication", otherChildrenNotInTheCaseMapper.map(caseData.getChildrenNotInTheCase()))
-            .add("allegationsOfHarm", YesOrNo.Yes.equals(caseData.getIsNewCaseCreated()) ? allegationsOfHarmRevisedMapper
+            .add("allegationsOfHarm", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion()) ? allegationsOfHarmRevisedMapper
                     .map(caseData) : allegationOfHarmMapper.map(caseData))
             .add("otherPeopleInTheCase", otherPeopleInTheCaseMapper.map(caseData.getOthersToNotify()))
             .add("otherProceedings", otherproceedingsMapper.map(caseData))

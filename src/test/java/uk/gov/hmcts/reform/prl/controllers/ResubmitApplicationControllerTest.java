@@ -49,6 +49,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -256,45 +257,45 @@ public class ResubmitApplicationControllerTest {
 
     @Test
     public void givenNoAllegationsOfHarmAndWelsh_whenLastEventWasIssued_thenIssuedPathFollowedAndCorrectDocsGeneratedForAllegationOfHarmRevised()
-        throws Exception {
+            throws Exception {
         AllegationOfHarmRevised allegationOfHarmNo = AllegationOfHarmRevised.builder()
-            .newAllegationsOfHarmYesNo(No).build();
+                .newAllegationsOfHarmYesNo(No).build();
 
         CaseData caseDataNoAllegations = CaseData.builder()
-            .id(12345L)
-            .state(State.CASE_ISSUE)
-            .allegationOfHarmRevised(allegationOfHarmNo)
-            .isNewCaseCreated(Yes)
-            .build();
+                .id(12345L)
+                .state(State.CASE_ISSUE)
+                .allegationOfHarmRevised(allegationOfHarmNo)
+                .taskListVersion(TASK_LIST_VERSION_V2)
+                .build();
 
         List<CaseEventDetail> caseEvents = List.of(
-            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.CASE_ISSUE.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
+                CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+                CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+                CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+                CaseEventDetail.builder().stateId(State.CASE_ISSUE.getValue()).build(),
+                CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder()
-            .isGenWelsh(true)
-            .isGenEng(false)
-            .build();
+                .isGenWelsh(true)
+                .isGenEng(false)
+                .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataNoAllegations);
         when(caseEventService.findEventsForCase(String.valueOf(caseDataNoAllegations.getId()))).thenReturn(caseEvents);
         when(courtFinderService.getNearestFamilyCourt(caseDataNoAllegations)).thenReturn(court);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
-            caseDataNoAllegations);
+                caseDataNoAllegations);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
-            caseDataNoAllegations);
+                caseDataNoAllegations);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
-            .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test", DOCUMENT_FIELD_FINAL_WELSH, "test"
-            ));
+                .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test", DOCUMENT_FIELD_FINAL_WELSH, "test"
+                ));
 
 
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(
-            auth,
-            callbackRequest
+                auth,
+                callbackRequest
         );
 
         assertEquals(State.CASE_ISSUE, response.getData().get("state"));

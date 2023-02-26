@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
@@ -105,6 +106,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
@@ -116,6 +118,9 @@ public class ApplicationsTabServiceTest {
 
     @InjectMocks
     ApplicationsTabService applicationsTabService;
+
+    @Mock
+    ApplicationsTabServiceHelper applicationsTabServiceHelper;
 
     @Mock
     ObjectMapper objectMapper;
@@ -544,11 +549,12 @@ public class ApplicationsTabServiceTest {
 
         RevisedChildAbductionDetails revisedChildAbductionDetails = RevisedChildAbductionDetails.builder()
                 .newAbductionChildHasPassport(Yes).build();
-        CaseData caseData = caseDataWithParties.toBuilder().isNewCaseCreated(Yes)
+        CaseData caseData = caseDataWithParties.toBuilder().taskListVersion(TASK_LIST_VERSION_V2)
                 .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                         .childPassportDetails(ChildPassportDetails.builder().newChildPassportPossession(List
                                 .of(NewPassportPossessionEnum.father)).build())
-                        .newAllegationsOfHarmYesNo(Yes).build()).build();
+                        .newAllegationsOfHarmYesNo(Yes)
+                        .childEmotionalAbuse(ChildAbuse.builder().build()).build()).build();
 
         when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class))
                 .thenReturn(OtherPersonInTheCase.builder().build());

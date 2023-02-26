@@ -114,6 +114,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -248,7 +249,7 @@ public class DocumentGenServiceTest {
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(Yes).build())
-            .isNewCaseCreated(YesOrNo.No)
+                .taskListVersion(TASK_LIST_VERSION_V2)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
             //.allegationsOfHarmYesNo(No)
@@ -277,7 +278,7 @@ public class DocumentGenServiceTest {
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.No).build())
-            .isNewCaseCreated(YesOrNo.No)
+                .taskListVersion(TASK_LIST_VERSION_V2)
             //.allegationsOfHarmYesNo(Yes)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
@@ -295,7 +296,7 @@ public class DocumentGenServiceTest {
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
-            .isNewCaseCreated(YesOrNo.No)
+                .taskListVersion(TASK_LIST_VERSION_V2)
             //.allegationsOfHarmYesNo(Yes)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
@@ -1274,7 +1275,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testSingleDocGenerationC1A() throws Exception {
-        c100CaseData = c100CaseData.toBuilder().isNewCaseCreated(Yes).build();
+        c100CaseData = c100CaseData.toBuilder().taskListVersion(TASK_LIST_VERSION_V2).build();
         documentGenService.generateSingleDocument("auth", c100CaseData, C1A_HINT, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }

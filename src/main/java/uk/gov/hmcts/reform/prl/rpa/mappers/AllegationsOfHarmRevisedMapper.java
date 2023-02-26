@@ -4,7 +4,8 @@ package uk.gov.hmcts.reform.prl.rpa.mappers;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuseBehaviours;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -88,7 +90,7 @@ public class AllegationsOfHarmRevisedMapper {
                 .add("newOrdersUndertakingInPlaceCourtName", String.valueOf(allegationOfHarmRevised.getNewOrdersUndertakingInPlaceCourtName()))
                 .add("newOrdersUndertakingInPlaceCaseNumber", String.valueOf(allegationOfHarmRevised.getNewOrdersUndertakingInPlaceCaseNumber()))
                 .add("domesticBehaviours", mapDomesticAbuseBehaviours(allegationOfHarmRevised.getDomesticBehaviours()))
-                .add("childAbuseBehaviours", mapChildAbuseBehaviours(allegationOfHarmRevised.getChildAbuseBehaviours()))
+                .add("childAbuseBehaviours", mapChildAbuseBehaviours(allegationOfHarmRevised))
                 .add("newChildAbductionReasons", allegationOfHarmRevised.getNewChildAbductionReasons())
                 .add("newPreviousAbductionThreats", CommonUtils.getYesOrNoValue(allegationOfHarmRevised.getNewPreviousAbductionThreats()))
                 .add("newPreviousAbductionThreatsDetails", allegationOfHarmRevised.getNewPreviousAbductionThreatsDetails())
@@ -138,23 +140,51 @@ public class AllegationsOfHarmRevisedMapper {
     }
 
 
-    private JsonArray mapChildAbuseBehaviours(List<Element<ChildAbuseBehaviours>> childAbuseBehaviours) {
+    private JsonArray mapChildAbuseBehaviours(AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        Optional<List<Element<ChildAbuseBehaviours>>> childAbuseBehavioursElementsCheck = ofNullable(childAbuseBehaviours);
-        if (childAbuseBehavioursElementsCheck.isEmpty()) {
+
+        Optional<ChildAbuse> childPhysicalAbuse =
+                ofNullable(allegationOfHarmRevised.getChildPhysicalAbuse());
+
+
+        Optional<ChildAbuse> childPsychologicalAbuse =
+                ofNullable(allegationOfHarmRevised.getChildPsychologicalAbuse());
+
+
+        Optional<ChildAbuse> childEmotionalAbuse =
+                ofNullable(allegationOfHarmRevised.getChildEmotionalAbuse());
+
+
+        Optional<ChildAbuse> childSexualAbuse =
+                ofNullable(allegationOfHarmRevised.getChildSexualAbuse());
+
+
+        Optional<ChildAbuse> childFinancialAbuse =
+                ofNullable(allegationOfHarmRevised.getChildFinancialAbuse());
+
+
+        if (childPhysicalAbuse.isEmpty() && childFinancialAbuse.isEmpty()
+                && childSexualAbuse.isEmpty() && childEmotionalAbuse.isEmpty()
+                && childPsychologicalAbuse.isEmpty()) {
             return JsonValue.EMPTY_JSON_ARRAY;
         }
-        List<ChildAbuseBehaviours> childAbuseBehavioursList = childAbuseBehaviours.stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
+
+        List<ChildAbuse> childAbuseBehavioursList = new ArrayList<>();
+        childPhysicalAbuse.ifPresent(childAbuseBehavioursList::add);
+        childPsychologicalAbuse.ifPresent(childAbuseBehavioursList::add);
+        childEmotionalAbuse.ifPresent(childAbuseBehavioursList::add);
+        childSexualAbuse.ifPresent(childAbuseBehavioursList::add);
+        childFinancialAbuse.ifPresent(childAbuseBehavioursList::add);
         return childAbuseBehavioursList.stream().map(childAbuseBehaviour -> new NullAwareJsonObjectBuilder()
-                .add("typeOfAbuse", childAbuseBehaviour.getTypeOfAbuse().getDisplayedValue())
-                .add("newAbuseNatureDescription", childAbuseBehaviour.getNewAbuseNatureDescription())
-                .add("newBehavioursStartDateAndLength", childAbuseBehaviour.getNewBehavioursStartDateAndLength())
-                .add("newBehavioursApplicantSoughtHelp", CommonUtils.getYesOrNoValue(childAbuseBehaviour.getNewBehavioursApplicantSoughtHelp()))
-                .add("newBehavioursApplicantHelpSoughtWho", childAbuseBehaviour.getNewBehavioursApplicantHelpSoughtWho())
+                .add("abuseNatureDescription", childAbuseBehaviour.getAbuseNatureDescription())
+                .add("behavioursStartDateAndLength", childAbuseBehaviour.getBehavioursStartDateAndLength())
+                .add("behavioursApplicantSoughtHelp", CommonUtils.getYesOrNoValue(childAbuseBehaviour.getBehavioursApplicantSoughtHelp()))
+                .add("behavioursApplicantHelpSoughtWho", childAbuseBehaviour.getBehavioursApplicantHelpSoughtWho())
                 .add("allChildrenAreRisk", CommonUtils.getYesOrNoValue(childAbuseBehaviour.getAllChildrenAreRisk()))
-                .add("whichChildrenAreRisk", childAbuseBehaviour.getWhichChildrenAreRisk())
+                .add("whichChildrenAreRisk", ofNullable(childAbuseBehaviour.getWhichChildrenAreRisk()).isEmpty() ? "" : childAbuseBehaviour
+                        .getWhichChildrenAreRisk().getValue().stream().map(DynamicMultiselectListElement::getCode)
+                                .collect(Collectors.joining(",")))
                 .build()).collect(JsonCollectors.toJsonArray());
+
     }
 }
