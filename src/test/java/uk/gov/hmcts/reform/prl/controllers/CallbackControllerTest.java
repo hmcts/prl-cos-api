@@ -1000,7 +1000,7 @@ public class CallbackControllerTest {
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
         CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd")
-            .isNewCaseCreated(Yes)
+                .taskListVersion(TASK_LIST_VERSION_V2)
             .applicantOrganisationPolicy(
             applicantOrganisationPolicy).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
@@ -1443,7 +1443,7 @@ public class CallbackControllerTest {
                                   .newAllegationsOfHarmChildAbductionYesNo(Yes)
                                   .newAllegationsOfHarmChildAbuseYesNo(Yes)
                                   .newAllegationsOfHarmDomesticAbuseYesNo(Yes).build())
-            .isNewCaseCreated(Yes)
+                .taskListVersion(TASK_LIST_VERSION_V2)
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
@@ -1891,7 +1891,7 @@ public class CallbackControllerTest {
                                   .newAllegationsOfHarmChildAbductionYesNo(Yes)
                                   .newAllegationsOfHarmDomesticAbuseYesNo(Yes)
                                   .newAllegationsOfHarmChildAbuseYesNo(Yes).build())
-            .isNewCaseCreated(Yes)
+                .taskListVersion(TASK_LIST_VERSION_V2)
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)

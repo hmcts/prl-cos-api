@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -69,12 +68,6 @@ public class AllegationsOfHarmRevisedMapperTest {
     @Test
     public void testDataAllegationsOfHarmMapperMapCollections() {
 
-        ChildAbuseBehaviours childAbuseBehaviours = ChildAbuseBehaviours.builder().allChildrenAreRisk(YesOrNo.Yes)
-                .whichChildrenAreRisk("child1").typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
-                .newAbuseNatureDescription("des").newBehavioursApplicantHelpSoughtWho("sought").newBehavioursApplicantSoughtHelp(YesOrNo.Yes).build();
-        Element<ChildAbuseBehaviours> childAbuseBehavioursElement = Element
-                .<ChildAbuseBehaviours>builder().value(childAbuseBehaviours).build();
-
 
         DomesticAbuseBehaviours domesticAbuseBehaviours = DomesticAbuseBehaviours.builder().typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
                 .newAbuseNatureDescription("des").newBehavioursApplicantHelpSoughtWho("sought").newBehavioursApplicantSoughtHelp(YesOrNo.Yes).build();
@@ -89,7 +82,6 @@ public class AllegationsOfHarmRevisedMapperTest {
         CaseData caseData = CaseData.builder()
                 .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                         .childPassportDetails(childPassportDetails)
-                        .childAbuseBehaviours(Collections.singletonList(childAbuseBehavioursElement))
                         .domesticBehaviours(Collections.singletonList(domesticAbuseBehavioursElement))
                         .build()).build();
         assertNotNull(allegationsOfHarmRevisedMapper.map(caseData));

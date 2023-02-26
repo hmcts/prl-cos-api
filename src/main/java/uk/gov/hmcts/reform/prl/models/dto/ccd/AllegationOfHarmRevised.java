@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuseBehaviours;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
@@ -120,16 +120,25 @@ public class AllegationOfHarmRevised {
 
     private final String undertakingInPlaceOrderCaseNumber;
 
-
-    //For Domestic Abuse Behaviours towards Applicant
-
     @JsonProperty("domesticBehaviours")
     private final List<Element<DomesticAbuseBehaviours>> domesticBehaviours;
 
-    //For child abuse
+    private final List<String> childAbuseBehaviours;
 
-    @JsonProperty("childAbuseBehaviours")
-    private final List<Element<ChildAbuseBehaviours>> childAbuseBehaviours;
+    @JsonProperty("childPhysicalAbuse")
+    private final ChildAbuse childPhysicalAbuse;
+
+    @JsonProperty("childPsychologicalAbuse")
+    private final ChildAbuse childPsychologicalAbuse;
+
+    @JsonProperty("childFinancialAbuse")
+    private final ChildAbuse childFinancialAbuse;
+
+    @JsonProperty("childSexualAbuse")
+    private final ChildAbuse childSexualAbuse;
+
+    @JsonProperty("childEmotionalAbuse")
+    private final ChildAbuse childEmotionalAbuse;
 
 
 

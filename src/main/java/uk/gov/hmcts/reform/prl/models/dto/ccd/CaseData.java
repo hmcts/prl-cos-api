@@ -167,8 +167,6 @@ public class CaseData implements MappableObject {
     private String childName;
 
 
-    private final YesOrNo isNewCaseCreated;
-
     /**
      * Confidential Disclaimer.
      */

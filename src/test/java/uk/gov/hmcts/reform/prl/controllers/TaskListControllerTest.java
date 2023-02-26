@@ -81,14 +81,14 @@ public class TaskListControllerTest {
     @Test
     public void testHandleSubmittedWithoutCourtStaffRoles() {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(List.of("test role")).build());
-        taskListController.handleSubmitted(callbackRequest, "testAuth");
+        taskListController.handleSubmitted(callbackRequest,"testAuth");
         verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
     }
 
     @Test
     public void testHandleSubmittedWithCourtStaffRoles() {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(ROLES).build());
-        taskListController.handleSubmitted(callbackRequest, "testAuth");
+        taskListController.handleSubmitted(callbackRequest,"testAuth");
         verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
     }
 }

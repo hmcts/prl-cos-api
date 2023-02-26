@@ -61,6 +61,9 @@ public class C100JsonMapperTest {
     @Mock
     ChildrenAndOtherPeopleMapper childrenAndOtherPeopleMapper;
 
+    @Mock
+    AllegationsOfHarmRevisedMapper allegationsOfHarmRevisedMapper;
+
     @Test
     public void testC100JsonMapperWithSomeFields() {
         OtherChildrenNotInTheCase child = OtherChildrenNotInTheCase.builder().firstName("Lewis").lastName("Christine")

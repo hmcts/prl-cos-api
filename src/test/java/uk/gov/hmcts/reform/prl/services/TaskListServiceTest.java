@@ -111,7 +111,7 @@ public class TaskListServiceTest {
     @Test
     public void getTasksShouldReturnListOfTasks_WithNewAllegationOfHarm() {
 
-        CaseData caseData = CaseData.builder().isNewCaseCreated(YesOrNo.Yes)
+        CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
                 .taskListVersion(TASK_LIST_VERSION_V2).build();
 

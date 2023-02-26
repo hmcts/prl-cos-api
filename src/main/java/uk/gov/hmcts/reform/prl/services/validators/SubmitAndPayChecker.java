@@ -68,17 +68,14 @@ public class SubmitAndPayChecker implements EventChecker {
             mandatoryEvents.put(CHILDREN_AND_APPLICANTS, eventsChecker.getChildrenAndApplicantsChecker());
             mandatoryEvents.put(CHILDREN_AND_RESPONDENTS, eventsChecker.getChildrenAndRespondentsChecker());
             mandatoryEvents.put(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION, eventsChecker.getChildrenAndOtherPeopleInThisApplicationChecker());
+            mandatoryEvents.put(ALLEGATIONS_OF_HARM_REVISED, eventsChecker.getAllegationsOfHarmRevisedChecker());
         } else {
             mandatoryEvents.put(CHILD_DETAILS, eventsChecker.getChildChecker());
+            mandatoryEvents.put(ALLEGATIONS_OF_HARM, eventsChecker.getAllegationsOfHarmChecker());
         }
         mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.getRespondentsChecker());
         if (YesOrNo.No.equals(caseData.getConsentOrder()) || caseData.getConsentOrder() == null) {
             mandatoryEvents.put(MIAM, eventsChecker.getMiamChecker());
-        }
-        if (YesOrNo.Yes.equals(caseData.getIsNewCaseCreated())) {
-            mandatoryEvents.put(ALLEGATIONS_OF_HARM_REVISED, eventsChecker.getAllegationsOfHarmRevisedChecker());
-        } else {
-            mandatoryEvents.put(ALLEGATIONS_OF_HARM, eventsChecker.getAllegationsOfHarmChecker());
         }
         boolean mandatoryFinished;
 

@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
@@ -25,6 +24,7 @@ import java.util.Map;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseInitiationControllerTest {
@@ -98,7 +98,6 @@ public class CaseInitiationControllerTest {
     }
 
 
-
     @Test
     public void testHandleSubmittedForAllegationOfHarmRevised() {
 
@@ -108,26 +107,25 @@ public class CaseInitiationControllerTest {
         String userID = "12345";
 
         CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(caseDataMap)
-            .build();
+                .id(123L)
+                .data(caseDataMap)
+                .build();
 
         CaseData caseData = CaseData.builder()
-            .id(123L)
-            .applicantCaseName("testCaseName")
-            .isNewCaseCreated(YesOrNo.Yes)
-            .build();
+                .id(123L)
+                .applicantCaseName("testCaseName")
+                .taskListVersion(TASK_LIST_VERSION_V2)
+                .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-
+                .caseDetails(caseDetails)
+                .build();
 
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        doNothing().when(assignCaseAccessService).assignCaseAccess(String.valueOf(caseData.getId()),auth);
+        doNothing().when(assignCaseAccessService).assignCaseAccess(String.valueOf(caseData.getId()), auth);
 
-        caseInitiationController.handleSubmitted(auth,callbackRequest);
+        caseInitiationController.handleSubmitted(auth, callbackRequest);
         CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
         eventService.publishEvent(caseDataChanged);
 

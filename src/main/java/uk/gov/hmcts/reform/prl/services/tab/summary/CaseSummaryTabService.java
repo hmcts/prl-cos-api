@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.TabService;
@@ -29,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
 
 @Service
@@ -104,33 +104,21 @@ public class CaseSummaryTabService implements TabService {
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
 
             return List.of(allocatedJudgeDetailsGenerator,
-                           caseStatusGenerator, confidentialDetailsGenerator,urgencyGenerator,typeOfApplicationGenerator,
-                           specialArrangementsGenerator,dateOfSubmissionGenerator);
+                    caseStatusGenerator, confidentialDetailsGenerator, urgencyGenerator, typeOfApplicationGenerator,
+                    specialArrangementsGenerator, dateOfSubmissionGenerator);
 
         }
-        if (YesOrNo.Yes.equals(caseData.getIsNewCaseCreated())) {
-            return List.of(
+
+        return List.of(
                 allocatedJudgeDetailsGenerator,
                 caseStatusGenerator,
                 confidentialDetailsGenerator,
                 orderAppliedForGenerator,
                 specialArrangementsGenerator,
                 urgencyGenerator,
-                allegationOfHarmRevisedGenerator,
+                TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion()) ? allegationOfHarmRevisedGenerator : allegationOfHarmGenerator,
                 dateOfSubmissionGenerator
-            );
-        }  else {
-            return List.of(
-                allocatedJudgeDetailsGenerator,
-                caseStatusGenerator,
-                confidentialDetailsGenerator,
-                orderAppliedForGenerator,
-                specialArrangementsGenerator,
-                urgencyGenerator,
-                allegationOfHarmGenerator,
-                dateOfSubmissionGenerator
-            );
-        }
+        );
     }
 
     @Override

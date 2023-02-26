@@ -22,19 +22,73 @@
 
 ## Add people to the case
 
+<div class='panel panel-border-wide govuk-!-font-size-16'>if children live with another party in the case (other than the applicant or respondent) you can add these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.</div>
+
+<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
+
+<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetailsRevised/childDetailsRevised1'>Child details</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started'/>
+
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
 <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started'/>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
-<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetails/childDetails1'>Child details</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started'/>
-
-<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
-
 <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started'/>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
+
+<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCaseRevised/otherPeopleInTheCaseRevised1'>Other people in the case</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started'/>
+
+<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
+
+<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherChildNotInTheCase/otherChildNotInTheCase1'>Other children not in the case</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started'/>
+
+<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
+
+<br/>
+
+## Relationships
+
+<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
+
+<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndApplicants/childrenAndApplicants1'>Children and applicants</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started'/>
+
+<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
+
+<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndRespondents/childrenAndRespondents1'>Children and respondents</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started'/>
+
+<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
+
+<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndOtherPeople/childrenAndOtherPeople1'>Children and other people</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started'/>
+
+<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
+
+<details class='govuk-details'>
+
+<summary class='govuk-details__summary'>
+
+<span class='govuk-details__summary-text'>
+
+Why can't I enter relationship details?
+
+</span>
+
+</summary>
+
+<div class='govuk-details__text'>
+
+Add people to the case details to to <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetailsRevised/childDetailsRevised1'>Child details</a>
+
+Add people to the case details to to <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details</a>
+
+Add people to the case details to to <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details</a>
+
+Add the details about other people in the case to <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCaseRevised/otherPeopleInTheCaseRevised1'>Other people in the case</a>
+
+</div>
+
+</details>
 
 <br/>
 
@@ -63,10 +117,6 @@
 ## Add additional information
 
 <div class='panel panel-border-wide govuk-!-font-size-16'>Only complete if relevant</div>
-
-<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
-
-<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCase/otherPeopleInTheCase1'>Other people in the case</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started'/>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 
@@ -107,6 +108,7 @@ public class SubmitAndPayCheckerTest {
 
     @Mock
     WelshLanguageRequirementsChecker welshLanguageRequirementsChecker;
+
 
     private CaseData caseData;
     private Address address;
@@ -221,7 +223,7 @@ public class SubmitAndPayCheckerTest {
 
     @Test
     public void whenNoDataEnteredThenIsFinishedReturnFalse() {
-        caseData = CaseData.builder().isNewCaseCreated(Yes).build();
+        caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
 
         when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
         when(caseNameChecker.isFinished(caseData)).thenReturn(false);
@@ -595,8 +597,8 @@ public class SubmitAndPayCheckerTest {
                              .soleTraderName("Trade Sole")
                              .miamCertificationDocumentUpload(Document.builder().build())
                              .build())
-            .allegationOfHarm(AllegationOfHarm.builder()
-                                  .allegationsOfHarmYesNo(No).build())
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                  .newAllegationsOfHarmYesNo(No).build())
             .build();
 
         when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
@@ -621,8 +623,8 @@ public class SubmitAndPayCheckerTest {
         when(respondentsChecker.isFinished(caseData)).thenReturn(true);
         when(miamChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(miamChecker.isFinished(caseData)).thenReturn(true);
-        when(allegationsOfHarmChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(allegationsOfHarmChecker.isFinished(caseData)).thenReturn(true);
+        when(allegationsOfHarmRevisedChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(allegationsOfHarmRevisedChecker.isFinished(caseData)).thenReturn(true);
         when(otherPeopleInTheCaseChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(otherPeopleInTheCaseChecker.isFinished(caseData)).thenReturn(true);
         when(otherPeopleInTheCaseChecker.isFinished(caseData)).thenReturn(true);
@@ -660,6 +662,7 @@ public class SubmitAndPayCheckerTest {
         when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);
         when(eventsChecker.getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
         when(eventsChecker.getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
+        when(eventsChecker.getAllegationsOfHarmRevisedChecker()).thenReturn(allegationsOfHarmRevisedChecker);
 
         assertTrue(submitAndPayChecker.hasMandatoryCompleted(caseData));
     }

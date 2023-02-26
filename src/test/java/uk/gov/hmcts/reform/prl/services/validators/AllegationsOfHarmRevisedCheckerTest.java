@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -411,38 +410,9 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
 
 
-    @Test
-    public void whenCompleteChildAbuseBehaviourReturnTrue() {
-
-        ChildAbuseBehaviours behaviour = ChildAbuseBehaviours.builder()
-            .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
-            .newAbuseNatureDescription("Test")
-            .newBehavioursStartDateAndLength("5 days")
-            .newBehavioursApplicantSoughtHelp(Yes)
-            .allChildrenAreRisk(Yes)
-            .whichChildrenAreRisk("test")
-            .newBehavioursApplicantHelpSoughtWho("Who from")
-            .build();
-
-        assertTrue(allegationsOfHarmChecker.validateChildAbuseBehaviours(behaviour));
-    }
 
 
 
-    @Test
-    public void whenCompleteChildAbuseBehaviourReturnFalse() {
-
-        ChildAbuseBehaviours behaviour = ChildAbuseBehaviours.builder()
-            .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
-            .newAbuseNatureDescription("Test")
-            .newBehavioursStartDateAndLength("5 days")
-            .newBehavioursApplicantSoughtHelp(Yes)
-            .allChildrenAreRisk(Yes)
-            .newBehavioursApplicantHelpSoughtWho("Who from")
-            .build();
-
-        assertTrue(allegationsOfHarmChecker.validateChildAbuseBehaviours(behaviour));
-    }
 
     @Test
     public void whenAbuseInCompleteReturnFalse() {
@@ -623,26 +593,14 @@ public class AllegationsOfHarmRevisedCheckerTest {
         Element<DomesticAbuseBehaviours>  domesticAbuseBehavioursElement = Element.<DomesticAbuseBehaviours>builder()
             .value(domesticAbuseBehaviours)
             .build();
-        ChildAbuseBehaviours childAbuseBehaviours = ChildAbuseBehaviours.builder()
-            .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
-            .allChildrenAreRisk(No)
-            .whichChildrenAreRisk("Test")
-            .newAbuseNatureDescription("Test")
-            .newBehavioursStartDateAndLength("5 days")
-            .newBehavioursApplicantSoughtHelp(Yes)
-            .newBehavioursApplicantHelpSoughtWho("Who from")
-            .build();
 
-        Element<ChildAbuseBehaviours> childAbuseBehavioursElement = Element.<ChildAbuseBehaviours>builder()
-            .value(childAbuseBehaviours)
-            .build();
+
 
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newAllegationsOfHarmYesNo(Yes)
                                   .newAllegationsOfHarmDomesticAbuseYesNo(Yes)
                                   .domesticBehaviours(Collections.singletonList(domesticAbuseBehavioursElement))
-                                  .childAbuseBehaviours(Collections.singletonList(childAbuseBehavioursElement))
                                   .newOrdersNonMolestation(No)
                                   .newOrdersOccupation(No)
                                   .newOrdersForcedMarriageProtection(No)

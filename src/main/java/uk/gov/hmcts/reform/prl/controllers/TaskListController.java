@@ -54,7 +54,6 @@ public class TaskListController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                 @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                 @Parameter(hidden = true) String authorisation) {
-
         log.debug("callbackRequest  :{} ",callbackRequest);
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();

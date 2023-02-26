@@ -113,17 +113,7 @@ public class DocumentGenService {
     @Value("${document.templates.c100.c100_c8_draft_filename}")
     protected String c100C8DraftFilename;
 
-    @Value("${document.templates.c100.c100_c1a_template}")
-    protected String c100C1aTemplate;
 
-    @Value("${document.templates.c100.c100_c1a_draft_template}")
-    protected String c100C1aDraftTemplate;
-
-    @Value("${document.templates.c100.c100_c1a_revised_template}")
-    protected String c100C1aRevisedTemplate;
-
-    @Value("${document.templates.c100.c100_c1a_revised_draft_template}")
-    protected String c100C1aRevisedDraftTemplate;
 
 
     @Value("${document.templates.c100.c100_c1a_filename}")
@@ -144,20 +134,8 @@ public class DocumentGenService {
     @Value("${document.templates.c100.c100_c8_draft_welsh_filename}")
     protected String c100C8DraftWelshFilename;
 
-    @Value("${document.templates.c100.c100_c1a_welsh_template}")
-    protected String c100C1aWelshTemplate;
-
-    @Value("${document.templates.c100.c100_c1a_revised_welsh_template}")
-    protected String c100C1aRevisedWelshTemplate;
-
     @Value("${document.templates.c100.c100_c1a_welsh_filename}")
     protected String c100C1aWelshFilename;
-
-    @Value("${document.templates.c100.c100_c1a_draft_welsh_template}")
-    protected String c100C1aDraftWelshTemplate;
-
-    @Value("${document.templates.c100.c100_c1a_revised_draft_welsh_template}")
-    protected String c100C1aRevisedDraftWelshTemplate;
 
     @Value("${document.templates.c100.c100_c1a_draft_welsh_filename}")
     protected String c100C1aDraftWelshFilename;
@@ -721,10 +699,10 @@ public class DocumentGenService {
                 template = c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData);
                 break;
             case C1A_HINT:
-                template = findC1ATemplate(isWelsh, caseData.getIsNewCaseCreated());
+                template = c100DocumentTemplateFinderService.findC1ATemplate(caseData);
                 break;
             case C1A_DRAFT_HINT:
-                template = findDraftC1ATemplate(isWelsh, caseData.getIsNewCaseCreated());
+                template = c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData);
                 break;
             case FINAL_HINT:
                 template = findFinalTemplate(isWelsh, caseData);
@@ -790,25 +768,7 @@ public class DocumentGenService {
         return template;
     }
 
-    private String findC1ATemplate(boolean isWelsh, YesOrNo newCaseCreated) {
-        String template;
-        if (Yes.equals(newCaseCreated)) {
-            template = !isWelsh ? c100C1aRevisedTemplate : c100C1aRevisedWelshTemplate;
-        } else {
-            template = !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
-        }
-        return template;
-    }
 
-    private String findDraftC1ATemplate(boolean isWelsh, YesOrNo newCaseCreated) {
-        String template;
-        if (Yes.equals(newCaseCreated)) {
-            template = !isWelsh ? c100C1aRevisedDraftTemplate : c100C1aRevisedDraftWelshTemplate;
-        } else {
-            template = !isWelsh ? c100C1aDraftTemplate : c100C1aDraftWelshTemplate;
-        }
-        return template;
-    }
 
     private String findDocCoverSheetTemplate(boolean isWelsh) {
         return !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;

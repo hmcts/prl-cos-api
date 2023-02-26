@@ -493,7 +493,6 @@ public class CallbackController {
             caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
             if (C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
                 caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
-                caseDataUpdated.put("isNewCaseCreated", Yes);
             }
         }
 
