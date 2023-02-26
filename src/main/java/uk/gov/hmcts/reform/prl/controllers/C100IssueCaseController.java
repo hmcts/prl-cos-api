@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -66,7 +67,7 @@ public class C100IssueCaseController {
             String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
             String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
             String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
-            caseDataUpdated.put("isCafcass", CaseUtils.cafcassFlag(regionId));
+            caseDataUpdated.put(PrlAppsConstants.IS_CAFCASS, CaseUtils.cafcassFlag(regionId));
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
                 .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
