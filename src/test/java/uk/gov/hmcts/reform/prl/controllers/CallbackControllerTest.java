@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfiden
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
@@ -252,7 +253,12 @@ public class CallbackControllerTest {
         fl401DocsMap.put(DOCUMENT_FIELD_C8_WELSH, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(),Mockito.anyString()))
-            .thenReturn("test-1-test-test-test-test");
+            .thenReturn(Optional.of(CourtVenue.builder()
+                                        .courtName("test")
+                                        .regionId("1")
+                                        .siteName("test")
+                                        .region("test")
+                                        .build()));
     }
 
     @Test

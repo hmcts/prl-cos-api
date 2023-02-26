@@ -46,6 +46,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
@@ -73,7 +74,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -86,8 +86,6 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_STATE;
@@ -316,17 +314,8 @@ public class CallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String baseLocationId = caseData.getCourtList().getValue().getCode();
-        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,authorisation).split("-");
-        String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
-        String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
-        caseDataUpdated.put(COURT_NAME_FIELD, courtName);
-        caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
-        String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
-        String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
-        caseDataUpdated.put(PrlAppsConstants.IS_CAFCASS, CaseUtils.cafcassFlag(regionId));
-        caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-            .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
-            .baseLocationName(baseLocationName).build());
+        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
+        caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
