@@ -422,6 +422,7 @@ public class ManageOrderService {
             "caseTypeOfApplication",
             CaseUtils.getCaseTypeOfApplication(caseData)
         );
+        headerMap.put("isCafcass", caseData.getIsCafcass());
         log.info("after populate-header map ===> " + headerMap);
         return headerMap;
     }
