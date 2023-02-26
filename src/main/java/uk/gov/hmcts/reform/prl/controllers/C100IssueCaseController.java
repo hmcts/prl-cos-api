@@ -60,6 +60,7 @@ public class C100IssueCaseController {
         if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
             String baseLocationId = caseData.getCourtList().getValue().getCode();
             String key = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
+            log.info("Key ====> " + key);
             String[] venueDetails = key.split("-");
             String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
             String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
