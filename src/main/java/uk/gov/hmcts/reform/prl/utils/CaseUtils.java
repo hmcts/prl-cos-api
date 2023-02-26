@@ -6,7 +6,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
@@ -132,14 +131,14 @@ public class CaseUtils {
         return caseDataMap;
     }
 
-    public static YesOrNo cafcassFlag(String regionId) {
+    public static String cafcassFlag(String regionId) {
         log.info("regionId ===> " + regionId);
-        YesOrNo cafcassFlag = YesOrNo.No; //wales
+        String cafcassFlag = PrlAppsConstants.NO; //wales
 
         int intRegionId = Integer.parseInt(regionId);
 
         if (intRegionId > 0 && intRegionId < 7) {
-            cafcassFlag = YesOrNo.Yes; //english regions
+            cafcassFlag = PrlAppsConstants.YES; //english regions
         }
         log.info("is cafcass flag set ===> " + cafcassFlag);
         return cafcassFlag;

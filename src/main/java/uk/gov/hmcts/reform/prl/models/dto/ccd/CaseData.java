@@ -145,8 +145,7 @@ public class CaseData implements MappableObject {
      */
     private CaseCreatedBy caseCreatedBy;
 
-    @JsonProperty("isCafcass")
-    private YesOrNo isCafcass;
+    private String isCafcass;
 
     /**
      * Case Type Of Application.

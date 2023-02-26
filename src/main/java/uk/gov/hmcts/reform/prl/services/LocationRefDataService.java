@@ -68,14 +68,11 @@ public class LocationRefDataService {
         CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(authToken,
                                                                                 authTokenGenerator.generate(),
                                                                                 SERVICE_ID);
-        log.info("courtDetails====> " + courtDetails);
-        log.info("baseLocationId====> " + baseLocationId);
 
         Optional<CourtVenue> courtVenue = courtDetails.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> baseLocationId.equalsIgnoreCase(location.getCourtEpimmsId()))
             .findFirst();
-        log.info("courtVenue====> " + courtVenue);
 
         return courtVenue.map(venue -> venue.getCourtEpimmsId() + "-" + venue.getRegionId()
             + "-" + venue.getCourtName() + "-" + venue.getPostcode() + "-" + venue.getRegion()
