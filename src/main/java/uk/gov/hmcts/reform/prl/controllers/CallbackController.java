@@ -323,7 +323,7 @@ public class CallbackController {
         caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
         String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
         String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
-        caseDataUpdated.put("isCafcass", CaseUtils.cafcassFlag(regionId));
+        caseDataUpdated.put(PrlAppsConstants.IS_CAFCASS, CaseUtils.cafcassFlag(regionId));
         caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
             .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
             .baseLocationName(baseLocationName).build());
