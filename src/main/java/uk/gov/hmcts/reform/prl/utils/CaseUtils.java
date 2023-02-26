@@ -28,7 +28,6 @@ import java.util.UUID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 
 @Slf4j
 public class CaseUtils {
@@ -109,7 +108,6 @@ public class CaseUtils {
             caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
                 .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
-            caseDataMap.put(IS_CAFCASS, cafcassFlag(regionId));
             caseDataMap.put(COURT_NAME_FIELD, courtName);
             caseDataMap.put(COURT_ID_FIELD, baseLocationId);
 
