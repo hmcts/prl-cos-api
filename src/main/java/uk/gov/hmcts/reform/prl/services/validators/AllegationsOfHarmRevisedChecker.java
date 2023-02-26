@@ -6,8 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuseBehaviours;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
@@ -114,8 +113,8 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
     public boolean validateDomesticAbuse(CaseData caseData) {
         boolean domesticBehavioursCompleted = true;
-        if (ofNullable(caseData.getAllegationOfHarmRevised().getChildAbuseBehaviours()).isPresent()) {
-            Optional<List<Element<ChildAbuseBehaviours>>> childBehavioursWrapped =
+        /*        if (ofNullable(caseData.getAllegationOfHarmRevised().getChildAbuseBehaviours()).isPresent()) {
+            Optional<List<Element<ChildAbuse>>> childBehavioursWrapped =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildAbuseBehaviours());
             if (childBehavioursWrapped.isPresent()
                 && !childBehavioursWrapped.get().isEmpty()) {
@@ -123,21 +122,21 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                     .stream().allMatch(behavioursElement -> validateChildAbuseBehaviours((behavioursElement.getValue())));
 
             }
-        }
+        }*/
         return domesticBehavioursCompleted;
     }
 
     public boolean validateChildAbuse(CaseData caseData) {
         boolean childBehavioursCompleted = true;
-        if (ofNullable(caseData.getAllegationOfHarmRevised().getChildAbuseBehaviours()).isPresent()) {
-            Optional<List<Element<ChildAbuseBehaviours>>> childBehavioursWrapped =
+        /*        if (ofNullable(caseData.getAllegationOfHarmRevised().getChildAbuseBehaviours()).isPresent()) {
+            Optional<List<Element<ChildAbuse>>> childBehavioursWrapped =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildAbuseBehaviours());
             if (childBehavioursWrapped.isPresent()
                 && !childBehavioursWrapped.get().isEmpty()) {
                 childBehavioursCompleted =  childBehavioursWrapped.get()
                     .stream().allMatch(behavioursElement -> validateChildAbuseBehaviours((behavioursElement.getValue())));
             }
-        }
+        }*/
         return childBehavioursCompleted;
     }
 
@@ -315,23 +314,22 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     }
 
 
-    public boolean validateChildAbuseBehaviours(ChildAbuseBehaviours childAbuseBehaviours) {
-
-        Optional<YesOrNo> allChildrenAreRisk = ofNullable(childAbuseBehaviours.getAllChildrenAreRisk());
-        Optional<String> whichChildrenAreRisk = ofNullable(childAbuseBehaviours.getWhichChildrenAreRisk());
-        Optional<String> abuseNatureDescription = ofNullable(childAbuseBehaviours.getNewAbuseNatureDescription());
-        Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(childAbuseBehaviours.getNewBehavioursApplicantHelpSoughtWho());
+    public boolean validateChildAbuseBehaviours(ChildAbuse childAbuse) {
+        /* Optional<YesOrNo> allChildrenAreRisk = ofNullable(childAbuse.getAllChildrenAreRisk());
+        Optional<String> whichChildrenAreRisk = ofNullable(childAbuse.getWhichChildrenAreRisk());
+        Optional<String> abuseNatureDescription = ofNullable(childAbuse.getNewAbuseNatureDescription());
+        Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(childAbuse.getNewBehavioursApplicantHelpSoughtWho());
 
         List<Optional<?>> fields = new ArrayList<>();
-        fields.add(ofNullable(childAbuseBehaviours.getTypeOfAbuse().getDisplayedValue()));
+        fields.add(ofNullable(childAbuse.getTypeOfAbuse().getDisplayedValue()));
         if (allChildrenAreRisk.isPresent()
               && allChildrenAreRisk.get().equals(No)) {
             fields.add(whichChildrenAreRisk);
         }
         fields.add(abuseNatureDescription);
-        Optional<String> behavioursStartDateAndLength = ofNullable(childAbuseBehaviours.getNewBehavioursStartDateAndLength());
+        Optional<String> behavioursStartDateAndLength = ofNullable(childAbuse.getNewBehavioursStartDateAndLength());
         fields.add(behavioursStartDateAndLength);
-        Optional<YesOrNo> behavioursApplicantSoughtHelp = ofNullable(childAbuseBehaviours.getNewBehavioursApplicantSoughtHelp());
+        Optional<YesOrNo> behavioursApplicantSoughtHelp = ofNullable(childAbuse.getNewBehavioursApplicantSoughtHelp());
         fields.add(behavioursApplicantSoughtHelp);
         if (behavioursApplicantSoughtHelp.isPresent()
             && behavioursApplicantSoughtHelp.get().equals(Yes)) {
@@ -339,7 +337,8 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         }
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent)
-            .map(Optional::get).noneMatch(field -> field.equals(""));
+            .map(Optional::get).noneMatch(field -> field.equals(""));*/
+        return Boolean.TRUE;
 
     }
 

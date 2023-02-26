@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
@@ -229,8 +228,8 @@ public class ApplicationsTabService implements TabService {
     private List<Element<ChildAbuseBehaviour>> getAllegationsOfHarmRevisedCaTable(CaseData caseData) {
 
         List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
-        if (YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmDomesticAbuseYesNo())) {
-            Optional<List<Element<ChildAbuseBehaviours>>> childAbuseBehaviours = ofNullable(caseData.getAllegationOfHarmRevised()
+        /*if (YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmDomesticAbuseYesNo())) {
+            Optional<List<Element<ChildAbuse>>> childAbuseBehaviours = ofNullable(caseData.getAllegationOfHarmRevised()
                     .getChildAbuseBehaviours());
 
             if (childAbuseBehaviours.isPresent()) {
@@ -250,7 +249,7 @@ public class ApplicationsTabService implements TabService {
                 );
                 return childAbuseBehaviourList;
             }
-        }
+        }*/
         ChildAbuseBehaviour childAbuseBehaviour = ChildAbuseBehaviour.builder().build();
         Element<ChildAbuseBehaviour> app = Element.<ChildAbuseBehaviour>builder().value(childAbuseBehaviour).build();
         childAbuseBehaviourList.add(app);
