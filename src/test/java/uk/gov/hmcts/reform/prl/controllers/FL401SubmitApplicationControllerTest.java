@@ -39,7 +39,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
-import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -181,7 +180,7 @@ public class FL401SubmitApplicationControllerTest {
             .address(Collections.singletonList(CourtAddress.builder().build()))
             .build();
         dynamicList = DynamicList.builder()
-            .value(DynamicListElement.builder().code("id:email").build()).build();
+            .value(DynamicListElement.builder().code("reg-base-courtname-postcode-regname-basename").build()).build();
         when(courtFinderApi.findClosestDomesticAbuseCourtByPostCode(Mockito.anyString()))
             .thenReturn(ServiceArea.builder()
                             .courts(Collections.singletonList(horshamCourt))
@@ -189,12 +188,7 @@ public class FL401SubmitApplicationControllerTest {
         when(courtFinderApi.getCourtDetails(Mockito.anyString())).thenReturn(horshamCourt);
         when(courtFinderService.getEmailAddress(horshamCourt)).thenReturn(Optional.of(courtEmailAddress));
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
-            .thenReturn(Optional.of(CourtVenue.builder()
-                                        .courtName("test")
-                                        .regionId("1")
-                                        .siteName("test")
-                                        .region("test")
-                                        .build()));
+            .thenReturn("test-1-test-test-test-test");
     }
 
     @Test
@@ -1219,7 +1213,7 @@ public class FL401SubmitApplicationControllerTest {
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         fl401SubmitApplicationController.fl401SendApplicationNotification(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(1))
+        verify(caseWorkerEmailService, times(0))
             .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
         verify(solicitorEmailService, times(1)).sendEmailToFl401Solicitor(
             callbackRequest.getCaseDetails(),
@@ -1257,7 +1251,7 @@ public class FL401SubmitApplicationControllerTest {
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         fl401SubmitApplicationController.fl401SendApplicationNotification(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(1))
+        verify(caseWorkerEmailService, times(0))
             .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
         verify(solicitorEmailService, times(1)).sendEmailToFl401Solicitor(
             callbackRequest.getCaseDetails(),

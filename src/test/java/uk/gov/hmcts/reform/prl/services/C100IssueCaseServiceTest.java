@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
@@ -45,7 +44,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -163,12 +161,7 @@ public class C100IssueCaseServiceTest {
         dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
                                                       .build()).build();
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
-            .thenReturn(Optional.of(CourtVenue.builder()
-                                        .courtName("test")
-                                        .regionId("1")
-                                        .siteName("test")
-                                        .region("test")
-                                        .build()));
+            .thenReturn("test-test-test-test-test-test");
     }
 
 

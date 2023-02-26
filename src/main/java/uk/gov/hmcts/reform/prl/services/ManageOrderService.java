@@ -437,14 +437,10 @@ public class ManageOrderService {
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
             setRecipientsOptions(caseData, headerMap);
             setOtherParties(caseData, headerMap);
-            if (caseData.getCaseManagementLocation() != null) {
-                headerMap.put(
-                    PrlAppsConstants.IS_CAFCASS,
-                    CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegionId())
-                );
-            } else {
-                headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
-            }
+            headerMap.put(
+                PrlAppsConstants.IS_CAFCASS,
+                caseData.getIsCafcass()
+            );
         } else {
             headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
         }

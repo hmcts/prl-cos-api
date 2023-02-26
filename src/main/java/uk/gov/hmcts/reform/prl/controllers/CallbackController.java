@@ -46,7 +46,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
-import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
@@ -87,6 +86,8 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_STATE;
@@ -221,7 +222,6 @@ public class CallbackController {
             .getEmailAddress(closestChildArrangementsCourt);
         if (courtEmailAddress.isPresent()) {
             log.info("Found court email for case id {}", caseData.getId());
-            log.info("Found court email {}", courtEmailAddress.get().getAddress());
             caseDataUpdated.put("localCourtAdmin", List.of(
                 Element.<LocalCourtAdminEmail>builder().value(LocalCourtAdminEmail.builder().email(courtEmailAddress.get().getAddress()).build())
                     .build()));
@@ -315,11 +315,18 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        String[] idEmail = caseData.getCourtList().getValue().getCode().split(":");
-        String baseLocationId = Arrays.stream(idEmail).toArray()[0].toString();
-        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
-        caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
-        log.info("amendCourtAboutToSubmit ===> " + caseDataUpdated);
+        String baseLocationId = caseData.getCourtList().getValue().getCode();
+        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,authorisation).split("-");
+        String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
+        String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
+        caseDataUpdated.put(COURT_NAME_FIELD, courtName);
+        caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
+        String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
+        String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
+        caseDataUpdated.put("isCafcass", CaseUtils.cafcassFlag(regionId));
+        caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
+            .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
+            .baseLocationName(baseLocationName).build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -355,8 +362,8 @@ public class CallbackController {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         List<String> stateList = List.of(DRAFT_STATE, "CLOSED",
-            PENDING_STATE,
-            SUBMITTED_STATE, RETURN_STATE
+                                         PENDING_STATE,
+                                         SUBMITTED_STATE, RETURN_STATE
         );
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
@@ -385,21 +392,8 @@ public class CallbackController {
     private void sendWithdrawEmails(CaseData caseData, UserDetails userDetails, CaseDetails caseDetails) {
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
-            Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
-            if (localCourtAdmin.isPresent()) {
-                Optional<LocalCourtAdminEmail> localCourtAdminEmail = localCourtAdmin.get().stream().map(Element::getValue)
-                    .findFirst();
-                if (localCourtAdminEmail.isPresent()) {
-                    String email = localCourtAdminEmail.get().getEmail();
-                    log.info(" Sending notification to court email : {}", email);
-                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
-                }
-            }
         } else {
             solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
-            caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(
-                caseDetails,
-                caseData.getCourtEmailAddress());
         }
     }
 
@@ -407,7 +401,6 @@ public class CallbackController {
         Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
         if (localCourtAdmin.isPresent()) {
             String email = localCourtAdmin.get().get(0).getValue().getEmail();
-            log.info(" Sending notification to court email : {}", email);
             caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
         }
         solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
@@ -613,6 +606,9 @@ public class CallbackController {
         } catch (Exception e) {
             log.error("Error while fetching User or Org details for the logged in user ", e);
         }
+
         return caseDataUpdated;
+
     }
+
 }

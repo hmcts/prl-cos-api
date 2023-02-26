@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -14,9 +13,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
@@ -43,7 +40,7 @@ public class C100IssueCaseService {
         caseData = caseData.toBuilder().issueDate(LocalDate.now()).build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
+        /*if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
             String[] idEmail = caseData.getCourtList().getValue().getCode().split(":");
             String baseLocationId = Arrays.stream(idEmail).toArray()[0].toString();
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
@@ -54,7 +51,7 @@ public class C100IssueCaseService {
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.putAll(CaseUtils.getCourtEmail(idEmail, caseTypeOfApplication));
             caseData.setCourtName(caseDataUpdated.get("courtName").toString());
-        }
+        }*/
         caseData.setIssueDate();
         // Generate All Docs and set to casedataupdated.
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));

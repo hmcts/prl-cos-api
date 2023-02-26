@@ -76,7 +76,7 @@ public class LocationRefDataService {
         return DynamicListElement.builder().code(key).label(value).build();
     }
 
-    public Optional<CourtVenue> getCourtDetailsFromEpimmsId(String baseLocationId, String authToken) {
+    public String getCourtDetailsFromEpimmsId(String baseLocationId, String authToken) {
         CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
             authToken,
             authTokenGenerator.generate(),
@@ -88,6 +88,8 @@ public class LocationRefDataService {
             .filter(location -> baseLocationId.equalsIgnoreCase(location.getCourtEpimmsId()))
             .findFirst();
 
-        return courtVenue;
+        return courtVenue.map(venue -> venue.getCourtEpimmsId() + "-" + venue.getRegionId()
+            + "-" + venue.getCourtName() + "-" + venue.getPostcode() + "-" + venue.getRegion()
+            + "-" + venue.getSiteName()).orElse("");
     }
 }
