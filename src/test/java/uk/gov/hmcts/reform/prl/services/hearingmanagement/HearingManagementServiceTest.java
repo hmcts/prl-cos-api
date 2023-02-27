@@ -212,10 +212,6 @@ public class HearingManagementServiceTest {
             .lastModified(LocalDateTime.now())
             .build();
 
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .data(stringObjectMap)
-            .build();
-
         EventRequestData eventRequestData = EventRequestData.builder()
             .eventId(CaseEvent.HEARING_STATE_CHANGE_SUCCESS.getValue())
             .caseTypeId(CASE_TYPE)
@@ -224,7 +220,7 @@ public class HearingManagementServiceTest {
             .userId(systemUpdateUserId)
             .userToken(userToken)
             .build();
-       startEventResponse = StartEventResponse.builder()
+        startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails)
             .token(userToken).build();
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
@@ -251,6 +247,9 @@ public class HearingManagementServiceTest {
         when(coreCaseDataService.eventRequest(CaseEvent.HEARING_STATE_CHANGE_SUCCESS, systemUpdateUserId)).thenReturn(eventRequestData);
         when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, systemUpdateUserId)).thenReturn(allTabsUpdateEventRequestData);
 
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .data(stringObjectMap)
+            .build();
         when(coreCaseDataService.createCaseDataContent(startEventResponse,caseDataUpdated)).thenReturn(caseDataContent);
         when(coreCaseDataService.submitUpdate(userToken, eventRequestData, caseDataContent,hearingRequest.getCaseRef(), true))
             .thenReturn(caseDetails);
@@ -310,10 +309,6 @@ public class HearingManagementServiceTest {
             .lastModified(LocalDateTime.now())
             .build();
 
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .data(stringObjectMap)
-            .build();
-
         EventRequestData eventRequestData = EventRequestData.builder()
             .eventId(CaseEvent.HEARING_STATE_CHANGE_FAILURE.getValue())
             .caseTypeId(CASE_TYPE)
@@ -322,7 +317,7 @@ public class HearingManagementServiceTest {
             .userId(systemUpdateUserId)
             .userToken(userToken)
             .build();
-         startEventResponse = StartEventResponse.builder()
+        startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails)
             .token(userToken).build();
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
@@ -355,6 +350,9 @@ public class HearingManagementServiceTest {
         when(coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId)).thenReturn(eventRequestData);
         when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, systemUpdateUserId)).thenReturn(allTabsUpdateEventRequestData);
 
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .data(stringObjectMap)
+            .build();
         when(coreCaseDataService.createCaseDataContent(startEventResponse,caseDataUpdated)).thenReturn(caseDataContent);
         when(coreCaseDataService.submitUpdate(userToken, eventRequestData, caseDataContent,hearingRequest1.getCaseRef(), true))
             .thenReturn(caseDetails);
@@ -417,10 +415,6 @@ public class HearingManagementServiceTest {
             .lastModified(LocalDateTime.now())
             .build();
 
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .data(stringObjectMap)
-            .build();
-
         EventRequestData eventRequestData = EventRequestData.builder()
             .eventId(CaseEvent.HEARING_STATE_CHANGE_FAILURE.getValue())
             .caseTypeId(CASE_TYPE)
@@ -429,7 +423,7 @@ public class HearingManagementServiceTest {
             .userId(systemUpdateUserId)
             .userToken(userToken)
             .build();
-         startEventResponse = StartEventResponse.builder()
+        startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails)
             .token(userToken).build();
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
@@ -457,6 +451,9 @@ public class HearingManagementServiceTest {
         when(coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId)).thenReturn(eventRequestData);
         when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, systemUpdateUserId)).thenReturn(allTabsUpdateEventRequestData);
 
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .data(stringObjectMap)
+            .build();
         when(coreCaseDataService.createCaseDataContent(startEventResponse,caseDataUpdated)).thenReturn(caseDataContent);
         when(coreCaseDataService.submitUpdate(userToken, eventRequestData, caseDataContent,hearingRequest.getCaseRef(), true))
             .thenReturn(caseDetails);
@@ -579,7 +576,6 @@ public class HearingManagementServiceTest {
         applicantSolicitorEmail = applicantFl401.getSolicitorEmail();
         respondentEmail = respondentFl401.getEmail();
 
-        CaseEvent caseEvent = CaseEvent.HEARING_STATE_CHANGE_SUCCESS;
         Map<String, Object> stringObjectMap = c100CaseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(fl401CaseData);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
@@ -593,10 +589,6 @@ public class HearingManagementServiceTest {
             .lastModified(LocalDateTime.now())
             .build();
 
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .data(stringObjectMap)
-            .build();
-
         EventRequestData eventRequestData = EventRequestData.builder()
             .eventId(CaseEvent.HEARING_STATE_CHANGE_FAILURE.getValue())
             .caseTypeId(CASE_TYPE)
@@ -605,7 +597,7 @@ public class HearingManagementServiceTest {
             .userId(systemUpdateUserId)
             .userToken(userToken)
             .build();
-         startEventResponse = StartEventResponse.builder()
+        startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails)
             .token(userToken).build();
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
@@ -613,6 +605,7 @@ public class HearingManagementServiceTest {
             userToken,eventRequestData, hearingRequest.getCaseRef(),true))
             .thenReturn(startEventResponse);
 
+        CaseEvent caseEvent = CaseEvent.HEARING_STATE_CHANGE_SUCCESS;
         EventRequestData allTabsUpdateEventRequestData = EventRequestData.builder()
             .eventId(caseEvent.getValue())
             .caseTypeId(CASE_TYPE)
@@ -632,6 +625,8 @@ public class HearingManagementServiceTest {
         when(coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId)).thenReturn(eventRequestData);
         when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, systemUpdateUserId)).thenReturn(allTabsUpdateEventRequestData);
 
+        CaseDataContent caseDataContent = CaseDataContent.builder().data(stringObjectMap)
+            .build();
         when(coreCaseDataService.createCaseDataContent(startEventResponse,caseDataUpdated)).thenReturn(caseDataContent);
         when(coreCaseDataService.submitUpdate(userToken, eventRequestData, caseDataContent,hearingRequest.getCaseRef(), true))
             .thenReturn(caseDetails);
@@ -716,9 +711,6 @@ public class HearingManagementServiceTest {
 
         Map<String, Object> stringObjectMap = c100CaseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(fl401CaseData);
-
-        CaseEvent caseEvent = CaseEvent.HEARING_STATE_CHANGE_FAILURE;
-
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         when(systemUserService.getUserId(userToken)).thenReturn(systemUpdateUserId);
 
@@ -730,10 +722,6 @@ public class HearingManagementServiceTest {
             .lastModified(LocalDateTime.now())
             .build();
 
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .data(stringObjectMap)
-            .build();
-
         EventRequestData eventRequestData = EventRequestData.builder()
             .eventId(CaseEvent.HEARING_STATE_CHANGE_FAILURE.getValue())
             .caseTypeId(CASE_TYPE)
@@ -742,7 +730,7 @@ public class HearingManagementServiceTest {
             .userId(systemUpdateUserId)
             .userToken(userToken)
             .build();
-         startEventResponse = StartEventResponse.builder()
+        startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails)
             .token(userToken).build();
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
@@ -763,6 +751,7 @@ public class HearingManagementServiceTest {
             userToken,eventRequestData, hearingRequest1.getCaseRef(),true))
             .thenReturn(startEventResponse);
 
+        CaseEvent caseEvent = CaseEvent.HEARING_STATE_CHANGE_FAILURE;
         EventRequestData allTabsUpdateEventRequestData = EventRequestData.builder()
             .eventId(caseEvent.getValue())
             .caseTypeId(CASE_TYPE)
@@ -782,6 +771,9 @@ public class HearingManagementServiceTest {
         when(coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId)).thenReturn(eventRequestData);
         when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, systemUpdateUserId)).thenReturn(allTabsUpdateEventRequestData);
 
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .data(stringObjectMap)
+            .build();
         when(coreCaseDataService.createCaseDataContent(startEventResponse,caseDataUpdated)).thenReturn(caseDataContent);
         when(coreCaseDataService.submitUpdate(userToken, eventRequestData, caseDataContent,hearingRequest1.getCaseRef(), true))
             .thenReturn(caseDetails);
@@ -858,8 +850,6 @@ public class HearingManagementServiceTest {
         applicantEmail = applicantFl401.getEmail();
         respondentEmail = respondentFl401.getEmail();
 
-        CaseEvent caseEvent = CaseEvent.HEARING_STATE_CHANGE_FAILURE;
-
         Map<String, Object> stringObjectMap = c100CaseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(fl401CaseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(fl401CaseData);
@@ -874,10 +864,6 @@ public class HearingManagementServiceTest {
             .lastModified(LocalDateTime.now())
             .build();
 
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .data(stringObjectMap)
-            .build();
-
         EventRequestData eventRequestData = EventRequestData.builder()
             .eventId(CaseEvent.HEARING_STATE_CHANGE_FAILURE.getValue())
             .caseTypeId(CASE_TYPE)
@@ -886,7 +872,7 @@ public class HearingManagementServiceTest {
             .userId(systemUpdateUserId)
             .userToken(userToken)
             .build();
-         startEventResponse = StartEventResponse.builder()
+        startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails)
             .token(userToken).build();
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
@@ -907,6 +893,7 @@ public class HearingManagementServiceTest {
             userToken,eventRequestData, hearingRequest1.getCaseRef(),true))
             .thenReturn(startEventResponse);
 
+        CaseEvent caseEvent = CaseEvent.HEARING_STATE_CHANGE_FAILURE;
         EventRequestData allTabsUpdateEventRequestData = EventRequestData.builder()
             .eventId(caseEvent.getValue())
             .caseTypeId(CASE_TYPE)
@@ -926,6 +913,9 @@ public class HearingManagementServiceTest {
         when(coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId)).thenReturn(eventRequestData);
         when(coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, systemUpdateUserId)).thenReturn(allTabsUpdateEventRequestData);
 
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .data(stringObjectMap)
+            .build();
         when(coreCaseDataService.createCaseDataContent(startEventResponse,caseDataUpdated)).thenReturn(caseDataContent);
         when(coreCaseDataService.submitUpdate(userToken, eventRequestData, caseDataContent,hearingRequest1.getCaseRef(), true))
             .thenReturn(caseDetails);
