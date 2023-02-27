@@ -155,15 +155,14 @@ public class FL401SubmitApplicationController {
         caseDataUpdated.put(COURT_NAME_FIELD, courtName);
         String postcode = Arrays.stream(venueDetails).toArray()[3].toString();
         String courtEmail = null;
-        if (null != courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode)) {
-            if (null != courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts()) {
-                String courtSlug = courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts().get(0).getCourtSlug();
-                Court court = courtFinderApi.getCourtDetails(courtSlug);
-                caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
-                Optional<CourtEmailAddress> optionalCourtEmail = courtFinderService.getEmailAddress(court);
-                if (optionalCourtEmail.isPresent()) {
-                    courtEmail = optionalCourtEmail.get().getAddress();
-                }
+        if (null != courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode)
+            && null != courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts()) {
+            String courtSlug = courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts().get(0).getCourtSlug();
+            Court court = courtFinderApi.getCourtDetails(courtSlug);
+            caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
+            Optional<CourtEmailAddress> optionalCourtEmail = courtFinderService.getEmailAddress(court);
+            if (optionalCourtEmail.isPresent()) {
+                courtEmail = optionalCourtEmail.get().getAddress();
             }
         }
         caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);

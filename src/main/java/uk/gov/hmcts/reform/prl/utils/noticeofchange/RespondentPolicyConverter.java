@@ -27,7 +27,7 @@ public class RespondentPolicyConverter {
                         isNotEmpty(element.getRepresentativeFirstName())
                             && isNotEmpty(element.getRepresentativeLastName())
                             && isNotEmpty(element.getSolicitorOrg()))
-            .map(child -> child.getSolicitorOrg())
+            .map(PartyDetails::getSolicitorOrg)
             .orElse(Organisation.builder().build());
     }
 }
