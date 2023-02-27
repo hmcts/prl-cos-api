@@ -39,9 +39,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
-import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 
@@ -60,7 +60,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -113,7 +112,7 @@ public class ManageOrdersControllerTest {
     @Mock
     private AmendOrderService amendOrderService;
     @Mock
-    private RefDataUserService refDataUserService;
+    private HearingDataService hearingDataService;
 
     PartyDetails applicant;
 
@@ -861,7 +860,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.populateHeader(caseData))
             .thenReturn(stringObjectMap);
         List<DynamicListElement> elements = new ArrayList<>();
-        when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE)).thenReturn(elements);
+        when(hearingDataService.prePopulateHearingType(authToken)).thenReturn(elements);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()

@@ -358,5 +358,10 @@ public class PrlAppsConstants {
     public static final String IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING =  "isJudgeOrLegalAdviserGatekeeping";
     public static final String JUDGE_NAME = "judgeName";
     public static final String HEARINGTYPE = "HearingType";
-    public static final String HEARINGCHILDREQUIRED = "Y";
+    public static final String IS_HEARINGCHILDREQUIRED_Y = "Y";
+    public static final String IS_HEARINGCHILDREQUIRED_N = "N";
+    public static final String HEARINGCHANNEL = "HearingChannel";
+    public static final String VIDEOPLATFORM = "Video";
+    public static final String TELEPHONEPLATFORM = "Telephone";
+
 }

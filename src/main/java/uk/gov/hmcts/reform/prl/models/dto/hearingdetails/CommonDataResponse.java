@@ -17,7 +17,7 @@ import java.util.List;
 public class CommonDataResponse {
 
     @JsonProperty("list_of_values")
-    private List<CategoryValues> listOfValues;
+    private List<CategoryValues> categoryValues;
 
 
 
