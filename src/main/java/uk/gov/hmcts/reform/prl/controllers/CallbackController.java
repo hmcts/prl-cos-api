@@ -299,7 +299,6 @@ public class CallbackController {
             "paymentServiceRequestReferenceNumber",
             paymentServiceResponse.getServiceRequestReference()
         );
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -328,8 +327,7 @@ public class CallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String baseLocationId = caseData.getCourtList().getValue().getCode();
-        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation).split(
-            "-");
+        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,authorisation).split("-");
         String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
         String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
         caseDataUpdated.put(COURT_NAME_FIELD, courtName);

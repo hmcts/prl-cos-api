@@ -216,7 +216,6 @@ public class CallbackControllerTest {
     @Mock
     private PaymentRequestService paymentRequestService;
 
-
     public static final String authToken = "Bearer TestAuthToken";
 
     private static final Map<String, Object> c100DraftMap = new HashMap<>();
