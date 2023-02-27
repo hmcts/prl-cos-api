@@ -961,6 +961,7 @@ public class CallbackControllerTest {
             .orgPolicyReference("jfljsd")
             .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
         caseDetails.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
+        caseDetails.put("caseTypeOfApplication", "C100");
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
         when(organisationService.findUserOrganisation(Mockito.anyString()))
