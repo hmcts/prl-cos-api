@@ -3,9 +3,12 @@ package uk.gov.hmcts.reform.prl.services;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicRadioList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
@@ -27,7 +30,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILD
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_Y;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONEPLATFORM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONESUBCHANNELS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOSUBCHANNELS;
 
 @Slf4j
 @Service
@@ -39,6 +44,12 @@ public class HearingDataService {
     @Autowired
     HearingService hearingService;
 
+    @Autowired
+    CoreCaseDataApi coreCaseDataApi;
+
+    @Autowired
+    AuthTokenGenerator authTokenGenerator;
+
     public List<DynamicListElement> prePopulateHearingType(String authorisation) {
         try {
             log.info("Prepopulate HearingType call in HearingDataService");
@@ -47,7 +58,7 @@ public class HearingDataService {
                 HEARINGTYPE,
                 IS_HEARINGCHILDREQUIRED_N
             );
-            return refDataUserService.categoryValuesByCategoryId(commonDataResponse, HEARINGTYPE);
+            return refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE);
         } catch (Exception e) {
             log.error("Category Values look up failed - " + e.getMessage(), e);
         }
@@ -55,13 +66,25 @@ public class HearingDataService {
     }
 
     public List<Element<HearingData>> mapHearingData(List<Element<HearingData>> hearingDatas, DynamicList hearingTypesDynamicList,
-                                                     DynamicList hearingDatesDynamicList) {
+                                                     DynamicList hearingDatesDynamicList, DynamicList retrievedHearingChannels,
+                                                     DynamicRadioList retrievedRadioHearingChannels, DynamicList retrievedVideoSubChannels,
+                                                     DynamicList retrievedTelephoneSubChannels,DynamicList retrievedCourtLocations) {
         hearingDatas.stream().parallel().forEach(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             hearingData.getHearingTypes().setListItems(null != hearingTypesDynamicList
                                                                              ? hearingTypesDynamicList.getListItems() : null);
             hearingData.getConfirmedHearingDates().setListItems(null != hearingDatesDynamicList
                                                                     ? hearingDatesDynamicList.getListItems() : null);
+            hearingData.getHearingChannels().setListItems(null != retrievedHearingChannels
+                                                                    ? retrievedHearingChannels.getListItems() : null);
+            hearingData.getHearingChannelDynamicRadioList().setListItems(null != retrievedRadioHearingChannels
+                                                              ? retrievedRadioHearingChannels.getListItems() : null);
+            hearingData.getHearingVideoChannels().setListItems(null != retrievedVideoSubChannels
+                                                                    ? retrievedVideoSubChannels.getListItems() : null);
+            hearingData.getHearingTelephoneChannels().setListItems(null != retrievedTelephoneSubChannels
+                                                                    ? retrievedTelephoneSubChannels.getListItems() : null);
+            hearingData.getCourtList().setListItems(null != retrievedCourtLocations
+                                                                       ? retrievedCourtLocations.getListItems() : null);
 
         });
         return hearingDatas;
@@ -93,29 +116,6 @@ public class HearingDataService {
         return DynamicListElement.builder().code(String.valueOf(hearingStartDateTime)).label(String.valueOf(hearingStartDateTime)).build();
     }
 
-    public  List<DynamicListElement> getHearingSubChannels(String authorization) {
-        try {
-            log.info("Prepopulate HearingSubChannel in HearingDataService");
-            CommonDataResponse commonDataResponse = refDataUserService.retrieveCategoryValues(
-                authorization,
-                HEARINGCHANNEL,
-                IS_HEARINGCHILDREQUIRED_Y
-            );
-            refDataUserService.categorySubValuesByCategoryId(
-                commonDataResponse,
-                VIDEOPLATFORM
-            );
-            refDataUserService.categorySubValuesByCategoryId(
-                commonDataResponse,
-                TELEPHONEPLATFORM
-            );
-        } catch (Exception e) {
-            log.error("Category Values look up failed - " + e.getMessage(), e);
-        }
-        return List.of(DynamicListElement.builder().build());
-
-    }
-
 
     public Map<String, List<DynamicListElement>> prePopulateHearingChannel(String authorisation) {
         try {
@@ -125,24 +125,27 @@ public class HearingDataService {
                 HEARINGCHANNEL,
                 IS_HEARINGCHILDREQUIRED_Y
             );
-
-            List<DynamicListElement> listOfHearingChannels = refDataUserService.categoryValuesByCategoryId(
-                commonDataResponse,HEARINGCHANNEL);
-            List<DynamicListElement> listOfVideoSubChannels = refDataUserService.categorySubValuesByCategoryId(
-                commonDataResponse,VIDEOPLATFORM);
-            List<DynamicListElement> listOfTelephoneSubChannels = refDataUserService.categorySubValuesByCategoryId(
-                commonDataResponse,TELEPHONEPLATFORM);
             Map<String, List<DynamicListElement>> values = new HashMap<>();
-            values.put("hearingChannels",listOfHearingChannels);
-            values.put("videoSubChannels",listOfVideoSubChannels);
-            values.put("telephoneSubChannels", listOfTelephoneSubChannels);
+            values.put(HEARINGCHANNEL, refDataUserService.filterCategoryValuesByCategoryId(
+                commonDataResponse,HEARINGCHANNEL));
+            values.put(VIDEOSUBCHANNELS,refDataUserService.filterCategorySubValuesByCategoryId(
+                commonDataResponse,VIDEOPLATFORM));
+            values.put(TELEPHONESUBCHANNELS,refDataUserService.filterCategorySubValuesByCategoryId(
+                commonDataResponse,TELEPHONEPLATFORM));
             return values;
         } catch (Exception e) {
             log.error("Category Values look up failed - " + e.getMessage(), e);
         }
-        //return List.of(DynamicListElement.builder().build());
         return null;
 
     }
+
+    /*
+    public CaseDetails getCase(String authorisation, String caseId) {
+        return coreCaseDataApi.getCase(authorisation,
+                                       ,caseId);
+    }
+
+  */
 
 }

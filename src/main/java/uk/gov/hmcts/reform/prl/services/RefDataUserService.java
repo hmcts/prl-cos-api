@@ -119,7 +119,7 @@ public class RefDataUserService {
         return commonDataResponse;
     }
 
-    public List<DynamicListElement> categoryValuesByCategoryId(CommonDataResponse commonDataResponse,String categoryId) {
+    public List<DynamicListElement> filterCategoryValuesByCategoryId(CommonDataResponse commonDataResponse,String categoryId) {
         log.info("categoryValuesByCategoryId {},{}", commonDataResponse,categoryId);
         if (null != commonDataResponse) {
             listOfCategoryValues = commonDataResponse.getCategoryValues().stream()
@@ -138,7 +138,7 @@ public class RefDataUserService {
         return DynamicListElement.builder().code(key).label(value).build();
     }
 
-    public List<DynamicListElement> categorySubValuesByCategoryId(CommonDataResponse commonDataResponse,String hearingPlatform) {
+    public List<DynamicListElement> filterCategorySubValuesByCategoryId(CommonDataResponse commonDataResponse,String hearingPlatform) {
         log.info("categoryValuesByCategoryId {}", hearingPlatform);
         if (null != commonDataResponse && null != commonDataResponse.getCategoryValues()) {
             return commonDataResponse.getCategoryValues().stream()
