@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.services.RespondentSolicitorTaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -64,18 +65,18 @@ public class CaseEventHandler {
 
         List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
 
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
+        if (CaseUtils.getCaseType(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
             List<Event> events = taskListService.getC100Events();
             eventErrors.removeIf(e -> !events.contains(e.getEvent()));
         }
 
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)) {
+        if (CaseUtils.getCaseType(caseData).equalsIgnoreCase(FL401_CASE_TYPE)) {
             List<Event> events = taskListService.getFL401Events(caseData);
             eventErrors.removeIf(e -> !events.contains(e.getEvent()));
         }
 
         return taskListRenderer
-            .render(tasks, eventErrors, caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE), caseData);
+            .render(tasks, eventErrors, CaseUtils.getCaseType(caseData).equalsIgnoreCase(C100_CASE_TYPE), caseData);
 
     }
 

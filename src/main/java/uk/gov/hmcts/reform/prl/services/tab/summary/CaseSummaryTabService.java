@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OtherProceedingsGe
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.SpecialArrangementsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.TypeOfApplicationGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.UrgencyGenerator;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -98,7 +99,7 @@ public class CaseSummaryTabService implements TabService {
     @Override
     public List<FieldGenerator> getGenerators(CaseData caseData) {
 
-        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+        if (FL401_CASE_TYPE.equals(CaseUtils.getCaseType(caseData))) {
 
             return List.of(allocatedJudgeDetailsGenerator,
                            caseStatusGenerator, confidentialDetailsGenerator,urgencyGenerator,typeOfApplicationGenerator,
