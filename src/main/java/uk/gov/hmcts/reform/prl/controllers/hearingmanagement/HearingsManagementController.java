@@ -111,7 +111,7 @@ public class HearingsManagementController {
 
     }
 
-    @PostMapping(path = "/update-next-hearing-details-callback", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/update-next-hearing-details-callback/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Update next Hearing date as part of CCD Callback")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
