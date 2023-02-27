@@ -100,7 +100,6 @@ public class EditAndApproveDraftOrderController {
         } else {
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
         }
-        log.info("*** before returning {} ***", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -146,7 +145,6 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("Case data {}", caseData);
         Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(caseData);
         String orderStatus = (String) response.remove("status");
         log.info("** Order status {}", orderStatus);
