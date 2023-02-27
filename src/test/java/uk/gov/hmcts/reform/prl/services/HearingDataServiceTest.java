@@ -51,7 +51,7 @@ public class HearingDataServiceTest {
         List<DynamicListElement> listHearingTypes = new ArrayList<>();
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
-        when(refDataUserService.categoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
         List<DynamicListElement> expectedResponse = hearingDataService.prePopulateHearingType(authToken);
         assertEquals(expectedResponse.get(0).getCode(),"ABA5-REV");
         assertEquals(expectedResponse.get(0).getLabel(),"Review");

@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
-/*
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -160,46 +160,67 @@ public class RefDataUserServiceTest {
         CategoryValues categoryValues2 = CategoryValues.builder().categoryKey("HearingType").valueEn("Case Management Conference").build();
         listOfCategoryValues.add(categoryValues1);
         listOfCategoryValues.add(categoryValues2);
-        CommonDataResponse commonDataResponse = CommonDataResponse.builder().listOfValues(listOfCategoryValues).build();
+        CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(listOfCategoryValues).build();
         when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
                                                                authTokenGenerator.generate(),
                                                                HEARINGTYPE,
                                                                SERVICE_ID,
                                                                IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
-        List<DynamicListElement> expectedRespose = refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N);
-        assertNotNull(expectedRespose);
-        assertEquals(expectedRespose.get(0).getLabel(),"Celebration hearing");
+        CommonDataResponse commonResponse = refDataUserService.retrieveCategoryValues(
+            authToken,
+            HEARINGTYPE,
+            IS_HEARINGCHILDREQUIRED_N
+        );
+        assertNotNull(commonResponse);
+        assertEquals(commonResponse.getCategoryValues().get(0).getValueEn(),"Celebration hearing");
     }
+
 
     @Test
     public void testGetHearingTypeNullData() {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
         List<CategoryValues> listOfCategoryValues = new ArrayList<>();
-        CommonDataResponse commonDataResponse = CommonDataResponse.builder().listOfValues(listOfCategoryValues).build();
+        CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(listOfCategoryValues).build();
         when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
                                                                authTokenGenerator.generate(),
                                                                HEARINGTYPE,
                                                                SERVICE_ID,
                                                                IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
-        List<DynamicListElement> expectedRespose = refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N);
-        assertEquals(expectedRespose.size(),0);
+        CommonDataResponse commonResponse = refDataUserService.retrieveCategoryValues(
+            authToken,
+            HEARINGTYPE,
+            IS_HEARINGCHILDREQUIRED_N
+        );
+        assertEquals(commonResponse.getCategoryValues().size(),0);
     }
 
-    @Test ()
-    public void testGetHearingTypeWithExceptionData() {
+    @Test
+    public void testGetHearingChannelWithData() {
+
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
         List<CategoryValues> listOfCategoryValues = new ArrayList<>();
+        CategoryValues categoryValues1 = CategoryValues.builder().key("ONPPRS").valueEn("On the Papers").build();
+        CategoryValues categoryValues2 = CategoryValues.builder().key("INTER").valueEn("IN Person").build();
+        listOfCategoryValues.add(categoryValues1);
+        listOfCategoryValues.add(categoryValues2);
+        CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(listOfCategoryValues).build();
         when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
                                                                authTokenGenerator.generate(),
                                                                HEARINGTYPE,
                                                                SERVICE_ID,
-                                                               IS_HEARINGCHILDREQUIRED_N)).thenThrow(NullPointerException.class);
-        List<DynamicListElement> expectedRespose = refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N);
-        assertNull(expectedRespose.get(0).getLabel());
+                                                               IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        CommonDataResponse commonResponse = refDataUserService.retrieveCategoryValues(
+            authToken,
+            HEARINGTYPE,
+            IS_HEARINGCHILDREQUIRED_N
+        );
+        assertNotNull(commonResponse);
+        assertEquals(commonResponse.getCategoryValues().get(0).getKey(),"ONPPRS");
+        assertEquals(commonResponse.getCategoryValues().get(0).getValueEn(),"On the Papers");
     }
 
 
 }
-*/
+
