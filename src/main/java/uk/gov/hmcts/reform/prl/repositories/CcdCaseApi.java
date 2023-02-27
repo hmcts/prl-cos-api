@@ -35,10 +35,10 @@ public class CcdCaseApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(CcdCaseApi.class);
 
     public void linkCitizenToCase(String authorisation, String anonymousUserToken, String caseId, CaseData caseData) {
-        linkToCase(authorisation, anonymousUserToken, caseId, caseData);
+        linkToCase(authorisation, anonymousUserToken, caseId);
     }
 
-    private void linkToCase(String authorisation, String anonymousUserToken, String caseId, CaseData caseData) {
+    private void linkToCase(String authorisation, String anonymousUserToken, String caseId) {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
         LOGGER.info("linkToCase  Linking the case {} ", caseId);
         LOGGER.debug("Granting access to case {} for citizen {}", caseId, userDetails.getId());
