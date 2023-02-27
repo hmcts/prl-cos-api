@@ -43,7 +43,7 @@ public class CcdCaseApi {
         LOGGER.info("linkToCase  Linking the case {} ", caseId);
         LOGGER.debug("Granting access to case {} for citizen {}", caseId, userDetails.getId());
         this.grantAccessToCase(userDetails.getId(), anonymousUserToken, caseId);
-        this.linkCitizen(anonymousUserToken, caseId, caseData);
+        this.linkCitizen(caseId);
         LOGGER.info("case is now linked {}", caseId);
     }
 
@@ -60,9 +60,7 @@ public class CcdCaseApi {
     }
 
     private CaseDetails linkCitizen(
-        String anonymousUserToken,
-        String caseId,
-        CaseData caseData
+        String caseId
     ) {
         LOGGER.info("updateCitizenIdAndEmail {}", caseId);
         return citizenCoreCaseDataService.linkDefendant(
@@ -71,7 +69,7 @@ public class CcdCaseApi {
         );
     }
 
-    public CaseDetails updateCase(String authorisation, String caseId, CaseData caseData, CaseEvent caseEvent) {
+    public CaseDetails updateCase(String caseId, CaseEvent caseEvent) {
         return citizenCoreCaseDataService.updateCase(
             Long.valueOf(caseId),
             caseEvent

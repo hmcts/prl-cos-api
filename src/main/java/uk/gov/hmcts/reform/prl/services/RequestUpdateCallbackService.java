@@ -68,12 +68,9 @@ public class RequestUpdateCallbackService {
                 true
             );
 
-        CaseData caseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
-
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
             startEventResponse,
             setCaseData(
-                caseData,
                 serviceRequestUpdateDto
             )
         );
@@ -119,6 +116,7 @@ public class RequestUpdateCallbackService {
             allTabsUpdateCaseData
         );
 
+        CaseData caseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
         log.info("Court details: " + caseData.getCourtName() + "  , ID:" + caseData.getCourtId());
 
         allTabService.updateAllTabsIncludingConfTabRefactored(
@@ -171,7 +169,7 @@ public class RequestUpdateCallbackService {
         return caseData;
     }
 
-    private CaseData setCaseData(CaseData caseData, ServiceRequestUpdateDto serviceRequestUpdateDto) {
+    private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto) {
         return CaseData.builder()
             .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
             .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()

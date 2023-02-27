@@ -74,7 +74,7 @@ public class CcdCaseApiTest {
         when(citizenCoreCaseDataService.updateCase(
             Long.valueOf(12345),
             CaseEvent.CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
-        CaseDetails expectedResponse = ccdCaseApi.updateCase(AUTH,"12345",caseData,CaseEvent.CITIZEN_CASE_UPDATE);
+        CaseDetails expectedResponse = ccdCaseApi.updateCase("12345", CaseEvent.CITIZEN_CASE_UPDATE);
         assertEquals(caseDetails.getCaseTypeId(),expectedResponse.getCaseTypeId());
     }
 
