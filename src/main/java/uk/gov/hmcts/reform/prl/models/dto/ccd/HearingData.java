@@ -63,6 +63,9 @@ public class HearingData {
     @JsonProperty("hearingEstimatedMinutes")
     private final String hearingEstimatedMinutes;
 
+    @JsonProperty("hearingEstimatedDays")
+    private final String  hearingEstimatedDays;
+
     @JsonProperty("allPartiesAttendHearingSameWayYesOrNo")
     private final YesOrNo allPartiesAttendHearingSameWayYesOrNo;
 
