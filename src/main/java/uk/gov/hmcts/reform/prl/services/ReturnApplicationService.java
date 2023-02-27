@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +26,7 @@ public class ReturnApplicationService {
     public String getLegalFullName(CaseData caseData) {
 
         String legalName = "";
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseType(caseData))) {
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
             if (applicantsWrapped.isPresent() && applicantsWrapped.get().size() == 1) {
@@ -42,7 +43,7 @@ public class ReturnApplicationService {
             } else {
                 legalName = caseData.getSolicitorName();
             }
-        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseType(caseData))) {
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
             String legalFirstName = fl401Applicant.getRepresentativeFirstName();
@@ -58,7 +59,7 @@ public class ReturnApplicationService {
         boolean noOptionSelected = true;
 
         boolean hasSelectedOption = allNonEmpty(caseData.getRejectReason());
-        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseType(caseData))) {
             hasSelectedOption = allNonEmpty(caseData.getFl401RejectReason());
         }
         if (hasSelectedOption) {
@@ -77,11 +78,11 @@ public class ReturnApplicationService {
             .append("Dear " + getLegalFullName(caseData) + ",\n\n")
             .append("Thank you for your application."
                         + " Your application has been reviewed and is being returned for the following reasons:" + "\n\n");
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseType(caseData))) {
             for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
             }
-        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseType(caseData))) {
             for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
             }
@@ -103,13 +104,13 @@ public class ReturnApplicationService {
 
         returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
 
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseType(caseData))) {
             for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
                 returnMsgStr.append(reasonEnum.getDisplayedValue());
                 returnMsgStr.append("\n\n");
             }
 
-        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseType(caseData))) {
             for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
                 returnMsgStr.append(reasonEnum.getDisplayedValue());
                 returnMsgStr.append("\n\n");

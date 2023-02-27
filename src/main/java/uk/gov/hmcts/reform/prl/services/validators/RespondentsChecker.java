@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +34,7 @@ public class RespondentsChecker implements EventChecker {
     public boolean isFinished(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
 
-        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) && caseData.getRespondentsFL401() != null) {
+        if (FL401_CASE_TYPE.equals(CaseUtils.getCaseType(caseData)) && caseData.getRespondentsFL401() != null) {
             Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getRespondentsFL401()).build();
             respondentsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
         }
@@ -45,7 +46,7 @@ public class RespondentsChecker implements EventChecker {
                 .collect(Collectors.toList());
 
             for (PartyDetails p : respondents) {
-                if (!(validateMandatoryFieldsForRespondent(p, caseData.getCaseTypeOfApplication()))) {
+                if (!(validateMandatoryFieldsForRespondent(p, CaseUtils.getCaseType(caseData)))) {
                     taskErrorService.addEventError(RESPONDENT_DETAILS, RESPONDENT_DETAILS_ERROR, RESPONDENT_DETAILS_ERROR.getError());
                     return false;
                 }
@@ -62,7 +63,7 @@ public class RespondentsChecker implements EventChecker {
     public boolean isStarted(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> respondentWrapped = ofNullable(caseData.getRespondents());
 
-        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) && caseData.getRespondentsFL401() != null) {
+        if (FL401_CASE_TYPE.equals(CaseUtils.getCaseType(caseData)) && caseData.getRespondentsFL401() != null) {
             Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getRespondentsFL401()).build();
             respondentWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
         }
