@@ -1,11 +1,15 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.CaseLinksElement;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicRadioList;
@@ -33,6 +37,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONEPLATFO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONESUBCHANNELS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOSUBCHANNELS;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
 @Slf4j
 @Service
@@ -49,6 +54,9 @@ public class HearingDataService {
 
     @Autowired
     AuthTokenGenerator authTokenGenerator;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     public List<DynamicListElement> prePopulateHearingType(String authorisation) {
         try {
@@ -68,7 +76,8 @@ public class HearingDataService {
     public List<Element<HearingData>> mapHearingData(List<Element<HearingData>> hearingDatas, DynamicList hearingTypesDynamicList,
                                                      DynamicList hearingDatesDynamicList, DynamicList retrievedHearingChannels,
                                                      DynamicRadioList retrievedRadioHearingChannels, DynamicList retrievedVideoSubChannels,
-                                                     DynamicList retrievedTelephoneSubChannels,DynamicList retrievedCourtLocations) {
+                                                     DynamicList retrievedTelephoneSubChannels,DynamicList retrievedCourtLocations,
+                                                     DynamicList hearingListedLinkedCases) {
         hearingDatas.stream().parallel().forEach(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             hearingData.getHearingTypes().setListItems(null != hearingTypesDynamicList
@@ -85,6 +94,8 @@ public class HearingDataService {
                                                                     ? retrievedTelephoneSubChannels.getListItems() : null);
             hearingData.getCourtList().setListItems(null != retrievedCourtLocations
                                                                        ? retrievedCourtLocations.getListItems() : null);
+            hearingData.getHearingListedLinkedCases().setListItems(null != hearingListedLinkedCases
+                                                        ? hearingListedLinkedCases.getListItems() : null);
 
         });
         return hearingDatas;
@@ -132,6 +143,7 @@ public class HearingDataService {
                 commonDataResponse,VIDEOPLATFORM));
             values.put(TELEPHONESUBCHANNELS,refDataUserService.filterCategorySubValuesByCategoryId(
                 commonDataResponse,TELEPHONEPLATFORM));
+            log.info("***Hearing Channels***",values);
             return values;
         } catch (Exception e) {
             log.error("Category Values look up failed - " + e.getMessage(), e);
@@ -140,12 +152,33 @@ public class HearingDataService {
 
     }
 
-    /*
-    public CaseDetails getCase(String authorisation, String caseId) {
-        return coreCaseDataApi.getCase(authorisation,
-                                       ,caseId);
+    public List<DynamicListElement> getLinkedCase(String authorisation, String caseId) {
+        try {
+            log.info("Case Id {} for the linked case ",caseId);
+            CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, authTokenGenerator.generate(),
+                                                              caseId);
+            return linkedCase(caseDetails);
+
+        } catch (Exception e) {
+            log.error("Linked Case Values look up failed - " + e.getMessage(), e);
+        }
+        return List.of(DynamicListElement.builder().build());
+
     }
 
-  */
+    private List<DynamicListElement> linkedCase(CaseDetails caseDetails) {
+        log.info("Linked case method ",caseDetails.getId());
+        CaseData caseData = getCaseData(caseDetails, objectMapper);
+        List<CaseLinksElement<CaseLink>> caseLinkDataList = caseData.getCaseLinks();
+        if (caseLinkDataList != null) {
+            return caseLinkDataList.stream().parallel()
+                .map(response -> DynamicListElement.builder().code(response.getValue().getCaseReference())
+                    .label(response.getValue().getCaseReference())
+                    .build()).collect(Collectors.toList());
+        }
+
+        return List.of(DynamicListElement.builder().build());
+    }
+
 
 }

@@ -79,7 +79,11 @@ public class HearingData {
     @JsonProperty("hearingJudgePersonalCode")
     private final String hearingJudgePersonalCode;
 
+    @JsonProperty("hearingJudgeLastName")
+    private final String hearingJudgeLastName;
 
+    @JsonProperty("hearingJudgeEmailAddress")
+    private final String hearingJudgeEmailAddress;
 
 
 }
