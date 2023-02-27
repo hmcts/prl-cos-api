@@ -58,9 +58,7 @@ public class CitizenCoreCaseDataService {
     CoreCaseDataService coreCaseDataService;
 
     public CaseDetails linkDefendant(
-        String anonymousUserToken,
         Long caseId,
-        CaseData caseData,
         CaseEvent caseEvent
     ) {
         try {
@@ -125,9 +123,7 @@ public class CitizenCoreCaseDataService {
     }
 
     public CaseDetails updateCase(
-        String authorisation,
         Long caseId,
-        CaseData caseData,
         CaseEvent caseEvent
     ) {
         try {

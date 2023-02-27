@@ -12,6 +12,9 @@ import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,13 +50,13 @@ public class AllTabServiceImpl implements AllTabsService {
     public void updateAllTabs(CaseData caseData) {
         Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
         if (caseData.getDateSubmitted() != null) {
-            combinedFieldsMap.put("dateSubmitted", caseData.getDateSubmitted());
+            combinedFieldsMap.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
         }
         if (caseData.getCourtName() != null) {
-            combinedFieldsMap.put("courtName", caseData.getCourtName());
+            combinedFieldsMap.put(COURT_NAME_FIELD, caseData.getCourtName());
         }
         if (caseData.getCourtId() != null) {
-            combinedFieldsMap.put("courtId", caseData.getCourtId());
+            combinedFieldsMap.put(COURT_ID_FIELD, caseData.getCourtId());
         }
         // Calling event to refresh the page.
         refreshCcdUsingEvent(caseData, combinedFieldsMap);
@@ -69,20 +72,19 @@ public class AllTabServiceImpl implements AllTabsService {
         );
     }
 
-    //TODO: Once the updateAllTabsIncludingConfTabRefactored is ready remove this method
     public void updateAllTabsIncludingConfTab(CaseData caseData) {
         Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(caseData);
         Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
         combinedFieldsMap.putAll(confidentialDetails);
 
         if (caseData.getDateSubmitted() != null) {
-            combinedFieldsMap.put("dateSubmitted", caseData.getDateSubmitted());
+            combinedFieldsMap.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
         }
         if (caseData.getCourtName() != null) {
-            combinedFieldsMap.put("courtName", caseData.getCourtName());
+            combinedFieldsMap.put(COURT_NAME_FIELD, caseData.getCourtName());
         }
         if (caseData.getCourtId() != null) {
-            combinedFieldsMap.put("courtId", caseData.getCourtId());
+            combinedFieldsMap.put(COURT_ID_FIELD, caseData.getCourtId());
         }
         getDocumentsMap(caseData, combinedFieldsMap);
         // Calling event to refresh the page.
@@ -99,15 +101,16 @@ public class AllTabServiceImpl implements AllTabsService {
         combinedFieldsMap.putAll(confidentialDetails);
 
         if (caseData.getDateSubmitted() != null) {
-            combinedFieldsMap.put("dateSubmitted", caseData.getDateSubmitted());
+            combinedFieldsMap.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
         }
         if (caseData.getCourtName() != null) {
-            combinedFieldsMap.put("courtName", caseData.getCourtName());
+            combinedFieldsMap.put(COURT_NAME_FIELD, caseData.getCourtName());
         }
         if (caseData.getCourtId() != null) {
-            combinedFieldsMap.put("courtId", caseData.getCourtId());
+            combinedFieldsMap.put(COURT_ID_FIELD, caseData.getCourtId());
         }
         getDocumentsMap(caseData, combinedFieldsMap);
+        refreshCcdUsingEvent(caseData, combinedFieldsMap);
 
         coreCaseDataServiceCcdClient.submitUpdate(
             authorisation,

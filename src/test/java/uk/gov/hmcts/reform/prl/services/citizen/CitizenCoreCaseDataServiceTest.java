@@ -133,7 +133,7 @@ public class CitizenCoreCaseDataServiceTest {
         when(coreCaseDataService.submitUpdate(userToken, eventRequestData, caseDataContent,String.valueOf(caseData.getId()), true))
             .thenReturn(caseDetails);
 
-        CaseDetails updatedDetails = citizenCoreCaseDataService.linkDefendant(userToken,caseData.getId(),caseData,CaseEvent.LINK_CITIZEN);
+        CaseDetails updatedDetails = citizenCoreCaseDataService.linkDefendant(caseData.getId(), CaseEvent.LINK_CITIZEN);
 
         Assert.assertEquals(caseDetails,updatedDetails);
     }
@@ -143,7 +143,7 @@ public class CitizenCoreCaseDataServiceTest {
 
         bearerToken = "Bearer token";
 
-        citizenCoreCaseDataService.linkDefendant(bearerToken,12345L,caseDataMock,CaseEvent.LINK_CITIZEN);
+        citizenCoreCaseDataService.linkDefendant(12345L, CaseEvent.LINK_CITIZEN);
     }
 
     @Test
@@ -208,7 +208,7 @@ public class CitizenCoreCaseDataServiceTest {
         when(coreCaseDataService.submitUpdate(userToken, eventRequestData, caseDataContent,String.valueOf(caseData.getId()), true))
             .thenReturn(caseDetails);
 
-        CaseDetails updatedDetails = citizenCoreCaseDataService.updateCase(bearerToken,12345L,caseDataMock,CaseEvent.LINK_CITIZEN);
+        CaseDetails updatedDetails = citizenCoreCaseDataService.updateCase(12345L, CaseEvent.LINK_CITIZEN);
 
         Assert.assertEquals(caseDetails,updatedDetails);
     }
@@ -218,7 +218,7 @@ public class CitizenCoreCaseDataServiceTest {
 
         bearerToken = "Bearer token";
 
-        citizenCoreCaseDataService.updateCase(bearerToken,12345L,caseDataMock,CaseEvent.LINK_CITIZEN);
+        citizenCoreCaseDataService.updateCase(12345L, CaseEvent.LINK_CITIZEN);
     }
 
     @Test

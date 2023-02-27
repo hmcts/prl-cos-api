@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSTPONED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WAITING_TO_BE_LISTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 
@@ -102,7 +103,7 @@ public class HearingManagementService {
                         true
                     );
                 //updating State in CaseData
-                startEventResponse.getCaseDetails().getData().put("state",state.getValue());
+                startEventResponse.getCaseDetails().getData().put(STATE_FIELD,state.getValue());
 
                 CaseData caseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
                 caseDataContent = coreCaseDataService.createCaseDataContent(
@@ -139,7 +140,7 @@ public class HearingManagementService {
                     );
 
                 //updating State in CaseData
-                startEventResponse.getCaseDetails().getData().put("state",state.getValue());
+                startEventResponse.getCaseDetails().getData().put(STATE_FIELD,state.getValue());
 
                 caseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
                 caseDataContent = coreCaseDataService.createCaseDataContent(
@@ -179,7 +180,7 @@ public class HearingManagementService {
                     );
 
                 //updating State in CaseData
-                startEventResponse.getCaseDetails().getData().put("state",state.getValue());
+                startEventResponse.getCaseDetails().getData().put(STATE_FIELD,state.getValue());
 
                 caseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
                 caseDataContent = coreCaseDataService.createCaseDataContent(
@@ -212,7 +213,6 @@ public class HearingManagementService {
         String systemUpdateUserId = systemUserService.getUserId(userToken);
 
         data.put("id", String.valueOf(id));
-        CaseData caseData = objectMapper.convertValue(data, CaseData.class);
 
         EventRequestData allTabsUpdateEventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.UPDATE_ALL_TABS,

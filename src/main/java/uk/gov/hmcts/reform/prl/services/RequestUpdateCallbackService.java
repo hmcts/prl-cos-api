@@ -68,7 +68,6 @@ public class RequestUpdateCallbackService {
                 true
             );
 
-        //TODO: validate for exception - where case is not present
         CaseData caseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
 
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
@@ -173,7 +172,7 @@ public class RequestUpdateCallbackService {
     }
 
     private CaseData setCaseData(CaseData caseData, ServiceRequestUpdateDto serviceRequestUpdateDto) {
-        return caseData.builder()
+        return CaseData.builder()
             .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
             .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
                                                      .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())

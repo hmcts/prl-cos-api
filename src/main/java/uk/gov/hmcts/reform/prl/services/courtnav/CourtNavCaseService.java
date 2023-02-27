@@ -179,7 +179,8 @@ public class CourtNavCaseService {
             uploadedDocumentsList = new ArrayList<>();
             uploadedDocumentsList.add(uploadedDocsElement);
         }
-        return tempCaseData.builder().courtNavUploadedDocs(uploadedDocumentsList).build();
+        tempCaseData = CaseData.builder().courtNavUploadedDocs(uploadedDocumentsList).build();
+        return tempCaseData;
     }
 
     private boolean checkTypeOfDocument(String typeOfDocument) {

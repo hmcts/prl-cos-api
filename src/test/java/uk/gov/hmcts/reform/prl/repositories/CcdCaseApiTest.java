@@ -71,8 +71,9 @@ public class CcdCaseApiTest {
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId("dsd").build();
-        when(citizenCoreCaseDataService.updateCase(AUTH, Long.valueOf(12345), caseData,
-                                                   CaseEvent.CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+        when(citizenCoreCaseDataService.updateCase(
+            Long.valueOf(12345),
+            CaseEvent.CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
         CaseDetails expectedResponse = ccdCaseApi.updateCase(AUTH,"12345",caseData,CaseEvent.CITIZEN_CASE_UPDATE);
         assertEquals(caseDetails.getCaseTypeId(),expectedResponse.getCaseTypeId());
     }
@@ -104,7 +105,8 @@ public class CcdCaseApiTest {
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId("12345").build();
         when(idamClient.getUserDetails(AUTH)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn(AUTH);
-        when(citizenCoreCaseDataService.linkDefendant(AUTH,Long.valueOf("12345"),caseData,CaseEvent.LINK_CITIZEN)).thenReturn(caseDetails);
+        when(citizenCoreCaseDataService.linkDefendant(Long.valueOf("12345"),
+                                                      CaseEvent.LINK_CITIZEN)).thenReturn(caseDetails);
         ccdCaseApi.linkCitizenToCase(AUTH,AUTH,"12345",caseData);
         assertEquals(caseDetails.getCaseTypeId(),caseDetails.getCaseTypeId());
     }

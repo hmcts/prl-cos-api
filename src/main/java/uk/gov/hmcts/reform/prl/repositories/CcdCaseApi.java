@@ -66,18 +66,14 @@ public class CcdCaseApi {
     ) {
         LOGGER.info("updateCitizenIdAndEmail {}", caseId);
         return citizenCoreCaseDataService.linkDefendant(
-            anonymousUserToken,
             Long.valueOf(caseId),
-            caseData,
             CaseEvent.LINK_CITIZEN
         );
     }
 
     public CaseDetails updateCase(String authorisation, String caseId, CaseData caseData, CaseEvent caseEvent) {
         return citizenCoreCaseDataService.updateCase(
-            authorisation,
             Long.valueOf(caseId),
-            caseData,
             caseEvent
         );
     }
