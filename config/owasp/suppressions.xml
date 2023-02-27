@@ -58,6 +58,11 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
+      jackson-core-2.14.0-rc1.jar ]]></notes>
+    <cve>CVE-2022-45688</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
       jackson-databind-2.13.3.jar ]]></notes>
     <cve>CVE-2022-42004</cve>
   </suppress>
