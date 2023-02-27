@@ -108,7 +108,7 @@ public class CcdCaseApiTest {
             .build();
         when(citizenCoreCaseDataService.linkDefendant(Long.valueOf("12345"),
                                                       CaseEvent.LINK_CITIZEN)).thenReturn(caseDetails);
-        ccdCaseApi.linkCitizenToCase(AUTH,AUTH,"12345",caseData);
+        ccdCaseApi.linkCitizenToCase(AUTH,AUTH,"12345");
         assertEquals(caseDetails.getCaseTypeId(),caseDetails.getCaseTypeId());
     }
 

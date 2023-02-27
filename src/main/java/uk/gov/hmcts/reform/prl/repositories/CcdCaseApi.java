@@ -34,7 +34,7 @@ public class CcdCaseApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CcdCaseApi.class);
 
-    public void linkCitizenToCase(String authorisation, String anonymousUserToken, String caseId, CaseData caseData) {
+    public void linkCitizenToCase(String authorisation, String anonymousUserToken, String caseId) {
         linkToCase(authorisation, anonymousUserToken, caseId);
     }
 
