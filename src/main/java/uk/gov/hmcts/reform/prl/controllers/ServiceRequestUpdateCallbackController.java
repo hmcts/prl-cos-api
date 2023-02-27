@@ -41,7 +41,6 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public void serviceRequestUpdate(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) throws WorkflowException {
