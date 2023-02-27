@@ -71,8 +71,6 @@ public class FeeAndPayServiceRequestControllerTest {
 
         when(feesService.fetchFeeDetails(feeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        //feeAndPayServiceRequestController.createPaymentServiceRequest(authToken, callbackRequest);
-
         verify(paymentRequestService).createServiceRequest(callbackRequest,authToken);
         verifyNoMoreInteractions(paymentRequestService);
 
@@ -88,8 +86,6 @@ public class FeeAndPayServiceRequestControllerTest {
         when(paymentRequestService.createServiceRequest(callbackRequest,authToken)).thenReturn(paymentServiceResponse);
 
         when(feesService.fetchFeeDetails(feeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
-
-        //feeAndPayServiceRequestController.createPaymentServiceRequest(authToken, callbackRequest);
 
         verifyNoMoreInteractions(feesService);
 

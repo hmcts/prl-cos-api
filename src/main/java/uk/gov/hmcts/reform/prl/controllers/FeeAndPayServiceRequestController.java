@@ -27,7 +27,12 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequiredArgsConstructor
 public class FeeAndPayServiceRequestController extends AbstractCallbackController {
 
-    //Moved create payment service request call to callbackcontroller
+    public static final String CONFIRMATION_HEADER = "# Please visit service request to make the payment";
+    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The case will now display as 'Pending' in your case list. "
+        + "You need to visit Service Request tab to make the payment"
+        + "\n\n <a href='/cases/case-details/";
+    public static final String CONFIRMATION_BODY_SUFFIX = "/#Service%20Request'>click here to pay</a> \n\n";
+
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "
         + "successful")
@@ -40,13 +45,10 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        log.info("Before {}", callbackRequest);
         return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-            "# Please visit service request to make the payment").confirmationBody(
-            "### What happens next \n\n The case will now display as 'Pending' in your case list. "
-                + "You need to visit Service Request tab to make the payment"
-                + "\n\n <a href='/cases/case-details/" + callbackRequest.getCaseDetails().getCaseId()
-                + "/#Service%20Request'>click here to pay</a> \n\n"
+            CONFIRMATION_HEADER).confirmationBody(
+            CONFIRMATION_BODY_PREFIX + callbackRequest.getCaseDetails().getCaseId()
+                + CONFIRMATION_BODY_SUFFIX
         ).build());
     }
 }
