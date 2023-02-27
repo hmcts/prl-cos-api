@@ -9,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
@@ -25,6 +27,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequiredArgsConstructor
 public class ServiceRequestUpdateCallbackController extends AbstractCallbackController {
 
+    private static final String SERVICE_AUTH = "ServiceAuthorization";
     private final RequestUpdateCallbackService requestUpdateCallbackService;
 
     @Autowired
@@ -38,6 +41,8 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public void serviceRequestUpdate(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
+        @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) throws WorkflowException {
         try {
