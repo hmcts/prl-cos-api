@@ -89,13 +89,6 @@ public class CcdCaseApiTest {
 
     @Test
     public void testLinkCitizen() {
-        CaseData caseData = CaseData.builder()
-            .manageOrders(ManageOrders.builder()
-                              .amendOrderDynamicList(DynamicList.builder()
-                                                         .value(DynamicListElement.builder()
-                                                                    .code(UUID.randomUUID())
-                                                                    .build()).build()).build())
-            .build();
 
         UserDetails userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
@@ -105,6 +98,14 @@ public class CcdCaseApiTest {
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId("12345").build();
         when(idamClient.getUserDetails(AUTH)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn(AUTH);
+
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .amendOrderDynamicList(DynamicList.builder()
+                                                         .value(DynamicListElement.builder()
+                                                                    .code(UUID.randomUUID())
+                                                                    .build()).build()).build())
+            .build();
         when(citizenCoreCaseDataService.linkDefendant(Long.valueOf("12345"),
                                                       CaseEvent.LINK_CITIZEN)).thenReturn(caseDetails);
         ccdCaseApi.linkCitizenToCase(AUTH,AUTH,"12345",caseData);
