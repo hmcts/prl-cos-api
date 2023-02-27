@@ -161,6 +161,7 @@ public class AmendOrderService {
             .orderTypeId(orderType)
             .orderDocument(amendedDocument)
             .orderSelectionType(orderSelectionType)
+            .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(time.now())
