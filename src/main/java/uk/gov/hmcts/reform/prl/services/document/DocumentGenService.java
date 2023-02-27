@@ -507,7 +507,6 @@ public class DocumentGenService {
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
-            updatedCaseData.put("isEngC7DocGen", Yes.toString());
             updatedCaseData.put("draftC7ResponseDoc", getDocument(authorisation, caseData, DRAFT_HINT, false));
         }
 

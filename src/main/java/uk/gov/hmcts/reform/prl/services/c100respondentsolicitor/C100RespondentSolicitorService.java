@@ -21,9 +21,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInter
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
@@ -34,6 +37,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.SUBMIT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -55,6 +62,9 @@ public class C100RespondentSolicitorService {
 
     @Autowired
     private final ObjectMapper objectMapper;
+
+    @Autowired
+    private final DocumentGenService documentGenService;
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
         log.info("Inside prePopulateAboutToStartCaseData");
@@ -444,7 +454,8 @@ public class C100RespondentSolicitorService {
         return keepDetailsPrivateList;
     }
 
-    public Map<String, Object> validateActiveRespondentResponse(CallbackRequest callbackRequest, List<String> errorList) {
+    public Map<String, Object> validateActiveRespondentResponse(CallbackRequest callbackRequest, List<String> errorList,
+                                                                String authorisation) throws Exception {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
@@ -458,8 +469,15 @@ public class C100RespondentSolicitorService {
         if (!mandatoryFinished) {
             errorList.add(
                 "Response submission is not allowed for this case unless you finish all the mandatory information");
+        } else {
+            Document document = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                SOLICITOR_C7_FINAL_DOCUMENT,
+                false
+            );
+            caseDataUpdated.put("finalC7ResponseDoc", document);
         }
-        //Todo final C7 Document generation
         return caseDataUpdated;
     }
 
@@ -484,7 +502,6 @@ public class C100RespondentSolicitorService {
 
                 respondents.set(respondents.indexOf(party), element(party.getId(), amended));
             });
-
         respondents.stream()
             .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
             .findFirst()
@@ -498,5 +515,31 @@ public class C100RespondentSolicitorService {
 
         updatedCaseData.put(RESPONDENTS, respondents);
         return updatedCaseData;
+    }
+
+    public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Document document = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            SOLICITOR_C7_DRAFT_DOCUMENT,
+            false
+        );
+        caseDataUpdated.put("draftC7ResponseDoc", document);
+
+        if(YES.equals(caseData.getRespondentAohYesNo())) {
+            Document documentForC1A = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                SOLICITOR_C1A_DRAFT_DOCUMENT,
+                false
+            );
+            caseDataUpdated.put("draftC1ADoc", documentForC1A);
+        }
+
+        return caseDataUpdated;
     }
 }

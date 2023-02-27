@@ -41,9 +41,6 @@ public class C100RespondentSolicitorController {
     C100RespondentSolicitorService respondentSolicitorService;
 
     @Autowired
-    private DocumentGenService documentGenService;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -141,27 +138,12 @@ public class C100RespondentSolicitorController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse generateC7ResponseDraftDocument(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody @Parameter(name = "CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest request
+        @RequestBody @Parameter(name = "CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
 
-        Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
-
-        Document document = documentGenService.generateSingleDocument(
-            authorisation,
-            caseData,
-            SOLICITOR_C7_DRAFT_DOCUMENT,
-            false
-        );
-        Document documentForC1A = documentGenService.generateSingleDocument(
-            authorisation,
-            caseData,
-            SOLICITOR_C1A_DRAFT_DOCUMENT,
-            false
-        );
-        caseDataUpdated.put("draftC7ResponseDoc", document);
-        caseDataUpdated.put("draftC1ADoc", documentForC1A);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(respondentSolicitorService.generateDraftDocumentsForRespondent(callbackRequest, authorisation))
+            .build();
     }
 
     @PostMapping(path = "/about-to-start-response-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
