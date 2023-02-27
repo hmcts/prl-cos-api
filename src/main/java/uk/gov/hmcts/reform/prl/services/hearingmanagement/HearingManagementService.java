@@ -44,8 +44,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSTPONED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WAITING_TO_BE_LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WAITING_TO_BE_LISTED;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 
