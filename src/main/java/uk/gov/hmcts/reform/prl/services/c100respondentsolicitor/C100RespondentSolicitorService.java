@@ -40,7 +40,7 @@ import java.util.UUID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.SUBMIT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -330,7 +330,7 @@ public class C100RespondentSolicitorService {
         if (solicitorRepresentedRespondents != null && !solicitorRepresentedRespondents.isEmpty()) {
             activeRespondent = solicitorRepresentedRespondents
                 .stream()
-                .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
+                .filter(x -> Yes.equals(x.getValue().getResponse().getActiveRespondent()))
                 .findFirst();
         }
         return activeRespondent;
@@ -358,7 +358,7 @@ public class C100RespondentSolicitorService {
                     Element<PartyDetails> respondent;
                     respondent = caseData.getRespondents().get(x.getIndex());
                     if (respondent.getValue().getResponse() != null
-                        && !(YesOrNo.Yes.equals(respondent.getValue().getResponse().getC7ResponseSubmitted()))) {
+                        && !(Yes.equals(respondent.getValue().getResponse().getC7ResponseSubmitted()))) {
                         solicitorRepresentedParties.add(respondent);
                     } else if (respondent.getValue().getResponse() == null) {
                         solicitorRepresentedParties.add(respondent);
@@ -406,11 +406,11 @@ public class C100RespondentSolicitorService {
             .findFirst()
             .ifPresent(party -> {
                 PartyDetails amended = party.getValue().toBuilder()
-                    .response(party.getValue().getResponse().toBuilder().activeRespondent(YesOrNo.Yes).build())
+                    .response(party.getValue().getResponse().toBuilder().activeRespondent(Yes).build())
                     .build();
                 if (callbackRequest.getEventId().equalsIgnoreCase(SUBMIT.getEventId())) {
                     amended = party.getValue().toBuilder()
-                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(YesOrNo.Yes).build())
+                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
                         .build();
                 }
                 respondents.set(respondents.indexOf(party), element(party.getId(), amended));
@@ -497,7 +497,7 @@ public class C100RespondentSolicitorService {
             .findFirst()
             .ifPresent(party -> {
                 PartyDetails amended = party.getValue().toBuilder()
-                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(YesOrNo.Yes).build())
+                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
                         .build();
 
                 respondents.set(respondents.indexOf(party), element(party.getId(), amended));
@@ -530,7 +530,7 @@ public class C100RespondentSolicitorService {
         );
         caseDataUpdated.put("draftC7ResponseDoc", document);
 
-        if(YES.equals(caseData.getRespondentAohYesNo())) {
+        if (Yes.equals(caseData.getRespondentAohYesNo())) {
             Document documentForC1A = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
