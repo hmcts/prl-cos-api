@@ -73,9 +73,8 @@ public class HearingManagementServiceTest {
     private EmailService emailService;
     @Mock
     private CoreCaseDataService coreCaseDataService;
-
     private StartEventResponse startEventResponse;
-    //private EventRequestData eventRequestData;
+
     private CaseDetails caseDetails;
 
     private CaseDataContent caseDataContent;
@@ -225,7 +224,7 @@ public class HearingManagementServiceTest {
             .userId(systemUpdateUserId)
             .userToken(userToken)
             .build();
-        StartEventResponse startEventResponse = StartEventResponse.builder()
+       startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails)
             .token(userToken).build();
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
@@ -323,7 +322,7 @@ public class HearingManagementServiceTest {
             .userId(systemUpdateUserId)
             .userToken(userToken)
             .build();
-        StartEventResponse startEventResponse = StartEventResponse.builder()
+         startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails)
             .token(userToken).build();
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
@@ -430,7 +429,7 @@ public class HearingManagementServiceTest {
             .userId(systemUpdateUserId)
             .userToken(userToken)
             .build();
-        StartEventResponse startEventResponse = StartEventResponse.builder()
+         startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails)
             .token(userToken).build();
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
@@ -507,10 +506,6 @@ public class HearingManagementServiceTest {
                        .build())
             .data(caseDataMap)
             .build();
-    }
-
-    private StartEventResponse buildStartEventResponse(String eventId, String eventToken, CaseDetails caseDetails) {
-        return startEventResponse.builder().eventId(eventId).token(eventToken).caseDetails(caseDetails).build();
     }
 
     @Test
@@ -610,7 +605,7 @@ public class HearingManagementServiceTest {
             .userId(systemUpdateUserId)
             .userToken(userToken)
             .build();
-        StartEventResponse startEventResponse = StartEventResponse.builder()
+         startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails)
             .token(userToken).build();
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
@@ -747,7 +742,7 @@ public class HearingManagementServiceTest {
             .userId(systemUpdateUserId)
             .userToken(userToken)
             .build();
-        StartEventResponse startEventResponse = StartEventResponse.builder()
+         startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails)
             .token(userToken).build();
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
@@ -891,7 +886,7 @@ public class HearingManagementServiceTest {
             .userId(systemUpdateUserId)
             .userToken(userToken)
             .build();
-        StartEventResponse startEventResponse = StartEventResponse.builder()
+         startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails)
             .token(userToken).build();
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);

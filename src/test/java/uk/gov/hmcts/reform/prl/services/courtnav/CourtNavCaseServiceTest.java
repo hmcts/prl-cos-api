@@ -17,14 +17,18 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.prl.clients.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -39,6 +43,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CourtNavCaseServiceTest {
@@ -69,6 +75,12 @@ public class CourtNavCaseServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    SystemUserService systemUserService;
+
+    @Mock
+    CoreCaseDataService coreCaseDataService;
+
     @InjectMocks
     CourtNavCaseService courtNavCaseService;
 
@@ -78,6 +90,12 @@ public class CourtNavCaseServiceTest {
     private CaseData caseData;
 
     public MultipartFile file;
+    private final String userToken = "Bearer testToken";
+    private final String systemUpdateUserId = "systemUserID";
+
+    private EventRequestData eventRequestData;
+
+    private String bearerToken;
 
     @Before
     public void setup() {
@@ -112,6 +130,7 @@ public class CourtNavCaseServiceTest {
             .documentUrl(randomAlphaNumeric)
             .documentBinaryUrl(randomAlphaNumeric)
             .build();
+
         Document document = testDocument();
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken("eventToken")
@@ -120,64 +139,66 @@ public class CourtNavCaseServiceTest {
                        .build())
             .data(Map.of("WITNESS_STATEMENT", tempDoc))
             .build();
-        CaseDetails tempCaseDetails = CaseDetails.builder().data(Map.of("id", "1234567891234567")).state(
-            "SUBMITTED_PAID").createdDate(
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails tempCaseDetails = CaseDetails.builder().id(1234567891234567L).data(stringObjectMap)
+            .state("SUBMITTED_PAID").createdDate(
             LocalDateTime.now()).lastModified(LocalDateTime.now()).id(1234567891234567L).build();
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
+
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1234567891234567L).data(stringObjectMap).build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(userToken);
+        when(systemUserService.getUserId(userToken)).thenReturn(systemUpdateUserId);
+
+        StartEventResponse startEventResponse = StartEventResponse.builder()
+            .caseDetails(caseDetails)
+            .token(bearerToken).build();
+        when(coreCaseDataService.startUpdate(
+            userToken,eventRequestData, String.valueOf(caseData.getId()),true))
+            .thenReturn(startEventResponse);
+        when(objectMapper.convertValue(tempCaseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
+        when(coreCaseDataService.createCaseDataContent(startEventResponse,caseDataUpdated)).thenReturn(caseDataContent);
+        when(coreCaseDataService.submitUpdate(userToken, eventRequestData, caseDataContent,String.valueOf(caseData.getId()), true))
+            .thenReturn(caseDetails);
+
+
         when(coreCaseDataApi.getCase(authToken, s2sToken, "1234567891234567")).thenReturn(tempCaseDetails);
-        //when(caseUtils.).thenReturn(caseData);
-        when(coreCaseDataApi.startEventForCaseWorker(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-                                                     Mockito.any(), Mockito.any(), Mockito.any())
-        ).thenReturn(StartEventResponse.builder().eventId("courtnav-document-upload").token("eventToken").build());
         when(caseDocumentClient.uploadDocuments(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
                                                 Mockito.any())).thenReturn(uploadResponse);
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(idamClient.getUserInfo(Mockito.any())).thenReturn(UserInfo.builder().uid(randomUserId).build());
-        when(coreCaseDataApi.submitEventForCaseWorker(
-            authToken,
-            s2sToken,
-            randomUserId, PrlAppsConstants.JURISDICTION,
-            PrlAppsConstants.CASE_TYPE,
-            "1234567891234567",
-            true,
-            caseDataContent
-             )
-        ).thenReturn(CaseDetails.builder().id(1234567891234567L).data(Map.of(
-            "typeOfDocument",
-            "fl401Doc1"
-        )).build());
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder().id(
-            1234567891234567L).data(stringObjectMap).build();
-
-        when(objectMapper.convertValue(tempCaseDetails.getData(), CaseData.class)).thenReturn(caseData);
         courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT",
                                            "1234567891234567"
         );
-        verify(coreCaseDataApi, times(1)).startEventForCaseWorker(
-            "Bearer abc",
-            "s2s token",
-            "e3ceb507-0137-43a9-8bd3-85dd23720648",
-            "PRIVATELAW",
-            "PRLAPPS",
-            "1234567891234567",
-            "courtnav-document-upload"
-        );
-        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.anyBoolean(),
-            Mockito.any(CaseDataContent.class)
-        );
+
+        verify(coreCaseDataService, Mockito.times(1)).startUpdate(userToken,
+                                                                  eventRequestData,
+                                                                  String.valueOf(caseData.getId()),
+                                                                  true);
+        verify(coreCaseDataService, Mockito.times(1)).submitUpdate(userToken,
+                                                                   eventRequestData,
+                                                                   caseDataContent,
+                                                                   String.valueOf(caseData.getId()),
+                                                                   true);
     }
 
     @Test(expected = ResponseStatusException.class)
     public void shouldNotUploadDocumentWhenInvalidDocumentTypeOfDocumentIsRequested() {
+        CaseEvent caseEvent = CaseEvent.COURTNAV_DOCUMENT_UPLOAD_EVENT_ID;
+        eventRequestData = EventRequestData.builder()
+            .eventId(caseEvent.getValue())
+            .caseTypeId(CASE_TYPE)
+            .ignoreWarning(true)
+            .jurisdictionId(JURISDICTION)
+            .userId(systemUpdateUserId)
+            .userToken(userToken)
+            .build();
+        when(coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId)).thenReturn(eventRequestData);
+
         courtNavCaseService.uploadDocument("Bearer abc", file, "InvalidTypeOfDocument",
                                            "1234567891234567"
         );
@@ -185,6 +206,8 @@ public class CourtNavCaseServiceTest {
 
     @Test(expected = ResponseStatusException.class)
     public void shouldNotUploadDocumentWhenInvalidDocumentFormatIsRequested() {
+        when(systemUserService.getSysUserToken()).thenReturn(userToken);
+        when(systemUserService.getUserId(userToken)).thenReturn(systemUpdateUserId);
         courtNavCaseService.uploadDocument("Bearer abc", file, "InvalidTypeOfDocument",
                                            "1234567891234567"
         );
