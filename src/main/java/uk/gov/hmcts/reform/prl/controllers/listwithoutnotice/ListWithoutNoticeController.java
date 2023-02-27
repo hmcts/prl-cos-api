@@ -23,9 +23,12 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicRadioList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.List;
@@ -41,8 +44,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOSUBCHANNEL
 @SecurityRequirement(name = "Bearer Authentication")
 public class ListWithoutNoticeController extends AbstractCallbackController {
 
-    @Autowired
-    RefDataUserService refDataUserService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -52,6 +53,12 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
 
     @Autowired
     LocationRefDataService locationRefDataService;
+
+    @Autowired
+    RefDataUserService refDataUserService;
+
+    @Autowired
+    AllocatedJudgeService allocatedJudgeService;
 
     private DynamicList retrievedHearingTypes = null;
 
@@ -67,13 +74,19 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
 
     private DynamicList retrievedCourtLocations = null;
 
+    private  DynamicList hearingListedLinkedCases = null;
+    public static final String SUBCHANNELNAKEY = "NA";
+    public static final String SUBCHANNELNAVALUE = "Not in Attendance";
+    public static final String JUDGE_NAME_EMAIL = "hearingJudgeNameAndEmail";
+
 
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate Hearing page details")
     public AboutToStartOrSubmitCallbackResponse prePopulateHearingPageData(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-        log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", callbackRequest.getCaseDetails().getId());
+        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+        log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
         if (null == retrievedHearingTypes) {
@@ -92,9 +105,11 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
             retrievedHearingChannels = DynamicList.builder()
                 .value(DynamicListElement.EMPTY)
                 .listItems(populateHearingChannel.get(HEARINGCHANNEL)).build();
+            List<DynamicListElement> radioChannels = populateHearingChannel.get(HEARINGCHANNEL);
+            radioChannels.remove(DynamicListElement.builder().code(SUBCHANNELNAKEY).label(SUBCHANNELNAVALUE).build());
             retrievedRadioHearingChannels = DynamicRadioList.builder()
                 .value(DynamicListElement.EMPTY)
-                .listItems(populateHearingChannel.get(HEARINGCHANNEL)).build();
+                .listItems(radioChannels).build();
             retrievedVideoSubChannels = DynamicList.builder()
                 .value(DynamicListElement.EMPTY)
                 .listItems(populateHearingChannel.get(VIDEOSUBCHANNELS)).build();
@@ -107,6 +122,11 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                 .value(DynamicListElement.EMPTY)
                 .listItems(locationRefDataService.getCourtLocations(authorisation)).build();
         }
+        if (null == hearingListedLinkedCases) {
+            hearingListedLinkedCases = DynamicList.builder()
+                .value(DynamicListElement.EMPTY)
+                .listItems(hearingDataService.getLinkedCase(authorisation,caseReferenceNumber)).build();
+        }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseDataUpdated.containsKey("listWithoutNoticeHearingDetails")) {
             caseDataUpdated.put("listWithoutNoticeHearingDetails",
@@ -114,7 +134,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                                                                   retrievedHearingTypes,retrievedHearingDates,
                                                                   retrievedHearingChannels,retrievedRadioHearingChannels,
                                                                   retrievedVideoSubChannels,retrievedTelephoneSubChannels,
-                                                                  retrievedCourtLocations));
+                                                                  retrievedCourtLocations,hearingListedLinkedCases));
         } else {
             caseDataUpdated.put("listWithoutNoticeHearingDetails",
                 ElementUtils.wrapElements(HearingData.builder()
@@ -125,6 +145,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                                               .hearingTelephoneChannels(retrievedTelephoneSubChannels)
                                               .courtList(retrievedCourtLocations)
                                               .hearingChannelDynamicRadioList(retrievedRadioHearingChannels)
+                                              .hearingListedLinkedCases(hearingListedLinkedCases)
                     .build()));
 
         }
@@ -147,10 +168,22 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
+        String[] judgePersonalCode = allocatedJudgeService.getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL));
+        List<JudicialUsersApiResponse> judgeDetails =
+            refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
+                                                             .personalCode(allocatedJudgeService
+                                                             .getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL))).build());
+        if (null != judgeDetails) {
+            caseDataUpdated.put("listWithoutNoticeHearingDetails", ElementUtils.wrapElements(HearingData.builder()
+                                 .hearingJudgeLastName(judgeDetails.get(0).getSurname())
+                                 .hearingJudgeEmailAddress(judgeDetails.get(0).getEmailId())
+                                 .hearingJudgePersonalCode(judgePersonalCode[0])));
+        }
         caseDataUpdated.put("listWithoutNoticeHearingDetails",hearingDataService
-            .mapHearingData(caseData.getListWithoutNoticeHearingDetails(),null,null,null,
-                            null,null,null,null));
+                .mapHearingData(caseData.getListWithoutNoticeHearingDetails(),null,
+                                null,null,
+                            null,null,
+                            null,null,null));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

@@ -68,7 +68,7 @@ public class AllocatedJudgeService {
         return allocatedJudgeBuilder.build();
     }
 
-    private String[] getPersonalCode(Object judgeDetails) {
+    public String[] getPersonalCode(Object judgeDetails) {
         String[] personalCodes = new String[3];
         try {
             personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
