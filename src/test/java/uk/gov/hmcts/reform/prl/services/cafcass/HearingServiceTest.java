@@ -77,7 +77,7 @@ public class HearingServiceTest {
         final List<CaseHearing> caseHearings = new ArrayList();
 
         final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
-                .hmcStatus("LISTED").hearingType("ABA5-APL").hearingDaySchedule(
+                .hmcStatus("LISTED").hearingType("ABA5-APL").hearingTypeValue("Appeal").hearingDaySchedule(
                 List.of(
                     HearingDaySchedule.hearingDayScheduleWith().hearingVenueName("BRENTFORD COUNTY COURT AND FAMILY COURT")
                             .hearingStartDateTime(LocalDateTime.parse("2023-01-24T13:00:00")).hearingEndDateTime(LocalDateTime.parse(
@@ -105,7 +105,7 @@ public class HearingServiceTest {
         final List<CaseHearing> caseHearings = new ArrayList();
 
         final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
-                .hmcStatus("LISTED").hearingType("ABA5-APL").hearingDaySchedule(
+                .hmcStatus("LISTED").hearingType("ABA5-APL").hearingTypeValue("Appeal").hearingDaySchedule(
                 List.of(
                     HearingDaySchedule.hearingDayScheduleWith().hearingVenueName("BRENTFORD COUNTY COURT AND FAMILY COURT")
                             .hearingStartDateTime(LocalDateTime.parse("2023-01-24T13:00:00")).hearingEndDateTime(LocalDateTime.parse(
