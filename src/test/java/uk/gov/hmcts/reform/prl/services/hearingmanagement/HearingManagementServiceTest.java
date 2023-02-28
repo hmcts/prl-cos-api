@@ -88,7 +88,7 @@ public class HearingManagementServiceTest {
     private final String jurisdiction = "PRIVATELAW";
     private final String caseType = "PRLAPPS";
     public static final String HEARING_STATE_CHANGE_SUCCESS = "hmcCaseUpdateSuccess";
-    public static final String HEARING_STATE_CHANGE_FAILURE = "hmcCaseUpdateFailure";
+    public static final String HEARING_STATE_CHANGE_FAILURE = "hmcCaseUpdateSuccess";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
     public static final String authToken = "Bearer TestAuthToken";
     private final String serviceAuthToken = "Bearer testServiceAuth";
@@ -271,8 +271,8 @@ public class HearingManagementServiceTest {
             1669565933090179L).data(stringObjectMap).build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, hearingRequest1.getCaseRef())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"))
-            .thenReturn(buildStartEventResponse("hmcCaseUpdateFailure", eventToken));
+                                                     caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateSuccess"))
+            .thenReturn(buildStartEventResponse("hmcCaseUpdateSuccess", eventToken));
         when(coreCaseDataApi.submitEventForCaseWorker(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
             Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
@@ -293,7 +293,7 @@ public class HearingManagementServiceTest {
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1,PREPARE_FOR_HEARING_CONDUCT_HEARING);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                        caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
+                                                        caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateSuccess"
         );
         verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                                                                    Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
@@ -326,8 +326,8 @@ public class HearingManagementServiceTest {
             1669565933090179L).data(stringObjectMap).build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, hearingRequest1.getCaseRef())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"))
-            .thenReturn(buildStartEventResponse("hmcCaseUpdateFailure", eventToken));
+                                                     caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateSuccess"))
+            .thenReturn(buildStartEventResponse("hmcCaseUpdateSuccess", eventToken));
         when(coreCaseDataApi.submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                                                       Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
                                                       Mockito.any(CaseDataContent.class)))
@@ -347,7 +347,7 @@ public class HearingManagementServiceTest {
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, PREPARE_FOR_HEARING_CONDUCT_HEARING);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                        caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
+                                                        caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateSuccess"
         );
         verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                                                                    Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
@@ -562,8 +562,8 @@ public class HearingManagementServiceTest {
 
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, hearingRequest1.getCaseRef())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"))
-            .thenReturn(buildStartEventResponse("hmcCaseUpdateFailure", eventToken));
+                                                     caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateSuccess"))
+            .thenReturn(buildStartEventResponse("hmcCaseUpdateSuccess", eventToken));
         when(coreCaseDataApi.submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                                                       Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
                                                       Mockito.any(CaseDataContent.class)))
@@ -583,7 +583,7 @@ public class HearingManagementServiceTest {
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, PREPARE_FOR_HEARING_CONDUCT_HEARING);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                        caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
+                                                        caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateSuccess"
         );
         verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                                                                    Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
@@ -653,8 +653,8 @@ public class HearingManagementServiceTest {
             .build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, hearingRequest1.getCaseRef())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"))
-            .thenReturn(buildStartEventResponse("hmcCaseUpdateFailure", eventToken));
+                                                     caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateSuccess"))
+            .thenReturn(buildStartEventResponse("hmcCaseUpdateSuccess", eventToken));
         when(coreCaseDataApi.submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                                                       Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
                                                       Mockito.any(CaseDataContent.class)))
@@ -673,7 +673,7 @@ public class HearingManagementServiceTest {
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1, PREPARE_FOR_HEARING_CONDUCT_HEARING);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                        caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
+                                                        caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateSuccess"
         );
         verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                                                                    Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
