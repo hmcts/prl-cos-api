@@ -697,6 +697,9 @@ public class CaseData implements MappableObject {
     private final RespondentChildAbduction respondentChildAbduction;
     private final RespondentOtherConcerns respondentOtherConcerns;
 
+    @JsonProperty("cafcassUploadedDocs")
+    private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
+
     /** Confirm or Edit your contact details. **/
     private final CitizenDetails resSolConfirmEditContactDetails;
 
@@ -752,7 +755,4 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
-    @JsonProperty("cafcassUploadedDocs")
-    private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
-
 }
