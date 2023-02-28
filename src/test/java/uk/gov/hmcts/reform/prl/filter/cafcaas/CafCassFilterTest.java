@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -31,9 +30,6 @@ public class CafCassFilterTest {
         List<String> caseTypeList = new ArrayList<>();
         caseTypeList.add("C100");
         ReflectionTestUtils.setField(cafCassFilter, "caseTypeList", caseTypeList);
-        List<String> caseStateList = new LinkedList<>();
-        caseStateList.add("DECISION_OUTCOME");
-        ReflectionTestUtils.setField(cafCassFilter, "caseStateList", caseStateList);
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         CafCassResponse cafCassResponse = objectMapper.readValue(
             TestResourceUtil.readFileFrom(jsonInString),

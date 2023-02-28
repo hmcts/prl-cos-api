@@ -14,13 +14,22 @@ import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Match;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Must;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Query;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -35,6 +44,9 @@ public class CaseDataService {
     @Value("${ccd.elastic-search-api.boost}")
     private String ccdElasticSearchApiBoost;
 
+    @Value("#{'${cafcaas.caseState}'.split(',')}")
+    private List<String> caseStateList;
+
 
     private final HearingService hearingService;
 
@@ -44,7 +56,9 @@ public class CaseDataService {
 
     private final  AuthTokenGenerator authTokenGenerator;
 
-    public CafCassResponse getCaseData(String authorisation, String serviceAuthorisation, String startDate, String endDate) throws IOException {
+    private final SystemUserService systemUserService;
+
+    public CafCassResponse getCaseData(String authorisation, String startDate, String endDate) throws IOException {
 
         log.info("Search API start date - {}, end date - {}", startDate, endDate);
 
@@ -55,13 +69,14 @@ public class CaseDataService {
 
         QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
         String searchString = objectMapper.writeValueAsString(ccdQueryParam);
+
+        String userToken = systemUserService.getSysUserToken();
         SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
-            authorisation,
+            userToken,
             searchString,
             authTokenGenerator.generate(),
             cafCassSearchCaseTypeId
         );
-        log.debug("CCD response: " + objectMapper.writeValueAsString(searchResult));
 
         CafCassResponse cafCassResponse = objectMapper.convertValue(
             searchResult,
@@ -81,10 +96,31 @@ public class CaseDataService {
     }
 
     private QueryParam buildCcdQueryParam(String startDate, String endDate) {
+
+        List<Should> shoulds = populateStatesForQuery();
+
         LastModified lastModified = LastModified.builder().gte(startDate).lte(endDate).boost(ccdElasticSearchApiBoost).build();
         Range range = Range.builder().lastModified(lastModified).build();
-        Query query = Query.builder().range(range).build();
+
+        StateFilter stateFilter = StateFilter.builder().should(shoulds).build();
+        Filter filter = Filter.builder().range(range).build();
+        Must must = Must.builder().stateFilter(stateFilter).build();
+        Bool bool = Bool.builder().filter(filter).must(must).build();
+        Query query = Query.builder().bool(bool).build();
         return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize).build();
+    }
+
+    private List<Should> populateStatesForQuery() {
+        caseStateList = caseStateList.stream().map(String::trim).collect(Collectors.toList());
+
+        List<Should> shoulds = new ArrayList<>();
+        if (caseStateList != null && !caseStateList.isEmpty()) {
+            for (String caseState:caseStateList
+                 ) {
+                shoulds.add(Should.builder().match(Match.builder().state(caseState).build()).build());
+            }
+        }
+        return shoulds;
     }
 
     /**

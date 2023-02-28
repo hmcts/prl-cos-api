@@ -25,8 +25,6 @@ public class CafCassFilter {
     @Value("#{'${cafcaas.caseTypeOfApplicationList}'.split(',')}")
     private List<String> caseTypeList;
 
-    @Value("#{'${cafcaas.caseState}'.split(',')}")
-    private List<String> caseStateList;
 
     @Autowired
     private PostcodeLookupService postcodeLookupService;
@@ -34,7 +32,6 @@ public class CafCassFilter {
     public void filter(CafCassResponse cafCassResponse) {
         if (caseTypeList != null && !caseTypeList.isEmpty()) {
             caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
-            caseStateList = caseStateList.stream().map(String::trim).collect(Collectors.toList());
             filterCaseByApplicationCaseType(cafCassResponse);
             filterCasesByApplicationValidPostcode(cafCassResponse);
             cafCassResponse.setTotal(cafCassResponse.getCases().size());
@@ -104,8 +101,7 @@ public class CafCassFilter {
     }
 
     private Predicate<CafCassCaseDetail> filterByCaseTypeAndState() {
-        return cafCassCaseDetail -> caseTypeList.contains(cafCassCaseDetail.getCaseData().getCaseTypeOfApplication())
-            && caseStateList.contains(cafCassCaseDetail.getState());
+        return cafCassCaseDetail -> caseTypeList.contains(cafCassCaseDetail.getCaseData().getCaseTypeOfApplication());
     }
 
     private void filterCasesByApplicationValidPostcode(CafCassResponse cafCassResponse) {
