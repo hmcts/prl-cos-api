@@ -383,7 +383,7 @@ bundle:
 postcodelookup:
   api:
     url: https://api.os.uk/search/places/v1
-    key: ${POST_CODE_LOOKUP_KEY:TcDHoU6gWt4GaAd6JU0TSendKdGHhaGT}
+    key: ${POST_CODE_LOOKUP_KEY:xxxxxxx}
 cafcaas:
   search-case-type-id: PRLAPPS
   caseTypeOfApplicationList: C100

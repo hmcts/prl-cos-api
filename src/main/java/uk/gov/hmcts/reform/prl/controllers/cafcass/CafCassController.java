@@ -56,8 +56,7 @@ public class CafCassController extends AbstractCallbackController {
                 log.info("processing request after authorization");
                 return ResponseEntity.ok(caseDataService.getCaseData(
                     authorisation,
-                    serviceAuthorisation,
-                    startDate,
+                        startDate,
                     endDate
                 ));
 
