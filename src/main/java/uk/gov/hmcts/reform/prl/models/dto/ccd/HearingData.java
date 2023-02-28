@@ -43,6 +43,18 @@ public class HearingData {
 
     private final DynamicList hearingListedLinkedCases;
 
+    private final DynamicList applicantSolicitorHearingChannel;
+
+    private final DynamicList respondentHearingChannel;
+
+    private final DynamicList respondentSolicitorHearingChannel;
+
+    private final DynamicList cafcassHearingChannel;
+
+    private final DynamicList cafcassCymruHearingChannel;
+
+    private final DynamicList applicantHearingChannel;
+
     @JsonSerialize(using = CustomEnumSerializer.class)
     @JsonProperty("hearingDateConfirmOptionEnum")
     private HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum;

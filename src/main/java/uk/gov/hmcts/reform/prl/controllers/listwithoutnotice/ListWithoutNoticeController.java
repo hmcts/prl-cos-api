@@ -73,7 +73,22 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
 
     private DynamicList retrievedCourtLocations = null;
 
+    private DynamicList applicantHearingChannel = null;
+
+    private DynamicList applicantSolicitorHearingChannel =  null;
+
+    private DynamicList respondentHearingChannel = null;
+
+    private DynamicList respondentSolicitorHearingChannel = null;
+
+    private DynamicList cafcassHearingChannel = null;
+
+    private DynamicList cafcassCymruHearingChannel = null;
+
+    private DynamicList localAuthorityHearingChannel = null;
+
     private  DynamicList hearingListedLinkedCases = null;
+
     public static final String SUBCHANNELNAKEY = "NA";
     public static final String SUBCHANNELNAVALUE = "Not in Attendance";
     public static final String JUDGE_NAME_EMAIL = "hearingJudgeNameAndEmail";
@@ -98,27 +113,30 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                 .value(DynamicListElement.EMPTY)
                 .listItems(hearingDataService.getHearingStartDate(authorisation,caseData)).build();
         }
+
+
         if (null == retrievedHearingChannels) {
             Map<String,List<DynamicListElement>> populateHearingChannel =
                 hearingDataService.prePopulateHearingChannel(authorisation);
             retrievedHearingChannels = DynamicList.builder()
                 .value(DynamicListElement.EMPTY)
                 .listItems(populateHearingChannel.get(HEARINGCHANNEL)).build();
-            log.info("*****retrievedHearingChannels*****",retrievedHearingChannels);
+            otherPartyHearingChannelsMapping(retrievedHearingChannels);
+            log.info("*****retrievedHearingChannels*****",retrievedHearingChannels.getListItems());
             List<DynamicListElement> radioChannels = populateHearingChannel.get(HEARINGCHANNEL);
             radioChannels.remove(DynamicListElement.builder().code(SUBCHANNELNAKEY).label(SUBCHANNELNAVALUE).build());
             retrievedRadioHearingChannels = DynamicList.builder()
                 .value(DynamicListElement.EMPTY)
                 .listItems(radioChannels).build();
-            log.info("*****retrievedRadioHearingChannels*****",retrievedRadioHearingChannels);
+            log.info("*****retrievedRadioHearingChannels*****",retrievedRadioHearingChannels.getListItems());
             retrievedVideoSubChannels = DynamicList.builder()
                 .value(DynamicListElement.EMPTY)
                 .listItems(populateHearingChannel.get(VIDEOSUBCHANNELS)).build();
-            log.info("*****retrievedVideoSubChannels*****",retrievedVideoSubChannels);
+            log.info("*****retrievedVideoSubChannels*****",retrievedVideoSubChannels.getListItems());
             retrievedTelephoneSubChannels = DynamicList.builder()
                 .value(DynamicListElement.EMPTY)
                 .listItems(populateHearingChannel.get(TELEPHONESUBCHANNELS)).build();
-            log.info("*****retrievedTelephoneSubChannels*****",retrievedTelephoneSubChannels);
+            log.info("*****retrievedTelephoneSubChannels*****",retrievedTelephoneSubChannels.getListItems());
         }
         if (null == retrievedCourtLocations) {
             retrievedCourtLocations = DynamicList.builder()
@@ -134,10 +152,12 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         if (caseDataUpdated.containsKey("listWithoutNoticeHearingDetails")) {
             caseDataUpdated.put("listWithoutNoticeHearingDetails",
                                 hearingDataService.mapHearingData(existingListWithoutNoticeHearingDetails,
-                                                                  retrievedHearingTypes,retrievedHearingDates,
-                                                                  retrievedHearingChannels,retrievedRadioHearingChannels,
-                                                                  retrievedVideoSubChannels,retrievedTelephoneSubChannels,
-                                                                  retrievedCourtLocations,hearingListedLinkedCases));
+                                            retrievedHearingTypes,retrievedHearingDates,
+                                            retrievedHearingChannels,retrievedRadioHearingChannels,
+                                            retrievedVideoSubChannels,retrievedTelephoneSubChannels,
+                                            retrievedCourtLocations,hearingListedLinkedCases,applicantHearingChannel,
+                                            applicantSolicitorHearingChannel,respondentHearingChannel,respondentSolicitorHearingChannel,
+                                            cafcassHearingChannel,cafcassCymruHearingChannel,localAuthorityHearingChannel));
         } else {
             caseDataUpdated.put("listWithoutNoticeHearingDetails",
                 ElementUtils.wrapElements(HearingData.builder()
@@ -149,11 +169,39 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                                               .courtList(retrievedCourtLocations)
                                               .hearingChannelDynamicRadioList(retrievedRadioHearingChannels)
                                               .hearingListedLinkedCases(hearingListedLinkedCases)
+                                              .applicantHearingChannel(applicantHearingChannel)
+                                              .applicantSolicitorHearingChannel(applicantSolicitorHearingChannel)
+                                              .respondentHearingChannel(respondentHearingChannel)
+                                              .respondentSolicitorHearingChannel(respondentSolicitorHearingChannel)
+                                              .cafcassHearingChannel(cafcassHearingChannel)
+                                              .cafcassCymruHearingChannel(cafcassCymruHearingChannel)
+                                              .localAuthorityHearingChannel(localAuthorityHearingChannel)
                     .build()));
 
         }
         log.info("******caseDateUpdated***",caseDataUpdated.get("listWithoutNoticeHearingDetails"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private void otherPartyHearingChannelsMapping(DynamicList retrievedHearingChannels) {
+
+        if (null != retrievedHearingChannels.getListItems()) {
+            applicantHearingChannel = mappingChannelValues(retrievedHearingChannels.getListItems());
+            applicantSolicitorHearingChannel = mappingChannelValues(retrievedHearingChannels.getListItems());
+            respondentHearingChannel = mappingChannelValues(retrievedHearingChannels.getListItems());
+            respondentSolicitorHearingChannel = mappingChannelValues(retrievedHearingChannels.getListItems());
+            cafcassHearingChannel = mappingChannelValues(retrievedHearingChannels.getListItems());
+            cafcassCymruHearingChannel = mappingChannelValues(retrievedHearingChannels.getListItems());
+            localAuthorityHearingChannel = mappingChannelValues(retrievedHearingChannels.getListItems());
+
+        }
+
+    }
+
+    private DynamicList mappingChannelValues(List<DynamicListElement> listItems) {
+        return DynamicList.builder()
+            .value(DynamicListElement.EMPTY)
+            .listItems(retrievedHearingChannels.getListItems()).build();
     }
 
 
@@ -186,7 +234,11 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                 .mapHearingData(caseData.getListWithoutNoticeHearingDetails(),null,
                                 null,null,
                             null,null,
-                            null,null,null));
+                            null,null,null,
+                                null,null,
+                                null,null,
+                                null,null,
+                null));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
