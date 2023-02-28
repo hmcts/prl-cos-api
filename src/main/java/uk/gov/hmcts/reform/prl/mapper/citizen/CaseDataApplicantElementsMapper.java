@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -111,17 +109,22 @@ public class CaseDataApplicantElementsMapper {
                                                     List<String> contactDetailsPrivateList) {
         return Response
             .builder()
-            .keepDetailsPrivate(
-                KeepDetailsPrivate
-                    .builder()
-                    .otherPeopleKnowYourContactDetails(YesNoDontKnow.getDisplayedValueIgnoreCase(applicantDto.getDetailsKnown()))
-                    .confidentiality(isNotEmpty(applicantDto.getStart()) ?
-                                         YesOrNo.getValue(applicantDto.getStart()) :
-                                         YesOrNo.getValue(applicantDto.getStartAlternative()))
-                    .confidentialityList(contactDetailsPrivateList.stream().map(c -> PrlAppsConstants.TELEPHONE.equals(c) ?
-                        ConfidentialityListEnum.phoneNumber : ConfidentialityListEnum.getValue(c) ).collect(
-                        Collectors.toList()))
-                    .build())
+            .keepDetailsPrivate(buildKeepDetailsPrivate(applicantDto, contactDetailsPrivateList))
+            .build();
+    }
+
+    private static KeepDetailsPrivate buildKeepDetailsPrivate(ApplicantDto applicantDto,
+                                                              List<String> contactDetailsPrivateList) {
+        return KeepDetailsPrivate
+            .builder()
+            .otherPeopleKnowYourContactDetails(YesNoDontKnow.getDisplayedValueIgnoreCase(applicantDto.getDetailsKnown()))
+            .confidentiality(isNotEmpty(applicantDto.getStart())
+                                 ? YesOrNo.getValue(applicantDto.getStart())
+                                 : YesOrNo.getValue(applicantDto.getStartAlternative()))
+            .confidentialityList(contactDetailsPrivateList.stream().map(c -> TELEPHONE_FIELD.equals(c)
+                ? ConfidentialityListEnum.phoneNumber
+                : ConfidentialityListEnum.getValue(c)).collect(
+                Collectors.toList()))
             .build();
     }
 }
