@@ -90,12 +90,8 @@ public class CourtNavCaseService {
     }
 
     public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
-
-        String authorisationToken = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(authorisationToken);
-
         CaseEvent caseEvent = CaseEvent.COURTNAV_DOCUMENT_UPLOAD_EVENT_ID;
-        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, authorisation);
 
         log.info("Following case event will be triggered {}", caseEvent.getValue());
 
@@ -104,7 +100,7 @@ public class CourtNavCaseService {
             && checkTypeOfDocument(typeOfDocument)) {
             StartEventResponse startEventResponse =
                 coreCaseDataService.startUpdate(
-                    authorisationToken,
+                    authorisation,
                     eventRequestData,
                     caseId,
                     true
@@ -139,7 +135,7 @@ public class CourtNavCaseService {
             );
 
             coreCaseDataService.submitUpdate(
-                authorisationToken,
+                authorisation,
                 eventRequestData,
                 caseDataContent,
                 caseId,

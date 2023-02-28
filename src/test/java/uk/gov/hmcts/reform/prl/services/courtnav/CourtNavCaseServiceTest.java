@@ -155,13 +155,13 @@ public class CourtNavCaseServiceTest {
             .caseDetails(caseDetails)
             .token(bearerToken).build();
         when(coreCaseDataService.startUpdate(
-            userToken,eventRequestData, String.valueOf(caseData.getId()),true))
+            authToken,eventRequestData, String.valueOf(caseData.getId()),true))
             .thenReturn(startEventResponse);
         when(objectMapper.convertValue(tempCaseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
         when(coreCaseDataService.createCaseDataContent(startEventResponse,caseDataUpdated)).thenReturn(caseDataContent);
-        when(coreCaseDataService.submitUpdate(userToken, eventRequestData, caseDataContent,String.valueOf(caseData.getId()), true))
+        when(coreCaseDataService.submitUpdate(authToken, eventRequestData, caseDataContent,String.valueOf(caseData.getId()), true))
             .thenReturn(caseDetails);
 
 
@@ -175,11 +175,11 @@ public class CourtNavCaseServiceTest {
                                            "1234567891234567"
         );
 
-        verify(coreCaseDataService, Mockito.times(1)).startUpdate(userToken,
+        verify(coreCaseDataService, Mockito.times(1)).startUpdate(authToken,
                                                                   eventRequestData,
                                                                   String.valueOf(caseData.getId()),
                                                                   true);
-        verify(coreCaseDataService, Mockito.times(1)).submitUpdate(userToken,
+        verify(coreCaseDataService, Mockito.times(1)).submitUpdate(authToken,
                                                                    eventRequestData,
                                                                    caseDataContent,
                                                                    String.valueOf(caseData.getId()),
