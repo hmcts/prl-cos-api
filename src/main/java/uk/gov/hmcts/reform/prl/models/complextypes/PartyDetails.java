@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -22,10 +23,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnu
 
 import java.time.LocalDate;
 import java.util.List;
-
+import java.util.UUID;
 
 @Data
 @Builder(toBuilder = true)
+@Slf4j
 @AllArgsConstructor
 public class PartyDetails {
 
@@ -107,4 +109,10 @@ public class PartyDetails {
             this.lastName
         );
     }
+
+    private UUID partyId;
+
+    private UUID solicitorOrgUuid;
+
+    private UUID solicitorPartyId;
 }
