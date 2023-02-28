@@ -92,8 +92,10 @@ public class HearingDataService {
             HearingData hearingData = hearingDataElement.getValue();
             hearingData.getHearingTypes().setListItems(null != hearingTypesDynamicList
                                                            ? hearingTypesDynamicList.getListItems() : null);
-            hearingData.getConfirmedHearingDates().setListItems(null != hearingDatesDynamicList
-                                                                    ? hearingDatesDynamicList.getListItems() : null);
+            if (hearingData.getConfirmedHearingDates() != null) {
+                hearingData.getConfirmedHearingDates().setListItems(null != hearingDatesDynamicList
+                                                                        ? hearingDatesDynamicList.getListItems() : null);
+            }
             hearingData.getHearingChannels().setListItems(null != retrievedHearingChannels
                                                               ? retrievedHearingChannels.getListItems() : null);
             hearingData.getHearingChannelDynamicRadioList().setListItems(null != retrievedRadioHearingChannels
