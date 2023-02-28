@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -71,6 +72,8 @@ public class CaseDataApplicantElementsMapper {
                 .canYouProvidePhoneNumber(applicantDto.getApplicantContactDetail().getCanProvideTelephoneNumber())
                 .email(isNotEmpty(applicantDto.getApplicantContactDetail().getEmailAddress())
                         ? applicantDto.getApplicantContactDetail().getEmailAddress() : null)
+                .contactPreferences(ContactPreferences.fromValue(
+                    applicantDto.getApplicantContactDetail().getApplicantContactPreferences()))
                 .address(buildAddress(applicantDto))
                 .isAtAddressLessThan5Years(applicantDto.getApplicantAddressHistory())
                 .addressLivedLessThan5YearsDetails(applicantDto.getApplicantProvideDetailsOfPreviousAddresses())
