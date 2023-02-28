@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicRadioList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
 import java.time.LocalDateTime;
@@ -32,7 +31,7 @@ public class HearingData {
 
     private final DynamicList hearingChannels;
 
-    private final DynamicRadioList hearingChannelDynamicRadioList;
+    private final DynamicList hearingChannelDynamicRadioList;
 
     private final DynamicList hearingVideoChannels;
 
