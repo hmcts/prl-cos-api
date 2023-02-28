@@ -51,7 +51,6 @@ import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HE
 public class HearingManagementService {
 
     public static final String HEARING_STATE_CHANGE_SUCCESS = "hmcCaseUpdateSuccess";
-    public static final String HEARING_STATE_CHANGE_FAILURE = "hmcCaseUpdateFailure";
 
     public static final String NEXT_HEARING_DATE_UPDATE_SUCCESS = "updateNextHearingDate";
 
@@ -95,7 +94,7 @@ public class HearingManagementService {
             case PREPARE_FOR_HEARING_CONDUCT_HEARING:
                 fields.put("state", PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue());
                 CaseDetails listedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                            fields,HEARING_STATE_CHANGE_FAILURE
+                                                            fields,HEARING_STATE_CHANGE_SUCCESS
                 );
                 updateTabsAfterStateChange(listedCaseDetails.getData(), listedCaseDetails.getId());
                 sendHearingDetailsEmail(caseData, hearingRequest);
@@ -156,8 +155,6 @@ public class HearingManagementService {
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
         allTabService.updateAllTabsIncludingConfTab(caseData);
     }
-
-
 
     private void sendHearingChangeDetailsEmail(CaseData caseData) {
 
