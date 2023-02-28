@@ -65,7 +65,7 @@ public class HearingData {
     @JsonProperty("instructionsForRemoteHearing")
     private final String instructionsForRemoteHearing;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private final List<LocalDateTime> hearingDateTime;
 
     @JsonProperty("hearingEstimatedHours")
