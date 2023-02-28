@@ -4,12 +4,15 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ApplicantDto;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
@@ -78,6 +81,7 @@ public class CaseDataApplicantElementsMapper {
                 .isEmailAddressConfidential(buildConfidentialField(contactDetailsPrivateList, EMAIL_FIELD))
                 .isPhoneNumberConfidential(buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .response(buildApplicantsResponse(applicantDto, contactDetailsPrivateList))
                 .build();
     }
 
@@ -104,4 +108,26 @@ public class CaseDataApplicantElementsMapper {
         return null;
     }
 
+    private static Response buildApplicantsResponse(ApplicantDto applicantDto,
+                                                    List<String> contactDetailsPrivateList) {
+        return Response
+            .builder()
+            .keepDetailsPrivate(buildKeepDetailsPrivate(applicantDto, contactDetailsPrivateList))
+            .build();
+    }
+
+    private static KeepDetailsPrivate buildKeepDetailsPrivate(ApplicantDto applicantDto,
+                                                              List<String> contactDetailsPrivateList) {
+        return KeepDetailsPrivate
+            .builder()
+            .otherPeopleKnowYourContactDetails(YesNoDontKnow.getDisplayedValueIgnoreCase(applicantDto.getDetailsKnown()))
+            .confidentiality(isNotEmpty(applicantDto.getStart())
+                                 ? YesOrNo.getValue(applicantDto.getStart())
+                                 : YesOrNo.getValue(applicantDto.getStartAlternative()))
+            .confidentialityList(contactDetailsPrivateList.stream().map(c -> TELEPHONE_FIELD.equals(c)
+                ? ConfidentialityListEnum.phoneNumber
+                : ConfidentialityListEnum.getValue(c)).collect(
+                Collectors.toList()))
+            .build();
+    }
 }
