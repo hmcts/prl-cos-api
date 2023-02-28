@@ -50,17 +50,6 @@ public class CaseUtils {
         return state != null ? state.getLabel() : "";
     }
 
-    public static Long getRemainingDaysSubmitCase(CaseData caseData) {
-        Long noOfDaysRemaining = null;
-        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
-            && State.AWAITING_SUBMISSION_TO_HMCTS.equals(caseData.getState())) {
-            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-            Long noDaysPassed = Duration.between(caseData.getCreatedDate(), zonedDateTime).toDays();
-            noOfDaysRemaining = PrlAppsConstants.CASE_SUBMISSION_THRESHOLD - noDaysPassed;
-        }
-        return noOfDaysRemaining;
-    }
-
     public static SelectTypeOfOrderEnum getSelectTypeOfOrder(CaseData caseData) {
         SelectTypeOfOrderEnum isFinalOrder = null;
         if (caseData.getSelectTypeOfOrder() != null) {
