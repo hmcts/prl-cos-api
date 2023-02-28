@@ -97,7 +97,17 @@
         "respondentLivedWithApplicant":null,
         "applicantContactInstructions":null,
         "user":null,
-        "response":null,
+        "response":{
+          "keepDetailsPrivate":{
+            "otherPeopleKnowYourContactDetails": "yes",
+            "confidentiality": "Yes",
+            "confidentialityList": [
+              "address",
+              "phoneNumber",
+              "email"
+            ]
+          }
+        },
         "currentRespondent":null,
         "applicantPreferredContact":null
       }
@@ -153,7 +163,13 @@
         "respondentLivedWithApplicant":null,
         "applicantContactInstructions":null,
         "user":null,
-        "response":null,
+        "response":{
+          "keepDetailsPrivate":{
+            "otherPeopleKnowYourContactDetails": "no",
+            "confidentiality": "No",
+            "confidentialityList": []
+          }
+        },
         "currentRespondent":null,
         "applicantPreferredContact":null
       }
