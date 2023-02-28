@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
@@ -55,6 +57,12 @@ public class FL401SubmitApplicationService {
 
     @Autowired
     private ConfidentialityTabService confidentialityTabService;
+
+    @Autowired
+    private SolicitorEmailService solicitorEmailService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public Map<String, Object> fl401GenerateDocumentSubmitApplication(String authorisation,
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
@@ -117,5 +125,24 @@ public class FL401SubmitApplicationService {
 
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
         return caseDataUpdated;
+    }
+
+    public CaseData fl401SendApplicationNotification(String authorisation, CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+
+        try {
+            solicitorEmailService.sendEmailToFl401Solicitor(callbackRequest.getCaseDetails(), userDetails);
+            caseData = caseData.toBuilder()
+                .isNotificationSent("Yes")
+                .build();
+
+        } catch (Exception e) {
+            log.error("Notification could not be sent due to {} ", e.getMessage());
+            caseData = caseData.toBuilder()
+                .isNotificationSent("No")
+                .build();
+        }
+        return caseData;
     }
 }
