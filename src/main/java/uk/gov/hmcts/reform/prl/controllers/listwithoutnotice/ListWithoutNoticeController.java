@@ -221,6 +221,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("****listWithoutNoticeSubmission***** {} ", callbackRequest.toString());
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
