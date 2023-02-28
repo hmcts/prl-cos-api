@@ -76,7 +76,11 @@ public class HearingDataService {
                                                      DynamicList hearingDatesDynamicList, DynamicList retrievedHearingChannels,
                                                      DynamicList retrievedRadioHearingChannels, DynamicList retrievedVideoSubChannels,
                                                      DynamicList retrievedTelephoneSubChannels,DynamicList retrievedCourtLocations,
-                                                     DynamicList hearingListedLinkedCases) {
+                                                     DynamicList hearingListedLinkedCases, DynamicList applicantHearingChannel,
+                                                     DynamicList applicantSolicitorHearingChannel, DynamicList respondentHearingChannel,
+                                                     DynamicList respondentSolicitorHearingChannel,DynamicList cafcassHearingChannel,
+                                                     DynamicList cafcassCymruHearingChannel, DynamicList localAuthorityHearingChannel
+                                                     ) {
         hearingDatas.stream().parallel().forEach(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             hearingData.getHearingTypes().setListItems(null != hearingTypesDynamicList
@@ -95,6 +99,20 @@ public class HearingDataService {
                                                                        ? retrievedCourtLocations.getListItems() : null);
             hearingData.getHearingListedLinkedCases().setListItems(null != hearingListedLinkedCases
                                                         ? hearingListedLinkedCases.getListItems() : null);
+            hearingData.getApplicantHearingChannel().setListItems(null != applicantHearingChannel
+                                                                       ? applicantHearingChannel.getListItems() : null);
+            hearingData.getApplicantSolicitorHearingChannel().setListItems(null != applicantSolicitorHearingChannel
+                                                                       ? applicantSolicitorHearingChannel.getListItems() : null);
+            hearingData.getRespondentHearingChannel().setListItems(null != respondentHearingChannel
+                                                                       ? respondentHearingChannel.getListItems() : null);
+            hearingData.getRespondentSolicitorHearingChannel().setListItems(null != respondentSolicitorHearingChannel
+                                                                       ? respondentSolicitorHearingChannel.getListItems() : null);
+            hearingData.getCafcassHearingChannel().setListItems(null != cafcassHearingChannel
+                                                                       ? cafcassHearingChannel.getListItems() : null);
+            hearingData.getCafcassCymruHearingChannel().setListItems(null != cafcassCymruHearingChannel
+                                                                       ? cafcassCymruHearingChannel.getListItems() : null);
+            hearingData.getLocalAuthorityHearingChannel().setListItems(null != localAuthorityHearingChannel
+                                                                       ? localAuthorityHearingChannel.getListItems() : null);
 
         });
         return hearingDatas;
