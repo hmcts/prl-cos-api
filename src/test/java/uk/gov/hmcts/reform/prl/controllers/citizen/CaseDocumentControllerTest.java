@@ -415,15 +415,12 @@ public class CaseDocumentControllerTest {
             .userToken(userToken)
             .build();
 
-        when(systemUserService.getSysUserToken()).thenReturn(userToken);
-        when(systemUserService.getUserId(userToken)).thenReturn(systemUpdateUserId);
-        when(coreCaseDataService.eventRequest(CaseEvent.CITIZEN_UPLOADED_DOCUMENT, systemUpdateUserId)).thenReturn(eventRequestData);
-
+        when(coreCaseDataService.eventRequest(CaseEvent.CITIZEN_UPLOADED_DOCUMENT, authToken)).thenReturn(eventRequestData);
         StartEventResponse startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails)
             .token(bearerToken).build();
         when(coreCaseDataService.startUpdate(
-            userToken,eventRequestData, String.valueOf(caseData.getId()),false))
+            authToken,eventRequestData, String.valueOf(caseData.getId()),false))
             .thenReturn(startEventResponse);
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
 
@@ -431,7 +428,7 @@ public class CaseDocumentControllerTest {
             .data(stringObjectMap)
             .build();
         Mockito.lenient().when(coreCaseDataService.createCaseDataContent(startEventResponse, any(CaseData.class))).thenReturn(caseDataContent);
-        Mockito.lenient().when(coreCaseDataService.submitUpdate(userToken, eventRequestData, caseDataContent,String.valueOf(caseData.getId()), true))
+        Mockito.lenient().when(coreCaseDataService.submitUpdate(authToken, eventRequestData, caseDataContent,String.valueOf(caseData.getId()), true))
             .thenReturn(caseDetails);
 
         ResponseEntity responseEntity = caseDocumentController.uploadCitizenStatementDocument(authToken,s2sToken,uploadedDocumentRequest);

@@ -58,18 +58,16 @@ public class CitizenCoreCaseDataService {
     CoreCaseDataService coreCaseDataService;
 
     public CaseDetails linkDefendant(
+        String anonymousUserToken,
         Long caseId,
         CaseEvent caseEvent
     ) {
         try {
-            String userToken = systemUserService.getSysUserToken();
-            String systemUpdateUserId = systemUserService.getUserId(userToken);
-
-            EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
-
+            UserDetails userDetails = idamClient.getUserDetails(anonymousUserToken);
+            EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, userDetails.getId());
             StartEventResponse startEventResponse =
                 coreCaseDataService.startUpdate(
-                    userToken,
+                    anonymousUserToken,
                     eventRequestData,
                     String.valueOf(caseId),
                     true
@@ -82,7 +80,7 @@ public class CitizenCoreCaseDataService {
             );
 
             return coreCaseDataService.submitUpdate(
-                userToken,
+                anonymousUserToken,
                 eventRequestData,
                 caseDataContent,
                 String.valueOf(caseId),
@@ -123,18 +121,17 @@ public class CitizenCoreCaseDataService {
     }
 
     public CaseDetails updateCase(
+        String authorisation,
         Long caseId,
         CaseEvent caseEvent
     ) {
         try {
-            String userToken = systemUserService.getSysUserToken();
-            String systemUpdateUserId = systemUserService.getUserId(userToken);
-
-            EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
+            UserDetails userDetails = idamClient.getUserDetails(authorisation);
+            EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, userDetails.getId());
 
             StartEventResponse startEventResponse =
                 coreCaseDataService.startUpdate(
-                    userToken,
+                    authorisation,
                     eventRequestData,
                     String.valueOf(caseId),
                     true
@@ -147,7 +144,7 @@ public class CitizenCoreCaseDataService {
             );
 
             return coreCaseDataService.submitUpdate(
-                userToken,
+                authorisation,
                 eventRequestData,
                 caseDataContent,
                 String.valueOf(caseId),

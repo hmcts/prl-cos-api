@@ -252,15 +252,13 @@ public class CaseDocumentController {
 
         String caseId = uploadedDocumentRequest.getCaseId();
 
-        String userToken = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(userToken);
         CaseEvent caseEvent = CaseEvent.CITIZEN_UPLOADED_DOCUMENT;
 
-        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, authorisation);
 
         StartEventResponse startEventResponse =
             coreCaseDataService.startUpdate(
-                userToken,
+                authorisation,
                 eventRequestData,
                 caseId,
                 false
@@ -293,7 +291,7 @@ public class CaseDocumentController {
             );
 
             coreCaseDataService.submitUpdate(
-                userToken,
+                authorisation,
                 eventRequestData,
                 caseDataContent,
                 caseId,

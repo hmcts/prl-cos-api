@@ -22,7 +22,7 @@ public class CcdCaseRepository implements CaseRepository {
 
     @Override
     public CaseDetails updateCase(String authorisation, String caseId, CaseData caseData, CaseEvent caseEvent) {
-        return ccdCaseApi.updateCase(caseId, caseEvent);
+        return ccdCaseApi.updateCase(authorisation, caseId, caseEvent);
     }
 
     @Override

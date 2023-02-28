@@ -112,7 +112,11 @@ public class CitizenCoreCaseDataServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         when(systemUserService.getUserId(userToken)).thenReturn(systemUpdateUserId);
-        when(coreCaseDataService.eventRequest(CaseEvent.LINK_CITIZEN, systemUpdateUserId)).thenReturn(eventRequestData);
+
+        UserDetails userDetails  = UserDetails.builder()
+            .id("testUser").roles(Arrays.asList(CITIZEN_ROLE)).build();
+        when(idamClient.getUserDetails(bearerToken)).thenReturn(userDetails);
+        when(coreCaseDataService.eventRequest(CaseEvent.LINK_CITIZEN, userDetails.getId())).thenReturn(eventRequestData);
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
@@ -126,14 +130,14 @@ public class CitizenCoreCaseDataServiceTest {
             .caseDetails(caseDetails)
             .token(bearerToken).build();
         when(coreCaseDataService.startUpdate(
-            userToken,eventRequestData, String.valueOf(caseData.getId()),true))
+            bearerToken,eventRequestData, String.valueOf(caseData.getId()),true))
             .thenReturn(startEventResponse);
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
         when(coreCaseDataService.createCaseDataContent(startEventResponse,caseDataUpdated)).thenReturn(caseDataContent);
-        when(coreCaseDataService.submitUpdate(userToken, eventRequestData, caseDataContent,String.valueOf(caseData.getId()), true))
+        when(coreCaseDataService.submitUpdate(bearerToken, eventRequestData, caseDataContent,String.valueOf(caseData.getId()), true))
             .thenReturn(caseDetails);
 
-        CaseDetails updatedDetails = citizenCoreCaseDataService.linkDefendant(caseData.getId(), CaseEvent.LINK_CITIZEN);
+        CaseDetails updatedDetails = citizenCoreCaseDataService.linkDefendant(bearerToken,caseData.getId(), CaseEvent.LINK_CITIZEN);
 
         Assert.assertEquals(caseDetails,updatedDetails);
     }
@@ -143,14 +147,11 @@ public class CitizenCoreCaseDataServiceTest {
 
         bearerToken = "Bearer token";
 
-        citizenCoreCaseDataService.linkDefendant(12345L, CaseEvent.LINK_CITIZEN);
+        citizenCoreCaseDataService.linkDefendant(bearerToken,12345L, CaseEvent.LINK_CITIZEN);
     }
 
     @Test
     public void citizenCoreCaseShouldBeUpdated() {
-        UserDetails userDetails  = UserDetails.builder()
-            .id("testUser").roles(Arrays.asList(CITIZEN_ROLE)).build();
-
         bearerToken = "Bearer token";
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id","12345L");
@@ -187,7 +188,11 @@ public class CitizenCoreCaseDataServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         when(systemUserService.getUserId(userToken)).thenReturn(systemUpdateUserId);
-        when(coreCaseDataService.eventRequest(CaseEvent.LINK_CITIZEN, systemUpdateUserId)).thenReturn(eventRequestData);
+
+        UserDetails userDetails  = UserDetails.builder()
+            .id("testUser").roles(Arrays.asList(CITIZEN_ROLE)).build();
+        when(idamClient.getUserDetails(bearerToken)).thenReturn(userDetails);
+        when(coreCaseDataService.eventRequest(CaseEvent.LINK_CITIZEN, userDetails.getId())).thenReturn(eventRequestData);
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
@@ -201,14 +206,14 @@ public class CitizenCoreCaseDataServiceTest {
             .caseDetails(caseDetails)
             .token(bearerToken).build();
         when(coreCaseDataService.startUpdate(
-            userToken,eventRequestData, String.valueOf(caseData.getId()),true))
+            bearerToken,eventRequestData, String.valueOf(caseData.getId()),true))
             .thenReturn(startEventResponse);
         CaseData caseDataUpdated = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
         when(coreCaseDataService.createCaseDataContent(startEventResponse,caseDataUpdated)).thenReturn(caseDataContent);
-        when(coreCaseDataService.submitUpdate(userToken, eventRequestData, caseDataContent,String.valueOf(caseData.getId()), true))
+        when(coreCaseDataService.submitUpdate(bearerToken, eventRequestData, caseDataContent,String.valueOf(caseData.getId()), true))
             .thenReturn(caseDetails);
 
-        CaseDetails updatedDetails = citizenCoreCaseDataService.updateCase(12345L, CaseEvent.LINK_CITIZEN);
+        CaseDetails updatedDetails = citizenCoreCaseDataService.updateCase(bearerToken, 12345L, CaseEvent.LINK_CITIZEN);
 
         Assert.assertEquals(caseDetails,updatedDetails);
     }
@@ -218,7 +223,7 @@ public class CitizenCoreCaseDataServiceTest {
 
         bearerToken = "Bearer token";
 
-        citizenCoreCaseDataService.updateCase(12345L, CaseEvent.LINK_CITIZEN);
+        citizenCoreCaseDataService.updateCase(bearerToken,12345L, CaseEvent.LINK_CITIZEN);
     }
 
     @Test
