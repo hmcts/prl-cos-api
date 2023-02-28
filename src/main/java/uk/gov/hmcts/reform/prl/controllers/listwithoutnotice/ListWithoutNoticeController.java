@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicRadioList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
@@ -66,7 +65,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
 
     private DynamicList retrievedHearingChannels = null;
 
-    private DynamicRadioList retrievedRadioHearingChannels = null;
+    private DynamicList retrievedRadioHearingChannels = null;
 
     private DynamicList retrievedVideoSubChannels = null;
 
@@ -107,7 +106,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                 .listItems(populateHearingChannel.get(HEARINGCHANNEL)).build();
             List<DynamicListElement> radioChannels = populateHearingChannel.get(HEARINGCHANNEL);
             radioChannels.remove(DynamicListElement.builder().code(SUBCHANNELNAKEY).label(SUBCHANNELNAVALUE).build());
-            retrievedRadioHearingChannels = DynamicRadioList.builder()
+            retrievedRadioHearingChannels = DynamicList.builder()
                 .value(DynamicListElement.EMPTY)
                 .listItems(radioChannels).build();
             retrievedVideoSubChannels = DynamicList.builder()

@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicRadioList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
@@ -75,7 +74,7 @@ public class HearingDataService {
 
     public List<Element<HearingData>> mapHearingData(List<Element<HearingData>> hearingDatas, DynamicList hearingTypesDynamicList,
                                                      DynamicList hearingDatesDynamicList, DynamicList retrievedHearingChannels,
-                                                     DynamicRadioList retrievedRadioHearingChannels, DynamicList retrievedVideoSubChannels,
+                                                     DynamicList retrievedRadioHearingChannels, DynamicList retrievedVideoSubChannels,
                                                      DynamicList retrievedTelephoneSubChannels,DynamicList retrievedCourtLocations,
                                                      DynamicList hearingListedLinkedCases) {
         hearingDatas.stream().parallel().forEach(hearingDataElement -> {
