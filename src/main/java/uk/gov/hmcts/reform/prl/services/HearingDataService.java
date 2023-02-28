@@ -12,12 +12,16 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.time.LocalDateTime;
@@ -57,6 +61,9 @@ public class HearingDataService {
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    AllocatedJudgeService allocatedJudgeService;
+
     public List<DynamicListElement> prePopulateHearingType(String authorisation) {
         try {
             log.info("Prepopulate HearingType call in HearingDataService");
@@ -75,54 +82,72 @@ public class HearingDataService {
     public List<Element<HearingData>> mapHearingData(List<Element<HearingData>> hearingDatas, DynamicList hearingTypesDynamicList,
                                                      DynamicList hearingDatesDynamicList, DynamicList retrievedHearingChannels,
                                                      DynamicList retrievedRadioHearingChannels, DynamicList retrievedVideoSubChannels,
-                                                     DynamicList retrievedTelephoneSubChannels,DynamicList retrievedCourtLocations,
+                                                     DynamicList retrievedTelephoneSubChannels, DynamicList retrievedCourtLocations,
                                                      DynamicList hearingListedLinkedCases, DynamicList applicantHearingChannel,
                                                      DynamicList applicantSolicitorHearingChannel, DynamicList respondentHearingChannel,
-                                                     DynamicList respondentSolicitorHearingChannel,DynamicList cafcassHearingChannel,
+                                                     DynamicList respondentSolicitorHearingChannel, DynamicList cafcassHearingChannel,
                                                      DynamicList cafcassCymruHearingChannel, DynamicList localAuthorityHearingChannel
-                                                     ) {
+    ) {
         hearingDatas.stream().parallel().forEach(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             hearingData.getHearingTypes().setListItems(null != hearingTypesDynamicList
-                                                                             ? hearingTypesDynamicList.getListItems() : null);
+                                                           ? hearingTypesDynamicList.getListItems() : null);
             hearingData.getConfirmedHearingDates().setListItems(null != hearingDatesDynamicList
                                                                     ? hearingDatesDynamicList.getListItems() : null);
             hearingData.getHearingChannels().setListItems(null != retrievedHearingChannels
-                                                                    ? retrievedHearingChannels.getListItems() : null);
+                                                              ? retrievedHearingChannels.getListItems() : null);
             hearingData.getHearingChannelDynamicRadioList().setListItems(null != retrievedRadioHearingChannels
-                                                              ? retrievedRadioHearingChannels.getListItems() : null);
+                                                                             ? retrievedRadioHearingChannels.getListItems() : null);
             hearingData.getHearingVideoChannels().setListItems(null != retrievedVideoSubChannels
-                                                                    ? retrievedVideoSubChannels.getListItems() : null);
+                                                                   ? retrievedVideoSubChannels.getListItems() : null);
             hearingData.getHearingTelephoneChannels().setListItems(null != retrievedTelephoneSubChannels
-                                                                    ? retrievedTelephoneSubChannels.getListItems() : null);
+                                                                       ? retrievedTelephoneSubChannels.getListItems() : null);
             hearingData.getCourtList().setListItems(null != retrievedCourtLocations
-                                                                       ? retrievedCourtLocations.getListItems() : null);
+                                                        ? retrievedCourtLocations.getListItems() : null);
             hearingData.getHearingListedLinkedCases().setListItems(null != hearingListedLinkedCases
-                                                        ? hearingListedLinkedCases.getListItems() : null);
+                                                                       ? hearingListedLinkedCases.getListItems() : null);
             hearingData.getApplicantHearingChannel().setListItems(null != applicantHearingChannel
-                                                                       ? applicantHearingChannel.getListItems() : null);
+                                                                      ? applicantHearingChannel.getListItems() : null);
             hearingData.getApplicantSolicitorHearingChannel().setListItems(null != applicantSolicitorHearingChannel
-                                                                       ? applicantSolicitorHearingChannel.getListItems() : null);
+                                                                               ? applicantSolicitorHearingChannel.getListItems() : null);
             hearingData.getRespondentHearingChannel().setListItems(null != respondentHearingChannel
                                                                        ? respondentHearingChannel.getListItems() : null);
             hearingData.getRespondentSolicitorHearingChannel().setListItems(null != respondentSolicitorHearingChannel
-                                                                       ? respondentSolicitorHearingChannel.getListItems() : null);
+                                                                                ? respondentSolicitorHearingChannel.getListItems() : null);
             hearingData.getCafcassHearingChannel().setListItems(null != cafcassHearingChannel
-                                                                       ? cafcassHearingChannel.getListItems() : null);
+                                                                    ? cafcassHearingChannel.getListItems() : null);
             hearingData.getCafcassCymruHearingChannel().setListItems(null != cafcassCymruHearingChannel
-                                                                       ? cafcassCymruHearingChannel.getListItems() : null);
+                                                                         ? cafcassCymruHearingChannel.getListItems() : null);
             hearingData.getLocalAuthorityHearingChannel().setListItems(null != localAuthorityHearingChannel
-                                                                       ? localAuthorityHearingChannel.getListItems() : null);
+                                                                           ? localAuthorityHearingChannel.getListItems() : null);
+            if (hearingData.getHearingJudgeNameAndEmail() != null) {
+                List<JudicialUsersApiResponse> judgeResponse = judgeMapping(hearingData.getHearingJudgeNameAndEmail());
+                if (null != judgeResponse) {
+                    hearingData.toBuilder().hearingJudgeLastName(judgeResponse.get(0).getSurname())
+                        .hearingJudgeEmailAddress(judgeResponse.get(0).getEmailId())
+                        .hearingJudgePersonalCode(judgeResponse.get(0).getPersonalCode()).build();
+                }
+            }
+
 
         });
         return hearingDatas;
     }
 
-    public   List<DynamicListElement> getHearingStartDate(String authorization,CaseData caseData) {
+    private List<JudicialUsersApiResponse> judgeMapping(JudicialUser hearingJudgeNameAndEmail) {
+
+        String[] judgePersonalCode = allocatedJudgeService.getPersonalCode(hearingJudgeNameAndEmail);
+        return refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
+                                                                .personalCode(judgePersonalCode).build());
+
+    }
+
+
+    public List<DynamicListElement> getHearingStartDate(String authorization, CaseData caseData) {
         try {
-            String caseReferenceNumber =  String.valueOf(caseData.getId());
+            String caseReferenceNumber = String.valueOf(caseData.getId());
             Hearings hearingDetails = hearingService.getHearings(authorization, caseReferenceNumber);
-            log.info("Hearing Details from hmc for the case id:{}",caseReferenceNumber);
+            log.info("Hearing Details from hmc for the case id:{}", caseReferenceNumber);
             if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
                 return hearingDetails.getCaseHearings().stream()
                     .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus()))
@@ -136,12 +161,14 @@ public class HearingDataService {
             log.error("List of Hearing Start Date Values look up failed - " + e.getMessage(), e);
         }
         //TODO: need to ensure this hardcoded values has to be removed while merging into release branch. Its added to test in preview/aat environment
-        return List.of(DynamicListElement.builder().code(String.valueOf(LocalDateTime.now())).label(String.valueOf(LocalDateTime.now())).build());
+        return List.of(DynamicListElement.builder().code(String.valueOf(LocalDateTime.now())).label(String.valueOf(
+            LocalDateTime.now())).build());
     }
 
     private DynamicListElement displayEntry(HearingDaySchedule hearingDaySchedule) {
         LocalDateTime hearingStartDateTime = hearingDaySchedule.getHearingStartDateTime();
-        return DynamicListElement.builder().code(String.valueOf(hearingStartDateTime)).label(String.valueOf(hearingStartDateTime)).build();
+        return DynamicListElement.builder().code(String.valueOf(hearingStartDateTime)).label(String.valueOf(
+            hearingStartDateTime)).build();
     }
 
 
@@ -155,12 +182,12 @@ public class HearingDataService {
             );
             Map<String, List<DynamicListElement>> values = new HashMap<>();
             values.put(HEARINGCHANNEL, refDataUserService.filterCategoryValuesByCategoryId(
-                commonDataResponse,HEARINGCHANNEL));
-            values.put(VIDEOSUBCHANNELS,refDataUserService.filterCategorySubValuesByCategoryId(
-                commonDataResponse,VIDEOPLATFORM));
-            values.put(TELEPHONESUBCHANNELS,refDataUserService.filterCategorySubValuesByCategoryId(
-                commonDataResponse,TELEPHONEPLATFORM));
-            log.info("***Hearing Channels***",values);
+                commonDataResponse, HEARINGCHANNEL));
+            values.put(VIDEOSUBCHANNELS, refDataUserService.filterCategorySubValuesByCategoryId(
+                commonDataResponse, VIDEOPLATFORM));
+            values.put(TELEPHONESUBCHANNELS, refDataUserService.filterCategorySubValuesByCategoryId(
+                commonDataResponse, TELEPHONEPLATFORM));
+            log.info("***Hearing Channels***", values);
             return values;
         } catch (Exception e) {
             log.error("Category Values look up failed - " + e.getMessage(), e);
@@ -171,9 +198,10 @@ public class HearingDataService {
 
     public List<DynamicListElement> getLinkedCase(String authorisation, String caseId) {
         try {
-            log.info("Case Id {} for the linked case ",caseId);
+            log.info("Case Id {} for the linked case ", caseId);
             CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, authTokenGenerator.generate(),
-                                                              caseId);
+                                                              caseId
+            );
             return linkedCase(caseDetails);
 
         } catch (Exception e) {
@@ -184,7 +212,7 @@ public class HearingDataService {
     }
 
     private List<DynamicListElement> linkedCase(CaseDetails caseDetails) {
-        log.info("Linked case method ",caseDetails.getId());
+        log.info("Linked case method ", caseDetails.getId());
         CaseData caseData = getCaseData(caseDetails, objectMapper);
         List<CaseLinksElement<CaseLink>> caseLinkDataList = caseData.getCaseLinks();
         if (caseLinkDataList != null) {

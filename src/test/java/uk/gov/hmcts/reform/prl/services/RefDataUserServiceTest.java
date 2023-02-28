@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategorySubValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
@@ -27,6 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_N;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGALOFFICE;
@@ -34,6 +36,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFORDERASC;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFSORTCOLUMN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
 
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -219,6 +222,67 @@ public class RefDataUserServiceTest {
         assertNotNull(commonResponse);
         assertEquals(commonResponse.getCategoryValues().get(0).getKey(),"ONPPRS");
         assertEquals(commonResponse.getCategoryValues().get(0).getValueEn(),"On the Papers");
+    }
+
+    @Test
+    public void testFilterCategoryValuesByCategoryId() {
+
+        List<CategoryValues> listOfCategoryValues = new ArrayList<>();
+        CategoryValues categoryValues1 = CategoryValues.builder().categoryKey(HEARINGTYPE).key("ONPPRS").valueEn("On the Papers").build();
+        CategoryValues categoryValues2 = CategoryValues.builder().categoryKey(HEARINGTYPE).key("INTER").valueEn("IN Person").build();
+        listOfCategoryValues.add(categoryValues1);
+        listOfCategoryValues.add(categoryValues2);
+        CommonDataResponse commonDataResponse =  CommonDataResponse.builder().categoryValues(listOfCategoryValues).build();
+        List<DynamicListElement> expectedResponse = refDataUserService.filterCategoryValuesByCategoryId(
+            commonDataResponse,
+            HEARINGTYPE);
+        assertEquals(expectedResponse.get(0).getCode(),"ONPPRS");
+        assertEquals(expectedResponse.get(0).getLabel(),"On the Papers");
+
+    }
+
+    @Test
+    public void testFilterCategoryValuesByNullResponse() {
+        List<DynamicListElement> expectedResponse = refDataUserService.filterCategoryValuesByCategoryId(
+            null,
+            HEARINGTYPE);
+        assertEquals(expectedResponse.get(0).getCode(),null);
+        assertEquals(expectedResponse.get(0).getLabel(),null);
+
+    }
+
+    @Test
+    public void testFilterSubCategoryValuesByCategoryId() {
+        CategorySubValues value1 = CategorySubValues.builder().categoryKey("HearingSubChannel").key("VIDOTHER").valueEn("Video - Other").build();
+        CategorySubValues value2 = CategorySubValues.builder().categoryKey("HearingSubChannel").key("VIDCVP").valueEn("Video - CVP").build();
+        CategorySubValues value3 = CategorySubValues.builder().categoryKey("HearingSubChannel").key("VIDPVL").valueEn("Prison Video").build();
+        CategorySubValues value4 = CategorySubValues.builder().categoryKey("HearingSubChannel").key("VIDSKYPE").valueEn("Video - Skype").build();
+        List<CategorySubValues> listOfCategorySubValues = new ArrayList<>();
+        listOfCategorySubValues.add(value1);
+        listOfCategorySubValues.add(value2);
+        listOfCategorySubValues.add(value3);
+        listOfCategorySubValues.add(value4);
+        List<CategoryValues> listOfCategoryValues = new ArrayList<>();
+        CategoryValues categoryValues1 = CategoryValues.builder().categoryKey(HEARINGCHANNEL).key("ONPPRS").valueEn("Video")
+            .childNodes(listOfCategorySubValues).build();
+        listOfCategoryValues.add(categoryValues1);
+        CommonDataResponse commonDataResponse =  CommonDataResponse.builder().categoryValues(listOfCategoryValues).build();
+        List<DynamicListElement> expectedResponse = refDataUserService.filterCategorySubValuesByCategoryId(
+            commonDataResponse,
+            VIDEOPLATFORM);
+        assertEquals(expectedResponse.get(0).getCode(),"VIDOTHER");
+        assertEquals(expectedResponse.get(0).getLabel(),"Video - Other");
+
+    }
+
+    @Test
+    public void testFilterCategorySubValuesByNullResponse() {
+        List<DynamicListElement> expectedResponse = refDataUserService.filterCategorySubValuesByCategoryId(
+            null,
+            VIDEOPLATFORM);
+        assertEquals(expectedResponse.get(0).getCode(),null);
+        assertEquals(expectedResponse.get(0).getLabel(),null);
+
     }
 
 
