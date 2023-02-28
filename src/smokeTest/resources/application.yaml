@@ -406,20 +406,6 @@ springdoc:
       enabled: true
     polymorphic-converter:
       enabled: true
-bundle:
-  api:
-    url: ${BUNDLE_URL:}
-  english:
-    config: ${BUNDLE_ENGLISH_CONFIG:prl-bundle-config.yaml}
-  welsh:
-    config: ${BUNDLE_WELSH_CONFIG:prl-bundle-config.yaml}
-
-courts:
-  filter: ${COURT_IDS_TO_FILTER:}
-
-fis_hearing:
-  api:
-    url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
 
 postcodelookup:
   api:
@@ -436,3 +422,19 @@ ccd:
   elastic-search-api:
     result-size: 100
     boost: 2.0
+
+bundle:
+  api:
+    url: ${BUNDLE_URL:}
+  english:
+    config: ${BUNDLE_ENGLISH_CONFIG:prl-bundle-config.yaml}
+  welsh:
+    config: ${BUNDLE_WELSH_CONFIG:prl-bundle-config.yaml}
+
+courts:
+  filter: ${COURT_IDS_TO_FILTER:}
+
+fis_hearing:
+  api:
+    url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
+
