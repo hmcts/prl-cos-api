@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 @Data
@@ -31,4 +32,8 @@ public class ApplicantDto {
     private String applicantAddressCounty;
     private YesOrNo applicantAddressHistory;
     private String applicantProvideDetailsOfPreviousAddresses;
+
+    private String detailsKnown;
+    private String start;
+    private String startAlternative;
 }
