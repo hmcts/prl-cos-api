@@ -53,9 +53,6 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     @Autowired
     AllocatedJudgeService allocatedJudgeService;
 
-    private HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists = null;
-
-
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate Hearing page details")
     public AboutToStartOrSubmitCallbackResponse prePopulateHearingPageData(
@@ -65,12 +62,8 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
-        if (null != hearingDataPrePopulatedDynamicLists) {
-            log.info("Inside null check for  hearingDataPrePopulatedDynamicLists for the case id {} {}",
-                caseReferenceNumber,hearingDataPrePopulatedDynamicLists);
-        } else {
-            hearingDataPrePopulatedDynamicLists = hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-        }
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseDataUpdated.containsKey(LISTWITHOUTNOTICE_HEARINGDETAILS)) {
             caseDataUpdated.put(
