@@ -82,8 +82,11 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = manageOrderService.populatePreviewOrder(authorisation, callbackRequest, caseData);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.populatePreviewOrder(
+            authorisation,
+            callbackRequest,
+            caseData
+        )).build();
 
     }
 
@@ -276,7 +279,6 @@ public class ManageOrdersController {
     ) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("/manage-orders/add-upload-order before caseData ===> " + callbackRequest);
         if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
             if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
@@ -326,7 +328,6 @@ public class ManageOrdersController {
         if (caseDetails.getData().containsKey(IS_THE_ORDER_ABOUT_ALL_CHILDREN) && caseDetails.getData().get(
             IS_THE_ORDER_ABOUT_ALL_CHILDREN) != null && !caseDetails.getData().get(
             IS_THE_ORDER_ABOUT_ALL_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
-            log.info("inside isTheOrderAboutAllChildren =====> " + caseDetails.getData().get(CHILD_OPTION));
             caseDetails.getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
                 .listItems(List.of(DynamicMultiselectListElement.EMPTY)).build());
         }

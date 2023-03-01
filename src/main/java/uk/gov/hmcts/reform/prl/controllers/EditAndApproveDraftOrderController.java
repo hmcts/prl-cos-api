@@ -69,8 +69,6 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("before entering into populateDraftOrderDocument...");
-        log.info("isCAfcass inside /judge-or-admin-populate-draft-order {}", caseData.getIsCafcass());
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(draftAnOrderService.populateDraftOrderDocument(
                 caseData)).build();
@@ -83,11 +81,10 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        Map<String, Object> caseDataUpdated = draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
+        return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
             authorisation,
             callbackRequest
-        );
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        )).build();
     }
 
 
@@ -101,13 +98,11 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse saveServeOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-
-        Map<String, Object> caseDataUpdated = draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
-            authorisation,
-            callbackRequest
-        );
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated).build();
+            .data(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
+                authorisation,
+                callbackRequest
+            )).build();
 
     }
 

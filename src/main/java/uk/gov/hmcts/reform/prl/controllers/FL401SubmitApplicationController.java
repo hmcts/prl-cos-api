@@ -17,39 +17,22 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
+import uk.gov.hmcts.reform.prl.services.FL401SubmitApplicationService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 
 @Slf4j
 @RestController
@@ -61,13 +44,7 @@ public class FL401SubmitApplicationController {
     private UserService userService;
 
     @Autowired
-    private AllTabServiceImpl allTabService;
-
-    @Autowired
     private SolicitorEmailService solicitorEmailService;
-
-    @Autowired
-    private CaseWorkerEmailService caseWorkerEmailService;
 
     @Autowired
     private FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
@@ -76,11 +53,11 @@ public class FL401SubmitApplicationController {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private DocumentGenService documentGenService;
-
+    LocationRefDataService locationRefDataService;
 
     @Autowired
-    LocationRefDataService locationRefDataService;
+    private final FL401SubmitApplicationService fl401SubmitApplicationService;
+
 
     @Autowired
     private ConfidentialityTabService confidentialityTabService;
@@ -91,8 +68,8 @@ public class FL401SubmitApplicationController {
         @ApiResponse(responseCode = "200", description = "Application Submitted."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse fl401SubmitApplicationValidation(@RequestHeader("Authorization") @Parameter(hidden = true)
-                                                                     String authorisation,
-                                                             @RequestBody CallbackRequest callbackRequest) {
+                                                                                 String authorisation,
+                                                                                 @RequestBody CallbackRequest callbackRequest) {
 
         List<String> errorList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -123,55 +100,12 @@ public class FL401SubmitApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        caseData = caseData.toBuilder()
-            .solicitorName(userService.getUserDetails(authorisation).getFullName())
-            .build();
-
-        final LocalDate localDate = LocalDate.now();
-
-        String[] idEmail = caseData.getSubmitCountyCourtSelection().getValue().getCode().split(":");
-        String baseLocationId = Arrays.stream(idEmail).toArray()[0].toString();
-        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
-            baseLocationId,
-            authorisation
-        );
-        caseData = caseData.toBuilder().issueDate(localDate)
-            .isCourtEmailFound("Yes").build();
-        caseData = caseData.toBuilder().isCourtEmailFound("Yes").build();
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
-        caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
-        caseDataUpdated.putAll(CaseUtils.getCourtEmail(idEmail, caseTypeOfApplication));
-
-        Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
-        if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
-            && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
-            caseData = caseData.toBuilder().build();
-        } else  if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
-            caseData = caseData.toBuilder()
-                .respondentBehaviourData(null)
-                .build();
-        } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
-            caseData = caseData.toBuilder()
-                .home(null)
-                .build();
-        }
-        caseData = caseData.setDateSubmittedDate();
-
-        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
-
-        caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
-
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-
-        caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
-        caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
-
-
-        caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated)
+            .data(fl401SubmitApplicationService.fl401GenerateDocumentSubmitApplication(
+                authorisation,
+                callbackRequest,
+                caseData
+            ))
             .build();
     }
 
@@ -181,31 +115,11 @@ public class FL401SubmitApplicationController {
         @ApiResponse(responseCode = "200", description = "Application Submitted."),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public CallbackResponse fl401SendApplicationNotification(@RequestHeader("Authorization")
-                                                                 @Parameter(hidden = true)  String authorisation,
-                                                                   @RequestBody CallbackRequest callbackRequest) {
-
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        log.info("*CaseDatra at fl401 submit {}", caseData);
-        try {
-            solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
-            if (null != caseData.getCourtEmailAddress()) {
-                caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
-            }
-            caseData = caseData.toBuilder()
-                .isNotificationSent("Yes")
-                .build();
-
-        } catch (Exception e) {
-            log.error("Notification could not be sent due to {} ", e.getMessage());
-            caseData = caseData.toBuilder()
-                .isNotificationSent("No")
-                .build();
-        }
+                                                             @Parameter(hidden = true)  String authorisation,
+                                                             @RequestBody CallbackRequest callbackRequest) {
 
         return CallbackResponse.builder()
-            .data(caseData)
+            .data(fl401SubmitApplicationService.fl401SendApplicationNotification(authorisation, callbackRequest))
             .build();
     }
 }

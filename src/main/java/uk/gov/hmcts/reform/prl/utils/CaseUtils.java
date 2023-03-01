@@ -8,9 +8,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
-import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -18,14 +16,10 @@ import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 
@@ -108,27 +102,11 @@ public class CaseUtils {
             caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
                 .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
+            caseDataMap.put(PrlAppsConstants.IS_CAFCASS, CaseUtils.cafcassFlag(regionId));
             caseDataMap.put(COURT_NAME_FIELD, courtName);
             caseDataMap.put(COURT_ID_FIELD, baseLocationId);
 
         }
-        return caseDataMap;
-    }
-
-    public static Map<String, Object> getCourtEmail(String[] idEmail, String caseTypeOfApplication) {
-        String courtEmail = "";
-        Map<String, Object> caseDataMap = new HashMap<>();
-        if (idEmail.length > 1) {
-            courtEmail = Arrays.stream(idEmail).toArray()[1].toString();
-        }
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
-            caseDataMap.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
-                                                               .value(LocalCourtAdminEmail.builder().email(courtEmail)
-                                                                          .build()).build()));
-        } else {
-            caseDataMap.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
-        }
-
         return caseDataMap;
     }
 
