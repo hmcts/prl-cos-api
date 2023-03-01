@@ -359,4 +359,5 @@ public class PrlAppsConstants {
     public static final String VIDEOSUBCHANNELS = "videoSubChannels";
     public static final String TELEPHONESUBCHANNELS = "telephoneSubChannels";
 
+    public static final String LISTWITHOUTNOTICE_HEARINGDETAILS = "listWithoutNoticeHearingDetails";
 }

@@ -67,13 +67,13 @@ public class HearingData {
     private final List<LocalDateTime> hearingDateTime;
 
     @JsonProperty("hearingEstimatedHours")
-    private final String hearingEstimatedHours;
+    private final int hearingEstimatedHours;
 
     @JsonProperty("hearingEstimatedMinutes")
-    private final String hearingEstimatedMinutes;
+    private final int hearingEstimatedMinutes;
 
     @JsonProperty("hearingEstimatedDays")
-    private final String  hearingEstimatedDays;
+    private final int  hearingEstimatedDays;
 
     @JsonProperty("allPartiesAttendHearingSameWayYesOrNo")
     private final YesOrNo allPartiesAttendHearingSameWayYesOrNo;
@@ -93,6 +93,8 @@ public class HearingData {
 
     @JsonProperty("hearingJudgeEmailAddress")
     private final String hearingJudgeEmailAddress;
+
+    private final String mainApplicantName;
 
 
 }

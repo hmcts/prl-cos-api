@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.CaseLinksElement;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
@@ -53,6 +55,12 @@ public class HearingDataService {
     HearingService hearingService;
 
     @Autowired
+    LocationRefDataService locationRefDataService;
+
+    @Autowired
+    HearingDataService hearingDataService;
+
+    @Autowired
     CoreCaseDataApi coreCaseDataApi;
 
     @Autowired
@@ -63,6 +71,21 @@ public class HearingDataService {
 
     @Autowired
     AllocatedJudgeService allocatedJudgeService;
+
+    @Autowired
+    HearingRequestDataMapper hearingRequestDataMapper;
+
+    public HearingDataPrePopulatedDynamicLists populateHearingDynamicLists(String authorisation, String caseReferenceNumber, CaseData caseData) {
+        Map<String, List<DynamicListElement>> hearingChannelsDetails = prePopulateHearingChannel(authorisation);
+        return HearingDataPrePopulatedDynamicLists.builder().retrievedHearingTypes(getDynamicList(prePopulateHearingType(authorisation)))
+            .retrievedHearingDates(getDynamicList(getHearingStartDate(authorisation, caseData)))
+            .retrievedHearingChannels(getDynamicList(hearingChannelsDetails.get(HEARINGCHANNEL)))
+            .retrievedVideoSubChannels(getDynamicList(hearingChannelsDetails.get(VIDEOSUBCHANNELS)))
+            .retrievedTelephoneSubChannels(getDynamicList(hearingChannelsDetails.get(TELEPHONESUBCHANNELS)))
+            .retrievedCourtLocations(getDynamicList(locationRefDataService.getCourtLocations(authorisation)))
+            .hearingListedLinkedCases(getDynamicList(hearingDataService.getLinkedCase(authorisation, caseReferenceNumber)))
+            .build();
+    }
 
     public List<DynamicListElement> prePopulateHearingType(String authorisation) {
         try {
@@ -78,72 +101,6 @@ public class HearingDataService {
         }
         return List.of(DynamicListElement.builder().build());
     }
-
-    public List<Element<HearingData>> mapHearingData(List<Element<HearingData>> hearingDatas, DynamicList hearingTypesDynamicList,
-                                                     DynamicList hearingDatesDynamicList, DynamicList retrievedHearingChannels,
-                                                     DynamicList retrievedRadioHearingChannels, DynamicList retrievedVideoSubChannels,
-                                                     DynamicList retrievedTelephoneSubChannels, DynamicList retrievedCourtLocations,
-                                                     DynamicList hearingListedLinkedCases, DynamicList applicantHearingChannel,
-                                                     DynamicList applicantSolicitorHearingChannel, DynamicList respondentHearingChannel,
-                                                     DynamicList respondentSolicitorHearingChannel, DynamicList cafcassHearingChannel,
-                                                     DynamicList cafcassCymruHearingChannel, DynamicList localAuthorityHearingChannel
-    ) {
-        hearingDatas.stream().parallel().forEach(hearingDataElement -> {
-            HearingData hearingData = hearingDataElement.getValue();
-            hearingData.getHearingTypes().setListItems(null != hearingTypesDynamicList
-                                                           ? hearingTypesDynamicList.getListItems() : null);
-            if (hearingData.getConfirmedHearingDates() != null) {
-                hearingData.getConfirmedHearingDates().setListItems(null != hearingDatesDynamicList
-                                                                        ? hearingDatesDynamicList.getListItems() : null);
-            }
-            hearingData.getHearingChannels().setListItems(null != retrievedHearingChannels
-                                                              ? retrievedHearingChannels.getListItems() : null);
-            hearingData.getHearingChannelDynamicRadioList().setListItems(null != retrievedRadioHearingChannels
-                                                                             ? retrievedRadioHearingChannels.getListItems() : null);
-            hearingData.getHearingVideoChannels().setListItems(null != retrievedVideoSubChannels
-                                                                   ? retrievedVideoSubChannels.getListItems() : null);
-            hearingData.getHearingTelephoneChannels().setListItems(null != retrievedTelephoneSubChannels
-                                                                       ? retrievedTelephoneSubChannels.getListItems() : null);
-            hearingData.getCourtList().setListItems(null != retrievedCourtLocations
-                                                        ? retrievedCourtLocations.getListItems() : null);
-            hearingData.getHearingListedLinkedCases().setListItems(null != hearingListedLinkedCases
-                                                                       ? hearingListedLinkedCases.getListItems() : null);
-            hearingData.getApplicantHearingChannel().setListItems(null != applicantHearingChannel
-                                                                      ? applicantHearingChannel.getListItems() : null);
-            hearingData.getApplicantSolicitorHearingChannel().setListItems(null != applicantSolicitorHearingChannel
-                                                                               ? applicantSolicitorHearingChannel.getListItems() : null);
-            hearingData.getRespondentHearingChannel().setListItems(null != respondentHearingChannel
-                                                                       ? respondentHearingChannel.getListItems() : null);
-            hearingData.getRespondentSolicitorHearingChannel().setListItems(null != respondentSolicitorHearingChannel
-                                                                                ? respondentSolicitorHearingChannel.getListItems() : null);
-            hearingData.getCafcassHearingChannel().setListItems(null != cafcassHearingChannel
-                                                                    ? cafcassHearingChannel.getListItems() : null);
-            hearingData.getCafcassCymruHearingChannel().setListItems(null != cafcassCymruHearingChannel
-                                                                         ? cafcassCymruHearingChannel.getListItems() : null);
-            hearingData.getLocalAuthorityHearingChannel().setListItems(null != localAuthorityHearingChannel
-                                                                           ? localAuthorityHearingChannel.getListItems() : null);
-            if (hearingData.getHearingJudgeNameAndEmail() != null) {
-                List<JudicialUsersApiResponse> judgeResponse = judgeMapping(hearingData.getHearingJudgeNameAndEmail());
-                if (null != judgeResponse) {
-                    hearingData.toBuilder().hearingJudgeLastName(judgeResponse.get(0).getSurname())
-                        .hearingJudgeEmailAddress(judgeResponse.get(0).getEmailId())
-                        .hearingJudgePersonalCode(judgeResponse.get(0).getPersonalCode()).build();
-                }
-            }
-
-
-        });
-        return hearingDatas;
-    }
-
-    private List<JudicialUsersApiResponse> judgeMapping(JudicialUser hearingJudgeNameAndEmail) {
-
-        String[] judgePersonalCode = allocatedJudgeService.getPersonalCode(hearingJudgeNameAndEmail);
-        return refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                                                                .personalCode(judgePersonalCode).build());
-
-    }
-
 
     public List<DynamicListElement> getHearingStartDate(String authorization, CaseData caseData) {
         try {
@@ -227,5 +184,58 @@ public class HearingDataService {
         return List.of(DynamicListElement.builder().build());
     }
 
+    public HearingData generateHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,String mainApplicantName) {
+        return HearingData.builder()
+            .hearingTypes(hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes())
+            .confirmedHearingDates(hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates())
+            .hearingChannels(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .hearingVideoChannels(hearingDataPrePopulatedDynamicLists.getRetrievedVideoSubChannels())
+            .hearingTelephoneChannels(hearingDataPrePopulatedDynamicLists.getRetrievedTelephoneSubChannels())
+            .courtList(hearingDataPrePopulatedDynamicLists.getRetrievedCourtLocations())
+            .hearingChannelDynamicRadioList(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .hearingListedLinkedCases(hearingDataPrePopulatedDynamicLists.getHearingListedLinkedCases())
+            .applicantHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantSolicitorHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .respondentHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .respondentSolicitorHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .cafcassHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .cafcassCymruHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .localAuthorityHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .mainApplicantName(mainApplicantName)
+            .build();
+    }
 
+    public List<Element<HearingData>> getHearingData(List<Element<HearingData>> hearingDatas,
+                                                     HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
+        hearingDatas.stream().parallel().forEach(hearingDataElement -> {
+
+            HearingData hearingData = hearingDataElement.getValue();
+            hearingRequestDataMapper.mapHearingData(hearingData,hearingDataPrePopulatedDynamicLists);
+            if (null != hearingData.getHearingJudgeNameAndEmail()) {
+                List<JudicialUsersApiResponse> judgeApiResponse = getJudgeDetails(hearingData.getHearingJudgeNameAndEmail());
+                if (null != judgeApiResponse) {
+                    hearingData.toBuilder().hearingJudgeLastName(judgeApiResponse.get(0).getSurname())
+                        .hearingJudgeEmailAddress(judgeApiResponse.get(0).getEmailId())
+                        .hearingJudgePersonalCode(judgeApiResponse.get(0).getPersonalCode()).build();
+                }
+            }
+
+
+        });
+        return hearingDatas;
+    }
+
+    private List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser hearingJudgeNameAndEmail) {
+
+        String[] judgePersonalCode = allocatedJudgeService.getPersonalCode(hearingJudgeNameAndEmail);
+        return refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
+            .personalCode(judgePersonalCode).build());
+
+    }
+
+    private DynamicList getDynamicList(List<DynamicListElement> listItems) {
+        return DynamicList.builder()
+            .value(DynamicListElement.EMPTY)
+            .listItems(listItems).build();
+    }
 }
