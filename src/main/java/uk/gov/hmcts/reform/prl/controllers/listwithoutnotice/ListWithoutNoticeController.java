@@ -65,7 +65,10 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
-        if (null == hearingDataPrePopulatedDynamicLists) {
+        if (null != hearingDataPrePopulatedDynamicLists) {
+            log.info("Inside null check for  hearingDataPrePopulatedDynamicLists for the case id {} {}",
+                caseReferenceNumber,hearingDataPrePopulatedDynamicLists);
+        } else {
             hearingDataPrePopulatedDynamicLists = hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
