@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +41,9 @@ public class CoreCaseDataServiceTest {
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
 
+    @Mock
+    private SystemUserService systemUserService;
+
     @InjectMocks
     CoreCaseDataService coreCaseDataService;
 
@@ -60,6 +64,7 @@ public class CoreCaseDataServiceTest {
 
     @Test
     public void testStartUpdateWhenIsRepresentedIsFalse() {
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         coreCaseDataService.startUpdate(userToken,
                                         buildEventRequestData(),caseId.toString(),false);
 

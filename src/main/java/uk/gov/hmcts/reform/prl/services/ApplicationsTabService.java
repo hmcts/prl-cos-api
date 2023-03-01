@@ -101,9 +101,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATIO
 public class ApplicationsTabService implements TabService {
 
     @Autowired
-    CoreCaseDataService coreCaseDataService;
-
-    @Autowired
     ObjectMapper objectMapper;
 
     @Override
