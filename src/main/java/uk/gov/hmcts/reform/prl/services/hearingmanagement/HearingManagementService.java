@@ -54,7 +54,7 @@ public class HearingManagementService {
 
     public static final String HEARING_STATE_CHANGE_SUCCESS = "hmcCaseUpdateSuccess";
 
-    public static final String NEXT_HEARING_DATE_UPDATE_SUCCESS = "updateNextHearingDate";
+    public static final String UPDATE_NEXT_HEARING_DATE_IN_CCD = "updateNextHearingDateInCCD";
 
     private static final String DATE_FORMAT = "dd-MM-yyyy";
 
@@ -519,7 +519,7 @@ public class HearingManagementService {
         String userToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(userToken);
         createEventForNextHearingDate(nextHearingDateRequest, userToken, systemUpdateUserId,
-                                                                      NEXT_HEARING_DATE_UPDATE_SUCCESS);
+                                      UPDATE_NEXT_HEARING_DATE_IN_CCD);
     }
 
     private CaseDetails createEventForNextHearingDate(NextHearingDateRequest nextHearingDateRequest, String userToken,

@@ -690,22 +690,22 @@ public class HearingManagementServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(
             1669565933090179L).data(stringObjectMap).build();
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, nextHearingDateRequest.getCaseRef(), "updateNextHearingDate"))
-            .thenReturn(buildStartEventResponse("updateNextHearingDate", eventToken));
+                                                     caseType, nextHearingDateRequest.getCaseRef(), "updateNextHearingDateInCCD"))
+            .thenReturn(buildStartEventResponse("updateNextHearingDateInCCD", eventToken));
         NextHearingDetails nextHearingDetails = NextHearingDetails.builder().hearingId("123").nextHearingDate(testNextHearingDate).build();
         when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                       caseType, nextHearingDateRequest.getCaseRef(), true,
-                                                      buildCaseDataContentForNhd("updateNextHearingDate", eventToken,nextHearingDetails)))
+                                                      buildCaseDataContentForNhd("updateNextHearingDateInCCD", eventToken,nextHearingDetails)))
             .thenReturn(caseDetails);
 
         hearingManagementService.caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                        caseType, nextHearingDateRequest.getCaseRef(), "updateNextHearingDate"
+                                                        caseType, nextHearingDateRequest.getCaseRef(), "updateNextHearingDateInCCD"
         );
         verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                          caseType, nextHearingDateRequest.getCaseRef(), true,
-                                                         buildCaseDataContentForNhd("updateNextHearingDate", eventToken,nextHearingDetails)
+                                                         buildCaseDataContentForNhd("updateNextHearingDateInCCD", eventToken,nextHearingDetails)
         );
 
         assertTrue(true);
