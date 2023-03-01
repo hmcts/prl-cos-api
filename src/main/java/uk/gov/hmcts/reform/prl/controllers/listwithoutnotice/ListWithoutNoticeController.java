@@ -53,8 +53,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     @Autowired
     AllocatedJudgeService allocatedJudgeService;
 
-    @Autowired
-    HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists = null;
+    private HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists = null;
 
 
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
