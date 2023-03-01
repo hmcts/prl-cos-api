@@ -121,10 +121,8 @@ public class CaseData implements MappableObject {
 
     private final State state;
 
-    @JsonIgnore
     private final LocalDateTime createdDate;
 
-    @JsonIgnore
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
@@ -754,6 +752,10 @@ public class CaseData implements MappableObject {
     private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
 
+
     private final List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers;
+
+    //Added for c100 rebuild
+    private Long noOfDaysRemainingToSubmitCase;
 
 }
