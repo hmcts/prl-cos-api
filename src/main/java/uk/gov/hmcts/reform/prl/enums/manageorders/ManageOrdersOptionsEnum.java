@@ -20,9 +20,7 @@ public enum ManageOrdersOptionsEnum {
     @JsonProperty("servedSavedOrders")
     servedSavedOrders("servedSavedOrders", "Served saved orders"),
     @JsonProperty("adminProduceOrder")
-    adminProduceOrder("adminProduceOrder", "Request that the admin produces an order"),
-    @JsonProperty("approveDraftOrder")
-    approveDraftOrder("approveDraftOrder", "Edit and approve a draft order");
+    adminProduceOrder("adminProduceOrder", "Request that the admin produces an order");
 
     private final String id;
     private final String displayedValue;
