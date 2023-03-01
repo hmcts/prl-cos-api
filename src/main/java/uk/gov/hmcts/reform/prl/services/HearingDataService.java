@@ -58,9 +58,6 @@ public class HearingDataService {
     LocationRefDataService locationRefDataService;
 
     @Autowired
-    HearingDataService hearingDataService;
-
-    @Autowired
     CoreCaseDataApi coreCaseDataApi;
 
     @Autowired
@@ -83,7 +80,7 @@ public class HearingDataService {
             .retrievedVideoSubChannels(getDynamicList(hearingChannelsDetails.get(VIDEOSUBCHANNELS)))
             .retrievedTelephoneSubChannels(getDynamicList(hearingChannelsDetails.get(TELEPHONESUBCHANNELS)))
             .retrievedCourtLocations(getDynamicList(locationRefDataService.getCourtLocations(authorisation)))
-            .hearingListedLinkedCases(getDynamicList(hearingDataService.getLinkedCase(authorisation, caseReferenceNumber)))
+            .hearingListedLinkedCases(getDynamicList(getLinkedCase(authorisation, caseReferenceNumber)))
             .build();
     }
 
