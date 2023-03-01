@@ -40,9 +40,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADJOURNED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSTPONED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WAITING_TO_BE_LISTED;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 
@@ -93,23 +99,40 @@ public class HearingManagementService {
         Map<String, String> fields = new HashMap<>();
         fields.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
 
+        CaseDetails caseDetailsData = null;
         switch (caseState) {
             case PREPARE_FOR_HEARING_CONDUCT_HEARING:
                 fields.put("state", PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue());
-                CaseDetails listedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                            fields,HEARING_STATE_CHANGE_SUCCESS
+                caseDetailsData = createEvent(hearingRequest, userToken, systemUpdateUserId,
+                                              fields,HEARING_STATE_CHANGE_SUCCESS
                 );
-                updateTabsAfterStateChange(listedCaseDetails.getData(), listedCaseDetails.getId());
-                sendHearingDetailsEmail(caseData, hearingRequest);
+                updateTabsAfterStateChange(caseDetailsData.getData(), caseDetailsData.getId());
                 break;
 
             case DECISION_OUTCOME:
                 fields.put("state", DECISION_OUTCOME.getValue());
-                CaseDetails cancelledCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                               fields, HEARING_STATE_CHANGE_SUCCESS
+                caseDetailsData = createEvent(hearingRequest, userToken, systemUpdateUserId,
+                                              fields, HEARING_STATE_CHANGE_SUCCESS
                 );
-                updateTabsAfterStateChange(cancelledCaseDetails.getData(), cancelledCaseDetails.getId());
+                updateTabsAfterStateChange(caseDetailsData.getData(), caseDetailsData.getId());
+                break;
+            default:
+                break;
+        }
+
+        String hmcStatus = hearingRequest.getHearingUpdate().getHmcStatus();
+        switch (hmcStatus) {
+            case LISTED:
+                sendHearingDetailsEmail(caseData, hearingRequest);
+                break;
+            case CANCELLED:
                 sendHearingCancelledEmail(caseData);
+                break;
+            case WAITING_TO_BE_LISTED:
+            case COMPLETED:
+            case POSTPONED:
+            case ADJOURNED:
+                sendHearingChangeDetailsEmail(caseData);
                 break;
             default:
                 break;
