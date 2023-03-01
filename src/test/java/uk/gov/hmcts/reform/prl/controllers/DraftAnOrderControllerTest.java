@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
@@ -201,7 +202,7 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(draftAnOrderService.generateDocument(callbackRequest, caseData)).thenReturn(caseData);
+        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class))).thenReturn(stringObjectMap);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
 
@@ -227,7 +228,7 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(draftAnOrderService.generateDocument(callbackRequest, caseData)).thenReturn(caseData);
+        when(draftAnOrderService.prepareDraftOrderCollection(Mockito.anyString(), Mockito.any(CallbackRequest.class))).thenReturn(stringObjectMap);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
 

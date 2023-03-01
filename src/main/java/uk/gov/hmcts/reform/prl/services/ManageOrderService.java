@@ -75,6 +75,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLI
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum.draftAnOrder;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
@@ -436,20 +437,23 @@ public class ManageOrderService {
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
             setRecipientsOptions(caseData, headerMap);
             setOtherParties(caseData, headerMap);
-            if (caseData.getCaseManagementLocation() != null) {
+            if (caseData.getIsCafcass() != null) {
+                headerMap.put(
+                    PrlAppsConstants.IS_CAFCASS,
+                    caseData.getIsCafcass()
+                );
+            } else if (caseData.getCaseManagementLocation() != null) {
                 headerMap.put(
                     PrlAppsConstants.IS_CAFCASS,
                     CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegionId())
                 );
             } else {
-                headerMap.put(
-                    PrlAppsConstants.IS_CAFCASS, No
-                );
+                headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
             }
         } else {
             headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
         }
-
+        log.info("IS_CAFCASS Flag ===>" + caseData.getIsCafcass());
     }
 
     private void setRecipientsOptions(CaseData caseData, Map<String, Object> headerMap) {
@@ -1046,7 +1050,7 @@ public class ManageOrderService {
         } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
             status = OrderStatusEnum.reviewedByJudge.getDisplayedValue();
         } else if (createAnOrder.toString().equals(orderSelectionType) || uploadAnOrder.toString().equals(
-            orderSelectionType)
+            orderSelectionType) || amendOrderUnderSlipRule.toString().equals(orderSelectionType)
             || draftAnOrder.toString().equals(orderSelectionType)) {
             if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
                 status = OrderStatusEnum.createdByJudge.getDisplayedValue();
