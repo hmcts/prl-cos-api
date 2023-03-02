@@ -230,14 +230,16 @@ public class RefDataUserServiceTest {
         List<CategoryValues> listOfCategoryValues = new ArrayList<>();
         CategoryValues categoryValues1 = CategoryValues.builder().categoryKey(HEARINGTYPE).key("ONPPRS").valueEn("On the Papers").build();
         CategoryValues categoryValues2 = CategoryValues.builder().categoryKey(HEARINGTYPE).key("INTER").valueEn("IN Person").build();
+        CategoryValues categoryValues3 = CategoryValues.builder().categoryKey(HEARINGTYPE).key("AINTER").valueEn("AIN Person").build();
         listOfCategoryValues.add(categoryValues1);
         listOfCategoryValues.add(categoryValues2);
+        listOfCategoryValues.add(categoryValues3);
         CommonDataResponse commonDataResponse =  CommonDataResponse.builder().categoryValues(listOfCategoryValues).build();
         List<DynamicListElement> expectedResponse = refDataUserService.filterCategoryValuesByCategoryId(
             commonDataResponse,
             HEARINGTYPE);
-        assertEquals(expectedResponse.get(0).getCode(),"ONPPRS");
-        assertEquals(expectedResponse.get(0).getLabel(),"On the Papers");
+        assertEquals(expectedResponse.get(0).getCode(),"AINTER");
+        assertEquals(expectedResponse.get(0).getLabel(),"AIN Person");
 
     }
 
