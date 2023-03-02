@@ -361,7 +361,6 @@ public class PrlAppsConstants {
     public static final String HEARINGCHANNEL = "HearingChannel";
     public static final String VIDEOPLATFORM = "Video";
     public static final String TELEPHONEPLATFORM = "Telephone";
-    public static final long CASE_SUBMISSION_THRESHOLD = 28;
 
     public static final String IS_CAFCASS = "isCafcass";
 
