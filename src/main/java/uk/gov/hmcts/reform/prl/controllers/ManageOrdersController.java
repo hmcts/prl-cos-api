@@ -125,7 +125,6 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("fetch-order-details before caseData ===> " + callbackRequest.getCaseDetails().getData());
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -143,12 +142,10 @@ public class ManageOrdersController {
                              .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
             .loggedInUserType(manageOrderService.getLoggedInUserType(authorisation))
             .build();
-        log.info("**Manage orders with child list {}", manageOrders);
 
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
-        log.info("after fetch-order-details caseData ===> " + caseData);
         return CallbackResponse.builder()
             .data(caseData)
             .build();
@@ -166,7 +163,6 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("caseData before populate-header ===> " + caseData);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageOrderService.populateHeader(caseData))
             .build();
@@ -203,7 +199,6 @@ public class ManageOrdersController {
     ) throws Exception {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         resetChildOptions(caseDetails);
-        log.info("before about to submit caseDetails =====> " + caseDetails);
         CaseData caseData = CaseUtils.getCaseData(caseDetails,objectMapper);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
@@ -211,7 +206,6 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.put("isWithdrawRequestSent", "Approved");
         }
-        log.info("Selection from Admin##### {}", caseData.getManageOrders().getAmendOrderSelectCheckOptions());
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
@@ -252,7 +246,6 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populateOrderToAmendDownloadLink(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("/amend-order/mid-event before" + callbackRequest.getCaseDetails());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -262,7 +255,6 @@ public class ManageOrdersController {
 
         caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
 
-        log.info("/amend-order/mid-event after" + caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -293,9 +285,7 @@ public class ManageOrdersController {
                 caseDataUpdated,
                 CaseData.class
             );
-            log.info("modifiedCaseData ===> " + modifiedCaseData);
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
-            log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
         } else {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.No);
         }
@@ -310,14 +300,11 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse manageOrderMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("/manage-order/mid-event before" + callbackRequest.getCaseDetails());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
         }
-
-        log.info("/manage-order/mid-event after" + caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -334,7 +321,6 @@ public class ManageOrdersController {
         if (caseDetails.getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN) && caseDetails.getData().get(
             IS_THE_ORDER_ABOUT_CHILDREN) != null && caseDetails.getData().get(
             IS_THE_ORDER_ABOUT_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
-            log.info("inside isTheOrderAboutChildren =====> " + caseDetails.getData().get(CHILD_OPTION));
             caseDetails.getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
                 .listItems(List.of(DynamicMultiselectListElement.EMPTY)).build());
         }
