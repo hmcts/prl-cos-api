@@ -15,9 +15,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
-import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
-import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
 
 import java.util.List;
 import java.util.UUID;
@@ -70,9 +67,9 @@ public class CaseInviteManagerTest {
 
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(launchDarklyClient.isFeatureEnabled("generate-pin")).thenReturn(true);
-        when(c100CaseInviteService.generateAndSendRespondentCaseInvite(any()))
+        when(c100CaseInviteService.generateAndSendCaseInvite(any()))
             .thenReturn(CaseData.builder().caseInvites(caseInvites).build());
-        when(fl401CaseInviteService.generateAndSendRespondentCaseInvite(any()))
+        when(fl401CaseInviteService.generateAndSendCaseInvite(any()))
             .thenReturn(CaseData.builder().caseInvites(caseInvites).build());
     }
 
