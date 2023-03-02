@@ -129,8 +129,6 @@ public class PrlAppsConstants {
                                                      "caseworker-privatelaw-judge",
                                                      "caseworker-privatelaw-la");
 
-    public static final List<String> ROLES_JUDGE = List.of("caseworker-privatelaw-judge",
-                                                     "caseworker-privatelaw-la");
     public static final String PREVIOUS_OR_ONGOING_PROCEEDINGS = "previousOrOngoingProceedings";
 
     public static final String FORMAT = "%s %s";
@@ -363,5 +361,8 @@ public class PrlAppsConstants {
     public static final String HEARINGCHANNEL = "HearingChannel";
     public static final String VIDEOPLATFORM = "Video";
     public static final String TELEPHONEPLATFORM = "Telephone";
+    public static final long CASE_SUBMISSION_THRESHOLD = 28;
+
+    public static final String IS_CAFCASS = "isCafcass";
 
 }

@@ -1,18 +1,29 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+
+@Slf4j
 public class CaseUtils {
 
     private CaseUtils() {
@@ -50,10 +61,26 @@ public class CaseUtils {
     }
 
     public static String getCaseTypeOfApplication(CaseData caseData) {
+        log.info("Manage order CaseTypeOfApplication ==> " +  caseData.getCaseTypeOfApplication());
         return caseData.getCaseTypeOfApplication() != null
             ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
     }
-    
+
+
+    public static String getOrderSelectionType(CaseData caseData) {
+        String orderSelectionType = null;
+        if (caseData.getManageOrdersOptions() != null) {
+            orderSelectionType = caseData.getManageOrdersOptions().toString();
+        } else if (caseData.getDraftOrderOptions() != null) {
+            orderSelectionType = caseData.getDraftOrderOptions().toString();
+        } else {
+            orderSelectionType = "";
+        }
+
+        return orderSelectionType;
+
+    }
+
     public static Long getRemainingDaysSubmitCase(CaseData caseData) {
         Long noOfDaysRemaining = null;
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
@@ -63,5 +90,36 @@ public class CaseUtils {
             noOfDaysRemaining = PrlAppsConstants.CASE_SUBMISSION_THRESHOLD - noDaysPassed;
         }
         return noOfDaysRemaining;
+    }
+
+    public static Map<String, Object> getCourtDetails(Optional<CourtVenue> courtVenue, String baseLocationId) {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        if (courtVenue.isPresent()) {
+            String regionId = courtVenue.get().getRegionId();
+            String courtName = courtVenue.get().getCourtName();
+            String regionName = courtVenue.get().getRegion();
+            String baseLocationName = courtVenue.get().getSiteName();
+            caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
+                .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
+                .baseLocationName(baseLocationName).build());
+            caseDataMap.put(PrlAppsConstants.IS_CAFCASS, CaseUtils.cafcassFlag(regionId));
+            caseDataMap.put(COURT_NAME_FIELD, courtName);
+            caseDataMap.put(COURT_ID_FIELD, baseLocationId);
+
+        }
+        return caseDataMap;
+    }
+
+    public static YesOrNo cafcassFlag(String regionId) {
+        log.info("regionId ===> " + regionId);
+        YesOrNo cafcassFlag = YesOrNo.No; //wales
+
+        int intRegionId = Integer.parseInt(regionId);
+
+        if (intRegionId > 0 && intRegionId < 7) {
+            cafcassFlag = YesOrNo.Yes; //english regions
+        }
+        log.info("is cafcass flag set ===> " + cafcassFlag);
+        return cafcassFlag;
     }
 }
