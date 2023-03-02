@@ -66,9 +66,12 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseDataUpdated.containsKey(LISTWITHOUTNOTICE_HEARINGDETAILS)) {
+            log.info("Inside case data updated containd key check for the case id {}", caseReferenceNumber);
             caseDataUpdated.put(
                 LISTWITHOUTNOTICE_HEARINGDETAILS,
                 hearingDataService.getHearingData(existingListWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists));
+            log.info("Inside Request mapper hearing data  {}", hearingDataService
+                .getHearingData(existingListWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists));
         } else {
             caseDataUpdated.put(
                 LISTWITHOUTNOTICE_HEARINGDETAILS,

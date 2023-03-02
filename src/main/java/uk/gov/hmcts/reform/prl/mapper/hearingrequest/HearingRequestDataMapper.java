@@ -33,6 +33,7 @@ public class HearingRequestDataMapper {
         mapDynamicListItems(hearingData.getHearingListedLinkedCases(),
             isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getHearingListedLinkedCases());
         mapOtherPartyHearingChannelsMapping(hearingData);
+        log.info("Inside Request mapper hearing data****  {}", hearingData);
     }
 
     private void mapOtherPartyHearingChannelsMapping(HearingData hearingData) {
