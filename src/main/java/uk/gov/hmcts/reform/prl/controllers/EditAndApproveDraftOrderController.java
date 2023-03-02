@@ -103,7 +103,6 @@ public class EditAndApproveDraftOrderController {
                 authorisation,
                 callbackRequest
             )).build();
-
     }
 
     @PostMapping(path = "/judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON,

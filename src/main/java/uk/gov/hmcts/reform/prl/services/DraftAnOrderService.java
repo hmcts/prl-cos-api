@@ -112,7 +112,6 @@ public class DraftAnOrderService {
         return Map.of(DRAFT_ORDER_COLLECTION, draftOrderList
         );
     }
-
     private DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType) {
         return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
     }
