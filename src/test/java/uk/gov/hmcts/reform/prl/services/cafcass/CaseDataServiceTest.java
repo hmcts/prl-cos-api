@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
@@ -18,11 +19,13 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,6 +37,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseDataServiceTest {
     private final String s2sToken = "s2s token";
+
+    private final String userToken = "Bearer testToken";
 
     @Mock
     HearingService hearingService;
@@ -49,6 +54,9 @@ public class CaseDataServiceTest {
 
     @InjectMocks
     private CaseDataService caseDataService;
+
+    @Mock
+    SystemUserService systemUserService;
 
     @BeforeEach
     public void setUp() {
@@ -87,9 +95,13 @@ public class CaseDataServiceTest {
         when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
         Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
         when(hearingService.getHearings(anyString(),anyString())).thenReturn(hearings);
+        when(systemUserService.getSysUserToken()).thenReturn(userToken);
+        List<String> caseStateList = new LinkedList<>();
+        caseStateList.add("DECISION_OUTCOME");
+        ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
 
-        CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation", "serviceAuthorisation",
-                                                               "start", "end"
+        CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
+                                                                          "start", "end"
         );
         assertEquals(objectMapper.writeValueAsString(cafCassResponse), objectMapper.writeValueAsString(realCafCassResponse));
 
@@ -102,12 +114,16 @@ public class CaseDataServiceTest {
         String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafcassResponseNoData.json");
         SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
                                                                     SearchResult.class);
-        CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
+        final CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
 
         when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
+        when(systemUserService.getSysUserToken()).thenReturn(userToken);
+        List<String> caseStateList = new LinkedList<>();
+        caseStateList.add("DECISION_OUTCOME");
+        ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
 
-        CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation", "serviceAuthorisation",
-                                                               "start", "end"
+        CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
+                                                                          "start", "end"
         );
         assertEquals(cafCassResponse, realCafCassResponse);
 

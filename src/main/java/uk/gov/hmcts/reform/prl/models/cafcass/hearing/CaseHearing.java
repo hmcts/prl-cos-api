@@ -22,6 +22,8 @@ public class CaseHearing {
 
     private String hearingType;
 
+    private String hearingTypeValue;
+
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String hmcStatus;
     private List<HearingDaySchedule> hearingDaySchedule;

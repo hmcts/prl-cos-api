@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
-public class Query {
-    private Bool bool;
+public class Match {
+
+    private String state;
+
 }
