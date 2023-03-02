@@ -432,7 +432,7 @@ postcodelookup:
 cafcaas:
   search-case-type-id: PRLAPPS
   caseTypeOfApplicationList: C100
-  caseState: DECISION_OUTCOME
+  caseState: DECISION_OUTCOME,PREPARE_FOR_HEARING_CONDUCT_HEARING
   hearingStatus: LISTED
 ccd:
   elastic-search-api:
