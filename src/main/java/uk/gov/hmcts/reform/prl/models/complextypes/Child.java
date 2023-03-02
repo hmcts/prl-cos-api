@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.addcafcassofficer.CafcassOfficerPositionEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 
@@ -45,6 +46,8 @@ public class Child {
     }
 
     private final String cafcassOfficerName;
+    private final CafcassOfficerPositionEnum cafcassOfficerPosition;
+    private final String cafcassOfficerOtherPosition;
     private final String cafcassOfficerEmailAddress;
     private final String cafcassOfficerPhoneNo;
 
