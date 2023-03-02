@@ -40,6 +40,11 @@ public class AddCafcassOfficerService {
                 ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
                     .childId(childElement.getId().toString())
                     .childName("Child name: " + childElement.getValue().getFirstName() + " " + childElement.getValue().getLastName())
+                    .cafcassOfficerName(childElement.getValue().getCafcassOfficerName())
+                    .cafcassOfficerPosition(childElement.getValue().getCafcassOfficerPosition())
+                    .cafcassOfficerOtherPosition(childElement.getValue().getCafcassOfficerOtherPosition())
+                    .cafcassOfficerEmailAddress(childElement.getValue().getCafcassOfficerEmailAddress())
+                    .cafcassOfficerPhoneNo(childElement.getValue().getCafcassOfficerPhoneNo())
                     .build();
                 childAndCafcassOfficers.add(element(childAndCafcassOfficer));
             }
@@ -66,6 +71,8 @@ public class AddCafcassOfficerService {
             .ifPresent(child -> {
                 Child amendedChild = child.getValue().toBuilder()
                     .cafcassOfficerName(cafcassOfficer.getValue().getCafcassOfficerName())
+                    .cafcassOfficerPosition(cafcassOfficer.getValue().getCafcassOfficerPosition())
+                    .cafcassOfficerOtherPosition(cafcassOfficer.getValue().getCafcassOfficerOtherPosition())
                     .cafcassOfficerEmailAddress(cafcassOfficer.getValue().getCafcassOfficerEmailAddress())
                     .cafcassOfficerPhoneNo(cafcassOfficer.getValue().getCafcassOfficerPhoneNo())
                     .build();
