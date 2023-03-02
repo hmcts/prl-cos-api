@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicList
 public class HearingRequestDataMapper {
 
     public void mapHearingData(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
-
+        log.info("Inside Request mapper hearing data****hearingDataPrePopulatedDynamicLists  {}", hearingDataPrePopulatedDynamicLists);
         boolean isHearingDynamicListItemsNullifyReq = (null != hearingDataPrePopulatedDynamicLists) ? false  : true;
         mapDynamicListItems(hearingData.getHearingTypes(),
             isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes());
@@ -32,25 +32,27 @@ public class HearingRequestDataMapper {
             isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedCourtLocations());
         mapDynamicListItems(hearingData.getHearingListedLinkedCases(),
             isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getHearingListedLinkedCases());
-        mapOtherPartyHearingChannelsMapping(hearingData);
+        mapOtherPartyHearingChannelsMapping(hearingData,hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
         log.info("Inside Request mapper hearing data****  {}", hearingData);
     }
 
-    private void mapOtherPartyHearingChannelsMapping(HearingData hearingData) {
-        mapDynamicListItems(hearingData.getApplicantHearingChannel(),hearingData.getHearingChannels());
-        mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel(),hearingData.getHearingChannels());
-        mapDynamicListItems(hearingData.getRespondentHearingChannel(),hearingData.getHearingChannels());
-        mapDynamicListItems(hearingData.getRespondentSolicitorHearingChannel(),hearingData.getHearingChannels());
-        mapDynamicListItems(hearingData.getCafcassHearingChannel(),hearingData.getHearingChannels());
-        mapDynamicListItems(hearingData.getCafcassHearingChannel(),hearingData.getHearingChannels());
-        mapDynamicListItems(hearingData.getCafcassCymruHearingChannel(),hearingData.getHearingChannels());
-        mapDynamicListItems(hearingData.getLocalAuthorityHearingChannel(),hearingData.getHearingChannels());
+    private void mapOtherPartyHearingChannelsMapping(HearingData hearingData, DynamicList retrievedHearingChannels) {
+        mapDynamicListItems(hearingData.getApplicantHearingChannel(),retrievedHearingChannels);
+        mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel(),retrievedHearingChannels);
+        mapDynamicListItems(hearingData.getRespondentHearingChannel(),retrievedHearingChannels);
+        mapDynamicListItems(hearingData.getRespondentSolicitorHearingChannel(),retrievedHearingChannels);
+        mapDynamicListItems(hearingData.getCafcassHearingChannel(),retrievedHearingChannels);
+        mapDynamicListItems(hearingData.getCafcassHearingChannel(),retrievedHearingChannels);
+        mapDynamicListItems(hearingData.getCafcassCymruHearingChannel(),retrievedHearingChannels);
+        mapDynamicListItems(hearingData.getLocalAuthorityHearingChannel(),retrievedHearingChannels);
     }
 
     private void mapDynamicListItems(DynamicList existingHearingDynamicList, DynamicList requiredHearingDynamicList) {
         if (null != existingHearingDynamicList) {
+            log.info("Inside Request mapper mapDynamicListItems() before set ListItems****  {}", existingHearingDynamicList);
             existingHearingDynamicList.setListItems(null != requiredHearingDynamicList
                 ? requiredHearingDynamicList.getListItems() : null);
+            log.info("Inside Request mapper mapDynamicListItems() before set ListItems****  {}", existingHearingDynamicList);
         }
     }
 }
