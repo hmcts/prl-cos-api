@@ -155,10 +155,12 @@ public class RefDataUserServiceTest {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
         List<CategoryValues> listOfCategoryValues = new ArrayList<>();
-        CategoryValues categoryValues1 = CategoryValues.builder().categoryKey("HearingType").valueEn("Celebration hearing").build();
-        CategoryValues categoryValues2 = CategoryValues.builder().categoryKey("HearingType").valueEn("Case Management Conference").build();
+        CategoryValues categoryValues1 = CategoryValues.builder().categoryKey(HEARINGTYPE).key("ONPPRS").valueEn("On the Papers").build();
+        CategoryValues categoryValues2 = CategoryValues.builder().categoryKey(HEARINGTYPE).key("INTER").valueEn("IN Person").build();
+        CategoryValues categoryValues3 = CategoryValues.builder().categoryKey(HEARINGTYPE).key("AINTER").valueEn("AIN Person").build();
         listOfCategoryValues.add(categoryValues1);
         listOfCategoryValues.add(categoryValues2);
+        listOfCategoryValues.add(categoryValues3);
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().listOfValues(listOfCategoryValues).build();
         when(commonDataRefApi.getAllCategoryValuesByCategoryId(authToken,
                                                                authTokenGenerator.generate(),
@@ -167,7 +169,7 @@ public class RefDataUserServiceTest {
                                                                HEARINGCHILDREQUIRED)).thenReturn(commonDataResponse);
         List<DynamicListElement> expectedRespose = refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE);
         assertNotNull(expectedRespose);
-        assertEquals(expectedRespose.get(0).getLabel(),"Celebration hearing");
+        assertEquals(expectedRespose.get(0).getLabel(),"AIN Person");
     }
 
     @Test
