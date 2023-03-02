@@ -94,7 +94,6 @@ public class DraftAnOrderController {
             || CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
-            log.info("Court name before prepopulate: {}", caseData.getCourtName());
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         } else {
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);

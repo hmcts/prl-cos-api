@@ -47,7 +47,6 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("isCAfcass inside /populate-draft-order-dropdown {}", caseData.getIsCafcass());
         if (caseData.getDraftOrderCollection() != null
             && !caseData.getDraftOrderCollection().isEmpty()) {
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -147,7 +146,6 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("isCAfcass inside /judge-or-admin-populate-draft-order {}", caseData.getIsCafcass());
         Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(caseData);
         String errorMessage = draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
         if (errorMessage != null) {
