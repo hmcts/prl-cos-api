@@ -9,7 +9,13 @@ import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Getter
@@ -22,6 +28,32 @@ public class HearingData {
 
     private final DynamicList confirmedHearingDates;
 
+    private final DynamicList hearingChannels;
+
+    private final DynamicList hearingChannelDynamicRadioList;
+
+    private final DynamicList hearingVideoChannels;
+
+    private final DynamicList hearingTelephoneChannels;
+
+    private final DynamicList courtList;
+
+    private final DynamicList localAuthorityHearingChannel;
+
+    private final DynamicList hearingListedLinkedCases;
+
+    private final DynamicList applicantSolicitorHearingChannel;
+
+    private final DynamicList respondentHearingChannel;
+
+    private final DynamicList respondentSolicitorHearingChannel;
+
+    private final DynamicList cafcassHearingChannel;
+
+    private final DynamicList cafcassCymruHearingChannel;
+
+    private final DynamicList applicantHearingChannel;
+
     @JsonSerialize(using = CustomEnumSerializer.class)
     @JsonProperty("hearingDateConfirmOptionEnum")
     private HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum;
@@ -31,6 +63,38 @@ public class HearingData {
 
     @JsonProperty("instructionsForRemoteHearing")
     private final String instructionsForRemoteHearing;
+
+    private final List<LocalDateTime> hearingDateTime;
+
+    @JsonProperty("hearingEstimatedHours")
+    private final int hearingEstimatedHours;
+
+    @JsonProperty("hearingEstimatedMinutes")
+    private final int hearingEstimatedMinutes;
+
+    @JsonProperty("hearingEstimatedDays")
+    private final int  hearingEstimatedDays;
+
+    @JsonProperty("allPartiesAttendHearingSameWayYesOrNo")
+    private final YesOrNo allPartiesAttendHearingSameWayYesOrNo;
+
+    @JsonSerialize(using = CustomEnumSerializer.class)
+    @JsonProperty("hearingAuthority")
+    private DioBeforeAEnum hearingAuthority;
+
+    @JsonProperty("hearingJudgeNameAndEmail")
+    private final JudicialUser hearingJudgeNameAndEmail;
+
+    @JsonProperty("hearingJudgePersonalCode")
+    private final String hearingJudgePersonalCode;
+
+    @JsonProperty("hearingJudgeLastName")
+    private final String hearingJudgeLastName;
+
+    @JsonProperty("hearingJudgeEmailAddress")
+    private final String hearingJudgeEmailAddress;
+
+    private final String mainApplicantName;
 
 
 }

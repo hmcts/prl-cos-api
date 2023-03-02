@@ -23,13 +23,13 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -47,6 +47,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
@@ -182,35 +183,26 @@ public class ManageOrdersController {
         );
 
         Map<String, Object> caseDataUpdated = manageOrderService.populateHeader(caseData);
+        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+        log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
         List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
-        if (null == retrievedHearingTypes) {
-            retrievedHearingTypes = DynamicList.builder()
-                .value(DynamicListElement.EMPTY)
-                .listItems(hearingDataService.prePopulateHearingType(authorisation)).build();
-        }
-        if (caseDataUpdated.containsKey("listWithoutNoticeHearingDetails")) {
-            caseDataUpdated.put("listWithoutNoticeHearingDetails",
-                                hearingDataService.mapHearingData(existingListWithoutNoticeHearingDetails,
-                                                                  retrievedHearingTypes,retrievedHearingDates));
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+
+        if (caseDataUpdated.containsKey(LISTWITHOUTNOTICE_HEARINGDETAILS)) {
+            log.info("Inside case data updated containd key check for the case id {}", caseReferenceNumber);
+            caseDataUpdated.put(
+                LISTWITHOUTNOTICE_HEARINGDETAILS,
+                hearingDataService.getHearingData(existingListWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists));
+            log.info("Inside Request mapper hearing data  {}", hearingDataService
+                .getHearingData(existingListWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists));
         } else {
-            retrievedHearingTypes = DynamicList.builder()
-                .value(DynamicListElement.EMPTY)
-                .listItems(hearingDataService.prePopulateHearingType(authorisation)).build();
-            retrievedHearingDates = DynamicList.builder()
-                .value(DynamicListElement.EMPTY)
-                .listItems(hearingDataService.getHearingStartDate(authorisation,caseData)).build();
-            retrievedHearingChannels = DynamicList.builder()
-                .value(DynamicListElement.EMPTY)
-                .listItems(hearingDataService.prePopulateHearingChannel(authorisation)).build();
-
-            caseDataUpdated.put("listWithoutNoticeHearingDetails",
-                                ElementUtils.wrapElements(HearingData.builder()
-                                                              .hearingTypes(retrievedHearingTypes)
-                                                              .confirmedHearingDates(retrievedHearingDates)
-                                                              .build()));
+            caseDataUpdated.put(
+                LISTWITHOUTNOTICE_HEARINGDETAILS,
+                ElementUtils.wrapElements(hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists,caseData.getApplicantName())));
 
         }
-        
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();

@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffResponse;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -119,12 +120,13 @@ public class RefDataUserService {
         return commonDataResponse;
     }
 
-    public List<DynamicListElement> categoryValuesByCategoryId(CommonDataResponse commonDataResponse,String categoryId) {
+    public List<DynamicListElement> filterCategoryValuesByCategoryId(CommonDataResponse commonDataResponse,String categoryId) {
         log.info("categoryValuesByCategoryId {},{}", commonDataResponse,categoryId);
         if (null != commonDataResponse) {
             listOfCategoryValues = commonDataResponse.getCategoryValues().stream()
                 .filter(response -> response.getCategoryKey().equalsIgnoreCase(categoryId))
                 .map(this::getDisplayCategoryEntry).collect(Collectors.toList());
+            Collections.sort(listOfCategoryValues, (a, b) -> a.getCode().compareToIgnoreCase(b.getCode()));
             return listOfCategoryValues;
         }
 
@@ -138,7 +140,7 @@ public class RefDataUserService {
         return DynamicListElement.builder().code(key).label(value).build();
     }
 
-    public List<DynamicListElement> categorySubValuesByCategoryId(CommonDataResponse commonDataResponse,String hearingPlatform) {
+    public List<DynamicListElement> filterCategorySubValuesByCategoryId(CommonDataResponse commonDataResponse,String hearingPlatform) {
         log.info("categoryValuesByCategoryId {}", hearingPlatform);
         if (null != commonDataResponse && null != commonDataResponse.getCategoryValues()) {
             return commonDataResponse.getCategoryValues().stream()
