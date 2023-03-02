@@ -217,7 +217,7 @@ public class HearingDataService {
                 }
             }
 
-
+            log.info("Inside hearing data service getHearingData method hearing data  {}", hearingData);
         });
         return hearingDatas;
     }
