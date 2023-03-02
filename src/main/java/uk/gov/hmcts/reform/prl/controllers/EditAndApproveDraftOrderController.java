@@ -100,6 +100,7 @@ public class EditAndApproveDraftOrderController {
         } else {
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
         }
+        caseDataUpdated.put("selectTypeOfOrder", null);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
