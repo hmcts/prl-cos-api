@@ -78,6 +78,7 @@ public class AddCafcassOfficerService {
                     .build();
                 children.set(children.indexOf(child), element(child.getId(), amendedChild));
             });
+        caseDataUpdated.put("children", children);
         caseDataUpdated.put("childDetailsTable", applicationsTabService.getChildDetails(caseData));
     }
 }
