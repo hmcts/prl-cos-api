@@ -9,6 +9,9 @@ import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -620,6 +623,21 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .build();
 
         assertTrue(allegationsOfHarmChecker.validateFields(caseData));
+
+    }
+
+    @Test
+    public void testValidateChildAbuseBehaviours() {
+        ChildAbuse childAbuse = ChildAbuse.builder().allChildrenAreRisk(No)
+                .abuseNatureDescription("test")
+                .behavioursApplicantHelpSoughtWho("test")
+                .behavioursApplicantSoughtHelp(Yes)
+                .behavioursStartDateAndLength("test")
+                .whichChildrenAreRisk(DynamicMultiSelectList
+                        .builder().value(List.of(DynamicMultiselectListElement
+                                .builder().code("test").build())).build()).build();
+
+        assertTrue(allegationsOfHarmChecker.validateChildAbuseBehaviours(childAbuse));
 
     }
 

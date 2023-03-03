@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.AllegationOfHarmRevisedService;
 import uk.gov.hmcts.reform.prl.services.DeleteDocumentService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -148,6 +149,9 @@ public class DocumentGenServiceTest {
 
     @Mock
     C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
+
+    @Mock
+    AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -394,7 +398,7 @@ public class DocumentGenServiceTest {
                 .builder().newAllegationsOfHarmYesNo(Yes).build()).allegationOfHarm(null).build();
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
-
+        when(allegationOfHarmRevisedService.updateChildAbuses(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseData);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
@@ -432,6 +436,7 @@ public class DocumentGenServiceTest {
         );
         when(organisationService.getApplicantOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
         when(organisationService.getRespondentOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
+        when(allegationOfHarmRevisedService.updateChildAbuses(Mockito.any(CaseData.class))).thenReturn(c100CaseDataFinal);
 
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataFinal);
 
@@ -533,7 +538,7 @@ public class DocumentGenServiceTest {
         );
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
-
+        when(allegationOfHarmRevisedService.updateChildAbuses(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         Map<String, Object> stringObjectMap = documentGenService.generateDraftDocuments(authToken, c100CaseData);
 
         assertTrue(stringObjectMap.containsKey(DRAFT_DOCUMENT_FIELD));
@@ -571,7 +576,7 @@ public class DocumentGenServiceTest {
             c100CaseDataC1A);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataC1A);
-
+        when(allegationOfHarmRevisedService.updateChildAbuses(Mockito.any(CaseData.class))).thenReturn(c100CaseDataC1A);
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataC1A);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
@@ -1429,6 +1434,7 @@ public class DocumentGenServiceTest {
         );
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseDataNotIssued);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseDataNotIssued);
+        when(allegationOfHarmRevisedService.updateChildAbuses(Mockito.any(CaseData.class))).thenReturn(c100CaseDataNotIssued);
 
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataNotIssued);
 
