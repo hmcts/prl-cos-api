@@ -208,7 +208,8 @@ public class HearingDataService {
 
             HearingData hearingData = hearingDataElement.getValue();
             hearingRequestDataMapper.mapHearingData(hearingData,hearingDataPrePopulatedDynamicLists);
-            if (null != hearingData.getHearingJudgeNameAndEmail()) {
+            JudicialUser judgeDetailsSelected = hearingData.getHearingJudgeNameAndEmail();
+            if (null != judgeDetailsSelected && null != judgeDetailsSelected.getPersonalCode()) {
                 List<JudicialUsersApiResponse> judgeApiResponse = getJudgeDetails(hearingData.getHearingJudgeNameAndEmail());
                 if (null != judgeApiResponse) {
                     hearingData.toBuilder().hearingJudgeLastName(judgeApiResponse.get(0).getSurname())
@@ -226,7 +227,7 @@ public class HearingDataService {
 
         String[] judgePersonalCode = allocatedJudgeService.getPersonalCode(hearingJudgeNameAndEmail);
         return refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                                                                .personalCode(judgePersonalCode).build());
+            .personalCode(judgePersonalCode).build());
 
     }
 
