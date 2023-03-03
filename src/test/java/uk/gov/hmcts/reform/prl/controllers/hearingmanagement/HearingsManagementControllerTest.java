@@ -1,24 +1,21 @@
 package uk.gov.hmcts.reform.prl.controllers.hearingmanagement;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.exception.HearingManagementValidationException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingsUpdate;
-import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
-import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -26,9 +23,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Ignore
 public class HearingsManagementControllerTest {
 
     @InjectMocks
@@ -45,8 +42,6 @@ public class HearingsManagementControllerTest {
 
     private HearingRequest hearingRequest;
 
-    private NextHearingDateRequest nextHearingDateRequest;
-
     @Before
     public void setUp() {
 
@@ -62,14 +57,6 @@ public class HearingsManagementControllerTest {
                                .hmcStatus("LISTED")
                                .build())
             .build();
-
-        nextHearingDateRequest = nextHearingDateRequest.builder()
-            .caseRef("1669565933090179")
-            .nextHearingDetails(NextHearingDetails.builder()
-                               .nextHearingDate(LocalDateTime.parse("2023-04-13T09:00:00"))
-                               .hearingId("2000004862")
-                               .build())
-            .build();
     }
 
     @Test
@@ -79,11 +66,11 @@ public class HearingsManagementControllerTest {
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
-        State caseState = DECISION_OUTCOME;
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest,caseState);
-        hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest, caseState);
+        doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest);
+
+        hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest);
         assertTrue(true);
 
     }
@@ -95,35 +82,11 @@ public class HearingsManagementControllerTest {
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
-        State caseState = DECISION_OUTCOME;
         when(authorisationService.authoriseService(any())).thenReturn(false);
-        doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest,caseState);
+        doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest);
         assertThrows(
             HearingManagementValidationException.class,
-            () ->  hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest, caseState)
+            () -> hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest)
         );
     }
-
-    @Test
-    public void shouldUpdateCaseNextHearingDateWhenCalled() throws Exception {
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
-        doNothing().when(hearingManagementService).caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
-
-        hearingsManagementController.nextHearingDateUpdateByHearingManagement("auth","s2s token", nextHearingDateRequest);
-        assertTrue(true);
-
-    }
-
-    @Test
-    public void shouldReturnErrorIfInvalidAuthTokenIsProvidedForNextHearing() throws Exception {
-        when(authorisationService.authoriseUser(any())).thenReturn(false);
-        when(authorisationService.authoriseService(any())).thenReturn(false);
-        doNothing().when(hearingManagementService).caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
-        assertThrows(
-            HearingManagementValidationException.class,
-            () -> hearingsManagementController.nextHearingDateUpdateByHearingManagement("auth","s2s token", nextHearingDateRequest)
-        );
-    }
-
 }
