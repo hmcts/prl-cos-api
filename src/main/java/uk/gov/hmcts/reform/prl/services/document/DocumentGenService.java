@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.AllegationOfHarmService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -99,8 +100,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RequiredArgsConstructor
 public class DocumentGenService {
 
-
-
     @Value("${document.templates.c100.c100_final_filename}")
     protected String c100FinalFilename;
 
@@ -112,9 +111,6 @@ public class DocumentGenService {
 
     @Value("${document.templates.c100.c100_c8_draft_filename}")
     protected String c100C8DraftFilename;
-
-
-
 
     @Value("${document.templates.c100.c100_c1a_filename}")
     protected String c100C1aFilename;
@@ -248,6 +244,9 @@ public class DocumentGenService {
     @Autowired
     C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
 
+    @Autowired
+    private  AllegationOfHarmService allegationOfHarmService;
+
     private CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -283,6 +282,10 @@ public class DocumentGenService {
         Map<String, Object> updatedCaseData = new HashMap<>();
 
         caseData = fillOrgDetails(caseData);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = allegationOfHarmService.updateChildAbuses(caseData);
+        }
+
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         documentLanguageIsEng(authorisation, caseData, updatedCaseData, documentLanguage);
@@ -419,6 +422,10 @@ public class DocumentGenService {
         Map<String, Object> updatedCaseData = new HashMap<>();
 
         caseData = fillOrgDetails(caseData);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = allegationOfHarmService.updateChildAbuses(caseData);
+        }
+
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         log.info(
             "Selected Language for generating the docs English => {}, Welsh => {}",
