@@ -48,6 +48,7 @@ public class AddCafcassOfficerController {
         for (Element<ChildAndCafcassOfficer> cafcassOfficer : childAndCafcassOfficers) {
             addCafcassOfficerService.populateCafcassOfficerDetails(caseData, caseDataUpdated, cafcassOfficer);
         }
+        caseDataUpdated.put("childAndCafcassOfficers", childAndCafcassOfficers);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

@@ -106,6 +106,9 @@ public class ApplicationsTabService implements TabService {
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    AddCafcassOfficerService addCafcassOfficerService;
+
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {
 
@@ -132,6 +135,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
             applicationTab.put("childDetailsTable", getChildDetails(caseData));
             applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
+            applicationTab.put("childAndCafcassOfficers", addCafcassOfficerService.prePopulateChildName(caseData));
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
             applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));
