@@ -6,11 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
-import uk.gov.hmcts.reform.prl.models.CaseLinksElement;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
@@ -19,6 +16,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
@@ -27,12 +26,15 @@ import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_N;
@@ -42,7 +44,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONEPLATFO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONESUBCHANNELS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOSUBCHANNELS;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
 @Slf4j
 @Service
@@ -80,7 +81,7 @@ public class HearingDataService {
             .retrievedVideoSubChannels(getDynamicList(hearingChannelsDetails.get(VIDEOSUBCHANNELS)))
             .retrievedTelephoneSubChannels(getDynamicList(hearingChannelsDetails.get(TELEPHONESUBCHANNELS)))
             .retrievedCourtLocations(getDynamicList(locationRefDataService.getCourtLocations(authorisation)))
-            .hearingListedLinkedCases(getDynamicList(getLinkedCase(authorisation, caseReferenceNumber)))
+            .hearingListedLinkedCases(getDynamicList(getLinkedCases(authorisation, caseData)))
             .build();
     }
 
@@ -152,34 +153,29 @@ public class HearingDataService {
 
     }
 
-    public List<DynamicListElement> getLinkedCase(String authorisation, String caseId) {
-        try {
-            log.info("Case Id {} for the linked case ", caseId);
-            CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, authTokenGenerator.generate(),
-                                                              caseId
-            );
-            return linkedCase(caseDetails);
-
-        } catch (Exception e) {
-            log.error("Linked Case Values look up failed - " + e.getMessage(), e);
+    protected List<DynamicListElement> getLinkedCases(String authorisation, CaseData caseData) {
+        log.info("Linked case method ", caseData.getId());
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()
+            .caseReference(String.valueOf(caseData.getId())).build();
+        Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
+        if (ofNullable(caseLinkedDataList).isPresent()) {
+            for (CaseLinkedData caseLinkedData : caseLinkedDataList.get()) {
+                Hearings hearingDetails = hearingService.getHearings(authorisation, caseLinkedData.getCaseReference());
+                if (!ofNullable(hearingDetails).isEmpty() && !ofNullable(hearingDetails.getCaseHearings()).isEmpty()) {
+                    List<CaseHearing> caseHearingsList =  hearingDetails.getCaseHearings().stream()
+                        .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).collect(Collectors.toList());
+                    if (ofNullable(caseHearingsList).isPresent()) {
+                        dynamicListElements.add(DynamicListElement.builder().code(caseLinkedData.getCaseReference())
+                                                    .label(caseLinkedData.getCaseName()).build());
+                    }
+                }
+            }
         }
-        return List.of(DynamicListElement.builder().build());
-
+        //TODO: need to ensure this hardcoded values has to be removed while merging into release branch. Its added to test in preview/aat environment
+        return List.of(DynamicListElement.builder().code(String.valueOf("1677767515750127")).label("CaseName-Test10").build());
     }
 
-    private List<DynamicListElement> linkedCase(CaseDetails caseDetails) {
-        log.info("Linked case method ", caseDetails.getId());
-        CaseData caseData = getCaseData(caseDetails, objectMapper);
-        List<CaseLinksElement<CaseLink>> caseLinkDataList = caseData.getCaseLinks();
-        if (caseLinkDataList != null) {
-            return caseLinkDataList.stream().parallel()
-                .map(response -> DynamicListElement.builder().code(response.getValue().getCaseReference())
-                    .label(response.getValue().getCaseReference())
-                    .build()).collect(Collectors.toList());
-        }
-
-        return List.of(DynamicListElement.builder().build());
-    }
 
     public HearingData generateHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,String mainApplicantName) {
         return HearingData.builder()
@@ -205,19 +201,17 @@ public class HearingDataService {
     public List<Element<HearingData>> getHearingData(List<Element<HearingData>> hearingDatas,
                                                      HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
         hearingDatas.stream().parallel().forEach(hearingDataElement -> {
-
             HearingData hearingData = hearingDataElement.getValue();
             hearingRequestDataMapper.mapHearingData(hearingData,hearingDataPrePopulatedDynamicLists);
-            JudicialUser judgeDetailsSelected = hearingData.getHearingJudgeNameAndEmail();
-            if (null != judgeDetailsSelected && null != judgeDetailsSelected.getPersonalCode()) {
-                List<JudicialUsersApiResponse> judgeApiResponse = getJudgeDetails(hearingData.getHearingJudgeNameAndEmail());
-                if (null != judgeApiResponse) {
-                    hearingData.toBuilder().hearingJudgeLastName(judgeApiResponse.get(0).getSurname())
-                        .hearingJudgeEmailAddress(judgeApiResponse.get(0).getEmailId())
-                        .hearingJudgePersonalCode(judgeApiResponse.get(0).getPersonalCode()).build();
+            Optional<JudicialUser> judgeDetailsSelected = ofNullable(hearingData.getHearingJudgeNameAndEmail());
+            if (judgeDetailsSelected.isPresent() && !judgeDetailsSelected.get().getPersonalCode().isEmpty()) {
+                Optional<List<JudicialUsersApiResponse>> judgeApiResponse = ofNullable(getJudgeDetails(hearingData.getHearingJudgeNameAndEmail()));
+                if (!judgeApiResponse.get().isEmpty()) {
+                    hearingData.toBuilder().hearingJudgeLastName(judgeApiResponse.get().stream().findFirst().get().getSurname())
+                        .hearingJudgeEmailAddress(judgeApiResponse.get().stream().findFirst().get().getEmailId())
+                        .hearingJudgePersonalCode(judgeApiResponse.get().stream().findFirst().get().getPersonalCode()).build();
                 }
             }
-
             log.info("Inside hearing data service getHearingData method hearing data  {}", hearingData);
         });
         return hearingDatas;
@@ -236,4 +230,5 @@ public class HearingDataService {
             .value(DynamicListElement.EMPTY)
             .listItems(listItems).build();
     }
+
 }
