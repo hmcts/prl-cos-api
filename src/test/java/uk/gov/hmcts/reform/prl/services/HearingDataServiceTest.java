@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
@@ -15,14 +16,19 @@ import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.time.LocalDateTime;
@@ -32,6 +38,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_N;
@@ -61,9 +68,15 @@ public class HearingDataServiceTest {
 
     @Mock
     CoreCaseDataApi coreCaseDataApi;
+    @Mock
+    AllocatedJudgeService allocatedJudgeService;
 
     public static final String authToken = "Bearer TestAuthToken";
+    @Mock
+    HearingApiClient hearingApiClient;
 
+    @Mock
+    Hearings hearingDetails;
 
     @Test()
     public void testPopulateHearingDynamicLists() {
@@ -177,6 +190,11 @@ public class HearingDataServiceTest {
         when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
         when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
 
+        JudicialUser judicialUser = JudicialUser.builder()
+            .personalCode("Test")
+            .idamId("Test")
+            .build();
+
         DynamicListElement dynamicListElement2 = DynamicListElement.builder()
             .code("INTER")
             .label("In Person")
@@ -215,6 +233,7 @@ public class HearingDataServiceTest {
             .hearingJudgeLastName("test")
             .hearingJudgeEmailAddress("Test")
             .mainApplicantName("Test")
+            .hearingJudgeNameAndEmail(judicialUser)
             .build();
 
         Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
@@ -224,6 +243,18 @@ public class HearingDataServiceTest {
             .courtName("testcourt")
             .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
             .build();
+        List<JudicialUsersApiResponse> judicialUsersApiResponses = new ArrayList<>();
+        JudicialUsersApiResponse judicialUsersApiResponse = JudicialUsersApiResponse.builder()
+            .emailId("Test")
+            .fullName("Test")
+            .surname("Test")
+            .personalCode("Test")
+            .build();
+        judicialUsersApiResponses.add(judicialUsersApiResponse);
+        JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
+            .personalCode(new String[]{"Test2", "test","test5"}).build();
+        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test","test5"});
+        when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             HearingDataPrePopulatedDynamicLists.builder()
                 .retrievedHearingTypes(dynamicList)
@@ -283,9 +314,31 @@ public class HearingDataServiceTest {
     }
 
     @Test()
-    public void testGetLinkedCase() {
-        List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCase(authToken, "test");
-        assertNotNull(expectedResponse);
+    public void testGetLinkedCases() {
+        List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
+        CaseLinkedData caseLinkedData = CaseLinkedData.hearingValuesWith()
+            .caseName("CaseName-Test10")
+            .caseReference("1677767515750127")
+            .build();
+        caseLinkedDataList.add(caseLinkedData);
+        when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
+        CaseHearing caseHearing = CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED").build();
+        List<CaseHearing> caseHearings =  new ArrayList<>();
+        caseHearings.add(caseHearing);
+        hearingDetails = Hearings.hearingsWith()
+            .hmctsServiceCode("CaseName-Test10")
+            .caseRef("1677767515750127")
+            .caseHearings(caseHearings)
+            .build();
+        when(hearingService.getHearings(any(), any())).thenReturn(hearingDetails);
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .build();
+        List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
+        assertEquals(expectedResponse.get(0).getCode(),"1677767515750127");
+        assertEquals(expectedResponse.get(0).getLabel(),"CaseName-Test10");
     }
 }
 
