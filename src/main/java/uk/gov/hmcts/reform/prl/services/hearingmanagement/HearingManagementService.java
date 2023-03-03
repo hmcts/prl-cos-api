@@ -105,7 +105,7 @@ public class HearingManagementService {
             case CANCELLED:
                 fields.put("state", PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue());
                 CaseDetails cancelledCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                               fields,HEARING_STATE_CHANGE_SUCCESS
+                                                               fields,HEARING_STATE_CHANGE_FAILURE
                 );
                 updateTabsAfterStateChange(cancelledCaseDetails.getData(), cancelledCaseDetails.getId());
                 sendHearingCancelledEmail(caseData);
@@ -116,7 +116,7 @@ public class HearingManagementService {
             case ADJOURNED:
                 fields.put("state", PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue());
                 CaseDetails completedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                               fields,HEARING_STATE_CHANGE_SUCCESS
+                                                               fields,HEARING_STATE_CHANGE_FAILURE
                 );
                 updateTabsAfterStateChange(completedCaseDetails.getData(), completedCaseDetails.getId());
                 sendHearingChangeDetailsEmail(caseData);
