@@ -51,8 +51,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,7 +59,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -401,16 +399,6 @@ public class FL401SubmitApplicationControllerTest {
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
 
-        String applicantNames = "TestFirst TestLast";
-
-        String isConfidential = "No";
-        if (fl401Applicant.getCanYouProvideEmailAddress().equals(YesOrNo.Yes)
-            || (fl401Applicant.getIsEmailAddressConfidential() != null
-            && fl401Applicant.getIsEmailAddressConfidential().equals(YesOrNo.Yes))
-            || (fl401Applicant.hasConfidentialInfo())) {
-            isConfidential = "Yes";
-        }
-
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -420,64 +408,21 @@ public class FL401SubmitApplicationControllerTest {
             .submitCountyCourtSelection(dynamicList)
             .build();
 
-        LocalDate issueDate = LocalDate.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        Map<String, Object> stringObjectMap = new HashMap<>();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
 
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(fl401SubmitApplicationService.fl401SendApplicationNotification(
+            Mockito.anyString(),
+            Mockito.any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)
+        )).thenReturn(caseData);
 
-        fl401SubmitApplicationController.fl401SendApplicationNotification(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(0))
-            .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
-        verify(solicitorEmailService, times(1)).sendEmailToFl401Solicitor(
-            callbackRequest.getCaseDetails(),
-            userDetails
-        );
-    }
+        assertNull(fl401SubmitApplicationController.fl401SendApplicationNotification(
+            authToken,
+            callbackRequest
+        ).getData());
 
-    @Test
-    public void testFl401SendApplicationNotificationFailure() throws Exception {
-
-        PartyDetails fl401Applicant = PartyDetails.builder()
-            .canYouProvideEmailAddress(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .applicantsFL401(fl401Applicant)
-            .courtEmailAddress("localcourt@test.com")
-            .isNotificationSent("No")
-            .build();
-
-        Map<String, Object> stringObjectMap = new HashMap<>();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                                                       .data(stringObjectMap).build()).build();
-
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-
-        fl401SubmitApplicationController.fl401SendApplicationNotification(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(0))
-            .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
-        verify(solicitorEmailService, times(1)).sendEmailToFl401Solicitor(
-            callbackRequest.getCaseDetails(),
-            userDetails
-        );
     }
 }

@@ -416,13 +416,11 @@ public class ManageOrderService {
         if (caseData.getOrderCollection() != null) {
             headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
             populateServeOrderDetails(caseData, headerMap);
-            log.info("OrderCollection ===> " + caseData.getOrderCollection());
         }
         headerMap.put(
             "caseTypeOfApplication",
             CaseUtils.getCaseTypeOfApplication(caseData)
         );
-        log.info("after populate-header map ===> " + headerMap);
         return headerMap;
     }
 
@@ -453,7 +451,6 @@ public class ManageOrderService {
         } else {
             headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
         }
-        log.info("IS_CAFCASS Flag ===>" + caseData.getIsCafcass());
     }
 
     private void setRecipientsOptions(CaseData caseData, Map<String, Object> headerMap) {
@@ -660,7 +657,6 @@ public class ManageOrderService {
         } else {
             selectedOrder = "";
         }
-        log.info("selectedOrder type for upload ====> " + selectedOrder);
         return selectedOrder;
     }
 
@@ -726,23 +722,9 @@ public class ManageOrderService {
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             List<Element<OrderDetails>> orderCollection = new ArrayList<>();
-            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-            if (documentLanguage.isGenEng()) {
-                log.info("*** Generating Final order in English ***");
-                orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
-                                                           fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME),
-                                                           fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME),
-                                                           caseData
-                ));
+            orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
+                                                       fieldMap, caseData));
 
-            }
-            if (documentLanguage.isGenWelsh()) {
-                log.info("*** Generating Final order in Welsh ***");
-                orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
-                                                           fieldMap.get(FINAL_TEMPLATE_WELSH),
-                                                           fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME), caseData
-                ));
-            }
             return orderCollection;
         } else {
             ServeOrderData serveOrderData;
@@ -887,7 +869,6 @@ public class ManageOrderService {
         Map<String, Object> orderMap = new HashMap<>();
 
         if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
-            log.info("value of orderCollection  ----> " + caseData.getOrderCollection());
             if (uploadAnOrder.equals(caseData.getManageOrdersOptions())
                 && (UserRoles.JUDGE.name().equals(loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
@@ -1043,8 +1024,6 @@ public class ManageOrderService {
 
     public String getOrderStatus(String orderSelectionType, String loggedInUserType, String eventId) {
         String status = null;
-        log.info("Order status orderSelectionType ====> " + orderSelectionType);
-        log.info("Order status loggedInUserType ====> " + loggedInUserType);
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
             status = OrderStatusEnum.reviewedByCA.getDisplayedValue();
         } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
@@ -1062,7 +1041,6 @@ public class ManageOrderService {
         } else {
             status = "";
         }
-        log.info("Order status ====> " + status);
         return status;
     }
 
@@ -1248,7 +1226,6 @@ public class ManageOrderService {
             .orderTypeId(order.getValue().getOrderTypeId())
             .serveOrderDetails(serveOrderDetails)
             .build();
-        log.info("amaneded order {}" + amended);
         orders.set(orders.indexOf(order), element(order.getId(), amended));
     }
 
@@ -1334,8 +1311,6 @@ public class ManageOrderService {
 
     private CaseData getN117FormData(CaseData caseData) {
 
-        log.info("Court name before N117 order {}", caseData.getCourtName());
-
         ManageOrders orderData = ManageOrders.builder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
@@ -1360,8 +1335,6 @@ public class ManageOrderService {
                 caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
             .build();
-
-        log.info("Court name after N117 order set{}", orderData.getManageOrdersCourtName());
 
         if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
             orderData = orderData.toBuilder()
@@ -1397,8 +1370,6 @@ public class ManageOrderService {
 
     private CaseData getFl404bFields(CaseData caseData) {
 
-        log.info("Court name before FL404 order {}", caseData.getCourtName());
-
         FL404 orderData = FL404.builder()
             .fl404bCaseNumber(String.valueOf(caseData.getId()))
             .fl404bCourtName(caseData.getCourtName())
@@ -1409,8 +1380,6 @@ public class ManageOrderService {
                                                 caseData.getRespondentsFL401().getLastName()
             ))
             .build();
-
-        log.info("FL404b court name: {}", orderData.getFl404bCourtName());
 
         if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
             orderData = orderData.toBuilder()
@@ -1466,7 +1435,6 @@ public class ManageOrderService {
 
     public CaseData getFL402FormData(CaseData caseData) {
 
-        log.info("Court name before FL402 order {}", caseData.getCourtName());
         ManageOrders orderData = ManageOrders.builder()
             .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
             .manageOrdersFl402CourtName(caseData.getCourtName())
@@ -1486,7 +1454,6 @@ public class ManageOrderService {
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .build();
-        log.info("Court name after FL402 order set{}", orderData.getManageOrdersFl402CourtName());
 
 
         return caseData.toBuilder().manageOrders(orderData)
@@ -1494,20 +1461,33 @@ public class ManageOrderService {
     }
 
     private Element<OrderDetails> getOrderDetailsElement(String authorisation, String flagSelectedOrderId,
-                                                         String flagSelectedOrder, String template, String fileName,
+                                                         String flagSelectedOrder, Map<String, String> fieldMap,
                                                          CaseData caseData) throws Exception {
-        log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, template);
+
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
-        if (template != null) {
-            generatedDocumentInfo = template.contains("-WEL-") ? dgsService.generateWelshDocument(
-                authorisation,
-                CaseDetails.builder().caseData(caseData).build(),
-                template
-            ) : dgsService.generateDocument(
+
+        if (documentLanguage.isGenEng()) {
+            log.info("*** Generating Final order in English ***");
+            String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
+
+            generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 CaseDetails.builder().caseData(caseData).build(),
                 template
             );
+            if (documentLanguage.isGenWelsh()) {
+                log.info("*** Generating Final order in Welsh ***");
+                String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
+                log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, welshTemplate);
+                if (welshTemplate != null && welshTemplate.contains("-WEL-")) {
+                    generatedDocumentInfo =  dgsService.generateWelshDocument(
+                        authorisation,
+                        CaseDetails.builder().caseData(caseData).build(),
+                        welshTemplate
+                    );
+                }
+            }
         }
         String loggedInUserType = getLoggedInUserType(authorisation);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
@@ -1526,7 +1506,12 @@ public class ManageOrderService {
                                               .documentUrl(generatedDocumentInfo.getUrl())
                                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                               .documentHash(generatedDocumentInfo.getHashToken())
-                                              .documentFileName(fileName).build())
+                                              .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
+                           .orderDocumentWelsh(Document.builder()
+                                                   .documentUrl(generatedDocumentInfo.getUrl())
+                                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                   .documentHash(generatedDocumentInfo.getHashToken())
+                                                   .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build())
                            .otherDetails(OtherOrderDetails.builder()
                                              .createdBy(caseData.getJudgeOrMagistratesLastName())
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
@@ -1566,9 +1551,6 @@ public class ManageOrderService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String loggedInUserType;
         List<String> roles = userDetails.getRoles();
-        log.info("roles ===> " + roles);
-        log.info("Judge ===> " + Roles.JUDGE.getValue());
-        log.info("LEGAL_ADVISER ===> " + Roles.LEGAL_ADVISER.getValue());
         if (roles.contains(Roles.JUDGE.getValue()) || roles.contains(Roles.LEGAL_ADVISER.getValue())) {
             loggedInUserType = UserRoles.JUDGE.name();
         } else if (roles.contains(Roles.COURT_ADMIN.getValue())) {
@@ -1582,13 +1564,11 @@ public class ManageOrderService {
         } else {
             loggedInUserType = "";
         }
-        log.info("loggedInUserType ===> " + loggedInUserType);
 
         return loggedInUserType;
     }
 
     public static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
-        log.info("caseDataUpdated before cleanup ===> " + caseDataUpdated);
         for (ManageOrderFieldsEnum field : ManageOrderFieldsEnum.values()) {
             if (caseDataUpdated.containsKey(field.getValue())) {
                 caseDataUpdated.remove(field.getValue());
