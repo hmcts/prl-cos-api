@@ -17,13 +17,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AllegationOfHarmRevisedService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -31,12 +28,14 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class AllegationOfHarmController {
+public class AllegationOfHarmRevisedController {
 
     private final ObjectMapper objectMapper;
 
+    private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+
     @PostMapping(path = "/pre-populate-child-data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Copy manage docs for tabs")
+    @Operation(description = "pre populuate child data ")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
@@ -47,31 +46,12 @@ public class AllegationOfHarmController {
                                                                      @RequestBody uk.gov.hmcts.reform
                                                                              .ccd.client.model.CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        caseData.getNewChildDetails().forEach(eachChild -> {
-            listItems.add(DynamicMultiselectListElement.builder().code(eachChild.getId().toString())
-                    .label(eachChild.getValue().getFirstName() + " " + eachChild.getValue().getLastName()).build());
-
-        });
-
-        caseDataUpdated.put("childPsychologicalAbuse", Map.of("whichChildrenAreRisk", DynamicMultiSelectList.builder()
-                .listItems(listItems)
-                .build()));
-        caseDataUpdated.put("childPhysicalAbuse", Map.of("whichChildrenAreRisk", DynamicMultiSelectList.builder()
-                .listItems(listItems)
-                .build()));
-        caseDataUpdated.put("childFinancialAbuse", Map.of("whichChildrenAreRisk", DynamicMultiSelectList.builder()
-                .listItems(listItems)
-                .build()));
-        caseDataUpdated.put("childSexualAbuse", Map.of("whichChildrenAreRisk", DynamicMultiSelectList.builder()
-                .listItems(listItems)
-                .build()));
-        caseDataUpdated.put("childEmotionalAbuse", Map.of("whichChildrenAreRisk", DynamicMultiSelectList.builder()
-                .listItems(listItems)
-                .build()));
+        caseDataUpdated.putAll(allegationOfHarmRevisedService.getPrePopulatedChildData(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
 }
