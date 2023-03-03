@@ -173,10 +173,9 @@ public class HearingDataService {
                     }
                 }
             }
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             log.info("Exception occured in Linked case method for hmc api calls ", caseData.getId());
-            }
+        }
         //TODO: need to ensure this hardcoded values has to be removed while merging into release branch. Its added to test in preview/aat environment
         return List.of(DynamicListElement.builder().code(String.valueOf("1677767515750127")).label("CaseName-Test10").build());
     }
