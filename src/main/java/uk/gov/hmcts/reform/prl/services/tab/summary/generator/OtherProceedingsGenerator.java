@@ -55,7 +55,7 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
     }
 
     public List<Element<OtherProceedings>> getOtherProceedingsDetails(CaseData caseData) {
-        if (CaseUtils.getCaseType(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             return getC100OtherProceedingsDetails(caseData);
         }
 
