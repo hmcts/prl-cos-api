@@ -27,17 +27,20 @@ public class AddCafcassOfficerController {
 
     private final ObjectMapper objectMapper;
     private final AddCafcassOfficerService addCafcassOfficerService;
+    /*
 
-    @PostMapping(path = "/add-cafcass-officer/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to add child name for Cafcass officer")
-    public AboutToStartOrSubmitCallbackResponse prePopulateChildDetails(@RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = addCafcassOfficerService.prePopulateChildName(caseData);
-        log.info("childAndCafcassOfficers ==> " + childAndCafcassOfficers);
-        caseDataUpdated.put("childAndCafcassOfficers", childAndCafcassOfficers);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
+        @PostMapping(path = "/add-cafcass-officer/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+        @Operation(description = "Callback to add child name for Cafcass officer")
+        public AboutToStartOrSubmitCallbackResponse prePopulateChildDetails(@RequestBody CallbackRequest callbackRequest) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = addCafcassOfficerService.prePopulateChildName(
+                caseData);
+            log.info("childAndCafcassOfficers ==> " + childAndCafcassOfficers);
+            caseDataUpdated.put("childAndCafcassOfficers", childAndCafcassOfficers);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        }
+    */
 
     @PostMapping(path = "/add-cafcass-officer/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to add Cafcass officer details")

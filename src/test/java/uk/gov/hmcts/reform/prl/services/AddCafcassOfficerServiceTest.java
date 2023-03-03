@@ -29,7 +29,7 @@ public class AddCafcassOfficerServiceTest {
     @Mock
     ApplicationsTabService applicationsTabService;
 
-    @Test
+    /*@Test
     public void testPrePopulateChildName() {
         List<Element<Child>> children = new ArrayList<>();
         Child child = Child.builder()
@@ -48,7 +48,7 @@ public class AddCafcassOfficerServiceTest {
             caseData);
         assertEquals("1accfb1e-2574-4084-b97e-1cd53fd14815", childAndCafcassOfficers.get(0).getValue().getChildId());
         assertEquals("Child name: test test", childAndCafcassOfficers.get(0).getValue().getChildName());
-    }
+    }*/
 
     @Test
     public void testPopulateCafcassOfficerDetails() {

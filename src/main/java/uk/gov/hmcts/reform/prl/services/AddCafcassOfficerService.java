@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,33 +23,13 @@ public class AddCafcassOfficerService {
 
     private final ApplicationsTabService applicationsTabService;
 
-    public List<Element<ChildAndCafcassOfficer>> prePopulateChildName(CaseData caseData) {
+    /*public List<Element<ChildAndCafcassOfficer>> prePopulateChildName(CaseData caseData) {
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = null;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             childAndCafcassOfficers = prePopulateChildNameForCA(caseData, childAndCafcassOfficers);
         }
         return childAndCafcassOfficers;
-    }
-
-    private List<Element<ChildAndCafcassOfficer>> prePopulateChildNameForCA(CaseData caseData,
-                                                                            List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers) {
-        if (caseData.getChildren() != null) {
-            childAndCafcassOfficers = new ArrayList<>();
-            for (Element<Child> childElement : caseData.getChildren()) {
-                ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
-                    .childId(childElement.getId().toString())
-                    .childName("Child name: " + childElement.getValue().getFirstName() + " " + childElement.getValue().getLastName())
-                    .cafcassOfficerName(childElement.getValue().getCafcassOfficerName())
-                    .cafcassOfficerPosition(childElement.getValue().getCafcassOfficerPosition())
-                    .cafcassOfficerOtherPosition(childElement.getValue().getCafcassOfficerOtherPosition())
-                    .cafcassOfficerEmailAddress(childElement.getValue().getCafcassOfficerEmailAddress())
-                    .cafcassOfficerPhoneNo(childElement.getValue().getCafcassOfficerPhoneNo())
-                    .build();
-                childAndCafcassOfficers.add(element(childAndCafcassOfficer));
-            }
-        }
-        return childAndCafcassOfficers;
-    }
+    }*/
 
     public void populateCafcassOfficerDetails(CaseData caseData, Map<String, Object> caseDataUpdated,
                                               Element<ChildAndCafcassOfficer> cafcassOfficer) {
