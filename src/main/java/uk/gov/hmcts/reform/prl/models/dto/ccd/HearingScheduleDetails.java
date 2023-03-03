@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,5 +17,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class HearingScheduleDetails {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm")
+    @JsonProperty("hearingDateTime")
     private final LocalDateTime hearingDateTime;
 }
