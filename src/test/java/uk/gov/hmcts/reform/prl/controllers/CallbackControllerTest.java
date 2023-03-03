@@ -1694,6 +1694,7 @@ public class CallbackControllerTest {
 
         Map<String, Object> caseDetails = new HashMap<>();
         caseDetails.put("applicantCaseName", "test");
+        caseDetails.put("caseTypeOfApplication", "C100_CASE_TYPE");
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
             .orgPolicyReference("jfljsd")
             .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
