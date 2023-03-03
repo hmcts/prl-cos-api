@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
 
-import java.util.Map;
-
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
@@ -32,7 +30,9 @@ public class C100IssueCaseController {
     public AboutToStartOrSubmitCallbackResponse issueAndSendToLocalCourt(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
-        Map<String, Object> caseDataUpdated = c100IssueCaseService.issueAndSendToLocalCourt(authorisation, callbackRequest);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(c100IssueCaseService.issueAndSendToLocalCourt(
+            authorisation,
+            callbackRequest
+        )).build();
     }
 }

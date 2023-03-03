@@ -5,7 +5,6 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.CoreMatchers;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,6 @@ public class CosApiSmokeTests {
 
 
     @Test
-    @Ignore
     public void checkSolicitorCanAccessC100MiamExemptionEvent() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(MIAM_VALIDATION_REQUEST_ERROR);
@@ -68,7 +66,6 @@ public class CosApiSmokeTests {
     }
 
     @Test
-    @Ignore
     public void checkSolicitorGetCorrectFeeForC100ApplicationEvent() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
 
@@ -86,7 +83,6 @@ public class CosApiSmokeTests {
 
 
     @Test
-    @Ignore
     public void checkSendAndReplyMessageMidEvent() throws Exception {
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
         request
@@ -102,7 +98,6 @@ public class CosApiSmokeTests {
     }
 
     @Test
-    @Ignore
     public void checkSendAndReplyMessageAboutToSubmitEvent() throws Exception {
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
         request
