@@ -123,9 +123,6 @@ public class ApplicationsTabServiceTest {
     AllegationsOfHarmOrders allegationsOfHarmOrders;
     AllegationsOfHarmOrders emptyAllegationOfHarmOrder;
 
-    @Mock
-    AddCafcassOfficerService addCafcassOfficerService;
-
     @Before
     public void setup() {
         address = Address.builder()
