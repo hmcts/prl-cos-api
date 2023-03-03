@@ -205,7 +205,7 @@ public class CaseData implements MappableObject {
     private final String childrenInProceeding;
     private final List<Element<Child>> otherChildren;
 
-
+    // people feature FPET-325
     @JsonUnwrapped
     private final Relations relations;
 

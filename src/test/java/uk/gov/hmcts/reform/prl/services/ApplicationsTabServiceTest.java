@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
 import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -42,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
+import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
@@ -547,6 +549,15 @@ public class ApplicationsTabServiceTest {
                 .undertakingInPlaceOrder(orderRevised)
                 .build();
 
+        DomesticAbuseBehaviours domesticAbuseBehaviours = DomesticAbuseBehaviours.builder().typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
+                .newAbuseNatureDescription("des").newBehavioursApplicantHelpSoughtWho("sought").newBehavioursApplicantSoughtHelp(YesOrNo.Yes).build();
+
+        Element<DomesticAbuseBehaviours> domesticAbuseBehavioursElement = Element
+                .<DomesticAbuseBehaviours>builder().value(domesticAbuseBehaviours).build();
+
+        ChildAbuse childAbuse = ChildAbuse.builder().abuseNatureDescription("test")
+                .allChildrenAreRisk(YesOrNo.Yes).build();
+
         RevisedChildAbductionDetails revisedChildAbductionDetails = RevisedChildAbductionDetails.builder()
                 .newAbductionChildHasPassport(Yes).build();
         CaseData caseData = caseDataWithParties.toBuilder().taskListVersion(TASK_LIST_VERSION_V2)
@@ -554,7 +565,14 @@ public class ApplicationsTabServiceTest {
                         .childPassportDetails(ChildPassportDetails.builder().newChildPassportPossession(List
                                 .of(NewPassportPossessionEnum.father)).build())
                         .newAllegationsOfHarmYesNo(Yes)
-                        .childEmotionalAbuse(ChildAbuse.builder().build()).build()).build();
+                        .newAllegationsOfHarmDomesticAbuseYesNo(Yes)
+                        .domesticBehaviours(List.of(domesticAbuseBehavioursElement))
+                        .newAllegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
+                        .childPhysicalAbuse(childAbuse)
+                        .childPsychologicalAbuse(childAbuse)
+                        .childEmotionalAbuse(childAbuse)
+                        .childFinancialAbuse(childAbuse)
+                        .childSexualAbuse(childAbuse).build()).build();
 
         when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class))
                 .thenReturn(OtherPersonInTheCase.builder().build());

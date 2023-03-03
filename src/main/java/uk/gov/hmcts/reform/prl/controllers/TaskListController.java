@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.launchdarkly.shaded.com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,7 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -57,7 +61,14 @@ public class TaskListController extends AbstractCallbackController {
         log.debug("callbackRequest  :{} ",callbackRequest);
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.debug("caseData  :{} ",caseData);
+        if ("allegationsOfHarmRevised".equalsIgnoreCase(callbackRequest.getEventId()) && YesOrNo.Yes.equals(caseData
+                .getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
+            caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse()
+                    .setWhichChildrenAreRisk(DynamicMultiSelectList.builder()
+                            .value(List.of(DynamicMultiselectListElement.builder().code("123").build())).build());
+            log.info("updated allegation of harm");
+        }
+        log.info("before event caseData  :{} ",new Gson().toJson(caseData));
         publishEvent(new CaseDataChanged(caseData));
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
