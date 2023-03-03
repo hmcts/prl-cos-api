@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.launchdarkly.shaded.com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,6 +160,8 @@ public class ApplicationsTabService implements TabService {
                 applicationTab.put("allegationsOfHarmRevisedChildAbductionTable", getRevisedChildAbductionTable(caseData));
                 applicationTab.put("allegationsOfHarmRevisedOtherConcernsTable", getAllegationsOfHarmRevisedOtherConcerns(caseData));
                 applicationTab.put("allegationsOfHarmRevisedChildContactTable", getAllegationsOfHarmRevisedChildContact(caseData));
+
+                log.info("application tab data v2");
             } else {
                 applicationTab.put("childDetailsTable", getChildDetails(caseData));
                 applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
@@ -193,6 +196,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
         }
+        log.info("application tab data {}",new Gson().toJson(applicationTab));
         return applicationTab;
     }
 
