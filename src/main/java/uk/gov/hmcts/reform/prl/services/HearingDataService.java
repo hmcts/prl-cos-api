@@ -154,24 +154,29 @@ public class HearingDataService {
     }
 
     protected List<DynamicListElement> getLinkedCases(String authorisation, CaseData caseData) {
-        log.info("Linked case method ", caseData.getId());
-        List<DynamicListElement> dynamicListElements = new ArrayList<>();
-        CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()
-            .caseReference(String.valueOf(caseData.getId())).build();
-        Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
-        if (ofNullable(caseLinkedDataList).isPresent()) {
-            for (CaseLinkedData caseLinkedData : caseLinkedDataList.get()) {
-                Hearings hearingDetails = hearingService.getHearings(authorisation, caseLinkedData.getCaseReference());
-                if (!ofNullable(hearingDetails).isEmpty() && !ofNullable(hearingDetails.getCaseHearings()).isEmpty()) {
-                    List<CaseHearing> caseHearingsList =  hearingDetails.getCaseHearings().stream()
-                        .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).collect(Collectors.toList());
-                    if (ofNullable(caseHearingsList).isPresent()) {
-                        dynamicListElements.add(DynamicListElement.builder().code(caseLinkedData.getCaseReference())
-                                                    .label(caseLinkedData.getCaseName()).build());
+        try {
+            log.info("Linked case method ", caseData.getId());
+            List<DynamicListElement> dynamicListElements = new ArrayList<>();
+            CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()
+                .caseReference(String.valueOf(caseData.getId())).build();
+            Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
+            if (ofNullable(caseLinkedDataList).isPresent()) {
+                for (CaseLinkedData caseLinkedData : caseLinkedDataList.get()) {
+                    Hearings hearingDetails = hearingService.getHearings(authorisation, caseLinkedData.getCaseReference());
+                    if (!ofNullable(hearingDetails).isEmpty() && !ofNullable(hearingDetails.getCaseHearings()).isEmpty()) {
+                        List<CaseHearing> caseHearingsList = hearingDetails.getCaseHearings().stream()
+                            .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).collect(Collectors.toList());
+                        if (ofNullable(caseHearingsList).isPresent()) {
+                            dynamicListElements.add(DynamicListElement.builder().code(caseLinkedData.getCaseReference())
+                                .label(caseLinkedData.getCaseName()).build());
+                        }
                     }
                 }
             }
         }
+        catch(Exception e) {
+            log.info("Exception occured in Linked case method for hmc api calls ", caseData.getId());
+            }
         //TODO: need to ensure this hardcoded values has to be removed while merging into release branch. Its added to test in preview/aat environment
         return List.of(DynamicListElement.builder().code(String.valueOf("1677767515750127")).label("CaseName-Test10").build());
     }
