@@ -362,13 +362,13 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     public boolean validateSubstanceAbuse(CaseData caseData) {
         Optional<YesOrNo> allegationsOfHarmRevisedSubstanceAbuse = ofNullable(caseData.getAllegationOfHarmRevised()
                                                                                  .getNewAllegationsOfHarmSubstanceAbuseYesNo());
-        Optional<String> allegationsOfHarmevisedOtherSubstanceAbuseDetails = ofNullable(caseData.getAllegationOfHarmRevised()
+        Optional<String> allegationsOfHarmRevisedOtherSubstanceAbuseDetails = ofNullable(caseData.getAllegationOfHarmRevised()
                                                                                       .getNewAllegationsOfHarmSubstanceAbuseDetails());
 
         List<Optional<?>> fields = new ArrayList<>();
         fields.add(allegationsOfHarmRevisedSubstanceAbuse);
         if (allegationsOfHarmRevisedSubstanceAbuse.isPresent() && allegationsOfHarmRevisedSubstanceAbuse.get().equals(Yes)) {
-            fields.add(allegationsOfHarmevisedOtherSubstanceAbuseDetails);
+            fields.add(allegationsOfHarmRevisedOtherSubstanceAbuseDetails);
         }
 
         return fields.stream().noneMatch(Optional::isEmpty)
@@ -379,17 +379,17 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     public boolean validateOtherConcerns(CaseData caseData) {
         Optional<YesOrNo> allegationsOfHarmRevisedOtherConcerns = ofNullable(caseData.getAllegationOfHarmRevised()
                                                                           .getNewAllegationsOfHarmOtherConcerns());
-        Optional<String> allegationsOfHarmevisedOtherConcernsDetails = ofNullable(caseData.getAllegationOfHarmRevised()
+        Optional<String> allegationsOfHarmRevisedOtherConcernsDetails = ofNullable(caseData.getAllegationOfHarmRevised()
                                                                                 .getNewAllegationsOfHarmOtherConcernsDetails());
-        Optional<String> allegationsOfHarmevisedOtherConcernsCourtActions = ofNullable(caseData.getAllegationOfHarmRevised()
+        Optional<String> allegationsOfHarmRevisedOtherConcernsCourtActions = ofNullable(caseData.getAllegationOfHarmRevised()
                                                                                      .getNewAllegationsOfHarmOtherConcernsCourtActions());
 
         List<Optional<?>> fields = new ArrayList<>();
         fields.add(allegationsOfHarmRevisedOtherConcerns);
         if (allegationsOfHarmRevisedOtherConcerns.isPresent() && allegationsOfHarmRevisedOtherConcerns.get().equals(Yes)) {
-            fields.add(allegationsOfHarmevisedOtherConcernsDetails);
+            fields.add(allegationsOfHarmRevisedOtherConcernsDetails);
         }
-        fields.add(allegationsOfHarmevisedOtherConcernsCourtActions);
+        fields.add(allegationsOfHarmRevisedOtherConcernsCourtActions);
 
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
