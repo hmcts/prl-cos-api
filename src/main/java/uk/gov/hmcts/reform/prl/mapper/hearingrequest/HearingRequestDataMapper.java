@@ -43,15 +43,15 @@ public class HearingRequestDataMapper {
             mapDynamicListItems(hearingData.getHearingTypes(),
                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes());
         } else {
-            mapDynamicListItemsForHearingTypesNotSelected(hearingData, hearingDataPrePopulatedDynamicLists);
+            mapDynamicListItemsForHearingTypesNotSelected(hearingData, isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
         }
     }
 
     private void mapDynamicListItemsForHearingTypesNotSelected(HearingData hearingData,
-                                                               HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
+                                                               boolean isHearingDynamicListItemsNullifyReq, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
         hearingData.toBuilder().hearingTypes(DynamicList.builder()
             .value(DynamicListElement.EMPTY)
-            .listItems(hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes().getListItems()).build()).build();
+            .listItems(isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes().getListItems()).build()).build();
     }
 
     private void mapOtherPartyHearingChannelsMapping(HearingData hearingData, DynamicList retrievedHearingChannels) {
