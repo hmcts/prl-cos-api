@@ -47,11 +47,11 @@ public class HearingRequestDataMapper {
         }
     }
 
-    private void mapDynamicListItemsForHearingTypesNotSelected(HearingData hearingData,
-                                                               boolean isHearingDynamicListItemsNullifyReq, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
+    private void mapDynamicListItemsForHearingTypesNotSelected(HearingData hearingData,boolean isHearingDynamicListItemsNullifyReq,
+                                                               HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
         hearingData.toBuilder().hearingTypes(DynamicList.builder()
-            .value(DynamicListElement.EMPTY)
-            .listItems(isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes().getListItems()).build()).build();
+            .value(DynamicListElement.EMPTY).listItems(isHearingDynamicListItemsNullifyReq
+                ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes().getListItems()).build()).build();
     }
 
     private void mapOtherPartyHearingChannelsMapping(HearingData hearingData, DynamicList retrievedHearingChannels) {
