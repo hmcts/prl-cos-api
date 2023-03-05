@@ -121,10 +121,8 @@ public class CaseData implements MappableObject {
 
     private final State state;
 
-    @JsonIgnore
     private final LocalDateTime createdDate;
 
-    @JsonIgnore
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
@@ -711,7 +709,6 @@ public class CaseData implements MappableObject {
 
     private final SubmitConsentEnum respondentAgreeStatement;
 
-    private YesOrNo nocApproved;
 
     /**
      * Respondent solicitor's Current or Past proceedings.
