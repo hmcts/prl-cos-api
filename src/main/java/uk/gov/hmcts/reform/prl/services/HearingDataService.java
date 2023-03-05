@@ -189,7 +189,6 @@ public class HearingDataService {
             .hearingVideoChannels(hearingDataPrePopulatedDynamicLists.getRetrievedVideoSubChannels())
             .hearingTelephoneChannels(hearingDataPrePopulatedDynamicLists.getRetrievedTelephoneSubChannels())
             .courtList(hearingDataPrePopulatedDynamicLists.getRetrievedCourtLocations())
-            .hearingChannelDynamicRadioList(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             .hearingListedLinkedCases(hearingDataPrePopulatedDynamicLists.getHearingListedLinkedCases())
             .applicantHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             .applicantSolicitorHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())

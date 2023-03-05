@@ -93,7 +93,6 @@ public class ListWithoutNoticeControllerTest {
             .confirmedHearingDates(dynamicList)
             .hearingChannels(dynamicList)
             .applicantHearingChannel(dynamicList)
-            .hearingChannelDynamicRadioList(dynamicList)
             .hearingVideoChannels(dynamicList)
             .hearingTelephoneChannels(dynamicList)
             .courtList(dynamicList)
