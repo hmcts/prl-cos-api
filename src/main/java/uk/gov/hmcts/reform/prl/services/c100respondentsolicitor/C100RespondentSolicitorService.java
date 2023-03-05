@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
@@ -36,7 +37,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.SUBMIT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -402,11 +405,11 @@ public class C100RespondentSolicitorService {
             .findFirst()
             .ifPresent(party -> {
                 PartyDetails amended = party.getValue().toBuilder()
-                    .response(party.getValue().getResponse().toBuilder().activeRespondent(YesOrNo.Yes).build())
+                    .response(party.getValue().getResponse().toBuilder().activeRespondent(Yes).build())
                     .build();
                 if (callbackRequest.getEventId().equalsIgnoreCase(SUBMIT.getEventId())) {
                     amended = party.getValue().toBuilder()
-                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(YesOrNo.Yes).build())
+                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
                         .build();
                 }
                 respondents.set(respondents.indexOf(party), element(party.getId(), amended));
@@ -493,7 +496,7 @@ public class C100RespondentSolicitorService {
             .findFirst()
             .ifPresent(party -> {
                 PartyDetails amended = party.getValue().toBuilder()
-                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(YesOrNo.Yes).build())
+                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
                         .build();
 
                 respondents.set(respondents.indexOf(party), element(party.getId(), amended));
@@ -511,5 +514,21 @@ public class C100RespondentSolicitorService {
 
         updatedCaseData.put(RESPONDENTS, respondents);
         return updatedCaseData;
+    }
+
+    public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Document document = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            SOLICITOR_C7_DRAFT_DOCUMENT,
+            false
+        );
+        caseDataUpdated.put("draftC7ResponseDoc", document);
+
+        return caseDataUpdated;
     }
 }

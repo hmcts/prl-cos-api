@@ -242,7 +242,7 @@ public class DocumentGenService {
     @Value("${document.templates.common.prl_solicitor_c7_draft_template}")
     protected String solicitorC7DraftTemplate;
 
-    @Value("${document.templates.common.prl_solicitor_c7_draft_template}")
+    @Value("${document.templates.common.prl_solicitor_c7_draft_filename}")
     protected String solicitorC7DraftFilename;
 
     @Value("${document.templates.common.prl_solicitor_c7_final_template}")
@@ -500,7 +500,6 @@ public class DocumentGenService {
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
-            updatedCaseData.put("isEngC7DocGen", Yes.toString());
             updatedCaseData.put("draftC7ResponseDoc", getDocument(authorisation, caseData, DRAFT_HINT, false));
         }
 
