@@ -73,7 +73,7 @@ public class HearingData {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "YYYY-MM-dd HH:mm")
     @JsonProperty("hearingDateTimes")
-    private final LocalDateTime hearingDateTimes;
+    private final  List<LocalDateTime> hearingDateTimes;
 
     @JsonProperty("hearingEstimatedHours")
     private final int hearingEstimatedHours;
