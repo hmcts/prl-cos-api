@@ -74,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.blankOrderOrDirections;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum.draftAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
@@ -526,12 +527,6 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, doiDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, doiDraftFile);
                 break;
-            case blankOrderOrDirectionsWithdraw:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
-                fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
-                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
-                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
-                break;
             case childArrangementsSpecificProhibitedOrder:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c43DraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c43DraftFile);
@@ -929,6 +924,8 @@ public class ManageOrderService {
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType) {
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
+            .c21OrderOptions(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
+                                 ? caseData.getManageOrders().getC21OrderOptions() : null)
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
             .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
