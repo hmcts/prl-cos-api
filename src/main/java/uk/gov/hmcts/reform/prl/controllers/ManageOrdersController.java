@@ -90,6 +90,7 @@ public class ManageOrdersController {
 
     }
 
+    //todo: API not required
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to fetch case data and custom order fields")
     @ApiResponses(value = {
@@ -142,7 +143,12 @@ public class ManageOrdersController {
                              .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
             .loggedInUserType(manageOrderService.getLoggedInUserType(authorisation))
             .build();
-
+        if (caseData.getCreateSelectOrderOptions() != null
+            && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
+            manageOrders = manageOrders.toBuilder()
+                .selectedC21Order(String.valueOf(caseData.getManageOrders().getC21OrderOptions()))
+                .build();
+        }
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
