@@ -21,7 +21,7 @@ public enum HearingDateConfirmOptionEnum {
     @JsonProperty("dateConfirmedByListingTeam")
     dateConfirmedByListingTeam("dateConfirmedByListingTeam", "The date needs to be confirmed by the listing team before service"),
     @JsonProperty("dateToBeFixed")
-    dateToBeFixed("dateToBeFixed", "The order will be served with the 'date to be fixed");
+    dateToBeFixed("dateToBeFixed", "This order will be served with the 'date to be fixed'");
 
     private final String id;
     private final String displayedValue;
