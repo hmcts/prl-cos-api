@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -66,6 +68,10 @@ public class HearingData {
 
     @JsonProperty("hearingScheduleDetails")
     private final List<HearingScheduleDetails> hearingScheduleDetails;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "YYYY-MM-dd HH:mm")
+    @JsonProperty("hearingDateTime")
+    private final LocalDateTime hearingDateTime;
 
     @JsonProperty("hearingEstimatedHours")
     private final int hearingEstimatedHours;
