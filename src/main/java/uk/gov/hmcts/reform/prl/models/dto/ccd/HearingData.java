@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
@@ -81,6 +82,10 @@ public class HearingData {
     @JsonSerialize(using = CustomEnumSerializer.class)
     @JsonProperty("hearingAuthority")
     private DioBeforeAEnum hearingAuthority;
+
+    @JsonSerialize(using = CustomEnumSerializer.class)
+    @JsonProperty("hearingChannelsEnum")
+    private HearingChannelsEnum hearingChannelsEnum;
 
     @JsonProperty("hearingJudgeNameAndEmail")
     private final JudicialUser hearingJudgeNameAndEmail;

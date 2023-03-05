@@ -39,10 +39,12 @@ public class HearingRequestDataMapper {
 
     private void mapHearingTypesListItems(HearingData hearingData, boolean isHearingDynamicListItemsNullifyReq,
                                           HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
-        if (null != hearingData.getHearingTypes()) {
+        if (null != hearingData.getHearingTypes() && null != hearingData.getHearingTypes().getValue()) {
+            log.info("Inside Request mapper mapHearingTypesListItems() before set ListItems to getHearingTypes in if ****  {}", hearingData.getHearingTypes());
             mapDynamicListItems(hearingData.getHearingTypes(),
                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes());
         } else {
+            log.info("Inside Request mapper mapHearingTypesListItems() before set ListItems to getHearingTypes in else****  {}", hearingData.getHearingTypes());
             mapDynamicListItemsForHearingTypesNotSelected(hearingData, isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
         }
     }
