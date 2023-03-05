@@ -32,8 +32,6 @@ public class HearingData {
 
     private final DynamicList hearingChannels;
 
-    private final DynamicList hearingChannelDynamicRadioList;
-
     private final DynamicList hearingVideoChannels;
 
     private final DynamicList hearingTelephoneChannels;
@@ -72,6 +70,10 @@ public class HearingData {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "YYYY-MM-dd HH:mm")
     @JsonProperty("hearingDateTime")
     private final LocalDateTime hearingDateTime;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "YYYY-MM-dd HH:mm")
+    @JsonProperty("hearingDateTime")
+    private final LocalDateTime hearingDateTimes;
 
     @JsonProperty("hearingEstimatedHours")
     private final int hearingEstimatedHours;

@@ -71,7 +71,6 @@ public class HearingRequestDataMapperTest {
             .hearingTypes(dynamicList1)
             .confirmedHearingDates(dynamicList1)
             .hearingChannels(dynamicList1)
-            .hearingChannelDynamicRadioList(dynamicList1)
             .hearingVideoChannels(dynamicList1)
             .hearingTelephoneChannels(dynamicList1)
             .courtList(dynamicList1)

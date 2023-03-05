@@ -22,8 +22,6 @@ public class HearingRequestDataMapper {
             isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates());
         mapDynamicListItems(hearingData.getHearingChannels(),
             isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
-        mapDynamicListItems(hearingData.getHearingChannelDynamicRadioList(),
-            isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
         mapDynamicListItems(hearingData.getHearingVideoChannels(),
             isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedVideoSubChannels());
         mapDynamicListItems(hearingData.getHearingTelephoneChannels(),
