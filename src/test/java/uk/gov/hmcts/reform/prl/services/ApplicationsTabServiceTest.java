@@ -93,6 +93,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -104,6 +105,7 @@ import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicationsTabServiceTest {
@@ -1386,7 +1388,33 @@ public class ApplicationsTabServiceTest {
     }
 
 
+    @Test
+    public void testUpdateTabWithChildren() {
+        List<Element<Child>> children = new ArrayList<>();
+        Child child = Child.builder()
+            .firstName("test")
+            .lastName("test")
+            .build();
 
+        Element<Child> childElement = element(UUID.fromString("1accfb1e-2574-4084-b97e-1cd53fd14815"), child);
+        children.add(childElement);
+
+        caseDataWithParties = caseDataWithParties.toBuilder()
+            .children(children)
+            .build();
+
+        when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class))
+            .thenReturn(OtherPersonInTheCase.builder().build());
+        when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOrders.class))
+            .thenReturn(allegationsOfHarmOrders);
+        when(objectMapper.convertValue(caseDataWithParties, ChildAbductionDetails.class))
+            .thenReturn(
+                ChildAbductionDetails.builder().build());
+        when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOtherConcerns.class))
+            .thenReturn(AllegationsOfHarmOtherConcerns.builder().build());
+
+        assertNotNull(applicationsTabService.updateTab(caseDataWithParties));
+    }
 
 
 

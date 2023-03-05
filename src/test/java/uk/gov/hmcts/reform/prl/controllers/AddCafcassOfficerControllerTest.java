@@ -19,7 +19,6 @@ import java.util.Map;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(SpringRunner.class)
@@ -28,32 +27,8 @@ public class AddCafcassOfficerControllerTest {
     @Mock
     AddCafcassOfficerService addCafcassOfficerService;
 
-    @Mock
-    ObjectMapper objectMapper;
-
     @InjectMocks
     private AddCafcassOfficerController addCafcassOfficerController;
-
-    /*@Test
-    public void testPrePopulateChildDetails() {
-        CaseData caseData = CaseData.builder()
-            .id(123L)
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-        List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = new ArrayList<>();
-        when(addCafcassOfficerService.prePopulateChildName(caseData)).thenReturn(childAndCafcassOfficers);
-        addCafcassOfficerController.prePopulateChildDetails(callbackRequest);
-        assertTrue(stringObjectMap.containsKey("childAndCafcassOfficers"));
-        assertEquals(childAndCafcassOfficers, stringObjectMap.get("childAndCafcassOfficers"));
-    }*/
 
     @Test
     public void testUpdateChildDetailsWithCafcassOfficer() {
@@ -66,7 +41,6 @@ public class AddCafcassOfficerControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -75,6 +49,6 @@ public class AddCafcassOfficerControllerTest {
             .build();
         addCafcassOfficerController.updateChildDetailsWithCafcassOfficer(callbackRequest);
         verify(addCafcassOfficerService, times(1))
-            .populateCafcassOfficerDetails(caseData, stringObjectMap, cafcassOfficerElement);
+            .populateCafcassOfficerDetails(callbackRequest);
     }
 }

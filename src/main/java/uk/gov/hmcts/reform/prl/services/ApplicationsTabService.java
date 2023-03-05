@@ -93,6 +93,8 @@ import java.util.stream.Collectors;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_AND_CAFCASS_OFFICER_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -135,7 +137,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
             applicationTab.put("childDetailsTable", getChildDetails(caseData));
             applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
-            applicationTab.put("childAndCafcassOfficers", prePopulateChildNameForCA(caseData));
+            applicationTab.put(CHILD_AND_CAFCASS_OFFICER_DETAILS, prePopulateChildAndCafcassOfficerDetails(caseData));
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
             applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));
@@ -1037,13 +1039,13 @@ public class ApplicationsTabService implements TabService {
         return toMap(builder.build());
     }
 
-    public List<Element<ChildAndCafcassOfficer>> prePopulateChildNameForCA(CaseData caseData) {
+    private List<Element<ChildAndCafcassOfficer>> prePopulateChildAndCafcassOfficerDetails(CaseData caseData) {
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = new ArrayList<>();
         if (caseData.getChildren() != null) {
-            for (Element<Child> childElement : caseData.getChildren()) {
+            caseData.getChildren().stream().forEach(childElement -> {
                 ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
                     .childId(childElement.getId().toString())
-                    .childName("Child name: " + childElement.getValue().getFirstName() + " " + childElement.getValue().getLastName())
+                    .childName(CHILD_NAME + childElement.getValue().getFirstName() + " " + childElement.getValue().getLastName())
                     .cafcassOfficerName(childElement.getValue().getCafcassOfficerName())
                     .cafcassOfficerPosition(childElement.getValue().getCafcassOfficerPosition())
                     .cafcassOfficerOtherPosition(childElement.getValue().getCafcassOfficerOtherPosition())
@@ -1051,7 +1053,7 @@ public class ApplicationsTabService implements TabService {
                     .cafcassOfficerPhoneNo(childElement.getValue().getCafcassOfficerPhoneNo())
                     .build();
                 childAndCafcassOfficers.add(element(childAndCafcassOfficer));
-            }
+            });
         }
         return childAndCafcassOfficers;
     }

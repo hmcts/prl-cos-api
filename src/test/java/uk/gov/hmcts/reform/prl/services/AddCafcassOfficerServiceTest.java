@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -29,26 +31,9 @@ public class AddCafcassOfficerServiceTest {
     @Mock
     ApplicationsTabService applicationsTabService;
 
-    /*@Test
-    public void testPrePopulateChildName() {
-        List<Element<Child>> children = new ArrayList<>();
-        Child child = Child.builder()
-            .firstName("test")
-            .lastName("test")
-            .build();
+    @Mock
+    ObjectMapper objectMapper;
 
-        Element<Child> childElement = element(UUID.fromString("1accfb1e-2574-4084-b97e-1cd53fd14815"), child);
-        children.add(childElement);
-        CaseData caseData = CaseData.builder()
-            .id(123L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .children(children)
-            .build();
-        List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = addCafcassOfficerService.prePopulateChildName(
-            caseData);
-        assertEquals("1accfb1e-2574-4084-b97e-1cd53fd14815", childAndCafcassOfficers.get(0).getValue().getChildId());
-        assertEquals("Child name: test test", childAndCafcassOfficers.get(0).getValue().getChildName());
-    }*/
 
     @Test
     public void testPopulateCafcassOfficerDetails() {
@@ -77,9 +62,14 @@ public class AddCafcassOfficerServiceTest {
             .childAndCafcassOfficers(childAndCafcassOfficers)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        addCafcassOfficerService.populateCafcassOfficerDetails(caseData,
-                                                               stringObjectMap,
-                                                               childAndCafcassOfficerElement);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        addCafcassOfficerService.populateCafcassOfficerDetails(callbackRequest);
         assertEquals("a a", caseData.getChildren().get(0).getValue().getCafcassOfficerName());
         assertEquals("abc@test.net", caseData.getChildren().get(0).getValue().getCafcassOfficerEmailAddress());
         assertEquals("01234567890", caseData.getChildren().get(0).getValue().getCafcassOfficerPhoneNo());

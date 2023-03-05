@@ -1,19 +1,24 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_AND_CAFCASS_OFFICER_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_DETAILS_TABLE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -21,28 +26,24 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class AddCafcassOfficerService {
 
+    private final ObjectMapper objectMapper;
+
     private final ApplicationsTabService applicationsTabService;
 
-    /*public List<Element<ChildAndCafcassOfficer>> prePopulateChildName(CaseData caseData) {
-        List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = null;
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            childAndCafcassOfficers = prePopulateChildNameForCA(caseData, childAndCafcassOfficers);
+    public Map<String, Object> populateCafcassOfficerDetails(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = caseData.getChildAndCafcassOfficers();
+        for (Element<ChildAndCafcassOfficer> cafcassOfficer : childAndCafcassOfficers) {
+            caseDataUpdated.putAll(populateCafcassOfficerForCA(caseData, cafcassOfficer));
         }
-        return childAndCafcassOfficers;
-    }*/
-
-    public void populateCafcassOfficerDetails(CaseData caseData, Map<String, Object> caseDataUpdated,
-                                              Element<ChildAndCafcassOfficer> cafcassOfficer) {
-        if (caseDataUpdated == null) {
-            caseDataUpdated = new HashMap<>();
-        }
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            populateCafcassOfficerForCA(caseData, caseDataUpdated, cafcassOfficer);
-        }
+        caseDataUpdated.put(CHILD_AND_CAFCASS_OFFICER_DETAILS, childAndCafcassOfficers);
+        return caseDataUpdated;
     }
 
-    private void populateCafcassOfficerForCA(CaseData caseData, Map<String, Object> caseDataUpdated,
+    private Map<String, Object> populateCafcassOfficerForCA(CaseData caseData,
                                             Element<ChildAndCafcassOfficer> cafcassOfficer) {
+        Map<String, Object> childDetailsMap = new HashMap<>();
         List<Element<Child>> children = caseData.getChildren();
         children.stream()
             .filter(child -> Objects.equals(child.getId().toString(), cafcassOfficer.getValue().getChildId()))
@@ -57,7 +58,9 @@ public class AddCafcassOfficerService {
                     .build();
                 children.set(children.indexOf(child), element(child.getId(), amendedChild));
             });
-        caseDataUpdated.put("children", children);
-        caseDataUpdated.put("childDetailsTable", applicationsTabService.getChildDetails(caseData));
+        childDetailsMap.put(CHILDREN, children);
+        childDetailsMap.put(CHILD_DETAILS_TABLE, applicationsTabService.getChildDetails(caseData));
+
+        return childDetailsMap;
     }
 }
