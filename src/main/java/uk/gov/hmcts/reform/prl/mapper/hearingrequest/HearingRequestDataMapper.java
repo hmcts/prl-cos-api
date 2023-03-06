@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 
@@ -51,9 +50,14 @@ public class HearingRequestDataMapper {
 
     private void mapDynamicListItemsForHearingTypesNotSelected(HearingData hearingData,boolean isHearingDynamicListItemsNullifyReq,
                                                                HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
-        hearingData.toBuilder().hearingTypes(DynamicList.builder()
+
+        //hearingData.builder().hearingTypes(DynamicList.builder().build()).build();
+        hearingData.setHearingTypes(DynamicList.builder().build());
+        mapDynamicListItems(hearingData.getHearingTypes(),
+                            isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes());
+        /*   hearingData.toBuilder().hearingTypes(DynamicList.builder()
             .value(DynamicListElement.EMPTY).listItems(isHearingDynamicListItemsNullifyReq
-                ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes().getListItems()).build()).build();
+                ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes().getListItems()).build()).build();*/
     }
 
     private void mapOtherPartyHearingChannelsMapping(HearingData hearingData, DynamicList retrievedHearingChannels) {

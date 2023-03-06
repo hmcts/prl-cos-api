@@ -26,7 +26,7 @@ import java.util.List;
 @AllArgsConstructor
 public class HearingData {
 
-    private final DynamicList hearingTypes;
+    private DynamicList hearingTypes;
 
     private final DynamicList confirmedHearingDates;
 
@@ -95,13 +95,13 @@ public class HearingData {
     private final JudicialUser hearingJudgeNameAndEmail;
 
     @JsonProperty("hearingJudgePersonalCode")
-    private final String hearingJudgePersonalCode;
+    private String hearingJudgePersonalCode;
 
     @JsonProperty("hearingJudgeLastName")
-    private final String hearingJudgeLastName;
+    private String hearingJudgeLastName;
 
     @JsonProperty("hearingJudgeEmailAddress")
-    private final String hearingJudgeEmailAddress;
+    private String hearingJudgeEmailAddress;
 
     private final String mainApplicantName;
 

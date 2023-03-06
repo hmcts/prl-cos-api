@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingRequestDataMapperTest {
@@ -97,6 +99,7 @@ public class HearingRequestDataMapperTest {
             .mainApplicantName("Test")
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists);
+        assertEquals(hearingData.getHearingTypes().getListItems().get(0).getCode(),"test");
     }
 
 }
