@@ -105,7 +105,7 @@ public class CcdCaseApiTest {
         when(idamClient.getUserDetails(AUTH)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn(AUTH);
         when(citizenCoreCaseDataService.linkDefendant(AUTH,Long.valueOf("12345"),caseData,CaseEvent.LINK_CITIZEN)).thenReturn(caseDetails);
-        ccdCaseApi.linkCitizenToCase(AUTH,AUTH,"12345",caseData);
+        ccdCaseApi.linkCitizenToCase(AUTH,AUTH,"12345",caseData, );
         assertEquals(caseDetails.getCaseTypeId(),caseDetails.getCaseTypeId());
     }
 
