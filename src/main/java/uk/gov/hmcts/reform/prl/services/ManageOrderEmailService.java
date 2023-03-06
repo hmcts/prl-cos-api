@@ -141,6 +141,17 @@ public class ManageOrderEmailService {
                     );
                 }
             }
+            //send notification for applicants
+            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                if (!StringUtils.isEmpty(applicant.getValue().getEmail())) {
+                    emailService.send(
+                        applicant.getValue().getEmail(),
+                        EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
+                        buildRespondentEmail(caseDetails, applicant.getValue()),
+                        LanguagePreference.english
+                    );
+                }
+            }
         } else {
             if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
                 emailService.send(
