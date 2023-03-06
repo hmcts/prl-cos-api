@@ -103,4 +103,14 @@ public class CitizenCallbackController extends AbstractCallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         citizenEmailService.sendCitizenCaseSubmissionEmail(authorisation, String.valueOf(caseData.getId()));
     }
+    @PostMapping(path = "/send-citizen-withdrawn-notifications", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to send notifications on case Withdrawal")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public void sendNotificationsOnCaseWithdrawal(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        citizenEmailService.sendCitizenCaseWithdrawalEmail(authorisation, String.valueOf(caseData.getId()),caseData);
+    }
 }
