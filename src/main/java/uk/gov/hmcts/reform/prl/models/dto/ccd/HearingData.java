@@ -103,7 +103,8 @@ public class HearingData {
     @JsonProperty("hearingJudgeEmailAddress")
     private String hearingJudgeEmailAddress;
 
-    private final String mainApplicantName;
-
-
+    private final String applicantName;
+    private final String applicantSolicitor;
+    private final String respondentName;
+    private final String respondentSolicitor;
 }

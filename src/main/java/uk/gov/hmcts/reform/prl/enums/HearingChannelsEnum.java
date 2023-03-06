@@ -10,13 +10,13 @@ import lombok.RequiredArgsConstructor;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum HearingChannelsEnum {
     @JsonProperty("INTER")
-    INTER("INTER", "In Person"),
+    INTER("INTER", "In person"),
     @JsonProperty("TEL")
     TEL("TEL", "Telephone"),
     @JsonProperty("VID")
     VID("VID", "Video"),
     @JsonProperty("ONPPRS")
-    ONPPRS("ONPPRS", "On the Papers");
+    ONPPRS("ONPPRS", "On the papers");
 
     private final String id;
     private final String displayedValue;

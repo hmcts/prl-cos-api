@@ -75,7 +75,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         } else {
             caseDataUpdated.put(
                 LISTWITHOUTNOTICE_HEARINGDETAILS,
-                ElementUtils.wrapElements(hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists,caseData.getApplicantName())));
+                ElementUtils.wrapElements(hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists,caseData)));
 
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();

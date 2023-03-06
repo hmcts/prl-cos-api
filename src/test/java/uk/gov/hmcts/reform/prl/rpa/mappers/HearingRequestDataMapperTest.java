@@ -96,7 +96,7 @@ public class HearingRequestDataMapperTest {
             .hearingJudgePersonalCode("test")
             .hearingJudgeLastName("test")
             .hearingJudgeEmailAddress("Test")
-            .mainApplicantName("Test")
+            .applicantName("Test")
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists);
         assertEquals(hearingData.getHearingTypes().getListItems().get(0).getCode(),"test");
