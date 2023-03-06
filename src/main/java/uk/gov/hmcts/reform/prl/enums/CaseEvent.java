@@ -15,7 +15,16 @@ public enum CaseEvent {
     EVENT_INTERNATIONAL_ELEMENT("citizenInternationalElement"),
     LEGAL_REPRESENTATION("legalRepresentation"),
     SUPPORT_YOU_NEED("support-you-need"),
-    REVIEW_AND_SUBMIT("reviewAndSubmit");
+    REVIEW_AND_SUBMIT("reviewAndSubmit"),
+    PAYMENT_SUCCESS_CALLBACK("paymentSuccessCallback"),
+    PAYMENT_FAILURE_CALLBACK("paymentFailureCallback"),
+    UPDATE_ALL_TABS("internal-update-all-tabs"),
+    COURTNAV_CASE_CREATION("courtnav-case-creation"),
+    COURTNAV_DOCUMENT_UPLOAD_EVENT_ID("courtnav-document-upload"),
+    HEARING_STATE_CHANGE_SUCCESS("hmcCaseUpdateSuccess"),
+    HEARING_STATE_CHANGE_FAILURE("hmcCaseUpdateFailure"),
+
+    INTERNAL_UPDATE_TASK_LIST("internal-update-task-list");
 
     private final String value;
 
