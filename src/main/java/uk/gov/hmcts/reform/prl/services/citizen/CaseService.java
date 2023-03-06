@@ -273,29 +273,30 @@ public class CaseService {
             .filter(CaseUtils::getPreviousState).findFirst();
         log.info("previousState " + previousState);
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
+        log.info("withDrawApplicationData " + withDrawApplicationData);
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
-        Map<String, Object> caseDataUpdated = getCase(authToken, caseId).getData();
+        Map<String, Object> caseDetailsMap = getCase(authToken, caseId).getData();
+        CaseData updatedCaseData = CaseUtils.getCaseData(CaseDetails.builder().data(caseDetailsMap).build(), objectMapper);
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
             if (previousState.isPresent()
                 && !CaseUtils.WITHDRAW_STATE_LIST.contains(previousState.get())) {
-                caseDataUpdated.put(WITHDRAW_REQUEST_FIELD, PENDING);
+                caseDetailsMap.put(WITHDRAW_REQUEST_FIELD, PENDING);
                 log.info("Case is updated as WithdrawRequestSent");
                 //REVIEW IF ANY EMAILS TO SEND
                 //sendWithdrawEmails(caseData, userDetails, caseDetails);
             } else {
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                    citizenEmailService.sendCitizenCaseWithdrawalEmail(authToken, caseId, caseData);
+                    citizenEmailService.sendCitizenCaseWithdrawalEmail(authToken, caseId, updatedCaseData);
                     // Refreshing the page in the same event. Hence no external event call needed.
                     // Getting the tab fields and add it to the casedetails..
                     Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-                    caseDataUpdated.putAll(allTabsFields);
+                    caseDetailsMap.putAll(allTabsFields);
                 }
-                caseDataUpdated.put(STATE_FIELD, WITHDRAWN_STATE);
+                caseDetailsMap.put(STATE_FIELD, WITHDRAWN_STATE);
             }
         }
-
-        return updateCase(CaseUtils.getCaseData(CaseDetails.builder().data(caseDataUpdated).build(), objectMapper),
-                          authToken, s2sToken, caseId, CaseEvent.CITIZEN_CASE_UPDATE.getValue(), null);
+        log.info("case withdrawn, updating case");
+        return updateCase(updatedCaseData, authToken, s2sToken, caseId, CaseEvent.CITIZEN_CASE_UPDATE.getValue(), null);
 
     }
 
