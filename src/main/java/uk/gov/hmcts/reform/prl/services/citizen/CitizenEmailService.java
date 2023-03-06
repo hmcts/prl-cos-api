@@ -7,11 +7,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.models.Element;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -45,6 +52,44 @@ public class CitizenEmailService {
         emailService.send(
             address,
             EmailTemplateNames.CITIZEN_CASE_SUBMISSION,
+            email,
+            LanguagePreference.english
+        );
+    }
+
+    public void sendCitizenCaseWithdrawalEmail(String authorisation, String caseId, CaseData caseData) {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        EmailTemplateVars emailTemplete = buildCitizenCaseSubmissionEmail(userDetails, caseId);
+
+
+        List<PartyDetails> applicants = caseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> applicantEmailIds = applicants.stream()
+            .map(element -> element.getEmail())
+            .collect(Collectors.toList());
+        applicantEmailIds.stream().forEach(i -> {sendWithdrawalEmail(i, emailTemplete);});
+
+        List<PartyDetails> respondents = caseData
+            .getRespondents()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> respondentEmailIds = applicants.stream()
+            .map(element -> element.getEmail())
+            .collect(Collectors.toList());
+        applicantEmailIds.stream().forEach(i -> {sendWithdrawalEmail(i, emailTemplete);});
+
+    }
+
+    private void sendWithdrawalEmail(String address, EmailTemplateVars email) {
+        emailService.send(
+            address,
+            EmailTemplateNames.WITHDRAW,
             email,
             LanguagePreference.english
         );

@@ -180,4 +180,26 @@ public class CaseController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+//    @PostMapping(value = "/case/withdraw/{caseId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+//    @Operation(description = "Withdrawn case")
+//    public CaseData WithdrawCase(
+//        @Valid @NotNull @RequestBody CaseData caseData,
+//        @PathVariable("caseId") String caseId,
+//        @PathVariable("eventId") String eventId,
+//        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+//        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+//        @RequestHeader("accessCode") String accessCode
+//    ) throws JsonProcessingException {
+//        if (isAuthorized(authorisation, s2sToken)) {
+//            CaseDetails caseDetails = null;
+//            String cosApis2sToken = authTokenGenerator.generate();
+//            caseDetails = caseService.getCase(authorisation,caseId);
+//            return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+//                .toBuilder().id(caseDetails.getId()).build();
+//
+//        } else {
+//            throw (new RuntimeException(INVALID_CLIENT));
+//        }
+//    }
+
 }
