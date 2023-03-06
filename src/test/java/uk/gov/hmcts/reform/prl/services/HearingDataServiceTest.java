@@ -126,7 +126,7 @@ public class HearingDataServiceTest {
             .hearingJudgePersonalCode("test")
             .hearingJudgeLastName("test")
             .hearingJudgeEmailAddress("Test")
-            .mainApplicantName("Test")
+            .applicantName("Test")
             .build();
 
         Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
@@ -227,7 +227,7 @@ public class HearingDataServiceTest {
             .hearingEstimatedDays(15)
             .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
             .hearingAuthority(DioBeforeAEnum.circuitJudge)
-            .mainApplicantName("Test")
+            .applicantName("Test")
             .hearingJudgeNameAndEmail(judicialUser)
             .build();
 
@@ -322,7 +322,7 @@ public class HearingDataServiceTest {
             .hearingEstimatedDays(15)
             .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
             .hearingAuthority(DioBeforeAEnum.circuitJudge)
-            .mainApplicantName("Test")
+            .applicantName("Test")
             .hearingJudgeNameAndEmail(judicialUser)
             .build();
 
@@ -389,6 +389,9 @@ public class HearingDataServiceTest {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
+            .applicantName("test")
+            .solicitorName("Test")
+            .respondentName("Test")
             .build();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             HearingDataPrePopulatedDynamicLists.builder()
@@ -402,7 +405,7 @@ public class HearingDataServiceTest {
                 .retrievedCourtLocations(dynamicList)
                 .hearingListedLinkedCases(dynamicList)
                 .build();
-        HearingData expectedResponse = hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, "test");
+        HearingData expectedResponse = hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, caseData);
         assertNotNull(expectedResponse);
     }
 

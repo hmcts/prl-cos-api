@@ -115,7 +115,7 @@ public class ListWithoutNoticeControllerTest {
             .hearingJudgePersonalCode("test")
             .hearingJudgeLastName("test")
             .hearingJudgeEmailAddress("Test")
-            .mainApplicantName("Test")
+            .applicantName("Test")
             .build();
 
         Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
