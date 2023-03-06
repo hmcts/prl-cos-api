@@ -7,15 +7,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -71,25 +70,15 @@ public class CitizenEmailService {
         List<String> applicantEmailIds = applicants.stream()
             .map(element -> element.getEmail())
             .collect(Collectors.toList());
-        applicantEmailIds.stream().forEach(i -> {sendWithdrawalEmail(i, emailTemplete);});
-
-        List<PartyDetails> respondents = caseData
-            .getRespondents()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
-        List<String> respondentEmailIds = applicants.stream()
-            .map(element -> element.getEmail())
-            .collect(Collectors.toList());
-        applicantEmailIds.stream().forEach(i -> {sendWithdrawalEmail(i, emailTemplete);});
+        applicantEmailIds.stream().forEach(i -> {
+            sendWithdrawalEmail(i, emailTemplete); });
 
     }
 
     private void sendWithdrawalEmail(String address, EmailTemplateVars email) {
         emailService.send(
             address,
-            EmailTemplateNames.WITHDRAW,
+            EmailTemplateNames.CITIZEN_WITHDRAWN,
             email,
             LanguagePreference.english
         );
