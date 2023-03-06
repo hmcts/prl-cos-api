@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
@@ -22,6 +23,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 
+@Slf4j
 public class CaseUtils {
 
     private CaseUtils() {
@@ -60,6 +62,7 @@ public class CaseUtils {
     }
 
     public static boolean getPreviousState(String eachState) {
+        log.info("eachState " + eachState);
         return (!WITHDRAWN_STATE.equalsIgnoreCase(eachState)
             && (!DRAFT_STATE.equalsIgnoreCase(eachState))
             && (!RETURN_STATE.equalsIgnoreCase(eachState))

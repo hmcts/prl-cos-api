@@ -269,6 +269,7 @@ public class CaseService {
     public CaseDetails withdrawCase(CaseData caseData, String caseId, String authToken, String s2sToken) throws JsonProcessingException {
 
         List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(caseId);
+        log.info("eventsForCase " + eventsForCase);
         Optional<String> previousState = eventsForCase.stream().map(CaseEventDetail::getStateId)
             .filter(CaseUtils::getPreviousState).findFirst();
         log.info("previousState " + previousState);
@@ -276,7 +277,9 @@ public class CaseService {
         log.info("withDrawApplicationData " + withDrawApplicationData);
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDetailsMap = getCase(authToken, caseId).getData();
+        log.info("caseDetailsMap " + caseDetailsMap);
         CaseData updatedCaseData = CaseUtils.getCaseData(CaseDetails.builder().data(caseDetailsMap).build(), objectMapper);
+        log.info("updatedCaseData " + updatedCaseData);
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
             if (previousState.isPresent()
                 && !CaseUtils.WITHDRAW_STATE_LIST.contains(previousState.get())) {
