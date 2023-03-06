@@ -44,10 +44,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADJOURNED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSTPONED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WAITING_TO_BE_LISTED;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
@@ -98,12 +100,12 @@ public class HearingManagementService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         Map<String, String> fields = new HashMap<>();
-        fields.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        fields.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
 
         CaseDetails caseDetailsData = null;
         switch (caseState) {
             case PREPARE_FOR_HEARING_CONDUCT_HEARING:
-                fields.put("state", PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue());
+                fields.put(STATE, PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue());
                 caseDetailsData = createEvent(hearingRequest, userToken, systemUpdateUserId,
                                               fields,HEARING_STATE_CHANGE_SUCCESS
                 );
@@ -111,7 +113,7 @@ public class HearingManagementService {
                 break;
 
             case DECISION_OUTCOME:
-                fields.put("state", DECISION_OUTCOME.getValue());
+                fields.put(STATE, DECISION_OUTCOME.getValue());
                 caseDetailsData = createEvent(hearingRequest, userToken, systemUpdateUserId,
                                               fields, HEARING_STATE_CHANGE_SUCCESS
                 );
@@ -154,8 +156,8 @@ public class HearingManagementService {
         );
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("state", fields.get("state"));
-        caseDataMap.put("caseTypeOfApplication", fields.get("caseTypeOfApplication"));
+        caseDataMap.put(STATE, fields.get(STATE));
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, fields.get(CASE_TYPE_OF_APPLICATION));
 
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
@@ -584,7 +586,7 @@ public class HearingManagementService {
 
     public NextHearingDetails getNextHearingDate(String caseReference) {
         String userToken = systemUserService.getSysUserToken();
-        return hearingService.getNextHearingDate(userToken, authTokenGenerator.generate());
+        return hearingService.getNextHearingDate(userToken, caseReference);
     }
 
 }
