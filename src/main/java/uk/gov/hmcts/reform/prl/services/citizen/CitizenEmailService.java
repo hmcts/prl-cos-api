@@ -7,8 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+//import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+//import uk.gov.hmcts.reform.prl.models.Element;
+//import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
@@ -16,8 +17,8 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
-import java.util.List;
-import java.util.stream.Collectors;
+//import java.util.List;
+//import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -59,26 +60,27 @@ public class CitizenEmailService {
     public void sendCitizenCaseWithdrawalEmail(String authorisation, String caseId, CaseData caseData) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         EmailTemplateVars emailTemplete = buildCitizenCaseSubmissionEmail(userDetails, caseId);
+        sendWithdrawalEmail(userDetails.getEmail(), emailTemplete);
 
-
-        List<PartyDetails> applicants = caseData
+        /*List<PartyDetails> applicants = caseData
             .getApplicants()
             .stream()
             .map(Element::getValue)
+            .filter(applicant -> YesOrNo.Yes.equals(applicant.getCanYouProvideEmailAddress()))
             .collect(Collectors.toList());
 
         List<String> applicantEmailIds = applicants.stream()
-            .map(element -> element.getEmail())
+            .map(PartyDetails::getEmail)
             .collect(Collectors.toList());
-        applicantEmailIds.stream().forEach(i -> {
-            sendWithdrawalEmail(i, emailTemplete); });
+        applicantEmailIds.forEach(email -> {
+            sendWithdrawalEmail(email, emailTemplete); });*/
 
     }
 
     private void sendWithdrawalEmail(String address, EmailTemplateVars email) {
         emailService.send(
             address,
-            EmailTemplateNames.CITIZEN_WITHDRAWN,
+            EmailTemplateNames.CITIZEN_CASE_WITHDRAWN,
             email,
             LanguagePreference.english
         );
