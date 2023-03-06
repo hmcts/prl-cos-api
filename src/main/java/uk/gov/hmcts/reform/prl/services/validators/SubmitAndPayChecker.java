@@ -84,7 +84,7 @@ public class SubmitAndPayChecker implements EventChecker {
         boolean optionalFinished;
 
         for (Map.Entry<Event, EventChecker> e : optionalEvents.entrySet()) {
-            optionalFinished = e.getValue().isFinished(caseData) || !(e.getValue().isStarted(caseData));
+            optionalFinished = e.getValue().isFinished(caseData) || !(e.getValue().isStarted(caseData)) || !e.getValue().hasMandatoryCompleted(caseData);
             if (!optionalFinished) {
                 return false;
             }
