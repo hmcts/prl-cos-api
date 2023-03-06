@@ -97,20 +97,7 @@ public class RequestUpdateCallbackService {
             serviceRequestUpdateDto.getCcdCaseNumber()
         );
 
-        log.info(
-            "allTabsUpdateCaseData before {} ",
-            allTabsUpdateCaseData
-        );
-
         getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, allTabsUpdateCaseData);
-
-        log.info(
-            "allTabsUpdateCaseData after {} ",
-            allTabsUpdateCaseData
-        );
-
-        CaseData caseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
-        log.info("Court details: " + caseData.getCourtName() + "  , ID:" + caseData.getCourtId());
 
         allTabService.updateAllTabsIncludingConfTabRefactored(
             authorisation,
@@ -118,11 +105,6 @@ public class RequestUpdateCallbackService {
             allTabsUpdateStartEventResponse,
             allTabsUpdateEventRequestData,
             allTabsUpdateCaseData
-        );
-
-        log.info(
-            "Refreshed the tab for caseid {} ",
-            serviceRequestUpdateDto.getCcdCaseNumber()
         );
 
         log.info(

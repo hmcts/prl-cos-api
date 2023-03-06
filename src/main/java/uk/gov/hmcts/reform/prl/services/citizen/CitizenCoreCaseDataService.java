@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -48,32 +49,28 @@ public class CitizenCoreCaseDataService {
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    CcdCoreCaseDataService ccdCoreCaseDataService;
+
     public CaseDetails linkDefendant(
         String anonymousUserToken,
         Long caseId,
         CaseData caseData,
-        CaseEvent caseEvent
+        CaseEvent caseEvent,
+        StartEventResponse startEventResponse
     ) {
         try {
             UserDetails userDetails = idamClient.getUserDetails(anonymousUserToken);
 
             EventRequestData eventRequestData = eventRequest(caseEvent, userDetails.getId());
 
-            StartEventResponse startEventResponse = startUpdate(
-                anonymousUserToken,
-                eventRequestData,
-                caseId,
-                true
-            );
-            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-            Iterables.removeIf(caseDataMap.values(), Objects::isNull);
+            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
 
-            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataMap);
-            return submitUpdate(
+            return ccdCoreCaseDataService.submitUpdate(
                 anonymousUserToken,
                 eventRequestData,
                 caseDataContent,
-                caseId,
+                String.valueOf(caseId),
                 true
             );
         } catch (Exception exception) {
@@ -139,38 +136,6 @@ public class CitizenCoreCaseDataService {
         }
     }
 
-    private CaseDetails submitUpdate(
-        String authorisation,
-        EventRequestData eventRequestData,
-        CaseDataContent caseDataContent,
-        Long caseId,
-        boolean isRepresented
-    ) {
-        if (isRepresented) {
-            return coreCaseDataApi.submitEventForCaseWorker(
-                authorisation,
-                authTokenGenerator.generate(),
-                eventRequestData.getUserId(),
-                eventRequestData.getJurisdictionId(),
-                eventRequestData.getCaseTypeId(),
-                caseId.toString(),
-                eventRequestData.isIgnoreWarning(),
-                caseDataContent
-            );
-        } else {
-            return coreCaseDataApi.submitEventForCitizen(
-                authorisation,
-                authTokenGenerator.generate(),
-                eventRequestData.getUserId(),
-                eventRequestData.getJurisdictionId(),
-                eventRequestData.getCaseTypeId(),
-                caseId.toString(),
-                eventRequestData.isIgnoreWarning(),
-                caseDataContent
-            );
-        }
-    }
-
     public CaseDetails updateCase(
         String authorisation,
         Long caseId,
@@ -190,11 +155,11 @@ public class CitizenCoreCaseDataService {
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
             Iterables.removeIf(caseDataMap.values(), Objects::isNull);
             CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataMap);
-            return submitUpdate(
+            return ccdCoreCaseDataService.submitUpdate(
                 authorisation,
                 eventRequestData,
                 caseDataContent,
-                caseId,
+                String.valueOf(caseId),
                 !userDetails.getRoles().contains(CITIZEN_ROLE)
             );
         } catch (Exception exception) {
@@ -213,7 +178,8 @@ public class CitizenCoreCaseDataService {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
 
         // We can Add a Caseworker Event as well in future depending on the Role from userdetails
-        EventRequestData eventRequestData = eventRequest(CITIZEN_CASE_CREATE,
+        EventRequestData eventRequestData = eventRequest(
+            CITIZEN_CASE_CREATE,
             userDetails.getId()
         );
 
