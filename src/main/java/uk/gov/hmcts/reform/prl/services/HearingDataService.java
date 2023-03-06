@@ -183,6 +183,9 @@ public class HearingDataService {
 
 
     public HearingData generateHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,CaseData caseData) {
+        log.info("ApplicantName : {}",caseData.getApplicantName());
+        log.info("SolicitorName : {}",caseData.getSolicitorName());
+        log.info("RespondentName : {}",caseData.getRespondentName());
         return HearingData.builder()
             .hearingTypes(hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes())
             .confirmedHearingDates(hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates())
@@ -200,9 +203,11 @@ public class HearingDataService {
             .localAuthorityHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             //We need to handle c100 details here ternary condition
             .applicantName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getApplicantName() : "")
-            .applicantSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getSolicitorName() : "")
+            .applicantSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                    ? caseData.getApplicantsFL401().getRepresentativeFirstName()
+                + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "")
             .respondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "")
-            .respondentSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getSolicitorName() : "")
+            .respondentSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? "" : "")
             .build();
     }
 
