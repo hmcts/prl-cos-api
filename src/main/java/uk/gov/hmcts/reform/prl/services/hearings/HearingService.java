@@ -20,7 +20,7 @@ public class HearingService {
 
     private final AuthTokenGenerator authTokenGenerator;
 
-    private final HearingApiClient hearingApiClient;
+    private  HearingApiClient hearingApiClient;
 
     public Hearings getHearings(String userToken, String caseReferenceNumber) {
 
