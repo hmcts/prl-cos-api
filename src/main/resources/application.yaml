@@ -118,6 +118,7 @@ uk:
             HEARING_CANCELLED: 408a5116-a9f5-42ce-afc2-7caec641498d
 
           welsh:
+            SOLICITOR: 8cb02993-7dbe-4e53-a4c4-8bdc106c99ae
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
