@@ -276,11 +276,12 @@ public class CaseService {
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         log.info("withDrawApplicationData " + withDrawApplicationData);
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
-        Map<String, Object> caseDetailsMap = getCase(authToken, caseId).getData();
-        log.info("caseDetailsMap " + caseDetailsMap);
-        CaseData updatedCaseData = CaseUtils.getCaseData(CaseDetails.builder().data(caseDetailsMap).build(), objectMapper);
+        CaseDetails caseDetails = getCase(authToken, caseId);
+        CaseData updatedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("updatedCaseData " + updatedCaseData);
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
+            Map<String, Object> caseDetailsMap = caseDetails.getData();
+            log.info("caseDetailsMap " + caseDetailsMap);
             if (previousState.isPresent()
                 && !CaseUtils.WITHDRAW_STATE_LIST.contains(previousState.get())) {
                 caseDetailsMap.put(WITHDRAW_REQUEST_FIELD, PENDING);
