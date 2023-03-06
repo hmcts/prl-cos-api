@@ -86,6 +86,7 @@ uk:
             CASEWORKER: 8c1cd107-b76f-4e10-9c44-afb49415cda2
             RETURNAPPLICATION: 6db213c8-b4a1-4a3f-b5b2-c71303b26061
             WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
+            WITHDRAWN_APPLICANT_RESPONDENT: ee06226c-222c-444c-a5d2-50015e6d07d1
             COURTADMIN: f980e4a8-4eed-4887-9ae9-cb2c6a42fec7
             GATEKEEPER: 52223e2c-1c68-470b-b0bb-66121569adb1
             GATEKEEPER_FL401: c078de4d-9177-4e0d-ab9f-5adcf27a6ee5
@@ -120,6 +121,7 @@ uk:
           welsh:
             SOLICITOR: 8cb02993-7dbe-4e53-a4c4-8bdc106c99ae
             RETURNAPPLICATION: 6db213c8-b4a1-4a3f-b5b2-c71303b26061
+            WITHDRAWN_APPLICANT_RESPONDENT: 69db41c2-7d4a-494f-987b-6cc97e0bc069
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
