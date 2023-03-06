@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 
 
@@ -31,5 +32,14 @@ public class HearingService {
         return hearingDetails;
     }
 
+    public NextHearingDetails getNextHearingDate(String userToken, String caseReferenceNumber) {
+
+        try {
+            return hearingApiClient.getNextHearingDate(userToken, authTokenGenerator.generate(), caseReferenceNumber);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
 
 }

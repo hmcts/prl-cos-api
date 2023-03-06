@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.exception.HearingManagementValidationException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
@@ -22,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class HearingsManagementControllerTest {
@@ -64,11 +66,12 @@ public class HearingsManagementControllerTest {
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
+        State caseState = DECISION_OUTCOME;
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest);
+        doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest,caseState);
 
-        hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest);
+        hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest,caseState);
         assertTrue(true);
 
     }
@@ -80,11 +83,12 @@ public class HearingsManagementControllerTest {
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
+        State caseState = DECISION_OUTCOME;
         when(authorisationService.authoriseService(any())).thenReturn(false);
-        doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest);
+        doNothing().when(hearingManagementService).caseStateChangeForHearingManagement(hearingRequest,caseState);
         assertThrows(
             HearingManagementValidationException.class,
-            () -> hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest)
+            () -> hearingsManagementController.caseStateUpdateByHearingManagement("s2s token", hearingRequest,caseState)
         );
     }
 }
