@@ -66,12 +66,11 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("selectedOrder", caseData.getCreateSelectOrderOptions() != null
+            ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseData.toBuilder()
-                      .selectedOrder(caseData.getCreateSelectOrderOptions() != null
-                                         ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
-                      .build().toMap(CcdObjectMapper.getObjectMapper())).build();
-
+            .data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/populate-draft-order-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -87,7 +86,6 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
 
@@ -189,4 +187,3 @@ public class DraftAnOrderController {
         )).build();
     }
 }
-
