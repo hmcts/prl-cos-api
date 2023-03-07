@@ -63,7 +63,6 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                    @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        log.info("case type of application in send and replu start: {}", caseData.getCaseTypeOfApplication());
         caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageList(caseData, authorisation));
 
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
@@ -81,7 +80,6 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        log.info("case type of application in send and replu mid: {}", caseData.getCaseTypeOfApplication());
         List<String> errors = new ArrayList<>();
         if (caseData.getChooseSendOrReply().equals(REPLY)) {
             if (!sendAndReplyService.hasMessages(caseData)) {
@@ -107,7 +105,6 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        log.info("case type of application in send and replu submti: {}", caseData.getCaseTypeOfApplication());
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             Message newMessage = sendAndReplyService.buildNewSendMessage(caseData);
