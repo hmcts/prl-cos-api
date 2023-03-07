@@ -72,7 +72,6 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(draftAnOrderService.populateDraftOrderDocument(
                 caseData)).build();
@@ -87,11 +86,6 @@ public class EditAndApproveDraftOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info(
-            "********caseData.getDoYouWantCourtAdminToAddAnything***** {}",
-            caseData.getJudgeDirectionsToAdmin()
-        );
-        log.info("*** Case type of application in edit and approve an order submission before: {}", caseData.getCaseTypeOfApplication());
         caseDataUpdated.put("caseTypeOfApplication", caseData.getSelectedCaseTypeID());
         if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")
             && (WhatToDoWithOrderEnum.finalizeSaveToServeLater

@@ -784,7 +784,6 @@ public class ManageOrderServiceTest {
             .doesOrderClosesCase(YesOrNo.Yes)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .manageOrders(manageOrders)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
@@ -810,6 +809,7 @@ public class ManageOrderServiceTest {
             .doesOrderClosesCase(YesOrNo.Yes)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -850,10 +850,10 @@ public class ManageOrderServiceTest {
             .orderCollection(new ArrayList<>())
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
             .manageOrders(manageOrders)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -965,10 +965,10 @@ public class ManageOrderServiceTest {
             .orderCollection(new ArrayList<>())
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
             .manageOrders(manageOrders)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))

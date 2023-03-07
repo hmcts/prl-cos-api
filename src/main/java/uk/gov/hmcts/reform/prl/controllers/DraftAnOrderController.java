@@ -68,12 +68,11 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("selectedOrder", caseData.getCreateSelectOrderOptions() != null
+            ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseData.toBuilder()
-                      .selectedOrder(caseData.getCreateSelectOrderOptions() != null
-                                         ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
-                      .build().toMap(CcdObjectMapper.getObjectMapper())).build();
-
+            .data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/populate-draft-order-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -89,7 +88,6 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
 
@@ -200,13 +198,14 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("*** Case type of application in draft orders submission before: {}", caseData.getSelectedCaseTypeID());
         caseDataUpdated.put("caseTypeOfApplication", caseData.getSelectedCaseTypeID());
         caseDataUpdated.putAll(draftAnOrderService.generateDraftOrderCollection(caseData));
         caseDataUpdated.put("previewOrderDoc",null);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
-

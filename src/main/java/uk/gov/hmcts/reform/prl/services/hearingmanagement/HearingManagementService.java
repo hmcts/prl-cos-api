@@ -85,7 +85,6 @@ public class HearingManagementService {
 
         log.info("Processing the callback for the caseId {} with HMC status {}", hearingRequest.getCaseRef(),
                      hearingRequest.getHearingUpdate().getHmcStatus());
-        log.info("State being sent....{}",caseState);
 
         String userToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(userToken);
