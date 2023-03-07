@@ -84,7 +84,7 @@ uk:
           english:
             SOLICITOR: a080f4ce-a07f-43ec-a3f0-f196d83f7730
             CASEWORKER: 8c1cd107-b76f-4e10-9c44-afb49415cda2
-            RETURNAPPLICATION: 41a7ffcd-a5ec-4377-ba50-59619ad0ac8c
+            RETURNAPPLICATION: 6db213c8-b4a1-4a3f-b5b2-c71303b26061
             WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
             COURTADMIN: f980e4a8-4eed-4887-9ae9-cb2c6a42fec7
             GATEKEEPER: 52223e2c-1c68-470b-b0bb-66121569adb1
@@ -118,6 +118,7 @@ uk:
             HEARING_CANCELLED: 408a5116-a9f5-42ce-afc2-7caec641498d
 
           welsh:
+            RETURNAPPLICATION: daf43ed7-d51e-4e0b-ac93-78b412cd4c47
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
