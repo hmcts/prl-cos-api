@@ -20,10 +20,14 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.cafcass.HmcHearingRefDataApi;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.refdata.Categories;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -44,9 +48,6 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.SEARCH_CASE_ENDPOINT;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.SERVICE_AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTH_TOKEN;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTH_TOKEN;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 @Slf4j
@@ -91,7 +92,8 @@ public class CafCassControllerFunctionalTest {
         Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
         Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
         Mockito.when(postcodeLookupService.isValidNationalPostCode(anyString(), anyString())).thenReturn(true);
-        Mockito.when(hearingRefDataApi.retrieveListOfValuesByCategoryId(anyString(), anyString(), anyString(), anyString())).thenReturn(refDataMap);
+        Mockito.when(hearingRefDataApi.retrieveListOfValuesByCategoryId(anyString(), anyString(), anyString(), anyString())).thenReturn(
+            Categories.builder().build());
         Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedSearchResult);
 
 
