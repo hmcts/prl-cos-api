@@ -18,6 +18,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.prl.clients.cafcass.HmcHearingRefDataApi;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -44,6 +45,9 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.SERVICE_AUTHORISATION_
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTH_TOKEN;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTH_TOKEN;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 @Slf4j
 @SpringBootTest
@@ -67,6 +71,9 @@ public class CafCassControllerFunctionalTest {
     @MockBean
     private AuthTokenGenerator authTokenGenerator;
 
+    @MockBean
+    private HmcHearingRefDataApi hearingRefDataApi;
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
@@ -76,12 +83,15 @@ public class CafCassControllerFunctionalTest {
     public void givenDatetimeWindow_whenGetRequestToSearchCasesByCafCassController_then200Response() throws Exception {
         String cafcassResponseStr = TestResourceUtil.readFileFrom(CREATE_SERVICE_RESPONSE);
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        Map<String, String> refDataMap = new HashMap<String, String>();
+        refDataMap.put("ABA5-APL","Appeal");
 
         SearchResult expectedSearchResult = objectMapper.readValue(cafcassResponseStr, SearchResult.class);
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
         Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
         Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
         Mockito.when(postcodeLookupService.isValidNationalPostCode(anyString(), anyString())).thenReturn(true);
+        Mockito.when(hearingRefDataApi.retrieveListOfValuesByCategoryId(anyString(), anyString(), anyString(), anyString())).thenReturn(refDataMap);
         Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedSearchResult);
 
 
