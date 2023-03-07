@@ -544,7 +544,7 @@ public class HearingManagementService {
     public void caseNextHearingDateChangeForHearingManagement(NextHearingDateRequest nextHearingDateRequest) throws Exception {
 
         log.info("Processing the callback for the caseId {} with next hearing date {}", nextHearingDateRequest.getCaseRef(),
-                 nextHearingDateRequest.getNextHearingDetails().getNextHearingDate());
+                 nextHearingDateRequest.getNextHearingDetails().getHearingDateTime());
 
         String userToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(userToken);

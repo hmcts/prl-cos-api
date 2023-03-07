@@ -120,7 +120,7 @@ public class HearingManagementServiceTest {
 
         nextHearingDateRequest = NextHearingDateRequest.builder()
             .caseRef("1669565933090179")
-            .nextHearingDetails(NextHearingDetails.builder().hearingId("123").nextHearingDate(testNextHearingDate)
+            .nextHearingDetails(NextHearingDetails.builder().hearingId("123").hearingDateTime(testNextHearingDate)
                                     .build())
             .build();
 
@@ -702,7 +702,7 @@ public class HearingManagementServiceTest {
                                                      UPDATE_NEXT_HEARING_DATE_IN_CCD
         ))
             .thenReturn(buildStartEventResponse("updateNextHearingDateInCCD", eventToken));
-        NextHearingDetails nextHearingDetails = NextHearingDetails.builder().hearingId("123").nextHearingDate(
+        NextHearingDetails nextHearingDetails = NextHearingDetails.builder().hearingId("123").hearingDateTime(
             testNextHearingDate).build();
         when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                       caseType, nextHearingDateRequest.getCaseRef(), true,

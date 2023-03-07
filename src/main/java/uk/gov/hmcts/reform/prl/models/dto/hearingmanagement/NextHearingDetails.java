@@ -17,6 +17,6 @@ public class NextHearingDetails {
     @JsonProperty("hearingId")
     private final String hearingId;
     @JsonProperty("nextHearingDate")
-    private final LocalDateTime nextHearingDate;
+    private final LocalDateTime hearingDateTime;
 
 }
