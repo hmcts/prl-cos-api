@@ -144,7 +144,6 @@ public class FL401SubmitApplicationService {
                 .isNotificationSent("No")
                 .build();
         }
-        log.info("fl401SendApplicationNotification ====> " + caseData);
         return caseData;
     }
 }
