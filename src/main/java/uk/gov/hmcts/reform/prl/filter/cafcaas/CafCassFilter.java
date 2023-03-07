@@ -41,11 +41,11 @@ public class CafCassFilter {
     }
 
     private void filterCaseByApplicationCaseType(CafCassResponse cafCassResponse) {
-        log.info("Cafcass response before filtering -> {}", cafCassResponse.getCases().size());
+        log.info("Cafcass response before ApplicationCaseType filtering -> {}", cafCassResponse.getCases().size());
         List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases().stream()
             .filter(filterByCaseTypeAndState())
             .collect(Collectors.toList());
-        log.info("Cafcaas records after filtering -> {}", (cafCassCaseDetailList != null && cafCassCaseDetailList.size() != 0)
+        log.info("Cafcaas records after ApplicationCaseType filtering -> {}", (cafCassCaseDetailList != null && cafCassCaseDetailList.size() != 0)
             ? cafCassCaseDetailList.size() : 0);
 
         setNonNullEmptyElementList(cafCassCaseDetailList);
@@ -115,6 +115,7 @@ public class CafCassFilter {
                 }
             }).collect(Collectors.toList());
         cafCassResponse.setCases(cafCassCaseDetailList);
+        log.info("total number of records after applying england postcode filters - {}", cafCassResponse.getCases().size());
     }
 
     private boolean hasApplicantValidPostcode(CafCassCaseData cafCassCaseData) {
