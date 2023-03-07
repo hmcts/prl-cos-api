@@ -124,6 +124,7 @@ public class FL401SubmitApplicationService {
 
 
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
+        log.info("CaseData after: " + caseDataUpdated);
         return caseDataUpdated;
     }
 

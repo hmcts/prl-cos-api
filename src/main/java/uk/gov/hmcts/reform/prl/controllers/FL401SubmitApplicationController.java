@@ -99,6 +99,7 @@ public class FL401SubmitApplicationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true)  String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
+        log.info("CaseData before: " + callbackRequest.getCaseDetails());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(fl401SubmitApplicationService.fl401GenerateDocumentSubmitApplication(
