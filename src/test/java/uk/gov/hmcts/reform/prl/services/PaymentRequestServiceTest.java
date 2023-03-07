@@ -723,5 +723,19 @@ public class PaymentRequestServiceTest {
         assertEquals("Success", paymentResponse.getPaymentStatus());
     }
 
+    @Test
+    public void testCreateServiceRequestFromCcdCallack() throws Exception {
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest ccdCallbackRequest
+            = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().data(stringObjectMap)
+                             .build()).build();
+
+        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        paymentRequestService.createServiceRequestFromCcdCallack(ccdCallbackRequest, authToken);
+    }
 }
 
