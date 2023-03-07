@@ -12,10 +12,10 @@ import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -63,8 +63,8 @@ public class HearingData {
     @JsonProperty("instructionsForRemoteHearing")
     private final String instructionsForRemoteHearing;
 
-    @JsonProperty("hearingDateTimes")
-    private final List<LocalDateTime> hearingDateTimes;
+    @JsonProperty("hearingScheduleDetails")
+    private final List<Element<HearingScheduleDetails>> hearingScheduleDetails;
 
     @JsonProperty("hearingEstimatedHours")
     private final int hearingEstimatedHours;
