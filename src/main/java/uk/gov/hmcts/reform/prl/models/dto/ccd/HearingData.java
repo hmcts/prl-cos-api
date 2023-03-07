@@ -31,11 +31,11 @@ public class HearingData {
 
     private final DynamicList hearingChannels;
 
-    private final DynamicList hearingVideoChannels;
+    private DynamicList hearingVideoChannels;
 
-    private final DynamicList hearingTelephoneChannels;
+    private DynamicList hearingTelephoneChannels;
 
-    private final DynamicList courtList;
+    private DynamicList courtList;
 
     private final DynamicList localAuthorityHearingChannel;
 
