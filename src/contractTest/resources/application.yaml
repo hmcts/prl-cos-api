@@ -393,9 +393,14 @@ postcodelookup:
 cafcaas:
   search-case-type-id: PRLAPPS
   caseTypeOfApplicationList: C100
-  caseState: DECISION_OUTCOME
-  hearingStatus: LISTED
+  caseState: DECISION_OUTCOME, PREPARE_FOR_HEARING_CONDUCT_HEARING
+  hearingStatus: LISTED, CANCELLED
 ccd:
   elastic-search-api:
     result-size: 100
     boost: 2.0
+
+hearing:
+  api:
+    url: ${HEARING_API_REFDATA_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
+  cateogry-id: HearingType
