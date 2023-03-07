@@ -58,6 +58,7 @@ public class CitizenEmailService {
     }
 
     public void sendCitizenCaseWithdrawalEmail(String authorisation, String caseId, CaseData caseData) {
+        log.info("Inside sendCitizenCaseWithdrawalEmail");
         UserDetails userDetails = userService.getUserDetails(authorisation);
         EmailTemplateVars emailTemplete = buildCitizenCaseSubmissionEmail(userDetails, caseId);
         sendWithdrawalEmail(userDetails.getEmail(), emailTemplete);
