@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -270,9 +271,8 @@ public class CaseService {
         Optional<String> previousState = caseEventService.findEventsForCase(caseId)
             .stream().map(CaseEventDetail::getStateId)
             .filter(CaseUtils::getPreviousState).findFirst();
-
-        Optional<YesOrNo> withdrawApplication = ofNullable(caseData.getWithDrawApplicationData()
-                                                               .getWithDrawApplication());
+        WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
+        Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         CaseDetails caseDetails = getCase(authToken, caseId);
         CaseData updatedCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder().id(caseDetails.getId()).build();
@@ -289,11 +289,8 @@ public class CaseService {
                 log.info("setting state to withdrawn and sending email notification");
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(updatedCaseData.getCaseTypeOfApplication())) {
                     log.info("c100 case withdrawn");
+                    updatedCaseData.toBuilder().withDrawApplicationData(withDrawApplicationData).build();
                     citizenEmailService.sendCitizenCaseWithdrawalEmail(authToken, caseId, updatedCaseData);
-                    // Refreshing the page in the same event. Hence no external event call needed.
-                    // Getting the tab fields and add it to the casedetails..
-                    Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-                    caseDetailsMap.putAll(allTabsFields);
                 }
                 caseDetailsMap.put(STATE_FIELD, WITHDRAWN_STATE);
                 log.info("caseDetailsMap " + caseDetailsMap);
