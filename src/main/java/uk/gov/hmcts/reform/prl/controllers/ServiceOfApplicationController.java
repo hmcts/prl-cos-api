@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @RestController
 @RequestMapping("/service-of-application")
@@ -78,7 +77,7 @@ public class ServiceOfApplicationController {
         List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData);
 
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase("C100")) {
             log.info("****** applicantList : {}", applicantList);
             log.info("****** applicantSolicitorList : {}", applicantSolicitorList);
             log.info("****** respondent list : {}", respondentList);
