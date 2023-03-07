@@ -1482,7 +1482,7 @@ public class ManageOrderService {
                 String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
                 log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, welshTemplate);
                 if (welshTemplate != null && welshTemplate.contains("-WEL-")) {
-                    generatedDocumentInfoWelsh =  dgsService.generateWelshDocument(
+                    generatedDocumentInfoWelsh = dgsService.generateWelshDocument(
                         authorisation,
                         CaseDetails.builder().caseData(caseData).build(),
                         welshTemplate
