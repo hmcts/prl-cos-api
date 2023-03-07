@@ -296,11 +296,11 @@ public class CaseService {
                     caseDetailsMap.putAll(allTabsFields);
                 }
                 caseDetailsMap.put(STATE_FIELD, WITHDRAWN_STATE);
-                log.info("caseDetailsMap "+ caseDetailsMap);
+                log.info("caseDetailsMap " + caseDetailsMap);
             }
         }
         log.info("case withdrawn, updating case");
-        log.info("updatedCaseData "+ updatedCaseData);
+        log.info("updatedCaseData " + updatedCaseData);
         return updateCase(updatedCaseData, authToken, s2sToken, caseId, CaseEvent.CITIZEN_CASE_UPDATE.getValue(), null);
 
     }
