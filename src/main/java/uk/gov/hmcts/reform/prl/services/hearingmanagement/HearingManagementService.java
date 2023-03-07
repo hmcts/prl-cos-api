@@ -62,6 +62,10 @@ public class HearingManagementService {
 
     public static final String HEARING_STATE_CHANGE_SUCCESS = "hmcCaseUpdateSuccess";
 
+    public static final String HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME = "hmcCaseUpdDecOutcome";
+
+    public static final String HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING = "hmcCaseUpdPrepForHearing";
+
     public static final String UPDATE_NEXT_HEARING_DATE_IN_CCD = "updateNextHearingDateInCCD";
 
     private static final String DATE_FORMAT = "dd-MM-yyyy";
@@ -107,7 +111,7 @@ public class HearingManagementService {
             case PREPARE_FOR_HEARING_CONDUCT_HEARING:
                 fields.put(STATE, PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue());
                 caseDetailsData = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                              fields,HEARING_STATE_CHANGE_SUCCESS
+                                              fields,HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING
                 );
                 updateTabsAfterStateChange(caseDetailsData.getData(), caseDetailsData.getId());
                 break;
@@ -115,7 +119,7 @@ public class HearingManagementService {
             case DECISION_OUTCOME:
                 fields.put(STATE, DECISION_OUTCOME.getValue());
                 caseDetailsData = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                              fields, HEARING_STATE_CHANGE_SUCCESS
+                                              fields, HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME
                 );
                 updateTabsAfterStateChange(caseDetailsData.getData(), caseDetailsData.getId());
                 break;
