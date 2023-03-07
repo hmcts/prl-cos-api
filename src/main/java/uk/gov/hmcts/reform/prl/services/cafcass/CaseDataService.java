@@ -144,21 +144,23 @@ public class CaseDataService {
         final Hearings hearing = cafCassResponse.getCases().stream()
             .filter(cafCassCaseDetail -> cafCassCaseDetail.getCaseData().getHearingData() != null)
             .map(cafCassCaseDetail -> cafCassCaseDetail.getCaseData().getHearingData())
-            .findFirst().get();
+            .findFirst().orElse(null);
 
-        final Map<String, String> refDataCategoryValueMap = hearingService.getRefDataCategoryValueMap(
-            authorisation,
-            s2sToken,
-            hearing.getHmctsServiceCode()
-        );
+        if (hearing != null) {
+            final Map<String, String> refDataCategoryValueMap = hearingService.getRefDataCategoryValueMap(
+                authorisation,
+                s2sToken,
+                hearing.getHmctsServiceCode()
+            );
 
-        cafCassResponse.getCases().stream().forEach(cafCassCaseDetail -> {
-            final Hearings hearingData = cafCassCaseDetail.getCaseData().getHearingData();
-            if (null != hearingData) {
-                hearingData.getCaseHearings().stream().forEach(caseHearing -> {
-                    caseHearing.setHearingTypeValue(refDataCategoryValueMap.get(caseHearing.getHearingType()));
-                });
-            }
-        });
+            cafCassResponse.getCases().stream().forEach(cafCassCaseDetail -> {
+                final Hearings hearingData = cafCassCaseDetail.getCaseData().getHearingData();
+                if (null != hearingData) {
+                    hearingData.getCaseHearings().stream().forEach(caseHearing -> {
+                        caseHearing.setHearingTypeValue(refDataCategoryValueMap.get(caseHearing.getHearingType()));
+                    });
+                }
+            });
+        }
     }
 }
