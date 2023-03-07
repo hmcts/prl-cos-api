@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers.cafcass;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -21,19 +20,24 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.cafcass.HmcHearingRefDataApi;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
-import uk.gov.hmcts.reform.prl.models.cafcass.hearing.refdata.Categories;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -57,6 +61,8 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTH_TOKE
 @ContextConfiguration
 public class CafCassControllerFunctionalTest {
 
+    private final String userToken = "Bearer testToken";
+
     private MockMvc mockMvc;
 
     @Autowired
@@ -76,26 +82,39 @@ public class CafCassControllerFunctionalTest {
     @MockBean
     private HmcHearingRefDataApi hearingRefDataApi;
 
+    @MockBean
+    SystemUserService systemUserService;
+
+    @MockBean
+    private HearingService hearingService;
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-    @Ignore
     @Test
     public void givenDatetimeWindow_whenGetRequestToSearchCasesByCafCassController_then200Response() throws Exception {
         String cafcassResponseStr = TestResourceUtil.readFileFrom(CREATE_SERVICE_RESPONSE);
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-        Map<String, String> refDataMap = new HashMap<String, String>();
+        Map<String, String> refDataMap = new HashMap<>();
         refDataMap.put("ABA5-APL","Appeal");
 
         SearchResult expectedSearchResult = objectMapper.readValue(cafcassResponseStr, SearchResult.class);
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
         Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
         Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(systemUserService.getSysUserToken()).thenReturn(userToken);
         Mockito.when(postcodeLookupService.isValidNationalPostCode(anyString(), anyString())).thenReturn(true);
-        Mockito.when(hearingRefDataApi.retrieveListOfValuesByCategoryId(anyString(), anyString(), anyString(), anyString())).thenReturn(
-            Categories.builder().build());
+        Mockito.when(hearingService.getHearings(
+            anyString(),
+            anyString()
+        )).thenReturn(Hearings.hearingsWith().hmctsServiceCode("ABA5")
+                          .caseHearings(List.of(
+                              CaseHearing.caseHearingWith().hearingType("ABA5-APL").build()))
+            .build());
+        Mockito.when(hearingService.getRefDataCategoryValueMap("authorisation", authTokenGenerator.generate(), "ABA5")).thenReturn(
+            refDataMap);
         Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedSearchResult);
 
 
