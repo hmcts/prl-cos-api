@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -43,9 +43,6 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAW_REQUEST_FIELD;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -278,22 +275,19 @@ public class CaseService {
             .toBuilder().id(caseDetails.getId()).build();
 
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            Map<String, Object> caseDetailsMap = caseDetails.getData();
             if (previousState.isPresent()
                 && !CaseUtils.WITHDRAW_STATE_LIST.contains(previousState.get())) {
-                caseDetailsMap.put(WITHDRAW_REQUEST_FIELD, PENDING);
+                updatedCaseData.toBuilder().isWithdrawRequestSent(PENDING);
                 log.info("Case is updated as WithdrawRequestSent");
                 //REVIEW IF ANY EMAILS TO SEND
-                //sendWithdrawEmails(caseData, userDetails, caseDetails);
             } else {
                 log.info("setting state to withdrawn and sending email notification");
-                if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(updatedCaseData.getCaseTypeOfApplication())) {
-                    log.info("c100 case withdrawn");
-                    updatedCaseData.toBuilder().withDrawApplicationData(withDrawApplicationData).build();
-                    citizenEmailService.sendCitizenCaseWithdrawalEmail(authToken, caseId, updatedCaseData);
-                }
-                caseDetailsMap.put(STATE_FIELD, WITHDRAWN_STATE);
-                log.info("caseDetailsMap " + caseDetailsMap);
+                updatedCaseData.toBuilder()
+                    .state(State.CASE_WITHDRAWN)
+                    .withDrawApplicationData(withDrawApplicationData)
+                    .build();
+
+                citizenEmailService.sendCitizenCaseWithdrawalEmail(authToken, caseId, updatedCaseData);
             }
         }
         log.info("case withdrawn, updating case");
