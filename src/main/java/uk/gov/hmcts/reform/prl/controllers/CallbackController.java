@@ -409,7 +409,6 @@ public class CallbackController {
                     .findFirst();
                 if (localCourtAdminEmail.isPresent()) {
                     String email = localCourtAdminEmail.get().getEmail();
-                    log.info(" Sending notification to court email : {}", email);
                     caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
                 }
             }
@@ -425,7 +424,6 @@ public class CallbackController {
         Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
         if (localCourtAdmin.isPresent()) {
             String email = localCourtAdmin.get().get(0).getValue().getEmail();
-            log.info(" Sending notification to court email : {}", email);
             caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
         }
         solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
