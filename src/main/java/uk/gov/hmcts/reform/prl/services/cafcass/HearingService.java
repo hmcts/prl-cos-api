@@ -7,10 +7,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.cafcass.HearingApiClient;
+import uk.gov.hmcts.reform.prl.clients.cafcass.HmcHearingRefDataApi;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.refdata.Categories;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.refdata.Category;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -19,8 +23,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HearingService {
 
-    @Value("${cafcaas.hearingStatus}")
-    private String hearingStatus;
+    @Value("#{'${cafcaas.hearingStatus}'.split(',')}")
+    private List<String> hearingStatusList;
+
+    @Value("${hearing.cateogry-id}")
+    private String categoryId;
 
     private Hearings hearingDetails;
 
@@ -28,8 +35,11 @@ public class HearingService {
 
     private final HearingApiClient hearingApiClient;
 
-    public Hearings getHearings(String userToken, String caseReferenceNumber) {
+    @Autowired
+    private final HmcHearingRefDataApi hearingRefDataApi;
 
+
+    public Hearings getHearings(String userToken, String caseReferenceNumber) {
         try {
             hearingDetails = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
             filterHearings();
@@ -46,10 +56,16 @@ public class HearingService {
 
             final List<CaseHearing> caseHearings = hearingDetails.getCaseHearings();
 
-            // filter hearing based on the configured hearing status
-            final List<CaseHearing> hearings = caseHearings.stream().filter(hearing -> hearing.getHmcStatus().equals(
-                hearingStatus)).collect(
-                Collectors.toList());
+            final List<String> hearingStatuses = hearingStatusList.stream().map(String::trim).collect(Collectors.toList());
+
+            final List<CaseHearing> hearings = caseHearings.stream()
+                    .filter(hearing ->
+                        hearingStatuses.stream().anyMatch(hearingStatus -> hearingStatus.equals(
+                            hearing.getHmcStatus()))
+                    )
+                .collect(
+                    Collectors.toList());
+
 
             // if we find any hearing after filteration, change hmc status to null as it's not required in response.
             if (hearings != null && !hearings.isEmpty()) {
@@ -59,6 +75,22 @@ public class HearingService {
                 hearingDetails = null;
             }
         }
+    }
+
+
+    public Map<String, String>  getRefDataCategoryValueMap(
+        String authorization, String serviceAuthorization, String serviceCode) {
+        // Call hearing api to get hmc status value
+        final Categories categoriesByCategoryId =
+            hearingRefDataApi.retrieveListOfValuesByCategoryId(
+                authorization,
+                serviceAuthorization,
+                categoryId,
+                serviceCode
+            );
+
+        return categoriesByCategoryId.getListOfCategory().stream()
+            .collect(Collectors.toMap(Category::getKey, Category::getValueEn));
     }
 
 }
