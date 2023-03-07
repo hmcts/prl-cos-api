@@ -17,7 +17,8 @@ public class CcdCaseRepository implements CaseRepository {
     CcdCaseApi ccdCaseApi;
 
     @Override
-    public void linkDefendant(String authorisation, String anonymousUserToken, String caseId, CaseData caseData, StartEventResponse startEventResponse) {
+    public void linkDefendant(String authorisation, String anonymousUserToken, String caseId,
+                              CaseData caseData, StartEventResponse startEventResponse) {
         ccdCaseApi.linkCitizenToCase(authorisation, anonymousUserToken, caseId, caseData, startEventResponse);
     }
 

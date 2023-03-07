@@ -111,7 +111,6 @@ public class CcdCoreCaseDataService {
     public StartEventResponse startSubmitCreate(
         String authorisation,
         String s2sToken,
-        String userId,
         EventRequestData eventRequestData,
         boolean isRepresented
     ) {
@@ -119,7 +118,7 @@ public class CcdCoreCaseDataService {
             return coreCaseDataApi.startForCaseworker(
                 authorisation,
                 s2sToken,
-                userId,
+                eventRequestData.getUserId(),
                 JURISDICTION,
                 CASE_TYPE,
                 eventRequestData.getEventId()
@@ -128,7 +127,7 @@ public class CcdCoreCaseDataService {
             return coreCaseDataApi.startForCitizen(
                 authorisation,
                 s2sToken,
-                userId,
+                eventRequestData.getUserId(),
                 JURISDICTION,
                 CASE_TYPE,
                 eventRequestData.getEventId()
