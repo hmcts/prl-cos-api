@@ -31,6 +31,8 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -46,6 +48,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -94,6 +97,13 @@ public class ManageOrderServiceTest {
     @Mock
     private DocumentLanguageService documentLanguageService;
 
+    @Mock
+    DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    private DynamicList dynamicList;
+    private DynamicMultiSelectList dynamicMultiSelectList;
+    private UUID uuid;
+    private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
     private ManageOrders manageOrders;
 
     @Before
@@ -103,8 +113,29 @@ public class ManageOrderServiceTest {
             .isCaseWithdrawn(YesOrNo.No)
             .build();
 
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(TEST_UUID).label(" ").build();
+        dynamicList = DynamicList.builder()
+            .listItems(List.of(dynamicListElement))
+            .value(dynamicListElement)
+            .build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code(TEST_UUID)
+            .label("test")
+            .build();
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        manageOrders = ManageOrders.builder()
+            .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
+            .isCaseWithdrawn(YesOrNo.No)
+            .build();
+
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        uuid = UUID.fromString(TEST_UUID);
+        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(Mockito.any(CaseData.class)))
+            .thenReturn(dynamicMultiSelectList);
     }
 
     @Test
@@ -687,7 +718,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-temaplate");
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -711,6 +742,56 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    public void testPopulateFinalWelshOrderFromCaseData() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+        recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
+        recipientList.add(OrderRecipientsEnum.respondentOrRespondentSolicitor);
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+        ReflectionTestUtils.setField(manageOrderService, "c21WelshTemplate", "c21-WEL-template");
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .orderRecipients(recipientList)
+            .applicants(partyDetails)
+            .respondents(partyDetails)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .build();
+
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+
+    }
+
+    @Test
     public void testPopulateFinalUploadOrderFromCaseData() throws Exception {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -726,9 +807,9 @@ public class ManageOrderServiceTest {
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .doesOrderClosesCase(YesOrNo.Yes)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
-            .doesOrderClosesCase(YesOrNo.Yes)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -769,10 +850,10 @@ public class ManageOrderServiceTest {
             .orderCollection(new ArrayList<>())
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -884,10 +965,10 @@ public class ManageOrderServiceTest {
             .orderCollection(new ArrayList<>())
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -1227,13 +1308,7 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testgetOrderToAmendDownloadLink() {
-        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code("00000000-0000-0000-0000-000000000000").label(" ").build();
-        DynamicList dynamicList = DynamicList.builder()
-            .listItems(List.of(dynamicListElement))
-            .value(dynamicListElement)
-            .build();
+
         CaseData caseData = CaseData.builder()
             .orderCollection(List.of(Element.<OrderDetails>builder().id(uuid).value(OrderDetails
                                                                                         .builder()
@@ -1293,14 +1368,6 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testServeOrderCA() throws Exception {
-
-        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code("00000000-0000-0000-0000-000000000000").label(" ").build();
-        DynamicList dynamicList = DynamicList.builder()
-            .listItems(List.of(dynamicListElement))
-            .value(dynamicListElement)
-            .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1309,7 +1376,7 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(YesOrNo.No)
-            .serveOrderDynamicList(dynamicList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                                       "abc.pdf").build())
@@ -1363,14 +1430,6 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testServeOrderCaCafcassServedOptionsYes() throws Exception {
-
-        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code("00000000-0000-0000-0000-000000000000").label(" ").build();
-        DynamicList dynamicList = DynamicList.builder()
-            .listItems(List.of(dynamicListElement))
-            .value(dynamicListElement)
-            .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1379,7 +1438,7 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassServedOptions(YesOrNo.Yes)
-            .serveOrderDynamicList(dynamicList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
@@ -1433,14 +1492,6 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testServeOrderDA() throws Exception {
-
-        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code("00000000-0000-0000-0000-000000000000").label(" ").build();
-        DynamicList dynamicList = DynamicList.builder()
-            .listItems(List.of(dynamicListElement))
-            .value(dynamicListElement)
-            .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1460,7 +1511,7 @@ public class ManageOrderServiceTest {
         orderList.add(orders);
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveOrderDynamicList(dynamicList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                                       "abc.pdf").build())
