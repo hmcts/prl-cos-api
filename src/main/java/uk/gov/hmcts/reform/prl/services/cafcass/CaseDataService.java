@@ -79,7 +79,7 @@ public class CaseDataService {
             authTokenGenerator.generate(),
             cafCassSearchCaseTypeId
         );
-
+        log.info("total number of records retrieved from ccd - {}", searchResult.getTotal());
         CafCassResponse cafCassResponse = objectMapper.convertValue(
             searchResult,
             CafCassResponse.class
@@ -88,6 +88,7 @@ public class CaseDataService {
         if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
 
             cafCassFilter.filter(cafCassResponse);
+            log.info("total number of records after applying cafcass filters - {}", cafCassResponse.getCases().size());
             getHearingDetails(authorisation, cafCassResponse);
             updateHearingResponse(authorisation, authTokenGenerator.generate(), cafCassResponse);
 
