@@ -501,6 +501,7 @@ public class CallbackController {
     ) {
         log.info("fl401-add-case-number before" + callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("caseTypeOfApplication", caseDataUpdated.get("selectedCaseTypeID"));
         caseDataUpdated.put("issueDate", LocalDate.now());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
