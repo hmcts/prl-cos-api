@@ -15,7 +15,9 @@ public enum YesNoDontKnow {
     @JsonProperty("no")
     no("no", "No"),
     @JsonProperty("dontKnow")
-    dontKnow("dontKnow", "Don't know");
+    dontKnow("dontKnow", "Don't know"),
+    @JsonProperty("iDontKnow")
+    iDontKnow("iDontKnow", "I dont know");
 
 
     private final String id;
@@ -39,6 +41,8 @@ public enum YesNoDontKnow {
             return YesNoDontKnow.no;
         } else if (enteredValue.equalsIgnoreCase("Dont know")) {
             return YesNoDontKnow.dontKnow;
+        } else if (enteredValue.equalsIgnoreCase("I dont know")) {
+            return YesNoDontKnow.iDontKnow;
         } else {
             return null;
         }
