@@ -287,7 +287,7 @@ public class CaseService {
                 //sendWithdrawEmails(caseData, userDetails, caseDetails);
             } else {
                 log.info("setting state to withdrawn and sending email notification");
-                if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(updatedCaseData.getCaseTypeOfApplication())) {
                     log.info("c100 case withdrawn");
                     citizenEmailService.sendCitizenCaseWithdrawalEmail(authToken, caseId, updatedCaseData);
                     // Refreshing the page in the same event. Hence no external event call needed.
@@ -296,9 +296,11 @@ public class CaseService {
                     caseDetailsMap.putAll(allTabsFields);
                 }
                 caseDetailsMap.put(STATE_FIELD, WITHDRAWN_STATE);
+                log.info("caseDetailsMap "+ caseDetailsMap);
             }
         }
         log.info("case withdrawn, updating case");
+        log.info("updatedCaseData "+ updatedCaseData);
         return updateCase(updatedCaseData, authToken, s2sToken, caseId, CaseEvent.CITIZEN_CASE_UPDATE.getValue(), null);
 
     }
