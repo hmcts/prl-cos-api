@@ -51,6 +51,7 @@ public class FeesAndPaymentControllerFunctionalTest {
     /*
     These test cases will be enabled once we have merged and integrated with Fee and Pay on Demo environment.
      */
+    @Ignore
     @Test
     public void givenRequestBody_whenGetC100ApplicationFees_then200Response() throws Exception {
         mockMvc.perform(get("/fees-and-payment-apis/getC100ApplicationFees")
