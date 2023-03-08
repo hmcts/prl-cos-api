@@ -10,6 +10,8 @@ import lombok.Setter;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.HearingPriorityTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.HearingSpecificDatesOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -103,4 +105,27 @@ public class HearingData {
     private final String applicantSolicitor;
     private final String respondentName;
     private final String respondentSolicitor;
+
+    @JsonProperty("hearingSpecificDatesOptionsEnum")
+    private HearingSpecificDatesOptionsEnum hearingSpecificDatesOptionsEnum;
+
+
+    @JsonProperty("firstDateOfTheHearing")
+    private LocalDateTime firstDateOfTheHearing;
+
+    @JsonProperty("hearingMustTakePlaceAtHour")
+    private final int hearingMustTakePlaceAtHour;
+
+    @JsonProperty("hearingMustTakePlaceAtMinute")
+    private final int hearingMustTakePlaceAtMinute;
+
+    @JsonProperty("earliestHearingDate")
+    private LocalDateTime earliestHearingDate;
+
+    @JsonProperty("latestHearingDate")
+    private LocalDateTime latestHearingDate;
+
+    @JsonProperty("hearingPriorityTypeEnum")
+    private HearingPriorityTypeEnum hearingPriorityTypeEnum;
+
 }
