@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -111,7 +112,7 @@ public class HearingData {
 
 
     @JsonProperty("firstDateOfTheHearing")
-    private LocalDateTime firstDateOfTheHearing;
+    private LocalDate firstDateOfTheHearing;
 
     @JsonProperty("hearingMustTakePlaceAtHour")
     private final int hearingMustTakePlaceAtHour;
@@ -120,10 +121,10 @@ public class HearingData {
     private final int hearingMustTakePlaceAtMinute;
 
     @JsonProperty("earliestHearingDate")
-    private LocalDateTime earliestHearingDate;
+    private LocalDate earliestHearingDate;
 
     @JsonProperty("latestHearingDate")
-    private LocalDateTime latestHearingDate;
+    private LocalDate latestHearingDate;
 
     @JsonProperty("hearingPriorityTypeEnum")
     private HearingPriorityTypeEnum hearingPriorityTypeEnum;
