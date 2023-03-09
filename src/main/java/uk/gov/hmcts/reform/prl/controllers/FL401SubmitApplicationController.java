@@ -122,8 +122,8 @@ public class FL401SubmitApplicationController {
         caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
             .listItems(locationRefDataService.getCourtLocations(authorisation))
             .build());
-        System.out.println("DEBUGGING value from locationRefData" +locationRefDataService.getCourtLocations(authorisation));
-        System.out.println("DEBUGGING value from caseData" +caseDataUpdated.get("submitCountyCourtSelection"));
+        System.out.println("DEBUGGING value from locationRefData" + locationRefDataService.getCourtLocations(authorisation));
+        System.out.println("DEBUGGING value from caseData" + caseDataUpdated.get("submitCountyCourtSelection"));
 
 
         return AboutToStartOrSubmitCallbackResponse.builder()
