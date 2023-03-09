@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
@@ -452,9 +451,7 @@ public class ManageOrdersControllerTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
-            .manageOrders(ManageOrders.builder()
-                              .c21OrderOptions(C21OrderOptionsEnum.c21ApplicationRefused)
-                              .build())
+            .manageOrders(ManageOrders.builder().build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -519,9 +516,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .courtName("testCourt")
-            .manageOrders(ManageOrders.builder()
-                              .c21OrderOptions(C21OrderOptionsEnum.c21ApplicationRefused)
-                              .build())
+            .manageOrders(ManageOrders.builder().build())
             .children(listOfChildren)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .childrenList("Child 1: TestName\n")
@@ -585,9 +580,7 @@ public class ManageOrdersControllerTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .fl401FamilymanCaseNumber("12345")
             .childrenList("Child 1: TestName\n")
-            .manageOrders(ManageOrders.builder()
-                              .c21OrderOptions(C21OrderOptionsEnum.c21ApplicationRefused)
-                              .build())
+            .manageOrders(ManageOrders.builder().build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectedOrder(
                 "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "

@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -134,6 +135,8 @@ public class ManageOrdersController {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
+        C21OrderOptionsEnum c21OrderType =  (null != caseData.getManageOrders())
+            ? caseData.getManageOrders().getC21OrderOptions() : null;
         caseData = manageOrderService.getUpdatedCaseData(caseData);
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && !caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
@@ -141,21 +144,18 @@ public class ManageOrdersController {
         }
 
         ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
+            .c21OrderOptions(c21OrderType)
             .childOption(DynamicMultiSelectList.builder()
                              .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
             .loggedInUserType(manageOrderService.getLoggedInUserType(authorisation))
             .build();
         if (caseData.getCreateSelectOrderOptions() != null
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-            log.info("C21 Order options from casedata:: *****{}******", (null != caseData.getManageOrders())
-                ? caseData.getManageOrders().getC21OrderOptions() : null);
-            caseData = caseData.toBuilder()
-                .manageOrders(manageOrders.toBuilder()
-                                  .selectedC21Order(String.valueOf(caseData.getManageOrders().getC21OrderOptions()))
-                                  .build())
-                .build();
-            log.info("Selected C21 Order:: *****{}******", manageOrders.getSelectedC21Order());
             log.info("C21 Order:: *****{}******", manageOrders.getC21OrderOptions());
+            manageOrders = manageOrders.toBuilder()
+                                  .selectedC21Order(String.valueOf(manageOrders.getC21OrderOptions()))
+                                  .build();
+            log.info("Selected C21 Order:: *****{}******", manageOrders.getSelectedC21Order());
         }
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
