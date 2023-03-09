@@ -58,4 +58,5 @@ java:
         - idam-solicitor-username
         - idam-solicitor-password
         - filtered-court-ids
+        - da-filtered-court-ids
         - postcode-lookup-token

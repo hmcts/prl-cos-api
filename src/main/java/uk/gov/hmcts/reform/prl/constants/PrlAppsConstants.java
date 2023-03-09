@@ -366,4 +366,6 @@ public class PrlAppsConstants {
     public static final String IS_CAFCASS = "isCafcass";
 
     public static final String LISTWITHOUTNOTICE_HEARINGDETAILS = "listWithoutNoticeHearingDetails";
+    public static final String CASEWORKER = "CaseWorker";
+    
 }
