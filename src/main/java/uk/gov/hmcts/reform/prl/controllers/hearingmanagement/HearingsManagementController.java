@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
@@ -72,6 +73,9 @@ public class HearingsManagementController {
 
     @Autowired
     HearingService hearingService;
+
+    @Autowired
+    AllTabServiceImpl allTabsService;
 
     @Value("${citizen.url}")
     private String hearingDetailsUrl;
@@ -127,5 +131,17 @@ public class HearingsManagementController {
         caseDataUpdated.put("nextHearingDetails",
             hearingManagementService.getNextHearingDate(String.valueOf(caseData.getId())));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/update-allTabs-after-hmc-case-state", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to refresh the tabs after HMC case state update")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse updateAllTabsAfterHmcCaseState(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        allTabsService.updateAllTabsIncludingConfTab(caseData);
+        return AboutToStartOrSubmitCallbackResponse.builder().build();
     }
 }
