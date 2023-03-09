@@ -10,9 +10,10 @@ import uk.gov.hmcts.reform.prl.enums.CafcassReportsEnum;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ApplicantOccupationEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ChildSelectorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.RespondentOccupationEnum;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
@@ -30,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.Post
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -140,38 +143,6 @@ public class ManageOrders {
     private Document manageOrdersAmendedOrder;
     private DynamicList amendOrderDynamicList;
 
-
-    @JsonProperty("childSelectorOption1")
-    private final List<ChildSelectorEnum> childSelectorOption1;
-    @JsonProperty("childSelectorOption2")
-    private final List<ChildSelectorEnum> childSelectorOption2;
-    @JsonProperty("childSelectorOption3")
-    private final List<ChildSelectorEnum> childSelectorOption3;
-    @JsonProperty("childSelectorOption4")
-    private final List<ChildSelectorEnum> childSelectorOption4;
-    @JsonProperty("childSelectorOption5")
-    private final List<ChildSelectorEnum> childSelectorOption5;
-    @JsonProperty("childSelectorOption6")
-    private final List<ChildSelectorEnum> childSelectorOption6;
-    @JsonProperty("childSelectorOption7")
-    private final List<ChildSelectorEnum> childSelectorOption7;
-    @JsonProperty("childSelectorOption8")
-    private final List<ChildSelectorEnum> childSelectorOption8;
-    @JsonProperty("childSelectorOption9")
-    private final List<ChildSelectorEnum> childSelectorOption9;
-    @JsonProperty("childSelectorOption10")
-    private final List<ChildSelectorEnum> childSelectorOption10;
-    @JsonProperty("childSelectorOption11")
-    private final List<ChildSelectorEnum> childSelectorOption11;
-    @JsonProperty("childSelectorOption12")
-    private final List<ChildSelectorEnum> childSelectorOption12;
-    @JsonProperty("childSelectorOption13")
-    private final List<ChildSelectorEnum> childSelectorOption13;
-    @JsonProperty("childSelectorOption14")
-    private final List<ChildSelectorEnum> childSelectorOption14;
-    @JsonProperty("childSelectorOption15")
-    private final List<ChildSelectorEnum> childSelectorOption15;
-
     /**
      * C45A.
      */
@@ -201,7 +172,11 @@ public class ManageOrders {
     @JsonProperty("cafcassReports")
     private final List<CafcassReportsEnum> cafcassReports;
 
-    private DynamicList serveOrderDynamicList;
+    @Builder.Default
+    @JsonProperty("childOption")
+    private final DynamicMultiSelectList childOption;
+
+    private DynamicMultiSelectList serveOrderDynamicList;
     @JsonProperty("serveOrderAdditionalDocuments")
     private final List<Element<Document>> serveOrderAdditionalDocuments;
 
@@ -225,7 +200,27 @@ public class ManageOrders {
     private final List<Element<EmailInformation>> emailInformationDA;
     @JsonProperty("postalInformationDA")
     private final List<Element<PostalInformation>> postalInformationDA;
-
     @JsonProperty("withdrawnOrRefusedOrder")
     private final WithDrawTypeOfOrderEnum withdrawnOrRefusedOrder;
+    @JsonProperty("ordersNeedToBeServed")
+    private final YesOrNo ordersNeedToBeServed;
+    @JsonProperty("isTheOrderAboutChildren")
+    private final YesOrNo isTheOrderAboutChildren;
+    @JsonProperty("isJudgeOrLa")
+    private final String isJudgeOrLa;
+    @JsonProperty("judgeDirectionsToAdminAmendOrder")
+    private final String judgeDirectionsToAdminAmendOrder;
+
+    @JsonProperty("amendOrderSelectCheckOptions")
+    private final AmendOrderCheckEnum amendOrderSelectCheckOptions;
+    @JsonProperty("amendOrderSelectJudgeOrLa")
+    private final JudgeOrLegalAdvisorCheckEnum amendOrderSelectJudgeOrLa;
+    @JsonProperty("nameOfJudgeAmendOrder")
+    private final String nameOfJudgeAmendOrder;
+    @JsonProperty("nameOfLaAmendOrder")
+    private final String nameOfLaAmendOrder;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+    private final LocalDateTime currentOrderCreatedDateTime;
+
 }

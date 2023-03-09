@@ -5,6 +5,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.Duration;
@@ -47,5 +48,20 @@ public class CaseUtils {
             noOfDaysRemaining = PrlAppsConstants.CASE_SUBMISSION_THRESHOLD - noDaysPassed;
         }
         return noOfDaysRemaining;
+    }
+
+    public static SelectTypeOfOrderEnum getSelectTypeOfOrder(CaseData caseData) {
+        SelectTypeOfOrderEnum isFinalOrder = null;
+        if (caseData.getSelectTypeOfOrder() != null) {
+            isFinalOrder = caseData.getSelectTypeOfOrder();
+        } else if (caseData.getServeOrderData() != null) {
+            isFinalOrder = caseData.getServeOrderData().getSelectTypeOfUploadOrder();
+        }
+        return isFinalOrder;
+    }
+
+    public static String getCaseTypeOfApplication(CaseData caseData) {
+        return caseData.getCaseTypeOfApplication() != null
+            ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
     }
 }

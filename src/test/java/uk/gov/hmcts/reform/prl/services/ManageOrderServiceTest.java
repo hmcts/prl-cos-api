@@ -10,15 +10,19 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DomesticAbuseOrdersEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.FcOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrdersOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
@@ -31,6 +35,8 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -46,6 +52,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -61,7 +68,9 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
@@ -94,10 +103,32 @@ public class ManageOrderServiceTest {
     @Mock
     private DocumentLanguageService documentLanguageService;
 
+    @Mock
+    DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    private DynamicList dynamicList;
+    private DynamicMultiSelectList dynamicMultiSelectList;
+    private UUID uuid;
+    private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
     private ManageOrders manageOrders;
+
+    @Mock
+    private UserService userService;
 
     @Before
     public void setup() {
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(TEST_UUID).label(" ").build();
+        dynamicList = DynamicList.builder()
+            .listItems(List.of(dynamicListElement))
+            .value(dynamicListElement)
+            .build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code(TEST_UUID)
+            .label("test")
+            .build();
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
         manageOrders = ManageOrders.builder()
             .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
             .isCaseWithdrawn(YesOrNo.No)
@@ -105,6 +136,11 @@ public class ManageOrderServiceTest {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        uuid = UUID.fromString(TEST_UUID);
+        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(Mockito.any(CaseData.class), Mockito.anyString()))
+            .thenReturn(dynamicMultiSelectList);
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().roles(ROLES_JUDGE).build());
     }
 
     @Test
@@ -184,7 +220,7 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
-        assertNotNull(responseMap.get("amendOrderDynamicList"));
+        assertNotNull(responseMap.get("caseTypeOfApplication"));
 
     }
 
@@ -504,26 +540,31 @@ public class ManageOrderServiceTest {
     }
 
 
-    public void testPupulateHeaderC100Test() {
+    @Test
+    public void testPopulateHeaderC100Test() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(element(OrderDetails.builder()
+                                                 .orderType("other")
+                                                 .otherDetails(OtherOrderDetails.builder()
+                                                                   .orderCreatedDate("10-Feb-2023").build()).build())))
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
-        assertEquals("Case Name: Test Case 45678\n\n"
-                         + "Family Man ID: \n\n", responseMap.get("manageOrderHeader1"));
+        assertEquals("C100", responseMap.get("caseTypeOfApplication"));
 
     }
 
 
-    public void testPupulateHeaderNoFl401FamilyManTest() {
+    @Test
+    public void testPopulateHeaderNoFl401FamilyManTest() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .caseTypeOfApplication("C100")
+            .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -531,8 +572,7 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
-        assertEquals("Case Name: Test Case 45678\n\n"
-                         + "Family Man ID: familyman12345\n\n", responseMap.get("manageOrderHeader1"));
+        assertEquals("FL401", responseMap.get("caseTypeOfApplication"));
 
     }
 
@@ -687,7 +727,57 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-temaplate");
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .orderRecipients(recipientList)
+            .applicants(partyDetails)
+            .respondents(partyDetails)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(manageOrders)
+            .build();
+
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+
+    }
+
+    @Test
+    public void testPopulateFinalWelshOrderFromCaseData() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+        recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
+        recipientList.add(OrderRecipientsEnum.respondentOrRespondentSolicitor);
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+        ReflectionTestUtils.setField(manageOrderService, "c21WelshTemplate", "c21-WEL-template");
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -726,9 +816,10 @@ public class ManageOrderServiceTest {
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
-            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(ManageOrders.builder().build())
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -769,10 +860,10 @@ public class ManageOrderServiceTest {
             .orderCollection(new ArrayList<>())
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -884,10 +975,10 @@ public class ManageOrderServiceTest {
             .orderCollection(new ArrayList<>())
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -1177,7 +1268,7 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        assertNotNull(manageOrderService.populateHeader(caseData).get("amendOrderDynamicList"));
+        assertNotNull(manageOrderService.populateHeader(caseData).get("caseTypeOfApplication"));
     }
 
 
@@ -1227,13 +1318,7 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testgetOrderToAmendDownloadLink() {
-        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code("00000000-0000-0000-0000-000000000000").label(" ").build();
-        DynamicList dynamicList = DynamicList.builder()
-            .listItems(List.of(dynamicListElement))
-            .value(dynamicListElement)
-            .build();
+
         CaseData caseData = CaseData.builder()
             .orderCollection(List.of(Element.<OrderDetails>builder().id(uuid).value(OrderDetails
                                                                                         .builder()
@@ -1293,14 +1378,6 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testServeOrderCA() throws Exception {
-
-        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code("00000000-0000-0000-0000-000000000000").label(" ").build();
-        DynamicList dynamicList = DynamicList.builder()
-            .listItems(List.of(dynamicListElement))
-            .value(dynamicListElement)
-            .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1309,7 +1386,7 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(YesOrNo.No)
-            .serveOrderDynamicList(dynamicList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                                       "abc.pdf").build())
@@ -1332,6 +1409,7 @@ public class ManageOrderServiceTest {
                                                                                                              .builder()
                                                                                                              .build())
                                                                                           .dateCreated(dateTime.now())
+                                                                                          .orderTypeId(TEST_UUID)
                                                                                           .otherDetails(
                                                                                               OtherOrderDetails.builder().build())
                                                                                           .build()).build();
@@ -1363,14 +1441,6 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testServeOrderCaCafcassServedOptionsYes() throws Exception {
-
-        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code("00000000-0000-0000-0000-000000000000").label(" ").build();
-        DynamicList dynamicList = DynamicList.builder()
-            .listItems(List.of(dynamicListElement))
-            .value(dynamicListElement)
-            .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1379,7 +1449,7 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassServedOptions(YesOrNo.Yes)
-            .serveOrderDynamicList(dynamicList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
@@ -1433,14 +1503,6 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testServeOrderDA() throws Exception {
-
-        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code("00000000-0000-0000-0000-000000000000").label(" ").build();
-        DynamicList dynamicList = DynamicList.builder()
-            .listItems(List.of(dynamicListElement))
-            .value(dynamicListElement)
-            .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1453,6 +1515,7 @@ public class ManageOrderServiceTest {
                                                                                                              .builder()
                                                                                                              .build())
                                                                                           .dateCreated(dateTime.now())
+                                                                                          .orderTypeId(TEST_UUID)
                                                                                           .otherDetails(
                                                                                           OtherOrderDetails.builder().build())
                                                                                           .build()).build();
@@ -1460,7 +1523,7 @@ public class ManageOrderServiceTest {
         orderList.add(orders);
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveOrderDynamicList(dynamicList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                                       "abc.pdf").build())
@@ -1536,7 +1599,7 @@ public class ManageOrderServiceTest {
             .manageOrders(expectedDetails)
             .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
-            .childArrangementOrders(ChildArrangementOrdersEnum.blankOrderOrDirections).build();
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82).build();
         assertNotNull(manageOrderService.populateCustomOrderFields(caseData));
     }
 
@@ -1576,6 +1639,74 @@ public class ManageOrderServiceTest {
             .respondentsFL401(partyDetails)
             .build();
         assertEquals("test test\n", manageOrderService.getAllRecipients(caseData));
+    }
+
+    @Test
+    public void testGetSelectedOrderInfoForUploadDomesticAbuseOrders() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .domesticAbuseOrders(DomesticAbuseOrdersEnum.blankOrder)
+            .build();
+        assertEquals("Blank order (FL404B)", manageOrderService.getSelectedOrderInfoForUpload(caseData));
+    }
+
+    @Test
+    public void testGetSelectedOrderInfoForUploadFcOrders() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .fcOrders(FcOrdersEnum.summonToAppearToCourt)
+            .build();
+        assertEquals("Summons to appear at court (FC601)", manageOrderService.getSelectedOrderInfoForUpload(caseData));
+    }
+
+    @Test
+    public void testGetSelectedOrderInfoForUploadOtherOrdersOption() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .otherOrdersOption(OtherOrdersOptionEnum.other)
+            .build();
+        assertEquals("Other", manageOrderService.getSelectedOrderInfoForUpload(caseData));
+    }
+
+    @Test
+    public void testGetSelectedOrderInForUpload() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .build();
+        assertEquals("", manageOrderService.getSelectedOrderInfoForUpload(caseData));
+    }
+
+    @Test
+    public void testPopulateDraftOrderForJudge() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .fcOrders(FcOrdersEnum.warrantOfCommittal)
+            .judgeOrMagistratesLastName("test")
+            .dateOrderMade(LocalDate.now())
+            .manageOrders(ManageOrders.builder()
+                              .recitalsOrPreamble("test")
+                              .isCaseWithdrawn(YesOrNo.Yes)
+                              .isTheOrderByConsent(YesOrNo.Yes)
+                              .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
+                              .isOrderDrawnForCafcass(YesOrNo.Yes)
+                              .orderDirections("test")
+                              .furtherDirectionsIfRequired("test")
+                              .childOption(dynamicMultiSelectList)
+                              .build())
+            .build();
+
+        when(userService.getUserDetails(Mockito.anyString()))
+            .thenReturn(UserDetails.builder().roles(ROLES_JUDGE).build());
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData).get("draftOrderCollection"));
     }
 
 }

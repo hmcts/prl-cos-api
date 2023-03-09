@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -109,6 +110,9 @@ public class DraftOrder {
     private final LocalDate underTakingDateExpiry;
     private final String underTakingExpiryTime;
     private final YesOrNo underTakingFormSign;
+
+    private final ManageOrdersOptionsEnum orderSelectionType;
+    private final String childrenList;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
