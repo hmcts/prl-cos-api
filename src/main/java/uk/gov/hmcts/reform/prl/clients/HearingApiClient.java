@@ -19,7 +19,7 @@ import java.util.List;
 )
 public interface HearingApiClient {
 
-    @GetMapping(path = "/hearings1", consumes = "application/json")
+    @GetMapping(path = "/hearings")
     Hearings getHearingDetails(
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
