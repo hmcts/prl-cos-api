@@ -58,8 +58,6 @@ public class CafcassUploadDocService {
             }
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-            checkIfNumberOfAttachmentExceeds(caseData);
-
             // upload document
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 authorisation,
