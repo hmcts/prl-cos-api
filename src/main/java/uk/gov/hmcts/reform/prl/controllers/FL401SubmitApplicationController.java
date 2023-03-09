@@ -125,6 +125,7 @@ public class FL401SubmitApplicationController {
         System.out.println("DEBUGGING value from locationRefData" +locationRefDataService.getCourtLocations(authorisation));
         System.out.println("DEBUGGING value from caseData" +caseDataUpdated.get("submitCountyCourtSelection"));
 
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .errors(errorList)
