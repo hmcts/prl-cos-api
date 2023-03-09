@@ -278,21 +278,17 @@ public class CaseService {
             if (previousState.isPresent()
                 && !CaseUtils.WITHDRAW_STATE_LIST.contains(previousState.get())) {
                 updatedCaseData = updatedCaseData.toBuilder().isWithdrawRequestSent(PENDING).build();
-                log.info("Case is updated as WithdrawRequestSent");
+                log.info("Case is updated WithdrawRequestSent as Pending");
                 //REVIEW IF ANY EMAILS TO SEND
             } else {
-                log.info("setting state to withdrawn and sending email notification");
                 updatedCaseData = updatedCaseData.toBuilder()
                     .state(State.CASE_WITHDRAWN)
                     .withDrawApplicationData(withDrawApplicationData)
                     .build();
-
-                citizenEmailService.sendCitizenCaseWithdrawalEmail(authToken, caseId, updatedCaseData);
             }
         }
-        log.info("case withdrawn, updating case");
-        log.info("updatedCaseData " + updatedCaseData);
-        return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_UPDATE);
+
+        return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
 }
