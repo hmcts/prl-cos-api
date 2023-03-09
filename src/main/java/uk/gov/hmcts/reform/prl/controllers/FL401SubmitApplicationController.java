@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.repositories.CcdCaseApi;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
@@ -101,6 +104,8 @@ public class FL401SubmitApplicationController {
     @Autowired
     private ConfidentialityTabService confidentialityTabService;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FL401SubmitApplicationController.class);
+
     @PostMapping(path = "/fl401-submit-application-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to send FL401 application notification. ")
     @ApiResponses(value = {
@@ -122,8 +127,9 @@ public class FL401SubmitApplicationController {
         caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
             .listItems(locationRefDataService.getCourtLocations(authorisation))
             .build());
-        System.out.println("DEBUGGING value from locationRefData" + locationRefDataService.getCourtLocations(authorisation));
-        System.out.println("DEBUGGING value from caseData" + caseDataUpdated.get("submitCountyCourtSelection"));
+
+        LOGGER.info("DEBUGGING value from locationRefData", locationRefDataService.getCourtLocations(authorisation));
+        LOGGER.info("DEBUGGING value from caseData", caseDataUpdated.get("submitCountyCourtSelection"));
 
 
         return AboutToStartOrSubmitCallbackResponse.builder()

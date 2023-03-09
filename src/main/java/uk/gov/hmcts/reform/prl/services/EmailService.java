@@ -3,9 +3,12 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
+import uk.gov.hmcts.reform.prl.controllers.FL401SubmitApplicationController;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -26,6 +29,7 @@ public class EmailService {
     private final NotificationClient notificationClient;
     private final EmailTemplatesConfig emailTemplatesConfig;
     private final ObjectMapper objectMapper;
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
 
     public void send(String email,
                      EmailTemplateNames templateName,
@@ -68,7 +72,7 @@ public class EmailService {
     }
 
     protected CaseData getCaseData(CaseDetails caseDetails) {
-        System.out.println("DEBUGGING value from EmailService caseDetails" + caseDetails);
+        LOGGER.info("DEBUGGING value from EmailService caseDetails", caseDetails);
         return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
             .id(caseDetails.getId())
