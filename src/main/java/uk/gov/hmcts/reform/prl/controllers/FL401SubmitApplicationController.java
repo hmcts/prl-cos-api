@@ -146,7 +146,7 @@ public class FL401SubmitApplicationController {
 
         final LocalDate localDate = LocalDate.now();
 
-        String baseLocationId = caseData.getSubmitCountyCourtSelection().getValue().getCode();
+        String baseLocationId = caseData.getSubmitCountyCourtSelection().getCourtName();
         String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,authorisation).split("-");
         String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
         caseData = caseData.toBuilder().issueDate(localDate).courtName(courtName).build();
