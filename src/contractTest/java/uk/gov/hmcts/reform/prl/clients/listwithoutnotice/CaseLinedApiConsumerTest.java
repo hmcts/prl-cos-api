@@ -7,7 +7,6 @@ import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +18,6 @@ import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 
 import java.util.List;
@@ -38,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
     properties = {"fis_hearing.api.url=http://localhost:8899", "idam.api.url=localhost:5000"}
 )
 @PactFolder("pacts")
-public class HearingApiConsumerTest {
+public class CaseLinedApiConsumerTest {
 
     @Autowired
     HearingApiClient hearingApiClient;
@@ -46,13 +44,9 @@ public class HearingApiConsumerTest {
     private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
     private static final String SERVICE_AUTHORIZATION_HEADER = "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
 
-    private final String validResponseBody = "listwithoutnotice/CaseLinkedResponseBody.json";
-
-    static final String AUTHORIZATION_HEADER = "Authorization";
-    static final String AUTHORIZATION_TOKEN = "Bearer some-access-token";
-    static final String SERVICE_AUTH_TOKEN = "someServiceAuthToken";
-    private final String validResponseBody1 = "listwithoutnotice/GetHearingDetails.json";
+    private final String caseLinkedResponseBodyResponseBody = "listwithoutnotice/CaseLinkedResponseBody.json";
     private CaseLinkedRequest caseLinkedRequest;
+
 
 
     @Pact(provider = "hearingApiClient", consumer = "prl_cos")
@@ -71,7 +65,7 @@ public class HearingApiConsumerTest {
             .body(new ObjectMapper().writeValueAsString(caseLinkedRequest), "application/json")
             .willRespondWith()
             .status(200)
-            .body(ResourceLoader.loadJson(validResponseBody),"application/json")
+            .body(ResourceLoader.loadJson(caseLinkedResponseBodyResponseBody),"application/json")
             .toPact();
     }
 
@@ -82,36 +76,7 @@ public class HearingApiConsumerTest {
         List<CaseLinkedData>
             caseLinkedData = hearingApiClient.getCaseLinkedData(BEARER_TOKEN,SERVICE_AUTHORIZATION_HEADER,caseLinkedRequest);
         assertNotNull(caseLinkedData);
-        assertEquals(caseLinkedData.get(0).getCaseReference(),"1677767515750127");
-        assertEquals(caseLinkedData.get(0).getCaseName(),"Test");
+        assertEquals(caseLinkedData.get(0).getCaseReference(),"1670601355422736");
+        assertEquals(caseLinkedData.get(0).getCaseName(),"Case_Flag_9_Dec_6");
     }
-
-
-    @Pact(provider = "hearingApiClient", consumer = "prl_cos")
-    public RequestResponsePact generatePactFragmentForGetHearingDetails(PactDslWithProvider builder) throws Exception {
-
-        // @formatter:off
-        return builder
-            .given("Get Hearing Details")
-            .uponReceiving("A Request for Get Hearing Details")
-            .method("GET")
-            .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
-            .path("/hearingse")
-            .query("caseReference=1677767515750127")
-            .willRespondWith()
-            .status(HttpStatus.SC_OK)
-            .body(ResourceLoader.loadJson(validResponseBody1),"application/json")
-            .toPact();
-    }
-
-    @Test
-    @PactTestFor(pactMethod = "generatePactFragmentForGetHearingDetails")
-    public void verifyGetHearingDetails() {
-        Hearings
-            hearingDetails = hearingApiClient.getHearingDetails(BEARER_TOKEN,SERVICE_AUTHORIZATION_HEADER,"1677767515750127");
-        assertNotNull(hearingDetails);
-        assertEquals(hearingDetails.getCaseHearings().get(0).getHearingType(),"Test");
-        assertEquals(hearingDetails.getCaseHearings().get(0).getHmcStatus(),"LISTED");
-    }
-
 }

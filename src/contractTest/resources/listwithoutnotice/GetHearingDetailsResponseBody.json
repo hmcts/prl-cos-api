@@ -6,7 +6,7 @@
       "hearingID": 2000004886,
       "hearingRequestDateTime": "2023-02-13T15:55:55.735864",
       "hearingType": "ABA5-FHR",
-      "hmcStatus": "LISTING",
+      "hmcStatus": "AWAITING_LISTING",
       "lastResponseReceivedDateTime": null,
       "requestVersion": null,
       "hearingListingStatus": null,
