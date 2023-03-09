@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.cafcass.hearing;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,7 +23,6 @@ public class CaseHearing {
 
     private String hearingTypeValue;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String hmcStatus;
     private List<HearingDaySchedule> hearingDaySchedule;
 

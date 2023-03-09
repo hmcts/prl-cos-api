@@ -139,6 +139,7 @@
         "caseHearings" : [ {
           "hearingID" : 2000004659,
           "hearingType" : "ABA5-FFH",
+          "hmcStatus": "LISTED",
           "hearingDaySchedule" : [ {
             "hearingVenueName" : "ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)",
             "hearingStartDateTime" : [ 2023, 5, 9, 9, 0 ],
@@ -251,6 +252,7 @@
         "caseHearings" : [ {
           "hearingID" : 2000004659,
           "hearingType" : "ABA5-FFH",
+          "hmcStatus": "LISTED",
           "hearingDaySchedule" : [ {
             "hearingVenueName" : "ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)",
             "hearingStartDateTime" : [ 2023, 5, 9, 9, 0 ],
@@ -485,6 +487,7 @@
         "caseHearings" : [ {
           "hearingID" : 2000004659,
           "hearingType" : "ABA5-FFH",
+          "hmcStatus": "LISTED",
           "hearingDaySchedule" : [ {
             "hearingVenueName" : "ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)",
             "hearingStartDateTime" : [ 2023, 5, 9, 9, 0 ],
@@ -641,6 +644,7 @@
         "caseHearings" : [ {
           "hearingID" : 2000004659,
           "hearingType" : "ABA5-FFH",
+          "hmcStatus": "LISTED",
           "hearingDaySchedule" : [ {
             "hearingVenueName" : "ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)",
             "hearingStartDateTime" : [ 2023, 5, 9, 9, 0 ],
