@@ -722,12 +722,7 @@ public class ManageOrderService {
 
             return orderCollection;
         } else {
-            ServeOrderData serveOrderData;
-            if (caseData.getServeOrderData() != null) {
-                serveOrderData = caseData.getServeOrderData();
-            } else {
-                serveOrderData = ServeOrderData.builder().build();
-            }
+            ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
             String loggedInUserType = getLoggedInUserType(authorisation);
             SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
             String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
@@ -735,6 +730,7 @@ public class ManageOrderService {
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                                        .orderTypeId(flagSelectedOrderId)
                                        .orderDocument(caseData.getUploadOrderDoc())
+                                       .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                                        .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
                                        .otherDetails(OtherOrderDetails.builder()
                                                          .createdBy(caseData.getJudgeOrMagistratesLastName())
@@ -763,22 +759,26 @@ public class ManageOrderService {
                                        .typeOfOrder(typeOfOrder != null
                                                             ? typeOfOrder.getDisplayedValue() : null)
                                        .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
-                                           ? caseData.getDoesOrderClosesCase() : null)
-                                       .serveOrderDetails(ServeOrderDetails.builder()
-                                                              .cafcassOrCymruNeedToProvideReport(
-                                                                  serveOrderData.getCafcassOrCymruNeedToProvideReport())
-                                                              .cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
-                                                              .whenReportsMustBeFiled(serveOrderData.getWhenReportsMustBeFiled() != null
-                                                                                          ? serveOrderData.getWhenReportsMustBeFiled()
-                                                                                              .format(DateTimeFormatter.ofPattern(
-                                                                                                  PrlAppsConstants.D_MMMM_YYYY,
-                                                                                                  Locale.UK
-                                                                                              )) : null)
-                                                              .orderEndsInvolvementOfCafcassOrCymru(
-                                                                  serveOrderData.getOrderEndsInvolvementOfCafcassOrCymru())
-                                                              .build())
+                                           ? serveOrderData.getDoesOrderClosesCase() : null)
+                                       .serveOrderDetails(buildServeOrderDetails(serveOrderData))
                                        .build()));
         }
+    }
+
+    public static ServeOrderDetails buildServeOrderDetails(ServeOrderData serveOrderData) {
+        return ServeOrderDetails.builder()
+            .cafcassOrCymruNeedToProvideReport(
+                serveOrderData.getCafcassOrCymruNeedToProvideReport())
+            .cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
+            .whenReportsMustBeFiled(serveOrderData.getWhenReportsMustBeFiled() != null
+                                        ? serveOrderData.getWhenReportsMustBeFiled()
+                .format(DateTimeFormatter.ofPattern(
+                    PrlAppsConstants.D_MMMM_YYYY,
+                    Locale.UK
+                )) : null)
+            .orderEndsInvolvementOfCafcassOrCymru(
+                serveOrderData.getOrderEndsInvolvementOfCafcassOrCymru())
+            .build();
     }
 
     public String getSelectedChildInfoFromMangeOrder(DynamicMultiSelectList childOption) {
@@ -923,11 +923,12 @@ public class ManageOrderService {
 
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType) {
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
+        SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .c21OrderOptions(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
                                  ? caseData.getManageOrders().getC21OrderOptions() : null)
-            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
-                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
+            .typeOfOrder(typeOfOrder != null
+                             ? typeOfOrder.getDisplayedValue() : null)
             .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
             .orderDocument(caseData.getPreviewOrderDoc())
             .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
@@ -948,7 +949,7 @@ public class ManageOrderService {
             .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
             .magistrateLastName(caseData.getMagistrateLastName())
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
-            .isTheOrderAboutAllChildren(caseData.getIsTheOrderAboutAllChildren())
+            .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
@@ -988,6 +989,7 @@ public class ManageOrderService {
             .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(No)
+            .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
             .build();
     }
 
@@ -1000,6 +1002,7 @@ public class ManageOrderService {
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderTypeId(flagSelectedOrderId)
             .orderDocument(caseData.getUploadOrderDoc())
+            .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .childrenList(caseData.getManageOrders() != null
                               ? getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()) : null)
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -1487,6 +1490,7 @@ public class ManageOrderService {
         String loggedInUserType = getLoggedInUserType(authorisation);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
+        ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         return element(OrderDetails.builder().orderType(flagSelectedOrder)
                            .orderTypeId(flagSelectedOrderId)
                            .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
@@ -1494,9 +1498,11 @@ public class ManageOrderService {
                            .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
                            .typeOfOrder(typeOfOrder != null
                                             ? typeOfOrder.getDisplayedValue() : null)
-                           .childrenList(getChildInfoFromCaseData(caseData))
+                           .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                           .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
                            .orderClosesCase(typeOfOrder.getDisplayedValue().equals("Final")
-                                                ? caseData.getDoesOrderClosesCase() : null)
+                                                ? serveOrderData.getDoesOrderClosesCase() : null)
+                           .serveOrderDetails(buildServeOrderDetails(serveOrderData))
                            .orderDocument(Document.builder()
                                               .documentUrl(generatedDocumentInfo.getUrl())
                                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())

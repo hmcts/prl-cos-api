@@ -19,10 +19,10 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ServeOrderData {
-    @JsonProperty("selectTypeOfUploadOrder")
-    private final SelectTypeOfOrderEnum selectTypeOfUploadOrder;
-    @JsonProperty("doesUploadOrderClosesCase")
-    private final YesOrNo doesUploadOrderClosesCase;
+    @JsonProperty("selectTypeOfOrder")
+    private final SelectTypeOfOrderEnum selectTypeOfOrder;
+    @JsonProperty("doesOrderClosesCase")
+    private final YesOrNo doesOrderClosesCase;
 
     @JsonProperty("cafcassOrCymruNeedToProvideReport")
     private final YesOrNo cafcassOrCymruNeedToProvideReport;
