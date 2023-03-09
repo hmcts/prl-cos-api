@@ -58,6 +58,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse prePopulateHearingPageData(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
+        log.info("prePopulateHearingPageData new or existing callbackRequest : {}", callbackRequest);
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
         log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
@@ -89,6 +90,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse listWithoutNoticeSubmission(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("listWithoutNoticeSubmission  callbackRequest : {}", callbackRequest);
         log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("****listWithoutNoticeSubmission***** {} ", callbackRequest.toString());
