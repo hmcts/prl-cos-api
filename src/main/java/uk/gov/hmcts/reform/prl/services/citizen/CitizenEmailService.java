@@ -57,11 +57,11 @@ public class CitizenEmailService {
         );
     }
 
-    public void sendCitizenCaseWithdrawalEmail(String authorisation, String caseId, CaseData caseData) {
+    public void sendCitizenCaseWithdrawalEmail(String authorisation, CaseData caseData) {
         log.info("Inside sendCitizenCaseWithdrawalEmail");
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        EmailTemplateVars emailTemplete = buildCitizenCaseSubmissionEmail(userDetails, caseId);
-        sendWithdrawalEmail(userDetails.getEmail(), emailTemplete);
+        EmailTemplateVars emailTemplate = buildCitizenCaseSubmissionEmail(userDetails, String.valueOf(caseData.getId()));
+        sendWithdrawalEmail(userDetails.getEmail(), emailTemplate);
 
         /*List<PartyDetails> applicants = caseData
             .getApplicants()
