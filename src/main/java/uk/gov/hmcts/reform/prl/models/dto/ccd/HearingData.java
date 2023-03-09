@@ -129,4 +129,6 @@ public class HearingData {
     @JsonProperty("hearingPriorityTypeEnum")
     private HearingPriorityTypeEnum hearingPriorityTypeEnum;
 
+    @JsonProperty("customDetails")
+    private  String customDetails;
 }
