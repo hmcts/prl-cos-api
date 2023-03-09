@@ -68,7 +68,7 @@ public class EmailService {
     }
 
     protected CaseData getCaseData(CaseDetails caseDetails) {
-
+        System.out.println("DEBUGGING value from EmailService caseDetails" +caseDetails);
         return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
             .id(caseDetails.getId())
