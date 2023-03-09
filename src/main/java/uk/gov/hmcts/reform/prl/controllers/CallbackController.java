@@ -367,19 +367,17 @@ public class CallbackController {
 
         Optional<String> previousState = eventsForCase.stream().map(CaseEventDetail::getStateId)
             .filter(
-                CallbackController::getPreviousState).findFirst();
+                CaseUtils::getPreviousState).findFirst();
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        List<String> stateList = List.of(DRAFT_STATE, "CLOSED",
-                                         PENDING_STATE,
-                                         SUBMITTED_STATE, RETURN_STATE
-        );
+
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            if (previousState.isPresent() && !stateList.contains(previousState.get())) {
+            if (previousState.isPresent() &&
+                !CaseUtils.WITHDRAW_STATE_LIST.contains(previousState.get())) {
                 caseDataUpdated.put("isWithdrawRequestSent", "Pending");
                 log.info("Case is updated as WithdrawRequestSent");
                 sendWithdrawEmails(caseData, userDetails, caseDetails);
@@ -527,16 +525,6 @@ public class CallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("issueDate", LocalDate.now());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    private static boolean getPreviousState(String eachState) {
-        return (!WITHDRAWN_STATE.equalsIgnoreCase(eachState)
-            && (!DRAFT_STATE.equalsIgnoreCase(eachState))
-            && (!RETURN_STATE.equalsIgnoreCase(eachState))
-            && (!PENDING_STATE.equalsIgnoreCase(eachState))
-            && (!SUBMITTED_STATE.equalsIgnoreCase(eachState)))
-            || ISSUED_STATE.equalsIgnoreCase(eachState)
-            || GATEKEEPING_STATE.equalsIgnoreCase(eachState);
     }
 
     @PostMapping(path = "/copy-manage-docs-for-tabs", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
