@@ -127,8 +127,8 @@ public class FL401SubmitApplicationController {
             .listItems(locationRefDataService.getCourtLocations(authorisation))
             .build());
 
-        LOGGER.info("DEBUGGING value from locationRefData", locationRefDataService.getCourtLocations(authorisation));
-        LOGGER.info("DEBUGGING value from caseData", caseDataUpdated.get("submitCountyCourtSelection"));
+        LOGGER.info("DEBUGGING value from locationRefData {}", locationRefDataService.getCourtLocations(authorisation));
+        LOGGER.info("DEBUGGING value from caseData {}", caseDataUpdated.get("submitCountyCourtSelection"));
 
 
         return AboutToStartOrSubmitCallbackResponse.builder()
