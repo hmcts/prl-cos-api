@@ -100,8 +100,10 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
-            .getHearingData(caseData.getListWithoutNoticeHearingDetails(),null));
+        if (caseData.getListWithoutNoticeHearingDetails() != null) {
+            caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
+                .getHearingData(caseData.getListWithoutNoticeHearingDetails(), null));
+        }
         caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
             authorisation,
             callbackRequest,
@@ -280,8 +282,10 @@ public class ManageOrdersController {
             List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
-            caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
-                .getHearingData(caseData.getListWithoutNoticeHearingDetails(),null));
+            if (caseData.getListWithoutNoticeHearingDetails() != null) {
+                caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
+                    .getHearingData(caseData.getListWithoutNoticeHearingDetails(), null));
+            }
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
