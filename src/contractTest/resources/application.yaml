@@ -389,6 +389,7 @@ fis_hearing:
 
 courts:
   filter: ${COURT_IDS_TO_FILTER:}
+  daFilter: ${DA_COURT_IDS_TO_FILTER:}
 
 staffDetails:
   api:
@@ -401,5 +402,5 @@ judicialUsers:
 commonData:
   api:
     url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
-  daFilter: ${DA_COURT_IDS_TO_FILTER:}
+
 
