@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 public class DgsService {
 
     private final DgsApiClient dgsApiClient;
-    private final AllegationOfHarmService allegationOfHarmService;
+    private final AllegationOfHarmRevisedService allegationOfHarmService;
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
 

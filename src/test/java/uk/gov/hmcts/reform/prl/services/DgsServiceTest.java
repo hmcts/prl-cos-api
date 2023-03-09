@@ -31,7 +31,7 @@ public class DgsServiceTest {
     private DgsApiClient dgsApiClient;
 
     @Mock
-    private AllegationOfHarmService allegationOfHarmService;
+    private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;

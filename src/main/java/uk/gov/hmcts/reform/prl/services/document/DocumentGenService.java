@@ -24,7 +24,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.services.AllegationOfHarmService;
+import uk.gov.hmcts.reform.prl.services.AllegationOfHarmRevisedService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -245,8 +245,7 @@ public class DocumentGenService {
     C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
 
     @Autowired
-    private  AllegationOfHarmService allegationOfHarmService;
-
+    private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
     private CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -283,7 +282,7 @@ public class DocumentGenService {
 
         caseData = fillOrgDetails(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = allegationOfHarmService.updateChildAbuses(caseData);
+            caseData = allegationOfHarmRevisedService.updateChildAbuses(caseData);
         }
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -423,7 +422,7 @@ public class DocumentGenService {
 
         caseData = fillOrgDetails(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = allegationOfHarmService.updateChildAbuses(caseData);
+            caseData = allegationOfHarmRevisedService.updateChildAbuses(caseData);
         }
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
