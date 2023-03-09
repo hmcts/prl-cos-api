@@ -229,7 +229,9 @@ public class ManageOrders {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime currentOrderCreatedDateTime;
 
+    @JsonProperty("c21OrderOptions")
     private final C21OrderOptionsEnum c21OrderOptions;
+    @JsonProperty("selectedC21Order")
     private String selectedC21Order;
     private final String furtherInformationIfRequired;
 }
