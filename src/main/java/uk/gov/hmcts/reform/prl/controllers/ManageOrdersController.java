@@ -126,6 +126,7 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("C21 order options in callback:: {}", caseData.getManageOrders().getC21OrderOptions());
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
