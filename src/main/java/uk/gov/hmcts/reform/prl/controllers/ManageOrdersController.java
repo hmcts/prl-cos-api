@@ -126,7 +126,8 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("C21 order options in callback:: {}", caseData.getManageOrders().getC21OrderOptions());
+        log.info("C21 order options in callback:: {}", (null != caseData.getManageOrders())
+            ? caseData.getManageOrders().getC21OrderOptions() : null);
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -146,9 +147,10 @@ public class ManageOrdersController {
             .build();
         if (caseData.getCreateSelectOrderOptions() != null
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-            log.info("C21 Order options from casedata:: *****{}******", caseData.getManageOrders().getC21OrderOptions());
+            log.info("C21 Order options from casedata:: *****{}******", (null != caseData.getManageOrders())
+                ? caseData.getManageOrders().getC21OrderOptions() : null);
             caseData = caseData.toBuilder()
-                .manageOrders(ManageOrders.builder()
+                .manageOrders(manageOrders.toBuilder()
                                   .selectedC21Order(String.valueOf(caseData.getManageOrders().getC21OrderOptions()))
                                   .build())
                 .build();
