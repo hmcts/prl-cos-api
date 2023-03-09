@@ -99,11 +99,18 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.populatePreviewOrder(
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
+            .getHearingData(caseData.getListWithoutNoticeHearingDetails(),null));
+        caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
             authorisation,
             callbackRequest,
             caseData
-        )).build();
+        ));
+
+        log.info("Hearing data {}", caseDataUpdated.get(LISTWITHOUTNOTICE_HEARINGDETAILS));
+        log.info("Hearing cae data {}", caseData.getListWithoutNoticeHearingDetails());
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
 
@@ -273,6 +280,8 @@ public class ManageOrdersController {
             List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
+            caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
+                .getHearingData(caseData.getListWithoutNoticeHearingDetails(),null));
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
