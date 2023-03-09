@@ -189,7 +189,7 @@ public class ManageOrdersController {
         log.info("Prepoulated hearingDynamicLists {}", hearingDataPrePopulatedDynamicLists);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseDataUpdated.containsKey(LISTWITHOUTNOTICE_HEARINGDETAILS)) {
-            log.info("Inside case data updated contain key check for the case id {}", caseReferenceNumber);
+            log.info("Inside case data updated containd key check for the case id {}", caseReferenceNumber);
             caseDataUpdated.put(
                 LISTWITHOUTNOTICE_HEARINGDETAILS,
                 hearingDataService.getHearingData(existingListWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists));
@@ -197,7 +197,7 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.put(
                 LISTWITHOUTNOTICE_HEARINGDETAILS,
-                ElementUtils.wrapElements(hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists,caseData.getApplicantName())));
+                ElementUtils.wrapElements(hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists,caseData)));
 
         }
 

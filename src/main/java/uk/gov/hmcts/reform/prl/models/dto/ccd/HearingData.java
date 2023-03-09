@@ -8,12 +8,15 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -23,19 +26,17 @@ import java.util.List;
 @AllArgsConstructor
 public class HearingData {
 
-    private final DynamicList hearingTypes;
+    private DynamicList hearingTypes;
 
     private final DynamicList confirmedHearingDates;
 
     private final DynamicList hearingChannels;
 
-    private final DynamicList hearingChannelDynamicRadioList;
+    private DynamicList hearingVideoChannels;
 
-    private final DynamicList hearingVideoChannels;
+    private DynamicList hearingTelephoneChannels;
 
-    private final DynamicList hearingTelephoneChannels;
-
-    private final DynamicList courtList;
+    private DynamicList courtList;
 
     private final DynamicList localAuthorityHearingChannel;
 
@@ -63,8 +64,8 @@ public class HearingData {
     @JsonProperty("instructionsForRemoteHearing")
     private final String instructionsForRemoteHearing;
 
-    @JsonProperty("hearingScheduleDetails")
-    private final List<HearingScheduleDetails> hearingScheduleDetails;
+    @JsonProperty("hearingDateTimes")
+    private final List<Element<LocalDateTime>> hearingDateTimes;
 
     @JsonProperty("hearingEstimatedHours")
     private final int hearingEstimatedHours;
@@ -82,19 +83,24 @@ public class HearingData {
     @JsonProperty("hearingAuthority")
     private DioBeforeAEnum hearingAuthority;
 
+    @JsonSerialize(using = CustomEnumSerializer.class)
+    @JsonProperty("hearingChannelsEnum")
+    private HearingChannelsEnum hearingChannelsEnum;
+
     @JsonProperty("hearingJudgeNameAndEmail")
     private final JudicialUser hearingJudgeNameAndEmail;
 
     @JsonProperty("hearingJudgePersonalCode")
-    private final String hearingJudgePersonalCode;
+    private String hearingJudgePersonalCode;
 
     @JsonProperty("hearingJudgeLastName")
-    private final String hearingJudgeLastName;
+    private String hearingJudgeLastName;
 
     @JsonProperty("hearingJudgeEmailAddress")
-    private final String hearingJudgeEmailAddress;
+    private String hearingJudgeEmailAddress;
 
-    private final String mainApplicantName;
-
-
+    private final String applicantName;
+    private final String applicantSolicitor;
+    private final String respondentName;
+    private final String respondentSolicitor;
 }
