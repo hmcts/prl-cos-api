@@ -146,8 +146,10 @@ public class ManageOrdersController {
         if (caseData.getCreateSelectOrderOptions() != null
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
             log.info("C21 Order options from casedata:: *****{}******", caseData.getManageOrders().getC21OrderOptions());
-            manageOrders = manageOrders.toBuilder()
-                .selectedC21Order(String.valueOf(caseData.getManageOrders().getC21OrderOptions()))
+            caseData = caseData.toBuilder()
+                .manageOrders(ManageOrders.builder()
+                                  .selectedC21Order(String.valueOf(caseData.getManageOrders().getC21OrderOptions()))
+                                  .build())
                 .build();
             log.info("Selected C21 Order:: *****{}******", manageOrders.getSelectedC21Order());
             log.info("C21 Order:: *****{}******", manageOrders.getC21OrderOptions());
