@@ -188,7 +188,7 @@ public class DraftAnOrderService {
             .orderTypeId(draftOrder.getOrderTypeId())
             .typeOfOrder(typeOfOrder != null
                              ? typeOfOrder.getDisplayedValue() : null)
-            .doesOrderClosesCase(serveOrderData.getDoesOrderClosesCase())
+            .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
             .serveOrderDetails(manageOrderService.buildServeOrderDetails(serveOrderData))
             .adminNotes(caseData.getCourtAdminNotes())
             .dateCreated(draftOrder.getOtherDetails().getDateCreated())

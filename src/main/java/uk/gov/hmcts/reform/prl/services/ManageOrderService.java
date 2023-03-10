@@ -759,7 +759,7 @@ public class ManageOrderService {
                                        .typeOfOrder(typeOfOrder != null
                                                             ? typeOfOrder.getDisplayedValue() : null)
                                        .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
-                                           ? serveOrderData.getDoesOrderClosesCase() : null)
+                                           ? caseData.getDoesOrderClosesCase() : null)
                                        .serveOrderDetails(buildServeOrderDetails(serveOrderData))
                                        .build()));
         }
@@ -1501,7 +1501,7 @@ public class ManageOrderService {
                            .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                            .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
                            .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
-                                                ? serveOrderData.getDoesOrderClosesCase() : null)
+                                                ? caseData.getDoesOrderClosesCase() : null)
                            .serveOrderDetails(buildServeOrderDetails(serveOrderData))
                            .orderDocument(Document.builder()
                                               .documentUrl(generatedDocumentInfo.getUrl())
