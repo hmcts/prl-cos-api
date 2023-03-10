@@ -1604,6 +1604,7 @@ public class ManageOrderService {
         } else {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, YesOrNo.No);
         }
+        log.info("checkOnlyC47aOrderSelectedToServe ==> " + caseDataUpdated);
         return caseDataUpdated;
     }
 
