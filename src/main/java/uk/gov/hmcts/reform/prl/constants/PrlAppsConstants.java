@@ -333,4 +333,7 @@ public class PrlAppsConstants {
 
     public static final String IS_CAFCASS = "isCafcass";
 
+
+    public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+
 }
