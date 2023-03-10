@@ -52,13 +52,7 @@ public class CaseUtils {
     }
 
     public static SelectTypeOfOrderEnum getSelectTypeOfOrder(CaseData caseData) {
-        SelectTypeOfOrderEnum typeOfOrder;
-        if (caseData.getServeOrderData() != null && caseData.getServeOrderData().getSelectTypeOfOrder() != null) {
-            typeOfOrder = caseData.getServeOrderData().getSelectTypeOfOrder();
-        } else {
-            typeOfOrder = caseData.getSelectTypeOfOrder();
-        }
-        return typeOfOrder;
+        return caseData.getSelectTypeOfOrder();
     }
 
     public static String getCaseTypeOfApplication(CaseData caseData) {

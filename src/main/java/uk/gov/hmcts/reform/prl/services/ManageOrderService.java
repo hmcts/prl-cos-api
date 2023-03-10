@@ -1500,7 +1500,7 @@ public class ManageOrderService {
                                             ? typeOfOrder.getDisplayedValue() : null)
                            .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                            .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
-                           .orderClosesCase(typeOfOrder.getDisplayedValue().equals("Final")
+                           .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
                                                 ? serveOrderData.getDoesOrderClosesCase() : null)
                            .serveOrderDetails(buildServeOrderDetails(serveOrderData))
                            .orderDocument(Document.builder()
