@@ -72,6 +72,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -1600,10 +1601,9 @@ public class ManageOrderService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
-        if (selectedServedOrderList.size() == 1 && selectedServedOrderList.get(0).getLabel().contains("C47A")) {
-            caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, YesOrNo.Yes);
-        } else {
-            caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, YesOrNo.No);
+        if (selectedServedOrderList.size() == 1 && selectedServedOrderList.get(0).getLabel().contains("C47A")
+            && caseDataUpdated.containsKey(IS_CAFCASS)) {
+            caseDataUpdated.remove(IS_CAFCASS);
         }
         if ((caseData.getServeOrderData() != null && YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))
             || servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
