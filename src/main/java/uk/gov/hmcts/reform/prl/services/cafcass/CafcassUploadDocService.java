@@ -116,15 +116,6 @@ public class CafcassUploadDocService {
         log.info("Document has been saved in CCD {}", document.getOriginalFilename());
     }
 
-    private void checkIfNumberOfAttachmentExceeds(CaseData caseData) {
-        if (caseData.getNumberOfAttachments() != null && caseData.getCafcassUploadedDocs() != null
-            && Integer.valueOf(caseData.getNumberOfAttachments())
-            <= caseData.getCafcassUploadedDocs().size()) {
-            log.error("Number of attachments size is reached {}", caseData.getNumberOfAttachments());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-    }
-
     public CaseDetails checkIfCasePresent(String caseId, String authorisation) {
         try {
             CaseDetails caseDetails = coreCaseDataApi.getCase(
