@@ -193,10 +193,10 @@ public class CaseController {
         @PathVariable("caseId") String caseId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
-    ) throws JsonProcessingException {
+    ) {
         CaseDetails caseDetails = null;
         if (isAuthorized(authorisation, s2sToken)) {
-            caseDetails = caseService.withdrawCase(caseData, caseId, authorisation, authTokenGenerator.generate());
+            caseDetails = caseService.withdrawCase(caseData, caseId, authorisation);
             return CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

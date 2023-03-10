@@ -90,13 +90,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_STATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -377,8 +371,8 @@ public class CallbackController {
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            if (previousState.isPresent() &&
-                !CaseUtils.WITHDRAW_STATE_LIST.contains(previousState.get())) {
+            if (previousState.isPresent()
+                && !CaseUtils.WITHDRAW_STATE_LIST.contains(previousState.get())) {
                 caseDataUpdated.put("isWithdrawRequestSent", "Pending");
                 log.info("Case is updated as WithdrawRequestSent");
                 sendWithdrawEmails(caseData, userDetails, caseDetails);

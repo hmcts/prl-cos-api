@@ -62,7 +62,6 @@ public class CaseUtils {
     }
 
     public static boolean getPreviousState(String eachState) {
-        log.info("eachState " + eachState);
         return (!WITHDRAWN_STATE.equalsIgnoreCase(eachState)
             && (!DRAFT_STATE.equalsIgnoreCase(eachState))
             && (!RETURN_STATE.equalsIgnoreCase(eachState))
