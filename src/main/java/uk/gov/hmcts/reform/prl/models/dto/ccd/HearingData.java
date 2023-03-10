@@ -134,4 +134,7 @@ public class HearingData {
 
     @JsonProperty("isRenderingRequiredFlag")
     private YesOrNo isRenderingRequiredFlag;
+
+    @JsonProperty("fillingFormRenderingInfo")
+    private String fillingFormRenderingInfo;
 }
