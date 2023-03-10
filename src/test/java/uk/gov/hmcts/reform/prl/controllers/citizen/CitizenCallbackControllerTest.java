@@ -167,4 +167,30 @@ public class CitizenCallbackControllerTest {
         citizenCallbackController.sendNotificationsOnCaseSubmission(authToken, callbackRequest);
         verify(allTabsService, times(0)).updateAllTabsIncludingConfTab(any(CaseData.class));
     }
+
+    @Test
+    public void sendNotitficationAfterCaseWithdrawnTest() throws Exception {
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("last")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        EmailTemplateVars email = CitizenCaseSubmissionEmail.builder()
+            .caseNumber(String.valueOf(caseData.getId()))
+            .caseLink(citizenSignUpLink + CITIZEN_HOME)
+            .applicantName(userDetails.getFullName())
+            .build();
+
+        doNothing().when(citizenEmailService).sendCitizenCaseSubmissionEmail(authToken,
+                                                                             String.valueOf(caseData.getId()));
+        citizenCallbackController.sendNotificationsOnCaseWithdrawn(authToken, callbackRequest);
+        verify(allTabsService, times(0)).updateAllTabsIncludingConfTab(any(CaseData.class));
+    }
 }
