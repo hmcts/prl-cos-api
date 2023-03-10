@@ -103,8 +103,6 @@ public class ManageOrderService {
 
     public static final String OTHER_PARTIES = "otherParties";
 
-    public static final String IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE = "isOnlyC47aOrderSelectedToServe";
-
     @Value("${document.templates.common.prl_c21_draft_template}")
     protected String sdoDraftTemplate;
 
