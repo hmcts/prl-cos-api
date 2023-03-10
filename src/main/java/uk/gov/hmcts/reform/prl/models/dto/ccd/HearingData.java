@@ -131,4 +131,7 @@ public class HearingData {
 
     @JsonProperty("customDetails")
     private  String customDetails;
+
+    @JsonProperty("isRenderingRequiredFlag")
+    private YesOrNo isRenderingRequiredFlag;
 }
