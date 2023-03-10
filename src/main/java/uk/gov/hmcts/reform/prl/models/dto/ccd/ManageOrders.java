@@ -234,5 +234,4 @@ public class ManageOrders {
     @JsonProperty("selectedC21Order")
     private String selectedC21Order;
     private final String furtherInformationIfRequired;
-    private final YesOrNo isOnlyC47aOrderSelectedToServe;
 }
