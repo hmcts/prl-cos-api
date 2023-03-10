@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -103,4 +104,6 @@ public class HearingData {
     private final String applicantSolicitor;
     private final String respondentName;
     private final String respondentSolicitor;
+    private List<Element<PartyDetails>> applicantList;
+    private List<Element<PartyDetails>> respondentList;
 }
