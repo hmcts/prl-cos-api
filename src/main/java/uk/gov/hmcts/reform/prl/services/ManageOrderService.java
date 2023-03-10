@@ -101,6 +101,8 @@ public class ManageOrderService {
 
     public static final String OTHER_PARTIES = "otherParties";
 
+    public static final String IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE = "isOnlyC47aOrderSelectedToServe";
+
     @Value("${document.templates.common.prl_c21_draft_template}")
     protected String sdoDraftTemplate;
 
@@ -1592,5 +1594,18 @@ public class ManageOrderService {
         }
         return caseDataUpdated;
     }
+
+    public Map<String, Object> checkOnlyC47aOrderSelectedToServe(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
+        if (selectedServedOrderList.size() == 1 && selectedServedOrderList.get(0).getLabel().contains("C47A")) {
+            caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, YesOrNo.Yes);
+        } else {
+            caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, YesOrNo.No);
+        }
+        return caseDataUpdated;
+    }
+
 
 }
