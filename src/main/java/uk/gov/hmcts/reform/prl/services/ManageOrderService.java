@@ -69,6 +69,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
@@ -1604,6 +1605,13 @@ public class ManageOrderService {
         } else {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, YesOrNo.No);
         }
+        if ((caseData.getServeOrderData() != null && YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))
+            || servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
+            caseDataUpdated.put("ordersNeedToBeServed", Yes);
+        } else {
+            caseDataUpdated.put("ordersNeedToBeServed", No);
+        }
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         log.info("checkOnlyC47aOrderSelectedToServe ==> " + caseDataUpdated);
         return caseDataUpdated;
     }
