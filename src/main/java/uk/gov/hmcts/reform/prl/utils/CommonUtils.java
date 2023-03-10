@@ -5,6 +5,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -76,15 +77,16 @@ public class CommonUtils {
         }
         return null;
     }
-public static void generatePartyUuidForC100(PartyDetails partyDetails) {
 
-    if (partyDetails.getSolicitorPartyId() == null) {
-        partyDetails.setSolicitorPartyId(generateUuid());
+    public static void generatePartyUuidForC100(PartyDetails partyDetails) {
+
+        if (partyDetails.getSolicitorPartyId() == null) {
+            partyDetails.setSolicitorPartyId(generateUuid());
+        }
+        if (partyDetails.getSolicitorOrgUuid() == null) {
+            partyDetails.setSolicitorOrgUuid(generateUuid());
+        }
     }
-    if (partyDetails.getSolicitorOrgUuid() == null) {
-        partyDetails.setSolicitorOrgUuid(generateUuid());
-    }
-}
 
     public static void generatePartyUuidForFL401(CaseData caseData) {
         if (caseData.getApplicantsFL401() != null) {
