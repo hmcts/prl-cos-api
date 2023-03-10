@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class CitizenInternationalElements {
-    private final YesOrNo childrenLiveOutsideOfEnWl;
+    private final String childrenLiveOutsideOfEnWl;
     private final String childrenLiveOutsideOfEnWlDetails;
     private final YesOrNo parentsAnyOneLiveOutsideEnWl;
     private final String parentsAnyOneLiveOutsideEnWlDetails;
