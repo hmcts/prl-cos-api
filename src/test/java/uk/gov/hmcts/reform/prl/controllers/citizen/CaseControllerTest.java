@@ -14,6 +14,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -267,5 +269,29 @@ public class CaseControllerTest {
 
         //Then
         assertThat(actualCaseData).isEqualTo(caseData);
+    }
+
+    @Test
+    public void shouldWithdrawCase() {
+        //Given
+        String caseId = "1234567891234567";
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .state(State.CASE_WITHDRAWN)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1234567891234567L).data(stringObjectMap).state(PrlAppsConstants.WITHDRAWN_STATE).build();
+
+        Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        Mockito.when(caseService.withdrawCase(caseData, caseId, authToken)).thenReturn(caseDetails);
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+        //When
+        CaseData actualCaseData = caseController.withdrawCase(caseData, caseId, authToken, servAuthToken);
+
+        //Then
+        assertThat(actualCaseData.getState()).isEqualTo(caseData.getState());
     }
 }

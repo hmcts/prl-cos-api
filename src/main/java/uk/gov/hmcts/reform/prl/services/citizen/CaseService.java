@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -263,7 +262,7 @@ public class CaseService {
         return caseRepository.createCase(authToken, caseData);
     }
 
-    public CaseDetails withdrawCase(CaseData caseData, String caseId, String authToken, String s2sToken) throws JsonProcessingException {
+    public CaseDetails withdrawCase(CaseData caseData, String caseId, String authToken) {
 
         Optional<String> previousState = caseEventService.findEventsForCase(caseId)
             .stream().map(CaseEventDetail::getStateId)
@@ -282,7 +281,6 @@ public class CaseService {
                 //REVIEW IF ANY EMAILS TO SEND
             } else {
                 updatedCaseData = updatedCaseData.toBuilder()
-                    .state(State.CASE_WITHDRAWN)
                     .withDrawApplicationData(withDrawApplicationData)
                     .build();
             }
