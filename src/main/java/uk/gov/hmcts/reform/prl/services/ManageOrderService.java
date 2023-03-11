@@ -1602,8 +1602,8 @@ public class ManageOrderService {
             caseDataUpdated.put("isOnlyC47aOrderSelectedToServe", Yes);
         } else {
             caseDataUpdated.put("isOnlyC47aOrderSelectedToServe", No);
+            caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         }
-        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         log.info("checkOnlyC47aOrderSelectedToServe ==> " + caseDataUpdated);
         return caseDataUpdated;
     }
