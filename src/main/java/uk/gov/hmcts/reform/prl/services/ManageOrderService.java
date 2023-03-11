@@ -90,6 +90,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class ManageOrderService {
 
+    public static final String IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE = "isOnlyC47aOrderSelectedToServe";
+    public static final String OTHER_PEOPLE_PRESENT_IN_CASE_FLAG = "otherPeoplePresentInCaseFlag";
     @Autowired
     LocationRefDataService locationRefDataService;
 
@@ -481,15 +483,15 @@ public class ManageOrderService {
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService
             .getOtherPeopleMultiSelectList(caseData);
         headerMap.put(
-            "otherParties", DynamicMultiSelectList.builder()
+            OTHER_PARTIES, DynamicMultiSelectList.builder()
                 .listItems(otherPeopleList)
                 .build());
         if (otherPeopleList.isEmpty()) {
             headerMap.put(
-                "otherPeoplePresentInCaseFlag", No);
+                OTHER_PEOPLE_PRESENT_IN_CASE_FLAG, No);
         } else {
             headerMap.put(
-                "otherPeoplePresentInCaseFlag", Yes);
+                OTHER_PEOPLE_PRESENT_IN_CASE_FLAG, Yes);
         }
     }
 
@@ -1606,9 +1608,9 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
         if (selectedServedOrderList.size() == 1 && selectedServedOrderList.get(0).getLabel().contains("C47A")) {
-            caseDataUpdated.put("isOnlyC47aOrderSelectedToServe", Yes);
+            caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, Yes);
         } else {
-            caseDataUpdated.put("isOnlyC47aOrderSelectedToServe", No);
+            caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, No);
         }
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         log.info("checkOnlyC47aOrderSelectedToServe ==> " + caseDataUpdated);
