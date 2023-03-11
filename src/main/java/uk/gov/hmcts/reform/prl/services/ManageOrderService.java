@@ -1598,7 +1598,7 @@ public class ManageOrderService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
-        if (selectedServedOrderList.size() != 1 || !selectedServedOrderList.get(0).getLabel().contains("C47A")) {
+        if (selectedServedOrderList.size() == 1 && selectedServedOrderList.get(0).getLabel().contains("C47A")) {
             caseDataUpdated.put("isOnlyC47aOrderSelectedToServe", Yes);
         } else {
             caseDataUpdated.put("isOnlyC47aOrderSelectedToServe", No);
