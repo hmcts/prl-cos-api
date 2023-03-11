@@ -484,6 +484,13 @@ public class ManageOrderService {
             "otherParties", DynamicMultiSelectList.builder()
                 .listItems(otherPeopleList)
                 .build());
+        if (otherPeopleList.isEmpty()) {
+            headerMap.put(
+                "otherPeoplePresentInCaseFlag", No);
+        } else {
+            headerMap.put(
+                "otherPeoplePresentInCaseFlag", Yes);
+        }
     }
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
