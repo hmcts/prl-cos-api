@@ -1597,12 +1597,13 @@ public class ManageOrderService {
     public Map<String, Object> checkOnlyC47aOrderSelectedToServe(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
-        if (selectedServedOrderList.size() != 1 || !selectedServedOrderList.get(0).getLabel().contains("C47A")
-            || PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
-            caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, caseTypeOfApplication);
+        if (selectedServedOrderList.size() != 1 || !selectedServedOrderList.get(0).getLabel().contains("C47A")) {
+            caseDataUpdated.put("isOnlyC47aOrderSelectedToServe", Yes);
+        } else {
+            caseDataUpdated.put("isOnlyC47aOrderSelectedToServe", No);
         }
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         log.info("checkOnlyC47aOrderSelectedToServe ==> " + caseDataUpdated);
         return caseDataUpdated;
     }
