@@ -80,7 +80,8 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
             authorisation,
             callbackRequest
         )).build();
