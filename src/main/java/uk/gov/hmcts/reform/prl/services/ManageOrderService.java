@@ -1607,12 +1607,30 @@ public class ManageOrderService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
+        String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         if (selectedServedOrderList.size() == 1 && selectedServedOrderList.get(0).getLabel().contains("C47A")) {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, Yes);
         } else {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, No);
         }
-        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, caseTypeOfApplication);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+            if (caseData.getIsCafcass() != null) {
+                caseDataUpdated.put(
+                    PrlAppsConstants.IS_CAFCASS,
+                    caseData.getIsCafcass()
+                );
+            } else if (caseData.getCaseManagementLocation() != null) {
+                caseDataUpdated.put(
+                    PrlAppsConstants.IS_CAFCASS,
+                    CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegionId())
+                );
+            } else {
+                caseDataUpdated.put(PrlAppsConstants.IS_CAFCASS, No);
+            }
+        } else {
+            caseDataUpdated.put(PrlAppsConstants.IS_CAFCASS, No);
+        }
         log.info("checkOnlyC47aOrderSelectedToServe ==> " + caseDataUpdated);
         return caseDataUpdated;
     }
