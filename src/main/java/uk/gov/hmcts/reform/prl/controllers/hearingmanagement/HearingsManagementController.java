@@ -73,6 +73,5 @@ public class HearingsManagementController {
         } else {
             hearingManagementService.caseStateChangeForHearingManagement(hearingRequest);
         }
-
     }
 }

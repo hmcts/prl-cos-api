@@ -254,7 +254,7 @@ public class CaseWorkerEmailService {
     public void sendEmailToCourtAdmin(CaseDetails caseDetails) {
 
         caseData = emailService.getCaseData(caseDetails);
-
+        log.info("Triggering case worker email service to send mail to court admin");
         List<LocalCourtAdminEmail> localCourtAdminEmails = caseData
             .getLocalCourtAdmin()
             .stream()
@@ -264,13 +264,16 @@ public class CaseWorkerEmailService {
         List<String> emailList = localCourtAdminEmails.stream()
             .map(LocalCourtAdminEmail::getEmail)
             .collect(Collectors.toList());
-
-        emailList.forEach(email ->   emailService.send(
-            email,
-            EmailTemplateNames.COURTADMIN,
-            buildCourtAdminEmail(caseDetails),
-            LanguagePreference.english
-        ));
+        emailList.forEach(email -> {
+            if (null != email) {
+                emailService.send(
+                    email,
+                    EmailTemplateNames.COURTADMIN,
+                    buildCourtAdminEmail(caseDetails),
+                    LanguagePreference.english
+                );
+            }
+        });
     }
 
     public EmailTemplateVars buildCourtAdminEmail(CaseDetails caseDetails) {
@@ -325,9 +328,6 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmailToFl401LocalCourt(CaseDetails caseDetails, String courtEmail) {
-
-        log.info("Sending FL401 email to localcourt for :{} ", caseDetails.getId());
-
         emailService.send(
             courtEmail,
             EmailTemplateNames.DA_LOCALCOURT,
