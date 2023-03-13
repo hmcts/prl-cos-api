@@ -36,15 +36,15 @@ public class CitizenEmailService {
     @Value("${citizen.url}")
     private String citizenSignUpLink;
 
-    public EmailTemplateVars buildCitizenCaseSubmissionEmail(UserDetails userDetails, String caseId) {
+    public EmailTemplateVars buildCitizenCaseSubmissionEmail(UserDetails userDetails, String caseId, String caseName) {
         return new CitizenCaseSubmissionEmail(String.valueOf(caseId),
-                                              citizenSignUpLink + CITIZEN_DASHBOARD, userDetails.getFullName()
+                                              citizenSignUpLink + CITIZEN_DASHBOARD, userDetails.getFullName(), caseName
         );
     }
 
     public void sendCitizenCaseSubmissionEmail(String authorisation, String caseId) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        EmailTemplateVars email = buildCitizenCaseSubmissionEmail(userDetails, caseId);
+        EmailTemplateVars email = buildCitizenCaseSubmissionEmail(userDetails, caseId, null);
         sendEmail(userDetails.getEmail(), email);
     }
 
@@ -60,8 +60,9 @@ public class CitizenEmailService {
     public void sendCitizenCaseWithdrawalEmail(String authorisation, CaseData caseData) {
         log.info("Inside sendCitizenCaseWithdrawalEmail");
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        EmailTemplateVars emailTemplate = buildCitizenCaseSubmissionEmail(userDetails, String.valueOf(caseData.getId()));
-        sendWithdrawalEmail(userDetails.getEmail(), emailTemplate);
+        EmailTemplateVars emailTemplate = buildCitizenCaseSubmissionEmail(
+            userDetails, String.valueOf(caseData.getId()), caseData.getApplicantCaseName());
+        sendWithdrawalEmail(userDetails.getEmail(), emailTemplate, caseData);
 
         /*List<PartyDetails> applicants = caseData
             .getApplicants()
@@ -78,12 +79,12 @@ public class CitizenEmailService {
 
     }
 
-    private void sendWithdrawalEmail(String address, EmailTemplateVars email) {
+    private void sendWithdrawalEmail(String address, EmailTemplateVars email, CaseData caseData) {
         emailService.send(
             address,
             EmailTemplateNames.CITIZEN_CASE_WITHDRAWN,
             email,
-            LanguagePreference.english
+            LanguagePreference.getLanguagePreference(caseData)
         );
     }
 }

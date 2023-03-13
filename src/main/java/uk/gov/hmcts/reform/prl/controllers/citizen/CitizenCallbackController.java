@@ -105,7 +105,7 @@ public class CitizenCallbackController extends AbstractCallbackController {
     }
 
     @PostMapping(path = "/citizen-case-withdrawn-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to send notifications on case submission")
+    @Operation(description = "Callback to send notifications on case withdrawn")
     @SecurityRequirement(name = "Bearer Authentication")
     public void sendNotificationsOnCaseWithdrawn(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
