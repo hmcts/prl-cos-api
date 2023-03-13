@@ -125,7 +125,7 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
-        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        caseDataMap.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataMap;
     }
 
@@ -135,7 +135,7 @@ public class DraftAnOrderService {
         UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper);
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        updatedCaseData.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        updatedCaseData.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if (e.getId().equals(selectedOrderId)) {
@@ -292,6 +292,7 @@ public class DraftAnOrderService {
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
+        log.info("orderUploadedAsDraftFlag value:: {} ", caseDataMap.get("orderUploadedAsDraftFlag"));
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
         DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
         if (language.isGenEng()) {
@@ -303,6 +304,7 @@ public class DraftAnOrderService {
         if (selectedOrder.getJudgeNotes() != null) {
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
         }
+        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
 
@@ -343,6 +345,7 @@ public class DraftAnOrderService {
         caseDataMap.put("underTakingDateExpiry", selectedOrder.getUnderTakingDateExpiry());
         caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
         caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
+        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
 
