@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -83,7 +81,7 @@ public class FL401SubmitApplicationController {
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
-            .listItems(locationRefDataService.getCourtLocations(authorisation))
+            .listItems(locationRefDataService.getDaCourtLocations(authorisation))
             .build());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
@@ -102,14 +100,12 @@ public class FL401SubmitApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        Map<String, Object> caseDataUpdated = fl401SubmitApplicationService.fl401GenerateDocumentSubmitApplication(
-            authorisation,
-            callbackRequest,
-            caseData
-        );
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated)
+            .data(fl401SubmitApplicationService.fl401GenerateDocumentSubmitApplication(
+                authorisation,
+                callbackRequest,
+                caseData
+            ))
             .build();
     }
 
@@ -122,25 +118,8 @@ public class FL401SubmitApplicationController {
                                                              @Parameter(hidden = true)  String authorisation,
                                                              @RequestBody CallbackRequest callbackRequest) {
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-
-        try {
-            solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
-            caseData = caseData.toBuilder()
-                .isNotificationSent("Yes")
-                .build();
-
-        } catch (Exception e) {
-            log.error("Notification could not be sent due to {} ", e.getMessage());
-            caseData = caseData.toBuilder()
-                .isNotificationSent("No")
-                .build();
-        }
-
         return CallbackResponse.builder()
-            .data(caseData)
+            .data(fl401SubmitApplicationService.fl401SendApplicationNotification(authorisation, callbackRequest))
             .build();
     }
 }
