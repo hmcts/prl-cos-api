@@ -1679,14 +1679,14 @@ public class ManageOrderService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
-        if (selectedServedOrderList.size() == 1 && selectedServedOrderList.get(0).getLabel().contains(C_47_A)) {
+        if (selectedServedOrderList != null && selectedServedOrderList.size() == 1
+            && selectedServedOrderList.get(0).getLabel().contains(C_47_A)) {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, Yes);
         } else {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, No);
         }
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
-        log.info("checkOnlyC47aOrderSelectedToServe ==> " + caseDataUpdated);
         return caseDataUpdated;
     }
 
