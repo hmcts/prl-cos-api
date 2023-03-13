@@ -329,9 +329,7 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmailToFl401LocalCourt(CaseDetails caseDetails, String courtEmail) {
-
         log.info("Sending FL401 email to localcourt for :{} ", caseDetails.getId(), courtEmail);
-
         emailService.send(
             courtEmail,
             EmailTemplateNames.DA_LOCALCOURT,
