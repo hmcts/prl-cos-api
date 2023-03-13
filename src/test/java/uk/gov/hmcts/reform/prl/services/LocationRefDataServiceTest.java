@@ -43,7 +43,8 @@ public class LocationRefDataServiceTest {
     @Before
     public void setUp() {
         when(authTokenGenerator.generate()).thenReturn("");
-        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1,2,3,4");
+        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2:email,3:email,4:email");
+        ReflectionTestUtils.setField(locationRefDataService,"daCourtsToFilter", "1:email,2:email,3:email,4:email");
     }
 
     @Test
@@ -55,10 +56,26 @@ public class LocationRefDataServiceTest {
     }
 
     @Test
+    public void testDaGetCourtDetailsWithNullCourtDetails() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(null);
+        List<DynamicListElement> courtLocations = locationRefDataService.getDaCourtLocations("test");
+        assertTrue(courtLocations.isEmpty());
+    }
+
+    @Test
     public void testgetCourtDetailsWithException() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenThrow(NullPointerException.class);
         List<DynamicListElement> courtLocations = locationRefDataService.getCourtLocations("test");
+        assertNull(courtLocations.get(0).getCode());
+    }
+
+    @Test
+    public void testDaGetCourtDetailsWithException() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenThrow(NullPointerException.class);
+        List<DynamicListElement> courtLocations = locationRefDataService.getDaCourtLocations("test");
         assertNull(courtLocations.get(0).getCode());
     }
 
@@ -75,6 +92,20 @@ public class LocationRefDataServiceTest {
         assertFalse(courtLocations.isEmpty());
     }
 
+
+    @Test
+    public void testDaGetCourtDetailsWithData() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
+                                                     .region("test").siteName("test")
+                                                     .courtEpimmsId("2")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .build());
+        List<DynamicListElement> courtLocations = locationRefDataService.getDaCourtLocations("test");
+        assertFalse(courtLocations.isEmpty());
+    }
+
     @Test
     public void testgetCourtDetailsWithNoData() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
@@ -86,6 +117,20 @@ public class LocationRefDataServiceTest {
                             .build());
         ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "");
         List<DynamicListElement> courtLocations = locationRefDataService.getCourtLocations("test");
+        assertFalse(courtLocations.isEmpty());
+    }
+
+    @Test
+    public void testDaGetCourtDetailsWithNoData() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
+                                                     .region("test").siteName("test")
+                                                     .courtEpimmsId("2")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .build());
+        ReflectionTestUtils.setField(locationRefDataService,"daCourtsToFilter", "");
+        List<DynamicListElement> courtLocations = locationRefDataService.getDaCourtLocations("test");
         assertFalse(courtLocations.isEmpty());
     }
 

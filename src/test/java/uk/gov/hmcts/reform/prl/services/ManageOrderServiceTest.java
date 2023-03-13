@@ -245,7 +245,6 @@ public class ManageOrderServiceTest {
                               .isCaseWithdrawn(YesOrNo.Yes)
                               .isTheOrderByConsent(YesOrNo.Yes)
                               .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
-                              .isOrderDrawnForCafcass(YesOrNo.Yes)
                               .orderDirections("test")
                               .furtherDirectionsIfRequired("test")
                               .build())
@@ -376,7 +375,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
@@ -387,7 +386,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
     }
@@ -733,7 +732,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
@@ -744,7 +743,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
 
@@ -774,7 +773,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-temaplate");
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -788,9 +787,59 @@ public class ManageOrderServiceTest {
             .respondents(partyDetails)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .manageOrders(manageOrders)
+            .build();
+
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+
+    }
+
+    @Test
+    public void testPopulateFinalWelshOrderFromCaseData() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+        recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
+        recipientList.add(OrderRecipientsEnum.respondentOrRespondentSolicitor);
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+        ReflectionTestUtils.setField(manageOrderService, "c21WelshTemplate", "c21-WEL-template");
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .orderRecipients(recipientList)
+            .applicants(partyDetails)
+            .respondents(partyDetails)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(manageOrders)
             .build();
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
@@ -1727,7 +1776,6 @@ public class ManageOrderServiceTest {
                               .isCaseWithdrawn(YesOrNo.Yes)
                               .isTheOrderByConsent(YesOrNo.Yes)
                               .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
-                              .isOrderDrawnForCafcass(YesOrNo.Yes)
                               .orderDirections("test")
                               .furtherDirectionsIfRequired("test")
                               .childOption(dynamicMultiSelectList)

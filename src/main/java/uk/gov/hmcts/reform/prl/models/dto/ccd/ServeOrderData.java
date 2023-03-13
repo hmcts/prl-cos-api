@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 
@@ -19,11 +18,6 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ServeOrderData {
-    @JsonProperty("selectTypeOfUploadOrder")
-    private final SelectTypeOfOrderEnum selectTypeOfUploadOrder;
-    @JsonProperty("doesUploadOrderClosesCase")
-    private final YesOrNo doesUploadOrderClosesCase;
-
     @JsonProperty("cafcassOrCymruNeedToProvideReport")
     private final YesOrNo cafcassOrCymruNeedToProvideReport;
     @JsonProperty("cafcassCymruDocuments")

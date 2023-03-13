@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,12 +66,11 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("selectedOrder", caseData.getCreateSelectOrderOptions() != null
+            ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseData.toBuilder()
-                      .selectedOrder(caseData.getCreateSelectOrderOptions() != null
-                                         ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
-                      .build().toMap(CcdObjectMapper.getObjectMapper())).build();
-
+            .data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/populate-draft-order-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -86,15 +86,12 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
 
-        if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
-            || CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw.equals(caseData.getCreateSelectOrderOptions()))
+        if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
-            log.info("Court name before prepopulate: {}", caseData.getCourtName());
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         } else {
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
@@ -189,4 +186,3 @@ public class DraftAnOrderController {
         )).build();
     }
 }
-
