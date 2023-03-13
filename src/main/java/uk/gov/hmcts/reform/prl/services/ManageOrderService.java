@@ -1546,6 +1546,7 @@ public class ManageOrderService {
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
+        GeneratedDocumentInfo generatedDocumentInfoWelsh = GeneratedDocumentInfo.builder().build();
 
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
@@ -1561,7 +1562,7 @@ public class ManageOrderService {
                 String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
                 log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, welshTemplate);
                 if (welshTemplate != null && welshTemplate.contains("-WEL-")) {
-                    generatedDocumentInfo =  dgsService.generateWelshDocument(
+                    generatedDocumentInfoWelsh = dgsService.generateWelshDocument(
                         authorisation,
                         CaseDetails.builder().caseData(caseData).build(),
                         welshTemplate
@@ -1590,11 +1591,11 @@ public class ManageOrderService {
                                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                               .documentHash(generatedDocumentInfo.getHashToken())
                                               .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
-                           .orderDocumentWelsh(Document.builder()
-                                                   .documentUrl(generatedDocumentInfo.getUrl())
-                                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                   .documentHash(generatedDocumentInfo.getHashToken())
-                                                   .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build())
+                           .orderDocumentWelsh(documentLanguage.isGenWelsh() ? Document.builder()
+                                                   .documentUrl(generatedDocumentInfoWelsh.getUrl())
+                                                   .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
+                                                   .documentHash(generatedDocumentInfoWelsh.getHashToken())
+                                                   .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build() : null)
                            .otherDetails(OtherOrderDetails.builder()
                                              .createdBy(caseData.getJudgeOrMagistratesLastName())
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(

@@ -334,4 +334,6 @@ public class PrlAppsConstants {
 
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
 
+    public static final String CASEWORKER = "CaseWorker";
+
 }
