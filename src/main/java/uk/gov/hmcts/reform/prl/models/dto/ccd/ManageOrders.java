@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.CafcassReportsEnum;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ApplicantOccupationEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
@@ -167,11 +167,6 @@ public class ManageOrders {
     @JsonProperty("fl404bCustomFields")
     private final FL404b fl404bCustomFields;
 
-    @JsonProperty("isOrderDrawnForCafcass")
-    private final YesOrNo isOrderDrawnForCafcass;
-    @JsonProperty("cafcassReports")
-    private final List<CafcassReportsEnum> cafcassReports;
-
     @Builder.Default
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
@@ -234,4 +229,23 @@ public class ManageOrders {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime currentOrderCreatedDateTime;
 
+    @JsonProperty("c21OrderOptions")
+    private final C21OrderOptionsEnum c21OrderOptions;
+    @JsonProperty("typeOfC21Order")
+    private String typeOfC21Order;
+    private final String furtherInformationIfRequired;
+    private final YesOrNo isOnlyC47aOrderSelectedToServe;
+    private final YesOrNo otherPeoplePresentInCaseFlag;
+
+    private final YesOrNo serveToRespondentOptionsOnlyC47a;
+    private final ServingRespondentsEnum servingRespondentsOptionsCaOnlyC47a;
+    private final DynamicMultiSelectList recipientsOptionsOnlyC47a;
+    private final DynamicMultiSelectList otherPartiesOnlyC47a;
+    @JsonProperty("serveOtherPartiesCaOnlyC47a")
+    private final List<OtherOrganisationOptions> serveOtherPartiesCaOnlyC47a;
+    private final DeliveryByEnum deliveryByOptionsCaOnlyC47a;
+    @JsonProperty("emailInformationCaOnlyC47a")
+    private final List<Element<EmailInformation>> emailInformationCaOnlyC47a;
+    @JsonProperty("postalInformationCaOnlyC47a")
+    private final List<Element<PostalInformation>> postalInformationCaOnlyC47a;
 }

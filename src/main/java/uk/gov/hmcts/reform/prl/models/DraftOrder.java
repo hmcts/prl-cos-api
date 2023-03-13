@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
@@ -117,6 +118,9 @@ public class DraftOrder {
     @JsonProperty("isOrderUploadedByJudgeOrAdmin")
     private final YesOrNo isOrderUploadedByJudgeOrAdmin;
     private final String childrenList;
+    private final YesOrNo isTheOrderAboutChildren;
+    private final C21OrderOptionsEnum c21OrderOptions;
+    private final String furtherInformationIfRequired;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
