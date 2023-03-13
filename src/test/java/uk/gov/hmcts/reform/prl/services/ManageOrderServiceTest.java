@@ -831,9 +831,9 @@ public class ManageOrderServiceTest {
             .respondents(partyDetails)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .manageOrders(manageOrders)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
