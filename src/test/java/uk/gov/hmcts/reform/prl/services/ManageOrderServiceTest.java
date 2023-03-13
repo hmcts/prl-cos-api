@@ -243,7 +243,6 @@ public class ManageOrderServiceTest {
                               .isCaseWithdrawn(YesOrNo.Yes)
                               .isTheOrderByConsent(YesOrNo.Yes)
                               .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
-                              .isOrderDrawnForCafcass(YesOrNo.Yes)
                               .orderDirections("test")
                               .furtherDirectionsIfRequired("test")
                               .build())
@@ -370,7 +369,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
@@ -381,7 +380,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
     }
@@ -727,7 +726,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
@@ -738,7 +737,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw);
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
 
@@ -1771,7 +1770,6 @@ public class ManageOrderServiceTest {
                               .isCaseWithdrawn(YesOrNo.Yes)
                               .isTheOrderByConsent(YesOrNo.Yes)
                               .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
-                              .isOrderDrawnForCafcass(YesOrNo.Yes)
                               .orderDirections("test")
                               .furtherDirectionsIfRequired("test")
                               .childOption(dynamicMultiSelectList)

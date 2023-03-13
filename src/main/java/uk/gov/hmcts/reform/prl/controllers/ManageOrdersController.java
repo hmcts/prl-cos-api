@@ -20,7 +20,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -90,6 +92,7 @@ public class ManageOrdersController {
 
     }
 
+    //todo: API not required
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to fetch case data and custom order fields")
     @ApiResponses(value = {
@@ -125,12 +128,21 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("C21 order options in callback:: {}", (null != caseData.getManageOrders())
+            ? caseData.getManageOrders().getC21OrderOptions() : null);
+        caseData = caseData.toBuilder()
+            .selectedC21Order((caseData.getManageOrders() != null
+                                  && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
+                                  ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ")
+            .build();
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
+        C21OrderOptionsEnum c21OrderType =  (null != caseData.getManageOrders())
+            ? caseData.getManageOrders().getC21OrderOptions() : null;
         caseData = manageOrderService.getUpdatedCaseData(caseData);
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && !caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
@@ -138,11 +150,18 @@ public class ManageOrdersController {
         }
 
         ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
+            .c21OrderOptions(c21OrderType)
             .childOption(DynamicMultiSelectList.builder()
                              .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
             .loggedInUserType(manageOrderService.getLoggedInUserType(authorisation))
             .build();
-
+        if (caseData.getCreateSelectOrderOptions() != null
+            && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
+            log.info("C21 Order:: *****{}******", manageOrders.getC21OrderOptions());
+            manageOrders = manageOrders.toBuilder()
+                                  .typeOfC21Order(String.valueOf(manageOrders.getC21OrderOptions().getDisplayedValue()))
+                                  .build();
+        }
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
@@ -309,6 +328,15 @@ public class ManageOrdersController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+    @PostMapping(path = "/manage-orders/serve-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to amend order mid-event")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse serveOrderMidEvent(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.checkOnlyC47aOrderSelectedToServe(
+            callbackRequest)).build();
+    }
 
 
     private static void resetChildOptions(CaseDetails caseDetails) {

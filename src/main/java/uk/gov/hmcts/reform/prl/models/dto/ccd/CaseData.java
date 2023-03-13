@@ -604,6 +604,7 @@ public class CaseData implements MappableObject {
     private String caseSolicitorName;
     private String caseSolicitorOrgName;
     private String selectedOrder;
+    private String selectedC21Order;
 
 
     /**
