@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
-import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
@@ -114,10 +113,10 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         log.info("***ListWithoutNotice***{},{}",caseDataUpdated,
                  caseData.getLegalAdviserList());
 
-        AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
+        /*   AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
-        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));*/
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
