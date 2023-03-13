@@ -103,8 +103,12 @@ public class HearingManagementService {
         );
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        Map<String, String> fields = new HashMap<>();
+        Map<String, Object> fields = new HashMap<>();
         fields.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
+
+        if (hearingRequest.getNextHearingDateRequest().getNextHearingDetails() != null) {
+            fields.put("nextHearingDetails", hearingRequest.getNextHearingDateRequest().getNextHearingDetails());
+        }
 
         CaseDetails caseDetailsData = null;
         switch (caseState) {
@@ -147,7 +151,7 @@ public class HearingManagementService {
     }
 
     private CaseDetails createEvent(HearingRequest hearingRequest, String userToken,
-                                    String systemUpdateUserId, Map<String, String> fields, String eventId) {
+                                    String systemUpdateUserId, Map<String, Object> fields, String eventId) {
 
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             userToken,
