@@ -384,6 +384,8 @@ public class HearingDataServiceTest {
             .label("In Person")
             .build();
         List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
         dynamicListElementsList.add(dynamicListElement2);
         DynamicList dynamicList = DynamicList.builder()
             .listItems(dynamicListElementsList)
@@ -400,6 +402,8 @@ public class HearingDataServiceTest {
             .respondentName("Test")
             .applicantsFL401(applicant)
             .caseTypeOfApplication("FL401")
+            .applicants(applicantList)
+            .respondents(respondentList)
             .build();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             HearingDataPrePopulatedDynamicLists.builder()

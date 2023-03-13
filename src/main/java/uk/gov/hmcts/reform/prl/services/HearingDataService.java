@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
@@ -208,11 +209,28 @@ public class HearingDataService {
                                     ? caseData.getApplicantsFL401().getRepresentativeFirstName()
                 + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "")
             .respondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "")
-            .applicantList(caseData.getApplicants())
-            .respondentList(caseData.getRespondents())
+            .applicantList(getApplicantNameList(caseData))
+            .respondentList(getRespondentNameList(caseData))
             .respondentSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? "" : "")
             .build();
     }
+
+    private List<String> getRespondentNameList(CaseData caseData) {
+        return caseData.getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .map(PartyDetails::getFirstName)
+            .collect(Collectors.toList());
+    }
+
+    private List<String> getApplicantNameList(CaseData caseData) {
+        return  caseData.getRespondents()
+            .stream()
+            .map(Element::getValue)
+            .map(PartyDetails:: getFirstName)
+            .collect(Collectors.toList());
+    }
+
 
     public List<Element<HearingData>> getHearingData(List<Element<HearingData>> hearingDatas,
                                                      HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
