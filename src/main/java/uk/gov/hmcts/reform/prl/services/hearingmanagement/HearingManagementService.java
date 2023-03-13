@@ -109,7 +109,7 @@ public class HearingManagementService {
         if (hearingRequest.getNextHearingDateRequest().getNextHearingDetails() != null) {
             fields.put("nextHearingDetails", hearingRequest.getNextHearingDateRequest().getNextHearingDetails());
         }
-
+        log.info("fields object -- > {}",fields);
 
         CaseDetails caseDetailsData = null;
         switch (caseState) {
