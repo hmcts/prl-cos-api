@@ -872,7 +872,6 @@ public class ManageOrderService {
             if (uploadAnOrder.equals(caseData.getManageOrdersOptions())
                 && (UserRoles.JUDGE.name().equals(loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
-
                 return setDraftOrderCollection(caseData, loggedInUserType);
             } else {
                 if (caseData.getManageOrdersOptions().equals(createAnOrder)
@@ -1002,7 +1001,9 @@ public class ManageOrderService {
         return DraftOrder.builder()
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderTypeId(flagSelectedOrderId)
-            .orderDocument(caseData.getUploadOrderDoc())
+            .orderDocument(caseData.getManageOrdersOptions().equals(createAnOrder) ? caseData.getPreviewOrderDoc()
+                : caseData.getUploadOrderDoc())
+            .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .childrenList(caseData.getManageOrders() != null
                               ? getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()) : null)
             .otherDetails(OtherDraftOrderDetails.builder()
