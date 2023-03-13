@@ -110,6 +110,7 @@ public class HearingManagementService {
             fields.put("nextHearingDetails", hearingRequest.getNextHearingDateRequest().getNextHearingDetails());
         }
 
+
         CaseDetails caseDetailsData = null;
         switch (caseState) {
             case PREPARE_FOR_HEARING_CONDUCT_HEARING:
