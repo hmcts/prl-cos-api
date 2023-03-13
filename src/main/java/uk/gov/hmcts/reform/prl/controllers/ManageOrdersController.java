@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -129,6 +130,11 @@ public class ManageOrdersController {
         );
         log.info("C21 order options in callback:: {}", (null != caseData.getManageOrders())
             ? caseData.getManageOrders().getC21OrderOptions() : null);
+        caseData = caseData.toBuilder()
+            .selectedC21Order((caseData.getManageOrders() != null
+                                  && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
+                                  ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ")
+            .build();
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -153,9 +159,8 @@ public class ManageOrdersController {
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
             log.info("C21 Order:: *****{}******", manageOrders.getC21OrderOptions());
             manageOrders = manageOrders.toBuilder()
-                                  .selectedC21Order(String.valueOf(manageOrders.getC21OrderOptions()))
+                                  .typeOfC21Order(String.valueOf(manageOrders.getC21OrderOptions().getDisplayedValue()))
                                   .build();
-            log.info("Selected C21 Order:: *****{}******", manageOrders.getSelectedC21Order());
         }
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
