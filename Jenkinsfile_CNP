@@ -1,5 +1,6 @@
 #!groovy
 import uk.gov.hmcts.contino.AppPipelineDsl
+import uk.gov.hmcts.contino.GithubAPI
 
 properties([
   [$class: 'GithubProjectProperty', projectUrlStr: 'https://github.com/hmcts/prl-cos-api.git'],
@@ -88,7 +89,10 @@ withPipeline(type, product, component) {
   }
   onPR() {
     env.ENV = 'preview'
-    // enableCleanupOfHelmReleaseOnSuccess()
+    def githubApi = new GithubAPI(this)
+    if (!githubApi.getLabelsbyPattern(env.BRANCH_NAME, "keep-helm")) {
+      enableCleanupOfHelmReleaseOnSuccess()
+    }
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
 }

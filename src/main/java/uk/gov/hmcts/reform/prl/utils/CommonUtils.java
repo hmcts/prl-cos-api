@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.UUID;
 
 @Slf4j
 public class CommonUtils {
@@ -74,5 +76,40 @@ public class CommonUtils {
             return "SOL_" + party.getSolicitorOrg().getOrganisationID();
         }
         return null;
+    }
+
+    public static void generatePartyUuidForC100(PartyDetails partyDetails) {
+
+        if (partyDetails.getSolicitorPartyId() == null) {
+            partyDetails.setSolicitorPartyId(generateUuid());
+        }
+        if (partyDetails.getSolicitorOrgUuid() == null) {
+            partyDetails.setSolicitorOrgUuid(generateUuid());
+        }
+    }
+
+    public static void generatePartyUuidForFL401(CaseData caseData) {
+        if (caseData.getApplicantsFL401() != null) {
+            if (caseData.getApplicantsFL401().getPartyId() == null) {
+                caseData.getApplicantsFL401().setPartyId(generateUuid());
+            }
+            if (caseData.getApplicantsFL401().getSolicitorPartyId() == null
+                && (caseData.getApplicantsFL401().getRepresentativeFirstName() != null
+                || caseData.getApplicantsFL401().getRepresentativeLastName() != null)) {
+                caseData.getApplicantsFL401().setSolicitorPartyId(generateUuid());
+            }
+            if (caseData.getApplicantsFL401().getSolicitorOrgUuid() == null) {
+                caseData.getApplicantsFL401().setSolicitorOrgUuid(generateUuid());
+            }
+        }
+        if (caseData.getRespondentsFL401() != null) {
+            if (caseData.getRespondentsFL401().getPartyId() == null) {
+                caseData.getRespondentsFL401().setPartyId(generateUuid());
+            }
+        }
+    }
+
+    private static UUID generateUuid() {
+        return UUID.randomUUID();
     }
 }

@@ -161,13 +161,9 @@ public class FL401ApplicationMapper {
                                                                                                           .getRelationshipWithRespondent()
                                                                                                           .getRelationshipStartDate()
                                                                                                           .mergeDate()))
-                                                    .relationshipDateComplexEndDate(getRelationShipEndDate(
-                                                        courtNavCaseData))
+                                                    .relationshipDateComplexEndDate(getRelationShipEndDate(courtNavCaseData))
                                                     .build())
-                .applicantRelationshipDate(LocalDate.parse(courtNavCaseData
-                                                               .getFl401()
-                                                               .getRelationshipWithRespondent()
-                                                               .getCeremonyDate().mergeDate()))
+                .applicantRelationshipDate(getRelationShipCeremonyDate(courtNavCaseData))
                 .build()) : null)
             .respondentRelationOptions((courtNavCaseData
                 .getFl401()
@@ -259,17 +255,31 @@ public class FL401ApplicationMapper {
 
     private List<ApplicantStopFromRespondentDoingToChildEnum> getChildrenBehaviourList(CourtNavFl401 courtNavCaseData) {
 
-        return (null != courtNavCaseData.getFl401()
+        return (null !=  courtNavCaseData.getFl401()
             .getRespondentBehaviour().getStopBehaviourTowardsChildren())
             ? getBehaviourTowardsChildren(courtNavCaseData) : null;
     }
 
     private List<ApplicantStopFromRespondentDoingEnum> getApplicantBehaviourList(CourtNavFl401 courtNavCaseData) {
 
-        return (null != courtNavCaseData.getFl401()
+        return (null !=  courtNavCaseData.getFl401()
             .getRespondentBehaviour().getStopBehaviourTowardsApplicant())
             ? getBehaviourTowardsApplicant(courtNavCaseData) : null;
     }
+
+
+    private LocalDate getRelationShipCeremonyDate(CourtNavFl401 courtNavCaseData) {
+        LocalDate cermonyDate = null;
+
+        if (null != courtNavCaseData.getFl401().getRelationshipWithRespondent().getCeremonyDate()) {
+            cermonyDate = LocalDate.parse(courtNavCaseData
+                                              .getFl401()
+                                              .getRelationshipWithRespondent()
+                                              .getCeremonyDate().mergeDate());
+        }
+        return cermonyDate;
+    }
+
 
     private LocalDate getRelationShipEndDate(CourtNavFl401 courtNavCaseData) {
         LocalDate endDate = null;
@@ -400,7 +410,7 @@ public class FL401ApplicationMapper {
             .doAnyChildrenLiveAtAddress(getAnyChildrenLivedAtAddress(courtNavCaseData))
             .children(getChildrenDetails(courtNavCaseData)
                           ? mapHomeChildren(courtNavCaseData.getFl401()
-                                                .getTheHome()) : null)
+                                              .getTheHome()) : null)
             .isPropertyAdapted(courtNavCaseData.getFl401()
                                    .getTheHome().isPropertySpeciallyAdapted() ? YesOrNo.Yes : YesOrNo.No)
             .howIsThePropertyAdapted(courtNavCaseData.getFl401()
@@ -603,7 +613,7 @@ public class FL401ApplicationMapper {
             .lastName(respondent.getRespondentLastName())
             .previousName(respondent.getRespondentOtherNames())
             .dateOfBirth(null != respondent.getRespondentDateOfBirth()
-                             ? LocalDate.parse(respondent.getRespondentDateOfBirth().mergeDate()) : null)
+                        ? LocalDate.parse(respondent.getRespondentDateOfBirth().mergeDate()) : null)
             .isDateOfBirthKnown(YesOrNo.valueOf(null != respondent.getRespondentDateOfBirth() ? "Yes" : "No"))
             .email(respondent.getRespondentEmailAddress())
             .canYouProvideEmailAddress(YesOrNo.valueOf(null != respondent.getRespondentEmailAddress() ? "Yes" : "No"))
