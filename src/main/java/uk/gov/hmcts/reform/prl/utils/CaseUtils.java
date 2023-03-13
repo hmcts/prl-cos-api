@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 
 import java.time.Duration;
 import java.time.ZoneId;
@@ -51,13 +52,7 @@ public class CaseUtils {
     }
 
     public static SelectTypeOfOrderEnum getSelectTypeOfOrder(CaseData caseData) {
-        SelectTypeOfOrderEnum isFinalOrder = null;
-        if (caseData.getSelectTypeOfOrder() != null) {
-            isFinalOrder = caseData.getSelectTypeOfOrder();
-        } else if (caseData.getServeOrderData() != null) {
-            isFinalOrder = caseData.getServeOrderData().getSelectTypeOfUploadOrder();
-        }
-        return isFinalOrder;
+        return caseData.getSelectTypeOfOrder();
     }
 
     public static String getCaseTypeOfApplication(CaseData caseData) {
@@ -121,5 +116,15 @@ public class CaseUtils {
         }
         log.info("is cafcass flag set ===> " + cafcassFlag);
         return cafcassFlag;
+    }
+
+    public static ServeOrderData getServeOrderData(CaseData caseData) {
+        ServeOrderData serveOrderData;
+        if (caseData.getServeOrderData() != null) {
+            serveOrderData = caseData.getServeOrderData();
+        } else {
+            serveOrderData = ServeOrderData.builder().build();
+        }
+        return serveOrderData;
     }
 }
