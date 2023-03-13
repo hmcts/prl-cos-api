@@ -231,7 +231,7 @@ public class ManageOrders {
 
     @JsonProperty("c21OrderOptions")
     private final C21OrderOptionsEnum c21OrderOptions;
-    @JsonProperty("selectedC21Order")
-    private String selectedC21Order;
+    @JsonProperty("typeOfC21Order")
+    private String typeOfC21Order;
     private final String furtherInformationIfRequired;
 }
