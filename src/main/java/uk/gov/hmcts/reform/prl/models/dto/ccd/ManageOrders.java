@@ -234,4 +234,18 @@ public class ManageOrders {
     @JsonProperty("typeOfC21Order")
     private String typeOfC21Order;
     private final String furtherInformationIfRequired;
+    private final YesOrNo isOnlyC47aOrderSelectedToServe;
+    private final YesOrNo otherPeoplePresentInCaseFlag;
+
+    private final YesOrNo serveToRespondentOptionsOnlyC47a;
+    private final ServingRespondentsEnum servingRespondentsOptionsCaOnlyC47a;
+    private final DynamicMultiSelectList recipientsOptionsOnlyC47a;
+    private final DynamicMultiSelectList otherPartiesOnlyC47a;
+    @JsonProperty("serveOtherPartiesCaOnlyC47a")
+    private final List<OtherOrganisationOptions> serveOtherPartiesCaOnlyC47a;
+    private final DeliveryByEnum deliveryByOptionsCaOnlyC47a;
+    @JsonProperty("emailInformationCaOnlyC47a")
+    private final List<Element<EmailInformation>> emailInformationCaOnlyC47a;
+    @JsonProperty("postalInformationCaOnlyC47a")
+    private final List<Element<PostalInformation>> postalInformationCaOnlyC47a;
 }

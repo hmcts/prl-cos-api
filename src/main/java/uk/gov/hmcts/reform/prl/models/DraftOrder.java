@@ -118,7 +118,7 @@ public class DraftOrder {
     @JsonProperty("isOrderUploadedByJudgeOrAdmin")
     private final YesOrNo isOrderUploadedByJudgeOrAdmin;
     private final String childrenList;
-
+    private final YesOrNo isTheOrderAboutChildren;
     private final C21OrderOptionsEnum c21OrderOptions;
     private final String furtherInformationIfRequired;
 

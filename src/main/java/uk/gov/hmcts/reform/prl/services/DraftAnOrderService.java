@@ -180,12 +180,16 @@ public class DraftAnOrderService {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         GeneratedDocumentInfo generatedDocumentInfoWelsh = null;
         String loggedInUserType = manageOrderService.getLoggedInUserType(auth);
+        ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
+        SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
 
         OrderDetails orderDetails = OrderDetails.builder()
             .orderType(draftOrder.getOrderTypeId())
             .orderTypeId(draftOrder.getOrderTypeId())
-            .typeOfOrder(draftOrder.getTypeOfOrder())
+            .typeOfOrder(typeOfOrder != null
+                             ? typeOfOrder.getDisplayedValue() : null)
             .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
+            .serveOrderDetails(manageOrderService.buildServeOrderDetails(serveOrderData))
             .adminNotes(caseData.getCourtAdminNotes())
             .dateCreated(draftOrder.getOtherDetails().getDateCreated())
             .judgeNotes(draftOrder.getJudgeNotes())
@@ -208,6 +212,8 @@ public class DraftAnOrderService {
                     .orderRecipients(manageOrderService.getAllRecipients(caseData))
                     .status(manageOrderService.getOrderStatus(draftOrder.getOrderSelectionType(),loggedInUserType, eventId))
                     .build())
+            .isTheOrderAboutChildren(draftOrder.getIsTheOrderAboutChildren())
+            .childrenList(draftOrder.getChildrenList())
             .build();
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
@@ -462,7 +468,7 @@ public class DraftAnOrderService {
             .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
             .magistrateLastName(caseData.getMagistrateLastName())
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
-            .isTheOrderAboutAllChildren(caseData.getIsTheOrderAboutAllChildren())
+            .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
@@ -505,6 +511,7 @@ public class DraftAnOrderService {
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .approvalDate(draftOrder.getApprovalDate())
+            .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
             .build();
     }
 
