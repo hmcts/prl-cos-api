@@ -21,6 +21,7 @@ java:
         - courtnav-functional-test-user
         - courtnav-functional-test-pwd
         - filtered-court-ids
+        - da-filtered-court-ids
         - postcode-lookup-token
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
