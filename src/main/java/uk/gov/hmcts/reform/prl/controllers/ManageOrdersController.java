@@ -159,7 +159,7 @@ public class ManageOrdersController {
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
             log.info("C21 Order:: *****{}******", manageOrders.getC21OrderOptions());
             manageOrders = manageOrders.toBuilder()
-                                  .typeOfC21Order(String.valueOf(manageOrders.getC21OrderOptions().getDisplayedValue()))
+                                  .typeOfC21Order(manageOrders.getC21OrderOptions().getDisplayedValue())
                                   .build();
         }
         caseData = caseData.toBuilder()
