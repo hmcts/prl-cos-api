@@ -20,7 +20,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -90,6 +92,7 @@ public class ManageOrdersController {
 
     }
 
+    //todo: API not required
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to fetch case data and custom order fields")
     @ApiResponses(value = {
@@ -125,13 +128,21 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("fetch-order-details before caseData ===> " + callbackRequest.getCaseDetails().getData());
+        log.info("C21 order options in callback:: {}", (null != caseData.getManageOrders())
+            ? caseData.getManageOrders().getC21OrderOptions() : null);
+        caseData = caseData.toBuilder()
+            .selectedC21Order((caseData.getManageOrders() != null
+                                  && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
+                                  ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ")
+            .build();
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
+        C21OrderOptionsEnum c21OrderType =  (null != caseData.getManageOrders())
+            ? caseData.getManageOrders().getC21OrderOptions() : null;
         caseData = manageOrderService.getUpdatedCaseData(caseData);
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && !caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
@@ -139,16 +150,21 @@ public class ManageOrdersController {
         }
 
         ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
+            .c21OrderOptions(c21OrderType)
             .childOption(DynamicMultiSelectList.builder()
                              .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
             .loggedInUserType(manageOrderService.getLoggedInUserType(authorisation))
             .build();
-        log.info("**Manage orders with child list {}", manageOrders);
-
+        if (caseData.getCreateSelectOrderOptions() != null
+            && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
+            log.info("C21 Order:: *****{}******", manageOrders.getC21OrderOptions());
+            manageOrders = manageOrders.toBuilder()
+                                  .typeOfC21Order(String.valueOf(manageOrders.getC21OrderOptions().getDisplayedValue()))
+                                  .build();
+        }
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
-        log.info("after fetch-order-details caseData ===> " + caseData);
         return CallbackResponse.builder()
             .data(caseData)
             .build();
@@ -166,7 +182,6 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("caseData before populate-header ===> " + caseData);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageOrderService.populateHeader(caseData))
             .build();
@@ -203,7 +218,6 @@ public class ManageOrdersController {
     ) throws Exception {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         resetChildOptions(caseDetails);
-        log.info("before about to submit caseDetails =====> " + caseDetails);
         CaseData caseData = CaseUtils.getCaseData(caseDetails,objectMapper);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
@@ -211,7 +225,6 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.put("isWithdrawRequestSent", "Approved");
         }
-        log.info("Selection from Admin##### {}", caseData.getManageOrders().getAmendOrderSelectCheckOptions());
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
@@ -252,7 +265,6 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populateOrderToAmendDownloadLink(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("/amend-order/mid-event before" + callbackRequest.getCaseDetails());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -262,7 +274,6 @@ public class ManageOrdersController {
 
         caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
 
-        log.info("/amend-order/mid-event after" + caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -293,9 +304,7 @@ public class ManageOrdersController {
                 caseDataUpdated,
                 CaseData.class
             );
-            log.info("modifiedCaseData ===> " + modifiedCaseData);
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
-            log.info("/manage-orders/add-upload-order after caseDataUpdated ===> " + caseDataUpdated);
         } else {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.No);
         }
@@ -310,18 +319,24 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse manageOrderMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("/manage-order/mid-event before" + callbackRequest.getCaseDetails());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
         }
 
-        log.info("/manage-order/mid-event after" + caseDataUpdated);
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+    @PostMapping(path = "/manage-orders/serve-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to amend order mid-event")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse serveOrderMidEvent(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.checkOnlyC47aOrderSelectedToServe(
+            callbackRequest)).build();
+    }
 
 
     private static void resetChildOptions(CaseDetails caseDetails) {
@@ -334,7 +349,6 @@ public class ManageOrdersController {
         if (caseDetails.getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN) && caseDetails.getData().get(
             IS_THE_ORDER_ABOUT_CHILDREN) != null && caseDetails.getData().get(
             IS_THE_ORDER_ABOUT_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
-            log.info("inside isTheOrderAboutChildren =====> " + caseDetails.getData().get(CHILD_OPTION));
             caseDetails.getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
                 .listItems(List.of(DynamicMultiselectListElement.EMPTY)).build());
         }
