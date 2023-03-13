@@ -131,7 +131,7 @@ public class ManageOrdersController {
         log.info("C21 order options in callback:: {}", (null != caseData.getManageOrders())
             ? caseData.getManageOrders().getC21OrderOptions() : null);
         caseData = caseData.toBuilder()
-            .selectedC21Order((caseData.getManageOrders() != null
+            .selectedC21Order((null != caseData.getManageOrders()
                                   && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
                                   ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ")
             .build();
@@ -155,11 +155,12 @@ public class ManageOrdersController {
                              .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
             .loggedInUserType(manageOrderService.getLoggedInUserType(authorisation))
             .build();
-        if (caseData.getCreateSelectOrderOptions() != null
+        if (null != caseData.getCreateSelectOrderOptions()
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
             log.info("C21 Order:: *****{}******", manageOrders.getC21OrderOptions());
             manageOrders = manageOrders.toBuilder()
-                                  .typeOfC21Order(manageOrders.getC21OrderOptions().getDisplayedValue())
+                                  .typeOfC21Order(null != manageOrders.getC21OrderOptions()
+                                                      ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
                                   .build();
         }
         caseData = caseData.toBuilder()
