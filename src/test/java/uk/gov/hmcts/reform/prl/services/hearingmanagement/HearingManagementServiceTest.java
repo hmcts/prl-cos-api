@@ -105,6 +105,12 @@ public class HearingManagementServiceTest {
     @Before
     public void setup() {
 
+        nextHearingDateRequest = NextHearingDateRequest.builder()
+            .caseRef("1669565933090179")
+            .nextHearingDetails(NextHearingDetails.builder().hearingId("123").hearingDateTime(testNextHearingDate)
+                                    .build())
+            .build();
+
         hearingRequest = HearingRequest.builder()
             .hearingId("123")
             .caseRef("1669565933090179")
@@ -116,13 +122,9 @@ public class HearingManagementServiceTest {
                                .hearingVenueName("Aldershot")
                                .hmcStatus("LISTED")
                                .build())
+            .nextHearingDateRequest(nextHearingDateRequest)
             .build();
 
-        nextHearingDateRequest = NextHearingDateRequest.builder()
-            .caseRef("1669565933090179")
-            .nextHearingDetails(NextHearingDetails.builder().hearingId("123").hearingDateTime(testNextHearingDate)
-                                    .build())
-            .build();
 
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -265,6 +267,7 @@ public class HearingManagementServiceTest {
                                .hearingVenueName("Aldershot")
                                .hmcStatus("ADJOURNED")
                                .build())
+            .nextHearingDateRequest(nextHearingDateRequest)
             .build();
 
         c100CaseData = c100CaseData.toBuilder().state(PREPARE_FOR_HEARING_CONDUCT_HEARING).build();
@@ -320,6 +323,7 @@ public class HearingManagementServiceTest {
                                .hearingVenueName("Aldershot")
                                .hmcStatus("CANCELLED")
                                .build())
+            .nextHearingDateRequest(nextHearingDateRequest)
             .build();
 
         c100CaseData = c100CaseData.toBuilder().state(PREPARE_FOR_HEARING_CONDUCT_HEARING).build();
@@ -404,6 +408,7 @@ public class HearingManagementServiceTest {
                                .hearingVenueName("Aldershot")
                                .hmcStatus("LISTED")
                                .build())
+            .nextHearingDateRequest(nextHearingDateRequest)
             .build();
 
         PartyDetails applicantFl401 = PartyDetails.builder()
@@ -562,6 +567,7 @@ public class HearingManagementServiceTest {
                                .hearingVenueName("Aldershot")
                                .hmcStatus("ADJOURNED")
                                .build())
+            .nextHearingDateRequest(nextHearingDateRequest)
             .build();
 
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, hearingRequest1.getCaseRef())).thenReturn(caseDetails);
@@ -654,6 +660,7 @@ public class HearingManagementServiceTest {
                                .hearingVenueName("Aldershot")
                                .hmcStatus("CANCELLED")
                                .build())
+            .nextHearingDateRequest(nextHearingDateRequest)
             .build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, hearingRequest1.getCaseRef())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
