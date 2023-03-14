@@ -52,7 +52,7 @@ public class CaseController {
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
-    public CaseData getCase(
+    public CitizenCaseData getCase(
         @PathVariable("caseId") String caseId,
         @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
@@ -61,8 +61,9 @@ public class CaseController {
         if (isAuthorized(userToken, s2sToken)) {
             caseDetails = caseService.getCase(userToken, caseId);
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            return caseData.toBuilder().noOfDaysRemainingToSubmitCase(
+            caseData = caseData.toBuilder().noOfDaysRemainingToSubmitCase(
                 CaseUtils.getRemainingDaysSubmitCase(caseData)).build();
+            return buildCitizenCaseData(caseData);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
