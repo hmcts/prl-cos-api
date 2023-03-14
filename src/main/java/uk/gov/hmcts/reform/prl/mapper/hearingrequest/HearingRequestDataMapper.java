@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -43,6 +44,10 @@ public class HearingRequestDataMapper {
                 + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "");
         hearingData.setRespondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "");
         hearingData.setRespondentSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? "" : "");
+        if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
+            .equals(ofNullable(hearingData.getHearingDateConfirmOptionEnum()).get())) {
+            hearingData = setEmptyUnnecessaryValues(hearingData);
+        }
         log.info("Inside Request mapper hearing data****  {}", hearingData);
     }
 
@@ -125,7 +130,7 @@ public class HearingRequestDataMapper {
 
     public HearingData setEmptyUnnecessaryValues(HearingData hearingData) {
         log.info("setEmptyUnnecessaryValues() before: {}",hearingData);
-        HearingData hearingDataTemp =  HearingData.builder()
+        HearingData hearingDataTemp = HearingData.builder()
                 .hearingTypes(hearingData.getHearingTypes())
                 .hearingDateConfirmOptionEnum(hearingData.getHearingDateConfirmOptionEnum())
                 .confirmedHearingDates(hearingData.getConfirmedHearingDates())
@@ -152,16 +157,5 @@ public class HearingRequestDataMapper {
                 .build();
         log.info("setEmptyUnnecessaryValues() after map: {}",hearingDataTemp);
         return hearingDataTemp;
-    }
-
-    private void setEmptyForAllPartiesAttendHearingSameWayYes(HearingData hearingData) {
-        DynamicList dynamicList = DynamicList.builder().build();
-        hearingData.setApplicantHearingChannel(dynamicList);
-        hearingData.setApplicantSolicitorHearingChannel(dynamicList);
-        hearingData.setRespondentHearingChannel(dynamicList);
-        hearingData.setRespondentSolicitorHearingChannel(dynamicList);
-        hearingData.setCafcassHearingChannel(dynamicList);
-        hearingData.setCafcassCymruHearingChannel(dynamicList);
-        hearingData.setLocalAuthorityHearingChannel(dynamicList);
     }
 }
