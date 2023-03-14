@@ -237,7 +237,7 @@ public class HearingRequestDataMapperTest {
             .cafcassHearingChannel(dynamicList1)
             .cafcassCymruHearingChannel(dynamicList1)
             .applicantHearingChannel(dynamicList1)
-            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
             .additionalHearingDetails("Test")
             .instructionsForRemoteHearing("Test")
             .hearingEstimatedHours(5)
