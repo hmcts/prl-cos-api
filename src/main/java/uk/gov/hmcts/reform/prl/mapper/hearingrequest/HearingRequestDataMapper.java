@@ -4,9 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
-import uk.gov.hmcts.reform.prl.enums.HearingSpecificDatesOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -46,7 +43,6 @@ public class HearingRequestDataMapper {
                 + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "");
         hearingData.setRespondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "");
         hearingData.setRespondentSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? "" : "");
-        setEmptyUnwantedValues(hearingData);
         log.info("Inside Request mapper hearing data****  {}", hearingData);
     }
 
@@ -127,22 +123,8 @@ public class HearingRequestDataMapper {
         }
     }
 
-    public void setEmptyUnwantedValues(HearingData hearingData) {
-
-        DynamicList dynamicList = DynamicList.builder().build();
-        if (HearingDateConfirmOptionEnum.dateReservedWithListAssit
-            .equals(ofNullable(hearingData.getHearingDateConfirmOptionEnum()).get())) {
-            hearingData.setFirstDateOfTheHearing(null);
-            hearingData.setHearingMustTakePlaceAtHour(0);
-            hearingData.setHearingMustTakePlaceAtMinute(0);
-            hearingData.setEarliestHearingDate(null);
-            hearingData.setLatestHearingDate(null);
-            if (YesOrNo.Yes.equals(hearingData.getAllPartiesAttendHearingSameWayYesOrNo())) {
-                setEmptyForAllPartiesAttendHearingSameWayYes(hearingData);
-            }
-        } else if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
-            .equals(ofNullable(hearingData.getHearingDateConfirmOptionEnum()).get())) {
-            HearingData hearingDataTemp =  HearingData.builder()
+    public HearingData setEmptyUnnecessaryValues(HearingData hearingData) {
+        HearingData hearingDataTemp =  HearingData.builder()
                 .hearingTypes(hearingData.getHearingTypes())
                 .hearingDateConfirmOptionEnum(hearingData.getHearingDateConfirmOptionEnum())
                 .confirmedHearingDates(hearingData.getConfirmedHearingDates())
@@ -150,7 +132,6 @@ public class HearingRequestDataMapper {
                 .instructionsForRemoteHearing(ofNullable(hearingData.getInstructionsForRemoteHearing()).orElse(""))
                 .confirmedHearingDates(hearingData.getConfirmedHearingDates())
                 .hearingChannels(hearingData.getHearingChannels())
-                .applicantHearingChannel(hearingData.getApplicantHearingChannel())
                 .hearingVideoChannels(hearingData.getHearingVideoChannels())
                 .hearingTelephoneChannels(hearingData.getHearingTelephoneChannels())
                 .courtList(hearingData.getCourtList())
@@ -169,41 +150,7 @@ public class HearingRequestDataMapper {
                 .applicantName(hearingData.getApplicantName())
                 .applicantSolicitor(hearingData.getApplicantSolicitor())
                 .build();
-            hearingData = hearingDataTemp;
-        } else if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
-            .equals(ofNullable(hearingData.getHearingDateConfirmOptionEnum()).get())) {
-            hearingData.setAdditionalHearingDetails("");
-            hearingData.setInstructionsForRemoteHearing("");
-            hearingData.setHearingDateTimes(null);
-            if (YesOrNo.No.equals(hearingData.getHearingSpecificDatesOptionsEnum())) {
-                hearingData.setFirstDateOfTheHearing(null);
-                hearingData.setEarliestHearingDate(null);
-                hearingData.setLatestHearingDate(null);
-            } else if (HearingSpecificDatesOptionsEnum.HearingRequiredBetweenCertainDates
-                .equals(hearingData.getHearingSpecificDatesOptionsEnum())) {
-                hearingData.setFirstDateOfTheHearing(null);
-            }
-            if (YesOrNo.Yes.equals(hearingData.getAllPartiesAttendHearingSameWayYesOrNo())) {
-                setEmptyForAllPartiesAttendHearingSameWayYes(hearingData);
-            }
-
-        } else {
-            hearingData.setAdditionalHearingDetails("");
-            hearingData.setInstructionsForRemoteHearing("");
-            hearingData.setHearingDateTimes(null);
-            if (YesOrNo.No.equals(hearingData.getHearingSpecificDatesOptionsEnum())) {
-                hearingData.setFirstDateOfTheHearing(null);
-                hearingData.setEarliestHearingDate(null);
-                hearingData.setLatestHearingDate(null);
-            } else if (HearingSpecificDatesOptionsEnum.HearingRequiredBetweenCertainDates
-                .equals(hearingData.getHearingSpecificDatesOptionsEnum())) {
-                hearingData.setFirstDateOfTheHearing(null);
-            }
-            if (YesOrNo.Yes.equals(hearingData.getAllPartiesAttendHearingSameWayYesOrNo())) {
-                setEmptyForAllPartiesAttendHearingSameWayYes(hearingData);
-            }
-
-        }
+        return hearingDataTemp;
     }
 
     private void setEmptyForAllPartiesAttendHearingSameWayYes(HearingData hearingData) {
