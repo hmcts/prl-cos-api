@@ -25,6 +25,7 @@ public class HearingRequestDataMapper {
             .equals(ofNullable(hearingData.getHearingDateConfirmOptionEnum()).get())) {
             hearingData = setEmptyUnnecessaryValues(hearingData);
         }
+
         boolean isHearingDynamicListItemsNullifyReq = (null != hearingDataPrePopulatedDynamicLists) ? false  : true;
         mapHearingTypesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
         mapDynamicListItems(hearingData.getConfirmedHearingDates(),
