@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.HearingPriorityTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
@@ -128,6 +129,8 @@ public class HearingDataServiceTest {
             .hearingJudgeLastName("test")
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
+            .hearingPriorityTypeEnum(HearingPriorityTypeEnum.StandardPriority)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
             .build();
 
         Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
@@ -384,8 +387,6 @@ public class HearingDataServiceTest {
             .label("In Person")
             .build();
         List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
-        List<Element<PartyDetails>> applicantList = new ArrayList<>();
-        List<Element<PartyDetails>> respondentList = new ArrayList<>();
         dynamicListElementsList.add(dynamicListElement2);
         DynamicList dynamicList = DynamicList.builder()
             .listItems(dynamicListElementsList)
@@ -402,8 +403,6 @@ public class HearingDataServiceTest {
             .respondentName("Test")
             .applicantsFL401(applicant)
             .caseTypeOfApplication("FL401")
-            .applicants(applicantList)
-            .respondents(respondentList)
             .build();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             HearingDataPrePopulatedDynamicLists.builder()

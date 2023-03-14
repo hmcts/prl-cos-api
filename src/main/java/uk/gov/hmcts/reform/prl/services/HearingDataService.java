@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
@@ -25,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -184,9 +184,6 @@ public class HearingDataService {
 
 
     public HearingData generateHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,CaseData caseData) {
-        log.info("ApplicantName : {}",caseData.getApplicantName());
-        log.info("SolicitorName : {}",caseData.getSolicitorName());
-        log.info("RespondentName : {}",caseData.getRespondentName());
         return HearingData.builder()
             .hearingTypes(hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes())
             .confirmedHearingDates(hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates())
@@ -209,28 +206,10 @@ public class HearingDataService {
                                     ? caseData.getApplicantsFL401().getRepresentativeFirstName()
                 + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "")
             .respondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "")
-            .applicantList(getApplicantNameList(caseData))
-            .respondentList(getRespondentNameList(caseData))
             .respondentSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? "" : "")
+            .fillingFormRenderingInfo(CommonUtils.renderCollapsible())
             .build();
     }
-
-    private List<String> getRespondentNameList(CaseData caseData) {
-        return caseData.getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .map(PartyDetails::getFirstName)
-            .collect(Collectors.toList());
-    }
-
-    private List<String> getApplicantNameList(CaseData caseData) {
-        return  caseData.getRespondents()
-            .stream()
-            .map(Element::getValue)
-            .map(PartyDetails:: getFirstName)
-            .collect(Collectors.toList());
-    }
-
 
     public List<Element<HearingData>> getHearingData(List<Element<HearingData>> hearingDatas,
                                                      HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {

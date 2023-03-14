@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.clients;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -19,11 +20,12 @@ import java.util.List;
 )
 public interface HearingApiClient {
 
-    @GetMapping(path = "/hearings")
+
+    @GetMapping(value = "/hearings")
     Hearings getHearingDetails(
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
-        @RequestHeader("caseReference") String caseReference
+        @PathVariable("caseRefNo") String caseRefNo
     );
 
 

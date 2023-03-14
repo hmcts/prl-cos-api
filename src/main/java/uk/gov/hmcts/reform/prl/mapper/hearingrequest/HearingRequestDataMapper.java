@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 @Slf4j
 @Component
@@ -100,6 +101,7 @@ public class HearingRequestDataMapper {
         mapDynamicListItems(hearingData.getCafcassHearingChannel(),retrievedHearingChannels);
         mapDynamicListItems(hearingData.getCafcassCymruHearingChannel(),retrievedHearingChannels);
         mapDynamicListItems(hearingData.getLocalAuthorityHearingChannel(),retrievedHearingChannels);
+        hearingData.setFillingFormRenderingInfo(CommonUtils.renderCollapsible());
     }
 
     private void mapDynamicListItems(DynamicList existingHearingDynamicList, DynamicList requiredHearingDynamicList) {

@@ -10,7 +10,9 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 public class CommonUtils {
@@ -74,5 +76,21 @@ public class CommonUtils {
             return "SOL_" + party.getSolicitorOrg().getOrganisationID();
         }
         return null;
+    }
+
+
+    public static String renderCollapsible() {
+        final List<String> collapsible = new ArrayList<>();
+        collapsible.add("<details class='govuk-details'>");
+        collapsible.add("<summary class='govuk-details__summary'>");
+        collapsible.add("<span class='govuk-details__summary-text'>");
+        collapsible.add("When should I fill this in?");
+        collapsible.add("</span>");
+        collapsible.add("</summary>");
+        collapsible.add("<div class='govuk-details__text'>");
+        collapsible.add("<p><strong>Only fill the following if you haven't requested the hearing yet</strong></p></br>");
+        collapsible.add("</div>");
+        collapsible.add("</details>");
+        return String.join("\n\n", collapsible);
     }
 }
