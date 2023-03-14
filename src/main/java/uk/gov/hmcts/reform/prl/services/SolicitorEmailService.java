@@ -138,7 +138,7 @@ public class SolicitorEmailService {
             solicitorEmail,
             EmailTemplateNames.WITHDRAW,
             buildCaseWithdrawEmail(caseDetails),
-            LanguagePreference.getLanguagePreference(caseData)
+            LanguagePreference.english
         );
 
     }
