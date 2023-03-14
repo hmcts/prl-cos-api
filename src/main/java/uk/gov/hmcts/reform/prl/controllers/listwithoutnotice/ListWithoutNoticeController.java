@@ -71,7 +71,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
             log.info("Inside case data updated containd key check for the case id {}", caseReferenceNumber);
             caseDataUpdated.put(
                 LISTWITHOUTNOTICE_HEARINGDETAILS,
-                hearingDataService.getHearingData(existingListWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists));
+                hearingDataService.getHearingData(existingListWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists,caseData));
             log.info("Inside controller after mapping hearing data  {}", caseDataUpdated.get(LISTWITHOUTNOTICE_HEARINGDETAILS));
         } else {
             caseDataUpdated.put(
@@ -99,7 +99,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
             CaseData.class
         );
         caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
-            .getHearingData(caseData.getListWithoutNoticeHearingDetails(),null));
+            .getHearingData(caseData.getListWithoutNoticeHearingDetails(),null,caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
