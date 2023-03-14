@@ -371,7 +371,7 @@ document:
       prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
       prl_c6_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Final.docx
       prl_c6_filename: Notice_Of_Parties_Order_C6.pdf
-      prl_C6_draft_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Draft.docx
+      prl_c6_draft_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Draft.docx
       prl_c6_draft_filename: Notice_Of_Parties_Order_C6_draft.pdf
       prl_c6a_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Final.docx
       prl_c6a_filename: Notice_Of_Parties_Order_C6a.pdf
