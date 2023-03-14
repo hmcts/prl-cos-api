@@ -51,6 +51,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSTPONED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WAITING_TO_BE_LISTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEXT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 
@@ -103,15 +104,13 @@ public class HearingManagementService {
         );
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        log.info("Caseeee Date NHD {}", caseData.getNextHearingDetails());
-
-
         Map<String, Object> fields = new HashMap<>();
         fields.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
 
         if (hearingRequest.getNextHearingDateRequest().getNextHearingDetails() != null) {
-            fields.put("nextHearingDetails", hearingRequest.getNextHearingDateRequest().getNextHearingDetails());
+            fields.put(NEXT_HEARING_DETAILS, hearingRequest.getNextHearingDateRequest().getNextHearingDetails());
         }
+
         log.info("fields object -- > {}",fields);
 
         CaseDetails caseDetailsData = null;
@@ -170,7 +169,7 @@ public class HearingManagementService {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put(STATE, fields.get(STATE));
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, fields.get(CASE_TYPE_OF_APPLICATION));
-        caseDataMap.put("nextHearingDetails", fields.get("nextHearingDetails"));
+        caseDataMap.put(NEXT_HEARING_DETAILS, fields.get(NEXT_HEARING_DETAILS));
 
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
