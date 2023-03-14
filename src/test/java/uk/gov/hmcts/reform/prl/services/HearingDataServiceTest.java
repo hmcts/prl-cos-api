@@ -205,9 +205,35 @@ public class HearingDataServiceTest {
             .build();
         List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
         dynamicListElementsList.add(dynamicListElement2);
+        List<JudicialUsersApiResponse> judicialUsersApiResponses = new ArrayList<>();
+        JudicialUsersApiResponse judicialUsersApiResponse = JudicialUsersApiResponse.builder()
+            //.emailId("Test")
+            //.fullName("Test")
+            //.surname("Test")
+            .personalCode("Test")
+            .build();
+        judicialUsersApiResponses.add(judicialUsersApiResponse);
+        JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
+            .personalCode(new String[]{"Test2", "test","test5"}).build();
+        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test","test5"});
+        when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
+        DynamicList dynamicList1 = DynamicList.builder()
+            .listItems(dynamicListElementsList)
+            .build();
         DynamicList dynamicList = DynamicList.builder()
             //.listItems(dynamicListElementsList)
             .build();
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            HearingDataPrePopulatedDynamicLists.builder()
+                .retrievedHearingTypes(dynamicList)
+                .hearingListedLinkedCases(dynamicList1)
+                .retrievedHearingDates(dynamicList1)
+                .retrievedHearingChannels(dynamicList1)
+                .retrievedVideoSubChannels(dynamicList1)
+                .retrievedTelephoneSubChannels(dynamicList1)
+                .retrievedCourtLocations(dynamicList)
+                .hearingListedLinkedCases(dynamicList)
+                .build();
         HearingData hearingData = HearingData.builder()
             .hearingTypes(dynamicList)
             .confirmedHearingDates(dynamicList)
@@ -235,7 +261,6 @@ public class HearingDataServiceTest {
             .applicantName("Test")
             .hearingJudgeNameAndEmail(judicialUser)
             .build();
-
         Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
         List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
 
@@ -243,34 +268,8 @@ public class HearingDataServiceTest {
             .courtName("testcourt")
             .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
             .build();
-        List<JudicialUsersApiResponse> judicialUsersApiResponses = new ArrayList<>();
-        JudicialUsersApiResponse judicialUsersApiResponse = JudicialUsersApiResponse.builder()
-            //.emailId("Test")
-            //.fullName("Test")
-            //.surname("Test")
-            .personalCode("Test")
-            .build();
-        judicialUsersApiResponses.add(judicialUsersApiResponse);
-        JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
-            .personalCode(new String[]{"Test2", "test","test5"}).build();
-        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test","test5"});
-        when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
-        DynamicList dynamicList1 = DynamicList.builder()
-            .listItems(dynamicListElementsList)
-            .build();
-        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            HearingDataPrePopulatedDynamicLists.builder()
-                .retrievedHearingTypes(dynamicList)
-                .hearingListedLinkedCases(dynamicList1)
-                .retrievedHearingDates(dynamicList1)
-                .retrievedHearingChannels(dynamicList1)
-                .retrievedVideoSubChannels(dynamicList1)
-                .retrievedTelephoneSubChannels(dynamicList1)
-                .retrievedCourtLocations(dynamicList)
-                .hearingListedLinkedCases(dynamicList)
-                .build();
         List<Element<HearingData>>  expectedResponse =
-            hearingDataService.getHearingData(listWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists);
+            hearingDataService.getHearingData(listWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists,caseData);
         assertNotNull(expectedResponse);
     }
 
@@ -300,9 +299,35 @@ public class HearingDataServiceTest {
             .build();
         List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
         dynamicListElementsList.add(dynamicListElement2);
+        List<JudicialUsersApiResponse> judicialUsersApiResponses = new ArrayList<>();
+        JudicialUsersApiResponse judicialUsersApiResponse = JudicialUsersApiResponse.builder()
+            //.emailId("Test")
+            //.fullName("Test")
+            //.surname("Test")
+            .personalCode("Test")
+            .build();
+        judicialUsersApiResponses.add(judicialUsersApiResponse);
+        JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
+            .personalCode(new String[]{"Test2", "test","test5"}).build();
+        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test","test5"});
+        when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
+        DynamicList dynamicList1 = DynamicList.builder()
+            .listItems(dynamicListElementsList)
+            .build();
         DynamicList dynamicList = DynamicList.builder()
             //.listItems(dynamicListElementsList)
             .build();
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            HearingDataPrePopulatedDynamicLists.builder()
+                .retrievedHearingTypes(dynamicList)
+                .hearingListedLinkedCases(dynamicList1)
+                .retrievedHearingDates(dynamicList1)
+                .retrievedHearingChannels(dynamicList1)
+                .retrievedVideoSubChannels(dynamicList1)
+                .retrievedTelephoneSubChannels(dynamicList1)
+                .retrievedCourtLocations(dynamicList)
+                .hearingListedLinkedCases(dynamicList)
+                .build();
         HearingData hearingData = HearingData.builder()
             .hearingTypes(dynamicList)
             .confirmedHearingDates(dynamicList)
@@ -330,7 +355,6 @@ public class HearingDataServiceTest {
             .applicantName("Test")
             .hearingJudgeNameAndEmail(judicialUser)
             .build();
-
         Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
         List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
 
@@ -338,34 +362,9 @@ public class HearingDataServiceTest {
             .courtName("testcourt")
             .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
             .build();
-        List<JudicialUsersApiResponse> judicialUsersApiResponses = new ArrayList<>();
-        JudicialUsersApiResponse judicialUsersApiResponse = JudicialUsersApiResponse.builder()
-            //.emailId("Test")
-            //.fullName("Test")
-            //.surname("Test")
-            .personalCode("Test")
-            .build();
-        judicialUsersApiResponses.add(judicialUsersApiResponse);
-        JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
-            .personalCode(new String[]{"Test2", "test","test5"}).build();
-        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test","test5"});
-        when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
-        DynamicList dynamicList1 = DynamicList.builder()
-            .listItems(dynamicListElementsList)
-            .build();
-        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            HearingDataPrePopulatedDynamicLists.builder()
-                .retrievedHearingTypes(dynamicList)
-                .hearingListedLinkedCases(dynamicList1)
-                .retrievedHearingDates(dynamicList1)
-                .retrievedHearingChannels(dynamicList1)
-                .retrievedVideoSubChannels(dynamicList1)
-                .retrievedTelephoneSubChannels(dynamicList1)
-                .retrievedCourtLocations(dynamicList)
-                .hearingListedLinkedCases(dynamicList)
-                .build();
+
         List<Element<HearingData>>  expectedResponse =
-            hearingDataService.getHearingData(listWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists);
+            hearingDataService.getHearingData(listWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists,caseData);
         assertEquals(expectedResponse.get(0).getValue().getHearingJudgePersonalCode(),"Test");
     }
 

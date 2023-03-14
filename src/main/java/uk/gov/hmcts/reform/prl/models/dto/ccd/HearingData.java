@@ -31,7 +31,7 @@ public class HearingData {
 
     private DynamicList hearingTypes;
 
-    private final DynamicList confirmedHearingDates;
+    private DynamicList confirmedHearingDates;
 
     private final DynamicList hearingChannels;
 
@@ -41,34 +41,34 @@ public class HearingData {
 
     private DynamicList courtList;
 
-    private final DynamicList localAuthorityHearingChannel;
+    private DynamicList localAuthorityHearingChannel;
 
     private final DynamicList hearingListedLinkedCases;
 
-    private final DynamicList applicantSolicitorHearingChannel;
+    private DynamicList applicantSolicitorHearingChannel;
 
-    private final DynamicList respondentHearingChannel;
+    private DynamicList respondentHearingChannel;
 
-    private final DynamicList respondentSolicitorHearingChannel;
+    private DynamicList respondentSolicitorHearingChannel;
 
-    private final DynamicList cafcassHearingChannel;
+    private DynamicList cafcassHearingChannel;
 
-    private final DynamicList cafcassCymruHearingChannel;
+    private DynamicList cafcassCymruHearingChannel;
 
-    private final DynamicList applicantHearingChannel;
+    private DynamicList applicantHearingChannel;
 
     @JsonSerialize(using = CustomEnumSerializer.class)
     @JsonProperty("hearingDateConfirmOptionEnum")
     private HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum;
 
     @JsonProperty("additionalHearingDetails")
-    private final String additionalHearingDetails;
+    private String additionalHearingDetails;
 
     @JsonProperty("instructionsForRemoteHearing")
-    private final String instructionsForRemoteHearing;
+    private String instructionsForRemoteHearing;
 
     @JsonProperty("hearingDateTimes")
-    private final List<Element<LocalDateTime>> hearingDateTimes;
+    private List<Element<LocalDateTime>> hearingDateTimes;
 
     @JsonProperty("hearingEstimatedHours")
     private final int hearingEstimatedHours;
@@ -102,10 +102,10 @@ public class HearingData {
     @JsonProperty("hearingJudgeEmailAddress")
     private String hearingJudgeEmailAddress;
 
-    private final String applicantName;
-    private final String applicantSolicitor;
-    private final String respondentName;
-    private final String respondentSolicitor;
+    private String applicantName;
+    private String applicantSolicitor;
+    private String respondentName;
+    private String respondentSolicitor;
 
     @JsonProperty("hearingSpecificDatesOptionsEnum")
     private HearingSpecificDatesOptionsEnum hearingSpecificDatesOptionsEnum;
@@ -115,10 +115,10 @@ public class HearingData {
     private LocalDate firstDateOfTheHearing;
 
     @JsonProperty("hearingMustTakePlaceAtHour")
-    private final int hearingMustTakePlaceAtHour;
+    private int hearingMustTakePlaceAtHour;
 
     @JsonProperty("hearingMustTakePlaceAtMinute")
-    private final int hearingMustTakePlaceAtMinute;
+    private int hearingMustTakePlaceAtMinute;
 
     @JsonProperty("earliestHearingDate")
     private LocalDate earliestHearingDate;

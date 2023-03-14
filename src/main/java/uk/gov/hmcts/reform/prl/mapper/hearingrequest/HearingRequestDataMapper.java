@@ -4,17 +4,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.HearingSpecificDatesOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
+
+import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HearingRequestDataMapper {
 
-    public void mapHearingData(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
+    public void mapHearingData(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
         log.info("Inside Request mapper hearing data****hearingDataPrePopulatedDynamicLists  {}", hearingDataPrePopulatedDynamicLists);
         boolean isHearingDynamicListItemsNullifyReq = (null != hearingDataPrePopulatedDynamicLists) ? false  : true;
         mapHearingTypesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
@@ -32,6 +39,14 @@ public class HearingRequestDataMapper {
             isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getHearingListedLinkedCases());
         mapOtherPartyHearingChannelsMapping(hearingData, isHearingDynamicListItemsNullifyReq
             ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        hearingData.setFillingFormRenderingInfo(CommonUtils.renderCollapsible());
+        hearingData.setApplicantName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getApplicantName() : "");
+        hearingData.setApplicantSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                    ? caseData.getApplicantsFL401().getRepresentativeFirstName()
+                + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "");
+        hearingData.setRespondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "");
+        hearingData.setRespondentSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? "" : "");
+        setEmptyUnwantedValues(hearingData);
         log.info("Inside Request mapper hearing data****  {}", hearingData);
     }
 
@@ -101,7 +116,6 @@ public class HearingRequestDataMapper {
         mapDynamicListItems(hearingData.getCafcassHearingChannel(),retrievedHearingChannels);
         mapDynamicListItems(hearingData.getCafcassCymruHearingChannel(),retrievedHearingChannels);
         mapDynamicListItems(hearingData.getLocalAuthorityHearingChannel(),retrievedHearingChannels);
-        hearingData.setFillingFormRenderingInfo(CommonUtils.renderCollapsible());
     }
 
     private void mapDynamicListItems(DynamicList existingHearingDynamicList, DynamicList requiredHearingDynamicList) {
@@ -111,5 +125,98 @@ public class HearingRequestDataMapper {
                 ? requiredHearingDynamicList.getListItems() : null);
             log.info("Inside Request mapper mapDynamicListItems() before set ListItems****  {}", existingHearingDynamicList);
         }
+    }
+
+    public void setEmptyUnwantedValues(HearingData hearingData) {
+
+        DynamicList dynamicList = DynamicList.builder().build();
+        if (HearingDateConfirmOptionEnum.dateReservedWithListAssit
+            .equals(ofNullable(hearingData.getHearingDateConfirmOptionEnum()).get())) {
+            hearingData.setConfirmedHearingDates(dynamicList);
+            hearingData.setFirstDateOfTheHearing(null);
+            hearingData.setHearingMustTakePlaceAtHour(0);
+            hearingData.setHearingMustTakePlaceAtMinute(0);
+            hearingData.setEarliestHearingDate(null);
+            hearingData.setLatestHearingDate(null);
+            if (YesOrNo.Yes.equals(hearingData.getAllPartiesAttendHearingSameWayYesOrNo())) {
+                setEmptyForAllPartiesAttendHearingSameWayYes(hearingData);
+            }
+        } else if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
+            .equals(ofNullable(hearingData.getHearingDateConfirmOptionEnum()).get())) {
+            HearingData hearingDataTemp =  HearingData.builder()
+                .hearingTypes(hearingData.getHearingTypes())
+                .hearingDateConfirmOptionEnum(hearingData.getHearingDateConfirmOptionEnum())
+                .confirmedHearingDates(hearingData.getConfirmedHearingDates())
+                .additionalHearingDetails(ofNullable(hearingData.getAdditionalHearingDetails()).orElse(""))
+                .instructionsForRemoteHearing(ofNullable(hearingData.getInstructionsForRemoteHearing()).orElse(""))
+                .confirmedHearingDates(dynamicList)
+                .hearingChannels(dynamicList)
+                .applicantHearingChannel(dynamicList)
+                .hearingVideoChannels(dynamicList)
+                .hearingTelephoneChannels(dynamicList)
+                .courtList(dynamicList)
+                .localAuthorityHearingChannel(dynamicList)
+                .hearingListedLinkedCases(dynamicList)
+                .applicantSolicitorHearingChannel(dynamicList)
+                .respondentHearingChannel(dynamicList)
+                .respondentSolicitorHearingChannel(dynamicList)
+                .cafcassHearingChannel(dynamicList)
+                .cafcassCymruHearingChannel(dynamicList)
+                .applicantHearingChannel(dynamicList)
+                .hearingEstimatedDays(0)
+                .hearingEstimatedMinutes(0)
+                .hearingMustTakePlaceAtHour(0)
+                .respondentName(hearingData.getRespondentName())
+                .applicantName(hearingData.getApplicantName())
+                .applicantSolicitor(hearingData.getApplicantSolicitor())
+                .build();
+            hearingData = hearingDataTemp;
+        } else if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
+            .equals(ofNullable(hearingData.getHearingDateConfirmOptionEnum()).get())) {
+            hearingData.setConfirmedHearingDates(dynamicList);
+            hearingData.setAdditionalHearingDetails("");
+            hearingData.setInstructionsForRemoteHearing("");
+            hearingData.setHearingDateTimes(null);
+            if (YesOrNo.No.equals(hearingData.getHearingSpecificDatesOptionsEnum())) {
+                hearingData.setFirstDateOfTheHearing(null);
+                hearingData.setEarliestHearingDate(null);
+                hearingData.setLatestHearingDate(null);
+            } else if (HearingSpecificDatesOptionsEnum.HearingRequiredBetweenCertainDates
+                .equals(hearingData.getHearingSpecificDatesOptionsEnum())) {
+                hearingData.setFirstDateOfTheHearing(null);
+            }
+            if (YesOrNo.Yes.equals(hearingData.getAllPartiesAttendHearingSameWayYesOrNo())) {
+                setEmptyForAllPartiesAttendHearingSameWayYes(hearingData);
+            }
+
+        } else {
+            hearingData.setConfirmedHearingDates(dynamicList);
+            hearingData.setAdditionalHearingDetails("");
+            hearingData.setInstructionsForRemoteHearing("");
+            hearingData.setHearingDateTimes(null);
+            if (YesOrNo.No.equals(hearingData.getHearingSpecificDatesOptionsEnum())) {
+                hearingData.setFirstDateOfTheHearing(null);
+                hearingData.setEarliestHearingDate(null);
+                hearingData.setLatestHearingDate(null);
+            } else if (HearingSpecificDatesOptionsEnum.HearingRequiredBetweenCertainDates
+                .equals(hearingData.getHearingSpecificDatesOptionsEnum())) {
+                hearingData.setFirstDateOfTheHearing(null);
+            }
+            if (YesOrNo.Yes.equals(hearingData.getAllPartiesAttendHearingSameWayYesOrNo())) {
+                setEmptyForAllPartiesAttendHearingSameWayYes(hearingData);
+            }
+
+        }
+    }
+
+    private void setEmptyForAllPartiesAttendHearingSameWayYes(HearingData hearingData) {
+        DynamicList dynamicList = DynamicList.builder().build();
+        hearingData.setApplicantHearingChannel(dynamicList);
+        hearingData.setApplicantSolicitorHearingChannel(dynamicList);
+        hearingData.setRespondentHearingChannel(dynamicList);
+        hearingData.setRespondentSolicitorHearingChannel(dynamicList);
+        hearingData.setCafcassHearingChannel(dynamicList);
+        hearingData.setCafcassCymruHearingChannel(dynamicList);
+        hearingData.setLocalAuthorityHearingChannel(dynamicList);
     }
 }

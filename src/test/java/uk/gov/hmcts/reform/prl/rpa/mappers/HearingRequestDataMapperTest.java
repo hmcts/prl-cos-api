@@ -5,12 +5,14 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.HearingSpecificDatesOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 
@@ -20,6 +22,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertNull;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -107,7 +110,7 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
             .build();
-        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists);
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
         assertEquals(hearingData.getHearingTypes().getListItems().get(0).getCode(),"INTER");
     }
 
@@ -172,7 +175,7 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
             .build();
-        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists);
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
         assertNotNull(hearingData);
     }
 
@@ -250,11 +253,551 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
             .build();
-        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists);
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
         assertEquals(hearingData.getHearingTypes().getListItems().get(0).getCode(),"test");
         assertEquals(hearingData.getHearingVideoChannels().getListItems().get(0).getCode(),"test");
         assertEquals(hearingData.getHearingTelephoneChannels().getListItems().get(0).getCode(),"test");
         assertEquals(hearingData.getCourtList().getListItems().get(0).getCode(),"test");
+    }
+
+
+
+    @Test
+    public void testSetEmptyUnWatedValuesDateReservedWithListAssit() {
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code("test")
+            .label("test")
+            .build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        LocalDateTime localDateTime = LocalDateTime.now();
+        List<LocalDateTime> localDateTimes = new ArrayList<>();
+        localDateTimes.add(localDateTime);
+        JudicialUser judicialUser = JudicialUser.builder()
+            .idamId("test")
+            .personalCode("Test")
+            .build();
+        DynamicListElement dynamicListElement4 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList4 = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement4);
+        DynamicList dynamicList1 = DynamicList.builder()
+            .listItems(dynamicListElementsList4)
+            .value(dynamicListElement4)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList1)
+            .confirmedHearingDates(dynamicList1)
+            .hearingChannels(dynamicList1)
+            .hearingVideoChannels(dynamicList1)
+            .hearingTelephoneChannels(dynamicList1)
+            .courtList(dynamicList1)
+            .localAuthorityHearingChannel(dynamicList1)
+            .hearingListedLinkedCases(dynamicList1)
+            .applicantSolicitorHearingChannel(dynamicList1)
+            .respondentHearingChannel(dynamicList1)
+            .respondentSolicitorHearingChannel(dynamicList1)
+            .cafcassHearingChannel(dynamicList1)
+            .cafcassCymruHearingChannel(dynamicList1)
+            .applicantHearingChannel(dynamicList1)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours(5)
+            .hearingEstimatedMinutes(40)
+            .hearingEstimatedDays(15)
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.No)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgeNameAndEmail(judicialUser)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .build();
+        hearingRequestDataMapper.setEmptyUnwantedValues(hearingData);
+        assertNotNull(hearingData.getApplicantHearingChannel());
+        assertEquals(hearingData.getHearingTypes().getValue().getCode(),"INTER");
+    }
+
+    @Test
+    public void testSetEmptyUnWatedValuesDateReservedWithListAssitWithYes() {
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code("test")
+            .label("test")
+            .build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        LocalDateTime localDateTime = LocalDateTime.now();
+        List<LocalDateTime> localDateTimes = new ArrayList<>();
+        localDateTimes.add(localDateTime);
+        JudicialUser judicialUser = JudicialUser.builder()
+            .idamId("test")
+            .personalCode("Test")
+            .build();
+        DynamicListElement dynamicListElement4 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList4 = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement4);
+        DynamicList dynamicList1 = DynamicList.builder()
+            .listItems(dynamicListElementsList4)
+            .value(dynamicListElement4)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList1)
+            .confirmedHearingDates(dynamicList1)
+            .hearingChannels(dynamicList1)
+            .hearingVideoChannels(dynamicList1)
+            .hearingTelephoneChannels(dynamicList1)
+            .courtList(dynamicList1)
+            .localAuthorityHearingChannel(dynamicList1)
+            .hearingListedLinkedCases(dynamicList1)
+            .applicantSolicitorHearingChannel(dynamicList1)
+            .respondentHearingChannel(dynamicList1)
+            .respondentSolicitorHearingChannel(dynamicList1)
+            .cafcassHearingChannel(dynamicList1)
+            .cafcassCymruHearingChannel(dynamicList1)
+            .applicantHearingChannel(dynamicList1)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours(5)
+            .hearingEstimatedMinutes(40)
+            .hearingEstimatedDays(15)
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgeNameAndEmail(judicialUser)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .build();
+        hearingRequestDataMapper.setEmptyUnwantedValues(hearingData);
+        assertNull(hearingData.getApplicantHearingChannel().getValue());
+        assertEquals(hearingData.getHearingTypes().getValue().getCode(),"INTER");
+    }
+
+
+
+    @Test
+    public void testSetEmptyUnWatedValuesDateConfirmedInHearingsTab() {
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code("test")
+            .label("test")
+            .build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        LocalDateTime localDateTime = LocalDateTime.now();
+        List<LocalDateTime> localDateTimes = new ArrayList<>();
+        localDateTimes.add(localDateTime);
+        JudicialUser judicialUser = JudicialUser.builder()
+            .idamId("test")
+            .personalCode("Test")
+            .build();
+        DynamicListElement dynamicListElement4 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList4 = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement4);
+        DynamicList dynamicList1 = DynamicList.builder()
+            .listItems(dynamicListElementsList4)
+            .value(dynamicListElement4)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList1)
+            .confirmedHearingDates(dynamicList1)
+            .hearingChannels(dynamicList1)
+            .hearingVideoChannels(dynamicList1)
+            .hearingTelephoneChannels(dynamicList1)
+            .courtList(dynamicList1)
+            .localAuthorityHearingChannel(dynamicList1)
+            .hearingListedLinkedCases(dynamicList1)
+            .applicantSolicitorHearingChannel(dynamicList1)
+            .respondentHearingChannel(dynamicList1)
+            .respondentSolicitorHearingChannel(dynamicList1)
+            .cafcassHearingChannel(dynamicList1)
+            .cafcassCymruHearingChannel(dynamicList1)
+            .applicantHearingChannel(dynamicList1)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours(5)
+            .hearingEstimatedMinutes(40)
+            .hearingEstimatedDays(15)
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgeNameAndEmail(judicialUser)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .build();
+        hearingRequestDataMapper.setEmptyUnwantedValues(hearingData);
+        assertEquals(hearingData.getHearingTypes().getValue().getCode(),"INTER");
+    }
+
+
+
+
+    @Test
+    public void testSetEmptyUnWatedValuesDateToBeFixedNO() {
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code("test")
+            .label("test")
+            .build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        LocalDateTime localDateTime = LocalDateTime.now();
+        List<LocalDateTime> localDateTimes = new ArrayList<>();
+        localDateTimes.add(localDateTime);
+        JudicialUser judicialUser = JudicialUser.builder()
+            .idamId("test")
+            .personalCode("Test")
+            .build();
+        DynamicListElement dynamicListElement4 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList4 = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement4);
+        DynamicList dynamicList1 = DynamicList.builder()
+            .listItems(dynamicListElementsList4)
+            .value(dynamicListElement4)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList1)
+            .confirmedHearingDates(dynamicList1)
+            .hearingChannels(dynamicList1)
+            .hearingVideoChannels(dynamicList1)
+            .hearingTelephoneChannels(dynamicList1)
+            .courtList(dynamicList1)
+            .localAuthorityHearingChannel(dynamicList1)
+            .hearingListedLinkedCases(dynamicList1)
+            .applicantSolicitorHearingChannel(dynamicList1)
+            .respondentHearingChannel(dynamicList1)
+            .respondentSolicitorHearingChannel(dynamicList1)
+            .cafcassHearingChannel(dynamicList1)
+            .cafcassCymruHearingChannel(dynamicList1)
+            .applicantHearingChannel(dynamicList1)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours(5)
+            .hearingEstimatedMinutes(40)
+            .hearingEstimatedDays(15)
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgeNameAndEmail(judicialUser)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .hearingSpecificDatesOptionsEnum(HearingSpecificDatesOptionsEnum.No)
+            .build();
+        hearingRequestDataMapper.setEmptyUnwantedValues(hearingData);
+        assertNull(hearingData.getFirstDateOfTheHearing());
+        assertNull(hearingData.getLatestHearingDate());
+        assertNull(hearingData.getLatestHearingDate());
+        assertEquals(hearingData.getHearingTypes().getValue().getCode(),"INTER");
+    }
+
+
+
+    @Test
+    public void testSetEmptyUnWatedValuesDateToBeFixedOther1() {
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code("test")
+            .label("test")
+            .build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        LocalDateTime localDateTime = LocalDateTime.now();
+        List<LocalDateTime> localDateTimes = new ArrayList<>();
+        localDateTimes.add(localDateTime);
+        JudicialUser judicialUser = JudicialUser.builder()
+            .idamId("test")
+            .personalCode("Test")
+            .build();
+        DynamicListElement dynamicListElement4 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList4 = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement4);
+        DynamicList dynamicList1 = DynamicList.builder()
+            .listItems(dynamicListElementsList4)
+            .value(dynamicListElement4)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList1)
+            .confirmedHearingDates(dynamicList1)
+            .hearingChannels(dynamicList1)
+            .hearingVideoChannels(dynamicList1)
+            .hearingTelephoneChannels(dynamicList1)
+            .courtList(dynamicList1)
+            .localAuthorityHearingChannel(dynamicList1)
+            .hearingListedLinkedCases(dynamicList1)
+            .applicantSolicitorHearingChannel(dynamicList1)
+            .respondentHearingChannel(dynamicList1)
+            .respondentSolicitorHearingChannel(dynamicList1)
+            .cafcassHearingChannel(dynamicList1)
+            .cafcassCymruHearingChannel(dynamicList1)
+            .applicantHearingChannel(dynamicList1)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours(5)
+            .hearingEstimatedMinutes(40)
+            .hearingEstimatedDays(15)
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgeNameAndEmail(judicialUser)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .hearingSpecificDatesOptionsEnum(HearingSpecificDatesOptionsEnum.HearingRequiredBetweenCertainDates)
+            .build();
+        hearingRequestDataMapper.setEmptyUnwantedValues(hearingData);
+        assertNull(hearingData.getFirstDateOfTheHearing());
+        assertEquals(hearingData.getHearingTypes().getValue().getCode(),"INTER");
+    }
+
+
+
+    @Test
+    public void testSetEmptyUnWatedValuesDateConfirmedByListingTeam() {
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code("test")
+            .label("test")
+            .build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        LocalDateTime localDateTime = LocalDateTime.now();
+        List<LocalDateTime> localDateTimes = new ArrayList<>();
+        localDateTimes.add(localDateTime);
+        JudicialUser judicialUser = JudicialUser.builder()
+            .idamId("test")
+            .personalCode("Test")
+            .build();
+        DynamicListElement dynamicListElement4 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList4 = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement4);
+        DynamicList dynamicList1 = DynamicList.builder()
+            .listItems(dynamicListElementsList4)
+            .value(dynamicListElement4)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList1)
+            .confirmedHearingDates(dynamicList1)
+            .hearingChannels(dynamicList1)
+            .hearingVideoChannels(dynamicList1)
+            .hearingTelephoneChannels(dynamicList1)
+            .courtList(dynamicList1)
+            .localAuthorityHearingChannel(dynamicList1)
+            .hearingListedLinkedCases(dynamicList1)
+            .applicantSolicitorHearingChannel(dynamicList1)
+            .respondentHearingChannel(dynamicList1)
+            .respondentSolicitorHearingChannel(dynamicList1)
+            .cafcassHearingChannel(dynamicList1)
+            .cafcassCymruHearingChannel(dynamicList1)
+            .applicantHearingChannel(dynamicList1)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours(5)
+            .hearingEstimatedMinutes(40)
+            .hearingEstimatedDays(15)
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgeNameAndEmail(judicialUser)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .build();
+        hearingRequestDataMapper.setEmptyUnwantedValues(hearingData);
+        assertEquals(hearingData.getHearingTypes().getValue().getCode(),"INTER");
+    }
+
+
+    @Test
+    public void testSetEmptyUnWatedValuesDateToBeFixed() {
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code("test")
+            .label("test")
+            .build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        LocalDateTime localDateTime = LocalDateTime.now();
+        List<LocalDateTime> localDateTimes = new ArrayList<>();
+        localDateTimes.add(localDateTime);
+        JudicialUser judicialUser = JudicialUser.builder()
+            .idamId("test")
+            .personalCode("Test")
+            .build();
+        DynamicListElement dynamicListElement4 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList4 = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement4);
+        DynamicList dynamicList1 = DynamicList.builder()
+            .listItems(dynamicListElementsList4)
+            .value(dynamicListElement4)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList1)
+            .confirmedHearingDates(dynamicList1)
+            .hearingChannels(dynamicList1)
+            .hearingVideoChannels(dynamicList1)
+            .hearingTelephoneChannels(dynamicList1)
+            .courtList(dynamicList1)
+            .localAuthorityHearingChannel(dynamicList1)
+            .hearingListedLinkedCases(dynamicList1)
+            .applicantSolicitorHearingChannel(dynamicList1)
+            .respondentHearingChannel(dynamicList1)
+            .respondentSolicitorHearingChannel(dynamicList1)
+            .cafcassHearingChannel(dynamicList1)
+            .cafcassCymruHearingChannel(dynamicList1)
+            .applicantHearingChannel(dynamicList1)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours(5)
+            .hearingEstimatedMinutes(40)
+            .hearingEstimatedDays(15)
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgeNameAndEmail(judicialUser)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .hearingSpecificDatesOptionsEnum(HearingSpecificDatesOptionsEnum.No)
+            .build();
+        hearingRequestDataMapper.setEmptyUnwantedValues(hearingData);
+        assertNull(hearingData.getFirstDateOfTheHearing());
+        assertNull(hearingData.getLatestHearingDate());
+        assertNull(hearingData.getLatestHearingDate());
+        assertEquals(hearingData.getHearingTypes().getValue().getCode(),"INTER");
+    }
+
+
+
+    @Test
+    public void testSetEmptyUnWatedValuesDateToBeFixedOther() {
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code("test")
+            .label("test")
+            .build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        LocalDateTime localDateTime = LocalDateTime.now();
+        List<LocalDateTime> localDateTimes = new ArrayList<>();
+        localDateTimes.add(localDateTime);
+        JudicialUser judicialUser = JudicialUser.builder()
+            .idamId("test")
+            .personalCode("Test")
+            .build();
+        DynamicListElement dynamicListElement4 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList4 = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement4);
+        DynamicList dynamicList1 = DynamicList.builder()
+            .listItems(dynamicListElementsList4)
+            .value(dynamicListElement4)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList1)
+            .confirmedHearingDates(dynamicList1)
+            .hearingChannels(dynamicList1)
+            .hearingVideoChannels(dynamicList1)
+            .hearingTelephoneChannels(dynamicList1)
+            .courtList(dynamicList1)
+            .localAuthorityHearingChannel(dynamicList1)
+            .hearingListedLinkedCases(dynamicList1)
+            .applicantSolicitorHearingChannel(dynamicList1)
+            .respondentHearingChannel(dynamicList1)
+            .respondentSolicitorHearingChannel(dynamicList1)
+            .cafcassHearingChannel(dynamicList1)
+            .cafcassCymruHearingChannel(dynamicList1)
+            .applicantHearingChannel(dynamicList1)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours(5)
+            .hearingEstimatedMinutes(40)
+            .hearingEstimatedDays(15)
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgeNameAndEmail(judicialUser)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .hearingSpecificDatesOptionsEnum(HearingSpecificDatesOptionsEnum.HearingRequiredBetweenCertainDates)
+            .build();
+        hearingRequestDataMapper.setEmptyUnwantedValues(hearingData);
+        assertNull(hearingData.getFirstDateOfTheHearing());
+        assertEquals(hearingData.getHearingTypes().getValue().getCode(),"INTER");
     }
 
 }
