@@ -132,7 +132,6 @@ public class HearingRequestDataMapper {
         DynamicList dynamicList = DynamicList.builder().build();
         if (HearingDateConfirmOptionEnum.dateReservedWithListAssit
             .equals(ofNullable(hearingData.getHearingDateConfirmOptionEnum()).get())) {
-            hearingData.setConfirmedHearingDates(dynamicList);
             hearingData.setFirstDateOfTheHearing(null);
             hearingData.setHearingMustTakePlaceAtHour(0);
             hearingData.setHearingMustTakePlaceAtMinute(0);
@@ -149,20 +148,20 @@ public class HearingRequestDataMapper {
                 .confirmedHearingDates(hearingData.getConfirmedHearingDates())
                 .additionalHearingDetails(ofNullable(hearingData.getAdditionalHearingDetails()).orElse(""))
                 .instructionsForRemoteHearing(ofNullable(hearingData.getInstructionsForRemoteHearing()).orElse(""))
-                .confirmedHearingDates(dynamicList)
-                .hearingChannels(dynamicList)
-                .applicantHearingChannel(dynamicList)
-                .hearingVideoChannels(dynamicList)
-                .hearingTelephoneChannels(dynamicList)
-                .courtList(dynamicList)
-                .localAuthorityHearingChannel(dynamicList)
-                .hearingListedLinkedCases(dynamicList)
-                .applicantSolicitorHearingChannel(dynamicList)
-                .respondentHearingChannel(dynamicList)
-                .respondentSolicitorHearingChannel(dynamicList)
-                .cafcassHearingChannel(dynamicList)
-                .cafcassCymruHearingChannel(dynamicList)
-                .applicantHearingChannel(dynamicList)
+                .confirmedHearingDates(hearingData.getConfirmedHearingDates())
+                .hearingChannels(hearingData.getHearingChannels())
+                .applicantHearingChannel(hearingData.getApplicantHearingChannel())
+                .hearingVideoChannels(hearingData.getHearingVideoChannels())
+                .hearingTelephoneChannels(hearingData.getHearingTelephoneChannels())
+                .courtList(hearingData.getCourtList())
+                .localAuthorityHearingChannel(hearingData.getLocalAuthorityHearingChannel())
+                .hearingListedLinkedCases(hearingData.getHearingListedLinkedCases())
+                .applicantSolicitorHearingChannel(hearingData.getApplicantSolicitorHearingChannel())
+                .respondentHearingChannel(hearingData.getRespondentHearingChannel())
+                .respondentSolicitorHearingChannel(hearingData.getRespondentSolicitorHearingChannel())
+                .cafcassHearingChannel(hearingData.getCafcassHearingChannel())
+                .cafcassCymruHearingChannel(hearingData.getCafcassCymruHearingChannel())
+                .applicantHearingChannel(hearingData.getApplicantHearingChannel())
                 .hearingEstimatedDays(0)
                 .hearingEstimatedMinutes(0)
                 .hearingMustTakePlaceAtHour(0)
@@ -173,7 +172,6 @@ public class HearingRequestDataMapper {
             hearingData = hearingDataTemp;
         } else if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
             .equals(ofNullable(hearingData.getHearingDateConfirmOptionEnum()).get())) {
-            hearingData.setConfirmedHearingDates(dynamicList);
             hearingData.setAdditionalHearingDetails("");
             hearingData.setInstructionsForRemoteHearing("");
             hearingData.setHearingDateTimes(null);
@@ -190,7 +188,6 @@ public class HearingRequestDataMapper {
             }
 
         } else {
-            hearingData.setConfirmedHearingDates(dynamicList);
             hearingData.setAdditionalHearingDetails("");
             hearingData.setInstructionsForRemoteHearing("");
             hearingData.setHearingDateTimes(null);
