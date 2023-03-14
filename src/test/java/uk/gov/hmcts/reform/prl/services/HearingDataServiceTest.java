@@ -344,7 +344,7 @@ public class HearingDataServiceTest {
             .cafcassHearingChannel(dynamicList)
             .cafcassCymruHearingChannel(dynamicList)
             .applicantHearingChannel(dynamicList)
-            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
             .additionalHearingDetails("Test")
             .instructionsForRemoteHearing("Test")
             .hearingEstimatedHours(5)
