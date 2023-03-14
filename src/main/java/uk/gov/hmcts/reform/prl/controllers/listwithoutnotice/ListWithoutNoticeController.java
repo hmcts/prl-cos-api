@@ -104,7 +104,6 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("****listWithoutNoticeSubmission***** {} ", callbackRequest.toString());
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -115,9 +114,6 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
             .getHearingData(caseData.getListWithoutNoticeHearingDetails(),null));
-        log.info("***ListWithoutNotice***{},{}",caseDataUpdated,
-                 caseData.getLegalAdviserList());
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
