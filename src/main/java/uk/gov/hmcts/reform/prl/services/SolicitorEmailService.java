@@ -91,7 +91,7 @@ public class SolicitorEmailService {
             applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
-            LanguagePreference.welsh
+            LanguagePreference.getLanguagePreference(caseData)
         );
 
     }
