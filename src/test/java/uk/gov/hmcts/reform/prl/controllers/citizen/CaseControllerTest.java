@@ -69,7 +69,6 @@ public class CaseControllerTest {
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .createdDate(LocalDateTime.now().minusDays(10))
             .build();
 
@@ -79,7 +78,7 @@ public class CaseControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule()));
         CaseDetails caseDetails = CaseDetails.builder().id(
-            1234567891234567L).data(stringObjectMap).state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build();
+            1234567891234567L).data(stringObjectMap).build();
 
         String caseId = "1234567891234567";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -87,8 +86,8 @@ public class CaseControllerTest {
         when(authTokenGenerator.generate()).thenReturn("servAuthToken");
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
-        CitizenCaseData citizenCaseData = caseController.getCase(caseId, authToken, servAuthToken);
-        assertEquals(caseData.getApplicantCaseName(), citizenCaseData.getCaseData().getApplicantCaseName());
+        CaseData caseData1 = caseController.getCase(caseId, authToken, servAuthToken);
+        assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
 
     }
 
