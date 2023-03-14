@@ -170,6 +170,7 @@ public class HearingManagementService {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put(STATE, fields.get(STATE));
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, fields.get(CASE_TYPE_OF_APPLICATION));
+        caseDataMap.put("nextHearingDetails", fields.get("nextHearingDetails"));
 
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
