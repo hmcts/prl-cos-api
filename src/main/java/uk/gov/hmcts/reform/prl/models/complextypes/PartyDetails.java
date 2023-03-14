@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnu
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 
 @Data
@@ -110,4 +111,10 @@ public class PartyDetails {
             this.lastName
         );
     }
+
+    private UUID partyId;
+
+    private UUID solicitorOrgUuid;
+
+    private UUID solicitorPartyId;
 }
