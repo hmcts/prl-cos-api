@@ -103,6 +103,9 @@ public class HearingManagementService {
         );
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
+        log.info("Caseeee Date NHD {}", caseData.getNextHearingDetails());
+
+
         Map<String, Object> fields = new HashMap<>();
         fields.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
 
