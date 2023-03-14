@@ -124,13 +124,13 @@ public class HearingRequestDataMapper {
     }
 
     public HearingData setEmptyUnnecessaryValues(HearingData hearingData) {
+        log.info("setEmptyUnnecessaryValues() before: {}",hearingData);
         HearingData hearingDataTemp =  HearingData.builder()
                 .hearingTypes(hearingData.getHearingTypes())
                 .hearingDateConfirmOptionEnum(hearingData.getHearingDateConfirmOptionEnum())
                 .confirmedHearingDates(hearingData.getConfirmedHearingDates())
                 .additionalHearingDetails(ofNullable(hearingData.getAdditionalHearingDetails()).orElse(""))
                 .instructionsForRemoteHearing(ofNullable(hearingData.getInstructionsForRemoteHearing()).orElse(""))
-                .confirmedHearingDates(hearingData.getConfirmedHearingDates())
                 .hearingChannels(hearingData.getHearingChannels())
                 .hearingVideoChannels(hearingData.getHearingVideoChannels())
                 .hearingTelephoneChannels(hearingData.getHearingTelephoneChannels())
@@ -150,6 +150,7 @@ public class HearingRequestDataMapper {
                 .applicantName(hearingData.getApplicantName())
                 .applicantSolicitor(hearingData.getApplicantSolicitor())
                 .build();
+        log.info("setEmptyUnnecessaryValues() after map: {}",hearingDataTemp);
         return hearingDataTemp;
     }
 
