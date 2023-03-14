@@ -28,4 +28,9 @@ public class CaseHearing {
     private String hmcStatus;
     private List<HearingDaySchedule> hearingDaySchedule;
 
+    @JsonProperty("hearingStatus")
+    public String getHearingStatus() {
+        return hmcStatus;
+    }
+
 }
