@@ -108,12 +108,14 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
+            .getHearingData(caseData.getListWithoutNoticeHearingDetails(),null));
+        log.info("*****LISTWITHOUTNOTICE_HEARINGDETAILS****",caseDataUpdated.get(caseData.getListWithoutNoticeHearingDetails()));
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
+        log.info("*****AllocatedJudge ****",allocatedJudge.getJudgeEmail());
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-        caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
-            .getHearingData(caseData.getListWithoutNoticeHearingDetails(),null));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
