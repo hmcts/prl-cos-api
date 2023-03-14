@@ -61,7 +61,7 @@ public class HearingService {
             final List<CaseHearing> hearings = caseHearings.stream()
                     .filter(hearing ->
                         hearingStatuses.stream().anyMatch(hearingStatus -> hearingStatus.equals(
-                            hearing.getHmcStatus()))
+                            hearing.getHearingStatus()))
                     )
                 .collect(
                     Collectors.toList());
