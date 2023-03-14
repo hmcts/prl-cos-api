@@ -108,8 +108,7 @@ uk:
           english:
             SOLICITOR: a080f4ce-a07f-43ec-a3f0-f196d83f7730
             CASEWORKER: 8c1cd107-b76f-4e10-9c44-afb49415cda2
-            RETURNAPPLICATION: daf43ed7-d51e-4e0b-ac93-78b412cd4c47
-            APPLICANT_SOLICITOR_CA: 72e32651-a952-4063-8a85-5f28950fcc84
+            RETURNAPPLICATION: 41a7ffcd-a5ec-4377-ba50-59619ad0ac8c
             WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
             COURTADMIN: f980e4a8-4eed-4887-9ae9-cb2c6a42fec7
             GATEKEEPER: 52223e2c-1c68-470b-b0bb-66121569adb1
@@ -127,9 +126,7 @@ uk:
             CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION: b6224e6a-f55c-46f8-bfc7-631d273070a4
             CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
           welsh:
-            SOLICITOR: 8cb02993-7dbe-4e53-a4c4-8bdc106c99ae
-            RETURNAPPLICATION: 6db213c8-b4a1-4a3f-b5b2-c71303b26061
-            APPLICANT_SOLICITOR_CA: 3f622a4c-37d6-4446-a831-522f21a25f57
+            EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
