@@ -21,6 +21,10 @@ public class HearingRequestDataMapper {
 
     public void mapHearingData(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
         log.info("Inside Request mapper hearing data****hearingDataPrePopulatedDynamicLists  {}", hearingDataPrePopulatedDynamicLists);
+        if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
+            .equals(ofNullable(hearingData.getHearingDateConfirmOptionEnum()).get())) {
+            hearingData = setEmptyUnnecessaryValues(hearingData);
+        }
         boolean isHearingDynamicListItemsNullifyReq = (null != hearingDataPrePopulatedDynamicLists) ? false  : true;
         mapHearingTypesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
         mapDynamicListItems(hearingData.getConfirmedHearingDates(),
@@ -44,10 +48,6 @@ public class HearingRequestDataMapper {
                 + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "");
         hearingData.setRespondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "");
         hearingData.setRespondentSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? "" : "");
-        if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
-            .equals(ofNullable(hearingData.getHearingDateConfirmOptionEnum()).get())) {
-            hearingData = setEmptyUnnecessaryValues(hearingData);
-        }
         log.info("Inside Request mapper hearing data****  {}", hearingData);
     }
 
