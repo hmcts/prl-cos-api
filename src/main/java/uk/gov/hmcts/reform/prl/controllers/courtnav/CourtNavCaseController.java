@@ -94,7 +94,10 @@ public class CourtNavCaseController {
         @RequestParam MultipartFile file,
         @RequestParam String typeOfDocument
     ) {
-        log.info("Document name {} and Type of document {}", file.getOriginalFilename(), typeOfDocument);
+        log.info("case id {} Document name {} and Type of document {}", caseId, file.getOriginalFilename(), typeOfDocument);
+
+        log.info("Auth token -> {}", authorisation);
+
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
 
@@ -102,6 +105,7 @@ public class CourtNavCaseController {
                 log.info("uploading cafcass document");
                 cafcassUploadDocService.uploadDocument(authorisation, file, typeOfDocument, caseId);
             } else {
+                log.info("uploading courtNav document");
                 courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
             }
             return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
