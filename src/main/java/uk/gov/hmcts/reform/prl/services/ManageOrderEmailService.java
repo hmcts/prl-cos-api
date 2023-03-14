@@ -66,7 +66,7 @@ public class ManageOrderEmailService {
             email,
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
-            LanguagePreference.getLanguagePreference(caseData)
+            LanguagePreference.english
         ));
 
     }
