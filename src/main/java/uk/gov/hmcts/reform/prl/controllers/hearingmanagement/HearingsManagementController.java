@@ -122,9 +122,10 @@ public class HearingsManagementController {
     ) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
+        log.info("Callbackkkkk {}",caseDataUpdated);
         caseDataUpdated.put("nextHearingDetails",
                             hearingManagementService.getNextHearingDate(String.valueOf(caseData.getId())));
+        log.info("Callbackkkkk {}",caseDataUpdated.get("nextHearingDetails"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
