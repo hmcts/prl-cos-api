@@ -84,13 +84,14 @@ public class SolicitorEmailService {
 
 
     public void sendEmail(CaseDetails caseDetails) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
         String applicantSolicitorEmailAddress = caseDetails.getData()
             .get(PrlAppsConstants.APPLICANT_SOLICITOR_EMAIL_ADDRESS).toString();
         emailService.send(
             applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
-            LanguagePreference.english
+            LanguagePreference.getLanguagePreference(caseData)
         );
 
     }
