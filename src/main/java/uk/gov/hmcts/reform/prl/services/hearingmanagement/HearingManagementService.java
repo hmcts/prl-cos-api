@@ -120,7 +120,6 @@ public class HearingManagementService {
                 caseDetailsData = createEvent(hearingRequest, userToken, systemUpdateUserId,
                                               fields,HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING
                 );
-                updateTabsAfterStateChange(caseDetailsData.getData(), caseDetailsData.getId());
                 break;
 
             case DECISION_OUTCOME:
@@ -128,7 +127,6 @@ public class HearingManagementService {
                 caseDetailsData = createEvent(hearingRequest, userToken, systemUpdateUserId,
                                               fields, HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME
                 );
-                updateTabsAfterStateChange(caseDetailsData.getData(), caseDetailsData.getId());
                 break;
             default:
                 break;

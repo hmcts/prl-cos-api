@@ -127,4 +127,16 @@ public class HearingsManagementController {
                             hearingManagementService.getNextHearingDate(String.valueOf(caseData.getId())));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+    @PostMapping(path = "/update-allTabs-after-hmc-case-state", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to refresh the tabs after HMC case state update")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse updateAllTabsAfterHmcCaseState(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        allTabsService.updateAllTabsIncludingConfTab(caseData);
+        return AboutToStartOrSubmitCallbackResponse.builder().build();
+    }
 }
