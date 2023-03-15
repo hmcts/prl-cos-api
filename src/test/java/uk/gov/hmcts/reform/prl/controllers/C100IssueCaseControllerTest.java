@@ -166,7 +166,7 @@ public class C100IssueCaseControllerTest {
         fl401DocsMap.put(PrlAppsConstants.DOCUMENT_FIELD_FINAL, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_C8_WELSH, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
-        dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:email").label("test")
+        dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
                                                       .build()).build();
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(),Mockito.anyString()))
             .thenReturn("test-test-test-test-test-test");

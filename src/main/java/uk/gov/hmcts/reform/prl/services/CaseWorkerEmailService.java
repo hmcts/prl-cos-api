@@ -254,7 +254,7 @@ public class CaseWorkerEmailService {
     public void sendEmailToCourtAdmin(CaseDetails caseDetails) {
 
         caseData = emailService.getCaseData(caseDetails);
-        log.info("*** Case worker email service {}", caseData);
+        log.info("Triggering case worker email service to send mail to court admin");
         List<LocalCourtAdminEmail> localCourtAdminEmails = caseData
             .getLocalCourtAdmin()
             .stream()
@@ -266,7 +266,6 @@ public class CaseWorkerEmailService {
             .collect(Collectors.toList());
         emailList.forEach(email -> {
             if (null != email) {
-                log.info(" Sending notification to court email : {}", email);
                 emailService.send(
                     email,
                     EmailTemplateNames.COURTADMIN,
@@ -329,9 +328,6 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmailToFl401LocalCourt(CaseDetails caseDetails, String courtEmail) {
-
-        log.info("Sending FL401 email to localcourt for :{} ", caseDetails.getId());
-
         emailService.send(
             courtEmail,
             EmailTemplateNames.DA_LOCALCOURT,
