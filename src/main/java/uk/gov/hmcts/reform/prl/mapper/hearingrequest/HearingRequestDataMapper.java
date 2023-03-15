@@ -156,14 +156,6 @@ public class HearingRequestDataMapper {
                 .applicantName(hearingData.getApplicantName())
                 .applicantSolicitor(hearingData.getApplicantSolicitor())
                 .build();
-        hearingData.setApplicantHearingChannel(DynamicList.builder().listItems(hearingData.getApplicantHearingChannel().getListItems()).build());
-        hearingData.setApplicantSolicitorHearingChannel(DynamicList.builder()
-                                                            .value(hearingData.getApplicantSolicitorHearingChannel().getValue()).build());
-        hearingData.setRespondentHearingChannel(DynamicList.builder().build());
-        hearingData.setRespondentSolicitorHearingChannel(DynamicList.builder().build());
-        hearingData.setCafcassHearingChannel(DynamicList.builder().build());
-        hearingData.setCafcassCymruHearingChannel(DynamicList.builder().build());
-        hearingData.setLocalAuthorityHearingChannel(DynamicList.builder().build());
         log.info("setEmptyUnnecessaryValues() after map: {}",hearingDataTemp);
         return hearingDataTemp;
     }
