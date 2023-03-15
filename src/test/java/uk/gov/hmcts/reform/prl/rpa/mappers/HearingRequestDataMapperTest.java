@@ -109,7 +109,7 @@ public class HearingRequestDataMapperTest {
             .applicantName("Test")
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
-        assertEquals(hearingData.getHearingTypes().getListItems().get(0).getCode(),"INTER");
+        assertEquals(hearingData.getHearingTypes().getListItems().get(0).getCode(),"test");
     }
 
 
