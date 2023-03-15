@@ -170,7 +170,7 @@ public class FL401SubmitApplicationController {
         String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
         String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
         caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-            .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
+            .region(regionId).baseLocation(baseLocationId).regionName(regionName)
             .baseLocationName(baseLocationName).build());
 
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
