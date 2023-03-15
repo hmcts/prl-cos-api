@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -74,6 +75,8 @@ public class HearingDataService {
 
     @Autowired
     HearingRequestDataMapper hearingRequestDataMapper;
+
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public HearingDataPrePopulatedDynamicLists populateHearingDynamicLists(String authorisation, String caseReferenceNumber, CaseData caseData) {
         Map<String, List<DynamicListElement>> hearingChannelsDetails = prePopulateHearingChannel(authorisation);
@@ -127,7 +130,7 @@ public class HearingDataService {
     private DynamicListElement displayEntry(HearingDaySchedule hearingDaySchedule) {
         LocalDateTime hearingStartDateTime = hearingDaySchedule.getHearingStartDateTime();
         return DynamicListElement.builder().code(String.valueOf(hearingStartDateTime)).label(String.valueOf(
-            hearingStartDateTime)).build();
+            hearingStartDateTime.format(dateTimeFormatter))).build();
     }
 
 
