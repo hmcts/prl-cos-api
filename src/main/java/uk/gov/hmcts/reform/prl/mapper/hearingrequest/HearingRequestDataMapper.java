@@ -21,10 +21,10 @@ public class HearingRequestDataMapper {
 
     public void mapHearingData(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
         log.info("Inside Request mapper hearing data****hearingDataPrePopulatedDynamicLists  {}", hearingDataPrePopulatedDynamicLists);
-        if (ofNullable(hearingDataPrePopulatedDynamicLists).isEmpty() && HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
+        /*if (ofNullable(hearingDataPrePopulatedDynamicLists).isEmpty() && HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
             .equals(ofNullable(hearingData.getHearingDateConfirmOptionEnum()).get())) {
             hearingData = setEmptyUnnecessaryValues(hearingData);
-        }
+        }*/
 
         boolean isHearingDynamicListItemsNullifyReq = (null != hearingDataPrePopulatedDynamicLists) ? false  : true;
         mapHearingTypesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
