@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -98,7 +97,6 @@ public class LocationRefDataServiceTest {
                                                      .courtEpimmsId("2")
                                                      .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
                             .build());
-        String actual = locationRefDataService.getCourtDetailsFromEpimmsId("2", "test");
-        assertEquals("2-id-1-123-test-test", actual);
+        assertTrue(locationRefDataService.getCourtDetailsFromEpimmsId("2", "test").isPresent());
     }
 }

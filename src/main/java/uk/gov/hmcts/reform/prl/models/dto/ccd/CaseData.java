@@ -130,6 +130,8 @@ public class CaseData implements MappableObject {
 
     private final String caseSubmittedTimeStamp;
 
+    private String courtSeal;
+
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;
 

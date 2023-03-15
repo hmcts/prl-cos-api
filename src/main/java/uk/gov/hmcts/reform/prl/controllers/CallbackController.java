@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.launchdarkly.shaded.com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -46,6 +47,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
@@ -75,7 +77,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -233,6 +234,7 @@ public class CallbackController {
         }
         log.info("       ------------********--------------      ");
         List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
+        log.info("Found court list for case  {}", new Gson().toJson(courtList));
         caseDataUpdated.put("courtList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
             .build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -327,16 +329,18 @@ public class CallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String baseLocationId = caseData.getCourtList().getValue().getCode();
-        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,authorisation).split("-");
-        String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
-        String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
-        caseDataUpdated.put(COURT_NAME_FIELD, courtName);
-        caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
-        String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
-        String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
-        caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-            .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
-            .baseLocationName(baseLocationName).build());
+        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
+        if (courtVenue.isPresent()) {
+            String regionId = courtVenue.get().getRegionId();
+            String courtName = courtVenue.get().getCourtName();
+            String regionName = courtVenue.get().getRegion();
+            String baseLocationName = courtVenue.get().getSiteName();
+            caseDataUpdated.put(COURT_NAME_FIELD, courtName);
+            caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
+            caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
+                    .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
+                    .baseLocationName(baseLocationName).build());
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
