@@ -103,11 +103,13 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
+        log.info("Before Serialization {}**", callbackRequest.getCaseDetails().getData());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("After Serialization {}**", caseData);
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
