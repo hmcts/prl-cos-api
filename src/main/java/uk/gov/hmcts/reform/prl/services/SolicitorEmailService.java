@@ -84,7 +84,6 @@ public class SolicitorEmailService {
 
 
     public void sendEmail(CaseDetails caseDetails) {
-        log.info("calling from solicitor");
         CaseData caseData = emailService.getCaseData(caseDetails);
         String applicantSolicitorEmailAddress = caseDetails.getData()
             .get(PrlAppsConstants.APPLICANT_SOLICITOR_EMAIL_ADDRESS).toString();
@@ -92,7 +91,7 @@ public class SolicitorEmailService {
             applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
-            LanguagePreference.welsh
+            LanguagePreference.getLanguagePreference(caseData)
         );
 
     }

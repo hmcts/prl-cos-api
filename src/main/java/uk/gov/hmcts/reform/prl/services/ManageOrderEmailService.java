@@ -56,7 +56,6 @@ public class ManageOrderEmailService {
 
 
     public void sendEmail(CaseDetails caseDetails) {
-        log.info("calling from manage order service");
         List<String> emailList = new ArrayList<>();
 
         CaseData caseData = emailService.getCaseData(caseDetails);
@@ -67,7 +66,7 @@ public class ManageOrderEmailService {
             email,
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
-            LanguagePreference.welsh
+            LanguagePreference.getLanguagePreference(caseData)
         ));
 
     }

@@ -64,7 +64,6 @@ public class EmailService {
     }
 
     private String getTemplateId(EmailTemplateNames templateName, LanguagePreference languagePreference) {
-        System.out.println(emailTemplatesConfig.getTemplates() + "template name" + templateName + " language pref" + languagePreference);
         return emailTemplatesConfig.getTemplates().get(languagePreference).get(templateName);
     }
 
