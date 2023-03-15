@@ -33,7 +33,7 @@ public class HearingData {
 
     private DynamicList confirmedHearingDates;
 
-    private final DynamicList hearingChannels;
+    private DynamicList hearingChannels;
 
     private DynamicList hearingVideoChannels;
 
@@ -43,7 +43,7 @@ public class HearingData {
 
     private DynamicList localAuthorityHearingChannel;
 
-    private final DynamicList hearingListedLinkedCases;
+    private DynamicList hearingListedLinkedCases;
 
     private DynamicList applicantSolicitorHearingChannel;
 
