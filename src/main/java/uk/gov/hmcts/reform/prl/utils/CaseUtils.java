@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
@@ -11,7 +12,18 @@ import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLOSED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
+
+@Slf4j
 public class CaseUtils {
 
     private CaseUtils() {
@@ -48,4 +60,20 @@ public class CaseUtils {
         }
         return noOfDaysRemaining;
     }
+
+    public static boolean getPreviousState(String eachState) {
+        return (!WITHDRAWN_STATE.equalsIgnoreCase(eachState)
+            && (!DRAFT_STATE.equalsIgnoreCase(eachState))
+            && (!RETURN_STATE.equalsIgnoreCase(eachState))
+            && (!PENDING_STATE.equalsIgnoreCase(eachState))
+            && (!SUBMITTED_STATE.equalsIgnoreCase(eachState)))
+            || ISSUED_STATE.equalsIgnoreCase(eachState)
+            || GATEKEEPING_STATE.equalsIgnoreCase(eachState);
+    }
+
+    public static List<String> WITHDRAW_STATE_LIST = List.of(DRAFT_STATE,
+                                                 RETURN_STATE,
+                                                 CLOSED_STATE,
+                                                 PENDING_STATE,
+                                                 SUBMITTED_STATE);
 }

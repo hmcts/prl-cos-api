@@ -180,4 +180,27 @@ public class CaseController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+    @PostMapping(value = "{caseId}/withdraw", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Withdraw a case submitted by citizen")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "success"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public CaseData withdrawCase(
+        @Valid @NotNull @RequestBody CaseData caseData,
+        @PathVariable("caseId") String caseId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        CaseDetails caseDetails = null;
+        if (isAuthorized(authorisation, s2sToken)) {
+            caseDetails = caseService.withdrawCase(caseData, caseId, authorisation);
+            return CaseUtils.getCaseData(caseDetails, objectMapper);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
 }
