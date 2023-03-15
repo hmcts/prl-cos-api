@@ -66,7 +66,7 @@ public class C100IssueCaseController {
             String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
             String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-                .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
+                .region(regionId).baseLocation(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
             caseData = caseData.toBuilder().issueDate(LocalDate.now()).courtName(courtName).build();
         }
