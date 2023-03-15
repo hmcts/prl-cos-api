@@ -128,7 +128,7 @@ public class HearingsManagementController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/update-allTabs-after-hmc-case-state", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/update-allTabs-after-hmc-case-state/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to refresh the tabs after HMC case state update")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse updateAllTabsAfterHmcCaseState(
