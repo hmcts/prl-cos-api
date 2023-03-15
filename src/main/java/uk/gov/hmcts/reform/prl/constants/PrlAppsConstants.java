@@ -52,6 +52,7 @@ public class PrlAppsConstants {
     public static final String C7_FINAL_WELSH = "c7FinalWelsh";
 
     public static final String COURT_NAME_FIELD = "courtName";
+    public static final String COURT_SEAL_FIELD = "courtSeal";
     public static final String COURT_ID_FIELD = "courtId";
     public static final String COURT_EMAIL_ADDRESS_FIELD = "courtEmailAddress";
     public static final String FINAL_DOCUMENT_FIELD = "finalDocument";

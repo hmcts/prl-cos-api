@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
@@ -52,6 +54,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -127,6 +130,9 @@ public class C100IssueCaseControllerTest {
     @Mock
     LocationRefDataService locationRefDataService;
 
+    @Mock
+    CourtSealFinderService courtSealFinderService;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     private static final Map<String, Object> c100DraftMap = new HashMap<>();
@@ -166,7 +172,7 @@ public class C100IssueCaseControllerTest {
         fl401DocsMap.put(DOCUMENT_FIELD_C8_WELSH, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(),Mockito.anyString()))
-            .thenReturn("test-test-test-test-test-test");
+            .thenReturn(Optional.of(CourtVenue.builder().build()));
     }
 
     @Test
