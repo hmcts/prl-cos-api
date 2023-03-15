@@ -48,4 +48,9 @@ public class CaseUtils {
         }
         return noOfDaysRemaining;
     }
+
+    public static String getCaseTypeOfApplication(CaseData caseData) {
+        return caseData.getCaseTypeOfApplication() != null
+            ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
+    }
 }
