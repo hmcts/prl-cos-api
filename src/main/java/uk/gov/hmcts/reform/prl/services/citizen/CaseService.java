@@ -54,6 +54,7 @@ public class CaseService {
 
     public static final String LINK_CASE = "linkCase";
     public static final String CITIZEN_INTERNAL_CASE_UPDATE = "citizen-internal-case-update";
+    public static final String INVALID = "Invalid";
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
 
@@ -232,11 +233,17 @@ public class CaseService {
             coreCaseDataApi.getCase(authorisation, s2sToken, caseId).getData(),
             CaseData.class
         );
+        if (null == caseData) {
+            return INVALID;
+        }
         return findAccessCodeStatus(accessCode, caseData);
     }
 
     private String findAccessCodeStatus(String accessCode, CaseData caseData) {
-        String accessCodeStatus = "Invalid";
+        String accessCodeStatus = INVALID;
+        if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()) {
+            return accessCodeStatus;
+        }
         List<CaseInvite> matchingCaseInvite = caseData.getCaseInvites()
             .stream()
             .map(Element::getValue)
