@@ -753,4 +753,6 @@ public class CaseData implements MappableObject {
     @JsonProperty("cafcassUploadedDocs")
     private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
 
+    private NextHearingDetails nextHearingDetails;
+
 }
