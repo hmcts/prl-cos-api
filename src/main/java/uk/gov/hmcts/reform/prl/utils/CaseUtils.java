@@ -61,6 +61,11 @@ public class CaseUtils {
         return noOfDaysRemaining;
     }
 
+    public static String getCaseTypeOfApplication(CaseData caseData) {
+        return caseData.getCaseTypeOfApplication() != null
+            ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
+    }
+
     public static boolean getPreviousState(String eachState) {
         return (!WITHDRAWN_STATE.equalsIgnoreCase(eachState)
             && (!DRAFT_STATE.equalsIgnoreCase(eachState))
