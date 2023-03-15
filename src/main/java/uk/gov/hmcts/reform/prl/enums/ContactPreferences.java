@@ -13,9 +13,9 @@ import java.util.Arrays;
 public enum ContactPreferences {
 
     @JsonProperty("digital")
-    digital("digital", "Digital"),
+    digital("digital", "digital"),
     @JsonProperty("post")
-    post("post", "Post");
+    post("post", "post");
 
     private final String id;
     private final String displayedValue;
