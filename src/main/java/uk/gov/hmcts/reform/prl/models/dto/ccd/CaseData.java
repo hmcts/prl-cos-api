@@ -134,6 +134,7 @@ public class CaseData implements MappableObject {
     /**
      * Case Type Of Application.
      */
+    @JsonProperty("caseTypeOfApplication")
     private final String caseTypeOfApplication;
 
     /**

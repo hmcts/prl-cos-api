@@ -326,7 +326,8 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        String baseLocationId = caseData.getCourtList().getValue().getCode();
+        String[] idEmail = caseData.getCourtList().getValue().getCode().split(":");
+        String baseLocationId = Arrays.stream(idEmail).toArray()[0].toString();
         String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,authorisation).split("-");
         String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
         String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
@@ -402,8 +403,20 @@ public class CallbackController {
     private void sendWithdrawEmails(CaseData caseData, UserDetails userDetails, CaseDetails caseDetails) {
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
+            Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
+            if (localCourtAdmin.isPresent()) {
+                Optional<LocalCourtAdminEmail> localCourtAdminEmail = localCourtAdmin.get().stream().map(Element::getValue)
+                    .findFirst();
+                if (localCourtAdminEmail.isPresent()) {
+                    String email = localCourtAdminEmail.get().getEmail();
+                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
+                }
+            }
         } else {
             solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
+            caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(
+                caseDetails,
+                caseData.getCourtEmailAddress());
         }
     }
 
