@@ -57,6 +57,7 @@ public class DraftOrder {
     private final String orderDirections;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
+    private final String addFurtherInformationIfThisIsRequired;
     private final String parentName;
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
     private final String manageOrdersFl402CourtName;
