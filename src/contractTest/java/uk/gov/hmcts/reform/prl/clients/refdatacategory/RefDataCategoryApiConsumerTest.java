@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.hmcts.reform.prl.clients.cafcass.HmcHearingRefDataApi;
+import uk.gov.hmcts.reform.prl.clients.cafcass.ReferenceDataApi;
 import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.refdata.Categories;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
@@ -26,14 +26,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @PactFolder("pacts")
 @ExtendWith(SpringExtension.class)
 @PactTestFor(providerName = "referenceDataCategoryApi", port = "8894")
-@TestPropertySource(properties = {"hearing.api.url=localhost:8894", "idam.api.url=localhost:5000"})
+@TestPropertySource(properties = {"refdata.api.url=localhost:8894", "idam.api.url=localhost:5000"})
 @ContextConfiguration(
         classes = {RefDataCategoryApiConsumerApplication.class, IdamApiConsumerApplication.class})
 public class RefDataCategoryApiConsumerTest {
 
     private final String response = "response/RefDataCategoryResponse.json";
 
-    @Autowired private HmcHearingRefDataApi hearingRefDataApi;
+    @Autowired private ReferenceDataApi hearingRefDataApi;
 
 
     static final String AUTHORIZATION_HEADER = "Authorization";
