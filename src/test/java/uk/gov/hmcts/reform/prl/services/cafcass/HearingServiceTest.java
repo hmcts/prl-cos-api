@@ -89,7 +89,7 @@ public class HearingServiceTest {
         hearings.setCaseRef("caseReference");
         hearings.setCaseHearings(caseHearings);
 
-        ReflectionTestUtils.setField(hearingService, "hearingStatus", "LISTED");
+        ReflectionTestUtils.setField(hearingService, "hearingStatusList", List.of("LISTED"));
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(hearingApiClient.getHearingDetails(authToken, authTokenGenerator.generate(),caseReferenceNumber)).thenReturn(hearings);
         Hearings response =
@@ -105,7 +105,7 @@ public class HearingServiceTest {
         final List<CaseHearing> caseHearings = new ArrayList();
 
         final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
-                .hmcStatus("LISTED").hearingType("ABA5-APL").hearingTypeValue("Appeal").hearingDaySchedule(
+                .hmcStatus("EXCEPTION").hearingType("ABA5-APL").hearingTypeValue("Appeal").hearingDaySchedule(
                 List.of(
                     HearingDaySchedule.hearingDayScheduleWith().hearingVenueName("BRENTFORD COUNTY COURT AND FAMILY COURT")
                             .hearingStartDateTime(LocalDateTime.parse("2023-01-24T13:00:00")).hearingEndDateTime(LocalDateTime.parse(
@@ -117,6 +117,7 @@ public class HearingServiceTest {
         hearings.setCaseRef("caseReference");
         hearings.setCaseHearings(caseHearings);
 
+        ReflectionTestUtils.setField(hearingService, "hearingStatusList", List.of("LISTED"));
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(hearingApiClient.getHearingDetails(authToken, authTokenGenerator.generate(),caseReferenceNumber)).thenReturn(hearings);
         Hearings response =
