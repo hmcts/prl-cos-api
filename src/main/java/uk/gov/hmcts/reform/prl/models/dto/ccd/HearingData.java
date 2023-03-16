@@ -46,10 +46,27 @@ public class HearingData {
     private final DynamicList hearingListedLinkedCases;
 
     private final DynamicList applicantSolicitorHearingChannel;
+    private final DynamicList applicantSolicitorHearingChannel1;
+    private final DynamicList applicantSolicitorHearingChannel2;
+    private final DynamicList applicantSolicitorHearingChannel3;
+    private final DynamicList applicantSolicitorHearingChannel4;
+    private final DynamicList applicantSolicitorHearingChannel5;
+
 
     private final DynamicList respondentHearingChannel;
+    private final DynamicList respondentHearingChannel1;
+    private final DynamicList respondentHearingChannel2;
+    private final DynamicList respondentHearingChannel3;
+    private final DynamicList respondentHearingChannel4;
+    private final DynamicList respondentHearingChannel5;
 
     private final DynamicList respondentSolicitorHearingChannel;
+    private final DynamicList respondentSolicitorHearingChannel1;
+    private final DynamicList respondentSolicitorHearingChannel2;
+    private final DynamicList respondentSolicitorHearingChannel3;
+    private final DynamicList respondentSolicitorHearingChannel4;
+    private final DynamicList respondentSolicitorHearingChannel5;
+
 
     private final DynamicList cafcassHearingChannel;
 
