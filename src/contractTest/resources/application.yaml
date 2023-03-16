@@ -400,7 +400,7 @@ ccd:
     result-size: 100
     boost: 2.0
 
-hearing:
+refdata:
   api:
-    url: ${HEARING_API_REFDATA_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
+    url: ${REFDATA_API_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
   cateogry-id: HearingType

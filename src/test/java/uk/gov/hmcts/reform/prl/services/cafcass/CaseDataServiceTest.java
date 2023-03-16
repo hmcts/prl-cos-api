@@ -25,8 +25,10 @@ import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -57,6 +59,9 @@ public class CaseDataServiceTest {
 
     @Mock
     SystemUserService systemUserService;
+
+    @Mock
+    private RefDataService refDataService;
 
     @BeforeEach
     public void setUp() {
@@ -99,6 +104,10 @@ public class CaseDataServiceTest {
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");
         ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+
+        Map<String, String> refDataMap = new HashMap<>();
+        refDataMap.put("ABA5-APL","Appeal");
+        when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString())).thenReturn(refDataMap);
 
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
                                                                           "start", "end"

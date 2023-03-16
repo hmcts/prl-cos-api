@@ -7,14 +7,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.cafcass.HearingApiClient;
-import uk.gov.hmcts.reform.prl.clients.cafcass.HmcHearingRefDataApi;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
-import uk.gov.hmcts.reform.prl.models.cafcass.hearing.refdata.Categories;
-import uk.gov.hmcts.reform.prl.models.cafcass.hearing.refdata.Category;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -26,18 +22,11 @@ public class HearingService {
     @Value("#{'${cafcaas.hearingStatus}'.split(',')}")
     private List<String> hearingStatusList;
 
-    @Value("${hearing.cateogry-id}")
-    private String categoryId;
-
     private Hearings hearingDetails;
 
     private final AuthTokenGenerator authTokenGenerator;
 
     private final HearingApiClient hearingApiClient;
-
-    @Autowired
-    private final HmcHearingRefDataApi hearingRefDataApi;
-
 
     public Hearings getHearings(String userToken, String caseReferenceNumber) {
         try {
@@ -76,21 +65,4 @@ public class HearingService {
             }
         }
     }
-
-
-    public Map<String, String>  getRefDataCategoryValueMap(
-        String authorization, String serviceAuthorization, String serviceCode) {
-        // Call hearing api to get hmc status value
-        final Categories categoriesByCategoryId =
-            hearingRefDataApi.retrieveListOfValuesByCategoryId(
-                authorization,
-                serviceAuthorization,
-                categoryId,
-                serviceCode
-            );
-
-        return categoriesByCategoryId.getListOfCategory().stream()
-            .collect(Collectors.toMap(Category::getKey, Category::getValueEn));
-    }
-
 }
