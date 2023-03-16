@@ -124,7 +124,7 @@ public class HearingDataService {
         }
         //TODO: need to ensure this hardcoded values has to be removed while merging into release branch. Its added to test in preview/aat environment
         return List.of(DynamicListElement.builder().code(String.valueOf("2023-04-13T09:00")).label(String.valueOf(
-            "2023-04-13T09:00")).build());
+            LocalDateTime.parse("2023-04-13T09:00").format(dateTimeFormatter))).build());
     }
 
     private DynamicListElement displayEntry(HearingDaySchedule hearingDaySchedule) {
