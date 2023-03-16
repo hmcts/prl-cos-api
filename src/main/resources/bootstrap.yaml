@@ -40,3 +40,4 @@ spring:
         prl.citizen-password: IDAM_CITIZEN_PASSWORD
         prl-citizen-frontend-idam-client-secret: CITIZEN_IDAM_CLIENT_SECRET
         prl.filtered-court-ids: COURT_IDS_TO_FILTER
+        prl.da-filtered-court-ids: DA_COURT_IDS_TO_FILTER
