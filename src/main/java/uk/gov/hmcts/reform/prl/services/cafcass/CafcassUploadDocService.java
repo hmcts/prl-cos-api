@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +59,12 @@ public class CafcassUploadDocService {
             }
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
+            try {
+                log.info("case data for cafcass ---> {}", objectMapper.writeValueAsString(caseData));
+            } catch (JsonProcessingException e) {
+                log.error("error while logging case data for cafcass");
+                e.printStackTrace();
+            }
 
             // upload document
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
