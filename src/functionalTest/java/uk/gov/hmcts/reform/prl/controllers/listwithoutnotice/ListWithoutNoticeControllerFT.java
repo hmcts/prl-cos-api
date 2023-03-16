@@ -17,7 +17,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
-
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -28,9 +27,14 @@ public class ListWithoutNoticeControllerFT {
     ObjectMapper objectMapper;
 
     private static final String LIST_WITHOUT_NOTICE_VALID_REQUEST_BODY = "requests/listwithoutnotice/ListWithoutNotice1.json";
+    private static final String dateConfirmedInHearingsTab = "requests/listwithoutnotice/ListWithoutNoticeWithdateConfirmedInHearingsTab.json";
 
     private static final String LIST_WITHOUT_NOTICE_VALID_REQUEST_BODY2 = "requests/listwithoutnotice/PrePopulateHearingWithExstingRequest.json";
-    private static final String LIST_WITHOUT_NOTICE_VALID_REQUEST_BODY3 = "requests/listwithoutnotice/ListWithoutNotice2.json";
+    private static final String dateReservedWithListAssit = "requests/listwithoutnotice/dateReservedWithListAssit.json";
+
+    private static final String dateConfirmedByListingTeam = "requests/listwithoutnotice/dateConfirmedByListingTeam.json";
+    private static final String dateToBeFixed = "requests/listwithoutnotice/dateToBeFixed.json";
+
     private final String prePopulateHearingPageEndpoint = "/pre-populate-hearingPage-Data";
 
     private final String listWithoutNoticeEndpoint = "/listWithoutNotice";
@@ -59,30 +63,26 @@ public class ListWithoutNoticeControllerFT {
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
         Assert.assertNotNull(res.getData());
-        Assert.assertTrue(res.getData().containsValue("listWithoutNoticeHearingDetails"));
+        Assert.assertTrue(res.getData().containsKey("listWithoutNoticeHearingDetails"));
     }
 
     @Test
-    public void testPrePopulateHearingPageEndpoint_200ResponseAndNoErrors() throws Exception {
-        String requestBody = ResourceLoader.loadJson(LIST_WITHOUT_NOTICE_VALID_REQUEST_BODY2);
+    public void testDateConfirmedInHearingsTab_200ResponseAndNoErrors() throws Exception {
+        String requestBody = ResourceLoader.loadJson(dateConfirmedInHearingsTab);
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,userToken)
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post(prePopulateHearingPageEndpoint);
+            .post(listWithoutNoticeEndpoint);
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(res.getData());
-        Assert.assertTrue(res.getData().containsKey("applicantName"));
-        Assert.assertTrue(res.getData().containsKey("applicantSolicitor"));
-        Assert.assertTrue(res.getData().containsKey("respondentName"));
-        Assert.assertTrue(res.getData().containsKey("courtList"));
+        Assert.assertTrue(res.getData().containsKey("listWithoutNoticeHearingDetails"));
     }
 
     @Test
-    public void testPrePopulateHearingPageWithExstingData_200ResponseAndNoErrors() throws Exception {
+    public void testPrePopulateHearingPageWithExstingData1_200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(LIST_WITHOUT_NOTICE_VALID_REQUEST_BODY2);
 
         Response response = request
@@ -97,8 +97,64 @@ public class ListWithoutNoticeControllerFT {
             AboutToStartOrSubmitCallbackResponse.class
         );
         Assert.assertNotNull(res.getData());
-        Assert.assertTrue(res.getData().containsKey("judgeNameAndEmail"));
-        Assert.assertTrue(res.getData().containsKey("hearingJudgeLastName"));
-        Assert.assertTrue(res.getData().containsKey("hearingJudgePersonalCode"));
+        Assert.assertTrue(res.getData().containsKey("listWithoutNoticeHearingDetails"));
+    }
+
+    @Test
+    public void testDateReservedWithListAssit_200ResponseAndNoErrors() throws Exception {
+        String requestBody = ResourceLoader.loadJson(dateReservedWithListAssit);
+
+        Response response = request
+            .header(HttpHeaders.AUTHORIZATION,userToken)
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post(prePopulateHearingPageEndpoint);
+        response.then().assertThat().statusCode(200);
+        AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(
+            response.getBody().asString(),
+            AboutToStartOrSubmitCallbackResponse.class
+        );
+        Assert.assertNotNull(res.getData());
+        Assert.assertTrue(res.getData().containsKey("listWithoutNoticeHearingDetails"));
+    }
+
+
+    @Test
+    public void testDateConfirmedByListingTeam_200ResponseAndNoErrors() throws Exception {
+        String requestBody = ResourceLoader.loadJson(dateConfirmedByListingTeam);
+
+        Response response = request
+            .header(HttpHeaders.AUTHORIZATION,userToken)
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post(prePopulateHearingPageEndpoint);
+        response.then().assertThat().statusCode(200);
+        AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(
+            response.getBody().asString(),
+            AboutToStartOrSubmitCallbackResponse.class
+        );
+        Assert.assertNotNull(res.getData());
+        Assert.assertTrue(res.getData().containsKey("listWithoutNoticeHearingDetails"));
+    }
+
+    @Test
+    public void testdateToBeFixed_200ResponseAndNoErrors() throws Exception {
+        String requestBody = ResourceLoader.loadJson(dateToBeFixed);
+
+        Response response = request
+            .header(HttpHeaders.AUTHORIZATION,userToken)
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post(prePopulateHearingPageEndpoint);
+        response.then().assertThat().statusCode(200);
+        AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(
+            response.getBody().asString(),
+            AboutToStartOrSubmitCallbackResponse.class
+        );
+        Assert.assertNotNull(res.getData());
+        Assert.assertTrue(res.getData().containsKey("listWithoutNoticeHearingDetails"));
     }
 }
