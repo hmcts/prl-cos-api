@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -80,7 +81,8 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
             authorisation,
             callbackRequest
         )).build();
@@ -119,8 +121,7 @@ public class EditAndApproveDraftOrderController {
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
-        if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType())
-            || CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw.equals(selectedOrder.getOrderType()))
+        if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
         ) {
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
             caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
@@ -155,5 +156,15 @@ public class EditAndApproveDraftOrderController {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(response).build();
         }
+    }
+
+    @PostMapping(path = "/judge-or-admin-edit-approve/serve-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to amend order mid-event")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse editAndServeOrderMidEvent(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.checkOnlyC47aOrderSelectedToServe(
+            callbackRequest)).build();
     }
 }

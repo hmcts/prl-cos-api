@@ -131,6 +131,7 @@ public class AmendOrderService {
                                                        String loggedInUserType) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> draftOrderElement = element(getCurrentDraftOrderDetails(caseData,amendedDocument, loggedInUserType));
+        log.info("Draft Order Collection:: {}", draftOrderElement.getValue().getIsOrderUploadedByJudgeOrAdmin());
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(draftOrderElement);
