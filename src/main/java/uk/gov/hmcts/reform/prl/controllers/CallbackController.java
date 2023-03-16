@@ -326,6 +326,7 @@ public class CallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
+        log.info("***CourtList {} ****",courtList);
         caseDataUpdated.put("courtList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
             .build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
