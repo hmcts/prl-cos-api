@@ -180,7 +180,7 @@ public class FL401SubmitApplicationControllerTest {
             .address(Collections.singletonList(CourtAddress.builder().build()))
             .build();
         dynamicList = DynamicList.builder()
-            .value(DynamicListElement.builder().code("reg-base-courtname-postcode-regname-basename").build()).build();
+            .value(DynamicListElement.builder().code("id:email").build()).build();
         when(courtFinderApi.findClosestDomesticAbuseCourtByPostCode(Mockito.anyString()))
             .thenReturn(ServiceArea.builder()
                             .courts(Collections.singletonList(horshamCourt))
@@ -1213,7 +1213,7 @@ public class FL401SubmitApplicationControllerTest {
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         fl401SubmitApplicationController.fl401SendApplicationNotification(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(0))
+        verify(caseWorkerEmailService, times(1))
             .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
         verify(solicitorEmailService, times(1)).sendEmailToFl401Solicitor(
             callbackRequest.getCaseDetails(),
@@ -1251,7 +1251,7 @@ public class FL401SubmitApplicationControllerTest {
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         fl401SubmitApplicationController.fl401SendApplicationNotification(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(0))
+        verify(caseWorkerEmailService, times(1))
             .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
         verify(solicitorEmailService, times(1)).sendEmailToFl401Solicitor(
             callbackRequest.getCaseDetails(),
