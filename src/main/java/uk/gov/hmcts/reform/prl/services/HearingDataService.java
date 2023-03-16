@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
@@ -184,6 +185,8 @@ public class HearingDataService {
 
 
     public HearingData generateHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,CaseData caseData) {
+        List<String> applicantNames  = getApplicantNameList(caseData);
+        int numberOfApplicant = applicantNames.size();
         return HearingData.builder()
             .hearingTypes(hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes())
             .confirmedHearingDates(hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates())
@@ -193,6 +196,11 @@ public class HearingDataService {
             .courtList(hearingDataPrePopulatedDynamicLists.getRetrievedCourtLocations())
             .hearingListedLinkedCases(hearingDataPrePopulatedDynamicLists.getHearingListedLinkedCases())
             .applicantHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantHearingChannel1(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantHearingChannel2(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantHearingChannel3(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantHearingChannel4(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantHearingChannel5(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             .applicantSolicitorHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             .respondentHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             .respondentSolicitorHearingChannel(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
@@ -202,6 +210,11 @@ public class HearingDataService {
             .localAuthorityHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             //We need to handle c100 details here ternary condition
             .applicantName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getApplicantName() : "")
+            .applicantName1(0 < numberOfApplicant ? applicantNames.get(0) : "")
+            .applicantName2(1 < numberOfApplicant ? applicantNames.get(1) : "")
+            .applicantName3(2 < numberOfApplicant ? applicantNames.get(2) : "")
+            .applicantName4(3 < numberOfApplicant ? applicantNames.get(3) : "")
+            .applicantName5(4 < numberOfApplicant ? applicantNames.get(4) : "")
             .applicantSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                                     ? caseData.getApplicantsFL401().getRepresentativeFirstName()
                 + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "")
@@ -242,6 +255,15 @@ public class HearingDataService {
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY)
             .listItems(listItems).build();
+    }
+
+
+    private List<String> getApplicantNameList(CaseData caseData) {
+        return caseData.getApplicants().stream()
+            .map(Element::getValue)
+            .map(PartyDetails::getLabelForDynamicList)
+            .collect(Collectors.toList());
+
     }
 
 }
