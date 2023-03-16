@@ -114,8 +114,23 @@ public class HearingData {
     private final String applicantName4;
     private final String applicantName5;
     private final String applicantSolicitor;
+    private final String applicantSolicitor1;
+    private final String applicantSolicitor2;
+    private final String applicantSolicitor3;
+    private final String applicantSolicitor4;
+    private final String applicantSolicitor5;
     private final String respondentName;
+    private final String respondentName1;
+    private final String respondentName2;
+    private final String respondentName3;
+    private final String respondentName4;
+    private final String respondentName5;
     private final String respondentSolicitor;
+    private final String respondentSolicitor1;
+    private final String respondentSolicitor2;
+    private final String respondentSolicitor3;
+    private final String respondentSolicitor4;
+    private final String respondentSolicitor5;
 
     @JsonProperty("hearingSpecificDatesOptionsEnum")
     private HearingSpecificDatesOptionsEnum hearingSpecificDatesOptionsEnum;

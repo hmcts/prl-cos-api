@@ -186,7 +186,13 @@ public class HearingDataService {
 
     public HearingData generateHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,CaseData caseData) {
         List<String> applicantNames  = getApplicantNameList(caseData);
+        List<String> respondentNames = getRespondentNameList(caseData);
+        List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData);
+        List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData);
         int numberOfApplicant = applicantNames.size();
+        int numberOfRespondents = respondentNames.size();
+        int numberOfApplicantSolicitors = applicantSolicitorNames.size();
+        int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
         return HearingData.builder()
             .hearingTypes(hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes())
             .confirmedHearingDates(hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates())
@@ -218,8 +224,23 @@ public class HearingDataService {
             .applicantSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                                     ? caseData.getApplicantsFL401().getRepresentativeFirstName()
                 + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "")
+            .applicantSolicitor1(0 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(0) : "")
+            .applicantSolicitor2(1 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(1) : "")
+            .applicantSolicitor3(2 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(2) : "")
+            .applicantSolicitor4(3 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(3) : "")
+            .applicantSolicitor5(4 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(4) : "")
             .respondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "")
+            .respondentName1(0 < numberOfRespondents ? respondentNames.get(0) : "")
+            .respondentName2(1 < numberOfRespondents ? respondentNames.get(1) : "")
+            .respondentName3(2 < numberOfRespondents ? respondentNames.get(2) : "")
+            .respondentName4(3 < numberOfRespondents ? respondentNames.get(3) : "")
+            .respondentName5(4 < numberOfRespondents ? respondentNames.get(4) : "")
             .respondentSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? "" : "")
+            .respondentSolicitor1(0 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(0) : "")
+            .respondentSolicitor2(1 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(1) : "")
+            .respondentSolicitor3(2 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(2) : "")
+            .respondentSolicitor4(3 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(3) : "")
+            .respondentSolicitor5(4 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(4) : "")
             .fillingFormRenderingInfo(CommonUtils.renderCollapsible())
             .build();
     }
@@ -262,6 +283,30 @@ public class HearingDataService {
         return caseData.getApplicants().stream()
             .map(Element::getValue)
             .map(PartyDetails::getLabelForDynamicList)
+            .collect(Collectors.toList());
+
+    }
+
+    private List<String> getRespondentNameList(CaseData caseData) {
+        return caseData.getRespondents().stream()
+            .map(Element::getValue)
+            .map(PartyDetails::getLabelForDynamicList)
+            .collect(Collectors.toList());
+
+    }
+
+    private List<String> getApplicantSolicitorNameList(CaseData caseData) {
+        return caseData.getApplicants().stream()
+            .map(Element::getValue)
+            .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+            .collect(Collectors.toList());
+
+    }
+
+    private List<String> getRespondentSolicitorNameList(CaseData caseData) {
+        return caseData.getRespondents().stream()
+            .map(Element::getValue)
+            .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
             .collect(Collectors.toList());
 
     }
