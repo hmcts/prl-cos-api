@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
-import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Slf4j
@@ -20,11 +19,6 @@ public class HearingRequestDataMapper {
 
     public void mapHearingData(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
         log.info("Inside Request mapper hearing data****hearingDataPrePopulatedDynamicLists  {}", hearingDataPrePopulatedDynamicLists);
-        /*if (ofNullable(hearingDataPrePopulatedDynamicLists).isEmpty() && HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
-            .equals(ofNullable(hearingData.getHearingDateConfirmOptionEnum()).get())) {
-            hearingData = setEmptyUnnecessaryValues(hearingData);
-        }*/
-
         boolean isHearingDynamicListItemsNullifyReq = (null != hearingDataPrePopulatedDynamicLists) ? false  : true;
         mapHearingTypesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
         mapConfirmedHearingDatesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
@@ -106,18 +100,6 @@ public class HearingRequestDataMapper {
             mapDynamicListItems(hearingData.getCourtList(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedCourtLocations());
         }
-    }
-
-
-    private void mapOtherPartyHearingChannelsMapping(HearingData hearingData, DynamicList retrievedHearingChannels) {
-        mapDynamicListItems(hearingData.getApplicantHearingChannel(),retrievedHearingChannels);
-        mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel(),retrievedHearingChannels);
-        mapDynamicListItems(hearingData.getRespondentHearingChannel(),retrievedHearingChannels);
-        mapDynamicListItems(hearingData.getRespondentSolicitorHearingChannel(),retrievedHearingChannels);
-        mapDynamicListItems(hearingData.getCafcassHearingChannel(),retrievedHearingChannels);
-        mapDynamicListItems(hearingData.getCafcassHearingChannel(),retrievedHearingChannels);
-        mapDynamicListItems(hearingData.getCafcassCymruHearingChannel(),retrievedHearingChannels);
-        mapDynamicListItems(hearingData.getLocalAuthorityHearingChannel(),retrievedHearingChannels);
     }
 
     private void mapDynamicListItems(DynamicList existingHearingDynamicList, DynamicList requiredHearingDynamicList) {
@@ -253,34 +235,4 @@ public class HearingRequestDataMapper {
         }
     }
 
-    public HearingData setEmptyUnnecessaryValues(HearingData hearingData) {
-        log.info("setEmptyUnnecessaryValues() before: {}",hearingData);
-        HearingData hearingDataTemp = HearingData.builder()
-                .hearingTypes(hearingData.getHearingTypes())
-                .hearingDateConfirmOptionEnum(hearingData.getHearingDateConfirmOptionEnum())
-                .confirmedHearingDates(hearingData.getConfirmedHearingDates())
-                .additionalHearingDetails(ofNullable(hearingData.getAdditionalHearingDetails()).orElse(""))
-                .instructionsForRemoteHearing(ofNullable(hearingData.getInstructionsForRemoteHearing()).orElse(""))
-                //.hearingChannels(hearingData.getHearingChannels())
-                //.hearingVideoChannels(hearingData.getHearingVideoChannels())
-                //.hearingTelephoneChannels(hearingData.getHearingTelephoneChannels())
-                //.courtList(hearingData.getCourtList())
-                //.localAuthorityHearingChannel(hearingData.getLocalAuthorityHearingChannel())
-                //.hearingListedLinkedCases(hearingData.getHearingListedLinkedCases())
-                //.applicantSolicitorHearingChannel(hearingData.getApplicantSolicitorHearingChannel())
-                //.respondentHearingChannel(hearingData.getRespondentHearingChannel())
-                //.respondentSolicitorHearingChannel(hearingData.getRespondentSolicitorHearingChannel())
-                //.cafcassHearingChannel(hearingData.getCafcassHearingChannel())
-                //.cafcassCymruHearingChannel(hearingData.getCafcassCymruHearingChannel())
-                //.applicantHearingChannel(hearingData.getApplicantHearingChannel())
-                //.hearingEstimatedDays(0)
-                //.hearingEstimatedMinutes(0)
-                //.hearingMustTakePlaceAtHour(0)
-                .respondentName(hearingData.getRespondentName())
-                .applicantName(hearingData.getApplicantName())
-                .applicantSolicitor(hearingData.getApplicantSolicitor())
-                .build();
-        log.info("setEmptyUnnecessaryValues() after map: {}",hearingDataTemp);
-        return hearingDataTemp;
-    }
 }
