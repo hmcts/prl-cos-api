@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
+@Slf4j
 public class CafcassServiceUtil {
 
     public static boolean checkTypeOfDocument(String typeOfDocument, List<String> allowedTypeOfDocs) {
@@ -30,6 +32,7 @@ public class CafcassServiceUtil {
 
     public static CaseData getCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument,
                                                  CaseData caseData, Document document) {
+        log.info("inside cafcass getCaseDataWithUploadedDocs");
         String partyName = caseData.getApplicantCaseName() != null
             ? caseData.getApplicantCaseName() : "CAFCASS";
         List<Element<UploadedDocuments>> uploadedDocumentsList;
@@ -47,9 +50,12 @@ public class CafcassServiceUtil {
                                              .documentHash(document.hashToken)
                                              .documentFileName(fileName).build()).build());
         if (caseData.getCafcassUploadedDocs() != null) {
+            log.info("Cafcass document already exiting, adding one more");
             uploadedDocumentsList = caseData.getCafcassUploadedDocs();
+            log.info("uploadedDocumentsList size {}",uploadedDocumentsList.size());
             uploadedDocumentsList.add(uploadedDocsElement);
         } else {
+            log.info("Cafcass first docuemnt upload");
             uploadedDocumentsList = new ArrayList<>();
             uploadedDocumentsList.add(uploadedDocsElement);
         }

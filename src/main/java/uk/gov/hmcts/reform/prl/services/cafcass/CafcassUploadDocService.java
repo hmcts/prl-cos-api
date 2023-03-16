@@ -67,7 +67,7 @@ public class CafcassUploadDocService {
                 PrlAppsConstants.JURISDICTION,
                 Arrays.asList(document)
             );
-            log.info("Document uploaded successfully through caseDocumentClient");
+            log.info("Cafcass Document uploaded successfully through caseDocumentClient");
             updateCcdAfterUploadingDocument(authorisation, document, typeOfDocument, caseId, caseData, uploadResponse);
 
         }
@@ -75,6 +75,9 @@ public class CafcassUploadDocService {
 
     private void updateCcdAfterUploadingDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId,
                                                  CaseData tempCaseData, UploadResponse uploadResponse) {
+
+
+        log.info("updated ccd after cafcass document upload");
 
         // get the existing CCD record with all the uploaded documents
         CaseData caseData = getCaseDataWithUploadedDocs(

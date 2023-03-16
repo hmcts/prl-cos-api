@@ -79,7 +79,7 @@ public class CourtNavCaseController {
     }
 
 
-    @PostMapping(path = "{caseId}/document", produces = APPLICATION_JSON_VALUE, consumes = MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(path = "{caseId}/courtnavDocumentUpload", produces = APPLICATION_JSON_VALUE, consumes = MULTIPART_FORM_DATA_VALUE)
     @Operation(description = "Uploading document for a specific case in CCD")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Document is uploaded"),
@@ -108,7 +108,7 @@ public class CourtNavCaseController {
                 log.info("uploading courtNav document");
                 courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
             }
-            return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
+            return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully:--> "
                                                                     + file.getOriginalFilename()));
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
