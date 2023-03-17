@@ -89,6 +89,7 @@ public class CaseDataService {
 
             cafCassFilter.filter(cafCassResponse);
             getHearingDetails(authorisation, cafCassResponse);
+            getHearingDetailsForAllCases(authorisation, cafCassResponse);
             updateHearingResponse(authorisation, authTokenGenerator.generate(), cafCassResponse);
 
         } else {
@@ -136,6 +137,29 @@ public class CaseDataService {
             cafCassCaseDetail.getCaseData().setHearingData(hearingService.getHearings(authorisation,
                                                                                       String.valueOf(cafCassCaseDetail.getId())));
         }
+    }
+
+    private void getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
+
+        List<String> caseIds =
+            cafCassResponse.getCases().stream()
+                .map(
+                    eachCafCassCaseDetail ->
+                        eachCafCassCaseDetail.getId().toString())
+                .collect(Collectors.toList());
+
+        List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(authorisation,caseIds);
+
+        if (!listOfHearingDetails.isEmpty()) {
+            for (CafCassCaseDetail cafCassCaseDetail : cafCassResponse.getCases()) {
+                for (Hearings hearing : listOfHearingDetails) {
+                    if (hearing.getCaseRef().equals(String.valueOf(cafCassCaseDetail.getId()))) {
+                        cafCassCaseDetail.getCaseData().setHearingData(hearing);
+                    }
+                }
+            }
+        }
+
     }
 
     private void updateHearingResponse(String authorisation, String s2sToken, CafCassResponse cafCassResponse) {
