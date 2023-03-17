@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
@@ -45,8 +46,6 @@ public class CaseService {
 
     public static final String LINK_CASE = "linkCase";
     public static final String CITIZEN_INTERNAL_CASE_UPDATE = "citizen-internal-case-update";
-    //C100 default court details
-    public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
 
@@ -97,7 +96,7 @@ public class CaseService {
 
             CaseData updatedCaseData = caseDataMapper
                 .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
-                                          .courtName(C100_DEFAULT_COURT_NAME)
+                                          .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
                                           .build());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
