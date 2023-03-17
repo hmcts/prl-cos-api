@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -83,7 +84,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
@@ -563,9 +563,6 @@ public class CaseData implements MappableObject {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
 
-    @JsonProperty("childOption")
-    private final String childOption;
-
     @JsonProperty("childrenList")
     private final String childrenList;
     @JsonProperty("magistrateLastName")
@@ -588,7 +585,6 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
-
 
     /**
      * Solicitor Details.
@@ -636,7 +632,7 @@ public class CaseData implements MappableObject {
     /**
      * Service Of Application.
      */
-    private OrdersToServeSA serviceOfApplicationScreen1;
+    private DynamicMultiSelectList serviceOfApplicationScreen1;
     private ConfirmRecipients confirmRecipients;
 
     @JsonProperty("citizenUploadedDocumentList")
@@ -698,9 +694,6 @@ public class CaseData implements MappableObject {
     private final RespondentChildAbduction respondentChildAbduction;
     private final RespondentOtherConcerns respondentOtherConcerns;
 
-    @JsonProperty("cafcassUploadedDocs")
-    private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
-
     /** Confirm or Edit your contact details. **/
     private final CitizenDetails resSolConfirmEditContactDetails;
 
@@ -759,4 +752,7 @@ public class CaseData implements MappableObject {
 
     //Added for c100 rebuild
     private Long noOfDaysRemainingToSubmitCase;
+    @JsonProperty("cafcassUploadedDocs")
+    private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
+
 }

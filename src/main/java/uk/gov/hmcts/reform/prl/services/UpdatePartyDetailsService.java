@@ -53,7 +53,6 @@ public class UpdatePartyDetailsService {
                 CommonUtils.generatePartyUuidForFL401(caseData);
                 updatedCaseData.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
                 setFL401ApplicantFlag(updatedCaseData, fl401Applicant);
-
             }
 
             if (Objects.nonNull(fl401respondent)) {
@@ -69,6 +68,7 @@ public class UpdatePartyDetailsService {
                     .stream()
                     .map(Element::getValue)
                     .collect(Collectors.toList());
+
                 PartyDetails applicant1 = applicants.get(0);
                 if (Objects.nonNull(applicant1)) {
                     updatedCaseData.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());

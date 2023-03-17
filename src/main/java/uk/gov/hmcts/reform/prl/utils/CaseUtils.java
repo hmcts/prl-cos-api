@@ -49,8 +49,11 @@ public class CaseUtils {
         return noOfDaysRemaining;
     }
 
-    public static String getCaseTypeOfApplication(CaseData caseData) {
-        return caseData.getCaseTypeOfApplication() != null
-            ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
+    public static String getCaseType(CaseData caseData) {
+        String caseType = caseData.getCaseTypeOfApplication();
+        if (caseType == null) {
+            caseType = caseData.getSelectedCaseTypeID();
+        }
+        return caseType;
     }
 }

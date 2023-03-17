@@ -35,7 +35,7 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
     }
 
     private boolean hasOtherProceedings(CaseData caseData) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (CaseUtils.getCaseType(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
             Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getPreviousOrOngoingProceedingsForChildren());
             Optional<List<Element<ProceedingDetails>>> proceedingsCheck = ofNullable(caseData.getExistingProceedings());
             return proceedingsCheck.isPresent() && (proceedingCheck.isEmpty() || proceedingCheck.get()

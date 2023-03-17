@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfiden
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.Fl401ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class ConfidentialityTabService {
 
         List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
 
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseType(caseData))) {
             List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             if (applicantList.isPresent()) {
