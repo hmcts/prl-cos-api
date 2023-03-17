@@ -56,6 +56,7 @@ import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -77,6 +78,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -91,6 +93,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_STATE;
@@ -130,6 +133,7 @@ public class CallbackController {
     private final LocationRefDataService locationRefDataService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
     private final PaymentRequestService paymentRequestService;
+    private final CourtSealFinderService courtSealFinderService;
 
     private final ConfidentialityTabService confidentialityTabService;
 
@@ -328,18 +332,20 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        String baseLocationId = caseData.getCourtList().getValue().getCode();
+        String[] idEmail = caseData.getCourtList().getValue().getCode().split(":");
+        String baseLocationId = Arrays.stream(idEmail).toArray()[0].toString();
         Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
         if (courtVenue.isPresent()) {
             String regionId = courtVenue.get().getRegionId();
             String courtName = courtVenue.get().getCourtName();
-            String regionName = courtVenue.get().getRegion();
-            String baseLocationName = courtVenue.get().getSiteName();
+            String courtSeal = courtSealFinderService.getCourtSeal(regionId);
+            caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
             caseDataUpdated.put(COURT_NAME_FIELD, courtName);
             caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
+            caseData.setCourtSeal(courtSeal);
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-                    .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
-                    .baseLocationName(baseLocationName).build());
+                    .regionId(regionId).baseLocationId(baseLocationId).regionName(courtVenue.get().getRegion())
+                    .baseLocationName(courtVenue.get().getSiteName()).build());
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -406,8 +412,20 @@ public class CallbackController {
     private void sendWithdrawEmails(CaseData caseData, UserDetails userDetails, CaseDetails caseDetails) {
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
+            Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
+            if (localCourtAdmin.isPresent()) {
+                Optional<LocalCourtAdminEmail> localCourtAdminEmail = localCourtAdmin.get().stream().map(Element::getValue)
+                    .findFirst();
+                if (localCourtAdminEmail.isPresent()) {
+                    String email = localCourtAdminEmail.get().getEmail();
+                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
+                }
+            }
         } else {
             solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
+            caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(
+                caseDetails,
+                caseData.getCourtEmailAddress());
         }
     }
 
