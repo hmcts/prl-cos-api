@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -25,6 +26,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@Ignore
 public class FeesAndPaymentControllerFunctionalTest {
 
     private MockMvc mockMvc;
@@ -49,6 +51,7 @@ public class FeesAndPaymentControllerFunctionalTest {
     /*
     These test cases will be enabled once we have merged and integrated with Fee and Pay on Demo environment.
      */
+    @Ignore
     @Test
     public void givenRequestBody_whenGetC100ApplicationFees_then200Response() throws Exception {
         mockMvc.perform(get("/fees-and-payment-apis/getC100ApplicationFees")

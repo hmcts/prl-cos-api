@@ -120,10 +120,10 @@ public class CaseData implements MappableObject {
 
     private final State state;
 
-    @JsonIgnore
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime createdDate;
 
-    @JsonIgnore
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
@@ -136,6 +136,7 @@ public class CaseData implements MappableObject {
     /**
      * Case Type Of Application.
      */
+    @JsonProperty("caseTypeOfApplication")
     private final String caseTypeOfApplication;
 
     /**
@@ -755,4 +756,7 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
+
+    //Added for c100 rebuild
+    private Long noOfDaysRemainingToSubmitCase;
 }
