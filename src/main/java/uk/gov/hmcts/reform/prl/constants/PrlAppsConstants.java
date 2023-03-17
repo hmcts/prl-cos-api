@@ -330,8 +330,9 @@ public class PrlAppsConstants {
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
     public static final long CASE_SUBMISSION_THRESHOLD = 28;
-
     public static final String IS_CAFCASS = "isCafcass";
+
+    public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
 
     public static final String CASEWORKER = "CaseWorker";
 
