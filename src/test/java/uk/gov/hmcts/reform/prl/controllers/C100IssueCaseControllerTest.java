@@ -140,6 +140,7 @@ public class C100IssueCaseControllerTest {
 
     private static final Map<String, Object> fl401DraftMap = new HashMap<>();
     private static final Map<String, Object> fl401DocsMap = new HashMap<>();
+    private static DynamicList dynamicList;
 
     @Before
     public void setUp() {
@@ -171,6 +172,8 @@ public class C100IssueCaseControllerTest {
         fl401DocsMap.put(PrlAppsConstants.DOCUMENT_FIELD_FINAL, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_C8_WELSH, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
+        dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                      .build()).build();
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(Optional.of(CourtVenue.builder().build()));
     }
@@ -236,6 +239,7 @@ public class C100IssueCaseControllerTest {
             .languageRequirementApplicationNeedWelsh(Yes)
             .applicantsConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
             .childrenConfidentialDetails(List.of(element(ChildConfidentialityDetails.builder().build())))
+            .courtList(dynamicList)
             .id(123L)
             .build();
 
@@ -327,6 +331,7 @@ public class C100IssueCaseControllerTest {
     public void testIssueAndSendLocalCourtConditionalFailures() throws Exception {
         CaseData caseData = CaseData.builder()
             .consentOrder(Yes)
+            .courtList(dynamicList)
             .id(123L)
             .build();
 
@@ -412,6 +417,7 @@ public class C100IssueCaseControllerTest {
                                   .allegationsOfHarmChildAbuseYesNo(Yes)
                                   .build())
             .welshLanguageRequirement(YesOrNo.Yes)
+            .courtList(dynamicList)
             .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(YesOrNo.Yes)
             .id(123L)
@@ -506,7 +512,7 @@ public class C100IssueCaseControllerTest {
             .applicantsConfidentialDetails(Collections.emptyList())
             .childrenConfidentialDetails(Collections.emptyList())
             .id(123L)
-            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("reg-base-courtname-test-test-test").build()).build())
+            .courtList(dynamicList)
             .build();
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))

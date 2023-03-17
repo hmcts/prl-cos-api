@@ -19,22 +19,17 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
-import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -47,6 +42,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,9 +62,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIEL
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SecurityRequirement(name = "Bearer Authentication")
 public class FL401SubmitApplicationController {
-
-    @Autowired
-    private CourtFinderService courtFinderService;
 
     @Autowired
     private UserService userService;
@@ -91,14 +84,9 @@ public class FL401SubmitApplicationController {
     @Autowired
     private DocumentGenService documentGenService;
 
-    @Autowired
-    OrganisationService organisationService;
 
     @Autowired
     LocationRefDataService locationRefDataService;
-
-    @Autowired
-    private CourtFinderApi courtFinderApi;
 
     @Autowired
     private ConfidentialityTabService confidentialityTabService;
@@ -125,7 +113,7 @@ public class FL401SubmitApplicationController {
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
-            .listItems(locationRefDataService.getCourtLocations(authorisation))
+            .listItems(locationRefDataService.getDaCourtLocations(authorisation))
             .build());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
@@ -151,34 +139,29 @@ public class FL401SubmitApplicationController {
 
         final LocalDate localDate = LocalDate.now();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        String baseLocationId = caseData.getSubmitCountyCourtSelection().getValue().getCode();
+        String[] idEmail = caseData.getSubmitCountyCourtSelection().getValue().getCode().split(":");
+        String baseLocationId = Arrays.stream(idEmail).toArray()[0].toString();
         Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
         if (courtVenue.isPresent()) {
             String regionId = courtVenue.get().getRegionId();
             String courtName = courtVenue.get().getCourtName();
             String courtSeal = courtSealFinderService.getCourtSeal(regionId);
-            caseData = caseData.toBuilder().issueDate(localDate).courtName(courtName)
-                    .courtSeal(courtSeal).build();
+            caseData = caseData.toBuilder().issueDate(localDate).courtName(courtName).courtSeal(courtSeal).build();
             caseData = caseData.toBuilder().isCourtEmailFound("Yes").build();
             caseDataUpdated.put(COURT_NAME_FIELD, courtName);
+            caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
             caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
-            String postcode = courtVenue.get().getPostcode();
-            String courtEmail = null;
-            if (null != courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode)
-                    && null != courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts()) {
-                String courtSlug = courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts().get(0).getCourtSlug();
-                Court court = courtFinderApi.getCourtDetails(courtSlug);
-                caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
-                Optional<CourtEmailAddress> optionalCourtEmail = courtFinderService.getEmailAddress(court);
-                if (optionalCourtEmail.isPresent()) {
-                    courtEmail = optionalCourtEmail.get().getAddress();
-                }
-            }
-            caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
                     .regionId(regionId).baseLocationId(baseLocationId).regionName(courtVenue.get().getRegion())
                     .baseLocationName(courtVenue.get().getSiteName()).build());
         }
+
+        String courtEmail = "";
+        if (idEmail.length > 1) {
+            courtEmail = Arrays.stream(idEmail).toArray()[1].toString();
+            caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
+        }
+
 
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
         if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
@@ -222,9 +205,11 @@ public class FL401SubmitApplicationController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         UserDetails userDetails = userService.getUserDetails(authorisation);
-
         try {
             solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
+            if (null != caseData.getCourtEmailAddress()) {
+                caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+            }
             caseData = caseData.toBuilder()
                 .isNotificationSent("Yes")
                 .build();
