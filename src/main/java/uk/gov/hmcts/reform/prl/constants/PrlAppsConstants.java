@@ -329,4 +329,11 @@ public class PrlAppsConstants {
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
     public static final long CASE_SUBMISSION_THRESHOLD = 28;
+
+    public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+
+    public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
+
+    public static final String STATE = "state";
+
 }
