@@ -3,8 +3,11 @@ package uk.gov.hmcts.reform.prl.clients.cafcass;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+
+import java.util.List;
 
 @FeignClient(
     name = "hearing-api-cafcaas",
@@ -18,6 +21,13 @@ public interface HearingApiClient {
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestHeader("caseReference") String caseReference
+    );
+
+    @GetMapping(path = "/hearings-by-list-of-case-ids")
+    List<Hearings> getHearingDetailsForAllCaseIds(
+        @RequestHeader("Authorization") String authorisation,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @RequestBody List<String> caseIds
     );
 
 }
