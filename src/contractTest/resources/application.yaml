@@ -385,6 +385,7 @@ fis_hearing:
 
 courts:
   filter: ${COURT_IDS_TO_FILTER:}
+  daFilter: ${DA_COURT_IDS_TO_FILTER:}
 
 postcodelookup:
   api:
