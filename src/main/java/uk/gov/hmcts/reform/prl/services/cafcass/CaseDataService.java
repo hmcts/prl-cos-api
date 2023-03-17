@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
@@ -60,6 +61,8 @@ public class CaseDataService {
 
     private final SystemUserService systemUserService;
 
+    private final RefDataService refDataService;
+
     public CafCassResponse getCaseData(String authorisation, String startDate, String endDate) throws IOException {
 
         log.info("Search API start date - {}, end date - {}", startDate, endDate);
@@ -79,7 +82,7 @@ public class CaseDataService {
             authTokenGenerator.generate(),
             cafCassSearchCaseTypeId
         );
-        log.info("total number of records retrieved from ccd - {}", searchResult.getTotal());
+
         CafCassResponse cafCassResponse = objectMapper.convertValue(
             searchResult,
             CafCassResponse.class
@@ -88,7 +91,6 @@ public class CaseDataService {
         if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
 
             cafCassFilter.filter(cafCassResponse);
-            log.info("total number of records after applying cafcass filters - {}", cafCassResponse.getCases().size());
             getHearingDetails(authorisation, cafCassResponse);
             updateHearingResponse(authorisation, authTokenGenerator.generate(), cafCassResponse);
 
@@ -141,26 +143,24 @@ public class CaseDataService {
 
     private void updateHearingResponse(String authorisation, String s2sToken, CafCassResponse cafCassResponse) {
 
-        final Hearings hearing = cafCassResponse.getCases().stream()
-            .filter(cafCassCaseDetail -> cafCassCaseDetail.getCaseData().getHearingData() != null)
-            .map(cafCassCaseDetail -> cafCassCaseDetail.getCaseData().getHearingData())
-            .findFirst().orElse(null);
+        Map<String, String> refDataCategoryValueMap = null;
 
-        if (hearing != null) {
-            final Map<String, String> refDataCategoryValueMap = hearingService.getRefDataCategoryValueMap(
-                authorisation,
-                s2sToken,
-                hearing.getHmctsServiceCode()
-            );
+        for (CafCassCaseDetail cafCassCaseDetail : cafCassResponse.getCases()) {
+            final Hearings hearingData = cafCassCaseDetail.getCaseData().getHearingData();
+            if (null != hearingData) {
 
-            cafCassResponse.getCases().stream().forEach(cafCassCaseDetail -> {
-                final Hearings hearingData = cafCassCaseDetail.getCaseData().getHearingData();
-                if (null != hearingData) {
-                    hearingData.getCaseHearings().stream().forEach(caseHearing -> {
-                        caseHearing.setHearingTypeValue(refDataCategoryValueMap.get(caseHearing.getHearingType()));
-                    });
+                if (refDataCategoryValueMap == null) {
+                    refDataCategoryValueMap = refDataService.getRefDataCategoryValueMap(
+                        authorisation,
+                        s2sToken,
+                        hearingData.getHmctsServiceCode()
+                    );
                 }
-            });
+
+                for (CaseHearing caseHearing : hearingData.getCaseHearings()) {
+                    caseHearing.setHearingTypeValue(refDataCategoryValueMap.get(caseHearing.getHearingType()));
+                }
+            }
         }
     }
 }

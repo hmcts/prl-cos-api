@@ -402,7 +402,7 @@ courts:
   filter: ${COURT_IDS_TO_FILTER:}
   daFilter: ${DA_COURT_IDS_TO_FILTER:}
 
-hearing:
+refdata:
   api:
-    url: ${HEARING_API_REFDATA_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
+    url: ${REFDATA_API_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
   cateogry-id: HearingType
