@@ -84,6 +84,7 @@ public class FL404 {
     private final String fl404bOccupationTime2;
     private final String fl404bDateOfNextHearing;
     private final String fl404bTimeOfNextHearing;
+    private final String fl404bDateAndTimeOfNextHearing;
 
     //Draft order changes
     @JsonProperty("addDirections")
