@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -179,7 +180,7 @@ public class CaseServiceTest {
 
         CaseData updatedCaseData = caseData.toBuilder()
             .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
-            .courtName("STOKE ON TRENT TRIBUNAL HEARING CENTRE")
+            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
             .build();
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
@@ -210,7 +211,7 @@ public class CaseServiceTest {
 
         CaseData updatedCaseData = caseData.toBuilder()
             .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
-            .courtName("STOKE ON TRENT TRIBUNAL HEARING CENTRE")
+            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
             .build();
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
