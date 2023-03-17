@@ -328,6 +328,8 @@ public class PrlAppsConstants {
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
+    public static final long CASE_SUBMISSION_THRESHOLD = 28;
+    public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
 
     public static final String SOLICITOR_C7_DRAFT_DOCUMENT = "SOLICITOR_C7_DRAFT";
     public static final String SOLICITOR_C7_FINAL_DOCUMENT = "SOLICITOR_C7_FINAL";
