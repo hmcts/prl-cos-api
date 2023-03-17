@@ -60,17 +60,16 @@ public class TaskListController extends AbstractCallbackController {
                                                                 @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                 @Parameter(hidden = true) String authorisation) {
 
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("/update-task-list CaseDetails start ===>" + callbackRequest.getCaseDetails());
         try {
             // convert user object to json string and return it
             log.info("/update-task-list CaseDetails start json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
-        }
-        catch (JsonProcessingException e) {
+        } catch (JsonProcessingException e) {
             // catch various errors
             e.printStackTrace();
         }
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("/update-task-list start ===>" + caseDataUpdated);
         publishEvent(new CaseDataChanged(caseData));
         UserDetails userDetails = userService.getUserDetails(authorisation);
