@@ -175,7 +175,7 @@ public class CaseController {
             caseDetails = caseService.createCase(caseData, authorisation);
             CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
-                CaseUtils.getRemainingDaysSubmitCase(createdCaseData)).build();
+                PrlAppsConstants.CASE_SUBMISSION_THRESHOLD).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
