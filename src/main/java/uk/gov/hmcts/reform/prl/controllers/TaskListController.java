@@ -57,6 +57,8 @@ public class TaskListController extends AbstractCallbackController {
 
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("/update-task-list CaseDetails start ===>" + callbackRequest.getCaseDetails());
+        log.info("/update-task-list start ===>" + caseDataUpdated);
         publishEvent(new CaseDataChanged(caseData));
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
@@ -79,6 +81,7 @@ public class TaskListController extends AbstractCallbackController {
             .c1AWelshDocument((Document) caseDataUpdated.get("c1AWelshDocument"))
             .build();
         tabService.updateAllTabsIncludingConfTab(caseData);
+        log.info("/update-task-list end ===>" + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
