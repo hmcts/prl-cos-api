@@ -601,6 +601,7 @@ public class CaseData implements MappableObject {
     /**
      * FL401 Court details for Pilot.
      */
+    @JsonProperty("submitCountyCourtSelection")
     private final DynamicList submitCountyCourtSelection;
 
     public CaseData setDateSubmittedDate() {
