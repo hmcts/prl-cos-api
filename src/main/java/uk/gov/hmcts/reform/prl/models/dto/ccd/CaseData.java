@@ -120,8 +120,10 @@ public class CaseData implements MappableObject {
 
     private final State state;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime createdDate;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
@@ -134,6 +136,7 @@ public class CaseData implements MappableObject {
     /**
      * Case Type Of Application.
      */
+    @JsonProperty("caseTypeOfApplication")
     private final String caseTypeOfApplication;
 
     /**
