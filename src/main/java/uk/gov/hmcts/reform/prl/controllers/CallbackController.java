@@ -501,6 +501,8 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        log.info("/about-to-submit-case-creation ===> " + callbackRequest.getCaseDetails());
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         //Added for Case linking
         if (caseDataUpdated.get(APPLICANT_CASE_NAME) != null) {
@@ -634,6 +636,7 @@ public class CallbackController {
             log.error("Error while fetching User or Org details for the logged in user ", e);
         }
 
+        log.info("Fetching the user and Org Details  ===> " + caseDataUpdated);
         return caseDataUpdated;
 
     }
