@@ -18,7 +18,6 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
-import uk.gov.hmcts.reform.prl.clients.cafcass.HmcHearingRefDataApi;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
@@ -27,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
+import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.util.HashMap;
@@ -80,13 +80,13 @@ public class CafCassControllerFunctionalTest {
     private AuthTokenGenerator authTokenGenerator;
 
     @MockBean
-    private HmcHearingRefDataApi hearingRefDataApi;
-
-    @MockBean
     SystemUserService systemUserService;
 
     @MockBean
     private HearingService hearingService;
+
+    @MockBean
+    private RefDataService refDataService;
 
     @Before
     public void setUp() {
@@ -113,7 +113,7 @@ public class CafCassControllerFunctionalTest {
                           .caseHearings(List.of(
                               CaseHearing.caseHearingWith().hearingType("ABA5-APL").build()))
             .build());
-        Mockito.when(hearingService.getRefDataCategoryValueMap("authorisation", authTokenGenerator.generate(), "ABA5")).thenReturn(
+        Mockito.when(refDataService.getRefDataCategoryValueMap("authorisation", authTokenGenerator.generate(), "ABA5")).thenReturn(
             refDataMap);
         Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedSearchResult);
 

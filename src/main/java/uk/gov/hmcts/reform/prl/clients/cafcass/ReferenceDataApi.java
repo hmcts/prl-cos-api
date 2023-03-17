@@ -12,15 +12,15 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.refdata.Categories;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @FeignClient(
-        name = "hmc-hearing",
-        url = "${hearing.api.url}",
+        name = "ref-data",
+        url = "${refdata.api.url}",
         configuration = FeignClientProperties.FeignClientConfiguration.class)
-public interface HmcHearingRefDataApi {
+public interface ReferenceDataApi {
     String SERVICE_AUTHORIZATION = "ServiceAuthorization";
-    String HEARING_ENDPOINT = "/refdata/commondata/lov/categories";
+    String REF_DATA_CATEGORY_ENDPOINT = "/refdata/commondata/lov/categories";
 
     @GetMapping(
-            value = HEARING_ENDPOINT + "/{categoryId}",
+            value = REF_DATA_CATEGORY_ENDPOINT + "/{categoryId}",
             consumes = MediaType.APPLICATION_JSON_VALUE)
     Categories retrieveListOfValuesByCategoryId(
             @RequestHeader(AUTHORIZATION) String authorisation,
