@@ -66,7 +66,7 @@ public class TaskListController extends AbstractCallbackController {
             log.info("/update-task-list CaseDetails start json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
         } catch (JsonProcessingException e) {
             // catch various errors
-            e.printStackTrace();
+            log.info("error");
         }
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
