@@ -42,7 +42,6 @@ public class CaseInitiationController extends AbstractCallbackController {
     public void handleSubmitted(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                 @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("/case-initiation/submitted ===> " + callbackRequest.getCaseDetails());
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         final CaseData caseData = getCaseData(caseDetails);
 
