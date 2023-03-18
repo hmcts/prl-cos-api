@@ -53,13 +53,15 @@ public class TestingSupportService {
             requestBody = ResourceLoader.loadJson(VALID_C100_INPUT_JSON);
         }
         CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
+        log.info("/testing-support/submit-case-creation dummyCaseDetails ===>" + dummyCaseDetails);
         CaseDetails updatedCaseDetails = dummyCaseDetails.toBuilder()
             .id(initialCaseDetails.getId())
             .createdDate(initialCaseDetails.getCreatedDate())
             .lastModified(initialCaseDetails.getLastModified()).build();
+        log.info("/testing-support/submit-case-creation updatedCaseDetails ===>" + updatedCaseDetails);
         CaseData updatedCaseData = CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
         Map<String, Object> caseDataUpdated = updatedCaseDetails.getData();
-        log.info("/update-task-list start ===>" + caseDataUpdated);
+        log.info("/testing-support/submit-case-creation caseDataUpdated ===>" + caseDataUpdated);
         eventPublisher.publishEvent(new CaseDataChanged(updatedCaseData));
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
