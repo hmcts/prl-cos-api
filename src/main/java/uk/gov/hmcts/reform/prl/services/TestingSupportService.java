@@ -44,8 +44,8 @@ public class TestingSupportService {
 
     private static final String VALID_C100_INPUT_JSON = "C100_Dummy_CaseDetails.json";
 
-    public Map<String, Object> submitCaseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
-        log.info("/testing-support/submit-case-creation start ===>" + callbackRequest.getCaseDetails());
+    public Map<String, Object> submitCaseCreation(CallbackRequest callbackRequest) throws Exception {
+        log.info("/testing-support/submitCaseCreation start ===>" + callbackRequest.getCaseDetails());
         String requestBody = null;
         CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
         CaseData initialCaseData = CaseUtils.getCaseData(initialCaseDetails, objectMapper);
@@ -53,29 +53,35 @@ public class TestingSupportService {
             requestBody = ResourceLoader.loadJson(VALID_C100_INPUT_JSON);
         }
         CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
-        log.info("/testing-support/submit-case-creation dummyCaseDetails ===>" + dummyCaseDetails);
+        log.info("/testing-support/submitCaseCreation dummyCaseDetails ===>" + dummyCaseDetails);
         CaseDetails updatedCaseDetails = dummyCaseDetails.toBuilder()
             .id(initialCaseDetails.getId())
             .createdDate(initialCaseDetails.getCreatedDate())
             .lastModified(initialCaseDetails.getLastModified()).build();
-        log.info("/testing-support/submit-case-creation updatedCaseDetails ===>" + updatedCaseDetails);
-        CaseData updatedCaseData = CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
+        log.info("/testing-support/submitCaseCreation updatedCaseDetails ===>" + updatedCaseDetails);
         Map<String, Object> caseDataUpdated = updatedCaseDetails.getData();
-        log.info("/testing-support/submit-case-creation caseDataUpdated ===>" + caseDataUpdated);
-        eventPublisher.publishEvent(new CaseDataChanged(updatedCaseData));
+        log.info("/testing-support/submitCaseCreation caseDataUpdated ===>" + caseDataUpdated);
+        return caseDataUpdated;
+    }
+
+    public Map<String, Object> submittedCaseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
+        log.info("/testing-support/submittedCaseCreation start ===>" + callbackRequest.getCaseDetails());
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        eventPublisher.publishEvent(new CaseDataChanged(caseData));
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
-        String state = updatedCaseDetails.getState();
+        String state = callbackRequest.getCaseDetails().getState();
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))) {
             try {
                 log.info("Generating documents for the amended details");
-                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, updatedCaseData));
+                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);
             }
         }
-        updatedCaseData = updatedCaseData.toBuilder()
+        caseData = caseData.toBuilder()
             .c8Document((Document) caseDataUpdated.get("c8Document"))
             .c1ADocument((Document) caseDataUpdated.get("c1ADocument"))
             .c8WelshDocument((Document) caseDataUpdated.get("c8WelshDocument"))
@@ -83,9 +89,10 @@ public class TestingSupportService {
             .finalWelshDocument((Document) caseDataUpdated.get("finalWelshDocument"))
             .c1AWelshDocument((Document) caseDataUpdated.get("c1AWelshDocument"))
             .build();
-        tabService.updateAllTabsIncludingConfTab(updatedCaseData);
-        log.info("/update-task-list end ===>" + caseDataUpdated);
+        tabService.updateAllTabsIncludingConfTab(caseData);
+        log.info("/testing-support/submittedCaseCreation end ===>" + caseDataUpdated);
         return caseDataUpdated;
     }
+
 
 }
