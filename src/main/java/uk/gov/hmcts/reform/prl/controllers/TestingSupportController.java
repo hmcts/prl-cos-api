@@ -24,12 +24,12 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class TestingSupportController extends AbstractCallbackController {
+public class TestingSupportController {
 
     @Autowired
     private final TestingSupportService testingSupportService;
 
-    @PostMapping(path = "/testing-support/submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/testing-support/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Copy fl401 case name to C100 Case name")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
@@ -41,6 +41,22 @@ public class TestingSupportController extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.submitCaseCreation(
+            callbackRequest
+        )).build();
+    }
+
+    @PostMapping(path = "/testing-support/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Copy fl401 case name to C100 Case name")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse submittedCaseCreation(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) throws Exception {
+        return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.submittedCaseCreation(
             authorisation,
             callbackRequest
         )).build();
