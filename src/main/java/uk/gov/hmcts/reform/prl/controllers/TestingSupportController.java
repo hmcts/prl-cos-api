@@ -23,7 +23,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class TestingSupportController {
+public class TestingSupportController extends AbstractCallbackController{
 
     private final TestingSupportService testingSupportService;
 
