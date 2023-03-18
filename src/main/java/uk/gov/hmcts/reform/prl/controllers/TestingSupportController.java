@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -23,13 +24,14 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @RestController
+@RequestMapping("/testing-support")
 @RequiredArgsConstructor
 public class TestingSupportController {
 
     @Autowired
     private final TestingSupportService testingSupportService;
 
-    @PostMapping(path = "/testing-support/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Copy fl401 case name to C100 Case name")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
@@ -40,12 +42,12 @@ public class TestingSupportController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.submitCaseCreation(
+        return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.initiateCaseCreation(
             callbackRequest
         )).build();
     }
 
-    @PostMapping(path = "/testing-support/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Copy fl401 case name to C100 Case name")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
