@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,32 +51,31 @@ public class TestingSupportService {
     private static final String VALID_FL401_INPUT_JSON = "FL401_Dummy_CaseDetails.json";
 
     public Map<String, Object> initiateCaseCreation(CallbackRequest callbackRequest) throws Exception {
-        log.info("/testing-support/initiateCaseCreation start ===>" + callbackRequest.getCaseDetails());
-        String requestBody = null;
+        String requestBody;
         CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
         CaseData initialCaseData = CaseUtils.getCaseData(initialCaseDetails, objectMapper);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
             requestBody = ResourceLoader.loadJson(VALID_C100_INPUT_JSON);
         } else {
             requestBody = ResourceLoader.loadJson(VALID_FL401_INPUT_JSON);
         }
         CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
-        log.info("/testing-support/initiateCaseCreation dummyCaseDetails ===>" + dummyCaseDetails);
-        CaseDetails updatedCaseDetails = dummyCaseDetails.toBuilder()
-            .id(initialCaseDetails.getId())
-            .createdDate(initialCaseDetails.getCreatedDate())
-            .lastModified(initialCaseDetails.getLastModified()).build();
-        log.info("/testing-support/initiateCaseCreation updatedCaseDetails ===>" + updatedCaseDetails);
-        Map<String, Object> caseDataUpdated = updatedCaseDetails.getData();
-        updateCaseName(initialCaseData, caseDataUpdated);
+        if (dummyCaseDetails != null) {
+            CaseDetails updatedCaseDetails = dummyCaseDetails.toBuilder()
+                .id(initialCaseDetails.getId())
+                .createdDate(initialCaseDetails.getCreatedDate())
+                .lastModified(initialCaseDetails.getLastModified()).build();
+            caseDataUpdated = updatedCaseDetails.getData();
+            updateCaseName(initialCaseData, caseDataUpdated);
+        }
         log.info("/testing-support/initiateCaseCreation caseDataUpdated ===>" + caseDataUpdated);
         return caseDataUpdated;
     }
 
-    public Map<String, Object> submittedCaseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
-        log.info("/testing-support/submittedCaseCreation start ===>" + callbackRequest.getCaseDetails());
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        eventPublisher.publishEvent(new CaseDataChanged(caseData));
+    public Map<String, Object> submittedCaseCreation(String authorisation, CallbackRequest callbackRequest) {
+        CaseData data = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        eventPublisher.publishEvent(new CaseDataChanged(data));
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
@@ -84,12 +84,12 @@ public class TestingSupportService {
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))) {
             try {
                 log.info("Generating documents for the amended details");
-                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
+                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, data));
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);
             }
         }
-        caseData = caseData.toBuilder()
+        data = data.toBuilder()
             .c8Document((Document) caseDataUpdated.get("c8Document"))
             .c1ADocument((Document) caseDataUpdated.get("c1ADocument"))
             .c8WelshDocument((Document) caseDataUpdated.get("c8WelshDocument"))
@@ -97,7 +97,7 @@ public class TestingSupportService {
             .finalWelshDocument((Document) caseDataUpdated.get("finalWelshDocument"))
             .c1AWelshDocument((Document) caseDataUpdated.get("c1AWelshDocument"))
             .build();
-        tabService.updateAllTabsIncludingConfTab(caseData);
+        tabService.updateAllTabsIncludingConfTab(data);
         log.info("/testing-support/submittedCaseCreation end ===>" + caseDataUpdated);
         return caseDataUpdated;
     }
