@@ -30,8 +30,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TestingSupportService {
 
-    private ObjectMapper objectMapper;
-    private EventService eventPublisher;
+    private final ObjectMapper objectMapper;
+    private final EventService eventPublisher;
 
     @Qualifier("allTabsService")
     private final AllTabServiceImpl tabService;
