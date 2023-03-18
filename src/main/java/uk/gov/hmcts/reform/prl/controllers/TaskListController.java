@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -52,22 +50,11 @@ public class TaskListController extends AbstractCallbackController {
     @Autowired
     DocumentGenService dgsService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                 @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                 @Parameter(hidden = true) String authorisation) {
 
-        log.info("/update-task-list CaseDetails start ===>" + callbackRequest.getCaseDetails());
-        try {
-            // convert user object to json string and return it
-            log.info("/update-task-list CaseDetails start json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
-        } catch (JsonProcessingException e) {
-            // catch various errors
-            log.info("error");
-        }
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("/update-task-list start ===>" + caseDataUpdated);
@@ -93,7 +80,6 @@ public class TaskListController extends AbstractCallbackController {
             .c1AWelshDocument((Document) caseDataUpdated.get("c1AWelshDocument"))
             .build();
         tabService.updateAllTabsIncludingConfTab(caseData);
-        log.info("/update-task-list end ===>" + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
