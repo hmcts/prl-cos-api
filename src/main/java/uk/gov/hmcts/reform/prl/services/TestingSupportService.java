@@ -30,14 +30,16 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TestingSupportService {
 
+    @Autowired
     private final ObjectMapper objectMapper;
+    @Autowired
     private final EventService eventPublisher;
-
+    @Autowired
     @Qualifier("allTabsService")
     private final AllTabServiceImpl tabService;
-
+    @Autowired
     private final UserService userService;
-
+    @Autowired
     private final DocumentGenService dgsService;
 
     private static final String VALID_C100_INPUT_JSON = "C100_Dummy_CaseDetails.json";
