@@ -21,6 +21,9 @@ import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NAME_HMCTS_INTERNAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
@@ -44,23 +47,28 @@ public class TestingSupportService {
 
     private static final String VALID_C100_INPUT_JSON = "C100_Dummy_CaseDetails.json";
 
-    public Map<String, Object> submitCaseCreation(CallbackRequest callbackRequest) throws Exception {
-        log.info("/testing-support/submitCaseCreation start ===>" + callbackRequest.getCaseDetails());
+    private static final String VALID_FL401_INPUT_JSON = "FL401_Dummy_CaseDetails.json";
+
+    public Map<String, Object> initiateCaseCreation(CallbackRequest callbackRequest) throws Exception {
+        log.info("/testing-support/initiateCaseCreation start ===>" + callbackRequest.getCaseDetails());
         String requestBody = null;
         CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
         CaseData initialCaseData = CaseUtils.getCaseData(initialCaseDetails, objectMapper);
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
             requestBody = ResourceLoader.loadJson(VALID_C100_INPUT_JSON);
+        } else {
+            requestBody = ResourceLoader.loadJson(VALID_FL401_INPUT_JSON);
         }
         CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
-        log.info("/testing-support/submitCaseCreation dummyCaseDetails ===>" + dummyCaseDetails);
+        log.info("/testing-support/initiateCaseCreation dummyCaseDetails ===>" + dummyCaseDetails);
         CaseDetails updatedCaseDetails = dummyCaseDetails.toBuilder()
             .id(initialCaseDetails.getId())
             .createdDate(initialCaseDetails.getCreatedDate())
             .lastModified(initialCaseDetails.getLastModified()).build();
-        log.info("/testing-support/submitCaseCreation updatedCaseDetails ===>" + updatedCaseDetails);
+        log.info("/testing-support/initiateCaseCreation updatedCaseDetails ===>" + updatedCaseDetails);
         Map<String, Object> caseDataUpdated = updatedCaseDetails.getData();
-        log.info("/testing-support/submitCaseCreation caseDataUpdated ===>" + caseDataUpdated);
+        updateCaseName(initialCaseData, caseDataUpdated);
+        log.info("/testing-support/initiateCaseCreation caseDataUpdated ===>" + caseDataUpdated);
         return caseDataUpdated;
     }
 
@@ -94,5 +102,12 @@ public class TestingSupportService {
         return caseDataUpdated;
     }
 
+    private static void updateCaseName(CaseData initialCaseData, Map<String, Object> caseDataUpdated) {
+        caseDataUpdated.put(APPLICANT_CASE_NAME, initialCaseData.getApplicantCaseName());
+        caseDataUpdated.put(CASE_NAME_HMCTS_INTERNAL, initialCaseData.getApplicantCaseName());
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
+            caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, initialCaseData.getApplicantCaseName());
+        }
+    }
 
 }
