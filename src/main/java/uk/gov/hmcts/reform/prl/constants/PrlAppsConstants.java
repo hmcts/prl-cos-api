@@ -330,6 +330,8 @@ public class PrlAppsConstants {
     public static final String COMPLETED = "COMPLETED";
     public static final long CASE_SUBMISSION_THRESHOLD = 28;
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+    //C100 default court details
+    public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
     public static final String CLOSED_STATE = State.ALL_FINAL_ORDERS_ISSUED.getValue();
     public static final String WITHDRAW_REQUEST_FIELD = "isWithdrawRequestSent";
     public static final String PENDING = "Pending";

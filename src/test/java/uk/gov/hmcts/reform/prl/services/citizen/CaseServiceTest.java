@@ -190,11 +190,10 @@ public class CaseServiceTest {
 
         CaseData updatedCaseData = caseData.toBuilder()
             .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
-            .courtName("Test Court")
+            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
             .build();
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(courtLocatorService.getNearestFamilyCourt(caseData)).thenReturn(Court.builder().courtName("Test Court").build());
         when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT)).thenReturn(caseDetails);
 
@@ -222,11 +221,10 @@ public class CaseServiceTest {
 
         CaseData updatedCaseData = caseData.toBuilder()
             .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
-            .courtName("Test Court")
+            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
             .build();
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(courtLocatorService.getNearestFamilyCourt(caseData)).thenReturn(Court.builder().courtName("Test Court").build());
         when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT_WITH_HWF)).thenReturn(caseDetails);
 
@@ -279,5 +277,4 @@ public class CaseServiceTest {
         //Then
         assertThat(actualCaseDetails.getState()).isEqualTo(caseDetails.getState());
     }
-
 }
