@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_AND_CAFCASS_OFFICER_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_DETAILS_TABLE;
@@ -34,11 +35,28 @@ public class AddCafcassOfficerService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = caseData.getChildAndCafcassOfficers();
+        resetExistingCafcassOfficerDetails(caseData);
         for (Element<ChildAndCafcassOfficer> cafcassOfficer : childAndCafcassOfficers) {
             caseDataUpdated.putAll(populateCafcassOfficerForCA(caseData, cafcassOfficer));
         }
         caseDataUpdated.put(CHILD_AND_CAFCASS_OFFICER_DETAILS, applicationsTabService.prePopulateChildAndCafcassOfficerDetails(caseData));
         return caseDataUpdated;
+    }
+
+    private static void resetExistingCafcassOfficerDetails(CaseData caseData) {
+        List<Element<Child>> children = caseData.getChildren();
+        if (children != null) {
+            caseData.getChildren().stream().forEach(childElement -> {
+                Child amendedChild = childElement.getValue().toBuilder()
+                    .cafcassOfficerName(BLANK_STRING)
+                    .cafcassOfficerPosition(null)
+                    .cafcassOfficerOtherPosition(BLANK_STRING)
+                    .cafcassOfficerEmailAddress(BLANK_STRING)
+                    .cafcassOfficerPhoneNo(BLANK_STRING)
+                    .build();
+                children.set(children.indexOf(childElement), element(childElement.getId(), amendedChild));
+            });
+        }
     }
 
     private Map<String, Object> populateCafcassOfficerForCA(CaseData caseData,
