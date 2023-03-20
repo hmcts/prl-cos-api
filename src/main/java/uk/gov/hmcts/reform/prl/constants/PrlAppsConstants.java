@@ -331,4 +331,6 @@ public class PrlAppsConstants {
     public static final String COMPLETED = "COMPLETED";
     public static final long CASE_SUBMISSION_THRESHOLD = 28;
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+    //C100 default court details
+    public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
 }
