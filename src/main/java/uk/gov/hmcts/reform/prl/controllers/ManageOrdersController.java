@@ -215,20 +215,11 @@ public class ManageOrdersController {
         List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-        log.info("Prepoulated hearingDynamicLists {}", hearingDataPrePopulatedDynamicLists);
+        log.info("pre-populated hearingDynamicLists {}", hearingDataPrePopulatedDynamicLists);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseDataUpdated.containsKey(LISTWITHOUTNOTICE_HEARINGDETAILS)) {
-            log.info("Inside case data updated containd key check for the case id {}", caseReferenceNumber);
-            caseDataUpdated.put(
-                LISTWITHOUTNOTICE_HEARINGDETAILS,
-                hearingDataService.getHearingData(existingListWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists));
-            log.info("Inside controller after mapping hearing data  {}", caseDataUpdated.get(LISTWITHOUTNOTICE_HEARINGDETAILS));
-        } else {
-            caseDataUpdated.put(
+        caseDataUpdated.put(
                 LISTWITHOUTNOTICE_HEARINGDETAILS,
                 ElementUtils.wrapElements(hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists,caseData)));
-
-        }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
