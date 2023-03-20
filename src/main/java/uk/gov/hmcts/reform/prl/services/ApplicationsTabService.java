@@ -1039,7 +1039,7 @@ public class ApplicationsTabService implements TabService {
         return toMap(builder.build());
     }
 
-    private List<Element<ChildAndCafcassOfficer>> prePopulateChildAndCafcassOfficerDetails(CaseData caseData) {
+    public List<Element<ChildAndCafcassOfficer>> prePopulateChildAndCafcassOfficerDetails(CaseData caseData) {
         List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = new ArrayList<>();
         if (caseData.getChildren() != null) {
             caseData.getChildren().stream().forEach(childElement -> {

@@ -37,7 +37,7 @@ public class AddCafcassOfficerService {
         for (Element<ChildAndCafcassOfficer> cafcassOfficer : childAndCafcassOfficers) {
             caseDataUpdated.putAll(populateCafcassOfficerForCA(caseData, cafcassOfficer));
         }
-        caseDataUpdated.put(CHILD_AND_CAFCASS_OFFICER_DETAILS, childAndCafcassOfficers);
+        caseDataUpdated.put(CHILD_AND_CAFCASS_OFFICER_DETAILS, applicationsTabService.prePopulateChildAndCafcassOfficerDetails(caseData));
         return caseDataUpdated;
     }
 
