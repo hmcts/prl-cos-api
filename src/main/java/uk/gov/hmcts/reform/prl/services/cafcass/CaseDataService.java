@@ -91,7 +91,7 @@ public class CaseDataService {
         if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
 
             cafCassFilter.filter(cafCassResponse);
-            //getHearingDetails(authorisation, cafCassResponse);
+            getHearingDetails(authorisation, cafCassResponse);
             getHearingDetailsForAllCases(authorisation, cafCassResponse);
             updateHearingResponse(authorisation, authTokenGenerator.generate(), cafCassResponse);
 
