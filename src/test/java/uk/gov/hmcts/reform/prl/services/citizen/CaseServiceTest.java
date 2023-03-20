@@ -23,12 +23,10 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
-import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
@@ -44,6 +42,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_WITHDRAW;
@@ -86,9 +85,6 @@ public class CaseServiceTest {
 
     @Mock
     AllTabServiceImpl allTabsService;
-
-    @Mock
-    CourtFinderService courtLocatorService;
 
     @Mock
     CaseEventService caseEventService;
@@ -239,7 +235,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldWithdrawCase() throws JsonProcessingException, NotFoundException {
+    public void shouldWithdrawCase() {
         //Given
         CaseData caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -258,7 +254,7 @@ public class CaseServiceTest {
 
         CaseData updatedCaseData = caseData.toBuilder()
             .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
-            .courtName("Test Court")
+            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
             .state(State.CASE_WITHDRAWN)
             .build();
 
@@ -268,8 +264,48 @@ public class CaseServiceTest {
         when(caseEventService.findEventsForCase(caseId)).thenReturn(caseEventDetails);
         when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(courtLocatorService.getNearestFamilyCourt(caseData)).thenReturn(Court.builder().courtName("Test Court").build());
-        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        //when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_WITHDRAW)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
+
+        //When
+        CaseDetails actualCaseDetails =  caseService.withdrawCase(caseData, caseId, authToken);
+
+        //Then
+        assertThat(actualCaseDetails.getState()).isEqualTo(caseDetails.getState());
+    }
+
+    @Test
+    public void shouldWithdrawCasePending() {
+        //Given
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .withDrawApplicationData(
+                WithdrawApplication.builder()
+                    .withDrawApplication(YesOrNo.Yes)
+                    .withDrawApplicationReason("Case withdrawn").build())
+            .build();
+        UserDetails userDetails = UserDetails
+            .builder()
+            .email("test@gmail.com")
+            .build();
+
+        CaseDetails caseDetails = mock(CaseDetails.class);
+
+        CaseData updatedCaseData = caseData.toBuilder()
+            .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
+            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
+            .state(State.CASE_ISSUE)
+            .isWithdrawRequestSent(PENDING)
+            .build();
+
+        List<CaseEventDetail> caseEventDetails = Arrays.asList(
+            CaseEventDetail.builder().stateId(PrlAppsConstants.ISSUED_STATE).build());
+
+        when(caseEventService.findEventsForCase(caseId)).thenReturn(caseEventDetails);
+        when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_WITHDRAW)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
 
