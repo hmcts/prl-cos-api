@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -1788,5 +1789,42 @@ public class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData).get("draftOrderCollection"));
+    }
+
+
+    @Test
+    public void testOrderStatusCreatedByAdmin() {
+        String status = manageOrderService.getOrderStatus("createAnOrder", "COURT_ADMIN", null, null);
+        assertEquals(OrderStatusEnum.createdByCA.getDisplayedValue(), status);
+    }
+
+    @Test
+    public void testOrderStatusCreatedByJudge() {
+        String status = manageOrderService.getOrderStatus("createAnOrder", "JUDGE", null, " ");
+        assertEquals(OrderStatusEnum.createdByJudge.getDisplayedValue(), status);
+    }
+
+    @Test
+    public void testOrderStatusCreatedBySolicitor() {
+        String status = manageOrderService.getOrderStatus("draftAnOrder", "SOLICITOR", null, "");
+        assertEquals(OrderStatusEnum.draftedByLR.getDisplayedValue(), status);
+    }
+
+    @Test
+    public void testOrderStatusReviewByAdminAlreadyReviewedByJudge() {
+        String status = manageOrderService.getOrderStatus("createAnOrder", "COURT_ADMIN", "adminEditAndApproveAnOrder", "Reviewed by Judge");
+        assertEquals(OrderStatusEnum.reviewedByJudge.getDisplayedValue(), status);
+    }
+
+    @Test
+    public void testOrderStatusReviewByAdminNotReviewedByJudge() {
+        String status = manageOrderService.getOrderStatus("createAnOrder", "COURT_ADMIN", "adminEditAndApproveAnOrder", "Created by Admin");
+        assertEquals(OrderStatusEnum.reviewedByCA.getDisplayedValue(), status);
+    }
+
+    @Test
+    public void testOrderStatusReviewByJudge() {
+        String status = manageOrderService.getOrderStatus("createAnOrder", "COURT_ADMIN", "editAndApproveAnOrder", "Created by Admin");
+        assertEquals(OrderStatusEnum.reviewedByJudge.getDisplayedValue(), status);
     }
 }
