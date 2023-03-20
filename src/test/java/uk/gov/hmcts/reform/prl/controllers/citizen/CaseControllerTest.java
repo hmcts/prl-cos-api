@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javassist.NotFoundException;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -53,6 +55,9 @@ public class CaseControllerTest {
 
     @Mock
     AuthTokenGenerator authTokenGenerator;
+
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
 
     private CaseData caseData;
     public static final String authToken = "Bearer TestAuthToken";
@@ -294,5 +299,19 @@ public class CaseControllerTest {
 
         //Then
         assertThat(actualCaseData.getState()).isEqualTo(caseData.getState());
+    }
+
+    @Test
+    public void withdrawCaseFailsWhenAuthFails() throws JsonProcessingException {
+
+        expectedEx.expect(RuntimeException.class);
+        expectedEx.expectMessage("Invalid Client");
+
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+        //When
+        caseController.withdrawCase(caseData, "1234567891234567", authToken, servAuthToken);
+
+        throw new RuntimeException("Invalid Client");
     }
 }
