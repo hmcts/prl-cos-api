@@ -53,7 +53,7 @@ public class TestingSupportService {
     public Map<String, Object> initiateCaseCreation(CallbackRequest callbackRequest) throws Exception {
         String requestBody;
         CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
-        CaseData initialCaseData = CaseUtils.getCaseData(initialCaseDetails, objectMapper);
+        CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
             requestBody = ResourceLoader.loadJson(VALID_C100_INPUT_JSON);
@@ -67,9 +67,9 @@ public class TestingSupportService {
                 .createdDate(initialCaseDetails.getCreatedDate())
                 .lastModified(initialCaseDetails.getLastModified()).build();
             caseDataUpdated = updatedCaseDetails.getData();
-            updateCaseName(initialCaseData, caseDataUpdated);
+//            updateCaseName(initialCaseData, caseDataUpdated);
         }
-        log.info("/testing-support/initiateCaseCreation caseDataUpdated ===>" + caseDataUpdated);
+//        log.info("/testing-support/initiateCaseCreation caseDataUpdated ===>" + caseDataUpdated);
         return caseDataUpdated;
     }
 
@@ -98,16 +98,16 @@ public class TestingSupportService {
             .c1AWelshDocument((Document) caseDataUpdated.get("c1AWelshDocument"))
             .build();
         tabService.updateAllTabsIncludingConfTab(data);
-        log.info("/testing-support/submittedCaseCreation end ===>" + caseDataUpdated);
+//        log.info("/testing-support/submittedCaseCreation end ===>" + caseDataUpdated);
         return caseDataUpdated;
     }
 
-    private static void updateCaseName(CaseData initialCaseData, Map<String, Object> caseDataUpdated) {
-        caseDataUpdated.put(APPLICANT_CASE_NAME, initialCaseData.getApplicantCaseName());
-        caseDataUpdated.put(CASE_NAME_HMCTS_INTERNAL, initialCaseData.getApplicantCaseName());
-        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-            caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, initialCaseData.getApplicantCaseName());
-        }
-    }
+//    private static void updateCaseName(CaseData initialCaseData, Map<String, Object> caseDataUpdated) {
+//        caseDataUpdated.put(APPLICANT_CASE_NAME, initialCaseData.getApplicantCaseName());
+//        caseDataUpdated.put(CASE_NAME_HMCTS_INTERNAL, initialCaseData.getApplicantCaseName());
+//        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
+//            caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, initialCaseData.getApplicantCaseName());
+//        }
+//    }
 
 }
