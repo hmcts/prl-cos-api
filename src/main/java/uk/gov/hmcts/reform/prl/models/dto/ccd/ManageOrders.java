@@ -56,6 +56,8 @@ public class ManageOrders {
     private final String orderDirections;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
+    @JsonProperty("furtherInformationIfRequired")
+    private final String furtherInformationIfRequired;
     private final String courtName1;
     private final Address courtAddress;
     private final String caseNumber;
@@ -233,7 +235,6 @@ public class ManageOrders {
     private final C21OrderOptionsEnum c21OrderOptions;
     @JsonProperty("typeOfC21Order")
     private String typeOfC21Order;
-    private final String furtherInformationIfRequired;
     private final YesOrNo isOnlyC47aOrderSelectedToServe;
     private final YesOrNo otherPeoplePresentInCaseFlag;
 
