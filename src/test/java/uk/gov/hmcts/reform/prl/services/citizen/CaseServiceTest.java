@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -55,6 +56,7 @@ public class CaseServiceTest {
     public static final String s2sToken = "Bearer TestAuthToken";
     public static final String caseId = "1234567891234567";
     public static final String accessCode = "123456";
+    public static final String INVALID = "Invalid";
 
     @InjectMocks
     private CaseService caseService;
@@ -276,5 +278,34 @@ public class CaseServiceTest {
 
         //Then
         assertThat(actualCaseDetails.getState()).isEqualTo(caseDetails.getState());
+    }
+
+    @Test
+    public void testValidateAccessCodeForInvalidCase() {
+
+        when(caseService.getCase(authToken, caseId)).thenReturn(null);
+
+        String isValid = caseService.validateAccessCode(authToken,s2sToken,caseId,accessCode);
+
+        assertEquals(INVALID, isValid);
+    }
+
+    @Test
+    public void testValidateAccessCodeForEmptyCaseInvites() {
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .caseInvites(null).build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234567891234567L)
+            .data(stringObjectMap)
+            .build();
+        when(coreCaseDataApi.getCase(authToken, s2sToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(stringObjectMap,CaseData.class)).thenReturn(caseData);
+
+        String isValid = caseService.validateAccessCode(authToken,s2sToken,caseId,accessCode);
+
+        assertEquals(INVALID, isValid);
     }
 }
