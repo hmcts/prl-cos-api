@@ -36,5 +36,14 @@ public enum OrderStatusEnum {
         return OrderStatusEnum.valueOf(key);
     }
 
+    public static OrderStatusEnum fromDisplayedValue(String text) {
+        for (OrderStatusEnum orderStatusEnum : OrderStatusEnum.values()) {
+            if (orderStatusEnum.displayedValue.equalsIgnoreCase(text)) {
+                return orderStatusEnum;
+            }
+        }
+        return null;
+    }
+
 
 }

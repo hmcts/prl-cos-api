@@ -1063,7 +1063,7 @@ public class ManageOrderService {
         }
 
         if (!StringUtils.isBlank(previousOrderStatus) && !StringUtils.isBlank(currentOrderStatus)
-            && OrderStatusEnum.getValue(previousOrderStatus).getPriority() > OrderStatusEnum.getValue(
+            && OrderStatusEnum.fromDisplayedValue(previousOrderStatus).getPriority() > OrderStatusEnum.fromDisplayedValue(
             currentOrderStatus).getPriority()) {
             currentOrderStatus = previousOrderStatus;
         }
