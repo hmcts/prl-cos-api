@@ -22,9 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NAME_HMCTS_INTERNAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
@@ -67,9 +64,7 @@ public class TestingSupportService {
                 .createdDate(initialCaseDetails.getCreatedDate())
                 .lastModified(initialCaseDetails.getLastModified()).build();
             caseDataUpdated = updatedCaseDetails.getData();
-//            updateCaseName(initialCaseData, caseDataUpdated);
         }
-//        log.info("/testing-support/initiateCaseCreation caseDataUpdated ===>" + caseDataUpdated);
         return caseDataUpdated;
     }
 
@@ -98,16 +93,6 @@ public class TestingSupportService {
             .c1AWelshDocument((Document) caseDataUpdated.get("c1AWelshDocument"))
             .build();
         tabService.updateAllTabsIncludingConfTab(data);
-//        log.info("/testing-support/submittedCaseCreation end ===>" + caseDataUpdated);
         return caseDataUpdated;
     }
-
-//    private static void updateCaseName(CaseData initialCaseData, Map<String, Object> caseDataUpdated) {
-//        caseDataUpdated.put(APPLICANT_CASE_NAME, initialCaseData.getApplicantCaseName());
-//        caseDataUpdated.put(CASE_NAME_HMCTS_INTERNAL, initialCaseData.getApplicantCaseName());
-//        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-//            caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, initialCaseData.getApplicantCaseName());
-//        }
-//    }
-
 }
