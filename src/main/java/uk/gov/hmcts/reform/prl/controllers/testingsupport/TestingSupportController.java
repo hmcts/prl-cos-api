@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers;
+package uk.gov.hmcts.reform.prl.controllers.testingsupport;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,7 +32,7 @@ public class TestingSupportController {
     private final TestingSupportService testingSupportService;
 
     @PostMapping(path = "/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Copy fl401 case name to C100 Case name")
+    @Operation(description = "Initiate the case creation for testing support")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
@@ -48,7 +48,7 @@ public class TestingSupportController {
     }
 
     @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Copy fl401 case name to C100 Case name")
+    @Operation(description = "Submit case creation for testing support")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
