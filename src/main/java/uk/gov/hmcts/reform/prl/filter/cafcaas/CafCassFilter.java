@@ -130,8 +130,18 @@ public class CafCassFilter {
         if (!ObjectUtils.isEmpty(applicationDetails.getValue())
             && !ObjectUtils.isEmpty(applicationDetails.getValue().getAddress())) {
             Address address = applicationDetails.getValue().getAddress();
-            return postcodeLookupService.isValidNationalPostCode(address.getPostCode(),
-                                                                 CafcassAppConstants.ENGLAND_POSTCODE_NATIONALCODE);
+            boolean isPostCodeValid = false;
+            try {
+                isPostCodeValid = postcodeLookupService.isValidNationalPostCode(
+                    address.getPostCode(),
+                    CafcassAppConstants.ENGLAND_POSTCODE_NATIONALCODE
+                );
+
+                return isPostCodeValid;
+
+            } catch (Exception e) {
+                log.error("Postcode Lookup Failed for postcode {} - {} ", address.getPostCode(), e.getMessage());
+            }
         }
         return false;
     }
