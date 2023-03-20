@@ -8,21 +8,27 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum OrderStatusEnum {
-
-    createdByCA("createdByCA", "Created by CA"),
-    createdByJudge("createdByJudge", "Created by Judge"),
-    draftedByLR("draftedByLR", "Drafted by LR"),
-    reviewedByJudge("reviewedByJudge", "Reviewed by Judge"),
-    reviewedByManager("reviewedByManager", "Reviewed by Manager"),
-    reviewedByCA("reviewedByCA", "Reviewed by CA");
+    draftedByLR("draftedByLR", "Drafted by Solicitor", 1),
+    createdByCA("createdByCA", "Created by Admin", 2),
+    reviewedByCA("reviewedByCA", "Reviewed by Admin", 3),
+    reviewedByManager("reviewedByManager", "Reviewed by Manager", 4),
+    createdByJudge("createdByJudge", "Created by Judge", 5),
+    reviewedByJudge("reviewedByJudge", "Reviewed by Judge", 6);
 
     private final String id;
     private final String displayedValue;
+
+    private final int priority;
 
 
     @JsonValue
     public String getDisplayedValue() {
         return displayedValue;
+    }
+
+    @JsonValue
+    public int getPriority() {
+        return priority;
     }
 
     @JsonCreator
