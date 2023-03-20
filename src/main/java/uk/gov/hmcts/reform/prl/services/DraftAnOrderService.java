@@ -210,7 +210,12 @@ public class DraftAnOrderService {
                             Locale.UK
                         )) : null)
                     .orderRecipients(manageOrderService.getAllRecipients(caseData))
-                    .status(manageOrderService.getOrderStatus(draftOrder.getOrderSelectionType(),loggedInUserType, eventId))
+                    .status(manageOrderService.getOrderStatus(
+                        draftOrder.getOrderSelectionType(),
+                        loggedInUserType,
+                        eventId,
+                        draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
+                    ))
                     .build())
             .isTheOrderAboutChildren(draftOrder.getIsTheOrderAboutChildren())
             .childrenList(draftOrder.getChildrenList())
@@ -434,7 +439,8 @@ public class DraftAnOrderService {
                               .status(manageOrderService.getOrderStatus(
                                   draftOrder.getOrderSelectionType(),
                                   loggedInUserType,
-                                  eventId
+                                  eventId,
+                                  draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
                               ))
                               .build())
             .build();
@@ -464,7 +470,12 @@ public class DraftAnOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getDateCreated() : dateTime.now())
-                              .status(manageOrderService.getOrderStatus(draftOrder.getOrderSelectionType(), loggedInUserType, eventId)).build())
+                              .status(manageOrderService.getOrderStatus(
+                                  draftOrder.getOrderSelectionType(),
+                                  loggedInUserType,
+                                  eventId,
+                                  draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
+                              )).build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
             .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
