@@ -91,7 +91,7 @@ public class CaseDataService {
         if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
 
             cafCassFilter.filter(cafCassResponse);
-            getHearingDetails(authorisation, cafCassResponse);
+            //getHearingDetails(authorisation, cafCassResponse);
             getHearingDetailsForAllCases(authorisation, cafCassResponse);
             updateHearingResponse(authorisation, authTokenGenerator.generate(), cafCassResponse);
 
@@ -156,13 +156,12 @@ public class CaseDataService {
         if (!listOfHearingDetails.isEmpty()) {
             for (CafCassCaseDetail cafCassCaseDetail : cafCassResponse.getCases()) {
                 for (Hearings hearing : listOfHearingDetails) {
-                    if (hearing.getCaseRef().equals(String.valueOf(cafCassCaseDetail.getId()))) {
+                    if (hearing != null && hearing.getCaseRef().equals(String.valueOf(cafCassCaseDetail.getId()))) {
                         cafCassCaseDetail.getCaseData().setHearingData(hearing);
                     }
                 }
             }
         }
-
     }
 
 
