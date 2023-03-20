@@ -3,11 +3,33 @@
   "jurisdiction": "PRIVATELAW",
   "state": "AWAITING_SUBMISSION_TO_HMCTS",
   "case_type_id": "PRLAPPS",
-  "created_date": "2023-03-18T12:03:14.548258",
-  "last_modified": "2023-03-18T12:11:55.697881",
+  "created_date": "2023-03-20T13:01:03.913356",
+  "last_modified": "2023-03-20T13:13:44.287196",
   "locked_by_user_id": null,
   "security_level": null,
   "case_data": {
+    "applicantChildDetails": [
+      {
+        "id": "a9346630-a536-42a8-90a3-c94e5c30d2b3",
+        "value": {
+          "fullName": "Joe Doe",
+          "dateOfBirth": "2020-01-01",
+          "applicantChildRelationship": "Father",
+          "respondentChildRelationship": "Mother",
+          "applicantRespondentShareParental": "Yes"
+        }
+      },
+      {
+        "id": "b05aa53d-d40f-4a15-b61a-4cd6de2e0772",
+        "value": {
+          "fullName": "Simon Anderson",
+          "dateOfBirth": "2021-01-01",
+          "applicantChildRelationship": "Father",
+          "respondentChildRelationship": "Mother",
+          "applicantRespondentShareParental": "Yes"
+        }
+      }
+    ],
     "typeOfApplicationLinkToCA": {
       "caApplicationNumber": null,
       "linkToCaApplication": "No"
@@ -19,7 +41,7 @@
       "welshLanguageRequirementApplicationNeedEnglish": null
     },
     "applicantFamilyDetails": {
-      "doesApplicantHaveChildren": "No"
+      "doesApplicantHaveChildren": "Yes"
     },
     "summaryTabForOrderAppliedFor": {
 
@@ -37,20 +59,20 @@
       "previousOrOngoingProceedings": ""
     },
     "applicationTypeDetails": {
-      "typesOfApplication": "Non-molestation order"
+      "typesOfApplication": "Non-molestation order\nOccupation order"
     },
     "respondentBehaviourData": {
-      "otherReasonApplicantWantToStopFromRespondentDoing": "test",
       "applicantWantToStopFromRespondentDoing": [
         "applicantStopFromRespondentEnum_Value_1"
       ],
       "applicantWantToStopFromRespondentDoingToChild": [
         "applicantStopFromRespondentDoingToChildEnum_Value_1"
-      ]
+      ],
+      "otherReasonApplicantWantToStopFromRespondentDoing": "test"
     },
     "fl401OtherProceedingsDetailsTable": [
       {
-        "id": "f3ead140-cd74-404d-8702-d023534f22bc",
+        "id": "ed86b519-5ea7-4cf2-9187-e372b7829f38",
         "value": {
           "caseNumber": null,
           "typeOfCase": null,
@@ -69,18 +91,18 @@
       "email": "sonali.saha@hmcts.net",
       "gender": null,
       "address": {
-        "County": "",
+        "County": null,
         "Country": "United Kingdom",
         "PostCode": "NE6 5LA",
         "PostTown": "Newcastle Upon Tyne",
-        "AddressLine1": "94 Simonside Terrace",
-        "AddressLine2": "",
-        "AddressLine3": ""
+        "AddressLine1": "96 Simonside Terrace",
+        "AddressLine2": null,
+        "AddressLine3": null
       },
-      "partyId": "9267c34e-ffc7-4c2f-a43b-09f7626a3fb1",
+      "partyId": "468cefd9-8be8-4ef1-aaed-6bbfbfd25415",
       "dxNumber": null,
       "landline": null,
-      "lastName": "test",
+      "lastName": "Richards",
       "response": {
         "miam": {
           "attendedMiam": null,
@@ -547,10 +569,10 @@
         },
         "provideDetailsForFactorsAffectingAbilityToParticipate": null
       },
-      "firstName": "bcd",
-      "dateOfBirth": null,
+      "firstName": "Mary",
+      "dateOfBirth": "1985-02-15",
       "otherGender": null,
-      "phoneNumber": "0123456789",
+      "phoneNumber": "0123456788",
       "placeOfBirth": null,
       "previousName": null,
       "solicitorOrg": {
@@ -560,7 +582,7 @@
         "details": [
 
         ],
-        "partyName": "bcd test",
+        "partyName": "Mary Richards",
         "roleOnCase": "Respondent"
       },
       "sendSignUpLink": null,
@@ -579,7 +601,7 @@
       "solicitorPartyId": null,
       "currentRespondent": null,
       "contactPreferences": null,
-      "isDateOfBirthKnown": "No",
+      "isDateOfBirthKnown": "Yes",
       "solicitorReference": null,
       "solicitorTelephone": null,
       "isPlaceOfBirthKnown": null,
@@ -609,14 +631,14 @@
     "fl401SolicitorDetailsTable": {
       "dxNumber": null,
       "solicitorOrg": {
-        "OrganisationID": "V4031UM",
-        "OrganisationName": "AutoTestt43tdf4af7d"
+        "OrganisationID": "MFQMRHW",
+        "OrganisationName": "AutoTest0velsq9dx16k"
       },
-      "solicitorEmail": "prl_aat_solicitor@mailinator.com",
+      "solicitorEmail": "legal.solicitor@example.net",
       "solicitorReference": null,
       "solicitorTelephone": "01234568999",
-      "representativeLastName": "test",
-      "representativeFirstName": "aaa"
+      "representativeLastName": "Solicitor",
+      "representativeFirstName": "Legal"
     },
     "c1ADocument": null,
     "dateOfSubmission": {
@@ -624,32 +646,32 @@
     },
     "fl401TypeOfApplicationTable": {
       "caCaseNumber": null,
-      "ordersApplyingFor": "Non-molestation order",
+      "ordersApplyingFor": "Non-molestation order, Occupation order",
       "isLinkedToChildArrangementApplication": "No"
     },
     "draftOrderDocWelsh": null,
-    "id": "1679140994504845",
+    "id": "1679317263984169",
     "fl401RespondentTable": {
       "email": "sonali.saha@hmcts.net",
       "address": {
-        "County": "",
+        "County": null,
         "Country": "United Kingdom",
         "PostCode": "NE6 5LA",
         "PostTown": "Newcastle Upon Tyne",
-        "AddressLine1": "94 Simonside Terrace",
-        "AddressLine2": "",
-        "AddressLine3": ""
+        "AddressLine1": "96 Simonside Terrace",
+        "AddressLine2": null,
+        "AddressLine3": null
       },
-      "lastName": "test",
-      "firstName": "bcd",
-      "dateOfBirth": null,
-      "phoneNumber": "0123456789",
+      "lastName": "Richards",
+      "firstName": "Mary",
+      "dateOfBirth": "1985-02-15",
+      "phoneNumber": "0123456788",
       "previousName": null,
       "isCurrentAddressKnown": "Yes",
       "canYouProvidePhoneNumber": "Yes",
       "canYouProvideEmailAddress": "Yes"
     },
-    "applicantOrRespondentCaseName": "testcase4",
+    "applicantOrRespondentCaseName": "John Doe",
     "caseFlags": {
       "details": [
 
@@ -657,7 +679,7 @@
       "partyName": null,
       "roleOnCase": null
     },
-    "applicantName": "abc test",
+    "applicantName": "John Doe",
     "selectedCaseTypeID": "FL401",
     "respondentRelationOptions": {
 
@@ -698,15 +720,35 @@
     },
     "applicantFamilyTable": {
       "applicantChild": [
-
+        {
+          "id": "a9346630-a536-42a8-90a3-c94e5c30d2b3",
+          "value": {
+            "fullName": "Joe Doe",
+            "dateOfBirth": "2020-01-01",
+            "applicantChildRelationship": "Father",
+            "respondentChildRelationship": "Mother",
+            "applicantRespondentShareParental": "Yes"
+          }
+        },
+        {
+          "id": "b05aa53d-d40f-4a15-b61a-4cd6de2e0772",
+          "value": {
+            "fullName": "Simon Anderson",
+            "dateOfBirth": "2021-01-01",
+            "applicantChildRelationship": "Father",
+            "respondentChildRelationship": "Mother",
+            "applicantRespondentShareParental": "Yes"
+          }
+        }
       ],
-      "doesApplicantHaveChildren": "No"
+      "doesApplicantHaveChildren": "Yes"
     },
-    "taskList": "<div class='width-50'>\n\n<br/>\n\n## Add application details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401CaseName/fl401CaseName1'>Case name</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401TypeOfApplication/fl401TypeOfApplication1'>Type of application</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/withoutNoticeOrderDetails/withoutNoticeOrderDetails1'>Without notice order</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add people to the case\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/information-added.png' title='Information added'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401ApplicantFamilyDetails/fl401ApplicantFamilyDetails1'>Applicant's family</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add case details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentRelationship/respondentRelationship1'>Relationship to respondent</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentBehaviour/respondentBehaviour1'>Respondent's behaviour</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add additional information\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>Only complete if relevant</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401OtherProceedings/fl401OtherProceedings1'>Other proceedings</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/welshLanguageRequirements/welshLanguageRequirements1'>Welsh language requirements</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Upload documents\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401UploadDocuments/fl401UploadDocuments1'>Upload documents</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Check and sign application\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/viewPdfDocument/viewPdfDocument1'>View PDF application</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a>Statement of truth and submit</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/cannot-start-yet.png' title='Cannot start yet'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n</div>\n\n<details class='govuk-details'>\n\n<summary class='govuk-details__summary'>\n\n<span class='govuk-details__summary-text'>\n\nWhy can't I submit my application?\n\n</span>\n\n</summary>\n\n<div class='govuk-details__text'>\n\nEnsure you have added relevant information in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentBehaviour/respondentBehaviour1'>Respondent's behaviour</a>\n\n</div>\n\n</details>",
+    "taskList": "<div class='width-50'>\n\n<br/>\n\n## Add application details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401CaseName/fl401CaseName1'>Case name</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401TypeOfApplication/fl401TypeOfApplication1'>Type of application</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/withoutNoticeOrderDetails/withoutNoticeOrderDetails1'>Without notice order</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add people to the case\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/information-added.png' title='Information added'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401ApplicantFamilyDetails/fl401ApplicantFamilyDetails1'>Applicant's family</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add case details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentRelationship/respondentRelationship1'>Relationship to respondent</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentBehaviour/respondentBehaviour1'>Respondent's behaviour</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401Home/fl401Home1'>The home</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add additional information\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>Only complete if relevant</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401OtherProceedings/fl401OtherProceedings1'>Other proceedings</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/welshLanguageRequirements/welshLanguageRequirements1'>Welsh language requirements</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Upload documents\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401UploadDocuments/fl401UploadDocuments1'>Upload documents</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Check and sign application\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/viewPdfDocument/viewPdfDocument1'>View PDF application</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a>Statement of truth and submit</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/cannot-start-yet.png' title='Cannot start yet'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n</div>\n\n<details class='govuk-details'>\n\n<summary class='govuk-details__summary'>\n\n<span class='govuk-details__summary-text'>\n\nWhy can't I submit my application?\n\n</span>\n\n</summary>\n\n<div class='govuk-details__text'>\n\nEnsure you have added all relevant details in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401Home/fl401Home1'>The home</a>\n\n</div>\n\n</details>",
     "caseSolicitorOrgName": "FPRL-test-organisation",
     "typeOfApplicationOrders": {
       "orderType": [
-        "nonMolestationOrder"
+        "nonMolestationOrder",
+        "occupationOrder"
       ]
     },
     "caseSolicitorName": "AAT Solicitor",
@@ -721,13 +763,13 @@
         "Country": "United Kingdom",
         "PostCode": "NE6 5LA",
         "PostTown": "Newcastle Upon Tyne",
-        "AddressLine1": "98 Simonside Terrace",
+        "AddressLine1": "100 Simonside Terrace",
         "AddressLine2": "",
         "AddressLine3": ""
       },
-      "lastName": "test",
-      "firstName": "abc",
-      "dateOfBirth": "1987-01-01",
+      "lastName": "Doe",
+      "firstName": "John",
+      "dateOfBirth": "1980-01-01",
       "phoneNumber": "01234567890",
       "previousName": null,
       "isAddressConfidential": "No",
@@ -739,6 +781,28 @@
     "respondentRelationObject": {
       "applicantRelationship": "marriedOrCivil"
     },
+    "fl401ChildDetailsTable": [
+      {
+        "id": "a9346630-a536-42a8-90a3-c94e5c30d2b3",
+        "value": {
+          "fullName": "Joe Doe",
+          "dateOfBirth": "2020-01-01",
+          "applicantChildRelationship": "Father",
+          "respondentChildRelationship": "Mother",
+          "applicantRespondentShareParental": "Yes"
+        }
+      },
+      {
+        "id": "b05aa53d-d40f-4a15-b61a-4cd6de2e0772",
+        "value": {
+          "fullName": "Simon Anderson",
+          "dateOfBirth": "2021-01-01",
+          "applicantChildRelationship": "Father",
+          "respondentChildRelationship": "Mother",
+          "applicantRespondentShareParental": "Yes"
+        }
+      }
+    ],
     "urgencyDetails": {
       "urgencyStatus": "With notice"
     },
@@ -763,7 +827,9 @@
       "habitualResidentInOtherStateGiveReason": null
     },
     "respondentBehaviourTable": {
-
+      "applicantWantToStopFromRespondentDoing": "Being violent or threatening towards them",
+      "applicantWantToStopFromRespondentDoingToChild": "Being violent or threatening towards their child or children",
+      "otherReasonApplicantWantToStopFromRespondentDoing": "test"
     },
     "relationshipToRespondentTable": {
       "applicantRelationship": "Married or in a civil partnership",
@@ -774,7 +840,7 @@
     },
     "otherProceedingsForSummaryTab": [
       {
-        "id": "27ad88e6-34c7-43b2-8728-86cd93d1833f",
+        "id": "c9891f9c-a69a-4d45-a697-09f46361049b",
         "value": {
           "caseNumber": null,
           "nameOfCourt": null,
@@ -785,19 +851,85 @@
     "allegationOfHarm": {
 
     },
-    "caseNameHmctsInternal": "testcase4",
+    "caseNameHmctsInternal": "John Doe",
     "SearchCriteria": {
 
     },
+    "home": {
+      "textAreaSomethingElse": null,
+      "everLivedAtTheAddress": "yesRespondent",
+      "intendToLiveAtTheAddress": null,
+      "doAnyChildrenLiveAtAddress": "No",
+      "isPropertyAdapted": "No",
+      "howIsThePropertyAdapted": null,
+      "isThereMortgageOnProperty": "No",
+      "isPropertyRented": "No",
+      "doesApplicantHaveHomeRights": "No",
+      "furtherInformation": "test",
+      "address": {
+        "AddressLine1": "Flat 23",
+        "AddressLine2": "Central House",
+        "AddressLine3": "3 Lampton Road",
+        "PostTown": "Hounslow",
+        "County": "",
+        "PostCode": "TW3 1HY",
+        "Country": "United Kingdom"
+      },
+      "peopleLivingAtThisAddress": [
+        "applicant"
+      ],
+      "children": [
+
+      ],
+      "mortgages": {
+        "textAreaSomethingElse": null,
+        "mortgageNumber": null,
+        "mortgageLenderName": null,
+        "mortgageNamedAfter": [
+
+        ],
+        "address": {
+          "AddressLine1": null,
+          "AddressLine2": null,
+          "AddressLine3": null,
+          "PostTown": null,
+          "County": null,
+          "PostCode": null,
+          "Country": null
+        }
+      },
+      "landlords": {
+        "textAreaSomethingElse": null,
+        "landlordName": null,
+        "mortgageNamedAfterList": [
+
+        ],
+        "address": {
+          "AddressLine1": null,
+          "AddressLine2": null,
+          "AddressLine3": null,
+          "PostTown": null,
+          "County": null,
+          "PostCode": null,
+          "Country": null
+        }
+      },
+      "livingSituation": [
+        "ableToStayInHome"
+      ],
+      "familyHome": [
+        "payForRepairs"
+      ]
+    },
     "finalDocument": null,
-    "respondentName": "bcd test",
+    "respondentName": "Mary Richards",
     "allocatedJudgeDetails": {
       "lastName": " ",
       "courtName": " ",
       "judgeTitle": " ",
       "emailAddress": " "
     },
-    "applicantCaseName": "testcase4",
+    "applicantCaseName": "John Doe",
     "withoutNoticeOrderTable": {
       "futherDetails": null,
       "bailConditionEndDate": null,
@@ -819,14 +951,14 @@
         "Country": "United Kingdom",
         "PostCode": "NE6 5LA",
         "PostTown": "Newcastle Upon Tyne",
-        "AddressLine1": "98 Simonside Terrace",
+        "AddressLine1": "100 Simonside Terrace",
         "AddressLine2": "",
         "AddressLine3": ""
       },
-      "partyId": "35b51a95-c91a-41d6-a6ab-52ba05306e67",
+      "partyId": "01a95dc3-46ec-4728-b8d2-5507badb5aef",
       "dxNumber": null,
       "landline": null,
-      "lastName": "test",
+      "lastName": "Doe",
       "response": {
         "miam": {
           "attendedMiam": null,
@@ -1293,37 +1425,37 @@
         },
         "provideDetailsForFactorsAffectingAbilityToParticipate": null
       },
-      "firstName": "abc",
-      "dateOfBirth": "1987-01-01",
+      "firstName": "John",
+      "dateOfBirth": "1980-01-01",
       "otherGender": null,
       "phoneNumber": "01234567890",
       "placeOfBirth": null,
       "previousName": null,
       "solicitorOrg": {
-        "OrganisationID": "V4031UM",
-        "OrganisationName": "AutoTestt43tdf4af7d"
+        "OrganisationID": "MFQMRHW",
+        "OrganisationName": "AutoTest0velsq9dx16k"
       },
       "partyLevelFlag": {
         "details": [
 
         ],
-        "partyName": "abc test",
+        "partyName": "John Doe",
         "roleOnCase": "Applicant"
       },
       "sendSignUpLink": null,
-      "solicitorEmail": "prl_aat_solicitor@mailinator.com",
+      "solicitorEmail": "legal.solicitor@example.net",
       "isAddressUnknown": null,
       "solicitorAddress": {
         "County": "",
         "Country": "United Kingdom",
         "PostCode": "NE6 5LA",
         "PostTown": "Newcastle Upon Tyne",
-        "AddressLine1": "100 Simonside Terrace",
+        "AddressLine1": "96 Simonside Terrace",
         "AddressLine2": "",
         "AddressLine3": ""
       },
-      "solicitorOrgUuid": "58a216ff-0c20-4837-8790-f247e52d53bc",
-      "solicitorPartyId": "1dc86f5e-bb47-4e74-b6a0-823a73d58b48",
+      "solicitorOrgUuid": "79621c6b-4390-46eb-9e68-fece528ab3e1",
+      "solicitorPartyId": "51273f63-d0a4-497b-9114-739a338f1d78",
       "currentRespondent": null,
       "contactPreferences": null,
       "isDateOfBirthKnown": null,
@@ -1334,8 +1466,8 @@
       "isAddressConfidential": "No",
       "isCurrentAddressKnown": null,
       "relationshipToChildren": null,
-      "representativeLastName": "test",
-      "representativeFirstName": "aaa",
+      "representativeLastName": "Solicitor",
+      "representativeFirstName": "Legal",
       "canYouProvidePhoneNumber": null,
       "applicantPreferredContact": [
 
@@ -1353,7 +1485,5 @@
       ],
       "isAtAddressLessThan5YearsWithDontKnow": null
     }
-  },
-  "security_classification": "PUBLIC",
-  "callback_response_status": null
+  }
 }
