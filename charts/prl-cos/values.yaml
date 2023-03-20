@@ -1,41 +1,41 @@
 java:
   applicationPort: 4044
-  ingressHost: prl-cos-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
+  ingressHost: prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
   aadIdentityName: prl
   autoscaling:
     enabled: true
     maxReplicas: 9
-    minReplicas: 6
+    minReplicas: 2
     targetCPUUtilizationPercentage: 80 # Default is 80% target CPU utilization
   environment:
-    PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
+    PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
     IDAM_CLIENT_ID: prl-cos-api
-    IDAM_CLIENT_REDIRECT_URI: https://prl-cos-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net/oauth2/callback
+    IDAM_CLIENT_REDIRECT_URI: https://prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/oauth2/callback
     IDAM_API_URL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
-    IDAM_S2S_AUTH_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
-    CORE_CASE_DATA_API_URL: http://ccd-data-store-api-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
+    IDAM_S2S_AUTH_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    CORE_CASE_DATA_API_URL: http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
-    AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
+    AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     DOCMOSIS_SERVICE_BASE_URL: https://docmosis.aat.platform.hmcts.net
-    CCD_CASE_DOCS_AM_API: http://ccd-case-document-am-api-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
+    CCD_CASE_DOCS_AM_API: http://ccd-case-document-am-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     XUI_URL: https://manage-case.{{ .Values.global.environment }}.platform.hmcts.net/cases/case-details
     REFORM_SERVICE_NAME: prl_cos_api
     AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE: prl_cos_api
     AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS: 900
     IDAM_S2S_AUTH_MICROSERVICE: prl_cos_api
-    PAY_URL: http://payment-api-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
-    PAY_CALLBACK_URL: http://prl-cos-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net/service-request-update
-    PRL_DGS_API_URL: http://prl-dgs-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
-    FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
+    PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    PAY_CALLBACK_URL: http://prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/service-request-update
+    PRL_DGS_API_URL: http://prl-dgs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PRL_S2S_AUTHORISED_SERVICES: api_gw,prl_citizen_frontend,fis_hmc_api
-    FACT_API: http://fact-api-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
-    LOCATION_REF_API: http://rd-location-ref-api-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
-    RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
-    ACA_SERVICE_API_BASEURL: http://aac-manage-case-assignment-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
+    FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    LOCATION_REF_API: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    ACA_SERVICE_API_BASEURL: http://aac-manage-case-assignment-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     CITIZEN_URL: https://privatelaw.{{ .Values.global.environment }}.platform.hmcts.net
-    BUNDLE_URL: http://em-ccd-orchestrator-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
-    HEARING_API_BASEURL : http://fis-hmc-api-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
+    BUNDLE_URL: http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    HEARING_API_BASEURL : http://fis-hmc-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
 
   keyVaults:
     prl:
