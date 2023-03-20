@@ -7,18 +7,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-//import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-//import uk.gov.hmcts.reform.prl.models.Element;
-//import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-
-//import java.util.List;
-//import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -63,20 +57,6 @@ public class CitizenEmailService {
         EmailTemplateVars emailTemplate = buildCitizenCaseSubmissionEmail(
             userDetails, String.valueOf(caseData.getId()), caseData.getApplicantCaseName());
         sendWithdrawalEmail(userDetails.getEmail(), emailTemplate, caseData);
-
-        /*List<PartyDetails> applicants = caseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .filter(applicant -> YesOrNo.Yes.equals(applicant.getCanYouProvideEmailAddress()))
-            .collect(Collectors.toList());
-
-        List<String> applicantEmailIds = applicants.stream()
-            .map(PartyDetails::getEmail)
-            .collect(Collectors.toList());
-        applicantEmailIds.forEach(email -> {
-            sendWithdrawalEmail(email, emailTemplete); });*/
-
     }
 
     private void sendWithdrawalEmail(String address, EmailTemplateVars email, CaseData caseData) {
