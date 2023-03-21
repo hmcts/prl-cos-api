@@ -416,10 +416,14 @@ public class ManageOrderService {
             case standardDirectionsOrder:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, sdoDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, sdoDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
                 break;
             case directionOnIssue:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, doiDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, doiDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
                 break;
             case blankOrderOrDirectionsWithdraw:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
@@ -889,7 +893,7 @@ public class ManageOrderService {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
             generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                CaseDetails.builder().caseData(caseData).build(),
                 fieldsMap.get(PrlAppsConstants.TEMPLATE)
             );
             caseDataUpdated.put("previewOrderDoc", Document.builder()
@@ -1091,7 +1095,7 @@ public class ManageOrderService {
 
             generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                CaseDetails.builder().caseData(caseData).build(),
                 template
             );
             if (documentLanguage.isGenWelsh()) {
@@ -1101,7 +1105,7 @@ public class ManageOrderService {
                 if (welshTemplate != null && welshTemplate.contains("-WEL-")) {
                     generatedDocumentInfoWelsh = dgsService.generateWelshDocument(
                         authorisation,
-                        CaseDetails.builder().caseData(caseData).build(),
+                        uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
                         welshTemplate
                     );
                 }

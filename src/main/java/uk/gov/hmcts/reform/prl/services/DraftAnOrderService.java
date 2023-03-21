@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.Post
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -233,14 +234,14 @@ public class DraftAnOrderService {
             if (documentLanguage.isGenEng()) {
                 generatedDocumentInfo = dgsService.generateDocument(
                     auth,
-                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                    CaseDetails.builder().caseData(caseData).build(),
                     fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
                 );
             }
             if (documentLanguage.isGenWelsh()) {
                 generatedDocumentInfoWelsh = dgsService.generateDocument(
                     auth,
-                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                    CaseDetails.builder().caseData(caseData).build(),
                     fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH)
                 );
             }
