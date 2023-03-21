@@ -605,23 +605,9 @@ public class ManageOrderService {
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             List<Element<OrderDetails>> orderCollection = new ArrayList<>();
-            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-            if (documentLanguage.isGenEng()) {
-                log.info("*** Generating Final order in English ***");
-                orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
-                                                           fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME),
-                                                           fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME),
-                                                           caseData
-                ));
+            orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
+                                                       fieldMap, caseData));
 
-            }
-            if (documentLanguage.isGenWelsh()) {
-                log.info("*** Generating Final order in Welsh ***");
-                orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
-                                                           fieldMap.get(FINAL_TEMPLATE_WELSH),
-                                                           fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME), caseData
-                ));
-            }
             return orderCollection;
         } else {
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
@@ -1092,20 +1078,34 @@ public class ManageOrderService {
     }
 
     private Element<OrderDetails> getOrderDetailsElement(String authorisation, String flagSelectedOrderId,
-                                                         String flagSelectedOrder, String template, String fileName,
+                                                         String flagSelectedOrder, Map<String, String> fieldMap,
                                                          CaseData caseData) throws Exception {
-        log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, template);
+
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
-        if (template != null) {
-            generatedDocumentInfo = template.contains("-WEL-") ? dgsService.generateWelshDocument(
-                authorisation,
-                CaseDetails.builder().caseData(caseData).build(),
-                template
-            ) : dgsService.generateDocument(
+        GeneratedDocumentInfo generatedDocumentInfoWelsh = GeneratedDocumentInfo.builder().build();
+
+        if (documentLanguage.isGenEng()) {
+            log.info("*** Generating Final order in English ***");
+            String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
+
+            generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 CaseDetails.builder().caseData(caseData).build(),
                 template
             );
+            if (documentLanguage.isGenWelsh()) {
+                log.info("*** Generating Final order in Welsh ***");
+                String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
+                log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, welshTemplate);
+                if (welshTemplate != null && welshTemplate.contains("-WEL-")) {
+                    generatedDocumentInfoWelsh = dgsService.generateWelshDocument(
+                        authorisation,
+                        CaseDetails.builder().caseData(caseData).build(),
+                        welshTemplate
+                    );
+                }
+            }
         }
 
         return element(OrderDetails.builder().orderType(flagSelectedOrder)
@@ -1122,7 +1122,12 @@ public class ManageOrderService {
                                               .documentUrl(generatedDocumentInfo.getUrl())
                                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                               .documentHash(generatedDocumentInfo.getHashToken())
-                                              .documentFileName(fileName).build())
+                                              .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
+                           .orderDocumentWelsh(documentLanguage.isGenWelsh() ? Document.builder()
+                                               .documentUrl(generatedDocumentInfoWelsh.getUrl())
+                                               .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
+                                               .documentHash(generatedDocumentInfoWelsh.getHashToken())
+                                               .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build() : null)
                            .otherDetails(OtherOrderDetails.builder()
                                              .createdBy(caseData.getJudgeOrMagistratesLastName())
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
