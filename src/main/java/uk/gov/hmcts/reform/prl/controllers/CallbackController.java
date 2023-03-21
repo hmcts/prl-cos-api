@@ -327,16 +327,16 @@ public class CallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String[] idEmail = caseData.getCourtList().getValue().getCode().split(":");
-        String baseLocation = Arrays.stream(idEmail).toArray()[0].toString();
-        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocation,authorisation).split("-");
-        String region = Arrays.stream(venueDetails).toArray()[1].toString();
+        String baseLocationId = Arrays.stream(idEmail).toArray()[0].toString();
+        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,authorisation).split("-");
+        String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
         String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
         caseDataUpdated.put(COURT_NAME_FIELD, courtName);
-        caseDataUpdated.put(COURT_ID_FIELD, baseLocation);
+        caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
         String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
         String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
         caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-            .region(region).baseLocation(baseLocation).regionName(regionName)
+            .region(regionId).baseLocation(baseLocationId).regionName(regionName)
             .baseLocationName(baseLocationName).build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
