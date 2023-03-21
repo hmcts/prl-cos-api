@@ -889,7 +889,7 @@ public class ManageOrderService {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
             generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
-                CaseDetails.builder().caseData(caseData).build(),
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
                 fieldsMap.get(PrlAppsConstants.TEMPLATE)
             );
             caseDataUpdated.put("previewOrderDoc", Document.builder()
@@ -1091,7 +1091,7 @@ public class ManageOrderService {
 
             generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
-                CaseDetails.builder().caseData(caseData).build(),
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
                 template
             );
             if (documentLanguage.isGenWelsh()) {
