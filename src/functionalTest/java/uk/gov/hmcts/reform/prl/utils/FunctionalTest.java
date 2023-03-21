@@ -67,7 +67,7 @@ public abstract class FunctionalTest {
                        .build())
             .data(Map.of(
                 "applicant1SolicitorName", "functional test",
-                "applicant1LanguagePreferenceWelsh", "NO"
+                "applicant1LanguagePreferenceWelsh", "YES"
             ))
             .build();
 
