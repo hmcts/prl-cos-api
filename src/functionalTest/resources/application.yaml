@@ -108,8 +108,6 @@ uk:
             CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
-            SOLICITOR: 8cb02993-7dbe-4e53-a4c4-8bdc106c99ae
-            RETURNAPPLICATION: daf43ed7-d51e-4e0b-ac93-78b412cd4c47
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
