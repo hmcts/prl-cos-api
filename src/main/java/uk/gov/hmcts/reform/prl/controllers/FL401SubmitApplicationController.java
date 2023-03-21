@@ -134,14 +134,14 @@ public class FL401SubmitApplicationController {
         final LocalDate localDate = LocalDate.now();
 
         String[] idEmail = caseData.getSubmitCountyCourtSelection().getValue().getCode().split(":");
-        String baseLocationId = Arrays.stream(idEmail).toArray()[0].toString();
-        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,authorisation).split("-");
+        String baseLocation = Arrays.stream(idEmail).toArray()[0].toString();
+        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocation,authorisation).split("-");
         String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
         caseData = caseData.toBuilder().issueDate(localDate).courtName(courtName).build();
         caseData = caseData.toBuilder().isCourtEmailFound("Yes").build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(COURT_NAME_FIELD, courtName);
-        caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
+        caseDataUpdated.put(COURT_ID_FIELD, baseLocation);
         String courtEmail = "";
         if (idEmail.length > 1) {
             courtEmail = Arrays.stream(idEmail).toArray()[1].toString();
@@ -149,9 +149,9 @@ public class FL401SubmitApplicationController {
         }
         String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
         String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
-        String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
+        String region = Arrays.stream(venueDetails).toArray()[1].toString();
         caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-            .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
+            .region(region).baseLocation(baseLocation).regionName(regionName)
             .baseLocationName(baseLocationName).build());
 
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
