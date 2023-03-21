@@ -45,10 +45,8 @@ public class AbilityToParticipateChecker implements RespondentEventChecker {
                     .getValue()
                     .getResponse()
                     .getAbilityToParticipate());
-            if (!abilityToParticipate.isEmpty()) {
-                if (checkAbilityToParticipateMandatoryCompleted(abilityToParticipate)) {
-                    mandatoryInfo = true;
-                }
+            if (!abilityToParticipate.isEmpty() && checkAbilityToParticipateMandatoryCompleted(abilityToParticipate)) {
+                mandatoryInfo = true;
             }
         }
         return mandatoryInfo;
