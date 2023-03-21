@@ -34,7 +34,8 @@ public class EmailService {
         final String reference = templateVars.getCaseReference();
         onBeforeLog(templateName, templateVars.getCaseReference(), reference);
         final String templateId = getTemplateId(templateName, languagePreference);
-
+        log.info("template id : {}, {}", languagePreference, templateId);
+        log.info("template name : {}", templateName);
         try {
             SendEmailResponse response = notificationClient.sendEmail(templateId, email, toMap(templateVars),
                                                                       reference);
