@@ -17,10 +17,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -32,6 +34,7 @@ public class CaseDataApplicantElementsMapper {
     private static final String ADDRESS_FIELD = "address";
     private static final String EMAIL_FIELD = "email";
     private static final String TELEPHONE_FIELD = "telephone";
+    private static final String I_DONT_KNOW = "I dont know";
 
     public static void updateApplicantElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
                                                       C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements) {
@@ -120,14 +123,24 @@ public class CaseDataApplicantElementsMapper {
                                                               List<String> contactDetailsPrivateList) {
         return KeepDetailsPrivate
             .builder()
-            .otherPeopleKnowYourContactDetails(YesNoDontKnow.getDisplayedValueIgnoreCase(applicantDto.getDetailsKnown()))
+            .otherPeopleKnowYourContactDetails(I_DONT_KNOW.equalsIgnoreCase(applicantDto.getDetailsKnown())
+                                                   ? YesNoDontKnow.dontKnow :
+                                                   YesNoDontKnow.getDisplayedValueIgnoreCase(applicantDto.getDetailsKnown()))
             .confidentiality(isNotEmpty(applicantDto.getStart())
                                  ? YesOrNo.getValue(applicantDto.getStart())
                                  : YesOrNo.getValue(applicantDto.getStartAlternative()))
-            .confidentialityList(contactDetailsPrivateList.stream().map(c -> TELEPHONE_FIELD.equals(c)
+            .confidentialityList(buildConfidentialityList(contactDetailsPrivateList))
+            .build();
+    }
+
+    private static List<ConfidentialityListEnum> buildConfidentialityList(List<String> contactDetailsPrivateList) {
+        if (isNull(contactDetailsPrivateList) || contactDetailsPrivateList.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            return contactDetailsPrivateList.stream().map(c -> TELEPHONE_FIELD.equals(c)
                 ? ConfidentialityListEnum.phoneNumber
                 : ConfidentialityListEnum.getValue(c)).collect(
-                Collectors.toList()))
-            .build();
+                Collectors.toList());
+        }
     }
 }
