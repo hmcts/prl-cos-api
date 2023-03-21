@@ -64,16 +64,16 @@ public class C100IssueCaseController {
 
         if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
             String[] idEmail = caseData.getCourtList().getValue().getCode().split(":");
-            String baseLocation = Arrays.stream(idEmail).toArray()[0].toString();
-            String key = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocation, authorisation);
+            String baseLocationId = Arrays.stream(idEmail).toArray()[0].toString();
+            String key = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
             String[] venueDetails = key.split("-");
-            String region = Arrays.stream(venueDetails).toArray()[1].toString();
+            String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
             String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
             String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
             String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
             caseDataUpdated.put("courtName", courtName);
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-                .region(region).baseLocation(baseLocation).regionName(regionName)
+                .region(regionId).baseLocation(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
             String courtEmail = "";
             if (idEmail.length > 1) {
