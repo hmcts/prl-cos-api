@@ -51,9 +51,6 @@ public class TaskListController extends AbstractCallbackController {
     @Autowired
     DocumentGenService dgsService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                 @RequestHeader(HttpHeaders.AUTHORIZATION)
