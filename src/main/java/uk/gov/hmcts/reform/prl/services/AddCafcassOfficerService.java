@@ -39,6 +39,7 @@ public class AddCafcassOfficerService {
         for (Element<ChildAndCafcassOfficer> cafcassOfficer : childAndCafcassOfficers) {
             caseDataUpdated.putAll(populateCafcassOfficerForCA(caseData, cafcassOfficer));
         }
+        caseDataUpdated.put(CHILD_DETAILS_TABLE, applicationsTabService.getChildDetails(caseData));
         caseDataUpdated.put(CHILD_AND_CAFCASS_OFFICER_DETAILS, applicationsTabService.prePopulateChildAndCafcassOfficerDetails(caseData));
         return caseDataUpdated;
     }
@@ -77,7 +78,6 @@ public class AddCafcassOfficerService {
                 children.set(children.indexOf(child), element(child.getId(), amendedChild));
             });
         childDetailsMap.put(CHILDREN, children);
-        childDetailsMap.put(CHILD_DETAILS_TABLE, applicationsTabService.getChildDetails(caseData));
 
         return childDetailsMap;
     }
