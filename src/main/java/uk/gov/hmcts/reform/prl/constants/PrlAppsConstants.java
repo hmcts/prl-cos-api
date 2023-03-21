@@ -374,7 +374,7 @@ public class PrlAppsConstants {
     public static final String CAFCASS_CYMRU_HEARING_CHANNEL = "cafcassCymruHearingChannel";
     public static final String HEARING_LISTED_LINKED_CASES = "hearingListedLinkedCases";
     public static final String LOCAL_AUTHORITY_HEARING_CHANNEL = "localAuthorityHearingChannel";
-    public static final String COURT_LIST ="courtList";
+    public static final String COURT_LIST = "courtList";
     public static final String HEARING_VIDEO_CHANNELS = "hearingVideoChannels";
     public static final String HEARING_TELEPHONE_CHANNELS = "hearingTelephoneChannels";
     public static final String HEARING_DATE_TIMES = "hearingDateTimes";
@@ -382,7 +382,7 @@ public class PrlAppsConstants {
     public static final String HEARING_ESTIMATED_HOURS = "hearingEstimatedHours";
     public static final String HEARING_ESTIMATED_MINUTES = "hearingEstimatedMinutes";
     public static final String HEARING_ESTIMATED_DAYS = "hearingEstimatedDays";
-    public static final String ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY ="allPartiesAttendHearingSameWayYesOrNo";
+    public static final String ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY = "allPartiesAttendHearingSameWayYesOrNo";
 
     public static final String HEARING_AUTHORITY = "hearingAuthority";
     public static final String HEARING_CHANNELS_ENUM = "hearingChannelsEnum";
