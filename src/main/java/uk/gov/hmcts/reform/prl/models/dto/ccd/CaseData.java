@@ -28,8 +28,12 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DomesticAbuseOrdersEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.FcOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrdersOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
@@ -45,6 +49,7 @@ import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -83,7 +88,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
@@ -120,10 +124,10 @@ public class CaseData implements MappableObject {
 
     private final State state;
 
-    @JsonIgnore
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime createdDate;
 
-    @JsonIgnore
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
@@ -136,12 +140,16 @@ public class CaseData implements MappableObject {
     /**
      * Case Type Of Application.
      */
+    @JsonProperty("caseTypeOfApplication")
     private final String caseTypeOfApplication;
 
     /**
      * Case created by.
      */
     private CaseCreatedBy caseCreatedBy;
+
+    @JsonProperty("isCafcass")
+    private YesOrNo isCafcass;
 
     /**
      * Case Type Of Application.
@@ -532,7 +540,11 @@ public class CaseData implements MappableObject {
     private String isDocumentGenerated;
     private String isNotificationSent;
 
+
     private ChildArrangementOrdersEnum childArrangementOrders;
+    private DomesticAbuseOrdersEnum domesticAbuseOrders;
+    private FcOrdersEnum fcOrders;
+    private OtherOrdersOptionEnum otherOrdersOption;
 
     /**
      * Manage Orders.
@@ -540,8 +552,9 @@ public class CaseData implements MappableObject {
 
     private final List<Element<OrderDetails>> orderCollection;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate approvalDate;
-    private Document appointmentOfGuardian;
+    private Document uploadOrderDoc;
     private Document previewOrderDoc;
     private Document previewOrderDocWelsh;
 
@@ -549,7 +562,6 @@ public class CaseData implements MappableObject {
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
     private final List<OrderRecipientsEnum> orderRecipients;
     private final SelectTypeOfOrderEnum selectTypeOfOrder;
-
 
     @JsonProperty("doesOrderClosesCase")
     private final YesOrNo doesOrderClosesCase;
@@ -561,9 +573,6 @@ public class CaseData implements MappableObject {
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
-
-    @JsonProperty("childOption")
-    private final String childOption;
 
     @JsonProperty("childrenList")
     private final String childrenList;
@@ -595,6 +604,7 @@ public class CaseData implements MappableObject {
     private String caseSolicitorName;
     private String caseSolicitorOrgName;
     private String selectedOrder;
+    private String selectedC21Order;
 
 
     /**
@@ -635,7 +645,7 @@ public class CaseData implements MappableObject {
     /**
      * Service Of Application.
      */
-    private OrdersToServeSA serviceOfApplicationScreen1;
+    private DynamicMultiSelectList serviceOfApplicationScreen1;
     private ConfirmRecipients confirmRecipients;
 
     @JsonProperty("citizenUploadedDocumentList")
@@ -739,6 +749,8 @@ public class CaseData implements MappableObject {
     private YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     private String courtAdminNotes;
 
+
+
     @JsonUnwrapped
     @Builder.Default
     private final ServeOrderData serveOrderData;
@@ -752,4 +764,8 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
+    private final DraftOrderOptionsEnum draftOrderOptions;
+
+    //Added for c100 rebuild
+    private Long noOfDaysRemainingToSubmitCase;
 }

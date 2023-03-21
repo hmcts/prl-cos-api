@@ -81,4 +81,34 @@
       tomcat-embed-core-9.0.68.jar ]]></notes>
     <cve>CVE-2022-45143</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+      spring-security-core-5.6.2.jar, spring-security-crypto-5.4.5.jar ]]></notes>
+    <cve>CVE-2022-22978</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      spring-security-core-5.6.2.jar ]]></notes>
+    <cve>CVE-2022-22976</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      spring-security-crypto-5.4.5.jar ]]></notes>
+    <cve>CVE-2021-22119</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      bcprov-jdk15on-1.64.jar ]]></notes>
+    <cve>CVE-2020-15522</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      spring-security-core-5.6.2.jar, spring-security-web-5.7.1.jar ]]></notes>
+    <cve>CVE-2022-31692</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      spring-security-core-5.6.2.jar, spring-security-web-5.7.1.jar ]]></notes>
+    <cve>CVE-2022-31690</cve>
+  </suppress>
 </suppressions>
