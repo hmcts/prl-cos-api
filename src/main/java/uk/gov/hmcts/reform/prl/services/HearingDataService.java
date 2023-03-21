@@ -31,18 +31,49 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_HEARING_CHANNEL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR_HEARING_CHANNEL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CYMRU_HEARING_CHANNEL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_HEARING_CHANNEL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIRMED_HEARING_DATES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_LIST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_CONFIRMED_IN_HEARINGS_TAB;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EARLIEST_HEARING_DATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FIRST_DATE_OF_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_AUTHORITY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_CHANNELS_ENUM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_DATE_CONFIRM_OPTION_ENUM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_DATE_TIMES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_ESTIMATED_DAYS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_ESTIMATED_HOURS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_ESTIMATED_MINUTES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_NAME_AND_EMAIL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_LISTED_LINKED_CASES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_MUST_TAKE_PLACE_AT_HOUR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_MUST_TAKE_PLACE_AT_MINUTE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PRIORITY_TYPE_ENUM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SPECIFIC_DATES_OPTIONS_ENUM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_TELEPHONE_CHANNELS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_VIDEO_CHANNELS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_N;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_Y;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LATEST_HEARING_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_HEARING_CHANNEL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_HEARING_CHANNEL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONEPLATFORM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONESUBCHANNELS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
@@ -245,6 +276,42 @@ public class HearingDataService {
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY)
             .listItems(listItems).build();
+    }
+
+    public void nullifyUnncessaryFieldsPopulated(LinkedHashMap hearingDataFromMap) {
+        //Note: When we add new fields , we need to add those fields in respective if else blocks to nullify to handle the data clearing issue from UI
+        if  (!(DATE_CONFIRMED_IN_HEARINGS_TAB.equals(hearingDataFromMap.get(HEARING_DATE_CONFIRM_OPTION_ENUM)))) {
+            hearingDataFromMap.put(CONFIRMED_HEARING_DATES,null);
+        } else {
+            hearingDataFromMap.put(APPLICANT_HEARING_CHANNEL, null);
+            hearingDataFromMap.put(APPLICANT_SOLICITOR_HEARING_CHANNEL, null);
+            hearingDataFromMap.put(RESPONDENT_HEARING_CHANNEL, null);
+            hearingDataFromMap.put(RESPONDENT_SOLICITOR_HEARING_CHANNEL, null);
+            hearingDataFromMap.put(CAFCASS_HEARING_CHANNEL, null);
+            hearingDataFromMap.put(CAFCASS_CYMRU_HEARING_CHANNEL, null);
+            hearingDataFromMap.put(HEARING_LISTED_LINKED_CASES, null);
+            hearingDataFromMap.put(LOCAL_AUTHORITY_HEARING_CHANNEL, null);
+            hearingDataFromMap.put(COURT_LIST, null);
+            hearingDataFromMap.put(HEARING_VIDEO_CHANNELS, null);
+            hearingDataFromMap.put(HEARING_TELEPHONE_CHANNELS, null);
+            hearingDataFromMap.put(HEARING_DATE_TIMES, null);
+            hearingDataFromMap.put(HEARING_ESTIMATED_HOURS,0);
+            hearingDataFromMap.put(HEARING_ESTIMATED_MINUTES,0);
+            hearingDataFromMap.put(HEARING_ESTIMATED_DAYS,0);
+            hearingDataFromMap.put(ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY,null);
+            hearingDataFromMap.put(HEARING_AUTHORITY,null);
+            hearingDataFromMap.put(HEARING_CHANNELS_ENUM,null);
+            hearingDataFromMap.put(HEARING_JUDGE_NAME_AND_EMAIL, null);
+            hearingDataFromMap.put(HEARING_SPECIFIC_DATES_OPTIONS_ENUM, null);
+            hearingDataFromMap.put(FIRST_DATE_OF_THE_HEARING, null);
+            hearingDataFromMap.put(HEARING_MUST_TAKE_PLACE_AT_HOUR,0);
+            hearingDataFromMap.put(HEARING_MUST_TAKE_PLACE_AT_MINUTE,0);
+            hearingDataFromMap.put(EARLIEST_HEARING_DATE, null);
+            hearingDataFromMap.put(LATEST_HEARING_DATE, null);
+            hearingDataFromMap.put(HEARING_PRIORITY_TYPE_ENUM, null);
+            hearingDataFromMap.put(CUSTOM_DETAILS,null);
+        }
+
     }
 
 }
