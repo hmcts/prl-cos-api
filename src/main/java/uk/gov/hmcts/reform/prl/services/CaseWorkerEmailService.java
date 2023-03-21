@@ -191,12 +191,12 @@ public class CaseWorkerEmailService {
 
             email = fl401Applicant.getSolicitorEmail();
         }
-
+        log.info("Return Applicant email: {}", LanguagePreference.getLanguagePreference(caseData));
         emailService.send(
             email,
             EmailTemplateNames.RETURNAPPLICATION,
             buildReturnApplicationEmail(caseDetails),
-            LanguagePreference.getLanguagePreference(caseData)
+            LanguagePreference.welsh
         );
 
 
