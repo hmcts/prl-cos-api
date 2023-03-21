@@ -131,7 +131,7 @@ private-law:
 
 fees-register:
   api:
-    url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}
+    url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.aat.platform.hmcts.net}
   parameters:
     C100_SUBMISSION_FEE:
       channel: default
@@ -190,21 +190,21 @@ resources:
 
 
 send-letter:
-  url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
+  url: http://rpe-send-letter-service-aat.aat.platform.hmcts.net
 
 case_document_am:
-  url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
+  url: http://ccd-case-document-am-api-aat.aat.platform.hmcts.net
 
 prl-dgs-api:
-  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
+  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.aat.platform.hmcts.net}
 
 courtfinder:
   api:
-    url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
+    url: ${FACT_API:http://fact-api-aat.aat.platform.hmcts.net}
 
 locationfinder:
   api:
-    url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
+    url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.aat.platform.hmcts.net}
     endpoint: /refdata/location/court-venues/services
 
 launchdarkly:
@@ -212,7 +212,7 @@ launchdarkly:
 
 rd_professional:
   api:
-    url: ${PRD_API_BASEURL:http://rd-professional-api-aat.service.core-compute-aat.internal}
+    url: ${PRD_API_BASEURL:http://rd-professional-api-aat.aat.platform.hmcts.net}
 
 document:
   templates:
@@ -381,7 +381,7 @@ bundle:
     config: ${BUNDLE_WELSH_CONFIG:prl-bundle-config.yaml}
 fis_hearing:
   api:
-    url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
+    url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.aat.platform.hmcts.net}
 
 courts:
   filter: ${COURT_IDS_TO_FILTER:}
