@@ -336,4 +336,7 @@ public class PrlAppsConstants {
 
     public static final String CASEWORKER = "CaseWorker";
 
+    public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+    //C100 default court details
+    public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
 }
