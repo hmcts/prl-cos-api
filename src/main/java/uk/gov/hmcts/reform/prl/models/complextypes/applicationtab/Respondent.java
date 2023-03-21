@@ -39,6 +39,9 @@ public class Respondent {
     private final String dxNumber;
     private final Organisation solicitorOrg;
 
+    private final YesOrNo isAddressConfidential;
+    private final YesOrNo isEmailAddressConfidential;
+    private final YesOrNo isPhoneNumberConfidential;
 
 
 }

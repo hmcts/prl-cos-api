@@ -14,6 +14,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -52,7 +56,11 @@ public class CaseControllerTest {
     @Mock
     AuthTokenGenerator authTokenGenerator;
 
+    @Mock
+    ConfidentialDetailsMapper confidentialDetailsMapper;
+
     private CaseData caseData;
+    Address address;
     public static final String authToken = "Bearer TestAuthToken";
     public static final String servAuthToken = "Bearer TestServToken";
 
@@ -101,6 +109,27 @@ public class CaseControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(authTokenGenerator.generate()).thenReturn(servAuthToken);
 
+
+        address = Address.builder()
+            .addressLine1("AddressLine1")
+            .postTown("Xyz town")
+            .postCode("AB1 2YZ")
+            .build();
+
+        List<Element<ApplicantConfidentialityDetails>> expectedOutput = List
+            .of(Element.<ApplicantConfidentialityDetails>builder()
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 1")
+                               .lastName("XYZ 2")
+                               .email("abc1@xyz.com")
+                               .phoneNumber("09876543211")
+                               .address(address)
+                               .build()).build());
+
+        CaseData updatedCasedata = CaseData.builder()
+            .applicantCaseName("test")
+            .respondentConfidentialDetails(expectedOutput)
+            .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
@@ -108,8 +137,8 @@ public class CaseControllerTest {
 
         String caseId = "1234567891234567";
         String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
-
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(confidentialDetailsMapper.mapConfidentialData(caseData)).thenReturn(updatedCasedata);
         when(authTokenGenerator.generate()).thenReturn("TestToken");
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
