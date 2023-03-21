@@ -329,7 +329,7 @@ public class ApplicationsTabService implements TabService {
         List<PartyDetails> currentRespondents = caseData.getRespondents().stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
-
+        currentRespondents = maskConfidentialDetails(currentRespondents);
         for (PartyDetails respondent : currentRespondents) {
             Respondent r = objectMapper.convertValue(respondent, Respondent.class);
             Element<Respondent> res = Element.<Respondent>builder().value(r).build();
