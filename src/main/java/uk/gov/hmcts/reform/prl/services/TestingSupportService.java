@@ -89,15 +89,15 @@ public class TestingSupportService {
     }
 
     public Map<String, Object> submittedCaseCreation(String authorisation, CallbackRequest callbackRequest) {
-        CaseData data = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        eventPublisher.publishEvent(new CaseDataChanged(data));
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        eventPublisher.publishEvent(new CaseDataChanged(caseData));
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (isCourtStaff) {
             try {
-                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, data));
+                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);
             }
@@ -108,7 +108,7 @@ public class TestingSupportService {
         log.info("finalDocument" + caseDataUpdated.get("finalDocument"));
         log.info("finalWelshDocument" + caseDataUpdated.get("finalWelshDocument"));
         log.info("c1AWelshDocument" + caseDataUpdated.get("c1AWelshDocument"));
-        data = data.toBuilder()
+        caseData = caseData.toBuilder()
             .c8Document(objectMapper.convertValue(caseDataUpdated.get("c8Document"), Document.class))
             .c1ADocument(objectMapper.convertValue(caseDataUpdated.get("c1ADocument"), Document.class))
             .c8WelshDocument(objectMapper.convertValue(caseDataUpdated.get("c8WelshDocument"), Document.class))
@@ -116,9 +116,9 @@ public class TestingSupportService {
             .finalWelshDocument(objectMapper.convertValue(caseDataUpdated.get("finalWelshDocument"), Document.class))
             .c1AWelshDocument(objectMapper.convertValue(caseDataUpdated.get("c1AWelshDocument"), Document.class))
             .build();
-        tabService.updateAllTabsIncludingConfTab(data);
+        tabService.updateAllTabsIncludingConfTab(caseData);
 
-        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(data);
+        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
 
         return caseDataUpdated;
