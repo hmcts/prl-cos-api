@@ -997,7 +997,7 @@ public class ApplicationsTabService implements TabService {
 
     private HomeDetails loadOrMaskHomeChildDetails(HomeDetails homeDetails, Home home) {
         List<Element<ChildrenLiveAtAddress>> children = home.getChildren();
-        if (!children.isEmpty()) {
+        if (isNotEmpty(children)) {
             List<ChildrenLiveAtAddress> eachChildren = children.stream()
                 .map(Element::getValue).collect(Collectors.toList());
             List<Element<HomeChild>> childList = new ArrayList<>();
