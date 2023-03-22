@@ -58,6 +58,8 @@ public class DraftOrder {
     private final String orderDirections;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
+    @JsonProperty("furtherInformationIfRequired")
+    private final String furtherInformationIfRequired;
     private final String parentName;
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
     private final String manageOrdersFl402CourtName;
@@ -122,7 +124,6 @@ public class DraftOrder {
     private final List<Element<HearingData>> manageOrderHearingDetails;
     private final YesOrNo isTheOrderAboutChildren;
     private final C21OrderOptionsEnum c21OrderOptions;
-    private final String furtherInformationIfRequired;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {

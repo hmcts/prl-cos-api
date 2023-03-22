@@ -210,7 +210,12 @@ public class DraftAnOrderService {
                             Locale.UK
                         )) : null)
                     .orderRecipients(manageOrderService.getAllRecipients(caseData))
-                    .status(manageOrderService.getOrderStatus(draftOrder.getOrderSelectionType(),loggedInUserType, eventId))
+                    .status(manageOrderService.getOrderStatus(
+                        draftOrder.getOrderSelectionType(),
+                        loggedInUserType,
+                        eventId,
+                        draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
+                    ))
                     .build())
             .isTheOrderAboutChildren(draftOrder.getIsTheOrderAboutChildren())
             .childrenList(draftOrder.getChildrenList())
@@ -373,6 +378,7 @@ public class DraftAnOrderService {
         caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
         caseDataMap.put("furtherDirectionsIfRequired", selectedOrder.getFurtherDirectionsIfRequired());
+        caseDataMap.put("furtherInformationIfRequired", selectedOrder.getFurtherInformationIfRequired());
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
@@ -433,7 +439,8 @@ public class DraftAnOrderService {
                               .status(manageOrderService.getOrderStatus(
                                   draftOrder.getOrderSelectionType(),
                                   loggedInUserType,
-                                  eventId
+                                  eventId,
+                                  draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
                               ))
                               .build())
             .build();
@@ -463,7 +470,12 @@ public class DraftAnOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getDateCreated() : dateTime.now())
-                              .status(manageOrderService.getOrderStatus(draftOrder.getOrderSelectionType(), loggedInUserType, eventId)).build())
+                              .status(manageOrderService.getOrderStatus(
+                                  draftOrder.getOrderSelectionType(),
+                                  loggedInUserType,
+                                  eventId,
+                                  draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
+                              )).build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
             .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
@@ -474,6 +486,7 @@ public class DraftAnOrderService {
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
+            .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
             .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
             .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
@@ -555,6 +568,7 @@ public class DraftAnOrderService {
                                   .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
                                   .orderDirections(caseData.getManageOrders().getOrderDirections())
                                   .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
+                                  .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
                                   .fl404CustomFields(fl404CustomFields)
                                   .manageOrdersFl402CourtName(caseData.getManageOrders().getManageOrdersFl402CourtName())
                                   .manageOrdersFl402CourtAddress(caseData.getManageOrders().getManageOrdersFl402CourtAddress())
@@ -598,6 +612,7 @@ public class DraftAnOrderService {
                                   .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
                                   .orderDirections(caseData.getManageOrders().getOrderDirections())
                                   .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
+                                  .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
                                   .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                                   .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
                                   .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())

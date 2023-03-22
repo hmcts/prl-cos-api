@@ -102,6 +102,7 @@ public class AmendOrderService {
                                           .status(manageOrderService.getOrderStatus(
                                               orderSelectionType,
                                               loggedInUserType,
+                                              null,
                                               null
                                           ))
                                           .build())
@@ -166,7 +167,7 @@ public class AmendOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(time.now())
-                              .status(manageOrderService.getOrderStatus(orderSelectionType, loggedInUserType, null))
+                              .status(manageOrderService.getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
