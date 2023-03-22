@@ -32,8 +32,7 @@ public enum LanguagePreference {
     public static LanguagePreference getWelshLanguageRequirementApplication(CaseData caseData) {
         if (caseData.getWelshLanguageRequirementApplication() != null) {
             return caseData.getWelshLanguageRequirementApplication();
-        }
-        else {
+        } else {
             return LanguagePreference.english;
         }
     }
