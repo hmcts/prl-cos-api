@@ -46,6 +46,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.UPDATE_NEXT_HEARING_DATE_IN_CCD;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class HearingManagementServiceTest {
@@ -690,22 +691,25 @@ public class HearingManagementServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(
             1669565933090179L).data(stringObjectMap).build();
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, nextHearingDateRequest.getCaseRef(), "updateNextHearingDateInCCD"))
-            .thenReturn(buildStartEventResponse("updateNextHearingDateInCCD", eventToken));
+                                                     caseType, nextHearingDateRequest.getCaseRef(),
+                                                     UPDATE_NEXT_HEARING_DATE_IN_CCD
+        ))
+            .thenReturn(buildStartEventResponse(UPDATE_NEXT_HEARING_DATE_IN_CCD, eventToken));
         NextHearingDetails nextHearingDetails = NextHearingDetails.builder().hearingID("123").hearingDateTime(testNextHearingDate).build();
         when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                       caseType, nextHearingDateRequest.getCaseRef(), true,
-                                                      buildCaseDataContentForNhd("updateNextHearingDateInCCD", eventToken,nextHearingDetails)))
+                                                      buildCaseDataContentForNhd(UPDATE_NEXT_HEARING_DATE_IN_CCD, eventToken, nextHearingDetails)))
             .thenReturn(caseDetails);
 
         hearingManagementService.caseNextHearingDateChangeForHearingManagement(nextHearingDateRequest);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                        caseType, nextHearingDateRequest.getCaseRef(), "updateNextHearingDateInCCD"
+                                                        caseType, nextHearingDateRequest.getCaseRef(),
+                                                        UPDATE_NEXT_HEARING_DATE_IN_CCD
         );
         verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                          caseType, nextHearingDateRequest.getCaseRef(), true,
-                                                         buildCaseDataContentForNhd("updateNextHearingDateInCCD", eventToken,nextHearingDetails)
+                                                         buildCaseDataContentForNhd(UPDATE_NEXT_HEARING_DATE_IN_CCD, eventToken, nextHearingDetails)
         );
 
         assertTrue(true);

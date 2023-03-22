@@ -24,5 +24,6 @@ public class TestConstants {
     public static final String TEST_SERVICE_AUTHORIZATION = "testServiceAuthorisation";
     public static final String JURISDICTION = "PRIVATELAW";
     public static final String CAFCASS_USER_ROLE = "caseworker-privatelaw-cafcass";
+    public static final String UPDATE_NEXT_HEARING_DATE_IN_CCD = "updateNextHearingInfo";
 
 }
