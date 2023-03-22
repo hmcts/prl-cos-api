@@ -329,6 +329,13 @@ public class PrlAppsConstants {
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
     public static final long CASE_SUBMISSION_THRESHOLD = 28;
+
+    public static final String CHILD_AND_CAFCASS_OFFICER_DETAILS = "childAndCafcassOfficers";
+    public static final String CHILD_NAME = "Child name: ";
+    public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
+
+    public static final String CHILDREN = "children";
+
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
     public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
     //C100 default court details
@@ -336,4 +343,5 @@ public class PrlAppsConstants {
     public static final String CLOSED_STATE = State.ALL_FINAL_ORDERS_ISSUED.getValue();
     public static final String WITHDRAW_REQUEST_FIELD = "isWithdrawRequestSent";
     public static final String PENDING = "Pending";
+
 }
