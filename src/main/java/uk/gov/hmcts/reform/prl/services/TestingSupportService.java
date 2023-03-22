@@ -109,12 +109,12 @@ public class TestingSupportService {
         log.info("finalWelshDocument" + caseDataUpdated.get("finalWelshDocument"));
         log.info("c1AWelshDocument" + caseDataUpdated.get("c1AWelshDocument"));
         data = data.toBuilder()
-            .c8Document((Document) caseDataUpdated.get("c8Document"))
-            .c1ADocument((Document) caseDataUpdated.get("c1ADocument"))
-            .c8WelshDocument((Document) caseDataUpdated.get("c8WelshDocument"))
-            .finalDocument((Document) caseDataUpdated.get("finalDocument"))
-            .finalWelshDocument((Document) caseDataUpdated.get("finalWelshDocument"))
-            .c1AWelshDocument((Document) caseDataUpdated.get("c1AWelshDocument"))
+            .c8Document(objectMapper.convertValue(caseDataUpdated.get("c8Document"), Document.class))
+            .c1ADocument((Document) (caseDataUpdated.get("c1ADocument")))
+            .c8WelshDocument((Document) (caseDataUpdated.get("c8WelshDocument")))
+            .finalDocument((Document) (caseDataUpdated.get("finalDocument")))
+            .finalWelshDocument((Document) (caseDataUpdated.get("finalWelshDocument")))
+            .c1AWelshDocument((Document) (caseDataUpdated.get("c1AWelshDocument")))
             .build();
         tabService.updateAllTabsIncludingConfTab(data);
 
