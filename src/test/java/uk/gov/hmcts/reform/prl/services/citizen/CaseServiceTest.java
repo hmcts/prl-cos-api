@@ -14,12 +14,12 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
@@ -38,6 +38,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -179,17 +180,47 @@ public class CaseServiceTest {
 
         CaseData updatedCaseData = caseData.toBuilder()
             .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
-            .courtName("Test Court")
+            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
             .build();
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(courtLocatorService.getNearestFamilyCourt(caseData)).thenReturn(Court.builder().courtName("Test Court").build());
         when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT)).thenReturn(caseDetails);
 
         //When
         CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
                                                                 CITIZEN_CASE_SUBMIT.getValue(), accessCode);
+
+        //Then
+        assertThat(actualCaseDetails).isEqualTo(caseDetails);
+    }
+
+    @Test
+    public void shouldUpdateCaseForSubmitEventWithHwf() throws JsonProcessingException, NotFoundException {
+        //Given
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .build();
+        UserDetails userDetails = UserDetails
+            .builder()
+            .email("test@gmail.com")
+            .build();
+
+        CaseDetails caseDetails = mock(CaseDetails.class);
+
+        CaseData updatedCaseData = caseData.toBuilder()
+            .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
+            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
+            .build();
+
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT_WITH_HWF)).thenReturn(caseDetails);
+
+        //When
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
+                                                                CITIZEN_CASE_SUBMIT_WITH_HWF.getValue(), accessCode);
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);

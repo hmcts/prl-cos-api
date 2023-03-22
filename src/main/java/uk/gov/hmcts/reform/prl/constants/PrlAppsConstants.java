@@ -328,4 +328,17 @@ public class PrlAppsConstants {
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
+    public static final long CASE_SUBMISSION_THRESHOLD = 28;
+
+    public static final String CHILD_AND_CAFCASS_OFFICER_DETAILS = "childAndCafcassOfficers";
+    public static final String CHILD_NAME = "Child name: ";
+    public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
+
+    public static final String CHILDREN = "children";
+
+    public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+    public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
+    //C100 default court details
+    public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
+
 }
