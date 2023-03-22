@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
@@ -135,10 +136,11 @@ public class HearingDataServiceTest {
             .build();
 
         Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
-        List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
+        List<Element<HearingData>> ordersHearingDetails = Collections.singletonList(childElement);
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(ordersHearingDetails).build())
             .build();
         HearingDataPrePopulatedDynamicLists expectedResponse = hearingDataService.populateHearingDynamicLists(authToken, "45654654", caseData);
         assertNotNull(expectedResponse);
@@ -238,11 +240,11 @@ public class HearingDataServiceTest {
             .build();
 
         Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
-        List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
+        List<Element<HearingData>> ordersHearingDetails = Collections.singletonList(childElement);
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
+            .manageOrders(ManageOrders.builder().ordersHearingDetails(ordersHearingDetails).build())
             .build();
         List<JudicialUsersApiResponse> judicialUsersApiResponses = new ArrayList<>();
         JudicialUsersApiResponse judicialUsersApiResponse = JudicialUsersApiResponse.builder()
@@ -271,7 +273,7 @@ public class HearingDataServiceTest {
                 .hearingListedLinkedCases(dynamicList)
                 .build();
         List<Element<HearingData>>  expectedResponse =
-            hearingDataService.getHearingData(listWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists);
+            hearingDataService.getHearingData(ordersHearingDetails,hearingDataPrePopulatedDynamicLists);
         assertNotNull(expectedResponse);
     }
 
@@ -333,11 +335,11 @@ public class HearingDataServiceTest {
             .build();
 
         Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
-        List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
+        List<Element<HearingData>> ordersHearingDetails = Collections.singletonList(childElement);
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
+            .manageOrders(ManageOrders.builder().ordersHearingDetails(ordersHearingDetails).build())
             .build();
         List<JudicialUsersApiResponse> judicialUsersApiResponses = new ArrayList<>();
         JudicialUsersApiResponse judicialUsersApiResponse = JudicialUsersApiResponse.builder()
@@ -366,7 +368,7 @@ public class HearingDataServiceTest {
                 .hearingListedLinkedCases(dynamicList)
                 .build();
         List<Element<HearingData>>  expectedResponse =
-            hearingDataService.getHearingData(listWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists);
+            hearingDataService.getHearingData(ordersHearingDetails,hearingDataPrePopulatedDynamicLists);
         assertEquals(expectedResponse.get(0).getValue().getHearingJudgePersonalCode(),"Test");
     }
 
