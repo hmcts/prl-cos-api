@@ -97,7 +97,7 @@ public class TestingSupportService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (isCourtStaff) {
             try {
-                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
+                caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(authorisation, caseData));
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);
             }
