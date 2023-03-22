@@ -93,6 +93,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -104,6 +105,7 @@ import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicationsTabServiceTest {
@@ -471,6 +473,7 @@ public class ApplicationsTabServiceTest {
             .dateOfBirth(LocalDate.of(1989, 11, 30))
             .applicantsRelationshipToChild(RelationshipsEnum.father.getDisplayedValue())
             .orderAppliedFor("Child Arrangements Order, Prohibited Steps Order")
+            .cafcassOfficerAdded(No)
             .personWhoLivesWithChild(List.of(
                 Element
                     .<OtherPersonWhoLivesWithChildDetails>builder().value(confidentilPerson1).build(),
@@ -1187,6 +1190,47 @@ public class ApplicationsTabServiceTest {
         assertEquals(expected, result);
     }
 
+    @Test
+    public void tesGetHomeDetailsWithNoChild() {
+
+        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
+            .keepChildrenInfoConfidential(YesOrNo.Yes)
+            .childFullName("child")
+            .childsAge("12")
+            .isRespondentResponsibleForChild(YesOrNo.Yes)
+            .build();
+
+        Home home = Home.builder()
+            .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
+            .doesApplicantHaveHomeRights(No)
+            .doAnyChildrenLiveAtAddress(No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
+            .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
+            .familyHome(List.of(FamilyHomeEnum.payForRepairs))
+            .livingSituation(List.of(LivingSituationEnum.awayFromHome))
+            .mortgages(Mortgage.builder().address(Address.builder().addressLine1("123").build()).mortgageLenderName("wer")
+                           .mortgageNumber("1234").mortgageNamedAfter(Collections.singletonList(MortgageNamedAfterEnum.applicant)).build())
+            .landlords(Landlord.builder().landlordName("test")
+                           .mortgageNamedAfterList(Collections.singletonList(MortgageNamedAfterEnum.applicant)).address(
+                    Address.builder().addressLine1("123").build()).build())
+            .build();
+        CaseData caseData = CaseData.builder().home(home).build();
+
+        Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
+                                                "Test data",
+                                                "applicantWantToStopFromRespondentDoingToChild",
+                                                "Being violent or threatening towards their child or children",
+                                                "isPhoneNumberConfidential","This information is to be kept confidential",
+                                                "isEmailAddressConfidential",
+                                                "This information is to be kept confidential",
+                                                "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
+        Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
+        assertEquals(expected, result);
+    }
+
 
     @Test
     public void tesGetHomeDetailsWithLandordAsNull() {
@@ -1385,7 +1429,33 @@ public class ApplicationsTabServiceTest {
     }
 
 
+    @Test
+    public void testUpdateTabWithChildren() {
+        List<Element<Child>> children = new ArrayList<>();
+        Child child = Child.builder()
+            .firstName("test")
+            .lastName("test")
+            .build();
 
+        Element<Child> childElement = element(UUID.fromString("1accfb1e-2574-4084-b97e-1cd53fd14815"), child);
+        children.add(childElement);
+
+        caseDataWithParties = caseDataWithParties.toBuilder()
+            .children(children)
+            .build();
+
+        when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class))
+            .thenReturn(OtherPersonInTheCase.builder().build());
+        when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOrders.class))
+            .thenReturn(allegationsOfHarmOrders);
+        when(objectMapper.convertValue(caseDataWithParties, ChildAbductionDetails.class))
+            .thenReturn(
+                ChildAbductionDetails.builder().build());
+        when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOtherConcerns.class))
+            .thenReturn(AllegationsOfHarmOtherConcerns.builder().build());
+
+        assertNotNull(applicationsTabService.updateTab(caseDataWithParties));
+    }
 
 
 
