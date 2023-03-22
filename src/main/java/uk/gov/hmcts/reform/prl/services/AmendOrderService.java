@@ -172,7 +172,7 @@ public class AmendOrderService {
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
-            .manageOrderHearingDetails(caseData.getListWithoutNoticeHearingDetails())
+            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .build();
     }
 }

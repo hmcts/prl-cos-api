@@ -30,7 +30,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
@@ -49,7 +48,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
@@ -102,9 +101,9 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseData.getListWithoutNoticeHearingDetails() != null) {
-            caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
-                .getHearingData(caseData.getListWithoutNoticeHearingDetails(), null));
+        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingDataService
+                .getHearingData(caseData.getManageOrders().getOrdersHearingDetails(), null));
         }
         caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
             authorisation,
@@ -112,8 +111,8 @@ public class ManageOrdersController {
             caseData
         ));
 
-        log.info("Hearing data {}", caseDataUpdated.get(LISTWITHOUTNOTICE_HEARINGDETAILS));
-        log.info("Hearing cae data {}", caseData.getListWithoutNoticeHearingDetails());
+        log.info("Hearing data {}", caseDataUpdated.get(ORDER_HEARING_DETAILS));
+        log.info("Hearing cae data {}", caseData.getManageOrders().getOrdersHearingDetails());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
@@ -212,13 +211,12 @@ public class ManageOrdersController {
         );
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
         log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
-        List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
         log.info("pre-populated hearingDynamicLists {}", hearingDataPrePopulatedDynamicLists);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(
-                LISTWITHOUTNOTICE_HEARINGDETAILS,
+                ORDER_HEARING_DETAILS,
                 ElementUtils.wrapElements(hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists,caseData)));
 
         return AboutToStartOrSubmitCallbackResponse.builder()
@@ -293,9 +291,9 @@ public class ManageOrdersController {
             List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
-            if (caseData.getListWithoutNoticeHearingDetails() != null) {
-                caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
-                    .getHearingData(caseData.getListWithoutNoticeHearingDetails(), null));
+            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingDataService
+                    .getHearingData(caseData.getManageOrders().getOrdersHearingDetails(), null));
             }
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }

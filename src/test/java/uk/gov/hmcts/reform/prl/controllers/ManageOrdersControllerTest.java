@@ -141,12 +141,14 @@ public class ManageOrdersControllerTest {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .courtName("Horsham Court")
+            .manageOrders(ManageOrders.builder().build())
             .uploadOrderDoc(Document.builder().build())
             .build();
 
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .previewOrderDoc(Document.builder()
                                  .documentUrl(generatedDocumentInfo.getUrl())
                                  .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -177,6 +179,7 @@ public class ManageOrdersControllerTest {
     public void testPopulatePreviewOrderWhenOrderUploaded() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .dateOrderMade(LocalDate.now())
@@ -188,6 +191,7 @@ public class ManageOrdersControllerTest {
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(objectMapper1);
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .previewOrderDoc(Document.builder()
                                  .documentUrl(generatedDocumentInfo.getUrl())
                                  .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -216,12 +220,14 @@ public class ManageOrdersControllerTest {
 
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .previewOrderDoc(Document.builder()
                                  .documentUrl(generatedDocumentInfo.getUrl())
@@ -264,12 +270,14 @@ public class ManageOrdersControllerTest {
 
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .build();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .previewOrderDoc(Document.builder()
                                  .documentUrl(generatedDocumentInfo.getUrl())
@@ -324,6 +332,7 @@ public class ManageOrdersControllerTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
@@ -334,6 +343,7 @@ public class ManageOrdersControllerTest {
 
         CaseData updatedCaseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
@@ -382,6 +392,7 @@ public class ManageOrdersControllerTest {
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -393,6 +404,7 @@ public class ManageOrdersControllerTest {
 
         CaseData updatedCaseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
@@ -441,6 +453,7 @@ public class ManageOrdersControllerTest {
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -453,6 +466,7 @@ public class ManageOrdersControllerTest {
 
         CaseData updatedCaseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .manageOrders(ManageOrders.builder().build())
@@ -504,6 +518,7 @@ public class ManageOrdersControllerTest {
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
@@ -515,6 +530,7 @@ public class ManageOrdersControllerTest {
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
@@ -565,6 +581,7 @@ public class ManageOrdersControllerTest {
         List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -572,11 +589,14 @@ public class ManageOrdersControllerTest {
             .courtName("testCourt")
             .home(Home.builder().children(listOfChildren).build())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
@@ -627,6 +647,7 @@ public class ManageOrdersControllerTest {
         List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -636,6 +657,7 @@ public class ManageOrdersControllerTest {
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -801,6 +823,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -849,6 +872,7 @@ public class ManageOrdersControllerTest {
     public void populateHeaderTest() throws Exception {
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -919,6 +943,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1011,6 +1036,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1103,6 +1129,7 @@ public class ManageOrdersControllerTest {
 
 
         caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
@@ -1200,6 +1227,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)

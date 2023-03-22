@@ -1049,7 +1049,7 @@ public class ManageOrderService {
             .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(No)
-            .manageOrderHearingDetails(caseData.getListWithoutNoticeHearingDetails())
+            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
             .build();
     }
@@ -1080,7 +1080,7 @@ public class ManageOrderService {
             .isOrderUploadedByJudgeOrAdmin(null != caseData.getManageOrdersOptions()
                                                && caseData.getManageOrdersOptions().equals(uploadAnOrder)
                                                ? Yes : No)
-            .manageOrderHearingDetails(caseData.getListWithoutNoticeHearingDetails())
+            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .build();
     }
 
@@ -1664,7 +1664,7 @@ public class ManageOrderService {
                                              .build())
                            .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                             ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
-                           .manageOrderHearingDetails(caseData.getListWithoutNoticeHearingDetails())
+                           .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                            .build());
     }
 
