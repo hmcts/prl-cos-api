@@ -278,40 +278,50 @@ public class HearingDataService {
             .listItems(listItems).build();
     }
 
-    public void nullifyUnncessaryFieldsPopulated(LinkedHashMap hearingDataFromMap) {
+    public void nullifyUnncessaryFieldsPopulated(Object listWithoutNoticeHeardetailsObj) {
         //Note: When we add new fields , we need to add those fields in respective if else blocks to nullify to handle the data clearing issue from UI
-        if  (!(DATE_CONFIRMED_IN_HEARINGS_TAB.equals(hearingDataFromMap.get(HEARING_DATE_CONFIRM_OPTION_ENUM)))) {
-            hearingDataFromMap.put(CONFIRMED_HEARING_DATES,null);
-        } else {
-            hearingDataFromMap.put(APPLICANT_HEARING_CHANNEL, null);
-            hearingDataFromMap.put(APPLICANT_SOLICITOR_HEARING_CHANNEL, null);
-            hearingDataFromMap.put(RESPONDENT_HEARING_CHANNEL, null);
-            hearingDataFromMap.put(RESPONDENT_SOLICITOR_HEARING_CHANNEL, null);
-            hearingDataFromMap.put(CAFCASS_HEARING_CHANNEL, null);
-            hearingDataFromMap.put(CAFCASS_CYMRU_HEARING_CHANNEL, null);
-            hearingDataFromMap.put(HEARING_LISTED_LINKED_CASES, null);
-            hearingDataFromMap.put(LOCAL_AUTHORITY_HEARING_CHANNEL, null);
-            hearingDataFromMap.put(COURT_LIST, null);
-            hearingDataFromMap.put(HEARING_VIDEO_CHANNELS, null);
-            hearingDataFromMap.put(HEARING_TELEPHONE_CHANNELS, null);
-            hearingDataFromMap.put(HEARING_DATE_TIMES, null);
-            hearingDataFromMap.put(HEARING_ESTIMATED_HOURS,0);
-            hearingDataFromMap.put(HEARING_ESTIMATED_MINUTES,0);
-            hearingDataFromMap.put(HEARING_ESTIMATED_DAYS,0);
-            hearingDataFromMap.put(ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY,null);
-            hearingDataFromMap.put(HEARING_AUTHORITY,null);
-            hearingDataFromMap.put(HEARING_CHANNELS_ENUM,null);
-            hearingDataFromMap.put(HEARING_JUDGE_NAME_AND_EMAIL, null);
-            hearingDataFromMap.put(HEARING_SPECIFIC_DATES_OPTIONS_ENUM, null);
-            hearingDataFromMap.put(FIRST_DATE_OF_THE_HEARING, null);
-            hearingDataFromMap.put(HEARING_MUST_TAKE_PLACE_AT_HOUR,0);
-            hearingDataFromMap.put(HEARING_MUST_TAKE_PLACE_AT_MINUTE,0);
-            hearingDataFromMap.put(EARLIEST_HEARING_DATE, null);
-            hearingDataFromMap.put(LATEST_HEARING_DATE, null);
-            hearingDataFromMap.put(HEARING_PRIORITY_TYPE_ENUM, null);
-            hearingDataFromMap.put(CUSTOM_DETAILS,null);
+        if (null != listWithoutNoticeHeardetailsObj) {
+            log.info("Inside null check for listWithoutNoticeHearingDetails ");
+            List list = (List) listWithoutNoticeHeardetailsObj;
+            if (null != list && list.size() > 0) {
+                list.parallelStream().forEach(i -> {
+                    LinkedHashMap hearingDataFromMap = (LinkedHashMap) (((LinkedHashMap) i).get("value"));
+                    if (null != hearingDataFromMap) {
+                        if (!(DATE_CONFIRMED_IN_HEARINGS_TAB.equals(hearingDataFromMap.get(HEARING_DATE_CONFIRM_OPTION_ENUM)))) {
+                            hearingDataFromMap.put(CONFIRMED_HEARING_DATES, null);
+                        } else {
+                            hearingDataFromMap.put(APPLICANT_HEARING_CHANNEL, null);
+                            hearingDataFromMap.put(APPLICANT_SOLICITOR_HEARING_CHANNEL, null);
+                            hearingDataFromMap.put(RESPONDENT_HEARING_CHANNEL, null);
+                            hearingDataFromMap.put(RESPONDENT_SOLICITOR_HEARING_CHANNEL, null);
+                            hearingDataFromMap.put(CAFCASS_HEARING_CHANNEL, null);
+                            hearingDataFromMap.put(CAFCASS_CYMRU_HEARING_CHANNEL, null);
+                            hearingDataFromMap.put(HEARING_LISTED_LINKED_CASES, null);
+                            hearingDataFromMap.put(LOCAL_AUTHORITY_HEARING_CHANNEL, null);
+                            hearingDataFromMap.put(COURT_LIST, null);
+                            hearingDataFromMap.put(HEARING_VIDEO_CHANNELS, null);
+                            hearingDataFromMap.put(HEARING_TELEPHONE_CHANNELS, null);
+                            hearingDataFromMap.put(HEARING_DATE_TIMES, null);
+                            hearingDataFromMap.put(HEARING_ESTIMATED_HOURS, 0);
+                            hearingDataFromMap.put(HEARING_ESTIMATED_MINUTES, 0);
+                            hearingDataFromMap.put(HEARING_ESTIMATED_DAYS, 0);
+                            hearingDataFromMap.put(ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY, null);
+                            hearingDataFromMap.put(HEARING_AUTHORITY, null);
+                            hearingDataFromMap.put(HEARING_CHANNELS_ENUM, null);
+                            hearingDataFromMap.put(HEARING_JUDGE_NAME_AND_EMAIL, null);
+                            hearingDataFromMap.put(HEARING_SPECIFIC_DATES_OPTIONS_ENUM, null);
+                            hearingDataFromMap.put(FIRST_DATE_OF_THE_HEARING, null);
+                            hearingDataFromMap.put(HEARING_MUST_TAKE_PLACE_AT_HOUR, 0);
+                            hearingDataFromMap.put(HEARING_MUST_TAKE_PLACE_AT_MINUTE, 0);
+                            hearingDataFromMap.put(EARLIEST_HEARING_DATE, null);
+                            hearingDataFromMap.put(LATEST_HEARING_DATE, null);
+                            hearingDataFromMap.put(HEARING_PRIORITY_TYPE_ENUM, null);
+                            hearingDataFromMap.put(CUSTOM_DETAILS, null);
+                        }
+                    }
+                });
+            }
         }
-
     }
 
 }

@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -110,15 +109,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("Getting the listWithoutNoticeHearingDetails from caseDataUpdated ");
         Object listWithoutNoticeHeardetailsObj = caseDataUpdated.get(LISTWITHOUTNOTICE_HEARINGDETAILS);
-        if (null != listWithoutNoticeHeardetailsObj) {
-            log.info("Inside null check for listWithoutNoticeHearingDetails ");
-            List list = (List) listWithoutNoticeHeardetailsObj;
-            if (null != list && list.size() > 0) {
-                for (int i = 0; i <= list.size() - 1; i++) {
-                    hearingDataService.nullifyUnncessaryFieldsPopulated((LinkedHashMap) ((LinkedHashMap) list.get(i)).get("value"));
-                }
-            }
-        }
+        hearingDataService.nullifyUnncessaryFieldsPopulated(listWithoutNoticeHeardetailsObj);
         objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
