@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -12,12 +14,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -37,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
 
 @Slf4j
@@ -62,6 +67,12 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     @Autowired
     @Qualifier("caseSummaryTab")
     private CaseSummaryTabService caseSummaryTabService;
+    public static final String CONFIRMATION_HEADER = "# Listing directions sent";
+
+    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
+        + "<ul><li>Listing directions  have been sent as a task to their local court listing.</li> "
+        + "<li>Listing directions have been saved in the notes tab and are available to view at any time.</li></ul>";
+
 
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate Hearing page details")
@@ -119,5 +130,24 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
             .getHearingData(caseData.getListWithoutNoticeHearingDetails(),null,caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+
+    @PostMapping(path = "/listWithoutNotice-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to List without notice confirmation . Returns service request reference if "
+        + "successful")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public ResponseEntity<SubmittedCallbackResponse> ccdSubmitted(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest callbackRequest
+    ) {
+        return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+            CONFIRMATION_HEADER).confirmationBody(
+            CONFIRMATION_BODY_PREFIX + callbackRequest.getCaseDetails().getCaseId()
+        ).build());
     }
 }
