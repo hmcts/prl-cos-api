@@ -196,7 +196,7 @@ public class CaseWorkerEmailService {
             email,
             EmailTemplateNames.RETURNAPPLICATION,
             buildReturnApplicationEmail(caseDetails),
-            LanguagePreference.getLanguagePreference(caseData)
+            LanguagePreference.getWelshLanguageRequirementApplication(caseData)
         );
 
 
