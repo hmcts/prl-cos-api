@@ -112,8 +112,6 @@ public class DraftAnOrderService {
 
     private DraftOrder getCurrentOrderDetails(CaseData caseData) {
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
-            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
-                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
             .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
             .orderDocument(caseData.getPreviewOrderDoc())
             .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
@@ -257,8 +255,8 @@ public class DraftAnOrderService {
 
         return element(OrderDetails.builder()
                            .orderType(draftOrder.getOrderTypeId())
-                           .typeOfOrder(draftOrder.getOrderType() != null
-                                            ? draftOrder.getOrderType().getDisplayedValue() : null)
+                           .typeOfOrder(caseData.getSelectTypeOfOrder() != null
+                                            ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
                            .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
                            .orderDocument(getGeneratedDocument(generatedDocumentInfo,false,fieldMap))
                            .orderDocumentWelsh(getGeneratedDocument(generatedDocumentInfoWelsh,documentLanguage.isGenWelsh(),fieldMap))
@@ -435,6 +433,7 @@ public class DraftAnOrderService {
         if (selectedOrder.getJudgeNotes() != null) {
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
         }
+        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
 
@@ -475,7 +474,7 @@ public class DraftAnOrderService {
         caseDataMap.put("underTakingDateExpiry", selectedOrder.getUnderTakingDateExpiry());
         caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
         caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
-        log.info("Selected order type is ********   from    populateDraftOrderCustomField",selectedOrder.getOrderType());
+        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
 
@@ -552,8 +551,8 @@ public class DraftAnOrderService {
             orderDocumentWelsh = draftOrder.getOrderDocumentWelsh();
         }
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
-            .typeOfOrder(draftOrder.getOrderType() != null
-                             ? draftOrder.getOrderType().getDisplayedValue() : null)
+            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
+                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
             .orderTypeId(draftOrder.getOrderType().getDisplayedValue())
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
