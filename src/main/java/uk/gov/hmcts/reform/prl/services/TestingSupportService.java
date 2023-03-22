@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -19,11 +18,8 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
-import static uk.gov.hmcts.reform.prl.enums.Event.TS_ADMIN_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
 
 @Slf4j
