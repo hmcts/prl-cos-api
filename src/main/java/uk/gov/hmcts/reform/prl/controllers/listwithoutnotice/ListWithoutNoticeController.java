@@ -147,7 +147,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     ) {
         return ok(SubmittedCallbackResponse.builder().confirmationHeader(
             CONFIRMATION_HEADER).confirmationBody(
-            CONFIRMATION_BODY_PREFIX + callbackRequest.getCaseDetails().getCaseId()
+            CONFIRMATION_BODY_PREFIX
         ).build());
     }
 }
