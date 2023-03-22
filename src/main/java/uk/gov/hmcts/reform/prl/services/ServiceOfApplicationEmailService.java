@@ -57,7 +57,7 @@ public class ServiceOfApplicationEmailService {
                 appSols.getKey(),
                 EmailTemplateNames.APPLICANT_SOLICITOR_CA,
                 buildApplicantSolicitorEmail(caseDetails, appSols.getValue()),
-                LanguagePreference.getLanguagePreference(caseData)
+                LanguagePreference.english
             );
         }
         List<Map<String,List<String>>> respondentSolicitors = caseData
