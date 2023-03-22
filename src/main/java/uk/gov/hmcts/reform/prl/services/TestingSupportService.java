@@ -102,6 +102,12 @@ public class TestingSupportService {
                 log.error("Error regenerating the document", e);
             }
         }
+        log.info("c8Document" + caseDataUpdated.get("c8Document"));
+        log.info("c1ADocument" + caseDataUpdated.get("c1ADocument"));
+        log.info("c8WelshDocument" + caseDataUpdated.get("c8WelshDocument"));
+        log.info("finalDocument" + caseDataUpdated.get("finalDocument"));
+        log.info("finalWelshDocument" + caseDataUpdated.get("finalWelshDocument"));
+        log.info("c1AWelshDocument" + caseDataUpdated.get("c1AWelshDocument"));
         data = data.toBuilder()
             .c8Document((Document) caseDataUpdated.get("c8Document"))
             .c1ADocument((Document) caseDataUpdated.get("c1ADocument"))
