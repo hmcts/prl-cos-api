@@ -46,6 +46,8 @@ public class ConfidentialDetailsMapper {
             .respondentConfidentialDetails(respondentsConfidentialDetails)
             .build();
 
+        log.info("respondentsConfidentialDetails {}", caseData.getRespondentConfidentialDetails());
+
         allTabsService.updateAllTabsIncludingConfTab(caseData);
 
         return caseData;

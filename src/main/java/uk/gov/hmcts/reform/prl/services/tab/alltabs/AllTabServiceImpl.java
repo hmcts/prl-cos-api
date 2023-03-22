@@ -68,6 +68,7 @@ public class AllTabServiceImpl implements AllTabsService {
         Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(caseData);
         Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
         combinedFieldsMap.putAll(confidentialDetails);
+        combinedFieldsMap.put("respondentsConfidentialDetails", caseData.getRespondentConfidentialDetails());
 
         if (caseData.getDateSubmitted() != null) {
             combinedFieldsMap.put("dateSubmitted", caseData.getDateSubmitted());
@@ -78,6 +79,9 @@ public class AllTabServiceImpl implements AllTabsService {
         if (caseData.getCourtId() != null) {
             combinedFieldsMap.put("courtId", caseData.getCourtId());
         }
+        log.info("respondentsConfidentialDetails {}", caseData.getRespondentConfidentialDetails());
+        log.info("respondentsConfidentialDetails {}", combinedFieldsMap.get("respondentsConfidentialDetails"));
+
         getDocumentsMap(caseData,combinedFieldsMap);
         // Calling event to refresh the page.
         refreshCcdUsingEvent(caseData, combinedFieldsMap);
