@@ -136,23 +136,6 @@ public class ManageOrderServiceTest {
             .isCaseWithdrawn(YesOrNo.No)
             .build();
 
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code(TEST_UUID).label(" ").build();
-        dynamicList = DynamicList.builder()
-            .listItems(List.of(dynamicListElement))
-            .value(dynamicListElement)
-            .build();
-        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
-            .code(TEST_UUID)
-            .label("test")
-            .build();
-        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
-            .value(List.of(dynamicMultiselectListElement))
-            .build();
-        manageOrders = ManageOrders.builder()
-            .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
-            .isCaseWithdrawn(YesOrNo.No)
-            .build();
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         uuid = UUID.fromString(TEST_UUID);
@@ -855,6 +838,7 @@ public class ManageOrderServiceTest {
             .respondents(partyDetails)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .manageOrders(manageOrders)
             .build();

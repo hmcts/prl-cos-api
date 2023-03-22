@@ -285,8 +285,8 @@ public class CallbackController {
 
         //Assign default court to all c100 cases for work allocation.
         caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-            .region(C100_DEFAULT_REGION_ID)
-            .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
+            .regionId(C100_DEFAULT_REGION_ID)
+            .baseLocationId(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
             .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
 
         PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
@@ -610,6 +610,9 @@ public class CallbackController {
         } catch (Exception e) {
             log.error("Error while fetching User or Org details for the logged in user ", e);
         }
+
         return caseDataUpdated;
+
     }
+
 }
