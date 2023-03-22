@@ -996,9 +996,8 @@ public class DocumentGenService {
             updatedCaseData.put(ENGDOCGEN, Yes.toString());
             isConfidentialInformationPresentForC100EngForTestingSupport(authorisation, caseData, updatedCaseData);
             isC100CaseTypeEngForTestingSupport(authorisation, caseData, updatedCaseData);
-            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
-            }
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
+            updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
         }
     }
 
@@ -1038,12 +1037,11 @@ public class DocumentGenService {
             updatedCaseData.put("isWelshDocGen", Yes.toString());
             isConfidentialInformationPresentForC100WelshForTestingSupport(authorisation, caseData, updatedCaseData);
             isC100CaseTypeWelshForTestingSupport(authorisation, caseData, updatedCaseData);
-            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                updatedCaseData.put(
-                    DOCUMENT_FIELD_FINAL_WELSH,
-                    getDocument(authorisation, caseData, FINAL_HINT, true)
-                );
-            }
+            updatedCaseData.put(
+                DOCUMENT_FIELD_FINAL_WELSH,
+                getDocument(authorisation, caseData, FINAL_HINT, true)
+            );
+            updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
         }
     }
 
