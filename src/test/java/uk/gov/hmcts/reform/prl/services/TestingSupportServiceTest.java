@@ -21,6 +21,8 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.enums.Event.TS_ADMIN_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TestingSupportServiceTest {
@@ -41,6 +43,8 @@ public class TestingSupportServiceTest {
 
     @Mock
     private CaseUtils caseUtils;
+    @Mock
+    private CaseWorkerEmailService caseWorkerEmailService;
 
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
@@ -62,6 +66,7 @@ public class TestingSupportServiceTest {
             .build();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
+            .eventId(TS_SOLICITOR_APPLICATION.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(callbackRequest);
@@ -69,7 +74,7 @@ public class TestingSupportServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitCaseCreationWithDummyC100Data() throws Exception {
+    public void testAboutToSubmitSolicitorCaseCreationWithDummyC100Data() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -83,6 +88,7 @@ public class TestingSupportServiceTest {
             .build();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
+            .eventId(TS_SOLICITOR_APPLICATION.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), Mockito.any(Class.class))).thenReturn(caseDetails);
@@ -91,7 +97,7 @@ public class TestingSupportServiceTest {
     }
 
     @Test
-    public void testAboutToSubmitCaseCreationWithDummyFl401Data() throws Exception {
+    public void testAboutToSubmitSolicitorCaseCreationWithDummyFl401Data() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -105,6 +111,54 @@ public class TestingSupportServiceTest {
             .build();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
+            .eventId(TS_SOLICITOR_APPLICATION.getId())
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.readValue(anyString(), Mockito.any(Class.class))).thenReturn(caseDetails);
+        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(callbackRequest);
+        Assert.assertTrue(!stringObjectMap.isEmpty());
+    }
+
+
+    @Test
+    public void testAboutToSubmitAdminCaseCreationWithDummyC100Data() throws Exception {
+        caseData = CaseData.builder()
+            .id(12345678L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+        caseDataMap = caseData.toMap(new ObjectMapper());
+        caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId(TS_ADMIN_APPLICATION.getId())
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.readValue(anyString(), Mockito.any(Class.class))).thenReturn(caseDetails);
+        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(callbackRequest);
+        Assert.assertTrue(!stringObjectMap.isEmpty());
+    }
+
+    @Test
+    public void testAboutToSubmitAdminCaseCreationWithDummyFl401Data() throws Exception {
+        caseData = CaseData.builder()
+            .id(12345678L)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+        caseDataMap = caseData.toMap(new ObjectMapper());
+        caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId(TS_ADMIN_APPLICATION.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), Mockito.any(Class.class))).thenReturn(caseDetails);
