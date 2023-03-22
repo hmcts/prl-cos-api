@@ -75,10 +75,6 @@ public class TestingSupportService {
         }
         CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
         if (dummyCaseDetails != null) {
-            if (TS_ADMIN_APPLICATION.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                caseWorkerEmailService.sendEmailToGateKeeper(dummyCaseDetails);
-            }
-
             CaseDetails updatedCaseDetails = dummyCaseDetails.toBuilder()
                 .id(initialCaseDetails.getId())
                 .createdDate(initialCaseDetails.getCreatedDate())
@@ -91,23 +87,12 @@ public class TestingSupportService {
     public Map<String, Object> submittedCaseCreation(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        List<String> roles = userDetails.getRoles();
-        boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (isCourtStaff) {
-            try {
-                caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(authorisation, caseData));
-            } catch (Exception e) {
-                log.error("Error regenerating the document", e);
-            }
+        try {
+            caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(authorisation, caseData));
+        } catch (Exception e) {
+            log.error("Error regenerating the document", e);
         }
-        log.info("c8Document" + caseDataUpdated.get("c8Document"));
-        log.info("c1ADocument" + caseDataUpdated.get("c1ADocument"));
-        log.info("c8WelshDocument" + caseDataUpdated.get("c8WelshDocument"));
-        log.info("finalDocument" + caseDataUpdated.get("finalDocument"));
-        log.info("finalWelshDocument" + caseDataUpdated.get("finalWelshDocument"));
-        log.info("c1AWelshDocument" + caseDataUpdated.get("c1AWelshDocument"));
         caseData = caseData.toBuilder()
             .c8Document(objectMapper.convertValue(caseDataUpdated.get("c8Document"), Document.class))
             .c1ADocument(objectMapper.convertValue(caseDataUpdated.get("c1ADocument"), Document.class))
@@ -117,7 +102,7 @@ public class TestingSupportService {
             .c1AWelshDocument(objectMapper.convertValue(caseDataUpdated.get("c1AWelshDocument"), Document.class))
             .build();
         tabService.updateAllTabsIncludingConfTab(caseData);
-
+        caseWorkerEmailService.sendEmailToGateKeeper(callbackRequest.getCaseDetails());
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
 
