@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
@@ -48,12 +49,16 @@ public class DraftOrder {
     private final List<Element<MagistrateLastName>> magistrateLastName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate approvalDate;
     private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     private final String recitalsOrPreamble;
     @JsonProperty("orderDirections")
     private final String orderDirections;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
+    @JsonProperty("furtherInformationIfRequired")
+    private final String furtherInformationIfRequired;
     private final String parentName;
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
     private final String manageOrdersFl402CourtName;
@@ -109,6 +114,14 @@ public class DraftOrder {
     private final LocalDate underTakingDateExpiry;
     private final String underTakingExpiryTime;
     private final YesOrNo underTakingFormSign;
+
+    private final String orderSelectionType;
+    private final String orderCreatedBy;
+    @JsonProperty("isOrderUploadedByJudgeOrAdmin")
+    private final YesOrNo isOrderUploadedByJudgeOrAdmin;
+    private final String childrenList;
+    private final YesOrNo isTheOrderAboutChildren;
+    private final C21OrderOptionsEnum c21OrderOptions;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
