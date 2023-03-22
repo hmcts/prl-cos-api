@@ -93,7 +93,8 @@ public class CommonUtils {
         collapsible.add("</div>");
         collapsible.add("</details>");
         return String.join("\n\n", collapsible);
-  }
+    }
+
     public static void generatePartyUuidForC100(PartyDetails partyDetails) {
 
         if (partyDetails.getSolicitorPartyId() == null) {
