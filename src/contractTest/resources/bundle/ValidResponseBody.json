@@ -14,7 +14,7 @@
               "document_url": "http://sampleurl/documents/2d134d2f-660d-41ed-8878-df3f70d748b7",
               "document_binary_url": "http://sampleurl/documents/2d134d2f-660d-41ed-8878-df3f70d748b7/binary",
               "document_filename": "C100FinalDocument.pdf",
-              "dsampleurlocument_hash": null,
+              "document_hash": null,
               "document_creation_date": null
             },
             "documentFileName": "C100FinalDocument.pdf",
