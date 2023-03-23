@@ -83,13 +83,13 @@ public class ManageOrdersController {
     @Autowired
     private HearingDataService hearingDataService;
 
-    private DynamicList retrievedHearingTypes = null;
+    private DynamicList retrievedHearingTypes;
 
-    private DynamicList retrievedHearingDates = null;
+    private DynamicList retrievedHearingDates;
 
-    private DynamicList retrievedHearingChannels = null;
+    private DynamicList retrievedHearingChannels;
 
-    private DynamicList retrievedHearingSubChannels = null;
+    private DynamicList retrievedHearingSubChannels;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
@@ -110,7 +110,8 @@ public class ManageOrdersController {
             callbackRequest,
             caseData
         ));
-
+        log.info("Case Data  --> {}", objectMapper.writeValueAsString(caseData));
+        log.info("Case Data  Hearing details--> {}", objectMapper.writeValueAsString(caseData.getManageOrders().getOrdersHearingDetails()));
         log.info("Hearing data {}", caseDataUpdated.get(ORDER_HEARING_DETAILS));
         log.info("Hearing cae data {}", caseData.getManageOrders().getOrdersHearingDetails());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
