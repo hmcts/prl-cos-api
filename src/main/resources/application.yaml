@@ -119,7 +119,8 @@ uk:
             CITIZEN_CASE_WITHDRAWN: ee06226c-222c-444c-a5d2-50015e6d07d1
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
-            CITIZEN_CASE_WITHDRAWN: ee06226c-222c-444c-a5d2-50015e6d07d1
+            CITIZEN_CASE_SUBMISSION: 1e9c07a2-e565-4b16-9ead-bd49206ba8de
+            CITIZEN_CASE_WITHDRAWN: 8fab03ec-8246-4711-9d79-a648af4ddc96
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name

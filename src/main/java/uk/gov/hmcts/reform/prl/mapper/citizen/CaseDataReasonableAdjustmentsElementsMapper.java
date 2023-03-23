@@ -89,7 +89,13 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                                .isDisabilityPresent(buildIsDisabilityPresent(disabilityRequirementsList))
                                .adjustmentsRequired(buildAdjustmentRequired(disabilityRequirementsList,
                                                                             c100RebuildReasonableAdjustmentsElements))
-                               .build());
+                               .build())
+            .languagePreferenceWelsh(specifyWelshPreference(languageList)); //To specify emails & documents to be generated in Welsh
+    }
+
+    private static YesOrNo specifyWelshPreference(List<String> languageList) {
+        return !languageList.isEmpty()
+            && languageList.contains(READ_WRITE_WELSH) ? YesOrNo.Yes : YesOrNo.No;
     }
 
     private static List<Element<InterpreterNeed>> buildInterpreterNeeds(List<String> languageList,
