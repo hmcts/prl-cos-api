@@ -33,6 +33,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_DRAFT_C8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL_401_STMT_OF_TRUTH;
@@ -131,6 +132,8 @@ public class TestingSupportService {
         } catch (Exception e) {
             log.error("Error regenerating the document", e);
         }
+        log.info("DOCUMENT_FIELD_DRAFT_C8" + caseDataUpdated.get(DOCUMENT_FIELD_DRAFT_C8));
+        log.info("DOCUMENT_FIELD_C8" + caseDataUpdated.get(DOCUMENT_FIELD_C8));
         caseData = caseData.toBuilder()
             .c8Document(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C8), Document.class))
             .c1ADocument(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C1A), Document.class))
