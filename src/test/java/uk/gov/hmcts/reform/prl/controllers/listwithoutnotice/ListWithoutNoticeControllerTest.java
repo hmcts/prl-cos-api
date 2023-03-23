@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.controllers.listwithoutnotice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -169,11 +168,53 @@ public class ListWithoutNoticeControllerTest {
 
 
     @Test
-    @Ignore
     public void testListWithoutNoticeSubmission() throws Exception {
+
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        DynamicList dynamicList = DynamicList.builder()
+            .listItems(dynamicListElementsList)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList)
+            .confirmedHearingDates(dynamicList)
+            .hearingChannels(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingVideoChannels(dynamicList)
+            .hearingTelephoneChannels(dynamicList)
+            .courtList(dynamicList)
+            .localAuthorityHearingChannel(dynamicList)
+            .hearingListedLinkedCases(dynamicList)
+            .applicantSolicitorHearingChannel(dynamicList)
+            .respondentHearingChannel(dynamicList)
+            .respondentSolicitorHearingChannel(dynamicList)
+            .cafcassHearingChannel(dynamicList)
+            .cafcassCymruHearingChannel(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours(5)
+            .hearingEstimatedMinutes(40)
+            .hearingEstimatedDays(15)
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .build();
+
+        Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
+        List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
+            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -206,8 +247,6 @@ public class ListWithoutNoticeControllerTest {
                                                                                                  .build()));
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
 
-        caseDataUpdated.put("listWithoutNoticeHearingDetails",List.of(DynamicListElement.builder()
-                                                                          .build()));
 
         AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController.listWithoutNoticeSubmission(authToken,callbackRequest);
         assertNotNull(response.getData().containsKey("listWithoutNoticeHearingDetails"));

@@ -12,14 +12,12 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingPriorityTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.HearingSpecificDatesOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -109,24 +107,8 @@ public class HearingData {
     private String respondentName;
     private String respondentSolicitor;
 
-    @JsonProperty("hearingSpecificDatesOptionsEnum")
-    private HearingSpecificDatesOptionsEnum hearingSpecificDatesOptionsEnum;
-
-
-    @JsonProperty("firstDateOfTheHearing")
-    private LocalDate firstDateOfTheHearing;
-
-    @JsonProperty("hearingMustTakePlaceAtHour")
-    private int hearingMustTakePlaceAtHour;
-
-    @JsonProperty("hearingMustTakePlaceAtMinute")
-    private int hearingMustTakePlaceAtMinute;
-
-    @JsonProperty("earliestHearingDate")
-    private LocalDate earliestHearingDate;
-
-    @JsonProperty("latestHearingDate")
-    private LocalDate latestHearingDate;
+    @JsonProperty("hearingSpecificDateDetails")
+    private HearingSpecificDateDetails hearingSpecificDateDetails;
 
     @JsonProperty("hearingPriorityTypeEnum")
     private HearingPriorityTypeEnum hearingPriorityTypeEnum;
