@@ -99,23 +99,24 @@ public class TestingSupportService {
                 .build();
             caseDataUpdated = updatedCaseDetails.getData();
             if (adminCreateApplication) {
-                updateDateInCase(initialCaseData, caseDataUpdated, dummyCaseData);
-            }
-            try {
-                caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(authorisation, dummyCaseData));
-            } catch (Exception e) {
-                log.error("Error regenerating the document", e);
+                caseDataUpdated.putAll(updateDateInCase(initialCaseData, dummyCaseData));
+                try {
+                    caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(authorisation, dummyCaseData));
+                } catch (Exception e) {
+                    log.error("Error regenerating the document", e);
+                }
             }
         }
 
         return caseDataUpdated;
     }
 
-    private static void updateDateInCase(CaseData initialCaseData, Map<String, Object> caseDataUpdated, CaseData dummyCaseData) {
+    private Map<String, Object> updateDateInCase(CaseData initialCaseData,CaseData dummyCaseData) {
+        Map<String, Object> objectMap = new HashMap<>();
         String dateSubmitted = DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now(ZoneId.of("Europe/London")));
-        caseDataUpdated.put(DATE_SUBMITTED_FIELD, dateSubmitted);
-        caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
-        caseDataUpdated.put(
+        objectMap.put(DATE_SUBMITTED_FIELD, dateSubmitted);
+        objectMap.put(ISSUE_DATE_FIELD, LocalDate.now());
+        objectMap.put(
             DATE_OF_SUBMISSION,
             DateOfSubmission.builder().dateOfSubmission(CommonUtils.getIsoDateToSpecificFormat(
                 dateSubmitted,
@@ -125,8 +126,9 @@ public class TestingSupportService {
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())
             && null != dummyCaseData.getFl401StmtOfTruth()) {
             StatementOfTruth statementOfTruth = dummyCaseData.getFl401StmtOfTruth().toBuilder().date(LocalDate.now()).build();
-            caseDataUpdated.put(FL_401_STMT_OF_TRUTH, statementOfTruth);
+            objectMap.put(FL_401_STMT_OF_TRUTH, statementOfTruth);
         }
+        return objectMap;
     }
 
     public Map<String, Object> submittedCaseCreation(CallbackRequest callbackRequest) {
