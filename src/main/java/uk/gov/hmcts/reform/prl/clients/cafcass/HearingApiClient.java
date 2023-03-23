@@ -28,7 +28,7 @@ public interface HearingApiClient {
     List<Hearings> getHearingDetailsForAllCaseIds(
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
-        @RequestBody Map<Long,String> caseIdWithRegionIdMap
+        @RequestBody Map<String,String> caseIdWithRegionIdMap
     );
 
 }

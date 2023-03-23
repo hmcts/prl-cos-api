@@ -41,7 +41,7 @@ public class HearingService {
         return hearingDetails;
     }
 
-    public List<Hearings> getHearingsForAllCases(String userToken, Map<Long,String> caseIdWithRegionIdMap) {
+    public List<Hearings> getHearingsForAllCases(String userToken, Map<String,String> caseIdWithRegionIdMap) {
         try {
             listOfHearingDetails = hearingApiClient.getHearingDetailsForAllCaseIds(userToken, authTokenGenerator.generate(), caseIdWithRegionIdMap);
             filterHearingsForListOfCaseIds();
