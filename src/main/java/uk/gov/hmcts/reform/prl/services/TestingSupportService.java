@@ -69,7 +69,7 @@ public class TestingSupportService {
 
     private static final String VALID_FL401_GATEKEEPING_INPUT_JSON = "FL401_Dummy_Gatekeeping_CaseDetails.json";
 
-    public Map<String, Object> initiateCaseCreation(CallbackRequest callbackRequest) throws Exception {
+    public Map<String, Object> initiateCaseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
         String requestBody;
         CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
         CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -101,7 +101,13 @@ public class TestingSupportService {
             if (adminCreateApplication) {
                 updateDateInCase(initialCaseData, caseDataUpdated, dummyCaseData);
             }
+            try {
+                caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(authorisation, dummyCaseData));
+            } catch (Exception e) {
+                log.error("Error regenerating the document", e);
+            }
         }
+
         return caseDataUpdated;
     }
 
@@ -123,17 +129,12 @@ public class TestingSupportService {
         }
     }
 
-    public Map<String, Object> submittedCaseCreation(String authorisation, CallbackRequest callbackRequest) {
+    public Map<String, Object> submittedCaseCreation(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        try {
-            caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(authorisation, caseData));
-        } catch (Exception e) {
-            log.error("Error regenerating the document", e);
-        }
-        log.info("DOCUMENT_FIELD_DRAFT_C8" + caseDataUpdated.get(DOCUMENT_FIELD_DRAFT_C8));
-        log.info("DOCUMENT_FIELD_C8" + caseDataUpdated.get(DOCUMENT_FIELD_C8));
+        log.info("c8DraftDocument " + caseDataUpdated.get(DOCUMENT_FIELD_DRAFT_C8));
+        log.info("c8Document " + caseDataUpdated.get(DOCUMENT_FIELD_C8));
         caseData = caseData.toBuilder()
             .c8Document(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C8), Document.class))
             .c1ADocument(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C1A), Document.class))
