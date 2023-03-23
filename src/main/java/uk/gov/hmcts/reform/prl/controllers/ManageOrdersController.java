@@ -78,6 +78,7 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("*****Manage orders preview order case data : {}", caseDataUpdated);
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -163,6 +164,7 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("*****Manage orders populate header order case data : {}", caseData);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageOrderService.populateHeader(caseData))
             .build();
