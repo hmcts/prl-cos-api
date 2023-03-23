@@ -145,13 +145,13 @@ public class CaseDataService {
 
     private void getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
 
-        Map<Long,String> caseIdWithRegionIdMap = new HashMap<>();
+        Map<String,String> caseIdWithRegionIdMap = new HashMap<>();
         for (CafCassCaseDetail caseDetails: cafCassResponse.getCases()) {
             CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
             if (caseManagementLocation != null && caseManagementLocation.getRegionId() != null) {
-                caseIdWithRegionIdMap.put(caseDetails.getId(),caseManagementLocation.getRegionId());
+                caseIdWithRegionIdMap.put(caseDetails.getId().toString(),caseManagementLocation.getRegionId());
             } else {
-                caseIdWithRegionIdMap.put(caseDetails.getId(),null);
+                caseIdWithRegionIdMap.put(caseDetails.getId().toString(),null);
             }
         }
         log.info("caseIdWithRegionIdMap {}",caseIdWithRegionIdMap);
