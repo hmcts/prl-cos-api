@@ -55,13 +55,12 @@ public class TestingSupportControllerTest {
     @Test
     public void testAboutToSubmitCaseCreation() throws Exception {
         testingSupportController.aboutToSubmitCaseCreation(auth, callbackRequest);
-        verify(testingSupportService, times(1)).initiateCaseCreation(Mockito.any(CallbackRequest.class));
+        verify(testingSupportService, times(1)).initiateCaseCreation(Mockito.anyString(), Mockito.any(CallbackRequest.class));
     }
 
     @Test
     public void testSubmittedCaseCreation() {
         testingSupportController.submittedCaseCreation(auth, callbackRequest);
-        verify(testingSupportService, times(1)).submittedCaseCreation(Mockito.anyString(),
-                                                                      Mockito.any(CallbackRequest.class));
+        verify(testingSupportService, times(1)).submittedCaseCreation(Mockito.any(CallbackRequest.class));
     }
 }

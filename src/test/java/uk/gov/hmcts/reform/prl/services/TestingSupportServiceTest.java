@@ -69,7 +69,7 @@ public class TestingSupportServiceTest {
             .eventId(TS_SOLICITOR_APPLICATION.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(callbackRequest);
+        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
         Assert.assertTrue(stringObjectMap.isEmpty());
     }
 
@@ -92,7 +92,7 @@ public class TestingSupportServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), Mockito.any(Class.class))).thenReturn(caseDetails);
-        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(callbackRequest);
+        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
 
@@ -115,7 +115,7 @@ public class TestingSupportServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), Mockito.any(Class.class))).thenReturn(caseDetails);
-        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(callbackRequest);
+        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
 
@@ -139,7 +139,7 @@ public class TestingSupportServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), Mockito.any(Class.class))).thenReturn(caseDetails);
-        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(callbackRequest);
+        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
 
@@ -162,7 +162,7 @@ public class TestingSupportServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), Mockito.any(Class.class))).thenReturn(caseDetails);
-        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(callbackRequest);
+        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
 }
