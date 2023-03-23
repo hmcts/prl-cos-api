@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -89,9 +91,8 @@ public class CaseDataService {
         );
 
         if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
-
             cafCassFilter.filter(cafCassResponse);
-            getHearingDetails(authorisation, cafCassResponse);
+            // getHearingDetails(authorisation, cafCassResponse);
             getHearingDetailsForAllCases(authorisation, cafCassResponse);
             updateHearingResponse(authorisation, authTokenGenerator.generate(), cafCassResponse);
 
@@ -144,14 +145,18 @@ public class CaseDataService {
 
     private void getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
 
-        List<String> caseIds =
-            cafCassResponse.getCases().stream()
-                .map(
-                    eachCafCassCaseDetail ->
-                        eachCafCassCaseDetail.getId().toString())
-                .collect(Collectors.toList());
+        Map<Long,String> caseIdWithRegionIdMap = new HashMap<>();
+        for (CafCassCaseDetail caseDetails: cafCassResponse.getCases()) {
+            CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
+            if (caseManagementLocation != null && caseManagementLocation.getRegionId() != null) {
+                caseIdWithRegionIdMap.put(caseDetails.getId(),caseManagementLocation.getRegionId());
+            } else {
+                caseIdWithRegionIdMap.put(caseDetails.getId(),null);
+            }
+        }
+        log.info("caseIdWithRegionIdMap {}",caseIdWithRegionIdMap);
 
-        List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(authorisation,caseIds);
+        List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(authorisation,caseIdWithRegionIdMap);
 
         if (!listOfHearingDetails.isEmpty()) {
             for (CafCassCaseDetail cafCassCaseDetail : cafCassResponse.getCases()) {

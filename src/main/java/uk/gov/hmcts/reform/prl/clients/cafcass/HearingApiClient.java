@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 
 import java.util.List;
+import java.util.Map;
 
 @FeignClient(
     name = "hearing-api-cafcaas",
@@ -27,7 +28,7 @@ public interface HearingApiClient {
     List<Hearings> getHearingDetailsForAllCaseIds(
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
-        @RequestBody List<String> caseIds
+        @RequestBody Map<Long,String> caseIdWithRegionIdMap
     );
 
 }
