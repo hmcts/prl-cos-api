@@ -43,7 +43,6 @@ public class DynamicMultiSelectListService {
         List<Element<Child>> children = caseData.getChildren();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         IncrementalInteger i = new IncrementalInteger(1);
-        IncrementalInteger j = new IncrementalInteger(1);
         if (children != null) {
             children.forEach(child -> {
                 if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
@@ -54,10 +53,9 @@ public class DynamicMultiSelectListService {
                 }
             });
         } else if (caseData.getApplicantChildDetails() != null) {
-            caseData.getApplicantChildDetails().forEach(child -> {
-                listItems.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
-                                     .label(child.getValue().getFullName()).build());
-            });
+            caseData.getApplicantChildDetails().forEach(child -> listItems.add(DynamicMultiselectListElement.builder()
+                                                                                   .code(child.getId().toString())
+                                 .label(child.getValue().getFullName()).build()));
         }
         return listItems;
     }
@@ -167,11 +165,13 @@ public class DynamicMultiSelectListService {
 
     public List<Child> getChildrenForDocmosis(CaseData caseData) {
         List<Child> childList = new ArrayList<>();
+        log.info("*****Child options selected are : {}", caseData.getManageOrders().getChildOption());
         if (null != caseData.getManageOrders()) {
             if (null != caseData.getManageOrders().getChildOption()) {
                 if (null != caseData.getManageOrders().getChildOption().getValue()) {
                     caseData.getManageOrders().getChildOption().getValue().forEach(value -> {
                         Child child = getChildDetails(caseData, value.getCode());
+                        log.info("*****Child : {}", child);
                         if (null != child) {
                             childList.add(child);
                         }
@@ -179,6 +179,7 @@ public class DynamicMultiSelectListService {
                 }
             }
         }
+        log.info("*****Child list : {}", childList);
         return childList;
     }
 
