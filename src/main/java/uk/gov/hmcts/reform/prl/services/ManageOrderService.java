@@ -889,6 +889,7 @@ public class ManageOrderService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         List<Child> children = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseData);
+        log.info("****Children in manage order service {}", children);
         if (children.size() != 0) {
             caseData.setChildrenListForDocmosis(children);
         }
