@@ -64,7 +64,7 @@ public class CitizenEmailService {
             address,
             EmailTemplateNames.CITIZEN_CASE_WITHDRAWN,
             email,
-            LanguagePreference.getLanguagePreference(caseData)
+            LanguagePreference.getPreferenceLanguage(caseData)
         );
     }
 }
