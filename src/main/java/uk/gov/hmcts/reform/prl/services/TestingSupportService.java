@@ -27,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_OF_SUBMISSION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
@@ -113,8 +114,10 @@ public class TestingSupportService {
 
     private Map<String, Object> updateDateInCase(CaseData initialCaseData,CaseData dummyCaseData) {
         Map<String, Object> objectMap = new HashMap<>();
-        String dateSubmitted = DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now(ZoneId.of("Europe/London")));
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        String dateSubmitted = DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime);
         objectMap.put(DATE_SUBMITTED_FIELD, dateSubmitted);
+        objectMap.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD,DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
         objectMap.put(ISSUE_DATE_FIELD, LocalDate.now());
         objectMap.put(
             DATE_OF_SUBMISSION,
