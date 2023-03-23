@@ -91,17 +91,17 @@ public class TestingSupportService {
         }
         CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
         if (dummyCaseDetails != null) {
-            CaseData dummyCaseData = CaseUtils.getCaseData(dummyCaseDetails, objectMapper);
             CaseDetails updatedCaseDetails = dummyCaseDetails.toBuilder()
                 .id(initialCaseDetails.getId())
                 .createdDate(initialCaseDetails.getCreatedDate())
                 .lastModified(initialCaseDetails.getLastModified())
                 .build();
             caseDataUpdated = updatedCaseDetails.getData();
+            CaseData updatedCaseData = CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
             if (adminCreateApplication) {
-                caseDataUpdated.putAll(updateDateInCase(initialCaseData, dummyCaseData));
+                caseDataUpdated.putAll(updateDateInCase(initialCaseData, updatedCaseData));
                 try {
-                    caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(authorisation, dummyCaseData));
+                    caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(authorisation, updatedCaseData));
                 } catch (Exception e) {
                     log.error("Error regenerating the document", e);
                 }
