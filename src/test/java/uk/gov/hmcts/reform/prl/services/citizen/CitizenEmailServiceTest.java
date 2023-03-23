@@ -56,10 +56,12 @@ public class CitizenEmailServiceTest {
             .email(emailId)
             .build();
 
+        CaseData caseData = CaseData.builder().id(12345L).applicantCaseName("Test case").build();
+
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         //When
-        citizenEmailService.sendCitizenCaseSubmissionEmail(authToken, "12345");
+        citizenEmailService.sendCitizenCaseSubmissionEmail(authToken, caseData);
 
         //Then
         verify(emailService).send(eq(emailId), eq(CITIZEN_CASE_SUBMISSION), any(),

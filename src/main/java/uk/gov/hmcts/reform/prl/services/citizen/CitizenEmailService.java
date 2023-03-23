@@ -36,18 +36,18 @@ public class CitizenEmailService {
         );
     }
 
-    public void sendCitizenCaseSubmissionEmail(String authorisation, String caseId) {
+    public void sendCitizenCaseSubmissionEmail(String authorisation, CaseData caseData) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        EmailTemplateVars email = buildCitizenCaseSubmissionEmail(userDetails, caseId, null);
-        sendEmail(userDetails.getEmail(), email);
+        EmailTemplateVars email = buildCitizenCaseSubmissionEmail(userDetails, String.valueOf(caseData.getId()), null);
+        sendEmail(userDetails.getEmail(), email, caseData);
     }
 
-    public void sendEmail(String address, EmailTemplateVars email) {
+    public void sendEmail(String address, EmailTemplateVars email, CaseData caseData) {
         emailService.send(
             address,
             EmailTemplateNames.CITIZEN_CASE_SUBMISSION,
             email,
-            LanguagePreference.english
+            LanguagePreference.getPreferenceLanguage(caseData)
         );
     }
 
