@@ -93,6 +93,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                                .adjustmentsRequired(buildAdjustmentRequired(disabilityRequirementsList,
                                                                             c100RebuildReasonableAdjustmentsElements))
                                .build())
+            //PRL-3382 - Update Welsh language requirements for c100 citizen application
             .welshLanguageRequirement(isWelshRequired)
             .welshLanguageRequirementApplication(YesOrNo.Yes.equals(isWelshRequired)
                                                      ? LanguagePreference.welsh : LanguagePreference.english)
