@@ -32,7 +32,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -104,7 +104,7 @@ public class CaseDataServiceTest {
         when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
         Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
         when(hearingService.getHearings(anyString(),anyString())).thenReturn(hearings);
-        when(hearingService.getHearingsForAllCases(anyString(),anyList())).thenReturn(listOfHearings);
+        when(hearingService.getHearingsForAllCases(anyString(),anyMap())).thenReturn(listOfHearings);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");

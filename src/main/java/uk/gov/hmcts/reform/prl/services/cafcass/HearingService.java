@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -40,12 +41,12 @@ public class HearingService {
         return hearingDetails;
     }
 
-    public List<Hearings> getHearingsForAllCases(String userToken, List<String> caseIds) {
+    public List<Hearings> getHearingsForAllCases(String userToken, Map<Long,String> caseIdWithRegionIdMap) {
         try {
-            listOfHearingDetails = hearingApiClient.getHearingDetailsForAllCaseIds(userToken, authTokenGenerator.generate(), caseIds);
+            listOfHearingDetails = hearingApiClient.getHearingDetailsForAllCaseIds(userToken, authTokenGenerator.generate(), caseIdWithRegionIdMap);
             filterHearingsForListOfCaseIds();
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error while getHearingsForAllCases {}",e.getMessage());
         }
         return listOfHearingDetails;
     }
