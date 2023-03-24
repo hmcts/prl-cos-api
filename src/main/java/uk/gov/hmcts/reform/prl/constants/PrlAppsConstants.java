@@ -368,7 +368,6 @@ public class PrlAppsConstants {
     public static final String ORDER_HEARING_DETAILS = "ordersHearingDetails";
 
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
-    public static final String CASEWORKER = "CaseWorker";
     public static final String CHILD_AND_CAFCASS_OFFICER_DETAILS = "childAndCafcassOfficers";
     public static final String CHILD_NAME = "Child name: ";
     public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
