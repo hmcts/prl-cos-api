@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.Duration;
@@ -22,6 +23,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
+import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
 @Slf4j
 public class CaseUtils {
@@ -81,4 +83,8 @@ public class CaseUtils {
                                                  CLOSED_STATE,
                                                  PENDING_STATE,
                                                  SUBMITTED_STATE);
+
+    public static boolean hasLegalRepresentation(PartyDetails partyDetails) {
+        return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
+    }
 }
