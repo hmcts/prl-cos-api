@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -90,7 +90,7 @@ public class ListWithoutNoticeControllerTest {
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
 
         AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController.prePopulateHearingPageData(authToken,callbackRequest);
-        assertNotNull(response.getData().containsKey("listWithoutNoticeHearingDetails"));
+        assertTrue(response.getData().containsKey("listWithoutNoticeHearingDetails"));
     }
 
     @Test
@@ -163,7 +163,7 @@ public class ListWithoutNoticeControllerTest {
 
 
         AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController.prePopulateHearingPageData(authToken,callbackRequest);
-        assertNotNull(response.getData().containsKey("listWithoutNoticeHearingDetails"));
+        assertTrue(response.getData().containsKey("listWithoutNoticeHearingDetails"));
     }
 
 
@@ -249,7 +249,7 @@ public class ListWithoutNoticeControllerTest {
 
 
         AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController.listWithoutNoticeSubmission(authToken,callbackRequest);
-        assertNotNull(response.getData().containsKey("listWithoutNoticeHearingDetails"));
+        assertTrue(response.getData().containsKey("listWithoutNoticeHearingDetails"));
     }
 
 }

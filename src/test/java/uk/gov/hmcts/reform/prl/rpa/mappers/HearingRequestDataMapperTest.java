@@ -109,7 +109,7 @@ public class HearingRequestDataMapperTest {
             .applicantName("Test")
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
-        assertEquals(hearingData.getHearingTypes().getListItems().get(0).getCode(),"INTER");
+        assertEquals("INTER",hearingData.getHearingTypes().getListItems().get(0).getCode());
     }
 
 
@@ -252,10 +252,10 @@ public class HearingRequestDataMapperTest {
             .applicantName("Test")
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
-        assertEquals(hearingData.getHearingTypes().getListItems().get(0).getCode(),"test");
-        assertEquals(hearingData.getHearingVideoChannels().getListItems().get(0).getCode(),"test");
-        assertEquals(hearingData.getHearingTelephoneChannels().getListItems().get(0).getCode(),"test");
-        assertEquals(hearingData.getCourtList().getListItems().get(0).getCode(),"test");
+        assertEquals("test",hearingData.getHearingTypes().getListItems().get(0).getCode());
+        assertEquals("test",hearingData.getHearingVideoChannels().getListItems().get(0).getCode());
+        assertEquals("test",hearingData.getHearingTelephoneChannels().getListItems().get(0).getCode());
+        assertEquals("test",hearingData.getCourtList().getListItems().get(0).getCode());
     }
 
 }

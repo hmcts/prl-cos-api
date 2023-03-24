@@ -110,6 +110,7 @@ public class HearingDataService {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public HearingDataPrePopulatedDynamicLists populateHearingDynamicLists(String authorisation, String caseReferenceNumber, CaseData caseData) {
+        log.info("populateHearingDynamicLists methd for caseReferenceNum : {}", caseReferenceNumber);
         Map<String, List<DynamicListElement>> hearingChannelsDetails = prePopulateHearingChannel(authorisation);
         return HearingDataPrePopulatedDynamicLists.builder().retrievedHearingTypes(getDynamicList(prePopulateHearingType(authorisation)))
             .retrievedHearingDates(getDynamicList(getHearingStartDate(authorisation, caseData)))
@@ -185,7 +186,7 @@ public class HearingDataService {
         } catch (Exception e) {
             log.error("Category Values look up failed - " + e.getMessage(), e);
         }
-        return null;
+        return new HashMap<>();
 
     }
 
@@ -196,7 +197,7 @@ public class HearingDataService {
             CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()
                 .caseReference(String.valueOf(caseData.getId())).build();
             Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
-            if (ofNullable(caseLinkedDataList).isPresent()) {
+            if (caseLinkedDataList.isPresent() && ofNullable(caseLinkedDataList).isPresent()) {
                 for (CaseLinkedData caseLinkedData : caseLinkedDataList.get()) {
                     Hearings hearingDetails = hearingService.getHearings(authorisation, caseLinkedData.getCaseReference());
                     if (!ofNullable(hearingDetails).isEmpty() && !ofNullable(hearingDetails.getCaseHearings()).isEmpty()) {
@@ -283,10 +284,10 @@ public class HearingDataService {
         //Note: When we add new fields , we need to add those fields in respective if else blocks to nullify to handle the data clearing issue from UI
         if (null != listWithoutNoticeHeardetailsObj) {
             log.info("Inside null check for listWithoutNoticeHearingDetails ");
-            List list = (List) listWithoutNoticeHeardetailsObj;
-            if (null != list && list.size() > 0) {
+            List<Object> list = (List) listWithoutNoticeHeardetailsObj;
+            if (list.size() > 0) {
                 list.parallelStream().forEach(i -> {
-                    LinkedHashMap hearingDataFromMap = (LinkedHashMap) (((LinkedHashMap) i).get("value"));
+                    LinkedHashMap<String,Object> hearingDataFromMap = (LinkedHashMap) (((LinkedHashMap) i).get("value"));
                     if (null != hearingDataFromMap) {
                         if (!(DATE_CONFIRMED_IN_HEARINGS_TAB.equals(hearingDataFromMap.get(HEARING_DATE_CONFIRM_OPTION_ENUM)))) {
                             hearingDataFromMap.put(CONFIRMED_HEARING_DATES, null);
