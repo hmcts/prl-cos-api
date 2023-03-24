@@ -148,8 +148,12 @@ public class CaseDataService {
         Map<String,String> caseIdWithRegionIdMap = new HashMap<>();
         for (CafCassCaseDetail caseDetails: cafCassResponse.getCases()) {
             CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
-            if (caseManagementLocation != null && caseManagementLocation.getRegionId() != null) {
-                caseIdWithRegionIdMap.put(caseDetails.getId().toString(),caseManagementLocation.getRegionId());
+            if (caseManagementLocation != null) {
+                if (caseManagementLocation.getRegionId() != null) {
+                    caseIdWithRegionIdMap.put(caseDetails.getId().toString(), caseManagementLocation.getRegionId());
+                } else {
+                    caseIdWithRegionIdMap.put(caseDetails.getId().toString(), caseManagementLocation.getRegion());
+                }
             } else {
                 caseIdWithRegionIdMap.put(caseDetails.getId().toString(),null);
             }
