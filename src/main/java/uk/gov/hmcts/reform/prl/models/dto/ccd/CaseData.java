@@ -96,6 +96,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.A
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -761,4 +763,15 @@ public class CaseData implements MappableObject {
 
     //Added for c100 rebuild
     private Long noOfDaysRemainingToSubmitCase;
+
+    private final DynamicList legalAdviserList;
+
+    private AllocatedJudge allocatedJudge;
+    @JsonProperty("gatekeepingDetails")
+    private GatekeepingDetails gatekeepingDetails;
+
+    @JsonUnwrapped
+    @Builder.Default
+    private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
+
 }
