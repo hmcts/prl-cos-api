@@ -18,5 +18,5 @@ public class CaseManagementLocation {
     private  String baseLocationId;
     private  String regionName;
     private  String baseLocationName;
-
+    private  String region;
 }
