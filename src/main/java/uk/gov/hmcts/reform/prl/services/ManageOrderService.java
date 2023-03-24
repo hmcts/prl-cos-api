@@ -886,7 +886,6 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         GeneratedDocumentInfo generatedDocumentInfo = null;
         Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         List<Child> children = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseData);
         log.info("****Children in manage order service {}", children);
@@ -894,6 +893,7 @@ public class ManageOrderService {
             caseData.setChildrenListForDocmosis(children);
         }
         log.info("****Children after setChildrenListForDocmosis {}", caseData);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
             generatedDocumentInfo = dgsService.generateDocument(
