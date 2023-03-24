@@ -61,6 +61,6 @@ public class TestingSupportControllerTest {
     @Test
     public void testSubmittedCaseCreation() {
         testingSupportController.submittedCaseCreation(auth, callbackRequest);
-        verify(testingSupportService, times(1)).submittedCaseCreation(Mockito.any(CallbackRequest.class));
+        verify(testingSupportService, times(1)).submittedCaseCreation(Mockito.any(CallbackRequest.class), Mockito.anyString());
     }
 }
