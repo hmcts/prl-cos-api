@@ -388,7 +388,13 @@ public class PrlAppsConstants {
     public static final String HEARING_CHANNELS_ENUM = "hearingChannelsEnum";
 
     public static final String HEARING_JUDGE_NAME_AND_EMAIL  = "hearingJudgeNameAndEmail";
-    public static final String HEARING_SPECIFIC_DATE_DETAILS = "hearingSpecificDateDetails";
+    public static final String HEARING_SPECIFIC_DATES_OPTIONS_ENUM = "hearingSpecificDatesOptionsEnum";
+    public static final String FIRST_DATE_OF_THE_HEARING = "firstDateOfTheHearing";
+    public static final String HEARING_MUST_TAKE_PLACE_AT_HOUR = "hearingMustTakePlaceAtHour";
+    public static final String HEARING_MUST_TAKE_PLACE_AT_MINUTE = "hearingMustTakePlaceAtMinute";
+
+    public static final String EARLIEST_HEARING_DATE = "earliestHearingDate";
+    public static final String LATEST_HEARING_DATE = "latestHearingDate";
     public static final String HEARING_PRIORITY_TYPE_ENUM = "hearingPriorityTypeEnum";
     public static final String CUSTOM_DETAILS = "customDetails";
 
