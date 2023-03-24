@@ -34,6 +34,7 @@ public class DgsService {
         Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put(CASE_DETAILS_STRING, AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
         GeneratedDocumentInfo generatedDocumentInfo = null;
+        log.info("***** temp case details {}", tempCaseDetails);
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest

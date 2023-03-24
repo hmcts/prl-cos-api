@@ -892,7 +892,6 @@ public class ManageOrderService {
         if (children.size() != 0) {
             caseData.setChildrenListForDocmosis(children);
         }
-        log.info("****Children after setChildrenListForDocmosis {}", caseData);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
