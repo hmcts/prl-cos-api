@@ -2,11 +2,11 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
@@ -58,6 +59,13 @@ public class TestingSupportServiceTest {
     CallbackRequest callbackRequest;
     String auth = "authorisation";
 
+    @Before
+    public void setUp() throws Exception {
+        when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Boolean.TRUE);
+
+    }
+
     @Test
     public void testAboutToSubmitCaseCreationWithoutDummyData() throws Exception {
         caseData = CaseData.builder()
@@ -74,8 +82,6 @@ public class TestingSupportServiceTest {
             .caseDetails(caseDetails)
             .eventId(TS_SOLICITOR_APPLICATION.getId())
             .build();
-        when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
-        when(authorisationService.authoriseService(anyString())).thenReturn(true);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
         Assert.assertTrue(stringObjectMap.isEmpty());
@@ -99,7 +105,8 @@ public class TestingSupportServiceTest {
             .eventId(TS_SOLICITOR_APPLICATION.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(objectMapper.readValue(anyString(), Mockito.any(Class.class))).thenReturn(caseDetails);
+        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
+
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
@@ -122,7 +129,7 @@ public class TestingSupportServiceTest {
             .eventId(TS_SOLICITOR_APPLICATION.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(objectMapper.readValue(anyString(), Mockito.any(Class.class))).thenReturn(caseDetails);
+        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
@@ -146,7 +153,7 @@ public class TestingSupportServiceTest {
             .eventId(TS_ADMIN_APPLICATION.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(objectMapper.readValue(anyString(), Mockito.any(Class.class))).thenReturn(caseDetails);
+        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
@@ -169,7 +176,7 @@ public class TestingSupportServiceTest {
             .eventId(TS_ADMIN_APPLICATION.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(objectMapper.readValue(anyString(), Mockito.any(Class.class))).thenReturn(caseDetails);
+        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }

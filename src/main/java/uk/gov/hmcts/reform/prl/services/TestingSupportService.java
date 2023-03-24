@@ -67,11 +67,11 @@ public class TestingSupportService {
     private final CaseWorkerEmailService caseWorkerEmailService;
     @Autowired
     private final AllTabServiceImpl allTabsService;
-    private LaunchDarklyClient launchDarklyClient;
-    private AuthorisationService authorisationService;
-    private RequestUpdateCallbackService requestUpdateCallbackService;
-    private CoreCaseDataApi coreCaseDataApi;
-    private AuthTokenGenerator authTokenGenerator;
+    private final LaunchDarklyClient launchDarklyClient;
+    private final AuthorisationService authorisationService;
+    private final RequestUpdateCallbackService requestUpdateCallbackService;
+    private final CoreCaseDataApi coreCaseDataApi;
+    private final AuthTokenGenerator authTokenGenerator;
 
     private static final String VALID_C100_DRAFT_INPUT_JSON = "C100_Dummy_Draft_CaseDetails.json";
 
