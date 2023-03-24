@@ -242,7 +242,7 @@ public class HearingDataService {
                                     ? caseData.getApplicantsFL401().getRepresentativeFirstName()
                 + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "")
             .respondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "")
-            .respondentSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? "" : "")
+            .respondentSolicitor("")
             .fillingFormRenderingInfo(CommonUtils.renderCollapsible())
             .build();
     }
