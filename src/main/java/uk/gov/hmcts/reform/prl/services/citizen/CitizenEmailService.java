@@ -14,12 +14,12 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CitizenEmailService {
-
-    public static final String CITIZEN_DASHBOARD = "/dashboard";
 
     @Autowired
     EmailService emailService;
