@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/hmcts/prl-cos-api.svg?branch=master)](https://travis-ci.org/hmcts/prl-cos-api)
 
-## Notes
+## Notes dummy commit
 
 Updates with master until 4.0-3.5
 
@@ -97,3 +97,4 @@ Make sure you have added the label 'keep-helm' while creating the PR. Otherwise,
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
