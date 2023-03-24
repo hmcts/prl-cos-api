@@ -74,7 +74,7 @@ public class AllocatedJudgeService {
             personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
                 .writeValueAsString(judgeDetails), JudicialUser.class).getPersonalCode();
         } catch (Exception e) {
-             log.error(e.getMessage());
+            log.error(e.getMessage());
         }
         return personalCodes;
     }
