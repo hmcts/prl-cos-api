@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -21,6 +22,7 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_ADMIN_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
 
@@ -45,6 +47,10 @@ public class TestingSupportServiceTest {
     private CaseUtils caseUtils;
     @Mock
     private CaseWorkerEmailService caseWorkerEmailService;
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
+    @Mock
+    private AuthorisationService authorisationService;
 
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
@@ -68,6 +74,8 @@ public class TestingSupportServiceTest {
             .caseDetails(caseDetails)
             .eventId(TS_SOLICITOR_APPLICATION.getId())
             .build();
+        when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
+        when(authorisationService.authoriseService(anyString())).thenReturn(true);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
         Assert.assertTrue(stringObjectMap.isEmpty());
