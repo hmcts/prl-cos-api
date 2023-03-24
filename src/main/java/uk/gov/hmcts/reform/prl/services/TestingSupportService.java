@@ -3,12 +3,12 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOf
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -41,6 +42,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL_401_STMT_OF_TRUTH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
 
 @Slf4j
@@ -63,13 +66,20 @@ public class TestingSupportService {
     private final CaseWorkerEmailService caseWorkerEmailService;
     @Autowired
     private final AllTabServiceImpl allTabsService;
+    @Autowired
+    CaseService citizenCaseService;
+    @Autowired
+    private LaunchDarklyClient launchDarklyClient;
+
+    @Autowired
+    AuthorisationService authorisationService;
 
     private static final String VALID_C100_DRAFT_INPUT_JSON = "C100_Dummy_Draft_CaseDetails.json";
 
     private static final String VALID_FL401_DRAFT_INPUT_JSON = "FL401_Dummy_Draft_CaseDetails.json";
 
     private static final String VALID_C100_GATEKEEPING_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails.json";
-    
+
     @Autowired
     CaseRepository caseRepository;
 
@@ -111,7 +121,10 @@ public class TestingSupportService {
             if (adminCreateApplication) {
                 caseDataUpdated.putAll(updateDateInCase(initialCaseData, updatedCaseData));
                 try {
-                    caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(authorisation, updatedCaseData));
+                    caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(
+                        authorisation,
+                        updatedCaseData
+                    ));
                 } catch (Exception e) {
                     log.error("Error regenerating the document", e);
                 }
@@ -121,12 +134,12 @@ public class TestingSupportService {
         return caseDataUpdated;
     }
 
-    private Map<String, Object> updateDateInCase(CaseData initialCaseData,CaseData dummyCaseData) {
+    private Map<String, Object> updateDateInCase(CaseData initialCaseData, CaseData dummyCaseData) {
         Map<String, Object> objectMap = new HashMap<>();
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String dateSubmitted = DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime);
         objectMap.put(DATE_SUBMITTED_FIELD, dateSubmitted);
-        objectMap.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD,DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
+        objectMap.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
         objectMap.put(ISSUE_DATE_FIELD, LocalDate.now());
         objectMap.put(
             DATE_OF_SUBMISSION,
@@ -154,7 +167,10 @@ public class TestingSupportService {
             .c1ADocument(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C1A), Document.class))
             .c8WelshDocument(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C8_WELSH), Document.class))
             .finalDocument(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_FINAL), Document.class))
-            .finalWelshDocument(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_FINAL_WELSH), Document.class))
+            .finalWelshDocument(objectMapper.convertValue(
+                caseDataUpdated.get(DOCUMENT_FIELD_FINAL_WELSH),
+                Document.class
+            ))
             .c1AWelshDocument(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C1A_WELSH), Document.class))
             .build();
         tabService.updateAllTabsIncludingConfTab(caseData);
@@ -165,11 +181,28 @@ public class TestingSupportService {
         return caseDataUpdated;
     }
 
-    public CaseDetails initiateCaseCreation_citizen()throws Exception {
-        String requestBody;
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        requestBody=ResourceLoader.loadJson(VALID_C100_CITIZEN_INPUT_JSON);
-        CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
-     return dummyCaseDetails;
+    public CaseData createDummyLiPC100Case(String authorisation, String s2sToken) throws Exception {
+        if (isAuthorized(authorisation, s2sToken)) {
+            CaseDetails dummyCaseDetails = objectMapper.readValue(
+                ResourceLoader.loadJson(VALID_C100_CITIZEN_INPUT_JSON),
+                CaseDetails.class
+            );
+
+            CaseDetails caseDetails = citizenCaseService.createCase(CaseUtils.getCaseData(
+                dummyCaseDetails,
+                objectMapper
+            ), authorisation);
+            CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
+                CaseUtils.getRemainingDaysSubmitCase(createdCaseData)).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private boolean isAuthorized(String authorisation, String s2sToken) {
+        return launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)
+            && Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
+            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken));
     }
 }
