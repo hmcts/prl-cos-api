@@ -151,7 +151,7 @@ public class RefDataUserServiceTest {
         )).thenReturn(listOfJudges);
         List<JudicialUsersApiResponse> expectedRespose = refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest);
         assertNotNull(expectedRespose);
-        assertEquals(expectedRespose.get(0).getSurname(),"lastName1");
+        assertEquals("lastName1",expectedRespose.get(0).getSurname());
     }
 
     @Test
@@ -175,7 +175,7 @@ public class RefDataUserServiceTest {
             IS_HEARINGCHILDREQUIRED_N
         );
         assertNotNull(commonResponse);
-        assertEquals(commonResponse.getCategoryValues().get(0).getValueEn(),"Celebration hearing");
+        assertEquals("Celebration hearing",commonResponse.getCategoryValues().get(0).getValueEn());
     }
 
 
@@ -195,7 +195,7 @@ public class RefDataUserServiceTest {
             HEARINGTYPE,
             IS_HEARINGCHILDREQUIRED_N
         );
-        assertEquals(commonResponse.getCategoryValues().size(),0);
+        assertEquals(0,commonResponse.getCategoryValues().size());
     }
 
     @Test
@@ -220,8 +220,8 @@ public class RefDataUserServiceTest {
             IS_HEARINGCHILDREQUIRED_N
         );
         assertNotNull(commonResponse);
-        assertEquals(commonResponse.getCategoryValues().get(0).getKey(),"ONPPRS");
-        assertEquals(commonResponse.getCategoryValues().get(0).getValueEn(),"On the Papers");
+        assertEquals("ONPPRS",commonResponse.getCategoryValues().get(0).getKey());
+        assertEquals("On the Papers",commonResponse.getCategoryValues().get(0).getValueEn());
     }
 
     @Test
@@ -238,8 +238,8 @@ public class RefDataUserServiceTest {
         List<DynamicListElement> expectedResponse = refDataUserService.filterCategoryValuesByCategoryId(
             commonDataResponse,
             HEARINGTYPE);
-        assertEquals(expectedResponse.get(0).getCode(),"AINTER");
-        assertEquals(expectedResponse.get(0).getLabel(),"AIN Person");
+        assertEquals("AINTER",expectedResponse.get(0).getCode());
+        assertEquals("AIN Person",expectedResponse.get(0).getLabel());
 
     }
 
@@ -248,8 +248,8 @@ public class RefDataUserServiceTest {
         List<DynamicListElement> expectedResponse = refDataUserService.filterCategoryValuesByCategoryId(
             null,
             HEARINGTYPE);
-        assertEquals(expectedResponse.get(0).getCode(),null);
-        assertEquals(expectedResponse.get(0).getLabel(),null);
+        assertEquals(null,expectedResponse.get(0).getCode());
+        assertEquals(null,expectedResponse.get(0).getLabel());
 
     }
 
@@ -272,8 +272,8 @@ public class RefDataUserServiceTest {
         List<DynamicListElement> expectedResponse = refDataUserService.filterCategorySubValuesByCategoryId(
             commonDataResponse,
             VIDEOPLATFORM);
-        assertEquals(expectedResponse.get(0).getCode(),"VIDOTHER");
-        assertEquals(expectedResponse.get(0).getLabel(),"Video - Other");
+        assertEquals("VIDOTHER",expectedResponse.get(0).getCode());
+        assertEquals("Video - Other",expectedResponse.get(0).getLabel());
 
     }
 
@@ -282,11 +282,10 @@ public class RefDataUserServiceTest {
         List<DynamicListElement> expectedResponse = refDataUserService.filterCategorySubValuesByCategoryId(
             null,
             VIDEOPLATFORM);
-        assertEquals(expectedResponse.get(0).getCode(),null);
-        assertEquals(expectedResponse.get(0).getLabel(),null);
+        assertEquals(null,expectedResponse.get(0).getCode());
+        assertEquals(null,expectedResponse.get(0).getLabel());
 
     }
-
 
 }
 

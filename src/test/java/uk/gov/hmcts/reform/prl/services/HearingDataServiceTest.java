@@ -156,8 +156,8 @@ public class HearingDataServiceTest {
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
         when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
         List<DynamicListElement> expectedResponse = hearingDataService.prePopulateHearingType(authToken);
-        assertEquals(expectedResponse.get(0).getCode(),"ABA5-REV");
-        assertEquals(expectedResponse.get(0).getLabel(),"Review");
+        assertEquals("ABA5-REV",expectedResponse.get(0).getCode());
+        assertEquals("Review",expectedResponse.get(0).getLabel());
     }
 
     @Test()
@@ -365,7 +365,7 @@ public class HearingDataServiceTest {
 
         List<Element<HearingData>>  expectedResponse =
             hearingDataService.getHearingData(listWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists,caseData);
-        assertEquals(expectedResponse.get(0).getValue().getHearingJudgePersonalCode(),"Test");
+        assertEquals("Test",expectedResponse.get(0).getValue().getHearingJudgePersonalCode());
     }
 
 
@@ -443,8 +443,8 @@ public class HearingDataServiceTest {
             .courtName("testcourt")
             .build();
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
-        assertEquals(expectedResponse.get(0).getCode(),"1677767515750127");
-        assertEquals(expectedResponse.get(0).getLabel(),"CaseName-Test10");
+        assertEquals("1677767515750127",expectedResponse.get(0).getCode());
+        assertEquals("CaseName-Test10",expectedResponse.get(0).getLabel());
     }
 }
 
