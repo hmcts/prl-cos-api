@@ -209,6 +209,7 @@ public class HearingDataService {
                     }
                 }
             }
+            return dynamicListElements;
         } catch (Exception e) {
             log.info("Exception occured in Linked case method for hmc api calls ", caseData.getId());
         }
