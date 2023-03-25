@@ -3,8 +3,8 @@
   "jurisdiction": "PRIVATELAW",
   "state": "GATE_KEEPING",
   "case_type_id": "PRLAPPS",
-  "created_date": "2023-03-22T20:42:48.488908",
-  "last_modified": "2023-03-22T21:04:48.290736",
+  "created_date": "2023-03-25T10:59:01.456667",
+  "last_modified": "2023-03-25T11:03:33.899039",
   "locked_by_user_id": null,
   "security_level": null,
   "case_data": {
@@ -104,7 +104,7 @@
       "doesApplicantHaveHomeRights": "Yes"
     },
     "c1AWelshDocument": null,
-    "caseSubmittedTimeStamp": "2023-03-22T20:54:00.901924Z",
+    "caseSubmittedTimeStamp": "2023-03-25T11:00:05.148804Z",
     "languageRequirementApplicationNeedWelsh": "Yes",
     "isHomeEntered": "true",
     "caseTypeOfApplication": "FL401",
@@ -127,7 +127,7 @@
     },
     "fl401OtherProceedingsDetailsTable": [
       {
-        "id": "013db24f-3f48-4237-bdad-104cad7ce3b4",
+        "id": "a0b9e3e8-9fad-4246-a746-c73cdca7798c",
         "value": {
           "caseNumber": null,
           "typeOfCase": null,
@@ -697,7 +697,7 @@
     },
     "c1ADocument": null,
     "dateOfSubmission": {
-      "dateOfSubmission": "22 03 2023"
+      "dateOfSubmission": "25 03 2023"
     },
     "fl401TypeOfApplicationTable": {
       "caCaseNumber": null,
@@ -705,7 +705,7 @@
       "isLinkedToChildArrangementApplication": "No"
     },
     "draftOrderDocWelsh": null,
-    "id": "1679517768487192",
+    "id": "1679741941415363",
     "fl401ConfidentialityCheck": {
       "confidentialityConsent": [
         "fl401ConfidentialConsent"
@@ -761,11 +761,11 @@
     "confidentialDetails": {
       "isConfidentialDetailsAvailable": "Yes"
     },
-    "dateSubmitted": "2023-03-22",
+    "dateSubmitted": "2023-03-25",
     "c8WelshDocument": {
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/c77899b2-29f9-4eaf-a257-ecd35a969c6c",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8a69904f-767d-4fd8-b8ee-f6d5e1cbaaf4",
       "document_filename": "C8_Document_Welsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/c77899b2-29f9-4eaf-a257-ecd35a969c6c/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8a69904f-767d-4fd8-b8ee-f6d5e1cbaaf4/binary",
       "document_creation_date": null
     },
     "confidentialityStatementDisclaimer": [
@@ -781,7 +781,7 @@
     },
     "applicantsConfidentialDetails": [
       {
-        "id": "b2846acc-64d5-45d8-b2cd-436ecc4006ec",
+        "id": "beda4f24-acf1-4048-9179-ea1192c30cc6",
         "value": {
           "email": "applicant1@example.net",
           "address": {
@@ -797,9 +797,11 @@
       "areAnySpecialArrangements": "No"
     },
     "caseManagementLocation": {
-      "regionId": "7",
+      "region": "7",
+      "regionId": null,
       "regionName": "Wales",
-      "baseLocationId": "234946",
+      "baseLocation": "234946",
+      "baseLocationId": null,
       "baseLocationName": "Swansea Civil Justice Centre"
     },
     "caseStatus": {
@@ -865,9 +867,9 @@
       "isEmailAddressConfidential": "Yes"
     },
     "finalWelshDocument": {
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/03ad8ea0-24e7-4662-a9d4-51e62f706052",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/5915efc4-49b4-4637-bbfa-bd64c9de0c58",
       "document_filename": "FL401FinalDocumentWelsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/03ad8ea0-24e7-4662-a9d4-51e62f706052/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/5915efc4-49b4-4637-bbfa-bd64c9de0c58/binary",
       "document_creation_date": null
     },
     "respondentRelationObject": {
@@ -878,7 +880,7 @@
         "value": {
           "email": "test@hmcts.net"
         },
-        "id": "2a933fef-cb18-44b9-8b94-517b64320780"
+        "id": "2acb3eb7-e93f-44c0-88a6-b39b0a615854"
       }
     ],
     "fl401ChildDetailsTable": [
@@ -908,7 +910,7 @@
       "urgencyStatus": "With notice"
     },
     "familymanCaseNumber": "2222222",
-    "issueDate": "2023-03-22",
+    "issueDate": "2023-03-25",
     "attendingTheHearingTable": {
       "isWelshNeeded": null,
       "adjustmentsRequired": null,
@@ -920,9 +922,9 @@
       "isSpecialArrangementsRequired": null
     },
     "c8Document": {
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/51d4973b-9728-4144-a665-436f57a92f3a",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e19db0d9-4bfd-48d9-ac10-34c29184901a",
       "document_filename": "C8_Document.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/51d4973b-9728-4144-a665-436f57a92f3a/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e19db0d9-4bfd-48d9-ac10-34c29184901a/binary",
       "document_creation_date": null
     },
     "draftOrderDoc": null,
@@ -947,7 +949,7 @@
       "relationshipDateComplexStartDate": null
     },
     "fl401StmtOfTruth": {
-      "date": "2023-03-22",
+      "date": "2023-03-25",
       "fullname": "test",
       "signature": null,
       "nameOfFirm": "test",
@@ -958,7 +960,7 @@
     },
     "otherProceedingsForSummaryTab": [
       {
-        "id": "9146838a-fd85-46e9-854c-72378d66453a",
+        "id": "6f341497-682c-4177-aedf-1de8c0f0ca15",
         "value": {
           "caseNumber": null,
           "nameOfCourt": null,
@@ -973,7 +975,7 @@
     "SearchCriteria": {
       "OtherCaseReferences": [
         {
-          "id": "1d984a66-9285-43b4-a46c-9a05c591700f",
+          "id": "84905ba3-1f8f-41a6-884a-221dd3f1c1db",
           "value": "2222222"
         }
       ]
@@ -1042,9 +1044,9 @@
       "doesApplicantHaveHomeRights": "Yes"
     },
     "finalDocument": {
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4c98cb02-355f-49f0-92ff-0fb5657bc335",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/77635e3c-5e7c-49bc-9179-6cb996ccceb9",
       "document_filename": "FL401FinalDocument.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4c98cb02-355f-49f0-92ff-0fb5657bc335/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/77635e3c-5e7c-49bc-9179-6cb996ccceb9/binary",
       "document_creation_date": null
     },
     "welshLanguageRequirementApplicationNeedEnglish": null,
