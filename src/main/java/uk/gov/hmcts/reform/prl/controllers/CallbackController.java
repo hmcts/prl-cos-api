@@ -395,6 +395,8 @@ public class CallbackController {
                     solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
                 }
                 caseDataUpdated.put("state", WITHDRAWN_STATE);
+                caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
+                caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
             }
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
