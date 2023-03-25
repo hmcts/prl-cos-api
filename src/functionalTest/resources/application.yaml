@@ -226,6 +226,7 @@ locationfinder:
     url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
     endpoint: /refdata/location/court-venues/services
 
+
 launchdarkly:
   sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
 

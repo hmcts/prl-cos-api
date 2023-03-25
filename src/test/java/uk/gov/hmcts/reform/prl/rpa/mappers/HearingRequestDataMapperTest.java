@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 
@@ -107,8 +108,8 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
             .build();
-        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists);
-        assertEquals(hearingData.getHearingTypes().getListItems().get(0).getCode(),"INTER");
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
+        assertEquals("INTER",hearingData.getHearingTypes().getListItems().get(0).getCode());
     }
 
 
@@ -172,7 +173,7 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
             .build();
-        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists);
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
         assertNotNull(hearingData);
     }
 
@@ -236,7 +237,7 @@ public class HearingRequestDataMapperTest {
             .cafcassHearingChannel(dynamicList1)
             .cafcassCymruHearingChannel(dynamicList1)
             .applicantHearingChannel(dynamicList1)
-            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
             .additionalHearingDetails("Test")
             .instructionsForRemoteHearing("Test")
             .hearingEstimatedHours(5)
@@ -250,11 +251,11 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
             .build();
-        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists);
-        assertEquals(hearingData.getHearingTypes().getListItems().get(0).getCode(),"test");
-        assertEquals(hearingData.getHearingVideoChannels().getListItems().get(0).getCode(),"test");
-        assertEquals(hearingData.getHearingTelephoneChannels().getListItems().get(0).getCode(),"test");
-        assertEquals(hearingData.getCourtList().getListItems().get(0).getCode(),"test");
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
+        assertEquals("test",hearingData.getHearingTypes().getListItems().get(0).getCode());
+        assertEquals("test",hearingData.getHearingVideoChannels().getListItems().get(0).getCode());
+        assertEquals("test",hearingData.getHearingTelephoneChannels().getListItems().get(0).getCode());
+        assertEquals("test",hearingData.getCourtList().getListItems().get(0).getCode());
     }
 
 }

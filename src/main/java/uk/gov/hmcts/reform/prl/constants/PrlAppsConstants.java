@@ -330,10 +330,6 @@ public class PrlAppsConstants {
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
 
-    public static final String JUDGE = "Judge";
-    public static final String CASEWORKER = "CaseWorker";
-
-    public static final long CASE_SUBMISSION_THRESHOLD = 28;
     public static final String DISTRICT_JUDGE = "districtJudge";
 
     public static final String MAGISTRATES = "magistrates";
@@ -355,6 +351,11 @@ public class PrlAppsConstants {
     public static final String JUDGE_NAME_EMAIL = "judgeNameAndEmail";
     public static final String IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING =  "isJudgeOrLegalAdviserGatekeeping";
     public static final String JUDGE_NAME = "judgeName";
+
+    public static final String JUDGE = "Judge";
+    public static final String CASEWORKER = "CaseWorker";
+
+    public static final long CASE_SUBMISSION_THRESHOLD = 28;
     public static final String HEARINGTYPE = "HearingType";
     public static final String IS_HEARINGCHILDREQUIRED_Y = "Y";
     public static final String IS_HEARINGCHILDREQUIRED_N = "N";
@@ -377,5 +378,47 @@ public class PrlAppsConstants {
     public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
     //C100 default court details
     public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
+
+    public static final String LISTWITHOUTNOTICE_HEARINGDETAILS = "listWithoutNoticeHearingDetails";
+
+    public static final String DATE_CONFIRMED_IN_HEARINGS_TAB = "dateConfirmedInHearingsTab";
+    public static final String HEARING_DATE_CONFIRM_OPTION_ENUM = "hearingDateConfirmOptionEnum";
+    public static final String CONFIRMED_HEARING_DATES = "confirmedHearingDates";
+    public static final String APPLICANT_HEARING_CHANNEL = "applicantHearingChannel";
+    public static final String APPLICANT_SOLICITOR_HEARING_CHANNEL = "applicantSolicitorHearingChannel";
+    public static final String RESPONDENT_HEARING_CHANNEL = "respondentHearingChannel";
+    public static final String RESPONDENT_SOLICITOR_HEARING_CHANNEL = "respondentSolicitorHearingChannel";
+    public static final String CAFCASS_HEARING_CHANNEL = "cafcassHearingChannel";
+    public static final String CAFCASS_CYMRU_HEARING_CHANNEL = "cafcassCymruHearingChannel";
+    public static final String HEARING_LISTED_LINKED_CASES = "hearingListedLinkedCases";
+    public static final String LOCAL_AUTHORITY_HEARING_CHANNEL = "localAuthorityHearingChannel";
+    public static final String COURT_LIST = "courtList";
+    public static final String HEARING_VIDEO_CHANNELS = "hearingVideoChannels";
+    public static final String HEARING_TELEPHONE_CHANNELS = "hearingTelephoneChannels";
+    public static final String HEARING_DATE_TIMES = "hearingDateTimes";
+
+    public static final String HEARING_ESTIMATED_HOURS = "hearingEstimatedHours";
+    public static final String HEARING_ESTIMATED_MINUTES = "hearingEstimatedMinutes";
+    public static final String HEARING_ESTIMATED_DAYS = "hearingEstimatedDays";
+    public static final String ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY = "allPartiesAttendHearingSameWayYesOrNo";
+
+    public static final String HEARING_AUTHORITY = "hearingAuthority";
+    public static final String HEARING_CHANNELS_ENUM = "hearingChannelsEnum";
+
+    public static final String HEARING_JUDGE_NAME_AND_EMAIL  = "hearingJudgeNameAndEmail";
+    public static final String HEARING_SPECIFIC_DATES_OPTIONS_ENUM = "hearingSpecificDatesOptionsEnum";
+    public static final String FIRST_DATE_OF_THE_HEARING = "firstDateOfTheHearing";
+    public static final String HEARING_MUST_TAKE_PLACE_AT_HOUR = "hearingMustTakePlaceAtHour";
+    public static final String HEARING_MUST_TAKE_PLACE_AT_MINUTE = "hearingMustTakePlaceAtMinute";
+
+    public static final String EARLIEST_HEARING_DATE = "earliestHearingDate";
+    public static final String LATEST_HEARING_DATE = "latestHearingDate";
+    public static final String HEARING_PRIORITY_TYPE_ENUM = "hearingPriorityTypeEnum";
+    public static final String CUSTOM_DETAILS = "customDetails";
+
+
+
+
+
 
 }

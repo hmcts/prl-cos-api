@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+
 @Slf4j
 public class CommonUtils {
     public static final String DATE_OF_SUBMISSION_FORMAT = "dd-MM-yyyy";
@@ -129,4 +130,5 @@ public class CommonUtils {
     private static UUID generateUuid() {
         return UUID.randomUUID();
     }
+
 }

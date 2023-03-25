@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
@@ -25,15 +26,16 @@ import java.util.List;
 @Data
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class HearingData {
 
     private DynamicList hearingTypes;
 
-    private final DynamicList confirmedHearingDates;
+    private DynamicList confirmedHearingDates;
 
-    private final DynamicList hearingChannels;
+    private DynamicList hearingChannels;
 
     private DynamicList hearingVideoChannels;
 
@@ -41,56 +43,34 @@ public class HearingData {
 
     private DynamicList courtList;
 
-    private final DynamicList localAuthorityHearingChannel;
+    private DynamicList localAuthorityHearingChannel;
 
-    private final DynamicList hearingListedLinkedCases;
+    private DynamicList hearingListedLinkedCases;
 
-    private final DynamicList applicantSolicitorHearingChannel;
-    private final DynamicList applicantSolicitorHearingChannel1;
-    private final DynamicList applicantSolicitorHearingChannel2;
-    private final DynamicList applicantSolicitorHearingChannel3;
-    private final DynamicList applicantSolicitorHearingChannel4;
-    private final DynamicList applicantSolicitorHearingChannel5;
+    private DynamicList applicantSolicitorHearingChannel;
 
+    private DynamicList respondentHearingChannel;
 
-    private final DynamicList respondentHearingChannel;
-    private final DynamicList respondentHearingChannel1;
-    private final DynamicList respondentHearingChannel2;
-    private final DynamicList respondentHearingChannel3;
-    private final DynamicList respondentHearingChannel4;
-    private final DynamicList respondentHearingChannel5;
+    private DynamicList respondentSolicitorHearingChannel;
 
-    private final DynamicList respondentSolicitorHearingChannel;
-    private final DynamicList respondentSolicitorHearingChannel1;
-    private final DynamicList respondentSolicitorHearingChannel2;
-    private final DynamicList respondentSolicitorHearingChannel3;
-    private final DynamicList respondentSolicitorHearingChannel4;
-    private final DynamicList respondentSolicitorHearingChannel5;
+    private DynamicList cafcassHearingChannel;
 
+    private DynamicList cafcassCymruHearingChannel;
 
-    private final DynamicList cafcassHearingChannel;
-
-    private final DynamicList cafcassCymruHearingChannel;
-
-    private final DynamicList applicantHearingChannel;
-    private final DynamicList applicantHearingChannel1;
-    private final DynamicList applicantHearingChannel2;
-    private final DynamicList applicantHearingChannel3;
-    private final DynamicList applicantHearingChannel4;
-    private final DynamicList applicantHearingChannel5;
+    private DynamicList applicantHearingChannel;
 
     @JsonSerialize(using = CustomEnumSerializer.class)
     @JsonProperty("hearingDateConfirmOptionEnum")
     private HearingDateConfirmOptionEnum hearingDateConfirmOptionEnum;
 
     @JsonProperty("additionalHearingDetails")
-    private final String additionalHearingDetails;
+    private String additionalHearingDetails;
 
     @JsonProperty("instructionsForRemoteHearing")
-    private final String instructionsForRemoteHearing;
+    private String instructionsForRemoteHearing;
 
     @JsonProperty("hearingDateTimes")
-    private final List<Element<LocalDateTime>> hearingDateTimes;
+    private List<Element<LocalDateTime>> hearingDateTimes;
 
     @JsonProperty("hearingEstimatedHours")
     private final int hearingEstimatedHours;
@@ -124,30 +104,10 @@ public class HearingData {
     @JsonProperty("hearingJudgeEmailAddress")
     private String hearingJudgeEmailAddress;
 
-    private final String applicantName;
-    private final String applicantName1;
-    private final String applicantName2;
-    private final String applicantName3;
-    private final String applicantName4;
-    private final String applicantName5;
-    private final String applicantSolicitor;
-    private final String applicantSolicitor1;
-    private final String applicantSolicitor2;
-    private final String applicantSolicitor3;
-    private final String applicantSolicitor4;
-    private final String applicantSolicitor5;
-    private final String respondentName;
-    private final String respondentName1;
-    private final String respondentName2;
-    private final String respondentName3;
-    private final String respondentName4;
-    private final String respondentName5;
-    private final String respondentSolicitor;
-    private final String respondentSolicitor1;
-    private final String respondentSolicitor2;
-    private final String respondentSolicitor3;
-    private final String respondentSolicitor4;
-    private final String respondentSolicitor5;
+    private String applicantName;
+    private String applicantSolicitor;
+    private String respondentName;
+    private String respondentSolicitor;
 
     @JsonProperty("hearingSpecificDatesOptionsEnum")
     private HearingSpecificDatesOptionsEnum hearingSpecificDatesOptionsEnum;
@@ -157,10 +117,10 @@ public class HearingData {
     private LocalDate firstDateOfTheHearing;
 
     @JsonProperty("hearingMustTakePlaceAtHour")
-    private final int hearingMustTakePlaceAtHour;
+    private int hearingMustTakePlaceAtHour;
 
     @JsonProperty("hearingMustTakePlaceAtMinute")
-    private final int hearingMustTakePlaceAtMinute;
+    private int hearingMustTakePlaceAtMinute;
 
     @JsonProperty("earliestHearingDate")
     private LocalDate earliestHearingDate;
