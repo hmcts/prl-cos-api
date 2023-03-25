@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.service.notify.NotificationClient;
 
 import java.time.LocalDate;
@@ -169,7 +170,7 @@ public class CaseWorkerEmailService {
     public void sendReturnApplicationEmailToSolicitor(CaseDetails caseDetails) {
         caseData = emailService.getCaseData(caseDetails);
         String email = "";
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<PartyDetails> applicants = caseData
                 .getApplicants()
                 .stream()
