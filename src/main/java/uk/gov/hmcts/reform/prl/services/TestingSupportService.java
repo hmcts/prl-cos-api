@@ -68,8 +68,7 @@ public class TestingSupportService {
     private final CaseWorkerEmailService caseWorkerEmailService;
     @Autowired
     private final AllTabServiceImpl allTabsService;
-    @Autowired
-    CaseService citizenCaseService;
+    private final CaseService citizenCaseService;
     private final LaunchDarklyClient launchDarklyClient;
     private final AuthorisationService authorisationService;
     private final RequestUpdateCallbackService requestUpdateCallbackService;
@@ -217,16 +216,6 @@ public class TestingSupportService {
         }
     }
 
-    private boolean isAuthorized(String authorisation) {
-        log.info("test");
-        log.info("launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED) "
-                     + launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED));
-        log.info("authorisationService.authoriseUser(authorisation) "
-                     + authorisationService.authoriseUser(authorisation));
-        return launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)
-            && Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation));
-    }
-
     public CaseData createDummyLiPC100Case(String authorisation, String s2sToken) throws Exception {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails dummyCaseDetails = objectMapper.readValue(
@@ -250,5 +239,10 @@ public class TestingSupportService {
         return launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)
             && Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
             && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken));
+    }
+
+    private boolean isAuthorized(String authorisation) {
+        return launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)
+            && Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation));
     }
 }

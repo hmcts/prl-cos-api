@@ -34,6 +34,7 @@ public class TestingSupportControllerTest {
     CaseData caseData;
     CallbackRequest callbackRequest;
     String auth = "authorisation";
+    String s2sAuth = "s2sAuth";
 
     @Before
     public void setup() {
@@ -68,5 +69,11 @@ public class TestingSupportControllerTest {
     public void testConfirmDummyPayment() {
         testingSupportController.confirmDummyPayment(auth, callbackRequest);
         verify(testingSupportService, times(1)).confirmDummyPayment(Mockito.any(CallbackRequest.class), Mockito.anyString());
+    }
+
+    @Test
+    public void testCreateDummyCitizenCase() throws Exception {
+        testingSupportController.createDummyCitizenCase(auth, s2sAuth);
+        verify(testingSupportService, times(1)).createDummyLiPC100Case(Mockito.anyString(), Mockito.anyString());
     }
 }
