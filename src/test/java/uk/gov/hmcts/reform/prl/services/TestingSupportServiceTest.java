@@ -18,12 +18,14 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -64,17 +66,21 @@ public class TestingSupportServiceTest {
     private CoreCaseDataApi coreCaseDataApi;
     @Mock
     private AuthTokenGenerator authTokenGenerator;
+    @Mock
+    private CaseService caseService;
 
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
     CaseData caseData;
     CallbackRequest callbackRequest;
     String auth = "authorisation";
+    String s2sAuth = "s2sAuth";
 
     @Before
     public void setUp() throws Exception {
         when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
         when(authorisationService.authoriseUser(anyString())).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
     }
 
     @Test
@@ -331,5 +337,48 @@ public class TestingSupportServiceTest {
             .build();
         when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
         testingSupportService.confirmDummyPayment(callbackRequest, auth);
+    }
+
+    @Test
+    public void testCreateDummyLiPC100Case() throws Exception {
+        caseData = CaseData.builder()
+            .id(12345678L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+        caseDataMap = caseData.toMap(new ObjectMapper());
+        caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId(TS_SOLICITOR_APPLICATION.getId())
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
+        when(caseService.createCase(Mockito.any(), Mockito.anyString())).thenReturn(caseDetails);
+
+        CaseData updatedCaseData = testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
+        assertEquals(updatedCaseData.getId(), 12345678L);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testCreateDummyLiPC100Case_InvalidClient_LdDisabled() throws Exception {
+        when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
+        testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testCreateDummyLiPC100Case_InvalidS2S() throws Exception {
+        when(authorisationService.authoriseService(anyString())).thenReturn(false);
+        testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testCreateDummyLiPC100Case_InvalidAuthorisation() throws Exception {
+        when(authorisationService.authoriseUser(anyString())).thenReturn(false);
+        testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
     }
 }
