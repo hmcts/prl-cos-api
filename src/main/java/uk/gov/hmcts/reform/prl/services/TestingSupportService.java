@@ -38,7 +38,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_DRAFT_C8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL_401_STMT_OF_TRUTH;
@@ -112,7 +111,7 @@ public class TestingSupportService {
                 caseDataUpdated = updatedCaseDetails.getData();
                 CaseData updatedCaseData = CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
                 if (adminCreateApplication) {
-                    caseDataUpdated.putAll(updateDateInCase(initialCaseData, updatedCaseData, authorisation));
+                    caseDataUpdated.putAll(updateDateInCase(initialCaseData.getCaseTypeOfApplication(), updatedCaseData));
                     try {
                         caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(
                             authorisation,
@@ -130,33 +129,29 @@ public class TestingSupportService {
         }
     }
 
-    private Map<String, Object> updateDateInCase(CaseData initialCaseData, CaseData dummyCaseData, String authorisation) {
-        if (isAuthorized(authorisation)) {
-            Map<String, Object> objectMap = new HashMap<>();
-            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-            String dateSubmitted = DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime);
-            objectMap.put(DATE_SUBMITTED_FIELD, dateSubmitted);
-            objectMap.put(
-                CASE_DATE_AND_TIME_SUBMITTED_FIELD,
-                DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
-            );
-            objectMap.put(ISSUE_DATE_FIELD, LocalDate.now());
-            objectMap.put(
-                DATE_OF_SUBMISSION,
-                DateOfSubmission.builder().dateOfSubmission(CommonUtils.getIsoDateToSpecificFormat(
-                    dateSubmitted,
-                    CommonUtils.DATE_OF_SUBMISSION_FORMAT
-                ).replace("-", " ")).build()
-            );
-            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())
-                && null != dummyCaseData.getFl401StmtOfTruth()) {
-                StatementOfTruth statementOfTruth = dummyCaseData.getFl401StmtOfTruth().toBuilder().date(LocalDate.now()).build();
-                objectMap.put(FL_401_STMT_OF_TRUTH, statementOfTruth);
-            }
-            return objectMap;
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
+    private Map<String, Object> updateDateInCase(String caseTypeOfApplication, CaseData dummyCaseData) {
+        Map<String, Object> objectMap = new HashMap<>();
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        String dateSubmitted = DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime);
+        objectMap.put(DATE_SUBMITTED_FIELD, dateSubmitted);
+        objectMap.put(
+            CASE_DATE_AND_TIME_SUBMITTED_FIELD,
+            DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
+        );
+        objectMap.put(ISSUE_DATE_FIELD, LocalDate.now());
+        objectMap.put(
+            DATE_OF_SUBMISSION,
+            DateOfSubmission.builder().dateOfSubmission(CommonUtils.getIsoDateToSpecificFormat(
+                dateSubmitted,
+                CommonUtils.DATE_OF_SUBMISSION_FORMAT
+            ).replace("-", " ")).build()
+        );
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)
+            && null != dummyCaseData.getFl401StmtOfTruth()) {
+            StatementOfTruth statementOfTruth = dummyCaseData.getFl401StmtOfTruth().toBuilder().date(LocalDate.now()).build();
+            objectMap.put(FL_401_STMT_OF_TRUTH, statementOfTruth);
         }
+        return objectMap;
     }
 
     public Map<String, Object> submittedCaseCreation(CallbackRequest callbackRequest, String authorisation) {
@@ -164,8 +159,6 @@ public class TestingSupportService {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            log.info("c8DraftDocument " + caseDataUpdated.get(DOCUMENT_FIELD_DRAFT_C8));
-            log.info("c8Document " + caseDataUpdated.get(DOCUMENT_FIELD_C8));
             caseData = caseData.toBuilder()
                 .c8Document(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C8), Document.class))
                 .c1ADocument(objectMapper.convertValue(caseDataUpdated.get(DOCUMENT_FIELD_C1A), Document.class))
@@ -203,12 +196,10 @@ public class TestingSupportService {
                                                              .ccdCaseNumber(String.valueOf(caseData.getId()))
                                                              .serviceRequestStatus("Paid")
                                                              .build());
-
             return coreCaseDataApi.getCase(
                 authorisation,
                 authTokenGenerator.generate(),
-                String.valueOf(
-                    caseData.getId())
+                String.valueOf(caseData.getId())
             ).getData();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
