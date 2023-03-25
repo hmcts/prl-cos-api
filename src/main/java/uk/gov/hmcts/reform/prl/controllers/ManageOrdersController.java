@@ -305,6 +305,7 @@ public class ManageOrdersController {
             }
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
+        log.info("case data --> {}", objectMapper.writeValueAsString(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
