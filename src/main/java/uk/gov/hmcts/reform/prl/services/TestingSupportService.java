@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOf
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
+import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -66,6 +68,7 @@ public class TestingSupportService {
     private final CaseWorkerEmailService caseWorkerEmailService;
     @Autowired
     private final AllTabServiceImpl allTabsService;
+    private final CaseService citizenCaseService;
     private final LaunchDarklyClient launchDarklyClient;
     private final AuthorisationService authorisationService;
     private final RequestUpdateCallbackService requestUpdateCallbackService;
@@ -77,6 +80,13 @@ public class TestingSupportService {
     private static final String VALID_FL401_DRAFT_INPUT_JSON = "FL401_Dummy_Draft_CaseDetails.json";
 
     private static final String VALID_C100_GATEKEEPING_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails.json";
+
+    @Autowired
+    CaseRepository caseRepository;
+
+    private static final String VALID_C100_INPUT_JSON = "C100_Dummy_CaseDetails.json";
+    private static final String VALID_C100_CITIZEN_INPUT_JSON = "C100_citizen_Dummy_CaseDetails.json";
+    private static final String VALID_FL401_INPUT_JSON = "FL401_Dummy_CaseDetails.json";
 
     private static final String VALID_FL401_GATEKEEPING_INPUT_JSON = "FL401_Dummy_Gatekeeping_CaseDetails.json";
 
@@ -206,12 +216,32 @@ public class TestingSupportService {
         }
     }
 
+    public CaseData createDummyLiPC100Case(String authorisation, String s2sToken) throws Exception {
+        if (isAuthorized(authorisation, s2sToken)) {
+            CaseDetails dummyCaseDetails = objectMapper.readValue(
+                ResourceLoader.loadJson(VALID_C100_CITIZEN_INPUT_JSON),
+                CaseDetails.class
+            );
+
+            CaseDetails caseDetails = citizenCaseService.createCase(CaseUtils.getCaseData(
+                dummyCaseDetails,
+                objectMapper
+            ), authorisation);
+            CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
+                CaseUtils.getRemainingDaysSubmitCase(createdCaseData)).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private boolean isAuthorized(String authorisation, String s2sToken) {
+        return launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)
+            && Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
+            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken));
+    }
+
     private boolean isAuthorized(String authorisation) {
-        log.info("test");
-        log.info("launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED) "
-                     + launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED));
-        log.info("authorisationService.authoriseUser(authorisation) "
-                     + authorisationService.authoriseUser(authorisation));
         return launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)
             && Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation));
     }
