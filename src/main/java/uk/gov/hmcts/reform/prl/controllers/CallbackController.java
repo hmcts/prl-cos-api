@@ -394,9 +394,11 @@ public class CallbackController {
                 } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                     solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
                 }
-                caseDataUpdated.put("state", WITHDRAWN_STATE);
-                caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
-                caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+                if (previousState.isPresent() && !RETURN_STATE.equalsIgnoreCase(previousState.get())) {
+                    caseDataUpdated.put("state", WITHDRAWN_STATE);
+                    caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
+                    caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+                }
             }
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -544,7 +546,7 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    private static boolean getPreviousState(String eachState) {
+    public static boolean getPreviousState(String eachState) {
         return (!WITHDRAWN_STATE.equalsIgnoreCase(eachState)
             && (!DRAFT_STATE.equalsIgnoreCase(eachState))
             && (!RETURN_STATE.equalsIgnoreCase(eachState))
