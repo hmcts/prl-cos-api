@@ -41,7 +41,7 @@ public enum Event {
     FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings"),
     FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents"),
     TS_SOLICITOR_APPLICATION("testingSupportDummySolicitorCreate", "TS-Solicitor application"),
-    TS_ADMIN_APPLICATION("testingSupportDummyAdminCreate", "TS-Admin application");
+    TS_SOLICITOR_APPLICATION_NOC("testingSupportDummySolicitorCreateNoc", "TS-Solicitor application-Noc");
 
     private final String id;
     private final String name;
