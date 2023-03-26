@@ -394,7 +394,10 @@ public class CallbackController {
                 } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                     solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
                 }
+                log.info("previousState ==> " + previousState);
+
                 if (previousState.isPresent() && !RETURN_STATE.equalsIgnoreCase(previousState.get())) {
+                    log.info("inside case state update ===== ");
                     caseDataUpdated.put("state", WITHDRAWN_STATE);
                     caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
                     caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));

@@ -79,7 +79,7 @@ public class CaseWithdrawnRequestController extends AbstractCallbackController {
             }
         } else {
             caseWithdrawnConfirmationHeader = APPLICATION_NOT_WITHDRAWN_REQUEST_LABEL;
-            caseWithdrawnConfirmationBodyPrefix = "";
+            caseWithdrawnConfirmationBodyPrefix = "\n\n";
         }
         log.info("caseWithdrawnConfirmationHeader ==> " + caseWithdrawnConfirmationHeader);
         log.info("caseWithdrawnConfirmationBodyPrefix ==> " + caseWithdrawnConfirmationBodyPrefix);
