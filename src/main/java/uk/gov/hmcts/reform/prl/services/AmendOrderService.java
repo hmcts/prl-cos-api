@@ -155,8 +155,7 @@ public class AmendOrderService {
         Optional<Element<OrderDetails>> orderDetails  = orders.stream()
             .filter(order -> Objects.equals(order.getId(), selectedOrderId))
             .findFirst();
-        orderDetails.isPresent();
-        String orderType = orderDetails.get().getValue().getOrderType();
+        String orderType = orderDetails.isPresent() ? orderDetails.get().getValue().getOrderType() : null;
 
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         return DraftOrder.builder()
