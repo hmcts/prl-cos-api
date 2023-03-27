@@ -266,7 +266,6 @@ public class CaseWorkerEmailService {
             .collect(Collectors.toList());
         emailList.forEach(email -> {
             if (null != email) {
-                log.info(" Sending notification to court email : {}", email);
                 emailService.send(
                     email,
                     EmailTemplateNames.COURTADMIN,
@@ -329,7 +328,6 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmailToFl401LocalCourt(CaseDetails caseDetails, String courtEmail) {
-        log.info("Sending FL401 email to localcourt for :{} ", caseDetails.getId(), courtEmail);
         emailService.send(
             courtEmail,
             EmailTemplateNames.DA_LOCALCOURT,

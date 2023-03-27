@@ -64,8 +64,6 @@ public class ServiceOfApplicationController {
             "serviceOfApplicationScreen1",
             dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, null)
         );
-        log.info("***** listElements : {}", caseDataUpdated.get("serviceOfApplicationScreen1"));
-        log.info("***** listElements : {}", caseDataUpdated);
 
         Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
             .getApplicantsMultiSelectList(caseData);
@@ -77,12 +75,6 @@ public class ServiceOfApplicationController {
         List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData);
 
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase("C100")) {
-            log.info("****** applicantList : {}", applicantList);
-            log.info("****** applicantSolicitorList : {}", applicantSolicitorList);
-            log.info("****** respondent list : {}", respondentList);
-            log.info("****** respondentSolicitorList : {}", respondentSolicitorList);
-        }
         ConfirmRecipients confirmRecipients = ConfirmRecipients.builder()
             .applicantsList(DynamicMultiSelectList.builder()
                                 .listItems(applicantList)
@@ -101,7 +93,6 @@ public class ServiceOfApplicationController {
                                  .build())
             .build();
         caseDataUpdated.put("confirmRecipients",confirmRecipients);
-        log.info("****** confirm recepietns : {}", confirmRecipients);
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -118,7 +109,6 @@ public class ServiceOfApplicationController {
         CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
         serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info("** submit list items : {}", updatedCaseData.get("serviceOfApplicationScreen1"));
         updatedCaseData.put("caseInvites", caseData.getCaseInvites());
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);

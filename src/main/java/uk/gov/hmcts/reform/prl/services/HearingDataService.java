@@ -181,7 +181,6 @@ public class HearingDataService {
                 commonDataResponse, VIDEOPLATFORM));
             values.put(TELEPHONESUBCHANNELS, refDataUserService.filterCategorySubValuesByCategoryId(
                 commonDataResponse, TELEPHONEPLATFORM));
-            log.info("***Hearing Channels***", values);
             return values;
         } catch (Exception e) {
             log.error("Category Values look up failed - " + e.getMessage(), e);
@@ -261,7 +260,6 @@ public class HearingDataService {
                     hearingData.setHearingJudgePersonalCode(judgeApiResponse.get().stream().findFirst().get().getPersonalCode());
                 }
             }
-            log.info("Inside hearing data service getHearingData method hearing data  {}", hearingData);
         });
         return hearingDatas;
     }
@@ -283,7 +281,6 @@ public class HearingDataService {
     public void nullifyUnncessaryFieldsPopulated(Object listWithoutNoticeHeardetailsObj) {
         //Note: When we add new fields , we need to add those fields in respective if else blocks to nullify to handle the data clearing issue from UI
         if (null != listWithoutNoticeHeardetailsObj) {
-            log.info("Inside null check for listWithoutNoticeHearingDetails ");
             List<Object> list = (List) listWithoutNoticeHeardetailsObj;
             if (list.size() > 0) {
                 list.parallelStream().forEach(i -> {

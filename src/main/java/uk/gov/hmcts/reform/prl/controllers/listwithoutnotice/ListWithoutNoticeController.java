@@ -79,21 +79,17 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse prePopulateHearingPageData(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-        log.info("prePopulateHearingPageData new or existing callbackRequest : {}", callbackRequest);
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
         log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeHearingDetails();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-        log.info("Prepoulated hearingDynamicLists {}", hearingDataPrePopulatedDynamicLists);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseDataUpdated.containsKey(LISTWITHOUTNOTICE_HEARINGDETAILS)) {
-            log.info("Inside case data updated containd key check for the case id {}", caseReferenceNumber);
             caseDataUpdated.put(
                 LISTWITHOUTNOTICE_HEARINGDETAILS,
                 hearingDataService.getHearingData(existingListWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists,caseData));
-            log.info("Inside controller after mapping hearing data  {}", caseDataUpdated.get(LISTWITHOUTNOTICE_HEARINGDETAILS));
         } else {
             caseDataUpdated.put(
                 LISTWITHOUTNOTICE_HEARINGDETAILS,
@@ -115,10 +111,8 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse listWithoutNoticeSubmission(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("listWithoutNoticeSubmission  callbackRequest : {}", callbackRequest);
         log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("Getting the listWithoutNoticeHearingDetails from caseDataUpdated ");
         Object listWithoutNoticeHeardetailsObj = caseDataUpdated.get(LISTWITHOUTNOTICE_HEARINGDETAILS);
         hearingDataService.nullifyUnncessaryFieldsPopulated(listWithoutNoticeHeardetailsObj);
         objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);

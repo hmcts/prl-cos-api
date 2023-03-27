@@ -220,7 +220,6 @@ public class ManageOrdersController {
         log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-        log.info("pre-populated hearingDynamicLists {}", hearingDataPrePopulatedDynamicLists);
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(
             ORDER_HEARING_DETAILS,
@@ -317,7 +316,6 @@ public class ManageOrdersController {
                 caseData.getCreateSelectOrderOptions()
             ));
         }
-        log.info("case data --> {}", objectMapper.writeValueAsString(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

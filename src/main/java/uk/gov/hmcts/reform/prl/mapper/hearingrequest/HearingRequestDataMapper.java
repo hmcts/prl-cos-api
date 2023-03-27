@@ -18,7 +18,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 public class HearingRequestDataMapper {
 
     public void mapHearingData(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
-        log.info("Inside Request mapper hearing data****hearingDataPrePopulatedDynamicLists  {}", hearingDataPrePopulatedDynamicLists);
         boolean isHearingDynamicListItemsNullifyReq = (null != hearingDataPrePopulatedDynamicLists) ? Boolean.FALSE  : Boolean.TRUE;
         mapHearingTypesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
         mapConfirmedHearingDatesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
@@ -43,20 +42,15 @@ public class HearingRequestDataMapper {
             + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "");
         hearingData.setRespondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "");
         hearingData.setRespondentSolicitor("");
-        log.info("Inside Request mapper hearing data****  {}", hearingData);
     }
 
 
     private void mapHearingTypesListItems(HearingData hearingData, boolean isHearingDynamicListItemsNullifyReq,
                                           HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
         if (null != hearingData.getHearingTypes() && null != hearingData.getHearingTypes().getValue()) {
-            log.info("Inside Request mapper mapHearingTypesListItems() before set ListItems to getHearingTypes in if ****  {}",
-                     hearingData.getHearingTypes());
             mapDynamicListItems(hearingData.getHearingTypes(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes());
         } else {
-            log.info("Inside Request mapper mapHearingTypesListItems() before set ListItems to getHearingTypes in else****  {}",
-                     hearingData.getHearingTypes());
             hearingData.setHearingTypes(DynamicList.builder().build());
             mapDynamicListItems(hearingData.getHearingTypes(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes());
@@ -104,10 +98,8 @@ public class HearingRequestDataMapper {
 
     private void mapDynamicListItems(DynamicList existingHearingDynamicList, DynamicList requiredHearingDynamicList) {
         if (null != existingHearingDynamicList) {
-            log.info("Inside Request mapper mapDynamicListItems() before set ListItems****  {}", existingHearingDynamicList);
             existingHearingDynamicList.setListItems(null != requiredHearingDynamicList
                                                         ? requiredHearingDynamicList.getListItems() : null);
-            log.info("Inside Request mapper mapDynamicListItems() before set ListItems****  {}", existingHearingDynamicList);
         }
     }
 
