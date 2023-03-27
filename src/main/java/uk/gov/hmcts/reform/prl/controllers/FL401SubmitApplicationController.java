@@ -152,7 +152,7 @@ public class FL401SubmitApplicationController {
             caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
             caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-                    .regionId(regionId).baseLocationId(baseLocationId).regionName(courtVenue.get().getRegion())
+                    .region(regionId).baseLocation(baseLocationId).regionName(courtVenue.get().getRegion())
                     .baseLocationName(courtVenue.get().getSiteName()).build());
         }
 
@@ -161,8 +161,6 @@ public class FL401SubmitApplicationController {
             courtEmail = Arrays.stream(idEmail).toArray()[1].toString();
             caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
         }
-
-
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
         if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
                 && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
