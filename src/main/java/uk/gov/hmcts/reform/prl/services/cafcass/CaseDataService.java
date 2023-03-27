@@ -50,6 +50,8 @@ public class CaseDataService {
     @Value("#{'${cafcaas.caseState}'.split(',')}")
     private List<String> caseStateList;
 
+    @Value("#{'${cafcaas.caseTypeOfApplicationList}'.split(',')}")
+    private List<String> caseTypeList;
 
     private final HearingService hearingService;
 
@@ -67,40 +69,50 @@ public class CaseDataService {
 
         log.info("Search API start date - {}, end date - {}", startDate, endDate);
 
-        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        CafCassResponse cafCassResponse = CafCassResponse.builder().cases(new ArrayList<>()).build();
 
-        QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
-        String searchString = objectMapper.writeValueAsString(ccdQueryParam);
+        if (caseTypeList != null && !caseTypeList.isEmpty()) {
+            caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
 
-        String userToken = systemUserService.getSysUserToken();
-        SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
-            userToken,
-            searchString,
-            authTokenGenerator.generate(),
-            cafCassSearchCaseTypeId
-        );
+            ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-        CafCassResponse cafCassResponse = objectMapper.convertValue(
-            searchResult,
-            CafCassResponse.class
-        );
+            QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
+            String searchString = objectMapper.writeValueAsString(ccdQueryParam);
 
-        if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
+            String userToken = systemUserService.getSysUserToken();
+            final String s2sToken = authTokenGenerator.generate();
+            SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
+                userToken,
+                searchString,
+                s2sToken,
+                cafCassSearchCaseTypeId
+            );
 
-            cafCassFilter.filter(cafCassResponse);
-            getHearingDetails(authorisation, cafCassResponse);
-            updateHearingResponse(authorisation, authTokenGenerator.generate(), cafCassResponse);
+            cafCassResponse = objectMapper.convertValue(
+                searchResult,
+                CafCassResponse.class
+            );
 
-        } else {
-            cafCassResponse = CafCassResponse.builder().cases(new ArrayList<>()).build();
+            if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
+
+                log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
+                cafCassFilter.filter(cafCassResponse);
+                log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
+                getHearingDetails(authorisation, cafCassResponse);
+                updateHearingResponse(authorisation, s2sToken, cafCassResponse);
+
+            }
         }
         return cafCassResponse;
     }
 
     private QueryParam buildCcdQueryParam(String startDate, String endDate) {
+
+        // set or condition for caseTypeofApplication (e.g. something like - caseTypeofApplication = C100 or caseTypeofApplication - FL401
+        List<Should> applicationTypes = populateCaseTypeOfApplicationForSearchQuery();
 
         List<Should> shoulds = populateStatesForQuery();
 
@@ -110,7 +122,7 @@ public class CaseDataService {
         StateFilter stateFilter = StateFilter.builder().should(shoulds).build();
         Filter filter = Filter.builder().range(range).build();
         Must must = Must.builder().stateFilter(stateFilter).build();
-        Bool bool = Bool.builder().filter(filter).must(must).build();
+        Bool bool = Bool.builder().filter(filter).should(applicationTypes).minimumShouldMatch(1).must(must).build();
         Query query = Query.builder().bool(bool).build();
         return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize).build();
     }
@@ -124,6 +136,16 @@ public class CaseDataService {
                  ) {
                 shoulds.add(Should.builder().match(Match.builder().state(caseState).build()).build());
             }
+        }
+        return shoulds;
+    }
+
+    private List<Should> populateCaseTypeOfApplicationForSearchQuery() {
+
+        List<Should> shoulds = new ArrayList<>();
+        for (String caseType : caseTypeList
+        ) {
+            shoulds.add(Should.builder().match(Match.builder().caseTypeOfApplication(caseType).build()).build());
         }
         return shoulds;
     }
