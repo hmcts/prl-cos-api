@@ -103,8 +103,8 @@ public class CaseDataService {
                 log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
                 cafCassFilter.filter(cafCassResponse);
                 log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
-                getHearingDetailsForAllCases(authorisation, cafCassResponse);
-                updateHearingResponse(authorisation, s2sToken, cafCassResponse);
+                CafCassResponse filteredCafcassData = getHearingDetailsForAllCases(authorisation, cafCassResponse);
+                updateHearingResponse(authorisation, s2sToken, filteredCafcassData);
 
             }
         }
@@ -165,19 +165,19 @@ public class CaseDataService {
         }
     }
 
-    private void getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
-
+    private CafCassResponse getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
+        CafCassResponse filteredCafcassResponse = CafCassResponse.builder().build();
         Map<String,String> caseIdWithRegionIdMap = new HashMap<>();
         for (CafCassCaseDetail caseDetails: cafCassResponse.getCases()) {
             CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
             if (caseManagementLocation != null) {
-                if (caseManagementLocation.getRegionId() != null) {
+                if (caseManagementLocation.getRegionId() != null && Integer.parseInt(caseManagementLocation.getRegionId()) < 7) {
                     caseIdWithRegionIdMap.put(caseDetails.getId().toString(), caseManagementLocation.getRegionId());
-                } else {
+                    filteredCafcassResponse.getCases().add(caseDetails);
+                } else if(Integer.parseInt(caseManagementLocation.getRegion()) < 7) {
                     caseIdWithRegionIdMap.put(caseDetails.getId().toString(), caseManagementLocation.getRegion());
+                    filteredCafcassResponse.getCases().add(caseDetails);
                 }
-            } else {
-                caseIdWithRegionIdMap.put(caseDetails.getId().toString(),null);
             }
         }
         log.info("caseIdWithRegionIdMap {}",caseIdWithRegionIdMap);
@@ -185,7 +185,7 @@ public class CaseDataService {
         List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(authorisation,caseIdWithRegionIdMap);
 
         if (!listOfHearingDetails.isEmpty()) {
-            for (CafCassCaseDetail cafCassCaseDetail : cafCassResponse.getCases()) {
+            for (CafCassCaseDetail cafCassCaseDetail : filteredCafcassResponse.getCases()) {
                 for (Hearings hearing : listOfHearingDetails) {
                     if (hearing != null && hearing.getCaseRef().equals(String.valueOf(cafCassCaseDetail.getId()))) {
                         cafCassCaseDetail.getCaseData().setHearingData(hearing);
@@ -193,6 +193,7 @@ public class CaseDataService {
                 }
             }
         }
+        return filteredCafcassResponse;
     }
 
 
