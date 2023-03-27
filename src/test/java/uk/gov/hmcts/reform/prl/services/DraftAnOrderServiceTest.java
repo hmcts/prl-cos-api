@@ -59,6 +59,7 @@ import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.PartiesListGenerator;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -1149,6 +1150,42 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap = draftAnOrderService.generateDraftOrderCollection(caseData);
         assertNotNull(stringObjectMap.get("draftOrderCollection"));
+    }
+
+    @Test
+    public void testGetDraftOrderInfo() throws Exception {
+
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        Element<DraftOrder> draftOrderElement = element(draftOrder);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> respondents = element(partyDetails);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .draftOrderCollection(draftOrderCollection)
+            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+            .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
+            .respondents(List.of(respondents))
+            .build();
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        stringObjectMap = draftAnOrderService.getDraftOrderInfo(authToken, caseData);
+        assertNotNull(stringObjectMap);
     }
 
     private static <T> Element<T> customElement(T element) {
