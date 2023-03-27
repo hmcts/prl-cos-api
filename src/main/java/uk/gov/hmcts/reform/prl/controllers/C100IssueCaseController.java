@@ -73,7 +73,7 @@ public class C100IssueCaseController {
             String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
             caseDataUpdated.put("courtName", courtName);
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-                .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
+                .region(regionId).baseLocation(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
             String courtEmail = "";
             if (idEmail.length > 1) {
