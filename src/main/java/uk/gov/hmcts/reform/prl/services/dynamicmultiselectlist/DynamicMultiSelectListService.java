@@ -163,14 +163,14 @@ public class DynamicMultiSelectListService {
         return "";
     }
 
-    public List<Element<Child>> getChildrenForDocmosis(CaseData caseData) {
-        List<Element<Child>> childList = new ArrayList<>();
+    public List<Child> getChildrenForDocmosis(CaseData caseData) {
+        List<Child> childList = new ArrayList<>();
         log.info("*****Child options selected are : {}", caseData.getManageOrders().getChildOption());
         if (null != caseData.getManageOrders()) {
             if (null != caseData.getManageOrders().getChildOption()) {
                 if (null != caseData.getManageOrders().getChildOption().getValue()) {
                     caseData.getManageOrders().getChildOption().getValue().forEach(value -> {
-                        Element<Child> child = getChildDetails(caseData, value.getCode());
+                        Child child = getChildDetails(caseData, value.getCode());
                         log.info("*****Child : {}", child);
                         if (null != child) {
                             childList.add(child);
@@ -183,8 +183,9 @@ public class DynamicMultiSelectListService {
         return childList;
     }
 
-    private Element<Child> getChildDetails(CaseData caseData, String id) {
-        Optional<Element<Child>> child = caseData.getChildren().stream().filter(element -> element.getId().toString().equalsIgnoreCase(id))
+    private Child getChildDetails(CaseData caseData, String id) {
+        Optional<Child> child = caseData.getChildren().stream().filter(element -> element.getId().toString().equalsIgnoreCase(id))
+            .map(Element::getValue)
             .findFirst();
         return child.orElseGet(() -> null);
     }
