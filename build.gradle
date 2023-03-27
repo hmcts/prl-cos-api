@@ -540,7 +540,6 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java',
   '**uk/gov/hmcts/reform/prl/services/hearings/HearingService.java',
-  '**uk/gov/hmcts/reform/prl/services/AmendOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/HearingDataService.java',
@@ -550,7 +549,6 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/controllers/ManageOrdersController.java',
   '**uk/gov/hmcts/reform/prl/services/tab/summary/generator/AllocatedJudgeDetailsGenerator.java',
   '**uk/gov/hmcts/reform/prl/services/gatekeeping/AllocatedJudgeService.java',
-  '**uk/gov/hmcts/reform/prl/services/dynamicmultiselectlist/DynamicMultiSelectListService.java',
   '**uk/gov/hmcts/reform/prl/mapper/hearingrequest/HearingRequestDataMapper.java',
   '**uk/gov/hmcts/reform/prl/services/RefDataUserService.java',
   '**uk/gov/hmcts/reform/prl/controllers/listwithoutnotice/ListWithoutNoticeController.java'
