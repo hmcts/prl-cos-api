@@ -74,6 +74,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
@@ -601,6 +602,7 @@ public class CaseData implements MappableObject {
     /**
      * FL401 Court details for Pilot.
      */
+    @JsonProperty("submitCountyCourtSelection")
     private final DynamicList submitCountyCourtSelection;
 
     public CaseData setDateSubmittedDate() {
@@ -753,6 +755,9 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
+
+
+    private final List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers;
 
     //Added for c100 rebuild
     private Long noOfDaysRemainingToSubmitCase;
