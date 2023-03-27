@@ -30,9 +30,7 @@ public class DgsService {
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
 
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
-        if (caseDetails != null) {
-            log.info("***** temp case details 1 {}", caseDetails.getCaseData().getChildrenListForDocmosis());
-        }
+        log.info("***** temp case details 1 {}", caseDetails);
         Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put(CASE_DETAILS_STRING, AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
         log.info("***** temp case details 2 {}", tempCaseDetails.get("childrenListForDocmosis"));
