@@ -61,7 +61,7 @@ public class CaseDataService {
 
     private final CafCassFilter cafCassFilter;
 
-    private final  AuthTokenGenerator authTokenGenerator;
+    private final AuthTokenGenerator authTokenGenerator;
 
     private final SystemUserService systemUserService;
 
@@ -87,16 +87,14 @@ public class CaseDataService {
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
-                userToken,
-                searchString,
-                s2sToken,
-                cafCassSearchCaseTypeId
-            );
+                    userToken,
+                    searchString,
+                    s2sToken,
+                    cafCassSearchCaseTypeId);
 
             cafCassResponse = objectMapper.convertValue(
-                searchResult,
-                CafCassResponse.class
-            );
+                    searchResult,
+                    CafCassResponse.class);
 
             if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
 
@@ -113,12 +111,14 @@ public class CaseDataService {
 
     private QueryParam buildCcdQueryParam(String startDate, String endDate) {
 
-        // set or condition for caseTypeofApplication (e.g. something like - caseTypeofApplication = C100 or caseTypeofApplication - FL401
+        // set or condition for caseTypeofApplication (e.g. something like -
+        // caseTypeofApplication = C100 or caseTypeofApplication - FL401
         List<Should> applicationTypes = populateCaseTypeOfApplicationForSearchQuery();
 
         List<Should> shoulds = populateStatesForQuery();
 
-        LastModified lastModified = LastModified.builder().gte(startDate).lte(endDate).boost(ccdElasticSearchApiBoost).build();
+        LastModified lastModified = LastModified.builder().gte(startDate).lte(endDate).boost(ccdElasticSearchApiBoost)
+                .build();
         Range range = Range.builder().lastModified(lastModified).build();
 
         StateFilter stateFilter = StateFilter.builder().should(shoulds).build();
@@ -134,8 +134,7 @@ public class CaseDataService {
 
         List<Should> shoulds = new ArrayList<>();
         if (caseStateList != null && !caseStateList.isEmpty()) {
-            for (String caseState:caseStateList
-                 ) {
+            for (String caseState : caseStateList) {
                 shoulds.add(Should.builder().match(Match.builder().state(caseState).build()).build());
             }
         }
@@ -145,8 +144,7 @@ public class CaseDataService {
     private List<Should> populateCaseTypeOfApplicationForSearchQuery() {
 
         List<Should> shoulds = new ArrayList<>();
-        for (String caseType : caseTypeList
-        ) {
+        for (String caseType : caseTypeList) {
             shoulds.add(Should.builder().match(Match.builder().caseTypeOfApplication(caseType).build()).build());
         }
         return shoulds;
@@ -154,35 +152,38 @@ public class CaseDataService {
 
     /**
      * Fetch the hearing data from fis hearing service.
-     *@param authorisation //
-     *@param cafCassResponse //
+     * 
+     * @param authorisation   //
+     * @param cafCassResponse //
      */
     private void getHearingDetails(String authorisation, CafCassResponse cafCassResponse) {
 
-        for (CafCassCaseDetail cafCassCaseDetail: cafCassResponse.getCases()) {
+        for (CafCassCaseDetail cafCassCaseDetail : cafCassResponse.getCases()) {
             cafCassCaseDetail.getCaseData().setHearingData(hearingService.getHearings(authorisation,
-                                                                                      String.valueOf(cafCassCaseDetail.getId())));
+                    String.valueOf(cafCassCaseDetail.getId())));
         }
     }
 
     private CafCassResponse getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
         CafCassResponse filteredCafcassResponse = CafCassResponse.builder().build();
-        Map<String,String> caseIdWithRegionIdMap = new HashMap<>();
-        for (CafCassCaseDetail caseDetails: cafCassResponse.getCases()) {
+        Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
+        for (CafCassCaseDetail caseDetails : cafCassResponse.getCases()) {
             CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
             if (caseManagementLocation != null) {
-                if (caseManagementLocation.getRegionId() != null && Integer.parseInt(caseManagementLocation.getRegionId()) < 7) {
+                if (caseManagementLocation.getRegionId() != null
+                        && Integer.parseInt(caseManagementLocation.getRegionId()) < 7) {
                     caseIdWithRegionIdMap.put(caseDetails.getId().toString(), caseManagementLocation.getRegionId());
                     filteredCafcassResponse.getCases().add(caseDetails);
-                } else if(Integer.parseInt(caseManagementLocation.getRegion()) < 7) {
+                } else if (Integer.parseInt(caseManagementLocation.getRegion()) < 7) {
                     caseIdWithRegionIdMap.put(caseDetails.getId().toString(), caseManagementLocation.getRegion());
                     filteredCafcassResponse.getCases().add(caseDetails);
                 }
             }
         }
-        log.info("caseIdWithRegionIdMap {}",caseIdWithRegionIdMap);
+        log.info("caseIdWithRegionIdMap {}", caseIdWithRegionIdMap);
 
-        List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(authorisation,caseIdWithRegionIdMap);
+        List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(authorisation,
+                caseIdWithRegionIdMap);
 
         if (!listOfHearingDetails.isEmpty()) {
             for (CafCassCaseDetail cafCassCaseDetail : filteredCafcassResponse.getCases()) {
@@ -196,7 +197,6 @@ public class CaseDataService {
         return filteredCafcassResponse;
     }
 
-
     private void updateHearingResponse(String authorisation, String s2sToken, CafCassResponse cafCassResponse) {
 
         Map<String, String> refDataCategoryValueMap = null;
@@ -207,10 +207,9 @@ public class CaseDataService {
 
                 if (refDataCategoryValueMap == null) {
                     refDataCategoryValueMap = refDataService.getRefDataCategoryValueMap(
-                        authorisation,
-                        s2sToken,
-                        hearingData.getHmctsServiceCode()
-                    );
+                            authorisation,
+                            s2sToken,
+                            hearingData.getHmctsServiceCode());
                 }
 
                 for (CaseHearing caseHearing : hearingData.getCaseHearings()) {
