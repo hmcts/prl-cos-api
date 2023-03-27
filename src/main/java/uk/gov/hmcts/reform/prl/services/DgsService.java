@@ -33,7 +33,9 @@ public class DgsService {
         log.info("***** temp case details 1 {}", caseDetails);
         Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put(CASE_DETAILS_STRING, AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
-        log.info("***** temp case details 2 {}", tempCaseDetails.get("childrenListForDocmosis"));
+        log.info("***** temp case details 2 {}", tempCaseDetails);
+        tempCaseDetails.put("childrenListForDocmosis", caseDetails.getCaseData().getChildrenListForDocmosis());
+        log.info("***** temp case details 3 {}", tempCaseDetails.get("childrenListForDocmosis"));
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
