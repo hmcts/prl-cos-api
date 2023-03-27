@@ -148,7 +148,7 @@ public class EditAndApproveDraftOrderController {
             CaseData.class
         );
         Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(caseData);
-        String errorMessage = draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
+        String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
         if (errorMessage != null) {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
                 errorMessage)).build();
