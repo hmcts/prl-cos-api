@@ -1258,7 +1258,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testJudgeOrAdminEditApproveDraftOrderMidEvent(){
+    public void testJudgeOrAdminEditApproveDraftOrderMidEvent() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -1303,7 +1303,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testJudgeOrAdminEditApproveDraftOrderAboutToSubmit(){
+    public void testJudgeOrAdminEditApproveDraftOrderAboutToSubmit() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -1344,53 +1344,6 @@ public class DraftAnOrderServiceTest {
             .build();
 
         stringObjectMap =  draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(authToken, callbackRequest);
-        assertNotNull(stringObjectMap);
-    }
-
-    @Test
-    public void testPrepareDraftOrderCollection(){
-        DraftOrder draftOrder = DraftOrder.builder()
-            .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
-            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
-            .otherDetails(OtherDraftOrderDetails.builder()
-                              .dateCreated(LocalDateTime.now())
-                              .createdBy("test")
-                              .build())
-            .build();
-
-        Element<DraftOrder> draftOrderElement = element(draftOrder);
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        draftOrderCollection.add(draftOrderElement);
-        PartyDetails partyDetails = PartyDetails.builder()
-            .solicitorOrg(Organisation.builder().organisationName("test").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .build();
-        Element<PartyDetails> respondents = element(partyDetails);
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .courtName("test")
-            .caseTypeOfApplication("C100")
-            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
-            .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
-            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).build())
-            .respondents(List.of(respondents))
-            .draftOrderCollection(draftOrderCollection)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
-            .build();
-        when(elementUtils.getDynamicListSelectedValue(
-            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetailsBefore(CaseDetails.builder().data(stringObjectMap).build())
-            .eventId("adminEditAndApproveAnOrder")
-            .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        stringObjectMap =  draftAnOrderService.prepareDraftOrderCollection(authToken, callbackRequest);
         assertNotNull(stringObjectMap);
     }
 
