@@ -153,6 +153,8 @@ public class FL401SubmitApplicationController {
         caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
             .region(regionId).baseLocation(baseLocationId).regionName(regionName)
             .baseLocationName(baseLocationName).build());
+        caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
+            .value(caseData.getSubmitCountyCourtSelection().getValue()).build());
 
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
         if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)

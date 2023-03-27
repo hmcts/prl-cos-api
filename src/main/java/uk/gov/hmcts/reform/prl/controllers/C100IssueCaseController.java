@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -83,6 +84,7 @@ public class C100IssueCaseController {
                                                                .value(LocalCourtAdminEmail.builder().email(courtEmail)
                                                                           .build()).build()));
             caseData.setCourtName(caseDataUpdated.get("courtName").toString());
+            caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
         }
         caseData.setIssueDate();
         // Generate All Docs and set to casedataupdated.

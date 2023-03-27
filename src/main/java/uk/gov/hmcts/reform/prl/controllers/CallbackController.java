@@ -338,6 +338,7 @@ public class CallbackController {
         caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
             .region(regionId).baseLocation(baseLocationId).regionName(regionName)
             .baseLocationName(baseLocationName).build());
+        caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
