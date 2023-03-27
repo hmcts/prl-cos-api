@@ -890,8 +890,11 @@ public class ManageOrderService {
             .getChildrenForDocmosis(caseData);
         log.info("****Children in manage order service {}", children);
         if (children.size() != 0) {
+            log.info("****Children in manage order service 1 {}", caseData.getChildrenListForDocmosis());
             caseData.setChildrenListForDocmosis(children);
+            log.info("****Children in manage order service 2 {}", caseData.getChildrenListForDocmosis());
         }
+        log.info("****Children in manage order service 3 {}", caseData.getChildrenListForDocmosis());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
