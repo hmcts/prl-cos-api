@@ -79,7 +79,7 @@ public class C100IssueCaseController {
                 String courtSeal = courtSealFinderService.getCourtSeal(regionId);
                 caseDataUpdated.put("courtName", courtName);
                 caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-                        .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
+                        .region(regionId).baseLocation(baseLocationId).regionName(regionName)
                         .baseLocationName(baseLocationName).build());
                 caseData = caseData.toBuilder().courtName(courtName)
                         .courtSeal(courtSeal).build();
