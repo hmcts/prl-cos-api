@@ -76,7 +76,7 @@ public class DraftAnOrderController {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
-        } else if (caseDataUpdated.get("Directions on issue") == "DOI") {
+        } else if (caseDataUpdated.get("Direction on issue") == "DOI") {
             List<String> errorList = new ArrayList<>();
             errorList.add(
                 "Solicitor's cannot draft a Direction On Issue order");
