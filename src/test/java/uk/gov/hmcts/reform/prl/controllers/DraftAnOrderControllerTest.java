@@ -120,7 +120,7 @@ public class DraftAnOrderControllerTest {
     }
 
     @Test
-    public void testPopulateHeaderDIO() {
+    public void testPopulateHeaderDio() {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
@@ -144,7 +144,7 @@ public class DraftAnOrderControllerTest {
     }
 
     @Test
-    public void testPopulateHeaderSDO() {
+    public void testPopulateHeaderSdo() {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
@@ -167,7 +167,7 @@ public class DraftAnOrderControllerTest {
         );
     }
 
-        @Test
+    @Test
     public void testPopulateFl404Fields() throws Exception {
 
         CaseData caseData = CaseData.builder()
