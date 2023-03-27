@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

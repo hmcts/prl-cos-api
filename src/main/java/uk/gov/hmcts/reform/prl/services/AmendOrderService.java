@@ -42,9 +42,7 @@ public class AmendOrderService {
     private final AmendedOrderStamper stamper;
     private final  UploadDocumentService uploadService;
     private final Time time;
-
-    @Autowired
-    private ManageOrderService manageOrderService;
+    private final ManageOrderService manageOrderService;
 
     public Map<String, Object> updateOrder(CaseData caseData, String authorisation) throws IOException {
         ManageOrders eventData = caseData.getManageOrders();
@@ -60,7 +58,6 @@ public class AmendOrderService {
             .documentUrl(stampedDocument.links.self.href)
             .documentBinaryUrl(stampedDocument.links.binary.href)
             .build();
-
 
         return updateAmendedOrderDetails(caseData, updatedDocument, loggedInUserType);
 
