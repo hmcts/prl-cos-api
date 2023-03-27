@@ -72,14 +72,14 @@ public class DraftAnOrderController {
         if (caseDataUpdated.get("selectedOrder") == "Standard directions order") {
             List<String> errorList = new ArrayList<>();
             errorList.add(
-                "Solicitor's cannot draft a Standard Directions order");
+                "Solicitors cannot draft a Standard Directions order");
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
         } else if (caseDataUpdated.get("selectedOrder") == "Direction on issue") {
             List<String> errorList = new ArrayList<>();
             errorList.add(
-                "Solicitor's cannot draft a Direction On Issue order");
+                "Solicitors cannot draft a Direction On Issue order");
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
