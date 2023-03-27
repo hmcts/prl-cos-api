@@ -205,7 +205,7 @@ public class HearingDataService {
                             .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).collect(Collectors.toList());
                         if (ofNullable(caseHearingsList).isPresent()) {
                             dynamicListElements.add(DynamicListElement.builder().code(caseLinkedData.getCaseReference())
-                                .label(caseLinkedData.getCaseName()).build());
+                                                        .label(caseLinkedData.getCaseName()).build());
                         }
                     }
                 }
@@ -270,7 +270,7 @@ public class HearingDataService {
 
         String[] judgePersonalCode = allocatedJudgeService.getPersonalCode(hearingJudgeNameAndEmail);
         return refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-            .personalCode(judgePersonalCode).build());
+                                                                .personalCode(judgePersonalCode).build());
 
     }
 

@@ -175,7 +175,7 @@ public class HearingDataServiceTest {
             .build();
         when((hearingService.getHearings(any(),any())))
             .thenReturn(Hearings.hearingsWith().hmctsServiceCode("CaseName-Test10")
-            .caseRef("1677767515750127").caseHearings(caseHearings).build());
+                            .caseRef("1677767515750127").caseHearings(caseHearings).build());
         List<DynamicListElement> expectedResponse = hearingDataService.getHearingStartDate(authToken,caseData);
         assertNotNull(expectedResponse);
     }
