@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
@@ -107,9 +108,12 @@ public class ManageOrdersController {
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-            caseDataUpdated.put(ORDER_HEARING_DETAILS,
-                                hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                                  hearingDataPrePopulatedDynamicLists,caseData));
+            caseDataUpdated.put(
+                ORDER_HEARING_DETAILS,
+                hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                  hearingDataPrePopulatedDynamicLists, caseData
+                )
+            );
         }
         caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
             authorisation,
@@ -160,7 +164,7 @@ public class ManageOrdersController {
             ? caseData.getManageOrders().getC21OrderOptions() : null);
         caseData = caseData.toBuilder()
             .selectedC21Order((null != caseData.getManageOrders()
-                                  && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
+                && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
                                   ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ")
             .build();
         if (callbackRequest
@@ -169,7 +173,7 @@ public class ManageOrdersController {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
-        C21OrderOptionsEnum c21OrderType =  (null != caseData.getManageOrders())
+        C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
             ? caseData.getManageOrders().getC21OrderOptions() : null;
         caseData = manageOrderService.getUpdatedCaseData(caseData);
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
@@ -187,9 +191,9 @@ public class ManageOrdersController {
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
             log.info("C21 Order:: *****{}******", manageOrders.getC21OrderOptions());
             manageOrders = manageOrders.toBuilder()
-                                  .typeOfC21Order(null != manageOrders.getC21OrderOptions()
-                                                      ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
-                                  .build();
+                .typeOfC21Order(null != manageOrders.getC21OrderOptions()
+                                    ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
+                .build();
         }
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
@@ -217,11 +221,14 @@ public class ManageOrdersController {
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
         log.info("pre-populated hearingDynamicLists {}", hearingDataPrePopulatedDynamicLists);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(
-                ORDER_HEARING_DETAILS,
-                ElementUtils.wrapElements(hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists,caseData)));
-
+            ORDER_HEARING_DETAILS,
+            ElementUtils.wrapElements(
+                hearingDataService.generateHearingData(
+                    hearingDataPrePopulatedDynamicLists, caseData))
+        );
+        caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
@@ -258,7 +265,7 @@ public class ManageOrdersController {
     ) throws Exception {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         resetChildOptions(caseDetails);
-        CaseData caseData = CaseUtils.getCaseData(caseDetails,objectMapper);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
             caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
@@ -299,11 +306,16 @@ public class ManageOrdersController {
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
             caseData.setAppointedGuardianName(namesList);
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-                caseDataUpdated.put(ORDER_HEARING_DETAILS,  hearingDataService
+                caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingDataService
                     .getHearingData(existingOrderHearingDetails,
-                                    hearingDataPrePopulatedDynamicLists,caseData));
+                                    hearingDataPrePopulatedDynamicLists, caseData
+                    ));
             }
-            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
+            caseDataUpdated.putAll(manageOrderService.getCaseData(
+                authorisation,
+                caseData,
+                caseData.getCreateSelectOrderOptions()
+            ));
         }
         log.info("case data --> {}", objectMapper.writeValueAsString(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -338,7 +350,7 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
