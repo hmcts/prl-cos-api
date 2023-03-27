@@ -223,7 +223,7 @@ public class TestingSupportService {
                 ResourceLoader.loadJson(VALID_C100_CITIZEN_INPUT_JSON),
                 CaseDetails.class
             );
-
+            log.info("dummyCaseDetails is: " + dummyCaseDetails);
             CaseDetails caseDetails = citizenCaseService.createCase(CaseUtils.getCaseData(
                 dummyCaseDetails,
                 objectMapper

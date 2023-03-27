@@ -86,6 +86,7 @@ public class CaseController {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = null;
             String cosApis2sToken = authTokenGenerator.generate();
+            log.info("received case data is: " + caseData);
             caseDetails = caseService.updateCase(
                 caseData,
                 authorisation,
@@ -94,6 +95,7 @@ public class CaseController {
                 eventId,
                 accessCode
             );
+            log.info("Updated case details is: " + caseDetails);
             return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
                 .toBuilder().id(caseDetails.getId()).build();
 
@@ -172,8 +174,12 @@ public class CaseController {
         CaseDetails caseDetails = null;
 
         if (isAuthorized(authorisation, s2sToken)) {
+            log.info("Updated case details is: " + caseDetails);
+            log.info("received case data is: " + caseData);
             caseDetails = caseService.createCase(caseData, authorisation);
+            log.info("Updated case details is: " + caseDetails);
             CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            log.info("Updated case data is: " + createdCaseData);
             return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
                 CaseUtils.getRemainingDaysSubmitCase(createdCaseData)).build();
         } else {
