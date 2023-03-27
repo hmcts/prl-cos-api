@@ -23,7 +23,7 @@ prl:
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
   document:
     generate:
-      uri: http://prl-dgs-aat.aat.platform.hmcts.net/health/liveness
+      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
 
 
 management:
@@ -230,7 +230,7 @@ resources:
     baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
 
 send-letter:
-  url: http://rpe-send-letter-service-aat.aat.platform.hmcts.net
+  url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
 
 case_document_am:
   url: http://ccd-case-document-am-api-aat.aat.platform.hmcts.net
