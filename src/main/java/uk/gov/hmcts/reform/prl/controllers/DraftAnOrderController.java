@@ -69,14 +69,14 @@ public class DraftAnOrderController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("selectedOrder", caseData.getCreateSelectOrderOptions() != null
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
-        if (caseDataUpdated.get("selectedOrder") == "Standard directions order") {
+        if (caseDataUpdated.get("selectedOrder") == "Standard directions order"){
             List<String> errorList = new ArrayList<>();
             errorList.add(
                 "Solicitor's cannot draft a Standard Directions order");
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
-        } else if (caseDataUpdated.get("Direction on issue") == "DOI") {
+        } else if (caseDataUpdated.get("selectedOrder") == "Direction on issue") {
             List<String> errorList = new ArrayList<>();
             errorList.add(
                 "Solicitor's cannot draft a Direction On Issue order");
