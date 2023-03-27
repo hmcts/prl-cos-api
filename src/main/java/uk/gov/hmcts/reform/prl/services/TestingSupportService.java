@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
@@ -204,6 +205,7 @@ public class TestingSupportService {
             requestUpdateCallbackService.processCallback(ServiceRequestUpdateDto
                                                              .builder()
                                                              .ccdCaseNumber(String.valueOf(caseData.getId()))
+                                                             .payment(PaymentDto.builder().build())
                                                              .serviceRequestStatus("Paid")
                                                              .build());
             return coreCaseDataApi.getCase(
