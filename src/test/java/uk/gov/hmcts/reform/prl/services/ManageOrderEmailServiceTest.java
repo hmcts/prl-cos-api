@@ -987,4 +987,29 @@ public class ManageOrderEmailServiceTest {
                                                            Mockito.any(),Mockito.any());
     }
 
+    @Test
+    public void verifyEmailNotificationTriggeredForFinalOrderIssuedBuildRespondentEmailFl401() throws  Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("Fl401")
+            .state(State.ALL_FINAL_ORDERS_ISSUED)
+            .respondentsFL401(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
+                                             .email("test@gmail.com")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build())
+            .build();
+
+
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        Mockito.when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
+
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
+                                                           Mockito.any(),
+                                                           Mockito.any(),Mockito.any());
+    }
+
 }
