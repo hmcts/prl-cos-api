@@ -246,7 +246,6 @@ public class CallbackController {
         } else {
             log.info("Court email not found for case id {}", caseData.getId());
         }
-        log.info("       ------------********--------------      ");
         List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
         caseDataUpdated.put("courtList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
             .build());
@@ -464,11 +463,8 @@ public class CallbackController {
         GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(caseDataUpdated,
                                                                                                 caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
-        log.info("Gatekeeping caseData: {}", caseData.getGatekeepingDetails());
 
         caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
-
-        log.info("Gatekeeping caseDataUpdated: {}", caseDataUpdated.get("gatekeepingDetails"));
 
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);

@@ -67,7 +67,7 @@ public class RefDataUserService {
             }
             return onlyLegalAdvisor(listOfStaffResponse);
         } catch (Exception e) {
-            log.error("Staff details Lookup Failed - " + e.getMessage(), e);
+            log.error("Staff details Lookup Failed - {}", e.getMessage());
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -115,13 +115,12 @@ public class RefDataUserService {
             );
 
         } catch (Exception e) {
-            log.error("Category Values look up failed - " + e.getMessage(), e);
+            log.error("Category Values look up failed {} ", e.getMessage());
         }
         return commonDataResponse;
     }
 
     public List<DynamicListElement> filterCategoryValuesByCategoryId(CommonDataResponse commonDataResponse,String categoryId) {
-        log.info("categoryValuesByCategoryId {},{}", commonDataResponse,categoryId);
         if (null != commonDataResponse) {
             listOfCategoryValues = commonDataResponse.getCategoryValues().stream()
                 .filter(response -> response.getCategoryKey().equalsIgnoreCase(categoryId))
