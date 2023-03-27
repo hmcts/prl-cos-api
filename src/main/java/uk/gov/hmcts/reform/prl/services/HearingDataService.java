@@ -197,7 +197,7 @@ public class HearingDataService {
             CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()
                 .caseReference(String.valueOf(caseData.getId())).build();
             Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
-            if (caseLinkedDataList.isPresent() && ofNullable(caseLinkedDataList).isPresent()) {
+            if (caseLinkedDataList.isPresent()) {
                 for (CaseLinkedData caseLinkedData : caseLinkedDataList.get()) {
                     Hearings hearingDetails = hearingService.getHearings(authorisation, caseLinkedData.getCaseReference());
                     if (!ofNullable(hearingDetails).isEmpty() && !ofNullable(hearingDetails.getCaseHearings()).isEmpty()) {
