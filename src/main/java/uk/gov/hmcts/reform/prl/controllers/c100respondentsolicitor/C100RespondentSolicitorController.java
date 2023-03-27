@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +48,9 @@ public class C100RespondentSolicitorController {
 
     @Autowired
     private ResponseSubmitChecker responseSubmitChecker;
+
+    @Autowired
+    ConfidentialDetailsMapper confidentialDetailsMapper;
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Respondent Solicitor")
@@ -126,10 +132,17 @@ public class C100RespondentSolicitorController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Application Submitted."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse generateConfidentialityDynamicSelectionDisplay(
+    public CallbackResponse generateConfidentialityDynamicSelectionDisplay(
         @RequestBody CallbackRequest callbackRequest) {
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest))
+
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        updatedCaseData = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest);
+        CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
+        caseData = confidentialDetailsMapper.mapConfidentialData(caseData);
+        return CallbackResponse.builder()
+            .data(caseData.toBuilder()
+                      .id(callbackRequest.getCaseDetails().getId())
+                      .build())
             .build();
     }
 

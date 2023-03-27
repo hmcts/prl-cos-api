@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -23,8 +24,10 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -35,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -45,6 +49,8 @@ public class C100RespondentSolicitorControllerTest {
     @InjectMocks
     private C100RespondentSolicitorController c100RespondentSolicitorController;
     private CaseData caseData;
+    private Address address;
+
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
 
@@ -53,6 +59,9 @@ public class C100RespondentSolicitorControllerTest {
 
     @Mock
     ObjectMapper objectMapper;
+
+    @Mock
+    ConfidentialDetailsMapper confidentialDetailsMapper;
 
     @Mock
     C100RespondentSolicitorService respondentSolicitorService;
@@ -237,12 +246,35 @@ public class C100RespondentSolicitorControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest)).thenReturn(stringObjectMap);
+        address = Address.builder()
+            .addressLine1("AddressLine1")
+            .postTown("Xyz town")
+            .postCode("AB1 2YZ")
+            .build();
 
-        AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController
+        List<Element<ApplicantConfidentialityDetails>> expectedOutput = List
+            .of(Element.<ApplicantConfidentialityDetails>builder()
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 1")
+                               .lastName("XYZ 2")
+                               .email("abc1@xyz.com")
+                               .phoneNumber("09876543211")
+                               .address(address)
+                               .build()).build());
+
+        CaseData updatedCasedata = CaseData.builder()
+            .applicantCaseName("test")
+            .respondentConfidentialDetails(expectedOutput)
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest)).thenReturn(stringObjectMap);
+        when(confidentialDetailsMapper.mapConfidentialData(caseData)).thenReturn(updatedCasedata);
+
+        CallbackResponse response = c100RespondentSolicitorController
             .generateConfidentialityDynamicSelectionDisplay(callbackRequest);
 
-        assertTrue(response.getData().containsKey("state"));
+        assertEquals(response.getData().getId(), 123L);
     }
 
     @Test
