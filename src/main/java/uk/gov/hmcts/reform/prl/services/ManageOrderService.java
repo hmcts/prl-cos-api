@@ -886,7 +886,7 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         GeneratedDocumentInfo generatedDocumentInfo = null;
         Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
-        List<Child> children = dynamicMultiSelectListService
+        List<Element<Child>> children = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseData);
         log.info("****Children in manage order service {}", children);
         if (children.size() != 0) {
