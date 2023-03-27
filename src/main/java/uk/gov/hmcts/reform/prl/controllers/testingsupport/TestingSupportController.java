@@ -67,20 +67,20 @@ public class TestingSupportController {
         )).build();
     }
 
-    @PostMapping(path = "/create-dummy-citizen-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/create-dummy-citizen-case")
     @Operation(description = "Initiate the dummy citizen case creation for testing support")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "processed.",
-            content = @Content(mediaType = "application/json")),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    @SecurityRequirement(name = "Bearer Authentication")
+        @ApiResponse(responseCode = "201", description = "Dummy case created"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
     public CaseData createDummyCitizenCase(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) throws Exception {
         return testingSupportService.createDummyLiPC100Case(authorisation, s2sToken);
     }
-    
+
     @PostMapping(path = "/submitted-payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Confirm the payment for testing support")
     @ApiResponses(value = {
