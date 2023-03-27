@@ -22,7 +22,7 @@ prl:
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
   document:
     generate:
-      uri: http://prl-dgs-aat.aat.platform.hmcts.net/health/liveness
+      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
 
 management:
   endpoint:
@@ -167,7 +167,7 @@ fees-register:
 
 idam:
   s2s-auth:
-    url: http://rpe-service-auth-provider-aat.aat.platform.hmcts.net
+    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
     totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
@@ -230,7 +230,7 @@ aca:
     url: ${ACA_SERVICE_API_BASEURL:http://localhost:4454}
 
 send-letter:
-  url: http://rpe-send-letter-service-aat.aat.platform.hmcts.net
+  url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
 
 case_document_am:
   url: http://ccd-case-document-am-api-aat.aat.platform.hmcts.net

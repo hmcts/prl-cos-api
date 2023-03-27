@@ -22,7 +22,7 @@ prl:
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
   document:
     generate:
-      uri: http://prl-dgs-aat.aat.platform.hmcts.net/health/liveness
+      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
 
 management:
   endpoint:
@@ -133,7 +133,7 @@ private-law:
 
 fees-register:
   api:
-    url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.aat.platform.hmcts.net}
+    url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}
   parameters:
     C100_SUBMISSION_FEE:
       channel: default
@@ -147,7 +147,7 @@ fees-register:
 
 idam:
   s2s-auth:
-    url: http://rpe-service-auth-provider-aat.aat.platform.hmcts.net
+    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
     totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
