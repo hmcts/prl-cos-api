@@ -480,7 +480,7 @@ public class ManageOrderService {
             } else if (caseData.getCaseManagementLocation() != null) {
                 headerMap.put(
                     PrlAppsConstants.IS_CAFCASS,
-                    CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegionId())
+                    CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion())
                 );
             } else {
                 headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
