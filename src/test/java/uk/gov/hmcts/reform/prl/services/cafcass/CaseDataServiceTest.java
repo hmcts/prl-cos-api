@@ -110,6 +110,11 @@ public class CaseDataServiceTest {
         caseStateList.add("DECISION_OUTCOME");
         ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
 
+        List<String> caseTypeList = new ArrayList<>();
+        caseTypeList.add("C100");
+        ReflectionTestUtils.setField(caseDataService, "caseTypeList", caseTypeList);
+
+
         Map<String, String> refDataMap = new HashMap<>();
         refDataMap.put("ABA5-APL","Appeal");
         when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString())).thenReturn(refDataMap);
