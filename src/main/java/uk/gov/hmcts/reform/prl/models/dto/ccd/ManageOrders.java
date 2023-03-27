@@ -250,7 +250,6 @@ public class ManageOrders {
     private final List<Element<EmailInformation>> emailInformationCaOnlyC47a;
     @JsonProperty("postalInformationCaOnlyC47a")
     private final List<Element<PostalInformation>> postalInformationCaOnlyC47a;
-    @JsonUnwrapped
-    @Builder.Default
+    @JsonProperty("ordersHearingDetails")
     private final List<Element<HearingData>> ordersHearingDetails;
 }
