@@ -69,8 +69,24 @@ public class DraftAnOrderController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("selectedOrder", caseData.getCreateSelectOrderOptions() != null
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated).build();
+        if (caseDataUpdated.get("selectedOrder") == "Standard directions order") {
+            List<String> errorList = new ArrayList<>();
+            errorList.add(
+                "Solicitor's cannot draft a Standard Directions order");
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        } else if (caseDataUpdated.get("Directions on issue") == "DOI") {
+            List<String> errorList = new ArrayList<>();
+            errorList.add(
+                "Solicitor's cannot draft a Direction On Issue order");
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        } else {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated).build();
+        }
     }
 
     @PostMapping(path = "/populate-draft-order-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
