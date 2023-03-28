@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.addcafcassofficer.CafcassOfficerPositionEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 
@@ -17,7 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class Child {
 
     private final String firstName;
@@ -39,9 +40,16 @@ public class Child {
     private final List<LiveWithEnum> childLiveWith;
     private final List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild;
     private final String parentalResponsibilityDetails;
+    private final YesOrNo isFinalOrderIssued;
 
     public boolean hasConfidentialInfo() {
         return YesOrNo.Yes.equals(this.isChildAddressConfidential);
     }
+
+    private final String cafcassOfficerName;
+    private final CafcassOfficerPositionEnum cafcassOfficerPosition;
+    private final String cafcassOfficerOtherPosition;
+    private final String cafcassOfficerEmailAddress;
+    private final String cafcassOfficerPhoneNo;
 
 }
