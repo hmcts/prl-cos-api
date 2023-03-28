@@ -62,7 +62,7 @@ public class CitizenEmailService {
     private void sendWithdrawalEmail(String address, EmailTemplateVars email, CaseData caseData) {
         emailService.send(
             address,
-            EmailTemplateNames.CITIZEN_CASE_WITHDRAWN,
+            EmailTemplateNames.CA_DA_CASE_WITHDRAWN,
             email,
             LanguagePreference.getPreferenceLanguage(caseData)
         );
