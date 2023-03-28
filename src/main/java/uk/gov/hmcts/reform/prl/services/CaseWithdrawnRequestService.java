@@ -36,13 +36,10 @@ public class CaseWithdrawnRequestService {
     public SubmittedCallbackResponse caseWithdrawnRequestSubmitted(CallbackRequest callbackRequest) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("CaseWithdrawnRequestController CaseData ==> " + caseData);
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         String caseWithdrawnConfirmationHeader;
         String caseWithdrawnConfirmationBodyPrefix;
-        log.info("withdrawApplication ==> " + withdrawApplication);
-        log.info("state ==> " + caseData.getState());
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
             if (State.CASE_ISSUE.equals(caseData.getState())
                 || State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState()) || State.GATE_KEEPING.equals(caseData.getState())) {
@@ -56,8 +53,6 @@ public class CaseWithdrawnRequestService {
             caseWithdrawnConfirmationHeader = APPLICATION_NOT_WITHDRAWN_REQUEST_LABEL;
             caseWithdrawnConfirmationBodyPrefix = " \n\n ";
         }
-        log.info("caseWithdrawnConfirmationHeader ==> " + caseWithdrawnConfirmationHeader);
-        log.info("caseWithdrawnConfirmationBodyPrefix ==> " + caseWithdrawnConfirmationBodyPrefix);
 
         return SubmittedCallbackResponse.builder().confirmationHeader(
             caseWithdrawnConfirmationHeader).confirmationBody(
