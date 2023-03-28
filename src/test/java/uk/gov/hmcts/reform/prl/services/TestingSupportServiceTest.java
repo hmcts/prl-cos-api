@@ -32,8 +32,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
-import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_ADMIN_APPLICATION_NOC;
+import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TestingSupportServiceTest {
