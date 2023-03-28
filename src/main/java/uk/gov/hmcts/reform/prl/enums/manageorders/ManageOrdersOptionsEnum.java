@@ -16,11 +16,13 @@ public enum ManageOrdersOptionsEnum {
     @JsonProperty("uploadAnOrder")
     uploadAnOrder("uploadAnOrder", "Upload an order"),
     @JsonProperty("amendOrderUnderSlipRule")
-    amendOrderUnderSlipRule("amendOrderUnderSlipRule", "Amend an order"),
+    amendOrderUnderSlipRule("amendOrderUnderSlipRule", "Amend an order under the slip rule"),
     @JsonProperty("servedSavedOrders")
     servedSavedOrders("servedSavedOrders", "Served saved orders"),
     @JsonProperty("adminProduceOrder")
-    adminProduceOrder("adminProduceOrder", "Request that the admin produces an order");
+    adminProduceOrder("adminProduceOrder", "Request that the admin produces an order"),
+    @JsonProperty("approveDraftOrder")
+    approveDraftOrder("approveDraftOrder", "Edit and approve a draft order");
 
     private final String id;
     private final String displayedValue;

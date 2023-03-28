@@ -149,6 +149,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         if (ofNullable(caseData.getClosedMessages()).isPresent()) {
             caseData.getClosedMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
         }
+
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
         if (caseDataMap.containsKey(CASE_TYPE_OF_APPLICATION) && caseDataMap.get(CASE_TYPE_OF_APPLICATION) == null) {
