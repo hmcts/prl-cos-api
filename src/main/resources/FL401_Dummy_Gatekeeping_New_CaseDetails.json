@@ -1,10 +1,10 @@
 {
   "id": 1111111111111111,
   "jurisdiction": "PRIVATELAW",
-  "state": "AWAITING_SUBMISSION_TO_HMCTS",
+  "state": "GATE_KEEPING",
   "case_type_id": "PRLAPPS",
-  "created_date": "2023-03-21T14:24:48.073098",
-  "last_modified": "2023-03-21T15:20:50.281458",
+  "created_date": "2023-03-28T13:12:50.909589",
+  "last_modified": "2023-03-28T13:58:35.214833",
   "locked_by_user_id": null,
   "security_level": null,
   "case_data": {
@@ -35,9 +35,9 @@
       "linkToCaApplication": "No"
     },
     "welshLanguageRequirementsTable": {
-      "welshLanguageRequirement": null,
-      "welshLanguageRequirementApplication": null,
-      "languageRequirementApplicationNeedWelsh": null,
+      "welshLanguageRequirement": "Yes",
+      "welshLanguageRequirementApplication": "english",
+      "languageRequirementApplicationNeedWelsh": "Yes",
       "welshLanguageRequirementApplicationNeedEnglish": null
     },
     "applicantFamilyDetails": {
@@ -55,11 +55,59 @@
     },
     "welshLanguageRequirementApplication": "english",
     "homeDetailsTable": {
+      "address": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "SW1H 9AJ",
+        "PostTown": "London",
+        "AddressLine1": "Ministry Of Justice",
+        "AddressLine2": "Seventh Floor 102 Petty France",
+        "AddressLine3": ""
+      },
+      "children": [
 
+      ],
+      "familyHome": "The applicant needs the use of the furniture or other household contents",
+      "landlordName": null,
+      "mortgageNumber": null,
+      "landlordAddress": {
+        "County": null,
+        "Country": null,
+        "PostCode": null,
+        "PostTown": null,
+        "AddressLine1": null,
+        "AddressLine2": null,
+        "AddressLine3": null
+      },
+      "livingSituation": "The applicant doesn’t want the respondent to be able to enter the home",
+      "mortgageAddress": {
+        "County": null,
+        "Country": null,
+        "PostCode": null,
+        "PostTown": null,
+        "AddressLine1": null,
+        "AddressLine2": null,
+        "AddressLine3": null
+      },
+      "isPropertyRented": "No",
+      "isPropertyAdapted": "No",
+      "furtherInformation": "Nothing else",
+      "landLordNamedAfter": "",
+      "mortgageLenderName": null,
+      "mortgageNamedAfter": "",
+      "everLivedAtTheAddress": "Yes, the respondent",
+      "howIsThePropertyAdapted": "No",
+      "intendToLiveAtTheAddress": "",
+      "isThereMortgageOnProperty": "No",
+      "peopleLivingAtThisAddress": "The applicant",
+      "doAnyChildrenLiveAtAddress": "No",
+      "doesApplicantHaveHomeRights": "Yes"
     },
     "c1AWelshDocument": null,
+    "caseSubmittedTimeStamp": "2023-03-28T14:13:43.469019+01:00",
     "languageRequirementApplicationNeedWelsh": "Yes",
-    "isHomeEntered": "false",
+    "legalAdviserList": null,
+    "isHomeEntered": "true",
     "caseTypeOfApplication": "FL401",
     "otherProceedingsTable": {
       "previousOrOngoingProceedings": ""
@@ -80,7 +128,7 @@
     },
     "fl401OtherProceedingsDetailsTable": [
       {
-        "id": "3e3d4ad3-02a0-4d8b-a5ea-2aca5b191c5b",
+        "id": "c435d21c-3d6b-4b99-a903-367430af1ee7",
         "value": {
           "caseNumber": null,
           "typeOfCase": null,
@@ -650,7 +698,7 @@
     },
     "c1ADocument": null,
     "dateOfSubmission": {
-      "dateOfSubmission": " "
+      "dateOfSubmission": "28 03 2023"
     },
     "fl401TypeOfApplicationTable": {
       "caCaseNumber": null,
@@ -659,6 +707,12 @@
     },
     "draftOrderDocWelsh": null,
     "id": "1111111111111111",
+    "fl401ConfidentialityCheck": {
+      "confidentialityConsent": [
+        "fl401ConfidentialConsent"
+      ]
+    },
+    "isWelshDocGen": "Yes",
     "fl401RespondentTable": {
       "email": "repondent1@example.net",
       "address": {
@@ -679,6 +733,9 @@
       "canYouProvidePhoneNumber": "No",
       "canYouProvideEmailAddress": "Yes"
     },
+    "courtId": "234946",
+    "isEngDocGen": "Yes",
+    "isSpecificGateKeeperNeeded": "No",
     "applicantOrRespondentCaseName": "John Smith",
     "caseFlags": {
       "details": [
@@ -699,13 +756,20 @@
       "agreedBy": null,
       "declarationText": "I understand that proceedings for contempt of court may be brought against anyone who makes, or causes to be made, a false statement in a document verified by a statement of truth without an honest belief in its truth. The applicant believes that the facts stated in this form and any continuation sheets are true. null is authorised by the applicant to sign this statement."
     },
+    "courtEmailAddress": "test@hmcts.net",
     "orderWithoutGivingNoticeToRespondent": {
       "orderWithoutGivingNotice": "No"
     },
     "confidentialDetails": {
       "isConfidentialDetailsAvailable": "Yes"
     },
-    "c8WelshDocument": null,
+    "dateSubmitted": "2023-03-28",
+    "c8WelshDocument": {
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b651316e-f3a2-42f6-9eca-8608b9b05b5f",
+      "document_filename": "C8_Document_Welsh.pdf",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b651316e-f3a2-42f6-9eca-8608b9b05b5f/binary",
+      "document_creation_date": null
+    },
     "confidentialityStatementDisclaimer": [
       "confidentialityStatementUnderstood"
     ],
@@ -719,7 +783,7 @@
     },
     "applicantsConfidentialDetails": [
       {
-        "id": "38c8d9f6-5367-43f6-8a50-1b74f845e643",
+        "id": "6a455ec4-cccf-484a-99a3-209cf04801d3",
         "value": {
           "email": "applicant1@example.net",
           "address": {
@@ -734,8 +798,16 @@
     "specialArrangement": {
       "areAnySpecialArrangements": "No"
     },
+    "caseManagementLocation": {
+      "region": "7",
+      "regionId": null,
+      "regionName": "Wales",
+      "baseLocation": "234946",
+      "baseLocationId": null,
+      "baseLocationName": "Swansea Civil Justice Centre"
+    },
     "caseStatus": {
-      "state": "Draft"
+      "state": "Case Issued"
     },
     "applicantFamilyTable": {
       "applicantChild": [
@@ -796,7 +868,12 @@
       "isPhoneNumberConfidential": "Yes",
       "isEmailAddressConfidential": "Yes"
     },
-    "finalWelshDocument": null,
+    "finalWelshDocument": {
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a5cc72dc-61da-4368-92bb-363a6956ac9a",
+      "document_filename": "FL401FinalDocumentWelsh.pdf",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a5cc72dc-61da-4368-92bb-363a6956ac9a/binary",
+      "document_creation_date": null
+    },
     "respondentRelationObject": {
       "applicantRelationship": "marriedOrCivil"
     },
@@ -822,9 +899,12 @@
         }
       }
     ],
+    "courtName": "Swansea Civil And Family Justice Centre",
     "urgencyDetails": {
       "urgencyStatus": "With notice"
     },
+    "familymanCaseNumber": "2222222",
+    "issueDate": "2023-03-28",
     "attendingTheHearingTable": {
       "isWelshNeeded": null,
       "adjustmentsRequired": null,
@@ -835,7 +915,15 @@
       "specialArrangementsRequired": null,
       "isSpecialArrangementsRequired": null
     },
-    "c8Document": null,
+    "c8Document": {
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/540a338c-06c2-4ac2-a80c-ea4702ef0f46",
+      "document_filename": "C8_Document.pdf",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/540a338c-06c2-4ac2-a80c-ea4702ef0f46/binary",
+      "document_creation_date": null
+    },
+    "judgeName": {
+
+    },
     "draftOrderDoc": null,
     "internationalElementTable": {
       "jurisdictionIssue": null,
@@ -857,9 +945,19 @@
       "relationshipDateComplexEndDate": "2020-01-01",
       "relationshipDateComplexStartDate": null
     },
+    "fl401StmtOfTruth": {
+      "date": "2023-03-28",
+      "fullname": "test",
+      "signature": null,
+      "nameOfFirm": "test",
+      "signOnBehalf": "test",
+      "applicantConsent": [
+        "fl401Consent"
+      ]
+    },
     "otherProceedingsForSummaryTab": [
       {
-        "id": "39d66158-0cb7-4431-9139-3e6780096194",
+        "id": "bbbf8e2e-9013-44ea-a0bd-dfbe91702a2f",
         "value": {
           "caseNumber": null,
           "nameOfCourt": null,
@@ -872,7 +970,12 @@
     },
     "caseNameHmctsInternal": "John Smith",
     "SearchCriteria": {
-
+      "OtherCaseReferences": [
+        {
+          "id": "8bc30a64-9231-442b-82cb-412ae840cd01",
+          "value": "2222222"
+        }
+      ]
     },
     "home": {
       "address": {
@@ -937,14 +1040,99 @@
       "doAnyChildrenLiveAtAddress": "No",
       "doesApplicantHaveHomeRights": "Yes"
     },
-    "finalDocument": null,
+    "finalDocument": {
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/ed08b876-d6f8-4bdb-bb53-90fb233453a3",
+      "document_filename": "FL401FinalDocument.pdf",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/ed08b876-d6f8-4bdb-bb53-90fb233453a3/binary",
+      "document_creation_date": null
+    },
+    "isJudgeOrLegalAdviserGatekeeping": null,
     "welshLanguageRequirementApplicationNeedEnglish": null,
+    "submitCountyCourtSelection": {
+      "value": {
+        "code": "234946:test@hmcts.net",
+        "label": "Swansea Civil Justice Centre - Quay West, Quay Parade - SA1 1SP"
+      },
+      "list_items": [
+        {
+          "code": "827534:test@hmcts.net",
+          "label": "Aberystwyth Justice Centre - Trefechan - SY23 1AS"
+        },
+        {
+          "code": "101959:test@hmcts.net",
+          "label": "Carmarthen County Court and Tribunal Hearing Centre - Hill House, Picton Terrace, Carmarthen - SA31 3BT"
+        },
+        {
+          "code": "816875:test@hmcts.net",
+          "label": "Chelmsford County and Family Court - Priory Place - CM2 0PP"
+        },
+        {
+          "code": "497679:test@hmcts.net",
+          "label": "Coventry Combined Court Centre - Much Park Street, Coventry - CV1 2SN"
+        },
+        {
+          "code": "898213:test@hmcts.net",
+          "label": "East London Family Court - Westferry Circus (Westferry House), Part Ground, 6th And 7th Floors, 11 Westferry Circus, Canary Wharf, London, E14 4HE - E14 4HD"
+        },
+        {
+          "code": "735217:test@hmcts.net",
+          "label": "Exeter Combined Court Centre - Southernhay Gardens, Exeter - EX1 1UH"
+        },
+        {
+          "code": "198592:test@hmcts.net",
+          "label": "Gloucestershire Family and Civil Court - Kimbrose Way, Gloucester Docks - GL1 2DE"
+        },
+        {
+          "code": "700596:test@hmcts.net",
+          "label": "Haverfordwest County and Family - Penffynnon, Hawthorn Rise - SA61 2AZ"
+        },
+        {
+          "code": "195520:test@hmcts.net",
+          "label": "Kingston-upon-Hull Combined Court Centre - The Combined Court Centre - HU1 2EZ"
+        },
+        {
+          "code": "195465:test@hmcts.net",
+          "label": "Lincoln County Court and Family Court - High Street - LN5 7PS"
+        },
+        {
+          "code": "390932:test@hmcts.net",
+          "label": "Llanelli Law Courts - Town Hall Square, Llanelli - SA15 3AW"
+        },
+        {
+          "code": "487294:test@hmcts.net",
+          "label": "Medway County Court and Family Court - 47-67 High Street Chatham Kent - ME4 4DW"
+        },
+        {
+          "code": "366796:test@hmcts.net",
+          "label": "Newcastle Civil & Family Courts and Tribunals Centre - Barras Bridge, Newcastle-Upon-Tyne - NE99 1NA"
+        },
+        {
+          "code": "471569:test@hmcts.net",
+          "label": "Peterborough Combined Court Centre - Crown Buildings, Rivergate - PE1 1EJ"
+        },
+        {
+          "code": "846055:test@hmcts.net",
+          "label": "Port Talbot Justice Centre - Harbourside Road - SA13 1SB"
+        },
+        {
+          "code": "43104:test@hmcts.net",
+          "label": "Southampton Combined Court Centre - The Courts of Justice, London Road - SO15 2XQ"
+        },
+        {
+          "code": "234946:test@hmcts.net",
+          "label": "Swansea Civil Justice Centre - Quay West, Quay Parade - SA1 1SP"
+        }
+      ]
+    },
     "respondentName": "Elise Lynn",
     "allocatedJudgeDetails": {
       "lastName": " ",
-      "courtName": " ",
+      "courtName": "Swansea Civil And Family Justice Centre",
+      "emailAddress": " ",
       "judgePersonalCode": null,
-      "emailAddress": " "
+      "tierOfJudiciaryType": " ",
+      "isJudgeOrLegalAdviser": null,
+      "isSpecificJudgeOrLegalAdviserNeeded": null
     },
     "welshLanguageRequirement": "Yes",
     "applicantCaseName": "John Smith",

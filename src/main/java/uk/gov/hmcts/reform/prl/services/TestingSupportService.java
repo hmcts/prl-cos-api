@@ -34,7 +34,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CCD_CASE_NUMBER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_OF_SUBMISSION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
@@ -125,6 +127,10 @@ public class TestingSupportService {
                 .build();
             caseDataUpdated = updatedCaseDetails.getData();
             CaseData updatedCaseData = CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
+            caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
+            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
+                caseDataUpdated.put(CCD_CASE_NUMBER, String.valueOf(initialCaseDetails.getId()));
+            }
             if (adminCreateApplication) {
                 caseDataUpdated.putAll(updateDateInCase(initialCaseData.getCaseTypeOfApplication(), updatedCaseData));
                 try {
