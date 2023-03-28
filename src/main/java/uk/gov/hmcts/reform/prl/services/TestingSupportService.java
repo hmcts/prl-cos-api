@@ -85,9 +85,7 @@ public class TestingSupportService {
     @Autowired
     CaseRepository caseRepository;
 
-    private static final String VALID_C100_INPUT_JSON = "C100_Dummy_CaseDetails.json";
     private static final String VALID_C100_CITIZEN_INPUT_JSON = "C100_citizen_Dummy_CaseDetails.json";
-    private static final String VALID_FL401_INPUT_JSON = "FL401_Dummy_CaseDetails.json";
 
     private static final String VALID_FL401_GATEKEEPING_INPUT_JSON = "FL401_Dummy_Gatekeeping_CaseDetails.json";
 
@@ -96,48 +94,70 @@ public class TestingSupportService {
             String requestBody;
             CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
             CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            Map<String, Object> caseDataUpdated = new HashMap<>();
             boolean adminCreateApplication = false;
             if (TS_SOLICITOR_APPLICATION.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-                    requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_INPUT_JSON);
-                } else {
-                    requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
-                }
+                requestBody = loadCaseDetailsInDraftStage(initialCaseData);
             } else {
-                if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-                    requestBody = ResourceLoader.loadJson(VALID_C100_GATEKEEPING_INPUT_JSON);
-                } else {
-                    requestBody = ResourceLoader.loadJson(VALID_FL401_GATEKEEPING_INPUT_JSON);
-                }
+                requestBody = loadCaseDetailsInGateKeepingStage(initialCaseData);
                 adminCreateApplication = true;
             }
             CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
-            if (dummyCaseDetails != null) {
-                CaseDetails updatedCaseDetails = dummyCaseDetails.toBuilder()
-                    .id(initialCaseDetails.getId())
-                    .createdDate(initialCaseDetails.getCreatedDate())
-                    .lastModified(initialCaseDetails.getLastModified())
-                    .build();
-                caseDataUpdated = updatedCaseDetails.getData();
-                CaseData updatedCaseData = CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
-                if (adminCreateApplication) {
-                    caseDataUpdated.putAll(updateDateInCase(initialCaseData.getCaseTypeOfApplication(), updatedCaseData));
-                    try {
-                        caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(
-                            authorisation,
-                            updatedCaseData
-                        ));
-                    } catch (Exception e) {
-                        log.error("Error regenerating the document", e);
-                    }
-                }
-            }
-
-            return caseDataUpdated;
+            return updateCaseDetails(
+                authorisation,
+                initialCaseDetails,
+                initialCaseData,
+                adminCreateApplication,
+                dummyCaseDetails
+            );
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private Map<String, Object> updateCaseDetails(String authorisation, CaseDetails initialCaseDetails,
+                                                  CaseData initialCaseData, boolean adminCreateApplication, CaseDetails dummyCaseDetails) {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        if (dummyCaseDetails != null) {
+            CaseDetails updatedCaseDetails = dummyCaseDetails.toBuilder()
+                .id(initialCaseDetails.getId())
+                .createdDate(initialCaseDetails.getCreatedDate())
+                .lastModified(initialCaseDetails.getLastModified())
+                .build();
+            caseDataUpdated = updatedCaseDetails.getData();
+            CaseData updatedCaseData = CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
+            if (adminCreateApplication) {
+                caseDataUpdated.putAll(updateDateInCase(initialCaseData.getCaseTypeOfApplication(), updatedCaseData));
+                try {
+                    caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(
+                        authorisation,
+                        updatedCaseData
+                    ));
+                } catch (Exception e) {
+                    log.error("Error regenerating the document", e);
+                }
+            }
+        }
+        return caseDataUpdated;
+    }
+
+    private static String loadCaseDetailsInGateKeepingStage(CaseData initialCaseData) throws Exception {
+        String requestBody;
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
+            requestBody = ResourceLoader.loadJson(VALID_C100_GATEKEEPING_INPUT_JSON);
+        } else {
+            requestBody = ResourceLoader.loadJson(VALID_FL401_GATEKEEPING_INPUT_JSON);
+        }
+        return requestBody;
+    }
+
+    private static String loadCaseDetailsInDraftStage(CaseData initialCaseData) throws Exception {
+        String requestBody;
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
+            requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_INPUT_JSON);
+        } else {
+            requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
+        }
+        return requestBody;
     }
 
     private Map<String, Object> updateDateInCase(String caseTypeOfApplication, CaseData dummyCaseData) {

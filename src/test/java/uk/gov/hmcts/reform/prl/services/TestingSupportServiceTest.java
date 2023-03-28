@@ -221,7 +221,8 @@ public class TestingSupportServiceTest {
             anyString(),
             any(CaseData.class)
         )).thenThrow(RuntimeException.class);
-        testingSupportService.initiateCaseCreation(auth, callbackRequest);
+        Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
+        Assert.assertTrue(!stringObjectMap.isEmpty());
     }
 
     @Test(expected = RuntimeException.class)
@@ -361,7 +362,7 @@ public class TestingSupportServiceTest {
         when(caseService.createCase(Mockito.any(), Mockito.anyString())).thenReturn(caseDetails);
 
         CaseData updatedCaseData = testingSupportService.createDummyLiPC100Case(auth, s2sAuth);
-        assertEquals(updatedCaseData.getId(), 12345678L);
+        assertEquals(12345678L, updatedCaseData.getId());
     }
 
     @Test(expected = RuntimeException.class)
