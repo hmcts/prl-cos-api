@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
@@ -118,16 +119,21 @@ public class C100RespondentSolicitorControllerTest {
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
-            .draftC7ResponseDoc(Document.builder()
-                                    .documentUrl(generatedDocumentInfo.getUrl())
-                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                    .documentHash(generatedDocumentInfo.getHashToken())
-                                    .documentFileName("c7DraftFilename.pdf")
-                                    .build())
-            .keepContactDetailsPrivateOther(KeepDetailsPrivate.builder()
-                                                .confidentiality(Yes)
-                                                .confidentialityList(confidentialityListEnums)
-                                                .build())
+
+            .respondentSolicitorData(RespondentSolicitorData.builder()
+                    .keepContactDetailsPrivateOther(KeepDetailsPrivate.builder()
+                                                                        .confidentiality(Yes)
+                                                                        .confidentialityList(confidentialityListEnums)
+                                                                        .build())
+
+                                         .draftC7ResponseDoc(Document.builder()
+                                                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                                                 .documentFileName("c7DraftFilename.pdf")
+                                                                 .build())
+                                         .build())
+
             .applicants(applicantList)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)

@@ -221,7 +221,7 @@ public class C100RespondentSolicitorService {
         Response buildResponseForRespondent = party.getValue().getResponse();
         switch (event) {
             case CONSENT:
-                Consent respondentConsentToApplication = caseData.getRespondentConsentToApplication();
+                Consent respondentConsentToApplication = caseData.getRespondentSolicitorData().getRespondentConsentToApplication();
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .consent(buildResponseForRespondent.getConsent().toBuilder()
                                  .consentToTheApplication(respondentConsentToApplication.getConsentToTheApplication())
@@ -234,14 +234,18 @@ public class C100RespondentSolicitorService {
             case KEEP_DETAILS_PRIVATE:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .solicitorKeepDetailsPriate(SolicitorKeepDetailsPrivate.builder()
-                                                    .respKeepDetailsPrivate(caseData.getKeepContactDetailsPrivate())
-                                                    .respKeepDetailsPrivateConfidentiality(caseData.getKeepContactDetailsPrivateOther())
+                                                    .respKeepDetailsPrivate(caseData
+                                                                                .getRespondentSolicitorData()
+                                                                                .getKeepContactDetailsPrivate())
+                                                    .respKeepDetailsPrivateConfidentiality(caseData
+                                                                                               .getRespondentSolicitorData()
+                                                                                               .getKeepContactDetailsPrivateOther())
                                                     .build())
 
                     .build();
                 break;
             case CONFIRM_EDIT_CONTACT_DETAILS:
-                CitizenDetails citizenDetails = caseData.getResSolConfirmEditContactDetails();
+                CitizenDetails citizenDetails = caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails();
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .citizenDetails(buildResponseForRespondent.getCitizenDetails().toBuilder()
                                         .firstName(citizenDetails.getFirstName())
@@ -257,48 +261,62 @@ public class C100RespondentSolicitorService {
                 break;
             case ATTENDING_THE_COURT:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .attendToCourt(caseData.getRespondentAttendingTheCourt())
+                    .attendToCourt(caseData.getRespondentSolicitorData().getRespondentAttendingTheCourt())
                     .build();
                 break;
             case MIAM:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .solicitorMiam(SolicitorMiam.builder()
-                                       .respSolHaveYouAttendedMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam())
-                                       .respSolWillingnessToAttendMiam(caseData.getRespondentSolicitorWillingnessToAttendMiam())
+                                       .respSolHaveYouAttendedMiam(caseData.getRespondentSolicitorData()
+                                                                       .getRespondentSolicitorHaveYouAttendedMiam())
+                                       .respSolWillingnessToAttendMiam(caseData.getRespondentSolicitorData()
+                                                                           .getRespondentSolicitorWillingnessToAttendMiam())
                               .build())
                     .build();
                 break;
             case CURRENT_OR_PREVIOUS_PROCEEDINGS:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .currentOrPastProceedingsForChildren(caseData.getCurrentOrPastProceedingsForChildren())
-                    .respondentExistingProceedings(caseData.getRespondentExistingProceedings())
+                    .currentOrPastProceedingsForChildren(caseData.getRespondentSolicitorData()
+                                                             .getCurrentOrPastProceedingsForChildren())
+                    .respondentExistingProceedings(caseData.getRespondentSolicitorData()
+                                                       .getRespondentExistingProceedings())
                     .build();
                 break;
             case ALLEGATION_OF_HARM:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData.builder()
-                                                         .respAohYesOrNo(caseData.getRespondentAohYesNo())
-                                                         .respAllegationsOfHarmInfo(caseData.getRespondentAllegationsOfHarm())
-                                                         .respDomesticAbuseInfo(caseData.getRespondentDomesticAbuseBehaviour())
-                                                         .respChildAbuseInfo(caseData.getRespondentChildAbuseBehaviour())
-                                                         .respChildAbductionInfo(caseData.getRespondentChildAbduction())
-                                                         .respOtherConcernsInfo(caseData.getRespondentOtherConcerns())
+                                                         .respAohYesOrNo(caseData.getRespondentSolicitorData()
+                                                                             .getRespondentAohYesNo())
+                                                         .respAllegationsOfHarmInfo(caseData.getRespondentSolicitorData()
+                                                                                        .getRespondentAllegationsOfHarm())
+                                                         .respDomesticAbuseInfo(caseData.getRespondentSolicitorData()
+                                                                                    .getRespondentDomesticAbuseBehaviour())
+                                                         .respChildAbuseInfo(caseData.getRespondentSolicitorData()
+                                                                                 .getRespondentChildAbuseBehaviour())
+                                                         .respChildAbductionInfo(caseData.getRespondentSolicitorData()
+                                                                                     .getRespondentChildAbduction())
+                                                         .respOtherConcernsInfo(caseData.getRespondentSolicitorData()
+                                                                                    .getRespondentOtherConcerns())
                                                          .build())
                     .build();
                 break;
             case INTERNATIONAL_ELEMENT:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .resSolInternationalElements(ResSolInternationalElements.builder()
-                                                     .internationalElementChildInfo(caseData.getInternationalElementChild())
-                                                     .internationalElementParentInfo(caseData.getInternationalElementParent())
-                                                     .internationalElementJurisdictionInfo(caseData.getInternationalElementJurisdiction())
-                                                     .internationalElementRequestInfo(caseData.getInternationalElementRequest())
+                                                     .internationalElementChildInfo(caseData.getRespondentSolicitorData()
+                                                                                        .getInternationalElementChild())
+                                                     .internationalElementParentInfo(caseData.getRespondentSolicitorData()
+                                                                                         .getInternationalElementParent())
+                                                     .internationalElementJurisdictionInfo(caseData.getRespondentSolicitorData()
+                                                                                               .getInternationalElementJurisdiction())
+                                                     .internationalElementRequestInfo(caseData.getRespondentSolicitorData()
+                                                                                          .getInternationalElementRequest())
                                                      .build())
                     .build();
                 break;
             case ABILITY_TO_PARTICIPATE:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .abilityToParticipate(caseData.getAbilityToParticipateInProceedings())
+                    .abilityToParticipate(caseData.getRespondentSolicitorData().getAbilityToParticipateInProceedings())
                     .build();
                 break;
             case VIEW_DRAFT_RESPONSE:
@@ -431,7 +449,7 @@ public class C100RespondentSolicitorService {
         StringBuilder selectedList = new StringBuilder();
 
         selectedList.append("<ul>");
-        for (ConfidentialityListEnum confidentiality: caseData.getKeepContactDetailsPrivateOther()
+        for (ConfidentialityListEnum confidentiality: caseData.getRespondentSolicitorData().getKeepContactDetailsPrivateOther()
             .getConfidentialityList()) {
             selectedList.append("<li>");
             selectedList.append(confidentiality.getDisplayedValue());
