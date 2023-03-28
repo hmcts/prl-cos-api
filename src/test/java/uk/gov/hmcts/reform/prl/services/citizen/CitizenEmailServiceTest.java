@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CITIZEN_CASE_SUBMISSION;
-import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CITIZEN_CASE_WITHDRAWN;
+import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.CA_DA_CASE_WITHDRAWN;
 
 
 @PropertySource(value = "classpath:application.yaml")
@@ -86,7 +86,7 @@ public class CitizenEmailServiceTest {
         citizenEmailService.sendCitizenCaseWithdrawalEmail(authToken, caseData);
 
         //Then
-        verify(emailService).send(eq(emailId), eq(CITIZEN_CASE_WITHDRAWN), any(),
+        verify(emailService).send(eq(emailId), eq(CA_DA_CASE_WITHDRAWN), any(),
                                   eq(LanguagePreference.english));
     }
 
