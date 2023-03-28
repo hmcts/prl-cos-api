@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -455,6 +456,12 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        try {
+            log.info("/send-to-gatekeeper CaseDetails start json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("Gatekeeping details for the case id : {}", caseData.getId());
 
