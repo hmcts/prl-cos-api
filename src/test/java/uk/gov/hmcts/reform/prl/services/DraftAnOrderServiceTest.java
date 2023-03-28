@@ -1484,6 +1484,38 @@ public class DraftAnOrderServiceTest {
         assertNotNull(stringObjectMap);
     }
 
+    @Test
+    public void testNotReviewedByJudge() throws Exception {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("adminEditAndApproveAnOrder")
+            .caseDetails(CaseDetails.builder()
+                             .id(123L)
+                             .build())
+            .build();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "Drafted by Solicitor");
+        response.put("reviewRequiredBy", "A judge or legal adviser needs to check the order");
+        String error =  draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);;
+        assertNotNull(error);
+    }
+
+    @Test
+    public void testCanNotBeReviewedByJudge() throws Exception {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("editAndApproveAnOrder")
+            .caseDetails(CaseDetails.builder()
+                             .id(123L)
+                             .build())
+            .build();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "test");
+        response.put("reviewRequiredBy", "test");
+        String error =  draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);;
+        assertNotNull(error);
+    }
+
     private static <T> Element<T> customElement(T element) {
         return Element.<T>builder()
             .id(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
