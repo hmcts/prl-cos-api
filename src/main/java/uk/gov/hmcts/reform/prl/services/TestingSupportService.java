@@ -201,7 +201,6 @@ public class TestingSupportService {
     public Map<String, Object> confirmDummyPayment(CallbackRequest callbackRequest, String authorisation) {
         if (isAuthorized(authorisation)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            log.info("caseData got here ::" + caseData);
             requestUpdateCallbackService.processCallback(ServiceRequestUpdateDto
                                                              .builder()
                                                              .ccdCaseNumber(String.valueOf(caseData.getId()))
@@ -224,7 +223,7 @@ public class TestingSupportService {
                 ResourceLoader.loadJson(VALID_C100_CITIZEN_INPUT_JSON),
                 CaseDetails.class
             );
-
+            log.info("dummyCaseDetails is: " + dummyCaseDetails);
             CaseDetails caseDetails = citizenCaseService.createCase(CaseUtils.getCaseData(
                 dummyCaseDetails,
                 objectMapper
