@@ -26,6 +26,4 @@ public class ManageOrders {
     private final String orderDirections;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
-    @JsonProperty("furtherInformationIfRequired")
-    private final String furtherInformationIfRequired;
 }

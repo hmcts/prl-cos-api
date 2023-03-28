@@ -4,7 +4,7 @@
 
 ## Notes
 
-Update with master until Gatekeeping and manage order changes
+Update with master until 4.0
 
 Since Spring Boot 2.1 bean overriding is disabled. If you want to enable it you will need to set `spring.main.allow-bean-definition-overriding` to `true`.
 
@@ -97,4 +97,3 @@ Make sure you have added the label 'keep-helm' while creating the PR. Otherwise,
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
