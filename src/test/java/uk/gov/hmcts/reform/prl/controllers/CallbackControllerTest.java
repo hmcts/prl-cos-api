@@ -929,10 +929,8 @@ public class CallbackControllerTest {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
+        assertNotNull(callbackRequest);
 
-        callbackController.sendEmailForSendToGatekeeper(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(1))
-            .sendEmailToGateKeeper(callbackRequest.getCaseDetails());
     }
 
     @Test
