@@ -41,7 +41,7 @@ public class CafcassServiceUtil {
                                              .documentUploadedDate(new Date().toString()).build())
                         .partyName(partyName).isApplicant("CAFCASS")
                         .parentDocumentType("Safe_guarding_Letter")
-                        .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                        .cafcassDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                                              .documentUrl(document.links.self.href)
                                              .documentBinaryUrl(document.links.binary.href)
                                              .documentHash(document.hashToken)

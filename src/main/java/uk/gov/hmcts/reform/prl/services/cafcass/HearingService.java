@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HearingService {
 
-    @Value("${cafcaas.hearingStatus}")
-    private String hearingStatus;
+    @Value("#{'${cafcaas.hearingStatus}'.split(',')}")
+    private List<String> hearingStatusList;
 
     private Hearings hearingDetails;
 
@@ -29,7 +29,6 @@ public class HearingService {
     private final HearingApiClient hearingApiClient;
 
     public Hearings getHearings(String userToken, String caseReferenceNumber) {
-
         try {
             hearingDetails = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
             filterHearings();
@@ -46,10 +45,16 @@ public class HearingService {
 
             final List<CaseHearing> caseHearings = hearingDetails.getCaseHearings();
 
-            // filter hearing based on the configured hearing status
-            final List<CaseHearing> hearings = caseHearings.stream().filter(hearing -> hearing.getHmcStatus().equals(
-                hearingStatus)).collect(
-                Collectors.toList());
+            final List<String> hearingStatuses = hearingStatusList.stream().map(String::trim).collect(Collectors.toList());
+
+            final List<CaseHearing> hearings = caseHearings.stream()
+                    .filter(hearing ->
+                        hearingStatuses.stream().anyMatch(hearingStatus -> hearingStatus.equals(
+                            hearing.getHmcStatus()))
+                    )
+                .collect(
+                    Collectors.toList());
+
 
             // if we find any hearing after filteration, change hmc status to null as it's not required in response.
             if (hearings != null && !hearings.isEmpty()) {
@@ -60,5 +65,4 @@ public class HearingService {
             }
         }
     }
-
 }

@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
@@ -29,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -47,6 +50,8 @@ public class CaseDataService {
     @Value("#{'${cafcaas.caseState}'.split(',')}")
     private List<String> caseStateList;
 
+    @Value("#{'${cafcaas.caseTypeOfApplicationList}'.split(',')}")
+    private List<String> caseTypeList;
 
     private final HearingService hearingService;
 
@@ -58,44 +63,56 @@ public class CaseDataService {
 
     private final SystemUserService systemUserService;
 
+    private final RefDataService refDataService;
+
     public CafCassResponse getCaseData(String authorisation, String startDate, String endDate) throws IOException {
 
         log.info("Search API start date - {}, end date - {}", startDate, endDate);
 
-        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        CafCassResponse cafCassResponse = CafCassResponse.builder().cases(new ArrayList<>()).build();
 
-        QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
-        String searchString = objectMapper.writeValueAsString(ccdQueryParam);
+        if (caseTypeList != null && !caseTypeList.isEmpty()) {
+            caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
 
-        String userToken = systemUserService.getSysUserToken();
-        SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
-            userToken,
-            searchString,
-            authTokenGenerator.generate(),
-            cafCassSearchCaseTypeId
-        );
+            ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-        CafCassResponse cafCassResponse = objectMapper.convertValue(
-            searchResult,
-            CafCassResponse.class
-        );
+            QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
+            String searchString = objectMapper.writeValueAsString(ccdQueryParam);
 
-        if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
+            String userToken = systemUserService.getSysUserToken();
+            final String s2sToken = authTokenGenerator.generate();
+            SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
+                userToken,
+                searchString,
+                s2sToken,
+                cafCassSearchCaseTypeId
+            );
 
-            cafCassResponse = objectMapper.convertValue(searchResult,
-                                                        CafCassResponse.class);
-            cafCassFilter.filter(cafCassResponse);
-            getHearingDetails(authorisation, cafCassResponse);
-        } else {
-            cafCassResponse = CafCassResponse.builder().cases(new ArrayList<>()).build();
+            cafCassResponse = objectMapper.convertValue(
+                searchResult,
+                CafCassResponse.class
+            );
+
+            if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
+
+                log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
+                cafCassFilter.filter(cafCassResponse);
+                log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
+                getHearingDetails(authorisation, cafCassResponse);
+                updateHearingResponse(authorisation, s2sToken, cafCassResponse);
+
+            }
         }
         return cafCassResponse;
     }
 
     private QueryParam buildCcdQueryParam(String startDate, String endDate) {
+
+        // set or condition for caseTypeofApplication (e.g. something like - caseTypeofApplication = C100 or caseTypeofApplication - FL401
+        List<Should> applicationTypes = populateCaseTypeOfApplicationForSearchQuery();
 
         List<Should> shoulds = populateStatesForQuery();
 
@@ -105,7 +122,7 @@ public class CaseDataService {
         StateFilter stateFilter = StateFilter.builder().should(shoulds).build();
         Filter filter = Filter.builder().range(range).build();
         Must must = Must.builder().stateFilter(stateFilter).build();
-        Bool bool = Bool.builder().filter(filter).must(must).build();
+        Bool bool = Bool.builder().filter(filter).should(applicationTypes).minimumShouldMatch(1).must(must).build();
         Query query = Query.builder().bool(bool).build();
         return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize).build();
     }
@@ -123,6 +140,16 @@ public class CaseDataService {
         return shoulds;
     }
 
+    private List<Should> populateCaseTypeOfApplicationForSearchQuery() {
+
+        List<Should> shoulds = new ArrayList<>();
+        for (String caseType : caseTypeList
+        ) {
+            shoulds.add(Should.builder().match(Match.builder().caseTypeOfApplication(caseType).build()).build());
+        }
+        return shoulds;
+    }
+
     /**
      * Fetch the hearing data from fis hearing service.
      *@param authorisation //
@@ -136,5 +163,26 @@ public class CaseDataService {
         }
     }
 
+    private void updateHearingResponse(String authorisation, String s2sToken, CafCassResponse cafCassResponse) {
 
+        Map<String, String> refDataCategoryValueMap = null;
+
+        for (CafCassCaseDetail cafCassCaseDetail : cafCassResponse.getCases()) {
+            final Hearings hearingData = cafCassCaseDetail.getCaseData().getHearingData();
+            if (null != hearingData) {
+
+                if (refDataCategoryValueMap == null) {
+                    refDataCategoryValueMap = refDataService.getRefDataCategoryValueMap(
+                        authorisation,
+                        s2sToken,
+                        hearingData.getHmctsServiceCode()
+                    );
+                }
+
+                for (CaseHearing caseHearing : hearingData.getCaseHearings()) {
+                    caseHearing.setHearingTypeValue(refDataCategoryValueMap.get(caseHearing.getHearingType()));
+                }
+            }
+        }
+    }
 }
