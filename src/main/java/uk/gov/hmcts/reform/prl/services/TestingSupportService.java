@@ -129,9 +129,6 @@ public class TestingSupportService {
             CaseData updatedCaseData = CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
             if (adminCreateApplication) {
-                if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-                    caseDataUpdated.put(CCD_CASE_NUMBER, String.valueOf(initialCaseDetails.getId()));
-                }
                 caseDataUpdated.putAll(updateDateInCase(initialCaseData.getCaseTypeOfApplication(), updatedCaseData));
                 try {
                     caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(
