@@ -33,7 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION_NOC;
+import static uk.gov.hmcts.reform.prl.enums.Event.TS_ADMIN_APPLICATION_NOC;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TestingSupportServiceTest {
@@ -167,7 +167,7 @@ public class TestingSupportServiceTest {
             .build();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
-            .eventId(TS_SOLICITOR_APPLICATION_NOC.getId())
+            .eventId(TS_ADMIN_APPLICATION_NOC.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
@@ -190,7 +190,7 @@ public class TestingSupportServiceTest {
             .build();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
-            .eventId(TS_SOLICITOR_APPLICATION_NOC.getId())
+            .eventId(TS_ADMIN_APPLICATION_NOC.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
@@ -213,7 +213,7 @@ public class TestingSupportServiceTest {
             .build();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
-            .eventId(TS_SOLICITOR_APPLICATION_NOC.getId())
+            .eventId(TS_ADMIN_APPLICATION_NOC.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
@@ -239,7 +239,7 @@ public class TestingSupportServiceTest {
             .build();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
-            .eventId(TS_SOLICITOR_APPLICATION_NOC.getId())
+            .eventId(TS_ADMIN_APPLICATION_NOC.getId())
             .build();
         when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
         when(authorisationService.authoriseUser(anyString())).thenReturn(Boolean.FALSE);
@@ -261,7 +261,7 @@ public class TestingSupportServiceTest {
             .build();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
-            .eventId(TS_SOLICITOR_APPLICATION_NOC.getId())
+            .eventId(TS_ADMIN_APPLICATION_NOC.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = testingSupportService.submittedCaseCreation(callbackRequest, auth);
@@ -284,7 +284,7 @@ public class TestingSupportServiceTest {
             .build();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
-            .eventId(TS_SOLICITOR_APPLICATION_NOC.getId())
+            .eventId(TS_ADMIN_APPLICATION_NOC.getId())
             .build();
         when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(true);
         when(authorisationService.authoriseUser(anyString())).thenReturn(Boolean.FALSE);
@@ -306,7 +306,7 @@ public class TestingSupportServiceTest {
             .build();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
-            .eventId(TS_SOLICITOR_APPLICATION_NOC.getId())
+            .eventId(TS_ADMIN_APPLICATION_NOC.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(coreCaseDataApi.getCase(
@@ -333,7 +333,7 @@ public class TestingSupportServiceTest {
             .build();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
-            .eventId(TS_SOLICITOR_APPLICATION_NOC.getId())
+            .eventId(TS_ADMIN_APPLICATION_NOC.getId())
             .build();
         when(launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)).thenReturn(false);
         testingSupportService.confirmDummyPayment(callbackRequest, auth);
