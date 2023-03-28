@@ -164,6 +164,6 @@ public class CaseWitdrawnRequestServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnRequestSubmitted(callbackRequest);
-        Assert.assertEquals("# Application not withdrawn", response.getConfirmationHeader());
+        Assert.assertEquals("# Application withdrawn cancelled", response.getConfirmationHeader());
     }
 }
