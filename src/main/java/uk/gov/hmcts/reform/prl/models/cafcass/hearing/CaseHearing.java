@@ -15,7 +15,7 @@ import java.util.List;
 @Builder(builderMethodName = "caseHearingWith")
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CaseHearing {
 
     private Long hearingID;
