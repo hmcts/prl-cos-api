@@ -94,9 +94,7 @@ public class CaseController {
                 eventId,
                 accessCode
             );
-            return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-                .toBuilder().id(caseDetails.getId()).build();
-
+            return CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
