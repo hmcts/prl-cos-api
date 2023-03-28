@@ -23,8 +23,6 @@ public class ServeOrderDetails {
     private final List<Element<Document>> additionalDocuments;
     private final YesOrNo serveOnRespondent;
     private final ServingRespondentsEnum servingRespondent;
-    private final String recipientsOptions;
-    private final String otherParties;
     private final YesOrNo cafcassServed;
     private final String cafcassEmail;
     private final YesOrNo otherPartiesServed;

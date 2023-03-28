@@ -4,6 +4,7 @@ description: A Helm chart for prl-cos-api App
 name: prl-cos
 home: https://github.com/hmcts/prl-cos-api
 version: 0.0.48
+
 maintainers:
   - name: HMCTS Family Private Law team
 dependencies:
