@@ -375,7 +375,6 @@ public class PrlAppsConstants {
 
     public static final String CHILDREN = "children";
 
-    public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
     public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
     //C100 default court details
     public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
