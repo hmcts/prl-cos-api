@@ -31,7 +31,7 @@ public class CaseWithdrawnRequestService {
     public static final String APPLICATION_WITHDRAWN_REQUEST_STATUS_LABEL = "### What happens next \n\n The court will consider your "
         + "withdrawal request.";
 
-    public static final String APPLICATION_NOT_WITHDRAWN_REQUEST_LABEL = "# Application not withdrawn";
+    public static final String APPLICATION_NOT_WITHDRAWN_REQUEST_LABEL = "# Application withdrawn cancelled";
 
     public SubmittedCallbackResponse caseWithdrawnRequestSubmitted(CallbackRequest callbackRequest) {
 
