@@ -943,7 +943,7 @@
     "allocatedJudgeDetails": {
       "lastName": " ",
       "courtName": " ",
-      "judgePersonalCode": null,
+      "judgeTitle": " ",
       "emailAddress": " "
     },
     "welshLanguageRequirement": "Yes",
