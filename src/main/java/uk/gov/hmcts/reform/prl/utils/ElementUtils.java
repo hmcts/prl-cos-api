@@ -124,6 +124,7 @@ public class ElementUtils {
         return DynamicList.builder().listItems(items).value(selectedItem).build();
     }
 
+
     public UUID getDynamicListSelectedValue(Object dynamicList, ObjectMapper mapper) {
         if (dynamicList instanceof String) {
             return UUID.fromString((String) dynamicList);
