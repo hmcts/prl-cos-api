@@ -546,7 +546,7 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    public static boolean getPreviousState(String eachState) {
+    private static boolean getPreviousState(String eachState) {
         return (!WITHDRAWN_STATE.equalsIgnoreCase(eachState)
             && (!DRAFT_STATE.equalsIgnoreCase(eachState))
             && (!RETURN_STATE.equalsIgnoreCase(eachState))
