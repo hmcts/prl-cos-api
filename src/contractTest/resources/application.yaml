@@ -106,11 +106,6 @@ uk:
             CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
-            CITIZEN_CASE_SUBMISSION: 33462301-6357-4ae1-a1d0-1403ddc538b3
-            CA_APPLICANT_SERVICE_APPLICATION: e21dc419-8fc2-4f89-bf22-a8794632c1fc
-            CA_DA_CASE_WITHDRAWN: 2a00c797-5141-4298-ac60-663fa763d311
-            CA_DA_MANAGE_ORDER_EMAIL: 948f7b9c-79de-49dd-bfe4-e2df164366dc
-            CA_DA_FINAL_ORDER_EMAIL: fb1062c8-d966-495e-956e-dfffbd781bed
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
