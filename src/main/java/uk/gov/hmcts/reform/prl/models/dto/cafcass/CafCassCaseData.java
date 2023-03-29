@@ -218,7 +218,7 @@ public class CafCassCaseData {
     @Setter(AccessLevel.NONE)
     private List<Element<CaseOrder>> orderCollection;
 
-    @Setter(AccessLevel.NONE)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private CaseManagementLocation caseManagementLocation;
 
 }
