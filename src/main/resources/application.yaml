@@ -116,9 +116,15 @@ uk:
             RESPONDENT_SOLICITOR_HEARING_DETAILS: 1c839744-7915-409f-982f-faf81d60e0e8
             HEARING_CHANGES: cafed1bc-a52e-43b9-b5a8-b28c7d6a92ba
             HEARING_CANCELLED: 408a5116-a9f5-42ce-afc2-7caec641498d
-
+            CA_DA_CASE_WITHDRAWN: ee06226c-222c-444c-a5d2-50015e6d07d1
+            CA_APPLICANT_SERVICE_APPLICATION: 7580f0a1-bbbc-481f-98fe-8c29190d68a4
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
+            CITIZEN_CASE_SUBMISSION: 33462301-6357-4ae1-a1d0-1403ddc538b3
+            CA_APPLICANT_SERVICE_APPLICATION: e21dc419-8fc2-4f89-bf22-a8794632c1fc
+            CA_DA_CASE_WITHDRAWN: 2a00c797-5141-4298-ac60-663fa763d311
+            CA_DA_MANAGE_ORDER_EMAIL: 948f7b9c-79de-49dd-bfe4-e2df164366dc
+            CA_DA_FINAL_ORDER_EMAIL: fb1062c8-d966-495e-956e-dfffbd781bed
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
