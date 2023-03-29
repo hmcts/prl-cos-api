@@ -197,7 +197,7 @@ public class HearingDataService {
             CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()
                 .caseReference(String.valueOf(caseData.getId())).build();
             Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
-            if (caseLinkedDataList.isPresent() && ofNullable(caseLinkedDataList).isPresent()) {
+            if (caseLinkedDataList.isPresent()) {
                 for (CaseLinkedData caseLinkedData : caseLinkedDataList.get()) {
                     Hearings hearingDetails = hearingService.getHearings(authorisation, caseLinkedData.getCaseReference());
                     if (!ofNullable(hearingDetails).isEmpty() && !ofNullable(hearingDetails.getCaseHearings()).isEmpty()) {
@@ -205,7 +205,7 @@ public class HearingDataService {
                             .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).collect(Collectors.toList());
                         if (ofNullable(caseHearingsList).isPresent()) {
                             dynamicListElements.add(DynamicListElement.builder().code(caseLinkedData.getCaseReference())
-                                .label(caseLinkedData.getCaseName()).build());
+                                                        .label(caseLinkedData.getCaseName()).build());
                         }
                     }
                 }
@@ -270,7 +270,7 @@ public class HearingDataService {
 
         String[] judgePersonalCode = allocatedJudgeService.getPersonalCode(hearingJudgeNameAndEmail);
         return refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-            .personalCode(judgePersonalCode).build());
+                                                                .personalCode(judgePersonalCode).build());
 
     }
 

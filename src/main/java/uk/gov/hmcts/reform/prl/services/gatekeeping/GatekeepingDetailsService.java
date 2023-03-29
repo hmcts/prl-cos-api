@@ -65,8 +65,7 @@ public class GatekeepingDetailsService {
             personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
                                                                 .writeValueAsString(judgeDetails), JudicialUser.class).getPersonalCode();
         } catch (Exception e) {
-            throw new RuntimeException(e);
-
+            log.error(e.getMessage());
         }
         return personalCodes;
     }

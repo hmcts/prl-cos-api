@@ -409,6 +409,8 @@ public class PrlAppsConstants {
     public static final String HEARING_PRIORITY_TYPE_ENUM = "hearingPriorityTypeEnum";
     public static final String CUSTOM_DETAILS = "customDetails";
 
+    public static final String[] EMPTY_ARRAY = {};
+
 
 
 
