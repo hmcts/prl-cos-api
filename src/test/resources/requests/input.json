@@ -5,7 +5,7 @@
     "case_data": {
       "_links": {
         "self": {
-          "href": "http://ccd-data-store-api-aat.aat.platform.hmcts.net/cases/1663336680763541"
+          "href": "http://ccd-data-store-api-aat.service.core-compute-aat.internal/cases/1663336680763541"
         }
       },
       "id": "1663336680763541",
@@ -100,9 +100,9 @@
         "c1AWelshDocument": null,
         "caseSubmittedTimeStamp": "2022-09-16T15:03:12.813264+01:00",
         "submitAndPayDownloadApplicationLink": {
-          "document_url": "http://dm-store-aat.aat.platform.hmcts.net/documents/d2494d31-cc28-4c19-8717-2ff286df785e",
+          "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d2494d31-cc28-4c19-8717-2ff286df785e",
           "document_filename": "Draft_C100_application.pdf",
-          "document_binary_url": "http://dm-store-aat.aat.platform.hmcts.net/documents/d2494d31-cc28-4c19-8717-2ff286df785e/binary"
+          "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d2494d31-cc28-4c19-8717-2ff286df785e/binary"
         },
         "otherProceedingsTable": {
           "previousOrOngoingProceedings": ""
@@ -114,9 +114,9 @@
             "id": "48bec397-3ff8-4460-9ec2-83d7bc91a8e9",
             "value": {
               "documentFurtherEvidence": {
-                "document_url": "http://dm-store-aat.aat.platform.hmcts.net/documents/b6f5b557-8c31-4bfe-8b2c-8fa456e76b66",
+                "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b6f5b557-8c31-4bfe-8b2c-8fa456e76b66",
                 "document_filename": "SampleDoc1.pdf",
-                "document_binary_url": "http://dm-store-aat.aat.platform.hmcts.net/documents/b6f5b557-8c31-4bfe-8b2c-8fa456e76b66/binary"
+                "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b6f5b557-8c31-4bfe-8b2c-8fa456e76b66/binary"
               },
               "typeOfDocumentFurtherEvidence": "consentOrder",
               "restrictCheckboxFurtherEvidence": []
@@ -126,9 +126,9 @@
             "id": "391eb8f1-6e38-4086-acc1-78bf384fc12f",
             "value": {
               "documentFurtherEvidence": {
-                "document_url": "http://dm-store-aat.aat.platform.hmcts.net/documents/42b2d014-337e-447e-bd11-00b10e75091e",
+                "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/42b2d014-337e-447e-bd11-00b10e75091e",
                 "document_filename": "SampleDoc2.pdf",
-                "document_binary_url": "http://dm-store-aat.aat.platform.hmcts.net/documents/42b2d014-337e-447e-bd11-00b10e75091e/binary"
+                "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/42b2d014-337e-447e-bd11-00b10e75091e/binary"
               },
               "typeOfDocumentFurtherEvidence": "miamCertificate",
               "restrictCheckboxFurtherEvidence": []
@@ -138,9 +138,9 @@
             "id": "2c08761e-199d-4852-a949-ec0b3ec05a9a",
             "value": {
               "documentFurtherEvidence": {
-                "document_url": "http://dm-store-aat.aat.platform.hmcts.net/documents/91db0bb9-2a9c-4ce9-9ae6-49c08a9b3fb2",
+                "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/91db0bb9-2a9c-4ce9-9ae6-49c08a9b3fb2",
                 "document_filename": "Sampledoc3WithWord.docx",
-                "document_binary_url": "http://dm-store-aat.aat.platform.hmcts.net/documents/91db0bb9-2a9c-4ce9-9ae6-49c08a9b3fb2/binary"
+                "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/91db0bb9-2a9c-4ce9-9ae6-49c08a9b3fb2/binary"
               },
               "typeOfDocumentFurtherEvidence": "previousOrders",
               "restrictCheckboxFurtherEvidence": []
@@ -452,9 +452,9 @@
               "notes": null,
               "documentName": "Application docu",
               "documentOther": {
-                "document_url": "http://dm-store-aat.aat.platform.hmcts.net/documents/08b3fcd9-4ead-4eeb-8f13-6d99095d9c07",
+                "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/08b3fcd9-4ead-4eeb-8f13-6d99095d9c07",
                 "document_filename": "Sampledoc3WithWord.docx",
-                "document_binary_url": "http://dm-store-aat.aat.platform.hmcts.net/documents/08b3fcd9-4ead-4eeb-8f13-6d99095d9c07/binary"
+                "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/08b3fcd9-4ead-4eeb-8f13-6d99095d9c07/binary"
               },
               "documentTypeOther": "applicantStatement",
               "restrictCheckboxOtherDocuments": []
