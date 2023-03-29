@@ -2288,8 +2288,8 @@
     ]
   },
   "caseManagementLocation": {
-    "regionId": "string",
-    "baseLocationId": "string",
+    "region": "string",
+    "baseLocation": "string",
     "regionName": "string",
     "baseLocationName": "string"
   },

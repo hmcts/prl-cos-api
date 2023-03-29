@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -120,6 +121,8 @@ public class DraftOrder {
     @JsonProperty("isOrderUploadedByJudgeOrAdmin")
     private final YesOrNo isOrderUploadedByJudgeOrAdmin;
     private final String childrenList;
+    @JsonProperty("manageOrderHearingDetails")
+    private final List<Element<HearingData>> manageOrderHearingDetails;
     private final YesOrNo isTheOrderAboutChildren;
     private final C21OrderOptionsEnum c21OrderOptions;
 

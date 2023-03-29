@@ -393,7 +393,6 @@ public class DraftAnOrderService {
             caseData.getDraftOrdersDynamicList(), objectMapper);
         return caseData.getDraftOrderCollection().stream()
             .filter(element -> {
-                log.info("Order collection id:: {}", element.getId());
                 return element.getId().equals(orderId);
             })
             .map(Element::getValue)
