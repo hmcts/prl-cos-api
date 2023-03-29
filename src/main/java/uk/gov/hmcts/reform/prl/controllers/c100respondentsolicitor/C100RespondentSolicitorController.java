@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -135,8 +134,7 @@ public class C100RespondentSolicitorController {
     public CallbackResponse generateConfidentialityDynamicSelectionDisplay(
         @RequestBody CallbackRequest callbackRequest) {
 
-        Map<String, Object> updatedCaseData = new HashMap<>();
-        updatedCaseData = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest);
+        Map<String, Object> updatedCaseData = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest);
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
         caseData = confidentialDetailsMapper.mapConfidentialData(caseData);
         return CallbackResponse.builder()
