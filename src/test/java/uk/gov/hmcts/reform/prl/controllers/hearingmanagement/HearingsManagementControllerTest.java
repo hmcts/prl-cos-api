@@ -66,8 +66,8 @@ public class HearingsManagementControllerTest {
         nextHearingDateRequest = nextHearingDateRequest.builder()
             .caseRef("1669565933090179")
             .nextHearingDetails(NextHearingDetails.builder()
-                               .nextHearingDate(LocalDateTime.parse("2023-04-13T09:00:00"))
-                               .hearingId("2000004862")
+                                    .hearingDateTime(LocalDateTime.parse("2023-04-13T09:00:00"))
+                               .hearingID("2000004862")
                                .build())
             .build();
     }

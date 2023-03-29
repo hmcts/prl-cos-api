@@ -341,4 +341,8 @@ public class PrlAppsConstants {
     //C100 default court details
     public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
 
+    public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
+
+    public static final String STATE = "state";
+
 }
