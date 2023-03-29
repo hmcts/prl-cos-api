@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
@@ -179,6 +180,9 @@ public class CaseDataService {
                 if (caseManagementLocation.getRegionId() != null
                         && Integer.parseInt(caseManagementLocation.getRegionId()) < 7) {
                     caseIdWithRegionIdMap.put(caseDetails.getId().toString(), caseManagementLocation.getRegionId());
+                    CafCassCaseData caseData = caseDetails.getCaseData();
+                    caseData = caseData.toBuilder().caseManagementLocation(null).build();
+                    caseDetails = caseDetails.toBuilder().caseData(caseData).build();
                     filteredCafcassResponse.getCases().add(caseDetails);
                 } else if (caseManagementLocation.getRegion() != null && Integer.parseInt(caseManagementLocation.getRegion()) < 7) {
                     caseIdWithRegionIdMap.put(String.valueOf(caseDetails.getId()), caseManagementLocation.getRegion());
