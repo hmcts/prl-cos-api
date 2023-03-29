@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -22,11 +21,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
-import uk.gov.hmcts.reform.prl.services.CaseEventService;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -40,7 +35,6 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -58,9 +52,6 @@ public class CaseService {
     CoreCaseDataApi coreCaseDataApi;
 
     @Autowired
-    CaseDetailsConverter caseDetailsConverter;
-
-    @Autowired
     CaseRepository caseRepository;
 
     @Autowired
@@ -75,17 +66,6 @@ public class CaseService {
     @Autowired
     CaseDataMapper caseDataMapper;
 
-    @Autowired
-    CitizenEmailService citizenEmailService;
-
-    @Autowired
-    AllTabServiceImpl allTabsService;
-
-    @Autowired
-    CourtFinderService courtLocatorService;
-
-    @Autowired
-    CaseEventService caseEventService;
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
@@ -258,9 +238,6 @@ public class CaseService {
 
     public CaseDetails withdrawCase(CaseData caseData, String caseId, String authToken) {
 
-        Optional<String> previousState = caseEventService.findEventsForCase(caseId)
-            .stream().map(CaseEventDetail::getStateId)
-            .filter(CaseUtils::getPreviousState).findFirst();
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         CaseDetails caseDetails = getCase(authToken, caseId);
@@ -268,16 +245,9 @@ public class CaseService {
             .toBuilder().id(caseDetails.getId()).build();
 
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            if (previousState.isPresent()
-                && !CaseUtils.WITHDRAW_STATE_LIST.contains(previousState.get())) {
-                updatedCaseData = updatedCaseData.toBuilder().isWithdrawRequestSent(PENDING).build();
-                log.info("Case is updated WithdrawRequestSent as Pending");
-                //REVIEW IF ANY EMAILS TO SEND
-            } else {
-                updatedCaseData = updatedCaseData.toBuilder()
-                    .withDrawApplicationData(withDrawApplicationData)
-                    .build();
-            }
+            updatedCaseData = updatedCaseData.toBuilder()
+                .withDrawApplicationData(withDrawApplicationData)
+                .build();
         }
 
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
