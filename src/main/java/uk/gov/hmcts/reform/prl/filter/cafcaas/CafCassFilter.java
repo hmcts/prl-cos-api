@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.filter.cafcaas;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Address;
@@ -15,72 +14,45 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class CafCassFilter {
-    public static final String CAFCAAS_CASE_TYPE_OF_APPLICATION_LIST_NOT_CONFIGURED = "cafcaas.caseTypeOfApplicationList not configured";
-    @Value("#{'${cafcaas.caseTypeOfApplicationList}'.split(',')}")
-    private List<String> caseTypeList;
-
 
     @Autowired
     private PostcodeLookupService postcodeLookupService;
 
     public void filter(CafCassResponse cafCassResponse) {
-        if (caseTypeList != null && !caseTypeList.isEmpty()) {
-            caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
-            filterCaseByApplicationCaseType(cafCassResponse);
-            filterCasesByApplicationValidPostcode(cafCassResponse);
-            cafCassResponse.setTotal(cafCassResponse.getCases().size());
-        } else {
-            log.error(CAFCAAS_CASE_TYPE_OF_APPLICATION_LIST_NOT_CONFIGURED);
-        }
+        setNonNullEmptyElementList(cafCassResponse);
+        //        filterCasesByApplicationValidPostcode(cafCassResponse);
+        cafCassResponse.setTotal(cafCassResponse.getCases().size());
     }
-
-    private void filterCaseByApplicationCaseType(CafCassResponse cafCassResponse) {
-        log.info("Cafcass response before ApplicationCaseType filtering -> {}", cafCassResponse.getCases().size());
-        List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases().stream()
-            .filter(filterByCaseTypeAndState())
-            .collect(Collectors.toList());
-        log.info("Cafcaas records after ApplicationCaseType filtering -> {}", (cafCassCaseDetailList != null && cafCassCaseDetailList.size() != 0)
-            ? cafCassCaseDetailList.size() : 0);
-
-        setNonNullEmptyElementList(cafCassCaseDetailList);
-
-        cafCassResponse.setCases(cafCassCaseDetailList);
-    }
-
 
     /**
      *  This method will filter List of Element type objects present in
      *  caseData object.
      *
-     * @param cafCassCaseDetailList - List of CafcassCaseDetail
+     * @param cafCassResponse - CafCassResponse
      */
-    private void setNonNullEmptyElementList(List<CafCassCaseDetail> cafCassCaseDetailList) {
+    private void setNonNullEmptyElementList(CafCassResponse cafCassResponse) {
+        cafCassResponse.getCases().forEach(cafCassCaseDetail -> {
+            CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
 
-        if (cafCassCaseDetailList != null && !cafCassCaseDetailList.isEmpty()) {
-            cafCassCaseDetailList.forEach(cafCassCaseDetail -> {
-                CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+            final CafCassCaseData cafCassCaseData = caseData.toBuilder().applicants(filterNonValueList(caseData.getApplicants()))
+                .otherPeopleInTheCaseTable(filterNonValueList(caseData.getOtherPeopleInTheCaseTable()))
+                .respondents(filterNonValueList(caseData.getRespondents()))
+                .children(filterNonValueList(caseData.getChildren()))
+                .interpreterNeeds(filterNonValueList(caseData.getInterpreterNeeds()))
+                .otherDocuments(filterNonValueList(caseData.getOtherDocuments()))
+                .manageOrderCollection(filterNonValueList(caseData.getManageOrderCollection()))
+                .orderCollection(filterNonValueList(caseData.getOrderCollection()))
+                .build();
 
-                final CafCassCaseData cafCassCaseData = caseData.toBuilder().applicants(filterNonValueList(caseData.getApplicants()))
-                    .otherPeopleInTheCaseTable(filterNonValueList(caseData.getOtherPeopleInTheCaseTable()))
-                    .respondents(filterNonValueList(caseData.getRespondents()))
-                    .children(filterNonValueList(caseData.getChildren()))
-                    .interpreterNeeds(filterNonValueList(caseData.getInterpreterNeeds()))
-                    .otherDocuments(filterNonValueList(caseData.getOtherDocuments()))
-                    .manageOrderCollection(filterNonValueList(caseData.getManageOrderCollection()))
-                    .orderCollection(filterNonValueList(caseData.getOrderCollection()))
-                    .build();
+            cafCassCaseDetail.setCaseData(cafCassCaseData);
 
-                cafCassCaseDetail.setCaseData(cafCassCaseData);
+        });
 
-            });
-
-        }
     }
 
     /**
@@ -98,10 +70,6 @@ public class CafCassFilter {
         }
 
         return null;
-    }
-
-    private Predicate<CafCassCaseDetail> filterByCaseTypeAndState() {
-        return cafCassCaseDetail -> caseTypeList.contains(cafCassCaseDetail.getCaseData().getCaseTypeOfApplication());
     }
 
     private void filterCasesByApplicationValidPostcode(CafCassResponse cafCassResponse) {
@@ -131,8 +99,18 @@ public class CafCassFilter {
         if (!ObjectUtils.isEmpty(applicationDetails.getValue())
             && !ObjectUtils.isEmpty(applicationDetails.getValue().getAddress())) {
             Address address = applicationDetails.getValue().getAddress();
-            return postcodeLookupService.isValidNationalPostCode(address.getPostCode(),
-                                                                 CafcassAppConstants.ENGLAND_POSTCODE_NATIONALCODE);
+            boolean isPostCodeValid = false;
+            try {
+                isPostCodeValid = postcodeLookupService.isValidNationalPostCode(
+                    address.getPostCode(),
+                    CafcassAppConstants.ENGLAND_POSTCODE_NATIONALCODE
+                );
+
+                return isPostCodeValid;
+
+            } catch (Exception e) {
+                log.error("Postcode Lookup Failed for postcode {} - {} ", address.getPostCode(), e.getMessage());
+            }
         }
         return false;
     }

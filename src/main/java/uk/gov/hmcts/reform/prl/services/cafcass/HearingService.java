@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -23,6 +24,8 @@ public class HearingService {
     private List<String> hearingStatusList;
 
     private Hearings hearingDetails;
+
+    private List<Hearings> listOfHearingDetails;
 
     private final AuthTokenGenerator authTokenGenerator;
 
@@ -38,6 +41,43 @@ public class HearingService {
         return hearingDetails;
     }
 
+    public List<Hearings> getHearingsForAllCases(String userToken, Map<String,String> caseIdWithRegionIdMap) {
+        try {
+            listOfHearingDetails = hearingApiClient.getHearingDetailsForAllCaseIds(userToken, authTokenGenerator.generate(), caseIdWithRegionIdMap);
+            filterHearingsForListOfCaseIds();
+        } catch (Exception e) {
+            log.error("Error while getHearingsForAllCases {}",e.getMessage());
+        }
+        return listOfHearingDetails;
+    }
+
+    private void filterHearingsForListOfCaseIds() {
+
+        for (Hearings hearingDetails : listOfHearingDetails) {
+            if (hearingDetails != null && hearingDetails.getCaseHearings() != null) {
+
+                final List<CaseHearing> caseHearings = hearingDetails.getCaseHearings();
+
+                final List<String> hearingStatuses = hearingStatusList.stream().map(String::trim).collect(Collectors.toList());
+
+                final List<CaseHearing> hearings = caseHearings.stream()
+                    .filter(hearing ->
+                                hearingStatuses.stream().anyMatch(hearingStatus -> hearingStatus.equals(
+                                    hearing.getHmcStatus()))
+                    )
+                    .collect(
+                        Collectors.toList());
+
+                // if we find any hearing after filteration, change hmc status to null as it's not required in response.
+                if (hearings != null && !hearings.isEmpty()) {
+                    hearingDetails.setCaseHearings(hearings);
+                    log.debug("Hearings filtered based on Listed hearing");
+                } else {
+                    hearingDetails = null;
+                }
+            }
+        }
+    }
 
     private void filterHearings() {
 

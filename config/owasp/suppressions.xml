@@ -22,6 +22,7 @@
     <cve>CVE-2022-31690</cve>
     <cve>CVE-2022-45688</cve>
     <cve>CVE-2023-24998</cve>
+    <cve>CVE-2023-20861</cve>
   </suppress>
   <suppress>
     <notes>Temporary Suppression</notes>
@@ -127,6 +128,7 @@
     <notes><![CDATA[
       snakeyaml-1.32.jar ]]></notes>
     <cve>CVE-2022-3064</cve>
+    <cve>CVE-2022-1471</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
