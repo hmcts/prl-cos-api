@@ -53,7 +53,6 @@
     <cve>CVE-2022-45143</cve>
     <cve>CVE-2022-42003</cve>
     <cve>CVE-2022-42004</cve>
-    <cve>CVE-2022-1471</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
