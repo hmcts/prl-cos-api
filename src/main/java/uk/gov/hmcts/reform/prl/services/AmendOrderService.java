@@ -42,6 +42,7 @@ public class AmendOrderService {
     private final AmendedOrderStamper stamper;
     private final  UploadDocumentService uploadService;
     private final Time time;
+    private final ManageOrderService manageOrderService;
 
     @Autowired
     private ManageOrderService manageOrderService;
@@ -60,7 +61,6 @@ public class AmendOrderService {
             .documentUrl(stampedDocument.links.self.href)
             .documentBinaryUrl(stampedDocument.links.binary.href)
             .build();
-
 
         return updateAmendedOrderDetails(caseData, updatedDocument, loggedInUserType);
 
@@ -155,8 +155,7 @@ public class AmendOrderService {
         Optional<Element<OrderDetails>> orderDetails  = orders.stream()
             .filter(order -> Objects.equals(order.getId(), selectedOrderId))
             .findFirst();
-        orderDetails.isPresent();
-        String orderType = orderDetails.get().getValue().getOrderType();
+        String orderType = orderDetails.isPresent() ? orderDetails.get().getValue().getOrderType() : null;
 
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         return DraftOrder.builder()
@@ -174,6 +173,7 @@ public class AmendOrderService {
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
+            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .build();
     }
 }

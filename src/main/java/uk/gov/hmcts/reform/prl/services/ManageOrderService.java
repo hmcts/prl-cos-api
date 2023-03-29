@@ -403,6 +403,30 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_n117_welsh_filename}")
     protected String n117WelshFile;
 
+    @Value("${document.templates.common.prl_c6_draft_template}")
+    protected String nopPartiesDraftTemplate;
+
+    @Value("${document.templates.common.prl_c6_draft_filename}")
+    protected String nopPartiesDraftFile;
+
+    @Value("${document.templates.common.prl_c6_template}")
+    protected String nopPartiesTemplate;
+
+    @Value("${document.templates.common.prl_c6_filename}")
+    protected String nopPartiesFile;
+
+    @Value("${document.templates.common.prl_c6a_draft_template}")
+    protected String nopNonPartiesDraftTemplate;
+
+    @Value("${document.templates.common.prl_c6a_draft_filename}")
+    protected String nopNonPartiesDraftFile;
+
+    @Value("${document.templates.common.prl_c6a_template}")
+    protected String nopNonPartiesTemplate;
+
+    @Value("${document.templates.common.prl_c6a_filename}")
+    protected String nopNonPartiesFile;
+
     private final DocumentLanguageService documentLanguageService;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
@@ -456,7 +480,7 @@ public class ManageOrderService {
             } else if (caseData.getCaseManagementLocation() != null) {
                 headerMap.put(
                     PrlAppsConstants.IS_CAFCASS,
-                    CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegionId())
+                    CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion())
                 );
             } else {
                 headerMap.put(PrlAppsConstants.IS_CAFCASS, No);
@@ -659,6 +683,18 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404bBlankDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404bTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404bBlankFile);
+                break;
+            case noticeOfProceedingsParties:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, nopPartiesDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, nopPartiesDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, nopPartiesTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, nopPartiesFile);
+                break;
+            case noticeOfProceedingsNonParties:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, nopNonPartiesDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, nopNonPartiesDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, nopNonPartiesTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, nopNonPartiesFile);
                 break;
             default:
                 break;
@@ -1016,6 +1052,7 @@ public class ManageOrderService {
             .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(No)
+            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
             .build();
     }
@@ -1046,6 +1083,7 @@ public class ManageOrderService {
             .isOrderUploadedByJudgeOrAdmin(null != caseData.getManageOrdersOptions()
                                                && caseData.getManageOrdersOptions().equals(uploadAnOrder)
                                                ? Yes : No)
+            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .build();
     }
 
@@ -1301,7 +1339,6 @@ public class ManageOrderService {
         } else {
             tempServeOrderDetails = ServeOrderDetails.builder().build();
         }
-
         ServeOrderDetails serveOrderDetails = tempServeOrderDetails.toBuilder().serveOnRespondent(serveOnRespondent)
             .servingRespondent(servingRespondentsOptions)
             .recipientsOptions(recipients)
@@ -1645,6 +1682,7 @@ public class ManageOrderService {
                                              .build())
                            .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                             ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
+                           .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                            .build());
     }
 
