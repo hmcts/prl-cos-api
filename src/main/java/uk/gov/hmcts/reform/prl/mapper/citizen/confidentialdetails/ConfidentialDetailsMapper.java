@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @Slf4j
 @Component
@@ -33,20 +34,35 @@ public class ConfidentialDetailsMapper {
 
         List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = new ArrayList<>();
 
-        Optional<List<Element<PartyDetails>>> respondentsList = ofNullable(caseData.getRespondents());
-        if (respondentsList.isPresent()) {
-            List<PartyDetails> respondents = caseData.getRespondents()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-            respondentsConfidentialDetails = getRespondentConfidentialDetails(respondents);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+
+
+            Optional<List<Element<PartyDetails>>> respondentsList = ofNullable(caseData.getRespondents());
+            if (respondentsList.isPresent()) {
+                List<PartyDetails> respondents = caseData.getRespondents()
+                    .stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+                respondentsConfidentialDetails = getRespondentConfidentialDetails(respondents);
+            }
+
+            caseData = caseData.toBuilder()
+                .respondentConfidentialDetails(respondentsConfidentialDetails)
+                .build();
+
+            log.info("respondentsConfidentialDetails {}", caseData.getRespondentConfidentialDetails());
+        } else {
+            if (null != caseData.getRespondentsFL401()) {
+                List<PartyDetails> fl401Respondent = List.of(caseData.getRespondentsFL401());
+                respondentsConfidentialDetails = getRespondentConfidentialDetails(fl401Respondent);
+            }
+
+            caseData = caseData.toBuilder()
+                .respondentConfidentialDetails(respondentsConfidentialDetails)
+                .build();
+
+            log.info("respondentsConfidentialDetails {}", caseData.getRespondentConfidentialDetails());
         }
-
-        caseData = caseData.toBuilder()
-            .respondentConfidentialDetails(respondentsConfidentialDetails)
-            .build();
-
-        log.info("respondentsConfidentialDetails {}", caseData.getRespondentConfidentialDetails());
 
         allTabsService.updateAllTabsIncludingConfTab(caseData);
 
