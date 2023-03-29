@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.enums.manageorders;
 
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -9,12 +10,10 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum JudgeOrLegalAdvisorCheckEnum {
-    @JsonProperty("judge")
-    judge("judge", "Judge"),
+public enum ChildSelectorEnum {
 
-    @JsonProperty("legalAdvisor")
-    legalAdvisor("legalAdvisor", "Legal advisor");
+    @JsonProperty("SELECTED")
+    SELECTED("SELECTED", "Yes");
 
     private final String id;
     private final String displayedValue;
@@ -25,7 +24,7 @@ public enum JudgeOrLegalAdvisorCheckEnum {
     }
 
     @JsonCreator
-    public static JudgeOrLegalAdvisorCheckEnum getValue(String key) {
-        return JudgeOrLegalAdvisorCheckEnum.valueOf(key);
+    public static ChildSelectorEnum getValue(String key) {
+        return ChildSelectorEnum.valueOf(key);
     }
 }
