@@ -442,3 +442,16 @@ refdata:
   api:
     url: ${REFDATA_API_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
   cateogry-id: HearingType
+
+staffDetails:
+  api:
+    url: ${STAFF_DETAILS_API:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}
+
+judicialUsers:
+  api:
+    url: ${JUDICIAL_USERS_API:http://rd-judicial-api-aat.service.core-compute-aat.internal}
+
+commonData:
+  api:
+    url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
+

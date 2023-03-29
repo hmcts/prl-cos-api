@@ -217,4 +217,8 @@ public class CafCassCaseData {
 
     @Setter(AccessLevel.NONE)
     private List<Element<CaseOrder>> orderCollection;
+
+    @Setter(AccessLevel.NONE)
+    private CaseManagementLocation caseManagementLocation;
+
 }

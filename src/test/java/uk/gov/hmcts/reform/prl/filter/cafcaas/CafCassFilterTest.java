@@ -5,15 +5,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CafCassFilterTest {
@@ -27,9 +24,6 @@ public class CafCassFilterTest {
 
     @org.junit.Test
     public void filterTest() throws IOException {
-        List<String> caseTypeList = new ArrayList<>();
-        caseTypeList.add("C100");
-        ReflectionTestUtils.setField(cafCassFilter, "caseTypeList", caseTypeList);
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         CafCassResponse cafCassResponse = objectMapper.readValue(
             TestResourceUtil.readFileFrom(jsonInString),

@@ -26,6 +26,7 @@ public class CaseHearing {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String hmcStatus;
+
     private List<HearingDaySchedule> hearingDaySchedule;
 
     @JsonProperty("hearingStatus")
