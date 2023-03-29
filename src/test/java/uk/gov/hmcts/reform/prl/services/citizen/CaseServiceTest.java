@@ -14,12 +14,12 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
@@ -180,11 +180,10 @@ public class CaseServiceTest {
 
         CaseData updatedCaseData = caseData.toBuilder()
             .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
-            .courtName("Test Court")
+            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
             .build();
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(courtLocatorService.getNearestFamilyCourt(caseData)).thenReturn(Court.builder().courtName("Test Court").build());
         when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT)).thenReturn(caseDetails);
 
@@ -212,11 +211,10 @@ public class CaseServiceTest {
 
         CaseData updatedCaseData = caseData.toBuilder()
             .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
-            .courtName("Test Court")
+            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
             .build();
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(courtLocatorService.getNearestFamilyCourt(caseData)).thenReturn(Court.builder().courtName("Test Court").build());
         when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT_WITH_HWF)).thenReturn(caseDetails);
 

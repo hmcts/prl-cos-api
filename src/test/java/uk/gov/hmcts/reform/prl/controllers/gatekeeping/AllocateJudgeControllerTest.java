@@ -25,6 +25,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertFalse;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -71,7 +72,7 @@ public class AllocateJudgeControllerTest {
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
         AboutToStartOrSubmitCallbackResponse response = allocateJudgeController.prePopulateLegalAdvisorDetails(
             "auth",callbackRequest);
-        assertNotNull(response.getData().containsKey("legalAdvisorList"));
+        assertFalse(response.getData().containsKey("legalAdvisorList"));
     }
 
 

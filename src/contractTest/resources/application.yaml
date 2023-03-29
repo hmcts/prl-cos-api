@@ -209,12 +209,14 @@ locationfinder:
     url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
     endpoint: /refdata/location/court-venues/services
 
+
 launchdarkly:
   sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
 
 rd_professional:
   api:
     url: ${PRD_API_BASEURL:http://rd-professional-api-aat.service.core-compute-aat.internal}
+
 
 document:
   templates:
@@ -396,4 +398,8 @@ staffDetails:
 judicialUsers:
   api:
     url: ${JUDICIAL_USERS_API:http://rd-judicial-api-aat.service.core-compute-aat.internal}
+
+commonData:
+  api:
+    url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
 
