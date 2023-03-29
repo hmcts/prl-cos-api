@@ -38,7 +38,7 @@ public class NoticeOfChangeControllerTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         caseData = new HashMap<>();
-        caseDetails = CaseDetails.builder().data(caseData).state(State.GATE_KEEPING.getValue())
+        caseDetails = CaseDetails.builder().data(caseData).state(State.JUDICIAL_REVIEW.getValue())
             .id(123488888L).createdDate(LocalDateTime.now()).lastModified(LocalDateTime.now()).build();
     }
 
