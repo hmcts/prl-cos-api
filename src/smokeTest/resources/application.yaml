@@ -22,7 +22,7 @@ prl:
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
   document:
     generate:
-      uri: http://prl-dgs-aat.aat.platform.hmcts.net/health/liveness
+      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
 
 management:
   endpoint:
@@ -137,7 +137,7 @@ private-law:
 
 fees-register:
   api:
-    url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.aat.platform.hmcts.net}
+    url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}
   parameters:
     C100_SUBMISSION_FEE:
       channel: default
@@ -208,18 +208,18 @@ send-letter:
   url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
 
 case_document_am:
-  url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.aat.platform.hmcts.net}
+  url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
 
 prl-dgs-api:
-  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.aat.platform.hmcts.net}
+  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
 
 courtfinder:
   api:
-    url: ${FACT_API:http://fact-api-aat.aat.platform.hmcts.net}
+    url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
 locationfinder:
   api:
-    url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.aat.platform.hmcts.net}
+    url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
     endpoint: /refdata/location/court-venues/services
 
 launchdarkly:
@@ -227,7 +227,7 @@ launchdarkly:
 
 rd_professional:
   api:
-    url: ${PRD_API_BASEURL:http://rd-professional-api-aat.aat.platform.hmcts.net}
+    url: ${PRD_API_BASEURL:http://rd-professional-api-aat.service.core-compute-aat.internal}
 
 document:
   templates:
@@ -420,5 +420,5 @@ courts:
 
 fis_hearing:
   api:
-    url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.aat.platform.hmcts.net}
+    url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
 
