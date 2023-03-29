@@ -73,38 +73,42 @@ public class CaseDataService {
 
         CafCassResponse cafCassResponse = CafCassResponse.builder().cases(new ArrayList<>()).build();
 
-        if (caseTypeList != null && !caseTypeList.isEmpty()) {
-            caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
+        try {
+            if (caseTypeList != null && !caseTypeList.isEmpty()) {
+                caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
 
-            ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+                ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+                objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-            QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
-            String searchString = objectMapper.writeValueAsString(ccdQueryParam);
+                QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
+                String searchString = objectMapper.writeValueAsString(ccdQueryParam);
 
-            String userToken = systemUserService.getSysUserToken();
-            final String s2sToken = authTokenGenerator.generate();
-            SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
-                    userToken,
-                    searchString,
-                    s2sToken,
-                    cafCassSearchCaseTypeId);
+                String userToken = systemUserService.getSysUserToken();
+                final String s2sToken = authTokenGenerator.generate();
+                SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
+                        userToken,
+                        searchString,
+                        s2sToken,
+                        cafCassSearchCaseTypeId);
 
-            cafCassResponse = objectMapper.convertValue(
-                    searchResult,
-                    CafCassResponse.class);
+                cafCassResponse = objectMapper.convertValue(
+                        searchResult,
+                        CafCassResponse.class);
 
-            if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
+                if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
 
-                log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
-                cafCassFilter.filter(cafCassResponse);
-                log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
-                CafCassResponse filteredCafcassData = getHearingDetailsForAllCases(authorisation, cafCassResponse);
-                updateHearingResponse(authorisation, s2sToken, filteredCafcassData);
+                    log.info("CCD Search Result Size --> {}", cafCassResponse.getTotal());
+                    cafCassFilter.filter(cafCassResponse);
+                    log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
+                    CafCassResponse filteredCafcassData = getHearingDetailsForAllCases(authorisation, cafCassResponse);
+                    updateHearingResponse(authorisation, s2sToken, filteredCafcassData);
 
+                }
             }
+        } catch (Exception e) {
+            log.error("Error in search cases {}", e);
         }
         return cafCassResponse;
     }
@@ -152,7 +156,7 @@ public class CaseDataService {
 
     /**
      * Fetch the hearing data from fis hearing service.
-     * 
+     *
      * @param authorisation   //
      * @param cafCassResponse //
      */
@@ -176,8 +180,8 @@ public class CaseDataService {
                         && Integer.parseInt(caseManagementLocation.getRegionId()) < 7) {
                     caseIdWithRegionIdMap.put(caseDetails.getId().toString(), caseManagementLocation.getRegionId());
                     filteredCafcassResponse.getCases().add(caseDetails);
-                } else if (Integer.parseInt(caseManagementLocation.getRegion()) < 7) {
-                    caseIdWithRegionIdMap.put(caseDetails.getId().toString(), caseManagementLocation.getRegion());
+                } else if (caseManagementLocation.getRegion() != null && Integer.parseInt(caseManagementLocation.getRegion()) < 7) {
+                    caseIdWithRegionIdMap.put(String.valueOf(caseDetails.getId()), caseManagementLocation.getRegion());
                     filteredCafcassResponse.getCases().add(caseDetails);
                 }
             }

@@ -25,7 +25,7 @@ public class CafCassFilter {
 
     public void filter(CafCassResponse cafCassResponse) {
         setNonNullEmptyElementList(cafCassResponse);
-        filterCasesByApplicationValidPostcode(cafCassResponse);
+        //        filterCasesByApplicationValidPostcode(cafCassResponse);
         cafCassResponse.setTotal(cafCassResponse.getCases().size());
     }
 
