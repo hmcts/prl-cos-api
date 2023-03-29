@@ -95,6 +95,12 @@ public class CaseController {
                 eventId,
                 accessCode
             );
+
+            try {
+                log.info("updateCase CaseDetails start json ===>" + objectMapper.writeValueAsString(caseDetails));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
                 .toBuilder().id(caseDetails.getId()).build();
 
