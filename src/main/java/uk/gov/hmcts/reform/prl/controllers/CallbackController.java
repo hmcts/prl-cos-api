@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -114,6 +115,7 @@ public class CallbackController {
     private final ExampleService exampleService;
     private final OrganisationService organisationService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
+    @Autowired
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
 
@@ -246,7 +248,6 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(
@@ -284,6 +285,8 @@ public class CallbackController {
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
             caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
         }
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        solicitorEmailService.sendAwaitingPaymentEmail(caseDetails);
 
         //Assign default court to all c100 cases for work allocation.
         caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()

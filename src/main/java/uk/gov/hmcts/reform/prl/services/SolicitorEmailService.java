@@ -108,6 +108,20 @@ public class SolicitorEmailService {
 
     }
 
+    public void sendAwaitingPaymentEmail(CaseDetails caseDetails) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        String applicantSolicitorEmailAddress = caseDetails.getData()
+            .get(PrlAppsConstants.APPLICANT_SOLICITOR_EMAIL_ADDRESS).toString();
+        emailService.send(
+            applicantSolicitorEmailAddress,
+            EmailTemplateNames.C100_AWAITING_PAYMENT,
+            buildEmail(caseDetails),
+            LanguagePreference.getLanguagePreference(caseData)
+        );
+
+    }
+
+
     private EmailTemplateVars buildCaseWithdrawEmail(CaseDetails caseDetails) {
 
         return SolicitorEmail.builder()

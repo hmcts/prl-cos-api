@@ -116,10 +116,9 @@ uk:
             RESPONDENT_SOLICITOR_HEARING_DETAILS: 1c839744-7915-409f-982f-faf81d60e0e8
             HEARING_CHANGES: cafed1bc-a52e-43b9-b5a8-b28c7d6a92ba
             HEARING_CANCELLED: 408a5116-a9f5-42ce-afc2-7caec641498d
+
           welsh:
-            SOLICITOR: 8cb02993-7dbe-4e53-a4c4-8bdc106c99ae
-            RETURNAPPLICATION: daf43ed7-d51e-4e0b-ac93-78b412cd4c47
-            APPLICANT_SOLICITOR_CA: 3f622a4c-37d6-4446-a831-522f21a25f57
+            EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
