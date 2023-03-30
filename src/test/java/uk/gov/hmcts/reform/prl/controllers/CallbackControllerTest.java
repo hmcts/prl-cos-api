@@ -1191,8 +1191,6 @@ public class CallbackControllerTest {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(caseEventService.findEventsForCase("1"))
             .thenReturn(List.of(CaseEventDetail.builder().stateId(SUBMITTED_STATE).build()));
-        when(caseEventService.findEventsForCase(any(String.class)))
-            .thenReturn(List.of(CaseEventDetail.builder().stateId("CLOSED").build()));
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
