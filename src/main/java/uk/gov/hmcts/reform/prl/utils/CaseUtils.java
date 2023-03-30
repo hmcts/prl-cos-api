@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.Duration;
@@ -12,6 +14,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
+
+@Slf4j
 public class CaseUtils {
 
     private CaseUtils() {
@@ -47,5 +52,14 @@ public class CaseUtils {
             noOfDaysRemaining = PrlAppsConstants.CASE_SUBMISSION_THRESHOLD - noDaysPassed;
         }
         return noOfDaysRemaining;
+    }
+
+    public static String getCaseTypeOfApplication(CaseData caseData) {
+        return caseData.getCaseTypeOfApplication() != null
+            ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
+    }
+
+    public static boolean hasLegalRepresentation(PartyDetails partyDetails) {
+        return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
     }
 }
