@@ -340,9 +340,15 @@ public class PrlAppsConstants {
     public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
     //C100 default court details
     public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
+    public static final String CITIZEN_DASHBOARD = "/dashboard";
 
     public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
 
     public static final String STATE = "state";
 
+    public static final String DATE_OF_SUBMISSION = "dateOfSubmission";
+    public static final String FL_401_STMT_OF_TRUTH = "fl401StmtOfTruth";
+    public static final String TESTING_SUPPORT_LD_FLAG_ENABLED = "testing-support";
+
+    public static final String CASE_DATA_ID = "id";
 }
