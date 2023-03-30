@@ -44,9 +44,6 @@ public class AmendOrderService {
     private final Time time;
     private final ManageOrderService manageOrderService;
 
-    @Autowired
-    private ManageOrderService manageOrderService;
-
     public Map<String, Object> updateOrder(CaseData caseData, String authorisation) throws IOException {
         ManageOrders eventData = caseData.getManageOrders();
 
