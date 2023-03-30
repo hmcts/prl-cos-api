@@ -86,7 +86,6 @@ public class CaseController {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = null;
             String cosApis2sToken = authTokenGenerator.generate();
-            log.info("received case data is: " + caseData);
             caseDetails = caseService.updateCase(
                 caseData,
                 authorisation,
