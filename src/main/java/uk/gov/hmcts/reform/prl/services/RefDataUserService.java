@@ -149,7 +149,7 @@ public class RefDataUserService {
                 .flatMap(Collection::stream)
                 .map(this::displaySubChannelEntry)
                 .collect(Collectors.toList());
-            Collections.sort(listOfSubCategoryValues, (a, b) -> a.getCode().compareToIgnoreCase(b.getCode()));
+            Collections.sort(listOfSubCategoryValues, (a, b) -> a.getLabel().compareToIgnoreCase(b.getLabel()));
             return listOfSubCategoryValues;
         }
 
