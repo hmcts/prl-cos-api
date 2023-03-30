@@ -19,7 +19,7 @@ public class HearingRequest {
     @JsonProperty("hearingId")
     private final String hearingId;
     private final HearingsUpdate hearingUpdate;
-
+    private NextHearingDateRequest nextHearingDateRequest;
 
 
 }
