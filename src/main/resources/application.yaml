@@ -116,9 +116,10 @@ uk:
             RESPONDENT_SOLICITOR_HEARING_DETAILS: 1c839744-7915-409f-982f-faf81d60e0e8
             HEARING_CHANGES: cafed1bc-a52e-43b9-b5a8-b28c7d6a92ba
             HEARING_CANCELLED: 408a5116-a9f5-42ce-afc2-7caec641498d
-
+            C100_AWAITING_PAYMENT: 3cf67615-8b67-4814-9e61-1ce786b986a1
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
+            C100_AWAITING_PAYMENT: 312019d9-54f4-4c9a-a8b0-2dc7e4008a9e
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
