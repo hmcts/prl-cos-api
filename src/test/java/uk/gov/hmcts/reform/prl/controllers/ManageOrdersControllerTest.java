@@ -111,6 +111,7 @@ public class ManageOrdersControllerTest {
     private IdamClient idamClient;
     @Mock
     private AmendOrderService amendOrderService;
+    
     @Mock
     private HearingDataService hearingDataService;
 
