@@ -154,9 +154,7 @@ public class HearingDataService {
         } catch (Exception e) {
             log.error("List of Hearing Start Date Values look up failed - " + e.getMessage(), e);
         }
-        //TODO: need to ensure this hardcoded values has to be removed while merging into release branch. Its added to test in preview/aat environment
-        return List.of(DynamicListElement.builder().code(String.valueOf("2023-04-13T09:00")).label(String.valueOf(
-            LocalDateTime.parse("2023-04-13T09:00").format(dateTimeFormatter))).build());
+        return List.of(DynamicListElement.builder().build());
     }
 
     private DynamicListElement displayEntry(HearingDaySchedule hearingDaySchedule) {
@@ -190,9 +188,9 @@ public class HearingDataService {
     }
 
     protected List<DynamicListElement> getLinkedCases(String authorisation, CaseData caseData) {
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
         try {
             log.info("Linked case method ", caseData.getId());
-            List<DynamicListElement> dynamicListElements = new ArrayList<>();
             CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()
                 .caseReference(String.valueOf(caseData.getId())).build();
             Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
@@ -209,12 +207,10 @@ public class HearingDataService {
                     }
                 }
             }
-            return dynamicListElements;
         } catch (Exception e) {
-            log.info("Exception occured in Linked case method for hmc api calls ", caseData.getId());
+            log.error("Exception occured in Linked case method for hmc api calls ", e.getMessage());
         }
-        //TODO: need to ensure this hardcoded values has to be removed while merging into release branch. Its added to test in preview/aat environment
-        return List.of(DynamicListElement.builder().code(String.valueOf("1677767515750127")).label("CaseName-Test10").build());
+        return dynamicListElements;
     }
 
 
