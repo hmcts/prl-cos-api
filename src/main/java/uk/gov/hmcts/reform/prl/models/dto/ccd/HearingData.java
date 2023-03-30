@@ -191,5 +191,4 @@ public class HearingData {
     private final String respondentSolicitor4;
     private final String respondentSolicitor5;
 
-
 }
