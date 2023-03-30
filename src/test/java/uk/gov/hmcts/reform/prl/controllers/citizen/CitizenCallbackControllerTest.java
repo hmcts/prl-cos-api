@@ -143,7 +143,7 @@ public class CitizenCallbackControllerTest {
     }
 
     @Test
-    public void sendNotitficationAfterSubmissionTest() throws Exception {
+    public void sendNotitficationAfterCaseWithdrawnTest() throws Exception {
 
         UserDetails userDetails = UserDetails.builder()
             .forename("test")
@@ -162,9 +162,8 @@ public class CitizenCallbackControllerTest {
             .applicantName(userDetails.getFullName())
             .build();
 
-        doNothing().when(citizenEmailService).sendCitizenCaseSubmissionEmail(authToken,
-                                                           String.valueOf(caseData.getId()));
-        citizenCallbackController.sendNotificationsOnCaseSubmission(authToken, callbackRequest);
+        doNothing().when(citizenEmailService).sendCitizenCaseSubmissionEmail(authToken, caseData);
+        citizenCallbackController.sendNotificationsOnCaseWithdrawn(authToken, callbackRequest);
         verify(allTabsService, times(0)).updateAllTabsIncludingConfTab(any(CaseData.class));
     }
 }

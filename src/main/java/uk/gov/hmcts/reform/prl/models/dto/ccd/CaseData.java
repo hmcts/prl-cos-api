@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -137,6 +136,8 @@ public class CaseData implements MappableObject {
 
     private final String caseSubmittedTimeStamp;
 
+    private String courtSeal;
+
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;
 
@@ -199,15 +200,6 @@ public class CaseData implements MappableObject {
      */
 
     private final Address childrenAddress;
-    private final YesNoDontKnow isChildrenKnownToAuthority;
-    private final String childAndLocalAuthority;
-    private final YesNoDontKnow isChildrenUnderChildProtection;
-    private final YesNoDontKnow isChildrenWithSameParents;
-    private final String parentsAndTheirChildren;
-    private final String parentalResponsibilities;
-    private final WhoChildrenLiveWith whoChildrenLiveWith;
-    private final String childAddressAndAdultsLivingWith;
-    private final YesOrNo isExistingProceedings;
     private final String childrenInProceeding;
     private final List<Element<Child>> otherChildren;
 

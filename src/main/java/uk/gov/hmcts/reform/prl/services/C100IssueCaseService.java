@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 
 @Service
 @Slf4j
@@ -31,6 +32,7 @@ public class C100IssueCaseService {
     private final C100JsonMapper c100JsonMapper;
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final LocationRefDataService locationRefDataService;
+    private final CourtSealFinderService courtSealFinderService;
 
     private final ObjectMapper objectMapper;
 
@@ -49,6 +51,12 @@ public class C100IssueCaseService {
                 authorisation
             );
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
+            if (courtVenue.isPresent()) {
+                String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
+                caseData = caseData.toBuilder().courtName(courtVenue.get().getCourtName())
+                    .courtSeal(courtSeal).build();
+                caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
+            }
             caseData = caseData.toBuilder().issueDate(LocalDate.now())
                 .courtName(caseDataUpdated.containsKey(COURT_NAME_FIELD) ? caseDataUpdated.get(COURT_NAME_FIELD).toString() : null)
                 .build();
