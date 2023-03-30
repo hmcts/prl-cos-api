@@ -441,6 +441,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseWorkerEmailService.sendEmailToGateKeeper(caseDetails);
 

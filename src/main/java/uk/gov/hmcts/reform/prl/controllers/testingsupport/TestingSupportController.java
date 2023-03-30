@@ -28,7 +28,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RestController
 @RequestMapping("/testing-support")
 @RequiredArgsConstructor
-
 public class TestingSupportController {
 
     @Autowired

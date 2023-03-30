@@ -347,8 +347,4 @@ public class PrlAppsConstants {
     public static final String TESTING_SUPPORT_LD_FLAG_ENABLED = "testing-support";
 
     public static final String CASE_DATA_ID = "id";
-
-
-
-
 }
