@@ -28,4 +28,9 @@ public enum LanguagePreference {
 
         return preferredLanguageIsWelsh ? LanguagePreference.welsh : LanguagePreference.english;
     }
+
+    public static LanguagePreference getPreferenceLanguage(CaseData caseData) {
+        return YesOrNo.Yes.equals(caseData.getWelshLanguageRequirement())
+            && welsh.equals(caseData.getWelshLanguageRequirementApplication()) ? LanguagePreference.welsh : LanguagePreference.english;
+    }
 }

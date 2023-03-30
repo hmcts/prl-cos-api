@@ -128,6 +128,9 @@ public class FL401SubmitApplicationServiceTest {
     @Mock
     private CourtFinderApi courtFinderApi;
 
+    @Mock
+    CourtSealFinderService courtSealFinderService;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     private TypeOfApplicationOrders orders;
