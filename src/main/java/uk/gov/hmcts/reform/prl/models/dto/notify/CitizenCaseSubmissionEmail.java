@@ -9,11 +9,14 @@ public class CitizenCaseSubmissionEmail extends EmailTemplateVars {
     private final String caseLink;
     private final String applicantName;
 
+    private final String caseName;
+
     @Builder
-    public CitizenCaseSubmissionEmail(String caseNumber, String caseLink, String applicantName) {
+    public CitizenCaseSubmissionEmail(String caseNumber, String caseLink, String applicantName, String caseName) {
         this.caseNumber = caseNumber;
         this.caseLink = caseLink;
         this.applicantName = applicantName;
+        this.caseName = caseName;
     }
 
 }
