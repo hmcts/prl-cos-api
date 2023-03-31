@@ -46,7 +46,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 public class CaseService {
 
     public static final String LINK_CASE = "linkCase";
-    public static final String CITIZEN_INTERNAL_CASE_UPDATE = "citizen-internal-case-update";
     public static final String INVALID = "Invalid";
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
