@@ -42,4 +42,12 @@ public enum LanguagePreference {
             return LanguagePreference.english;
         }
     }
+
+    public static LanguagePreference getPreferenceLanguage(CaseData caseData) {
+        if (caseData.getWelshLanguageRequirementApplication() != null) {
+            return caseData.getWelshLanguageRequirementApplication();
+        } else {
+            return LanguagePreference.english;
+        }
+    }
 }
