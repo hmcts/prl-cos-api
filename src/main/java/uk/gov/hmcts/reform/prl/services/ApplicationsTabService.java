@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.launchdarkly.shaded.com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -51,6 +52,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetail
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
+import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ApplicantFamily;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
@@ -107,8 +109,12 @@ import java.util.stream.Collectors;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_AND_CAFCASS_OFFICER_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+
 
 
 @Slf4j
@@ -143,7 +149,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("attendingTheHearingTable", getAttendingTheHearingTable(caseData));
             applicationTab.put("litigationCapacityTable", getLitigationCapacityDetails(caseData));
             applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
-            applicationTab.put("otherPeopleInTheCaseTable", getOtherPeopleInTheCaseTable(caseData));
+            applicationTab.put(CHILD_AND_CAFCASS_OFFICER_DETAILS, prePopulateChildAndCafcassOfficerDetails(caseData));
             if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
                 applicationTab.put("childDetailsRevisedTable", applicationsTabServiceHelper.getChildRevisedDetails(caseData));
                 applicationTab.put("childDetailsRevisedExtraTable", getExtraChildDetailsTable(caseData));
@@ -301,7 +307,6 @@ public class ApplicationsTabService implements TabService {
         Optional<List<LiveWithEnum>> childLivesWith = ofNullable(child.getChildLiveWith());
         Optional<List<OrderTypeEnum>> orderAppliedFor = ofNullable(child.getOrderAppliedFor());
 
-
         return ChildDetails.builder().firstName(child.getFirstName())
                 .lastName(child.getLastName())
                 .dateOfBirth(child.getDateOfBirth())
@@ -321,6 +326,10 @@ public class ApplicationsTabService implements TabService {
                         .map(OrderTypeEnum::getDisplayedValue).collect(
                                 Collectors.joining(", ")))
                 .parentalResponsibilityDetails(child.getParentalResponsibilityDetails())
+                .cafcassOfficerAdded(!StringUtils.isBlank(child.getCafcassOfficerName()) ? YesOrNo.Yes : YesOrNo.No)
+                .cafcassOfficerName(child.getCafcassOfficerName())
+                .cafcassOfficerEmailAddress(child.getCafcassOfficerEmailAddress())
+                .cafcassOfficerPhoneNo(child.getCafcassOfficerPhoneNo())
                 .build();
     }
 
@@ -1206,7 +1215,7 @@ public class ApplicationsTabService implements TabService {
 
     private HomeDetails loadOrMaskHomeChildDetails(HomeDetails homeDetails, Home home) {
         List<Element<ChildrenLiveAtAddress>> children = home.getChildren();
-        if (!children.isEmpty()) {
+        if (isNotEmpty(children)) {
             List<ChildrenLiveAtAddress> eachChildren = children.stream()
                 .map(Element::getValue).collect(Collectors.toList());
             List<Element<HomeChild>> childList = new ArrayList<>();
@@ -1247,6 +1256,25 @@ public class ApplicationsTabService implements TabService {
         }
 
         return toMap(builder.build());
+    }
+
+    public List<Element<ChildAndCafcassOfficer>> prePopulateChildAndCafcassOfficerDetails(CaseData caseData) {
+        List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = new ArrayList<>();
+        if (caseData.getChildren() != null) {
+            caseData.getChildren().stream().forEach(childElement -> {
+                ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
+                    .childId(childElement.getId().toString())
+                    .childName(CHILD_NAME + childElement.getValue().getFirstName() + " " + childElement.getValue().getLastName())
+                    .cafcassOfficerName(childElement.getValue().getCafcassOfficerName())
+                    .cafcassOfficerPosition(childElement.getValue().getCafcassOfficerPosition())
+                    .cafcassOfficerOtherPosition(childElement.getValue().getCafcassOfficerOtherPosition())
+                    .cafcassOfficerEmailAddress(childElement.getValue().getCafcassOfficerEmailAddress())
+                    .cafcassOfficerPhoneNo(childElement.getValue().getCafcassOfficerPhoneNo())
+                    .build();
+                childAndCafcassOfficers.add(element(childAndCafcassOfficer));
+            });
+        }
+        return childAndCafcassOfficers;
     }
 
 }

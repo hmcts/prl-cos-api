@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
@@ -64,10 +65,16 @@ public class ServiceOfApplicationService {
     public CaseData sendEmail(CaseDetails caseDetails) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("Sending service of application email notifications");
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            serviceOfApplicationEmailService.sendEmailC100(caseDetails);
+        //PRL-3326 - send email to all applicants on application served & issued
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
         } else {
-            serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
+            //PRL-3156 - Skip sending emails for solicitors for c100 case created by Citizen
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                serviceOfApplicationEmailService.sendEmailC100(caseDetails);
+            } else {
+                serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
+            }
         }
         return caseInviteManager.generatePinAndSendNotificationEmail(caseData);
     }
