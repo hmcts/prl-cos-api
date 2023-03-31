@@ -36,6 +36,12 @@ public enum LanguagePreference {
     }
 
     public static LanguagePreference getPreferenceLanguage(CaseData caseData) {
+        LOGGER.info("****************The doc in welsh "
+                        + "for email I received is ***************: "
+                        + "{}", caseData.getWelshLanguageRequirement());
+        LOGGER.info("****************The language for completion "
+                        + "for email I received is ***************: "
+                        + "{}", caseData.getWelshLanguageRequirementApplication());
         return YesOrNo.Yes.equals(caseData.getWelshLanguageRequirement())
             && welsh.equals(caseData.getWelshLanguageRequirementApplication()) ? LanguagePreference.welsh : LanguagePreference.english;
     }

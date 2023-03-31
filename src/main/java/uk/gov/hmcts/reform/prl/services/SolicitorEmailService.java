@@ -112,9 +112,10 @@ public class SolicitorEmailService {
         CaseData caseData = emailService.getCaseData(caseDetails);
         String applicantSolicitorEmailAddress = caseDetails.getData()
             .get(PrlAppsConstants.APPLICANT_SOLICITOR_EMAIL_ADDRESS).toString();
-        log.info("****************The Language preference for "
-                     + "email I received is ***************: "
-                     + "{}", LanguagePreference.getLanguagePreference(caseData));
+
+        log.info("****************Final pref "
+                        + "lang that came is ***************: "
+                        + "{}", LanguagePreference.getPreferenceLanguage(caseData));
         emailService.send(
             applicantSolicitorEmailAddress,
             EmailTemplateNames.C100_AWAITING_PAYMENT,
