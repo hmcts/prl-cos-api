@@ -69,6 +69,9 @@ public class DraftAnOrderController {
 
         log.info("case data in draft order {}", caseData);
 
+        log.info("C21 Draft order options in callback:: {}", (null != caseData.getManageOrders())
+            ? caseData.getManageOrders().getC21OrderOptions() : null);
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("selectedOrder", caseData.getCreateSelectOrderOptions() != null
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
