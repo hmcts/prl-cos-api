@@ -101,6 +101,7 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
+
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -121,7 +122,6 @@ public class ManageOrdersController {
             caseData
         ));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-
     }
 
     //todo: API not required
@@ -164,7 +164,7 @@ public class ManageOrdersController {
             ? caseData.getManageOrders().getC21OrderOptions() : null);
         caseData = caseData.toBuilder()
             .selectedC21Order((null != caseData.getManageOrders()
-                && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
+                                  && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
                                   ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ")
             .build();
         if (callbackRequest
@@ -191,9 +191,9 @@ public class ManageOrdersController {
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
             log.info("C21 Order:: *****{}******", manageOrders.getC21OrderOptions());
             manageOrders = manageOrders.toBuilder()
-                .typeOfC21Order(null != manageOrders.getC21OrderOptions()
-                                    ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
-                .build();
+                                  .typeOfC21Order(null != manageOrders.getC21OrderOptions()
+                                                      ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
+                                  .build();
         }
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
@@ -333,7 +333,6 @@ public class ManageOrdersController {
         }
 
         caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
-
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

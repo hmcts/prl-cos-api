@@ -141,13 +141,16 @@ public class RefDataUserService {
 
     public List<DynamicListElement> filterCategorySubValuesByCategoryId(CommonDataResponse commonDataResponse,String hearingPlatform) {
         log.info("categoryValuesByCategoryId {}", hearingPlatform);
+        List<DynamicListElement> listOfSubCategoryValues;
         if (null != commonDataResponse && null != commonDataResponse.getCategoryValues()) {
-            return commonDataResponse.getCategoryValues().stream()
+            listOfSubCategoryValues = commonDataResponse.getCategoryValues().stream()
                 .filter(categoryValues -> categoryValues.getChildNodes() != null && categoryValues.getValueEn().equalsIgnoreCase(hearingPlatform))
                 .map(CategoryValues::getChildNodes).collect(Collectors.toList()).stream()
                 .flatMap(Collection::stream)
                 .map(this::displaySubChannelEntry)
                 .collect(Collectors.toList());
+            Collections.sort(listOfSubCategoryValues, (a, b) -> a.getLabel().compareToIgnoreCase(b.getLabel()));
+            return listOfSubCategoryValues;
         }
 
         return List.of(DynamicListElement.builder().build());
