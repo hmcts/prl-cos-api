@@ -195,7 +195,7 @@ send-letter:
   url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
 
 case_document_am:
-  url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
+  url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
 
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
@@ -211,7 +211,7 @@ locationfinder:
 
 
 launchdarkly:
-  sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
+  sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
 
 rd_professional:
   api:

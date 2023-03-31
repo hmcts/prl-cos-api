@@ -272,8 +272,14 @@ public class RefDataUserServiceTest {
         List<DynamicListElement> expectedResponse = refDataUserService.filterCategorySubValuesByCategoryId(
             commonDataResponse,
             VIDEOPLATFORM);
-        assertEquals("VIDOTHER",expectedResponse.get(0).getCode());
-        assertEquals("Video - Other",expectedResponse.get(0).getLabel());
+        assertEquals("VIDPVL",expectedResponse.get(0).getCode());
+        assertEquals("Prison Video",expectedResponse.get(0).getLabel());
+        assertEquals("VIDCVP",expectedResponse.get(1).getCode());
+        assertEquals("Video - CVP",expectedResponse.get(1).getLabel());
+        assertEquals("VIDOTHER",expectedResponse.get(2).getCode());
+        assertEquals("Video - Other",expectedResponse.get(2).getLabel());
+        assertEquals("VIDSKYPE",expectedResponse.get(3).getCode());
+        assertEquals("Video - Skype",expectedResponse.get(3).getLabel());
 
     }
 

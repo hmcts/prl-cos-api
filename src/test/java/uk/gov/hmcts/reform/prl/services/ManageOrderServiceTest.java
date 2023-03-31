@@ -2400,5 +2400,4 @@ public class ManageOrderServiceTest {
         Map<String, Object> result = manageOrderService.populatePreviewOrder("test", callbackRequest, caseData);
         Assert.assertTrue(!result.isEmpty());
     }
-
 }
