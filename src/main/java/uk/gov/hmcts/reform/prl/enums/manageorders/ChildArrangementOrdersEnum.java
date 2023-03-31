@@ -15,8 +15,6 @@ public enum ChildArrangementOrdersEnum {
     standardDirectionsOrder("standardDirectionsOrder", "Standard directions order"),
     @JsonProperty("blankOrderOrDirections")
     blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)"),
-    @JsonProperty("blankOrderOrDirectionsWithdraw")
-    blankOrderOrDirectionsWithdraw("blankOrderOrDirectionsWithdraw", "Blank order or directions (C21)"),
     @JsonProperty("caSpecificProhibitedOrder")
     caSpecificProhibitedOrder("caSpecificProhibitedOrder", "Child arrangements, specific issue or prohibited steps order (C43)"),
     @JsonProperty("parentalResponsibilityOrder")
@@ -44,7 +42,7 @@ public enum ChildArrangementOrdersEnum {
     @JsonProperty("financialCompensationC82")
     financialCompensationC82("financialCompensationC82", "Financial compensation order following C79 enforcement application (C82)"),
     @JsonProperty("summonsFC601")
-    summonsFC601("summonsFC601", "Page 2 of summons to appear at court for directions in contempt proceedings (FC601)"),
+    summonsFC601("summonsFC601", "Summons to appear at court for directions in contempt proceedings (FC601)"),
     @JsonProperty("secureAttendanceFC602")
     secureAttendanceFC602("secureAttendanceFC602", "Warrant to secure attendance at court (FC602)"),
     @JsonProperty("fc603Order")
