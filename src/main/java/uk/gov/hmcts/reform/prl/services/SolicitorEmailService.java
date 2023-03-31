@@ -64,9 +64,10 @@ public class SolicitorEmailService {
                 .collect(Collectors.toList());
 
             String applicantNames = String.join(", ", applicantNamesList);
-
+            log.info("****************The Applicant/Applicants name/names we want to see for email is ***************: {}", applicantNames);
             Court court = null;
             court = courtLocatorService.getNearestFamilyCourt(caseData);
+            log.info("****************The court name we want to see for email is ***************: {}", court.getCourtName());
 
             return SolicitorEmail.builder()
                 .caseReference(String.valueOf(caseDetails.getId()))
@@ -112,6 +113,9 @@ public class SolicitorEmailService {
         CaseData caseData = emailService.getCaseData(caseDetails);
         String applicantSolicitorEmailAddress = caseDetails.getData()
             .get(PrlAppsConstants.APPLICANT_SOLICITOR_EMAIL_ADDRESS).toString();
+        log.info("****************The Language preference for "
+                     + "email I received is ***************: "
+                     + "{}", LanguagePreference.getLanguagePreference(caseData));
         emailService.send(
             applicantSolicitorEmailAddress,
             EmailTemplateNames.C100_AWAITING_PAYMENT,
