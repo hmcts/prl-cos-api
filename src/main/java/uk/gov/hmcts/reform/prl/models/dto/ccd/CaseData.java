@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DomesticAbuseOrdersEnum;
@@ -506,7 +507,7 @@ public class CaseData implements MappableObject {
     private final List<Element<Document>> fl401UploadWitnessDocuments;
     private final List<Element<Document>> fl401UploadSupportDocuments;
 
-    /**
+    /**f
      * Send to Gatekeeper.
      */
     private final List<Element<GatekeeperEmail>> gatekeeper;
@@ -778,4 +779,5 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
 
+    private List<ListOnNoticeReasonsEnum> listOnNoticeReasonsEnum;
 }
