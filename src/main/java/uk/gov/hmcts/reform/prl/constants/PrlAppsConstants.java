@@ -52,6 +52,7 @@ public class PrlAppsConstants {
     public static final String C7_FINAL_WELSH = "c7FinalWelsh";
 
     public static final String COURT_NAME_FIELD = "courtName";
+    public static final String COURT_SEAL_FIELD = "courtSeal";
     public static final String COURT_ID_FIELD = "courtId";
     public static final String COURT_EMAIL_ADDRESS_FIELD = "courtEmailAddress";
     public static final String FINAL_DOCUMENT_FIELD = "finalDocument";
@@ -329,7 +330,24 @@ public class PrlAppsConstants {
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
     public static final long CASE_SUBMISSION_THRESHOLD = 28;
+
+    public static final String CHILD_AND_CAFCASS_OFFICER_DETAILS = "childAndCafcassOfficers";
+    public static final String CHILD_NAME = "Child name: ";
+    public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
+
+    public static final String CHILDREN = "children";
+
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+    public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
+    //C100 default court details
+    public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
+    public static final String CITIZEN_DASHBOARD = "/dashboard";
+
+    public static final String DATE_OF_SUBMISSION = "dateOfSubmission";
+    public static final String FL_401_STMT_OF_TRUTH = "fl401StmtOfTruth";
+    public static final String TESTING_SUPPORT_LD_FLAG_ENABLED = "testing-support";
+
+    public static final String CASE_DATA_ID = "id";
 
     public static final String SOLICITOR_C7_DRAFT_DOCUMENT = "SOLICITOR_C7_DRAFT";
     public static final String SOLICITOR_C7_FINAL_DOCUMENT = "SOLICITOR_C7_FINAL";

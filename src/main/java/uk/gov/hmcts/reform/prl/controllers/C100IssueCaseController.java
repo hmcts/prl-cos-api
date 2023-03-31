@@ -16,9 +16,11 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -29,10 +31,12 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 
 @Slf4j
 @RestController
@@ -47,6 +51,7 @@ public class C100IssueCaseController {
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
     private final LocationRefDataService locationRefDataService;
+    private final CourtSealFinderService courtSealFinderService;
 
     @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Issue and send to local court")
@@ -65,16 +70,21 @@ public class C100IssueCaseController {
         if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
             String[] idEmail = caseData.getCourtList().getValue().getCode().split(":");
             String baseLocationId = Arrays.stream(idEmail).toArray()[0].toString();
-            String key = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
-            String[] venueDetails = key.split("-");
-            String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
-            String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
-            String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
-            String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
-            caseDataUpdated.put("courtName", courtName);
-            caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-                .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
-                .baseLocationName(baseLocationName).build());
+            Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
+            if (courtVenue.isPresent()) {
+                String regionId = courtVenue.get().getRegionId();
+                String courtName = courtVenue.get().getCourtName();
+                String regionName = courtVenue.get().getRegion();
+                String baseLocationName = courtVenue.get().getSiteName();
+                String courtSeal = courtSealFinderService.getCourtSeal(regionId);
+                caseDataUpdated.put("courtName", courtName);
+                caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
+                        .region(regionId).baseLocation(baseLocationId).regionName(regionName)
+                        .baseLocationName(baseLocationName).build());
+                caseData = caseData.toBuilder().courtName(courtName)
+                        .courtSeal(courtSeal).build();
+                caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
+            }
             String courtEmail = "";
             if (idEmail.length > 1) {
                 courtEmail = Arrays.stream(idEmail).toArray()[1].toString();
@@ -82,7 +92,7 @@ public class C100IssueCaseController {
             caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
                                                                .value(LocalCourtAdminEmail.builder().email(courtEmail)
                                                                           .build()).build()));
-            caseData.setCourtName(caseDataUpdated.get("courtName").toString());
+
         }
         caseData.setIssueDate();
         // Generate All Docs and set to casedataupdated.
