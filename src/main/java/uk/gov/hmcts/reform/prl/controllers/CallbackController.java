@@ -120,6 +120,7 @@ public class CallbackController {
     private final ExampleService exampleService;
     private final OrganisationService organisationService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
+    @Autowired
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
 
@@ -300,6 +301,8 @@ public class CallbackController {
             caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
         }
 
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        solicitorEmailService.sendAwaitingPaymentEmail(caseDetails);
         //Assign default court to all c100 cases for work allocation.
         caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
             .region(C100_DEFAULT_REGION_ID)
