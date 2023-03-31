@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -387,9 +386,14 @@ public class ManageOrderService {
     }
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
-        return caseData.toBuilder().childrenList(getChildInfoFromCaseData(caseData))
+        return caseData.toBuilder().childrenList(dynamicMultiSelectListService
+                                                     .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                                                              .getChildOption()))
             .manageOrders(ManageOrders.builder()
-                              .childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)).build())
+                              .childListForSpecialGuardianship(dynamicMultiSelectListService
+                                                                   .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                                                                            .getChildOption()))
+                              .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
@@ -555,37 +559,6 @@ public class ManageOrderService {
         }
         selectedOrder.append("\n\n");
         return selectedOrder.toString();
-    }
-
-    private String getChildInfoFromCaseData(CaseData caseData) {
-        String childNames = "";
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            List<Child> children = new ArrayList<>();
-            if (caseData.getChildren() != null) {
-                children = caseData.getChildren().stream()
-                    .map(Element::getValue)
-                    .collect(Collectors.toList());
-            }
-            List<String> childList = children.stream()
-                .map(element -> element.getFirstName() + " " + element.getLastName())
-                .collect(Collectors.toList());
-            childNames = String.join(", ", childList);
-
-        } else {
-            Optional<List<Element<ApplicantChild>>> applicantChildDetails =
-                ofNullable(caseData.getApplicantChildDetails());
-            if (applicantChildDetails.isPresent()) {
-                List<ApplicantChild> children = applicantChildDetails.get().stream()
-                    .map(Element::getValue)
-                    .collect(Collectors.toList());
-                List<String> childList = children.stream()
-                    .map(ApplicantChild::getFullName)
-                    .collect(Collectors.toList());
-                childNames = String.join(", ", childList);
-
-            }
-        }
-        return childNames;
     }
 
     private List<Element<OrderDetails>> getCurrentOrderDetails(String authorisation, CaseData caseData)
@@ -1126,7 +1099,9 @@ public class ManageOrderService {
                            .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
                            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
-                           .childrenList(getChildInfoFromCaseData(caseData))
+                           .childrenList(dynamicMultiSelectListService
+                                             .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                                                      .getChildOption()))
                            .orderClosesCase(caseData.getSelectTypeOfOrder().getDisplayedValue().equals("Final")
                                                 ? caseData.getDoesOrderClosesCase() : null)
                            .orderDocument(Document.builder()
