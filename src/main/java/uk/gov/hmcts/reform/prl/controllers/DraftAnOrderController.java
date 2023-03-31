@@ -66,6 +66,16 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+
+        log.info("case data in draft order {}", caseData);
+//
+//        log.info("C21 Draft order options in callback:: {}", (null != caseData.getManageOrders())
+//            ? caseData.draf().getC21OrderOptions() : null);
+//        caseData = caseData.toBuilder()
+//            .selectedC21Order((null != caseData.getManageOrders()
+//                && caseData.getDraftOrderOptions() == DraftOrderOptionsEnum.draftAnOrder)
+//                                  ? caseData.C21OrderOptionsEnum().getDisplayedValue() : " ")
+//            .build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("selectedOrder", caseData.getCreateSelectOrderOptions() != null
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
