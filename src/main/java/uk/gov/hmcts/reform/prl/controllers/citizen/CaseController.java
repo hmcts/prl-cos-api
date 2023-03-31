@@ -200,5 +200,4 @@ public class CaseController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
-
 }
