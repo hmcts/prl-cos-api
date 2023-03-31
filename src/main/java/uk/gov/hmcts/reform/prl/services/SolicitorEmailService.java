@@ -119,7 +119,7 @@ public class SolicitorEmailService {
             applicantSolicitorEmailAddress,
             EmailTemplateNames.C100_AWAITING_PAYMENT,
             buildEmail(caseDetails),
-            LanguagePreference.getLanguagePreference(caseData)
+            LanguagePreference.getPreferenceLanguage(caseData)
         );
 
     }
