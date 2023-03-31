@@ -24,9 +24,9 @@ public class CaseInviteManager {
         if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
             log.info("Generating and sending PIN to respondents");
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                caseData = c100CaseInviteService.generateAndSendRespondentCaseInvite(caseData);
+                caseData = c100CaseInviteService.generateAndSendCaseInvite(caseData);
             } else {
-                caseData = fl401CaseInviteService.generateAndSendRespondentCaseInvite(caseData);
+                caseData = fl401CaseInviteService.generateAndSendCaseInvite(caseData);
             }
         }
         return caseData;
@@ -36,9 +36,9 @@ public class CaseInviteManager {
 
         caseData = caseData.toBuilder().caseInvites(new ArrayList<>()).build();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = c100CaseInviteService.generateAndSendRespondentCaseInvite(caseData);
+            caseData = c100CaseInviteService.generateAndSendCaseInvite(caseData);
         } else {
-            caseData = fl401CaseInviteService.generateAndSendRespondentCaseInvite(caseData);
+            caseData = fl401CaseInviteService.generateAndSendCaseInvite(caseData);
         }
         return caseData;
     }

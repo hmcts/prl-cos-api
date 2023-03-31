@@ -19,20 +19,17 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
-import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -56,6 +53,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 
@@ -64,9 +62,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIEL
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SecurityRequirement(name = "Bearer Authentication")
 public class FL401SubmitApplicationController {
-
-    @Autowired
-    private CourtFinderService courtFinderService;
 
     @Autowired
     private UserService userService;
@@ -89,17 +84,15 @@ public class FL401SubmitApplicationController {
     @Autowired
     private DocumentGenService documentGenService;
 
-    @Autowired
-    OrganisationService organisationService;
 
     @Autowired
     LocationRefDataService locationRefDataService;
 
     @Autowired
-    private CourtFinderApi courtFinderApi;
+    private ConfidentialityTabService confidentialityTabService;
 
     @Autowired
-    private ConfidentialityTabService confidentialityTabService;
+    private  CourtSealFinderService courtSealFinderService;
 
     @PostMapping(path = "/fl401-submit-application-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to send FL401 application notification. ")
@@ -120,7 +113,7 @@ public class FL401SubmitApplicationController {
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
-            .listItems(locationRefDataService.getCourtLocations(authorisation))
+            .listItems(locationRefDataService.getDaCourtLocations(authorisation))
             .build());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
@@ -132,59 +125,54 @@ public class FL401SubmitApplicationController {
     @PostMapping(path = "/fl401-generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate FL401 final document and submit application. ")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Application Submitted."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
+            @ApiResponse(responseCode = "200", description = "Application Submitted."),
+            @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse fl401GenerateDocumentSubmitApplication(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true)  String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
+            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         caseData = caseData.toBuilder()
-            .solicitorName(userService.getUserDetails(authorisation).getFullName())
-            .build();
+                .solicitorName(userService.getUserDetails(authorisation).getFullName())
+                .build();
 
         final LocalDate localDate = LocalDate.now();
-
-        String baseLocationId = caseData.getSubmitCountyCourtSelection().getValue().getCode();
-        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,authorisation).split("-");
-        String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
-        caseData = caseData.toBuilder().issueDate(localDate).courtName(courtName).build();
-        caseData = caseData.toBuilder().isCourtEmailFound("Yes").build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put(COURT_NAME_FIELD, courtName);
-        String postcode = Arrays.stream(venueDetails).toArray()[3].toString();
-        String courtEmail = null;
-        if (null != courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode)
-            && null != courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts()) {
-            String courtSlug = courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts().get(0).getCourtSlug();
-            Court court = courtFinderApi.getCourtDetails(courtSlug);
+        String[] idEmail = caseData.getSubmitCountyCourtSelection().getValue().getCode().split(":");
+        String baseLocationId = Arrays.stream(idEmail).toArray()[0].toString();
+        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
+        if (courtVenue.isPresent()) {
+            String regionId = courtVenue.get().getRegionId();
+            String courtName = courtVenue.get().getCourtName();
+            String courtSeal = courtSealFinderService.getCourtSeal(regionId);
+            caseData = caseData.toBuilder().issueDate(localDate).courtName(courtName).courtSeal(courtSeal).build();
+            caseData = caseData.toBuilder().isCourtEmailFound("Yes").build();
+            caseDataUpdated.put(COURT_NAME_FIELD, courtName);
             caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
-            Optional<CourtEmailAddress> optionalCourtEmail = courtFinderService.getEmailAddress(court);
-            if (optionalCourtEmail.isPresent()) {
-                courtEmail = optionalCourtEmail.get().getAddress();
-            }
+            caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
+            caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
+                    .region(regionId).baseLocation(baseLocationId).regionName(courtVenue.get().getRegion())
+                    .baseLocationName(courtVenue.get().getSiteName()).build());
         }
-        caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
-        String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
-        String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
-        String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
-        caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-            .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
-            .baseLocationName(baseLocationName).build());
 
+        String courtEmail = "";
+        if (idEmail.length > 1) {
+            courtEmail = Arrays.stream(idEmail).toArray()[1].toString();
+            caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
+        }
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
         if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
-            && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
+                && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
             caseData = caseData.toBuilder().build();
-        } else  if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
+        } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
             caseData = caseData.toBuilder()
-                .respondentBehaviourData(null)
-                .build();
+                    .respondentBehaviourData(null)
+                    .build();
         } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
             caseData = caseData.toBuilder()
-                .home(null)
-                .build();
+                    .home(null)
+                    .build();
         }
         caseData = caseData.setDateSubmittedDate();
 
@@ -199,8 +187,8 @@ public class FL401SubmitApplicationController {
 
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated)
-            .build();
+                .data(caseDataUpdated)
+                .build();
     }
 
     @PostMapping(path = "/fl401-submit-application-send-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -215,9 +203,11 @@ public class FL401SubmitApplicationController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         UserDetails userDetails = userService.getUserDetails(authorisation);
-
         try {
             solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
+            if (null != caseData.getCourtEmailAddress()) {
+                caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+            }
             caseData = caseData.toBuilder()
                 .isNotificationSent("Yes")
                 .build();

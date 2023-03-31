@@ -82,7 +82,8 @@ public class ManageOrderEmailService {
             for (Map.Entry<String, String> appValues : applicantsMap.entrySet()) {
                 if (!StringUtils.isEmpty(appValues.getKey())) {
                     sendEmailToParty(isFinalOrder, appValues.getKey(),
-                                     buildApplicantRespondentEmail(caseDetails, appValues.getValue())
+                                     buildApplicantRespondentEmail(caseDetails, appValues.getValue()),
+                                     caseData
                     );
                 }
             }
@@ -90,7 +91,8 @@ public class ManageOrderEmailService {
             for (Map.Entry<String, String> appValues : respondentMap.entrySet()) {
                 if (!StringUtils.isEmpty(appValues.getKey())) {
                     sendEmailToParty(isFinalOrder, appValues.getKey(),
-                                     buildApplicantRespondentEmail(caseDetails, appValues.getValue())
+                                     buildApplicantRespondentEmail(caseDetails, appValues.getValue()),
+                                     caseData
                     );
                 }
             }
@@ -106,14 +108,18 @@ public class ManageOrderEmailService {
             sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getEmail(),
                              buildApplicantRespondentEmail(
                                  caseDetails, caseData.getApplicantsFL401().getFirstName()
-                                 + " " + caseData.getApplicantsFL401().getFirstName()));
+                                 + " " + caseData.getApplicantsFL401().getFirstName()),
+                             caseData
+            );
 
 
         }
         if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
             sendEmailToParty(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
                              buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
-                                 + " " + caseData.getRespondentsFL401().getFirstName()));
+                                 + " " + caseData.getRespondentsFL401().getFirstName()),
+                             caseData
+            );
         }
     }
 
@@ -136,6 +142,17 @@ public class ManageOrderEmailService {
                         respondent.getValue().getEmail(),
                         EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
                         buildRespondentEmail(caseDetails, respondent.getValue()),
+                        LanguagePreference.english
+                    );
+                }
+            }
+            //send notification for applicants
+            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                if (!StringUtils.isEmpty(applicant.getValue().getEmail())) {
+                    emailService.send(
+                        applicant.getValue().getEmail(),
+                        EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
+                        buildRespondentEmail(caseDetails, applicant.getValue()),
                         LanguagePreference.english
                     );
                 }
@@ -176,13 +193,14 @@ public class ManageOrderEmailService {
 
     private void sendEmailToParty(SelectTypeOfOrderEnum isFinalOrder,
                                   String emailAddress,
-                                  EmailTemplateVars email) {
+                                  EmailTemplateVars email,
+                                  CaseData caseData) {
         emailService.send(
             emailAddress,
             (isFinalOrder == SelectTypeOfOrderEnum.finl) ? EmailTemplateNames.CA_DA_FINAL_ORDER_EMAIL
                 : EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
              email,
-            LanguagePreference.english
+            LanguagePreference.getPreferenceLanguage(caseData)
         );
     }
 
