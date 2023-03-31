@@ -1,10 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
-import java.util.List;
-import java.util.Map;
-
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,10 +13,14 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+
+import java.util.List;
+import java.util.Map;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @RestController
@@ -49,7 +48,7 @@ public class ListOnNoticeController {
 
     private String getReasonsSelected(List<ListOnNoticeReasonsEnum> listOnNoticeReasonsEnum) {
         String reasonsSelected = "";
-        listOnNoticeReasonsEnum.stream().forEach(reason -> reasonsSelected.concat(reason.getDisplayedValue()+"\n"));
+        listOnNoticeReasonsEnum.stream().forEach(reason ->  reasonsSelected.concat(reason.getDisplayedValue() + "\n"));
         return reasonsSelected;
     }
 }
