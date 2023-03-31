@@ -30,7 +30,6 @@ import static org.junit.Assert.assertNotNull;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class DynamicMultiSelectListServiceTest {
 
-
     @InjectMocks
     private DynamicMultiSelectListService dynamicMultiSelectListService;
 
@@ -90,7 +89,30 @@ public class DynamicMultiSelectListServiceTest {
     @Test
     public void testOrderDetails() throws Exception {
         DynamicMultiSelectList dynamicMultiSelectList = dynamicMultiSelectListService
-            .getOrdersAsDynamicMultiSelectList(caseData);
+            .getOrdersAsDynamicMultiSelectList(caseData,  null);
+        assertNotNull(dynamicMultiSelectList);
+    }
+
+    @Test
+    public void testOrderDetailsAsNull() throws Exception {
+        caseData = caseData.toBuilder().orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
+                                                            .otherDetails(OtherOrderDetails.builder().build())
+                                                            .build()).build())).build();
+        DynamicMultiSelectList dynamicMultiSelectList = dynamicMultiSelectListService
+            .getOrdersAsDynamicMultiSelectList(caseData,  "Served saved orders");
+        assertNotNull(dynamicMultiSelectList);
+    }
+
+    @Test
+    public void testOrderDetailsOtherDetailsAsNull() throws Exception {
+        caseData = caseData.toBuilder().orderCollection(List.of(Element.<OrderDetails>builder()
+                                                                    .value(OrderDetails.builder()
+                                                                               .otherDetails(OtherOrderDetails.builder()
+                                                                                                 .orderServedDate("")
+                                                                                                 .build())
+                                                                               .build()).build())).build();
+        DynamicMultiSelectList dynamicMultiSelectList = dynamicMultiSelectListService
+            .getOrdersAsDynamicMultiSelectList(caseData,  "Served saved orders");
         assertNotNull(dynamicMultiSelectList);
     }
 
