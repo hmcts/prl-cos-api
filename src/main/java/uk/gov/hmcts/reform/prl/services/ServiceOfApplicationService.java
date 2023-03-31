@@ -65,8 +65,11 @@ public class ServiceOfApplicationService {
     public CaseData sendEmail(CaseDetails caseDetails) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("Sending service of application email notifications");
-        //PRL-3156 - Skip sending emails for solicitors for c100 case created by Citizen
-        if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+        //PRL-3326 - send email to all applicants on application served & issued
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
+        } else {
+            //PRL-3156 - Skip sending emails for solicitors for c100 case created by Citizen
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 serviceOfApplicationEmailService.sendEmailC100(caseDetails);
             } else {
