@@ -26,7 +26,7 @@ java:
         - prl-rd-api-system-username
         - prl-rd-api-system-user-password
   environment:
-    PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
+    PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_CALLBACK_URL: https://prl-cos-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net/service-request
     FEE_URL: http://fees-register-api-{{ .Values.global.environment }}.{{ .Values.global.environment }}.platform.hmcts.net
