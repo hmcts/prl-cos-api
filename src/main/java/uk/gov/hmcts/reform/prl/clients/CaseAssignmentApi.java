@@ -14,7 +14,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATION;
 
 @FeignClient(
-    name = "case-assignment-api",
+    name = "prl-case-assignment-api",
     url = "${aca.api.url}",
     configuration = FeignClientProperties.FeignClientConfiguration.class
 )
