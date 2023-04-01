@@ -129,7 +129,9 @@ public class CaseEventHandlerTest {
             Map.of(
                 "taskList",
                 c100renderedTaskList,
-                "respondentTaskList",
+                "respondentTaskListA",
+                respondentTaskList,
+                "respondentTaskListB",
                 respondentTaskList,
                 "id",
                 String.valueOf(caseData.getId())
@@ -202,7 +204,9 @@ public class CaseEventHandlerTest {
             Map.of(
                 "taskList",
                 fl410renderedTaskList,
-                "respondentTaskList",
+                "respondentTaskListA",
+                respondentTaskList,
+                "respondentTaskListB",
                 respondentTaskList,
                 "id",
                 String.valueOf(caseData.getId())
@@ -287,7 +291,9 @@ public class CaseEventHandlerTest {
             Map.of(
                 "taskList",
                 c100renderedTaskList,
-                "respondentTaskList",
+                "respondentTaskListA",
+                respondentTaskList,
+                "respondentTaskListB",
                 respondentTaskList,
                 "id",
                 String.valueOf(caseData.getId())
