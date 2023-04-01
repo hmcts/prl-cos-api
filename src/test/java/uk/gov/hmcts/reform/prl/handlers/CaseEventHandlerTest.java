@@ -129,6 +129,8 @@ public class CaseEventHandlerTest {
             Map.of(
                 "taskList",
                 c100renderedTaskList,
+                "respondentTaskList",
+                respondentTaskList,
                 "respondentTaskListA",
                 respondentTaskList,
                 "respondentTaskListB",
@@ -204,6 +206,8 @@ public class CaseEventHandlerTest {
             Map.of(
                 "taskList",
                 fl410renderedTaskList,
+                "respondentTaskList",
+                respondentTaskList,
                 "respondentTaskListA",
                 respondentTaskList,
                 "respondentTaskListB",
@@ -291,6 +295,8 @@ public class CaseEventHandlerTest {
             Map.of(
                 "taskList",
                 c100renderedTaskList,
+                "respondentTaskList",
+                respondentTaskList,
                 "respondentTaskListA",
                 respondentTaskList,
                 "respondentTaskListB",
