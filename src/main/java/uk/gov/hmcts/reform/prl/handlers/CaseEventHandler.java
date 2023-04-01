@@ -51,7 +51,9 @@ public class CaseEventHandler {
             Map.of(
                 "taskList",
                 taskList,
-                "respondentTaskList",
+                "respondentTaskListA",
+                respondentTaskList,
+                "respondentTaskListB",
                 respondentTaskList,
                 "id",
                 String.valueOf(caseData.getId())
