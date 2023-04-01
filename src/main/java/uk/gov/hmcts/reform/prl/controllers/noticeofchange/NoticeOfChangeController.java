@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.CaseAssignmentService;
 
 import java.util.Map;
 
@@ -28,6 +30,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequestMapping("/noc")
 public class NoticeOfChangeController extends AbstractCallbackController {
 
+    private final CaseAssignmentService caseAssignmentService;
+
     @PostMapping(path = "/aboutToSubmitNoCRequest", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit NoC Request")
     @ApiResponses(value = {
@@ -35,13 +39,12 @@ public class NoticeOfChangeController extends AbstractCallbackController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse aboutToSubmitNoCRequest(
+    public CallbackResponse aboutToSubmitNoCRequest(
             @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         log.info("aboutToSubmitNoCRequest entered");
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        return caseAssignmentService.applyDecision(callbackRequest.getCaseDetails());
     }
 
     @PostMapping(path = "/submittedNoCRequest", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
