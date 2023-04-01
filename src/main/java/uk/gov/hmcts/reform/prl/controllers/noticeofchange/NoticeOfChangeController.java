@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
-import uk.gov.hmcts.reform.prl.services.noticeofchange.CaseAssignmentService;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
 import java.util.Map;
 
@@ -31,7 +31,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class NoticeOfChangeController extends AbstractCallbackController {
 
     @Autowired
-    private final CaseAssignmentService caseAssignmentService;
+    private final NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     @PostMapping(path = "/aboutToSubmitNoCRequest", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit NoC Request")
@@ -45,7 +45,7 @@ public class NoticeOfChangeController extends AbstractCallbackController {
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         log.info("aboutToSubmitNoCRequest entered");
-        return caseAssignmentService.applyDecision(callbackRequest.getCaseDetails(), authorisation);
+        return noticeOfChangePartiesService.applyDecision(callbackRequest.getCaseDetails(), authorisation);
     }
 
     @PostMapping(path = "/submittedNoCRequest", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
