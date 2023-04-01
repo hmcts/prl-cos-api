@@ -263,6 +263,20 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("C1A_Allegation_Of_Harm_Draft_Document.pdf")
+            .build();
+        caseDataUpdated.put("draftC7ResponseDoc", document);
+        when(respondentSolicitorService.generateDraftDocumentsForRespondent(callbackRequest,authToken)).thenReturn(caseDataUpdated);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.generateC7ResponseDraftDocument(
             authToken,
             callbackRequest
@@ -286,7 +300,7 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
-        when(respondentSolicitorService.validateActiveRespondentResponse(callbackRequest, errorList)).thenReturn(stringObjectMap);
+        when(respondentSolicitorService.validateActiveRespondentResponse(callbackRequest, errorList, authToken)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.validateActiveRespondentResponseBeforeStart(
             authToken,
