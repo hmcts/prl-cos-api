@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.CaseAssignmentApi;
-import uk.gov.hmcts.reform.prl.request.RequestData;
 
 import static uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest.decisionRequest;
 
@@ -16,18 +15,13 @@ import static uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest.deci
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseAssignmentService {
 
-    private final RequestData requestData;
+    @Autowired
     private final AuthTokenGenerator tokenGenerator;
+    @Autowired
     private final CaseAssignmentApi caseAssignmentApi;
 
 
-
-
-    public AboutToStartOrSubmitCallbackResponse applyDecision(CaseDetails caseDetails) {
-        return applyDecision(caseDetails, requestData.authorisation());
-    }
-
-    private AboutToStartOrSubmitCallbackResponse applyDecision(CaseDetails caseDetails, String userToken) {
+    public AboutToStartOrSubmitCallbackResponse applyDecision(CaseDetails caseDetails, String userToken) {
         return caseAssignmentApi.applyDecision(
             userToken,
             tokenGenerator.generate(),
