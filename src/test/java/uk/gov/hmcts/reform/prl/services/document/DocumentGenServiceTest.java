@@ -112,6 +112,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -2278,6 +2280,13 @@ public class DocumentGenServiceTest {
         assertNotNull(responseMap);
     }
 
+    @Test
+    public void testSingleDocGenerationForSolicitorC7() throws Exception {
+        documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C7_DRAFT_DOCUMENT, false);
+        documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C7_FINAL_DOCUMENT, false);
+        verify(dgsService, times(2)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+    }
+    
     @Test
     public void generateDocumentsForTestingSupportForC100Test() throws Exception {
 

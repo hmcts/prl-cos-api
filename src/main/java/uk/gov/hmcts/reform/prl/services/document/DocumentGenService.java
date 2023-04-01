@@ -88,6 +88,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_PDF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
@@ -236,6 +239,24 @@ public class DocumentGenService {
 
     @Value("${document.templates.common.prl_c7_final_filename_wel}")
     protected String docC7FinalWelshFilename;
+
+    @Value("${document.templates.common.prl_solicitor_c7_draft_template}")
+    protected String solicitorC7DraftTemplate;
+
+    @Value("${document.templates.common.prl_solicitor_c7_draft_filename}")
+    protected String solicitorC7DraftFilename;
+
+    @Value("${document.templates.common.prl_solicitor_c7_final_template}")
+    protected String solicitorC7FinalTemplate;
+
+    @Value("${document.templates.common.prl_solicitor_c7_final_filename}")
+    protected String solicitorC7FinalFilename;
+
+    @Value("${document.templates.common.prl_solicitor_c1a_draft_template}")
+    protected String solicitorC1ADraftTemplate;
+
+    @Value("${document.templates.common.prl_solicitor_c1a_draft_filename}")
+    protected String solicitorC1ADraftFilename;
 
     @Value("${document.templates.common.prl_c1a_blank_template}")
     protected String docC1aBlankTemplate;
@@ -486,7 +507,6 @@ public class DocumentGenService {
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
-            updatedCaseData.put("isEngC7DocGen", Yes.toString());
             updatedCaseData.put("draftC7ResponseDoc", getDocument(authorisation, caseData, DRAFT_HINT, false));
         }
 
@@ -670,6 +690,15 @@ public class DocumentGenService {
             case C7_FINAL_WELSH:
                 fileName = docC7FinalWelshFilename;
                 break;
+            case SOLICITOR_C7_DRAFT_DOCUMENT:
+                fileName = solicitorC7DraftFilename;
+                break;
+            case SOLICITOR_C7_FINAL_DOCUMENT:
+                fileName = solicitorC7FinalFilename;
+                break;
+            case SOLICITOR_C1A_DRAFT_DOCUMENT:
+                fileName = solicitorC1ADraftFilename;
+                break;
             default:
                 fileName = "";
         }
@@ -758,6 +787,15 @@ public class DocumentGenService {
                 break;
             case C7_FINAL_WELSH:
                 template = docC7FinalWelshTemplate;
+                break;
+            case SOLICITOR_C7_DRAFT_DOCUMENT:
+                template = solicitorC7DraftTemplate;
+                break;
+            case SOLICITOR_C7_FINAL_DOCUMENT:
+                template = solicitorC7FinalTemplate;
+                break;
+            case SOLICITOR_C1A_DRAFT_DOCUMENT:
+                template = solicitorC1ADraftTemplate;
                 break;
             default:
                 template = "";

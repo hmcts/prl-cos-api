@@ -17,15 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -36,9 +32,6 @@ public class C100RespondentSolicitorController {
 
     @Autowired
     C100RespondentSolicitorService respondentSolicitorService;
-
-    @Autowired
-    private DocumentGenService documentGenService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -133,20 +126,17 @@ public class C100RespondentSolicitorController {
             .build();
     }
 
-    @PostMapping(path = "/generate-c7response-draft-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/generate-c7response-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate and store document")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse generateC7ResponseDraftDocument(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody @Parameter(name = "CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest request
+        @RequestBody @Parameter(name = "CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
 
-        Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
-
-        caseDataUpdated.putAll(documentGenService.generateC7DraftDocuments(authorisation, caseData));
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(respondentSolicitorService.generateDraftDocumentsForRespondent(callbackRequest, authorisation))
+            .build();
     }
 
     @PostMapping(path = "/about-to-start-response-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -165,7 +155,8 @@ public class C100RespondentSolicitorController {
             .builder()
             .data(respondentSolicitorService.validateActiveRespondentResponse(
                 callbackRequest,
-                errorList))
+                errorList,
+                authorisation))
             .errors(errorList)
             .build();
     }

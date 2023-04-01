@@ -712,6 +712,7 @@ public class CaseData implements MappableObject {
     private final String viewC7PdflinkText;
     private final String isEngC7DocGen;
     private final Document draftC7ResponseDoc;
+    private final Document draftC1ADoc;
 
     /**
      * Respondent solicitor's Current or Past proceedings.
