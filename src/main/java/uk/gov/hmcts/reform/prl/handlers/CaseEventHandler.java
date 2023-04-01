@@ -51,6 +51,8 @@ public class CaseEventHandler {
             Map.of(
                 "taskList",
                 taskList,
+                "respondentTaskList",
+                respondentTaskList,
                 "respondentTaskListA",
                 respondentTaskList,
                 "respondentTaskListB",
