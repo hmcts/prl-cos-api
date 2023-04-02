@@ -71,14 +71,14 @@ public class KeepDetailsPrivateCheckerTest {
 
     @Test
     public void isStartedTest() {
-        boolean anyNonEmpty = keepDetailsPrivateChecker.isStarted(caseData);
+        boolean anyNonEmpty = keepDetailsPrivateChecker.isStarted(caseData, "A");
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = keepDetailsPrivateChecker.isFinished(caseData);
+        boolean anyNonEmpty = keepDetailsPrivateChecker.isFinished(caseData, "A");
 
         Assert.assertTrue(anyNonEmpty);
     }

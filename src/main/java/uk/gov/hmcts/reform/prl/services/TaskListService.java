@@ -76,11 +76,11 @@ public class TaskListService {
             .collect(toList());
     }
 
-    public List<RespondentTask> getRespondentSolicitorTasks(CaseData caseData) {
+    public List<RespondentTask> getRespondentSolicitorTasks(CaseData caseData, String respondent) {
         return getRespondentsEvents().stream()
             .map(event -> RespondentTask.builder()
                 .event(event)
-                .state(getRespondentTaskState(caseData, event))
+                .state(getRespondentTaskState(caseData, event, respondent))
                 .build())
             .collect(toList());
     }
@@ -98,11 +98,11 @@ public class TaskListService {
         return TaskState.NOT_STARTED;
     }
 
-    private TaskState getRespondentTaskState(CaseData caseData, RespondentSolicitorEvents event) {
-        if (respondentEventsChecker.isFinished(event, caseData)) {
+    private TaskState getRespondentTaskState(CaseData caseData, RespondentSolicitorEvents event, String respondent) {
+        if (respondentEventsChecker.isFinished(event, caseData, respondent)) {
             return TaskState.FINISHED;
         }
-        if (respondentEventsChecker.isStarted(event, caseData)) {
+        if (respondentEventsChecker.isStarted(event, caseData, respondent)) {
             return TaskState.IN_PROGRESS;
         }
         return TaskState.NOT_STARTED;

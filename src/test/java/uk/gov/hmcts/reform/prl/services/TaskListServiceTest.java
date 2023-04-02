@@ -347,7 +347,7 @@ public class TaskListServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .consentOrder(YesOrNo.Yes)
             .build();
-        List<RespondentTask> actualTasks = taskListService.getRespondentSolicitorTasks(caseData);
+        List<RespondentTask> actualTasks = taskListService.getRespondentSolicitorTasks(caseData, "A");
 
         List<RespondentTask> expectedTasks = List.of(
             RespondentTask.builder().event(RespondentSolicitorEvents.CONSENT).state(TaskState.NOT_STARTED).build(),

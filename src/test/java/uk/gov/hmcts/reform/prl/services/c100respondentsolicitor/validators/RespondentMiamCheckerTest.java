@@ -76,14 +76,14 @@ public class RespondentMiamCheckerTest {
     public void testMiamAttendedIsStarted() {
 
         boolean isStarted;
-        isStarted = respondentMiamChecker.isStarted(caseData);
+        isStarted = respondentMiamChecker.isStarted(caseData, "A");
         assertTrue(isStarted);
 
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = respondentMiamChecker.isFinished(caseData);
+        boolean anyNonEmpty = respondentMiamChecker.isFinished(caseData, "A");
 
         Assert.assertTrue(anyNonEmpty);
     }
@@ -115,7 +115,7 @@ public class RespondentMiamCheckerTest {
             .respondents(respondentsList)
             .build();
 
-        boolean anyNonEmpty = respondentMiamChecker.isFinished(caseData1);
+        boolean anyNonEmpty = respondentMiamChecker.isFinished(caseData1, "A");
 
         Assert.assertTrue(anyNonEmpty);
     }

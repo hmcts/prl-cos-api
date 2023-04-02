@@ -67,12 +67,12 @@ public class RespondentEventsChecker {
 
     }
 
-    public boolean isStarted(RespondentSolicitorEvents event, CaseData caseData) {
-        return eventStatus.get(event).isStarted(caseData);
+    public boolean isStarted(RespondentSolicitorEvents event, CaseData caseData, String respondent) {
+        return eventStatus.get(event).isStarted(caseData, respondent);
     }
 
-    public boolean isFinished(RespondentSolicitorEvents event, CaseData caseData) {
-        return eventStatus.get(event).isFinished(caseData);
+    public boolean isFinished(RespondentSolicitorEvents event, CaseData caseData, String respondent) {
+        return eventStatus.get(event).isFinished(caseData, respondent);
     }
 
     public Map<RespondentSolicitorEvents, RespondentEventChecker> getEventStatus() {

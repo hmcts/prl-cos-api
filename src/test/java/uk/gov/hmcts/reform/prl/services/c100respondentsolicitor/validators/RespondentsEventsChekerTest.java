@@ -64,40 +64,40 @@ public class RespondentsEventsChekerTest {
 
     @Test
     public void whenConsentEventHasMandatory_thenReturnsTrue() {
-        when(consentToApplicationChecker.isFinished(caseData)).thenReturn(true);
-        assertTrue(respondentEventsChecker.isFinished(CONSENT, caseData));
+        when(consentToApplicationChecker.isFinished(caseData, "A")).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(CONSENT, caseData, "A"));
 
     }
 
     @Test
     public void whenAllegationsOfHarmEventHasMandatoryCompleted_MandatoryReturnsTrue() {
-        when(respondentAllegationsOfHarmChecker.isFinished(caseData)).thenReturn(true);
-        assertTrue(respondentEventsChecker.isFinished(ALLEGATION_OF_HARM, caseData));
+        when(respondentAllegationsOfHarmChecker.isFinished(caseData, "A")).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(ALLEGATION_OF_HARM, caseData, "A"));
 
     }
 
     @Test
     public void whenKeepDetailsPrivateEventIsStarted_thenEventCheckerStartedReturnsTrue() {
-        when(keepDetailsPrivateChecker.isStarted(caseData)).thenReturn(true);
-        assertTrue(respondentEventsChecker.isStarted(KEEP_DETAILS_PRIVATE, caseData));
+        when(keepDetailsPrivateChecker.isStarted(caseData, "A")).thenReturn(true);
+        assertTrue(respondentEventsChecker.isStarted(KEEP_DETAILS_PRIVATE, caseData, "A"));
     }
 
     @Test
     public void whenInternationalElementEventIsStarted_thenEventCheckerStartedReturnsTrue() {
-        when(internationalElementsChecker.isStarted(caseData)).thenReturn(true);
-        assertTrue(respondentEventsChecker.isStarted(INTERNATIONAL_ELEMENT, caseData));
+        when(internationalElementsChecker.isStarted(caseData, "A")).thenReturn(true);
+        assertTrue(respondentEventsChecker.isStarted(INTERNATIONAL_ELEMENT, caseData, "A"));
     }
 
     @Test
     public void checkGetMiamEventStatus() {
-        when(respondentMiamChecker.isFinished(caseData)).thenReturn(true);
-        assertTrue(respondentEventsChecker.isFinished(MIAM, caseData));
+        when(respondentMiamChecker.isFinished(caseData, "A")).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(MIAM, caseData, "A"));
     }
 
     @Test
     public void checkAttendToCourtEventStatus() {
-        when(attendToCourtChecker.isFinished(caseData)).thenReturn(true);
-        assertTrue(respondentEventsChecker.isFinished(ATTENDING_THE_COURT, caseData));
+        when(attendToCourtChecker.isFinished(caseData, "A")).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(ATTENDING_THE_COURT, caseData, "A"));
     }
 
     @Test

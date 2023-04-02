@@ -118,7 +118,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
 
     @Test
     public void isStarted() {
-        Boolean bool = respondentAllegationsOfHarmChecker.isStarted(caseData);
+        Boolean bool = respondentAllegationsOfHarmChecker.isStarted(caseData, "A");
 
         assertTrue(bool);
     }
@@ -126,7 +126,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     @Test
     public void hasMandatoryCompleted() {
 
-        Boolean bool = respondentAllegationsOfHarmChecker.isFinished(caseData);
+        Boolean bool = respondentAllegationsOfHarmChecker.isFinished(caseData, "A");
 
         assertTrue(bool);
     }

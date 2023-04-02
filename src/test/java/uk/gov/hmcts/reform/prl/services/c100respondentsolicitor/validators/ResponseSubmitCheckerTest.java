@@ -93,7 +93,7 @@ public class ResponseSubmitCheckerTest {
     @Test
     public void isStarted() {
 
-        Boolean bool = responseSubmitChecker.isStarted(emptyCaseData);
+        Boolean bool = responseSubmitChecker.isStarted(emptyCaseData, "A");
         assertFalse(bool);
     }
 
@@ -109,7 +109,7 @@ public class ResponseSubmitCheckerTest {
         when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
 
 
-        Boolean bool = responseSubmitChecker.isFinished(emptyCaseData);
+        Boolean bool = responseSubmitChecker.isFinished(emptyCaseData, "A");
 
         assertFalse(bool);
     }

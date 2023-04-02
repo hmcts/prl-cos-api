@@ -3,8 +3,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -20,31 +19,21 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 public class ConsentToApplicationChecker implements RespondentEventChecker {
 
     @Override
-    public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
-        return activeRespondent.filter(partyDetailsElement -> anyNonEmpty(partyDetailsElement
-                                                                              .getValue()
-                                                                              .getResponse()
-                                                                              .getConsent()
-        )).isPresent();
+    public boolean isStarted(CaseData caseData, String respondent) {
+        Optional<Response> response = findResponse(caseData, respondent);
+
+        return response
+            .filter(res -> anyNonEmpty(res.getConsent()))
+            .isPresent();
     }
 
     @Override
-    public boolean isFinished(CaseData caseData) {
+    public boolean isFinished(CaseData caseData, String respondent) {
         boolean mandatoryInfo = false;
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
+        Optional<Response> response = findResponse(caseData, respondent);
 
-        if (activeRespondent.isPresent()) {
-            Optional<Consent> consent = Optional.ofNullable(activeRespondent.get()
-                                                                .getValue()
-                                                                .getResponse()
-                                                                .getConsent());
+        if (response.isPresent()) {
+            Optional<Consent> consent = Optional.ofNullable(response.get().getConsent());
             if (!consent.isEmpty() && checkConsentMandatoryCompleted(consent)) {
                 mandatoryInfo = true;
             }
