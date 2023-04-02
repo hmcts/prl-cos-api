@@ -71,8 +71,8 @@ public class RespondentEventsChecker {
         return eventStatus.get(event).isStarted(caseData);
     }
 
-    public boolean hasMandatoryCompleted(RespondentSolicitorEvents event, CaseData caseData) {
-        return eventStatus.get(event).hasMandatoryCompleted(caseData);
+    public boolean isFinished(RespondentSolicitorEvents event, CaseData caseData) {
+        return eventStatus.get(event).isFinished(caseData);
     }
 
     public Map<RespondentSolicitorEvents, RespondentEventChecker> getEventStatus() {

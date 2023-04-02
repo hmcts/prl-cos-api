@@ -11,16 +11,18 @@ import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
+import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
-import uk.gov.hmcts.reform.prl.services.RespondentSolicitorTaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorTaskListRenderer;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +46,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_TYPE_OF_APPLICATION_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RESPONDENT_BEHAVIOUR_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.TYPE_OF_APPLICATION_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.CONSENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.FINISHED;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
 
@@ -65,6 +69,9 @@ public class CaseEventHandlerTest {
 
     @Mock
     private TaskErrorService taskErrorService;
+
+    @Mock
+    private RespondentTaskErrorService respondentTaskErrorService;
 
     @InjectMocks
     private CaseEventHandler caseEventHandler;
@@ -98,18 +105,23 @@ public class CaseEventHandlerTest {
         );
 
         final List<RespondentTask> respondentTask = List.of(
-            RespondentTask.builder().event(RespondentSolicitorEvents.CONSENT).build(),
+            RespondentTask.builder().event(CONSENT).build(),
             RespondentTask.builder().event(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS).build()
         );
 
         final String c100renderedTaskList = "<h1>Case Name</h1><h2>Miam</h2>";
 
-        final String respondentTaskList = " ";
+        final String respondentTaskListA = "<h3>Respond to the application for Respondent A";
+        final String respondentTaskListB = "<h3>Respond to the application for Respondent B";
+
+        List<RespondentEventValidationErrors> resErrors = new ArrayList<>();
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
-        when(taskListService.getRespondentSolicitorTasks()).thenReturn(respondentTask);
+        when(taskListService.getRespondentSolicitorTasks(caseData)).thenReturn(respondentTask);
         when(taskListRenderer.render(c100Tasks, errors, true, caseData)).thenReturn(c100renderedTaskList);
-        when(respondentSolicitorTaskListRenderer.render(respondentTask)).thenReturn(respondentTaskList);
+        when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "A")).thenReturn(respondentTaskListA);
+        when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "B")).thenReturn(respondentTaskListB);
+        when(respondentTaskErrorService.getEventErrors(caseData)).thenReturn(resErrors);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
@@ -130,11 +142,11 @@ public class CaseEventHandlerTest {
                 "taskList",
                 c100renderedTaskList,
                 "respondentTaskList",
-                respondentTaskList,
+                "",
                 "respondentTaskListA",
-                respondentTaskList,
+                respondentTaskListA,
                 "respondentTaskListB",
-                respondentTaskList,
+                respondentTaskListB,
                 "id",
                 String.valueOf(caseData.getId())
             )
@@ -149,7 +161,8 @@ public class CaseEventHandlerTest {
             .build();
         final CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
 
-        final String respondentTaskList = " ";
+        final String respondentTaskListA = "<h3>Respond to the application for Respondent A";
+        final String respondentTaskListB = "<h3>Respond to the application for Respondent B";
 
         final List<Event> fl410Events = List.of(
             CASE_NAME,
@@ -175,18 +188,21 @@ public class CaseEventHandlerTest {
         );
 
         final List<RespondentTask> respondentTask = List.of(
-            RespondentTask.builder().event(RespondentSolicitorEvents.CONSENT).build(),
+            RespondentTask.builder().event(CONSENT).build(),
             RespondentTask.builder().event(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS).build()
         );
 
         final String fl410renderedTaskList = "<h1>Case Name</h1><h2>Type of Application</h2>";
 
         final List<EventValidationErrors> eventsErrors = Collections.emptyList();
+        final List<RespondentEventValidationErrors> resErrors = Collections.emptyList();
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(fl401Tasks);
-        when(taskListService.getRespondentSolicitorTasks()).thenReturn(respondentTask);
+        when(taskListService.getRespondentSolicitorTasks(caseData)).thenReturn(respondentTask);
         when(taskListRenderer.render(fl401Tasks, eventsErrors, false, caseData)).thenReturn(fl410renderedTaskList);
-        when(respondentSolicitorTaskListRenderer.render(respondentTask)).thenReturn(respondentTaskList);
+        when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "A")).thenReturn(respondentTaskListA);
+        when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "B")).thenReturn(respondentTaskListB);
+        when(respondentTaskErrorService.getEventErrors(caseData)).thenReturn(resErrors);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
@@ -207,11 +223,11 @@ public class CaseEventHandlerTest {
                 "taskList",
                 fl410renderedTaskList,
                 "respondentTaskList",
-                respondentTaskList,
+                "",
                 "respondentTaskListA",
-                respondentTaskList,
+                respondentTaskListA,
                 "respondentTaskListB",
-                respondentTaskList,
+                respondentTaskListB,
                 "id",
                 String.valueOf(caseData.getId())
             )
@@ -264,18 +280,28 @@ public class CaseEventHandlerTest {
         );
 
         final List<RespondentTask> respondentTask = List.of(
-            RespondentTask.builder().event(RespondentSolicitorEvents.CONSENT).build(),
+            RespondentTask.builder().event(CONSENT).build(),
             RespondentTask.builder().event(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS).build()
         );
 
         final String c100renderedTaskList = "<h1>Case Name</h1><h2>Miam</h2>";
 
-        final String respondentTaskList = " ";
+        final String respondentTaskListA = "<h3>Respond to the application for Respondent A";
+        final String respondentTaskListB = "<h3>Respond to the application for Respondent B";
+        List<RespondentEventValidationErrors> resErrors = new ArrayList<>();
+
+        final List<RespondentSolicitorEvents> respondentEvents = List.of(
+            CONSENT,
+            KEEP_DETAILS_PRIVATE
+        );
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
-        when(taskListService.getRespondentSolicitorTasks()).thenReturn(respondentTask);
+        when(taskListService.getRespondentsEvents()).thenReturn(respondentEvents);
+        when(taskListService.getRespondentSolicitorTasks(caseData)).thenReturn(respondentTask);
         when(taskListRenderer.render(c100Tasks, errors, true, caseData)).thenReturn(c100renderedTaskList);
-        when(respondentSolicitorTaskListRenderer.render(respondentTask)).thenReturn(respondentTaskList);
+        when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "A")).thenReturn(respondentTaskListA);
+        when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "B")).thenReturn(respondentTaskListB);
+        when(respondentTaskErrorService.getEventErrors(caseData)).thenReturn(resErrors);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
@@ -296,11 +322,11 @@ public class CaseEventHandlerTest {
                 "taskList",
                 c100renderedTaskList,
                 "respondentTaskList",
-                respondentTaskList,
+                "",
                 "respondentTaskListA",
-                respondentTaskList,
+                respondentTaskListA,
                 "respondentTaskListB",
-                respondentTaskList,
+                respondentTaskListB,
                 "id",
                 String.valueOf(caseData.getId())
             )

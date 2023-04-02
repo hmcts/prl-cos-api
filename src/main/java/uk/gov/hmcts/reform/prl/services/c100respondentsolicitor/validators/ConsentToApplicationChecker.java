@@ -33,7 +33,7 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
     }
 
     @Override
-    public boolean hasMandatoryCompleted(CaseData caseData) {
+    public boolean isFinished(CaseData caseData) {
         boolean mandatoryInfo = false;
         Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
             .stream()

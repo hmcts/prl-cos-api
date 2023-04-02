@@ -1,20 +1,25 @@
-package uk.gov.hmcts.reform.prl.services;
+package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection;
+import uk.gov.hmcts.reform.prl.services.TaskListRenderElements;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection.newSection;
 
 @Service
@@ -32,28 +37,32 @@ public class RespondentSolicitorTaskListRenderer {
     private final TaskListRenderElements taskListRenderElements;
 
 
-    public String render(List<RespondentTask> allTasks) {
+    public String render(List<RespondentTask> allTasks, List<RespondentEventValidationErrors> tasksErrors, String respondent) {
         final List<String> lines = new LinkedList<>();
         lines.add(
-            "<div class='width-50'><h3>Respond to the application</h3><p>This online response combines forms C7 and C8."
+            "<div class='width-50'>"
+                + "<h3>Respond to the application for Respondent " + respondent + "</h3>"
+                + "<p>This online response combines forms C7 and C8."
                 + " It also allows you to make your own allegations of harm and violence (C1A)"
-                + " in the section of safety concerns.</p><div>");
+                + " in the section of safety concerns.</p>"
+                + "</div>");
 
         lines.add("<div class='width-50'>");
 
         (groupInSections(allTasks))
-            .forEach(section -> lines.addAll(renderSection(section)));
+            .forEach(section -> lines.addAll(renderSection(section, respondent)));
 
         lines.add("</div>");
+
+        lines.addAll(renderResSolTasksErrors(tasksErrors, respondent));
 
         return String.join("\n\n", lines);
     }
 
     private List<RespondentTaskSection> groupInSections(List<RespondentTask> allTasks) {
-        final Map<RespondentSolicitorEvents, RespondentTask> tasks = allTasks.stream().collect(toMap(
-            RespondentTask::getEvent,
-            identity()
-        ));
+        final Map<RespondentSolicitorEvents, RespondentTask> tasks
+            = allTasks.stream().collect(toMap(RespondentTask::getEvent, identity()));
+
         final RespondentTaskSection consent = newSection("1. Consent to the Application")
             .withTask(tasks.get(RespondentSolicitorEvents.CONSENT));
 
@@ -92,7 +101,7 @@ public class RespondentSolicitorTaskListRenderer {
             .collect(toList());
     }
 
-    private List<String> renderSection(RespondentTaskSection sec) {
+    private List<String> renderSection(RespondentTaskSection sec, String respondent) {
         final List<String> section = new LinkedList<>();
 
         section.add(NEW_LINE);
@@ -103,19 +112,68 @@ public class RespondentSolicitorTaskListRenderer {
 
         section.add(HORIZONTAL_LINE);
         sec.getRespondentTasks().forEach(task -> {
-            section.addAll(renderRespondentTask(task));
+            section.addAll(renderRespondentTask(task, respondent));
             section.add(HORIZONTAL_LINE);
         });
 
         return section;
     }
 
-    private List<String> renderRespondentTask(RespondentTask respondentTask) {
+    private List<String> renderRespondentTask(RespondentTask respondentTask, String respondent) {
         final List<String> lines = new LinkedList<>();
 
-        lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask));
+        switch (respondentTask.getState()) {
+
+            case NOT_STARTED:
+                if (respondentTask.getEvent().equals(RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE)) {
+                    lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent));
+                } else if (respondentTask.getEvent().equals(RespondentSolicitorEvents.SUBMIT)) {
+                    lines.add(taskListRenderElements.renderRespondentDisabledLink(respondentTask)
+                                  + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
+                } else {
+                    lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent)
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started"));
+                }
+                break;
+            case IN_PROGRESS:
+                lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent)
+                              + taskListRenderElements.renderImage(IN_PROGRESS, "In progress"));
+                break;
+            case MANDATORY_COMPLETED:
+                lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent)
+                              + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added"));
+                break;
+            case FINISHED:
+                if (respondentTask.getEvent().equals(RespondentSolicitorEvents.SUBMIT)) {
+                    lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent)
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet"));
+                } else {
+                    lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent)
+                                  + taskListRenderElements.renderImage(FINISHED, "Finished"));
+                }
+                break;
+            default:
+                lines.add(taskListRenderElements.renderRespondentSolicitorLink(respondentTask, respondent));
+        }
 
         respondentTask.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
         return lines;
+    }
+
+    private List<String> renderResSolTasksErrors(List<RespondentEventValidationErrors> taskErrors, String respondent) {
+        if (isEmpty(taskErrors)) {
+            return emptyList();
+        }
+        final List<String> errors = taskErrors.stream()
+            .flatMap(task -> task.getErrors()
+                .stream()
+                .map(error -> format(
+                    "%s in %s",
+                    error,
+                    taskListRenderElements.renderRespondentSolicitorLink(task.getEvent(), respondent)
+                )))
+            .collect(toList());
+
+        return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
     }
 }

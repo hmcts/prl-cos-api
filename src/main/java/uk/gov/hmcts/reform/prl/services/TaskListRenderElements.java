@@ -32,13 +32,15 @@ public class TaskListRenderElements {
                       event.getId(), event.getId(), event.getName());
     }
 
-    public String renderRespondentSolicitorLink(RespondentTask respondentTask) {
-        return renderRespondentSolicitorLink(respondentTask.getEvent());
+    public String renderRespondentSolicitorLink(RespondentTask respondentTask, String respondent) {
+        return renderRespondentSolicitorLink(respondentTask.getEvent(), respondent);
     }
 
-    public String renderRespondentSolicitorLink(RespondentSolicitorEvents respondentSolicitorEvents) {
+    public String renderRespondentSolicitorLink(RespondentSolicitorEvents respondentSolicitorEvents, String respondent) {
         return format("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/%s/%s1'>%s</a>",
-                      respondentSolicitorEvents.getEventId(), respondentSolicitorEvents.getEventId(), respondentSolicitorEvents.getEventName());
+                      respondentSolicitorEvents.getEventId() + respondent,
+                      respondentSolicitorEvents.getEventId() + respondent,
+                      respondentSolicitorEvents.getEventName());
     }
 
     public String renderImage(String imageName, String title) {
@@ -47,6 +49,10 @@ public class TaskListRenderElements {
 
     public String renderDisabledLink(Task event) {
         return format("<a>%s</a>", event.getEvent().getName());
+    }
+
+    public String renderRespondentDisabledLink(RespondentTask respondentTask) {
+        return format("<a>%s</a>", respondentTask.getEvent().getEventName());
     }
 
     public String renderHint(String text) {

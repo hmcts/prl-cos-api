@@ -64,7 +64,7 @@ public class CurrentOrPastProceedingsCheckerTest {
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = currentOrPastProceedingsChecker.hasMandatoryCompleted(caseData);
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(caseData);
         Assert.assertTrue(anyNonEmpty);
     }
 }

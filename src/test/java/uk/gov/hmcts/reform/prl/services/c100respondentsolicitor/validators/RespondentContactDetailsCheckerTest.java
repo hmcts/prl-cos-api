@@ -106,13 +106,13 @@ public class RespondentContactDetailsCheckerTest {
 
     @Test
     public void mandatoryInformationTest() {
-        Boolean bool = respondentContactDetailsChecker.hasMandatoryCompleted(caseData);
+        Boolean bool = respondentContactDetailsChecker.isFinished(caseData);
         assertTrue(bool);
     }
 
     @Test
     public void noAddressTest() {
-        Boolean bool = respondentContactDetailsChecker.hasMandatoryCompleted(noAddressData);
+        Boolean bool = respondentContactDetailsChecker.isFinished(noAddressData);
         assertFalse(bool);
     }
 }

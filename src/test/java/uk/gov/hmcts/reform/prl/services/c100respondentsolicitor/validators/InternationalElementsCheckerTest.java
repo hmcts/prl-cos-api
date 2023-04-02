@@ -72,7 +72,7 @@ public class InternationalElementsCheckerTest {
 
     @Test
     public void mandatoryCompleted() {
-        Boolean bool = internationalElementsChecker.hasMandatoryCompleted(caseData);
+        Boolean bool = internationalElementsChecker.isFinished(caseData);
         assertTrue(bool);
     }
 

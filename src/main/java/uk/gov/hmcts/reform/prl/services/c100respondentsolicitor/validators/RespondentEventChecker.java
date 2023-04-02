@@ -6,6 +6,6 @@ public interface RespondentEventChecker {
 
     boolean isStarted(CaseData caseData);
 
-    boolean hasMandatoryCompleted(CaseData caseData);
+    boolean isFinished(CaseData caseData);
 
 }

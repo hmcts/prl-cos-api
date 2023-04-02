@@ -30,7 +30,7 @@ public class CurrentOrPastProceedingsChecker implements RespondentEventChecker {
     }
 
     @Override
-    public boolean hasMandatoryCompleted(CaseData caseData) {
+    public boolean isFinished(CaseData caseData) {
         List<Optional<?>> fields = new ArrayList<>();
         Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
             .stream()

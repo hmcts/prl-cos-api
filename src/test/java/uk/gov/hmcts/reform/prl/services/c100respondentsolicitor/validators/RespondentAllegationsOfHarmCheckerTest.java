@@ -126,7 +126,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     @Test
     public void hasMandatoryCompleted() {
 
-        Boolean bool = respondentAllegationsOfHarmChecker.hasMandatoryCompleted(caseData);
+        Boolean bool = respondentAllegationsOfHarmChecker.isFinished(caseData);
 
         assertTrue(bool);
     }

@@ -64,15 +64,15 @@ public class RespondentsEventsChekerTest {
 
     @Test
     public void whenConsentEventHasMandatory_thenReturnsTrue() {
-        when(consentToApplicationChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        assertTrue(respondentEventsChecker.hasMandatoryCompleted(CONSENT, caseData));
+        when(consentToApplicationChecker.isFinished(caseData)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(CONSENT, caseData));
 
     }
 
     @Test
     public void whenAllegationsOfHarmEventHasMandatoryCompleted_MandatoryReturnsTrue() {
-        when(respondentAllegationsOfHarmChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        assertTrue(respondentEventsChecker.hasMandatoryCompleted(ALLEGATION_OF_HARM, caseData));
+        when(respondentAllegationsOfHarmChecker.isFinished(caseData)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(ALLEGATION_OF_HARM, caseData));
 
     }
 
@@ -90,14 +90,14 @@ public class RespondentsEventsChekerTest {
 
     @Test
     public void checkGetMiamEventStatus() {
-        when(respondentMiamChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        assertTrue(respondentEventsChecker.hasMandatoryCompleted(MIAM, caseData));
+        when(respondentMiamChecker.isFinished(caseData)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(MIAM, caseData));
     }
 
     @Test
     public void checkAttendToCourtEventStatus() {
-        when(attendToCourtChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        assertTrue(respondentEventsChecker.hasMandatoryCompleted(ATTENDING_THE_COURT, caseData));
+        when(attendToCourtChecker.isFinished(caseData)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(ATTENDING_THE_COURT, caseData));
     }
 
     @Test

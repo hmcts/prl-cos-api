@@ -62,7 +62,7 @@ public class ConsentToApplicationCheckerTest {
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = consentToApplicationChecker.hasMandatoryCompleted(caseData);
+        boolean anyNonEmpty = consentToApplicationChecker.isFinished(caseData);
 
         Assert.assertTrue(anyNonEmpty);
     }

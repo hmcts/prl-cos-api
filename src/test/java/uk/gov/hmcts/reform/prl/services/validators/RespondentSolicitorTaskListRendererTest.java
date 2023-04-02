@@ -1,10 +1,13 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Test;
+import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
-import uk.gov.hmcts.reform.prl.services.RespondentSolicitorTaskListRenderer;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderElements;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorTaskListRenderer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
@@ -17,7 +20,6 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEv
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.MIAM;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.START_RESPONSE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE;
 
@@ -29,24 +31,23 @@ public class RespondentSolicitorTaskListRendererTest {
     );
 
     private final List<RespondentTask> tasks = List.of(
-        RespondentTask.builder().event(START_RESPONSE).build(),
-        RespondentTask.builder().event(CONSENT).build(),
-        RespondentTask.builder().event(KEEP_DETAILS_PRIVATE).build(),
-        RespondentTask.builder().event(CONFIRM_EDIT_CONTACT_DETAILS).build(),
-        RespondentTask.builder().event(ATTENDING_THE_COURT).build(),
-        RespondentTask.builder().event(MIAM).build(),
-        RespondentTask.builder().event(CURRENT_OR_PREVIOUS_PROCEEDINGS).build(),
-        RespondentTask.builder().event(ALLEGATION_OF_HARM).build(),
-        RespondentTask.builder().event(INTERNATIONAL_ELEMENT).build(),
-        RespondentTask.builder().event(ABILITY_TO_PARTICIPATE).build(),
-        RespondentTask.builder().event(VIEW_DRAFT_RESPONSE).build(),
-        RespondentTask.builder().event(SUBMIT).build()
+        RespondentTask.builder().event(CONSENT).state(TaskState.NOT_STARTED).build(),
+        RespondentTask.builder().event(KEEP_DETAILS_PRIVATE).state(TaskState.NOT_STARTED).build(),
+        RespondentTask.builder().event(CONFIRM_EDIT_CONTACT_DETAILS).state(TaskState.NOT_STARTED).build(),
+        RespondentTask.builder().event(ATTENDING_THE_COURT).state(TaskState.NOT_STARTED).build(),
+        RespondentTask.builder().event(MIAM).state(TaskState.NOT_STARTED).build(),
+        RespondentTask.builder().event(CURRENT_OR_PREVIOUS_PROCEEDINGS).state(TaskState.NOT_STARTED).build(),
+        RespondentTask.builder().event(ALLEGATION_OF_HARM).state(TaskState.NOT_STARTED).build(),
+        RespondentTask.builder().event(INTERNATIONAL_ELEMENT).state(TaskState.NOT_STARTED).build(),
+        RespondentTask.builder().event(ABILITY_TO_PARTICIPATE).state(TaskState.NOT_STARTED).build(),
+        RespondentTask.builder().event(VIEW_DRAFT_RESPONSE).state(TaskState.NOT_STARTED).build(),
+        RespondentTask.builder().event(SUBMIT).state(TaskState.NOT_STARTED).build()
     );
 
     @Test
     public void renderTaskListTest() {
-
-        String taskList = taskListRenderer.render(tasks);
+        List<RespondentEventValidationErrors> resErrors = new ArrayList<>();
+        String taskList = taskListRenderer.render(tasks, resErrors, "A");
 
         assertNotNull(taskList);
     }

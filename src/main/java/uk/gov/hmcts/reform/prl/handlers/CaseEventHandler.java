@@ -6,16 +6,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
+import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
-import uk.gov.hmcts.reform.prl.services.RespondentSolicitorTaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorTaskListRenderer;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.List;
 import java.util.Map;
@@ -35,13 +38,15 @@ public class CaseEventHandler {
     private final TaskListRenderer taskListRenderer;
     private final RespondentSolicitorTaskListRenderer respondentSolicitorTaskListRenderer;
     private final TaskErrorService taskErrorService;
+    private final RespondentTaskErrorService respondentTaskErrorService;
 
     @EventListener
     public void handleCaseDataChange(final CaseDataChanged event) {
         final CaseData caseData = event.getCaseData();
 
         final String taskList = getUpdatedTaskList(caseData);
-        final String respondentTaskList = getRespondentTaskList();
+        final String respondentTaskListA = getRespondentTaskList(caseData, "A");
+        final String respondentTaskListB = getRespondentTaskList(caseData, "B");
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
@@ -52,11 +57,11 @@ public class CaseEventHandler {
                 "taskList",
                 taskList,
                 "respondentTaskList",
-                respondentTaskList,
+                "",
                 "respondentTaskListA",
-                respondentTaskList,
+                respondentTaskListA,
                 "respondentTaskListB",
-                respondentTaskList,
+                respondentTaskListB,
                 "id",
                 String.valueOf(caseData.getId())
             )
@@ -83,12 +88,20 @@ public class CaseEventHandler {
 
     }
 
-    public String getRespondentTaskList() {
-        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks();
+    public String getRespondentTaskList(CaseData caseData, String respondent) {
+        if (null == respondent || "".equalsIgnoreCase(respondent)) {
+            return "";
+        }
+        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(caseData);
         log.info("tasks found: " + tasks.size());
 
+        List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors(caseData);
+
+        List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents();
+        eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+
         return respondentSolicitorTaskListRenderer
-            .render(tasks);
+            .render(tasks, eventErrors, respondent);
 
     }
 }

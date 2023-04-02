@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.RespondentEventsChecker;
 import uk.gov.hmcts.reform.prl.services.validators.EventsChecker;
 
 import java.util.ArrayList;
@@ -64,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEv
 public class TaskListService {
 
     private final EventsChecker eventsChecker;
+    private final RespondentEventsChecker respondentEventsChecker;
 
     public List<Task> getTasksForOpenCase(CaseData caseData) {
         return getEvents(caseData).stream()
@@ -74,10 +76,11 @@ public class TaskListService {
             .collect(toList());
     }
 
-    public List<RespondentTask> getRespondentSolicitorTasks() {
+    public List<RespondentTask> getRespondentSolicitorTasks(CaseData caseData) {
         return getRespondentsEvents().stream()
             .map(event -> RespondentTask.builder()
                 .event(event)
+                .state(getRespondentTaskState(caseData, event))
                 .build())
             .collect(toList());
     }
@@ -90,6 +93,16 @@ public class TaskListService {
             return TaskState.MANDATORY_COMPLETED;
         }
         if (eventsChecker.isStarted(event, caseData)) {
+            return TaskState.IN_PROGRESS;
+        }
+        return TaskState.NOT_STARTED;
+    }
+
+    private TaskState getRespondentTaskState(CaseData caseData, RespondentSolicitorEvents event) {
+        if (respondentEventsChecker.isFinished(event, caseData)) {
+            return TaskState.FINISHED;
+        }
+        if (respondentEventsChecker.isStarted(event, caseData)) {
             return TaskState.IN_PROGRESS;
         }
         return TaskState.NOT_STARTED;
@@ -171,6 +184,5 @@ public class TaskListService {
             VIEW_DRAFT_RESPONSE,
             RespondentSolicitorEvents.SUBMIT
         ));
-
     }
 }

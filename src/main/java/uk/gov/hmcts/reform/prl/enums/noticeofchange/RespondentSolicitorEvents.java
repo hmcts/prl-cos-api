@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -33,7 +34,11 @@ public enum RespondentSolicitorEvents {
         + "respondentChildAbduction,respondentOtherConcerns"),
     INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", "internationalElementChild,"
         + "internationalElementParent,internationalElementJurisdiction,internationalElementRequest"),
-    ABILITY_TO_PARTICIPATE("c100ResSolAbilityToParticipate", "Ability to participate", "abilityToParticipateInProceedings"),
+    ABILITY_TO_PARTICIPATE(
+        "c100ResSolAbilityToParticipate",
+        "Ability to participate",
+        "abilityToParticipateInProceedings"
+    ),
     VIEW_DRAFT_RESPONSE("c100ResSolViewResponseDraftDocument", "View a draft of your response", ""),
     SUBMIT("c100ResSolSubmit", "Submit", "");
 
@@ -50,4 +55,19 @@ public enum RespondentSolicitorEvents {
             .filter(event -> event.eventId.equals(eventId))
             .findFirst();
     }
+
+    public static List<RespondentSolicitorEvents> getEventOrder() {
+        return List.of(
+            CONSENT,
+            KEEP_DETAILS_PRIVATE,
+            CONFIRM_EDIT_CONTACT_DETAILS,
+            ATTENDING_THE_COURT,
+            MIAM,
+            CURRENT_OR_PREVIOUS_PROCEEDINGS,
+            ALLEGATION_OF_HARM,
+            INTERNATIONAL_ELEMENT,
+            ABILITY_TO_PARTICIPATE
+        );
+    }
+
 }
