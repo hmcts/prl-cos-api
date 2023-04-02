@@ -29,12 +29,12 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
     RespondentEventsChecker respondentEventsChecker;
 
     @Override
-    public boolean isStarted(CaseData caseData) {
+    public boolean isStarted(CaseData caseData, String respondent) {
         return false;
     }
 
     @Override
-    public boolean isFinished(CaseData caseData) {
+    public boolean isFinished(CaseData caseData, String respodent) {
 
         EnumMap<RespondentSolicitorEvents, RespondentEventChecker> mandatoryEvents = new EnumMap<>(RespondentSolicitorEvents.class);
 
@@ -50,7 +50,7 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
         boolean mandatoryFinished;
 
         for (Map.Entry<RespondentSolicitorEvents, RespondentEventChecker> e : mandatoryEvents.entrySet()) {
-            mandatoryFinished = e.getValue().isFinished(caseData);
+            mandatoryFinished = e.getValue().isFinished(caseData, respodent);
             if (!mandatoryFinished) {
                 return false;
             }

@@ -5,7 +5,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.WhomConsistPassportList;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -20,30 +20,21 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 @Service
 public class RespondentAllegationsOfHarmChecker implements RespondentEventChecker {
     @Override
-    public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
-        return activeRespondent.filter(partyDetailsElement -> anyNonEmpty(partyDetailsElement
-                                                                              .getValue()
-                                                                              .getResponse()
-                                                                              .getRespondentAllegationsOfHarmData()
-        )).isPresent();
+    public boolean isStarted(CaseData caseData, String respondent) {
+        Optional<Response> response = findResponse(caseData, respondent);
+
+        return response
+            .filter(res -> anyNonEmpty(res.getRespondentAllegationsOfHarmData()
+            )).isPresent();
     }
 
     @Override
-    public boolean isFinished(CaseData caseData) {
+    public boolean isFinished(CaseData caseData, String respondent) {
         boolean mandatoryInfo = false;
+        Optional<Response> response = findResponse(caseData, respondent);
 
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
-        if (activeRespondent.isPresent()) {
-            Optional<RespondentAllegationsOfHarmData> respondentAllegationsOfHarm = Optional.ofNullable(activeRespondent.get()
-                                                                                                            .getValue()
-                                                                                                            .getResponse()
+        if (response.isPresent()) {
+            Optional<RespondentAllegationsOfHarmData> respondentAllegationsOfHarm = Optional.ofNullable(response.get()
                                                                                                             .getRespondentAllegationsOfHarmData());
             if (!respondentAllegationsOfHarm.isEmpty() && checkAllegationsOfHarmManadatoryCompleted(
                 respondentAllegationsOfHarm)) {

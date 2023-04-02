@@ -92,7 +92,7 @@ public class CaseEventHandler {
         if (null == respondent || "".equalsIgnoreCase(respondent)) {
             return "";
         }
-        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(caseData);
+        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(caseData, respondent);
         log.info("tasks found: " + tasks.size());
 
         List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors(caseData);

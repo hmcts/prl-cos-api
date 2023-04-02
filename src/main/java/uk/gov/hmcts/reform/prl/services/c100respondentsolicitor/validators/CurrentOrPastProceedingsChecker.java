@@ -2,9 +2,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
@@ -17,39 +15,26 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 @Service
 public class CurrentOrPastProceedingsChecker implements RespondentEventChecker {
     @Override
-    public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
-        return activeRespondent.filter(partyDetailsElement -> anyNonEmpty(partyDetailsElement
-                                                                              .getValue()
-                                                                              .getResponse()
-                                                                              .getCurrentOrPastProceedingsForChildren()
-        )).isPresent();
+    public boolean isStarted(CaseData caseData, String respondent) {
+        Optional<Response> response = findResponse(caseData, respondent);
+
+        return response
+            .filter(res -> anyNonEmpty(res.getActiveRespondent()))
+            .isPresent();
     }
 
     @Override
-    public boolean isFinished(CaseData caseData) {
+    public boolean isFinished(CaseData caseData, String respondent) {
         List<Optional<?>> fields = new ArrayList<>();
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
-        if (activeRespondent.isPresent()) {
-            fields.add(ofNullable(activeRespondent.get()
-                                      .getValue()
-                                      .getResponse()
-                                      .getCurrentOrPastProceedingsForChildren()));
+        Optional<Response> response = findResponse(caseData, respondent);
 
-            YesNoDontKnow currentOrPastProceedingsForChildren = activeRespondent.get()
-                .getValue()
-                .getResponse()
-                .getCurrentOrPastProceedingsForChildren();
+        if (response.isPresent()) {
+            fields.add(ofNullable(response.get().getCurrentOrPastProceedingsForChildren()));
+
+            YesNoDontKnow currentOrPastProceedingsForChildren = response.get().getCurrentOrPastProceedingsForChildren();
 
             if (currentOrPastProceedingsForChildren.equals(YesNoDontKnow.yes)) {
-                fields.add(ofNullable(activeRespondent.get().getValue()
-                                          .getResponse().getRespondentExistingProceedings()));
+                fields.add(ofNullable(response.get().getRespondentExistingProceedings()));
             }
         }
         return fields.stream().noneMatch(Optional::isEmpty)

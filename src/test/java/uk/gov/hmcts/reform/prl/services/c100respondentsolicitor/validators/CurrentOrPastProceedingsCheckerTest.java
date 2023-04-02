@@ -57,14 +57,14 @@ public class CurrentOrPastProceedingsCheckerTest {
 
     @Test
     public void isStartedTest() {
-        boolean anyNonEmpty = currentOrPastProceedingsChecker.isStarted(caseData);
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isStarted(caseData, "A");
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(caseData);
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(caseData, "A");
         Assert.assertTrue(anyNonEmpty);
     }
 }

@@ -117,7 +117,8 @@ public class CaseEventHandlerTest {
         List<RespondentEventValidationErrors> resErrors = new ArrayList<>();
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
-        when(taskListService.getRespondentSolicitorTasks(caseData)).thenReturn(respondentTask);
+        when(taskListService.getRespondentSolicitorTasks(caseData, "A")).thenReturn(respondentTask);
+        when(taskListService.getRespondentSolicitorTasks(caseData, "B")).thenReturn(respondentTask);
         when(taskListRenderer.render(c100Tasks, errors, true, caseData)).thenReturn(c100renderedTaskList);
         when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "A")).thenReturn(respondentTaskListA);
         when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "B")).thenReturn(respondentTaskListB);
@@ -198,7 +199,8 @@ public class CaseEventHandlerTest {
         final List<RespondentEventValidationErrors> resErrors = Collections.emptyList();
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(fl401Tasks);
-        when(taskListService.getRespondentSolicitorTasks(caseData)).thenReturn(respondentTask);
+        when(taskListService.getRespondentSolicitorTasks(caseData, "A")).thenReturn(respondentTask);
+        when(taskListService.getRespondentSolicitorTasks(caseData, "B")).thenReturn(respondentTask);
         when(taskListRenderer.render(fl401Tasks, eventsErrors, false, caseData)).thenReturn(fl410renderedTaskList);
         when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "A")).thenReturn(respondentTaskListA);
         when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "B")).thenReturn(respondentTaskListB);
@@ -297,7 +299,8 @@ public class CaseEventHandlerTest {
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
         when(taskListService.getRespondentsEvents()).thenReturn(respondentEvents);
-        when(taskListService.getRespondentSolicitorTasks(caseData)).thenReturn(respondentTask);
+        when(taskListService.getRespondentSolicitorTasks(caseData, "A")).thenReturn(respondentTask);
+        when(taskListService.getRespondentSolicitorTasks(caseData, "B")).thenReturn(respondentTask);
         when(taskListRenderer.render(c100Tasks, errors, true, caseData)).thenReturn(c100renderedTaskList);
         when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "A")).thenReturn(respondentTaskListA);
         when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "B")).thenReturn(respondentTaskListB);

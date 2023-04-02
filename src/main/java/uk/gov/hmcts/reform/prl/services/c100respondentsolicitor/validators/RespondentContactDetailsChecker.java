@@ -3,8 +3,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -18,30 +17,21 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 @Service
 public class RespondentContactDetailsChecker implements RespondentEventChecker {
     @Override
-    public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
-        return activeRespondent.filter(partyDetailsElement -> anyNonEmpty(partyDetailsElement
-                                                                              .getValue()
-                                                                              .getResponse()
-                                                                              .getCitizenDetails()
-        )).isPresent();
+    public boolean isStarted(CaseData caseData, String respondent) {
+        Optional<Response> response = findResponse(caseData, respondent);
+
+        return response
+            .filter(res -> anyNonEmpty(res.getCitizenDetails()
+            )).isPresent();
     }
 
     @Override
-    public boolean isFinished(CaseData caseData) {
+    public boolean isFinished(CaseData caseData, String respondent) {
         boolean mandatoryInfo = false;
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
+        Optional<Response> response = findResponse(caseData, respondent);
 
-        if (activeRespondent.isPresent()) {
-            Optional<CitizenDetails> citizenDetails = Optional.ofNullable(activeRespondent.get()
-                                                                              .getValue()
-                                                                              .getResponse()
+        if (response.isPresent()) {
+            Optional<CitizenDetails> citizenDetails = Optional.ofNullable(response.get()
                                                                               .getCitizenDetails());
             if (!citizenDetails.isEmpty() && checkContactDetailsMandatoryCompleted(citizenDetails)) {
                 mandatoryInfo = true;

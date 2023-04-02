@@ -47,14 +47,14 @@ public class AbilityToParticipateCheckerTest {
 
     @Test
     public void isStartedTest() {
-        boolean anyNonEmpty = abilityToParticipateChecker.isStarted(caseData);
+        boolean anyNonEmpty = abilityToParticipateChecker.isStarted(caseData, "A");
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = abilityToParticipateChecker.isFinished(caseData);
+        boolean anyNonEmpty = abilityToParticipateChecker.isFinished(caseData, "A");
 
         assertFalse(anyNonEmpty);
     }

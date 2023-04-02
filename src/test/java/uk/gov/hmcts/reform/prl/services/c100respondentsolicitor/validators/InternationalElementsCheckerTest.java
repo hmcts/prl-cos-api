@@ -66,13 +66,13 @@ public class InternationalElementsCheckerTest {
 
     @Test
     public void isStarted() {
-        Boolean bool = internationalElementsChecker.isStarted(caseData);
+        Boolean bool = internationalElementsChecker.isStarted(caseData, "A");
         assertTrue(bool);
     }
 
     @Test
     public void mandatoryCompleted() {
-        Boolean bool = internationalElementsChecker.isFinished(caseData);
+        Boolean bool = internationalElementsChecker.isFinished(caseData, "A");
         assertTrue(bool);
     }
 

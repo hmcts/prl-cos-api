@@ -55,14 +55,14 @@ public class ConsentToApplicationCheckerTest {
 
     @Test
     public void isStartedTest() {
-        boolean anyNonEmpty = consentToApplicationChecker.isStarted(caseData);
+        boolean anyNonEmpty = consentToApplicationChecker.isStarted(caseData, "A");
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = consentToApplicationChecker.isFinished(caseData);
+        boolean anyNonEmpty = consentToApplicationChecker.isFinished(caseData, "A");
 
         Assert.assertTrue(anyNonEmpty);
     }

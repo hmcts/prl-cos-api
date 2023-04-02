@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -19,29 +19,21 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 @Service
 public class AttendToCourtChecker implements RespondentEventChecker {
     @Override
-    public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
-        return activeRespondent.filter(partyDetailsElement -> anyNonEmpty(partyDetailsElement
-                                                                              .getValue()
-                                                                              .getResponse()
-                                                                              .getAttendToCourt()
-        )).isPresent();
+    public boolean isStarted(CaseData caseData, String respondent) {
+        Optional<Response> response = findResponse(caseData, respondent);
+
+        return response
+            .filter(res -> anyNonEmpty(res.getAttendToCourt()
+            )).isPresent();
     }
 
     @Override
-    public boolean isFinished(CaseData caseData) {
+    public boolean isFinished(CaseData caseData, String respondent) {
         boolean mandatoryInfo = false;
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
-        if (activeRespondent.isPresent()) {
-            Optional<AttendToCourt> attendToCourt = Optional.ofNullable(activeRespondent.get()
-                                                                            .getValue()
-                                                                            .getResponse()
+        Optional<Response> response = findResponse(caseData, respondent);
+
+        if (response.isPresent()) {
+            Optional<AttendToCourt> attendToCourt = Optional.ofNullable(response.get()
                                                                             .getAttendToCourt());
             if (!attendToCourt.isEmpty() && checkAttendToCourtMandatoryCompleted(attendToCourt)) {
                 mandatoryInfo = true;

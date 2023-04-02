@@ -100,19 +100,19 @@ public class RespondentContactDetailsCheckerTest {
 
     @Test
     public void isStartedTest() {
-        Boolean bool = respondentContactDetailsChecker.isStarted(caseData);
+        Boolean bool = respondentContactDetailsChecker.isStarted(caseData, "A");
         assertTrue(bool);
     }
 
     @Test
     public void mandatoryInformationTest() {
-        Boolean bool = respondentContactDetailsChecker.isFinished(caseData);
+        Boolean bool = respondentContactDetailsChecker.isFinished(caseData, "A");
         assertTrue(bool);
     }
 
     @Test
     public void noAddressTest() {
-        Boolean bool = respondentContactDetailsChecker.isFinished(noAddressData);
+        Boolean bool = respondentContactDetailsChecker.isFinished(noAddressData, "A");
         assertFalse(bool);
     }
 }
