@@ -32,7 +32,7 @@ public class AttendToCourtChecker implements RespondentEventChecker {
     }
 
     @Override
-    public boolean hasMandatoryCompleted(CaseData caseData) {
+    public boolean isFinished(CaseData caseData) {
         boolean mandatoryInfo = false;
         Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
             .stream()
@@ -43,14 +43,14 @@ public class AttendToCourtChecker implements RespondentEventChecker {
                                                                             .getValue()
                                                                             .getResponse()
                                                                             .getAttendToCourt());
-            if (!attendToCourt.isEmpty() && checkAttendToCourtManadatoryCompleted(attendToCourt)) {
+            if (!attendToCourt.isEmpty() && checkAttendToCourtMandatoryCompleted(attendToCourt)) {
                 mandatoryInfo = true;
             }
         }
         return mandatoryInfo;
     }
 
-    private boolean checkAttendToCourtManadatoryCompleted(Optional<AttendToCourt> attendToCourt) {
+    private boolean checkAttendToCourtMandatoryCompleted(Optional<AttendToCourt> attendToCourt) {
 
         List<Optional<?>> fields = new ArrayList<>();
         if (attendToCourt.isPresent()) {

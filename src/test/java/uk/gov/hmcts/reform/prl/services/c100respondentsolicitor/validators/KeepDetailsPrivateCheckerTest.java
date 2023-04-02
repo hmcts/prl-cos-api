@@ -78,7 +78,7 @@ public class KeepDetailsPrivateCheckerTest {
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = keepDetailsPrivateChecker.hasMandatoryCompleted(caseData);
+        boolean anyNonEmpty = keepDetailsPrivateChecker.isFinished(caseData);
 
         Assert.assertTrue(anyNonEmpty);
     }

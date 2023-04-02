@@ -83,7 +83,7 @@ public class RespondentMiamCheckerTest {
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = respondentMiamChecker.hasMandatoryCompleted(caseData);
+        boolean anyNonEmpty = respondentMiamChecker.isFinished(caseData);
 
         Assert.assertTrue(anyNonEmpty);
     }
@@ -115,7 +115,7 @@ public class RespondentMiamCheckerTest {
             .respondents(respondentsList)
             .build();
 
-        boolean anyNonEmpty = respondentMiamChecker.hasMandatoryCompleted(caseData1);
+        boolean anyNonEmpty = respondentMiamChecker.isFinished(caseData1);
 
         Assert.assertTrue(anyNonEmpty);
     }

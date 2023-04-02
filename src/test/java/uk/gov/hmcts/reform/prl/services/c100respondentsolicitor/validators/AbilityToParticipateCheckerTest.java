@@ -54,7 +54,7 @@ public class AbilityToParticipateCheckerTest {
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = abilityToParticipateChecker.hasMandatoryCompleted(caseData);
+        boolean anyNonEmpty = abilityToParticipateChecker.isFinished(caseData);
 
         assertFalse(anyNonEmpty);
     }

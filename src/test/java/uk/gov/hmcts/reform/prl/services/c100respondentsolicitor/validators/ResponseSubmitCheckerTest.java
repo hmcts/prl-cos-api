@@ -109,7 +109,7 @@ public class ResponseSubmitCheckerTest {
         when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
 
 
-        Boolean bool = responseSubmitChecker.hasMandatoryCompleted(emptyCaseData);
+        Boolean bool = responseSubmitChecker.isFinished(emptyCaseData);
 
         assertFalse(bool);
     }

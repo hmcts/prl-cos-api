@@ -81,7 +81,7 @@ public class AttendToCourtCheckerTest {
 
     @Test
     public void mandatoryCompletedTest() {
-        Boolean bool = attendToCourtChecker.hasMandatoryCompleted(caseData);
+        Boolean bool = attendToCourtChecker.isFinished(caseData);
 
         assertTrue(bool);
     }
