@@ -151,6 +151,7 @@ public class ManageOrderServiceTest {
         manageOrders = ManageOrders.builder()
             .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
             .isCaseWithdrawn(YesOrNo.No)
+            .childOption(dynamicMultiSelectList)
             .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
@@ -164,6 +165,8 @@ public class ManageOrderServiceTest {
             .thenReturn(dynamicMultiSelectList);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
+        when(dynamicMultiSelectListService.getStringFromDynamicMultiSelectList(Mockito.any(DynamicMultiSelectList.class)))
+            .thenReturn("testChild");
     }
 
     @Test
@@ -187,11 +190,12 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
+            .manageOrders(manageOrders)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
-        assertEquals("Test Name", caseData1.getChildrenList());
+        assertEquals("testChild", caseData1.getChildrenList());
         assertNotNull(caseData1.getSelectedOrder());
     }
 
@@ -218,6 +222,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .applicantChildDetails(listOfChildren)
+            .manageOrders(manageOrders)
             .home(Home.builder()
                       .children(listOfHomeChildren)
                       .build())
@@ -226,7 +231,7 @@ public class ManageOrderServiceTest {
 
         CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
 
-        assertEquals("TestName", caseData1.getChildrenList());
+        assertEquals("testChild", caseData1.getChildrenList());
         assertNotNull(caseData1.getSelectedOrder());
     }
 

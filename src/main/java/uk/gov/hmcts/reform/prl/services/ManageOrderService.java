@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -537,6 +536,9 @@ public class ManageOrderService {
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
+        String test = dynamicMultiSelectListService
+            .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                     .getChildOption());
         return caseData.toBuilder()
             .childrenList(dynamicMultiSelectListService
                               .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
