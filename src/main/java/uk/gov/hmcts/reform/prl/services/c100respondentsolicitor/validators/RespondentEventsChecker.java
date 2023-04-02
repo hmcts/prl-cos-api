@@ -19,6 +19,8 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEv
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.SUBMIT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE;
 
 @Getter
 @Service
@@ -51,6 +53,12 @@ public class RespondentEventsChecker {
     @Autowired
     private RespondentAllegationsOfHarmChecker respondentAllegationsOfHarmChecker;
 
+    @Autowired
+    private ViewDraftResponseChecker viewDraftResponseChecker;
+
+    @Autowired
+    private ResponseSubmitChecker responseSubmitChecker;
+
     private Map<RespondentSolicitorEvents, RespondentEventChecker> eventStatus = new EnumMap<>(RespondentSolicitorEvents.class);
 
     @PostConstruct
@@ -62,8 +70,11 @@ public class RespondentEventsChecker {
         eventStatus.put(MIAM, respondentMiamChecker);
         eventStatus.put(CURRENT_OR_PREVIOUS_PROCEEDINGS, currentOrPastProceedingsChecker);
         eventStatus.put(ALLEGATION_OF_HARM, respondentAllegationsOfHarmChecker);
-        eventStatus.put(INTERNATIONAL_ELEMENT, getInternationalElementsChecker());
+        eventStatus.put(INTERNATIONAL_ELEMENT, internationalElementsChecker);
         eventStatus.put(CONFIRM_EDIT_CONTACT_DETAILS, respondentContactDetailsChecker);
+        eventStatus.put(VIEW_DRAFT_RESPONSE, viewDraftResponseChecker);
+        eventStatus.put(SUBMIT, responseSubmitChecker);
+
 
     }
 
