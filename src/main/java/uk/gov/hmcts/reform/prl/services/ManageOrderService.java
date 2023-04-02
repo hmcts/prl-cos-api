@@ -536,6 +536,9 @@ public class ManageOrderService {
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
+        String test = dynamicMultiSelectListService
+            .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                     .getChildOption());
         return caseData.toBuilder()
             .childrenList(dynamicMultiSelectListService
                               .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
