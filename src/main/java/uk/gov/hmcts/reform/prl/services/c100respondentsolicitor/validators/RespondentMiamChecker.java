@@ -52,10 +52,10 @@ public class RespondentMiamChecker implements RespondentEventChecker {
         if (miam.isPresent()) {
             fields.add(ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam()));
             YesOrNo attendMiam = miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam();
-            if (attendMiam.equals(YesOrNo.No)) {
+            if (YesOrNo.No.equals(attendMiam)) {
                 fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam()));
                 YesOrNo willingToAttendMiam = miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam();
-                if (willingToAttendMiam.equals(YesOrNo.No)) {
+                if (YesOrNo.No.equals(willingToAttendMiam)) {
                     fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getReasonNotAttendingMiam()));
                 }
             }
