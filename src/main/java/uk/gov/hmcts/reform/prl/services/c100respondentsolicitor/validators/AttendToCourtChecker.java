@@ -48,7 +48,7 @@ public class AttendToCourtChecker implements RespondentEventChecker {
         if (attendToCourt.isPresent()) {
             Optional<YesOrNo> respondentWelshNeeds = ofNullable(attendToCourt.get().getRespondentWelshNeeds());
             fields.add(respondentWelshNeeds);
-            if (respondentWelshNeeds.isPresent() && respondentWelshNeeds.equals(Optional.of((YesOrNo.Yes)))) {
+            if (respondentWelshNeeds.isPresent() && YesOrNo.Yes.equals(respondentWelshNeeds.get())) {
                 fields.add(ofNullable(attendToCourt.get().getRespondentWelshNeedsList()));
             }
             isRespondentNeededInterpreter(attendToCourt, fields);
@@ -65,7 +65,7 @@ public class AttendToCourtChecker implements RespondentEventChecker {
         if (attendToCourt.isPresent()) {
             Optional<YesOrNo> respondentIntermediaryNeeds = ofNullable(attendToCourt.get().getRespondentIntermediaryNeeds());
             fields.add(respondentIntermediaryNeeds);
-            if (respondentIntermediaryNeeds.isPresent() && respondentIntermediaryNeeds.equals(Optional.of((YesOrNo.Yes)))) {
+            if (respondentIntermediaryNeeds.isPresent() && YesOrNo.Yes.equals(respondentIntermediaryNeeds.get())) {
                 fields.add(ofNullable(attendToCourt.get().getRespondentIntermediaryNeedDetails()));
             }
         }
@@ -75,7 +75,7 @@ public class AttendToCourtChecker implements RespondentEventChecker {
         if (attendToCourt.isPresent()) {
             Optional<YesOrNo> respondentSpecialArrangements = ofNullable(attendToCourt.get().getRespondentSpecialArrangements());
             fields.add(respondentSpecialArrangements);
-            if (respondentSpecialArrangements.isPresent() && respondentSpecialArrangements.equals(Optional.of((YesOrNo.Yes)))) {
+            if (respondentSpecialArrangements.isPresent() && YesOrNo.Yes.equals(respondentSpecialArrangements.get())) {
                 fields.add(ofNullable(attendToCourt.get().getRespondentSpecialArrangementDetails()));
             }
         }
@@ -85,7 +85,7 @@ public class AttendToCourtChecker implements RespondentEventChecker {
         if (attendToCourt.isPresent()) {
             Optional<YesOrNo> haveAnyDisability = ofNullable(attendToCourt.get().getHaveAnyDisability());
             fields.add(haveAnyDisability);
-            if (haveAnyDisability.isPresent() && haveAnyDisability.equals(Optional.of((YesOrNo.Yes)))) {
+            if (haveAnyDisability.isPresent() && YesOrNo.Yes.equals(haveAnyDisability.get())) {
                 fields.add(ofNullable(attendToCourt.get().getDisabilityNeeds()));
             }
         }
@@ -95,7 +95,7 @@ public class AttendToCourtChecker implements RespondentEventChecker {
         if (attendToCourt.isPresent()) {
             Optional<YesOrNo> isRespondentNeededInterpreter = ofNullable(attendToCourt.get().getIsRespondentNeededInterpreter());
             fields.add(isRespondentNeededInterpreter);
-            if (isRespondentNeededInterpreter.isPresent() && isRespondentNeededInterpreter.equals(Optional.of((YesOrNo.Yes)))) {
+            if (isRespondentNeededInterpreter.isPresent() && YesOrNo.Yes.equals(isRespondentNeededInterpreter.get())) {
                 List<RespondentInterpreterNeeds> respondentInterpreterNeeds = attendToCourt.get()
                     .getRespondentInterpreterNeeds()
                     .stream()

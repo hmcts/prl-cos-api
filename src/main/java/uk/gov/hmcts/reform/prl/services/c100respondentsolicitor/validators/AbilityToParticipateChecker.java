@@ -49,7 +49,7 @@ public class AbilityToParticipateChecker implements RespondentEventChecker {
 
             Optional<YesNoDontKnow> abilityToParticipateYesOrNo = ofNullable(abilityToParticipate.get().getFactorsAffectingAbilityToParticipate());
             fields.add(abilityToParticipateYesOrNo);
-            if (abilityToParticipateYesOrNo.isPresent() && abilityToParticipateYesOrNo.equals(Optional.of(YesNoDontKnow.yes))) {
+            if (abilityToParticipateYesOrNo.isPresent() && YesNoDontKnow.yes.equals(abilityToParticipateYesOrNo.get())) {
                 fields.add(ofNullable(abilityToParticipate.get().getProvideDetailsForFactorsAffectingAbilityToParticipate()));
             }
         }
