@@ -47,26 +47,26 @@ public class InternationalElementsChecker implements RespondentEventChecker {
 
             Optional<YesOrNo> reasonForChild = ofNullable(internationalElements.get().getInternationalElementChildInfo().getReasonForChild());
             fields.add(reasonForChild);
-            if (reasonForChild.isPresent() && reasonForChild.equals(Optional.of((YesOrNo.Yes)))) {
+            if (reasonForChild.isPresent() && YesOrNo.Yes.equals(reasonForChild.get())) {
                 fields.add(ofNullable(internationalElements.get().getInternationalElementChildInfo().getReasonForChildDetails()));
             }
 
             Optional<YesOrNo> reasonForParent = ofNullable(internationalElements.get().getInternationalElementChildInfo().getReasonForParent());
             fields.add(reasonForParent);
-            if (reasonForParent.isPresent() && reasonForParent.equals(Optional.of((YesOrNo.Yes)))) {
+            if (reasonForParent.isPresent() && YesOrNo.Yes.equals(reasonForParent.get())) {
                 fields.add(ofNullable(internationalElements.get().getInternationalElementParentInfo().getReasonForParentDetails()));
             }
 
             Optional<YesOrNo> reasonForJurisdiction = ofNullable(internationalElements.get()
                                                                      .getInternationalElementChildInfo().getReasonForJurisdiction());
             fields.add(reasonForJurisdiction);
-            if (reasonForJurisdiction.isPresent() && reasonForJurisdiction.equals(Optional.of((YesOrNo.Yes)))) {
+            if (reasonForJurisdiction.isPresent() && YesOrNo.Yes.equals(reasonForJurisdiction.get())) {
                 fields.add(ofNullable(internationalElements.get().getInternationalElementParentInfo().getReasonForJurisdictionDetails()));
             }
 
             Optional<YesOrNo> requestToAuthority = ofNullable(internationalElements.get().getInternationalElementChildInfo().getRequestToAuthority());
             fields.add(requestToAuthority);
-            if (requestToAuthority.isPresent() && requestToAuthority.equals(Optional.of((YesOrNo.Yes)))) {
+            if (requestToAuthority.isPresent() && YesOrNo.Yes.equals(requestToAuthority.get())) {
                 fields.add(ofNullable(internationalElements.get().getInternationalElementParentInfo().getRequestToAuthorityDetails()));
             }
         }

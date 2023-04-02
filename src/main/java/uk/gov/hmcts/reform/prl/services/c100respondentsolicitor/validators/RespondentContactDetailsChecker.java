@@ -52,8 +52,8 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
                 return false;
             }
             fields.add(ofNullable(citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years()));
-            if (citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years()
-                .equals(YesOrNo.No)) {
+            if (YesOrNo.No
+                .equals(citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years())) {
                 fields.add(ofNullable(citizenDetails.get().getAddressHistory().getPreviousAddressHistory()));
             }
             fields.add(ofNullable(citizenDetails.get().getContact().getPhoneNumber()));
