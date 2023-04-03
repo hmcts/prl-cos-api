@@ -86,6 +86,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("**********Start {} ",caseDataUpdated);
         if (caseDataUpdated.containsKey(LISTWITHOUTNOTICE_HEARINGDETAILS)) {
             caseDataUpdated.put(
                 LISTWITHOUTNOTICE_HEARINGDETAILS,
@@ -100,6 +101,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
         caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
             .build());
+        log.info("**********End {} ",caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
