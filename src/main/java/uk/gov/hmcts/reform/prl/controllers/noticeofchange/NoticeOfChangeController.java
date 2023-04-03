@@ -45,7 +45,7 @@ public class NoticeOfChangeController extends AbstractCallbackController {
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         log.info("aboutToSubmitNoCRequest entered");
-        return noticeOfChangePartiesService.applyDecision(callbackRequest.getCaseDetails(), authorisation);
+        return noticeOfChangePartiesService.applyDecision(callbackRequest, authorisation);
     }
 
     @PostMapping(path = "/submittedNoCRequest", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
