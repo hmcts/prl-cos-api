@@ -23,8 +23,9 @@ public enum CaseEvent {
     COURTNAV_DOCUMENT_UPLOAD_EVENT_ID("courtnav-document-upload"),
     HEARING_STATE_CHANGE_SUCCESS("hmcCaseUpdateSuccess"),
     HEARING_STATE_CHANGE_FAILURE("hmcCaseUpdateFailure"),
-
-    INTERNAL_UPDATE_TASK_LIST("internal-update-task-list");
+    INTERNAL_UPDATE_TASK_LIST("internal-update-task-list"),
+    CITIZEN_CASE_SUBMIT_WITH_HWF("citizenCaseSubmitWithHWF"),
+    CITIZEN_CASE_WITHDRAW("citizenCaseWithdraw");
 
     private final String value;
 
