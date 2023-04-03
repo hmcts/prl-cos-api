@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -18,8 +20,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
-import uk.gov.hmcts.reform.prl.models.user.UserInfo;
-import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -110,25 +110,9 @@ public class NoticeOfChangePartiesService {
         } catch (JsonProcessingException e) {
             log.info("error");
         }
-
-        return assignCaseAccessClient.applyDecision(
-            authorisation,
-            tokenGenerator.generate(),
-            decisionRequest(callbackRequest.getCaseDetails()));
-    }
-
-    public CaseData nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
-        CaseData oldCaseData = getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
-        CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        try {
-            log.info("callbackRequest.getCaseDetailsBefore() json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetailsBefore()));
-            log.info("callbackRequest.getCaseDetails() json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
-
-        ChangeOrganisationRequest changeOrganisationRequest = oldCaseData.getChangeOrganisationRequestField();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = getCaseData(caseDetails, objectMapper);
+        ChangeOrganisationRequest changeOrganisationRequest = caseData.getChangeOrganisationRequestField();
         if (changeOrganisationRequest != null
             && changeOrganisationRequest.getCaseRoleId() != null
             && changeOrganisationRequest.getCaseRoleId().getValue() != null) {
@@ -137,25 +121,39 @@ public class NoticeOfChangePartiesService {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(caseRoleLabel);
             if (solicitorRole.isPresent() && RESPONDENT.equals(solicitorRole.get().getRepresenting())) {
                 log.info("inside solicitorRole present");
-                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(newCaseData))) {
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                     int partyIndex = solicitorRole.get().getIndex();
-                    Element<PartyDetails> representedRespondentElement = newCaseData.getRespondents().get(partyIndex);
-                    UserInfo legalRepresentativeSolicitorInfo = userService.getUserInfo(
-                        authorisation,
-                        UserRoles.SOLICITOR
+                    Element<PartyDetails> representedRespondentElement = caseData.getRespondents().get(partyIndex);
+                    UserDetails legalRepresentativeSolicitorInfo = userService.getUserDetails(
+                        authorisation
                     );
                     representedRespondentElement.getValue()
                         .setUser(User.builder()
-                                     .idamId(legalRepresentativeSolicitorInfo.getIdamId())
-                                     .email(legalRepresentativeSolicitorInfo.getEmailAddress())
+                                     .idamId(legalRepresentativeSolicitorInfo.getId())
+                                     .email(legalRepresentativeSolicitorInfo.getEmail())
                                      .solicitorRepresented(YesOrNo.Yes)
                                      .build());
                     log.info("updated representedRespondentElement ===> " + representedRespondentElement);
-                    newCaseData.getRespondents().set(partyIndex, representedRespondentElement);
+                    caseData.getRespondents().set(partyIndex, representedRespondentElement);
                 }
             }
         }
-        log.info("return newCaseData ===> " + newCaseData);
+        log.info("return newCaseData ===> " + caseData);
+        caseDetails.setData(caseData.toMap(objectMapper));
+        return assignCaseAccessClient.applyDecision(
+            authorisation,
+            tokenGenerator.generate(),
+            decisionRequest(caseDetails));
+    }
+
+    public CaseData nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
+        CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        try {
+            log.info("callbackRequest.getCaseDetailsBefore() json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetailsBefore()));
+            log.info("callbackRequest.getCaseDetails() json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         return newCaseData;
     }
 }
