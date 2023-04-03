@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangeContentProv
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NoticeOfChangeEventHandler {
-    private EmailService emailService;
+    private final EmailService emailService;
     private final NoticeOfChangeContentProvider noticeOfChangeContentProvider;
 
     @Async
