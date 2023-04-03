@@ -96,7 +96,7 @@ public class NoticeOfChangePartiesService {
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(CaseDetails caseDetails, String userToken) {
         try {
-            log.info("applyDecision start json ===>" + objectMapper.writeValueAsString(caseDetails.getData()));
+            log.info("applyDecision start json ===>" + objectMapper.writeValueAsString(caseDetails));
         } catch (JsonProcessingException e) {
             log.info("error");
         }
