@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.noticeofchange;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ public class NoticeOfChangePartiesService {
     public final RespondentPolicyConverter policyConverter;
     private final AuthTokenGenerator tokenGenerator;
     private final AssignCaseAccessClient assignCaseAccessClient;
+    private final ObjectMapper objectMapper;
 
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing) {
         return generate(caseData, representing, POPULATE);
@@ -89,6 +92,12 @@ public class NoticeOfChangePartiesService {
     }
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(CaseDetails caseDetails, String userToken) {
+        try {
+            log.info("applyDecision start json ===>" + objectMapper.writeValueAsString(caseDetails.getData()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
         return assignCaseAccessClient.applyDecision(
             userToken,
             tokenGenerator.generate(),
