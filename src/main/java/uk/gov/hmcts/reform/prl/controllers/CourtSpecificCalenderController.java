@@ -23,12 +23,10 @@ public class CourtSpecificCalenderController {
 
     @GetMapping(value = "courtSpecificCalender/bank-holidays.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UkHolidayDates> bankHolidays() throws IOException {
-        log.info("bankHolidays()---> Start");
         Resource resource = new ClassPathResource("/bank-holidays.json");
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         UkHolidayDates ukHolidayDates = mapper.readValue(resource.getInputStream(), UkHolidayDates.class);
-        log.info("bankHolidays()---> End");
         return ok(ukHolidayDates);
     }
 
