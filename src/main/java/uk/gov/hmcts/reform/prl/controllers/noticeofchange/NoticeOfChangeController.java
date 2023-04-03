@@ -57,7 +57,8 @@ public class NoticeOfChangeController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse submittedNoCRequest(
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        log.info("Calling submittedNoCRequest in backend");
+        log.info("Calling submittedNoCRequest");
+        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

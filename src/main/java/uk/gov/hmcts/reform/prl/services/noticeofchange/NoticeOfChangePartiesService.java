@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -24,9 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.RESPONDENT;
 import static uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest.decisionRequest;
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.BLANK;
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.POPULATE;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
 @Component
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
@@ -102,5 +105,20 @@ public class NoticeOfChangePartiesService {
             userToken,
             tokenGenerator.generate(),
             decisionRequest(caseDetails));
+    }
+
+    public void nocRequestSubmitted(CallbackRequest callbackRequest) {
+        CaseData oldCaseData = getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+        CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        List<Element<PartyDetails>> oldRepresentables = RESPONDENT.getTarget().apply(oldCaseData);
+        List<Element<PartyDetails>> currentRepresentables = RESPONDENT.getTarget().apply(newCaseData);
+
+        try {
+            log.info("oldRepresentables json ===>" + objectMapper.writeValueAsString(oldRepresentables));
+            log.info("currentRepresentables json ===>" + objectMapper.writeValueAsString(currentRepresentables));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
     }
 }
