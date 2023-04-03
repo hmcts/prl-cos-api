@@ -18,10 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
-
-import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -55,13 +52,11 @@ public class NoticeOfChangeController extends AbstractCallbackController {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public CallbackResponse submittedNoCRequest(
+    public void submittedNoCRequest(
             @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         log.info("Calling submittedNoCRequest");
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, authorisation);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        return CallbackResponse.builder().data(noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, authorisation)).build();
     }
 }

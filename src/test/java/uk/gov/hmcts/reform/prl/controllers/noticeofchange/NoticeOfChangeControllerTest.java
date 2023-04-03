@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDateTime;
@@ -51,14 +50,5 @@ public class NoticeOfChangeControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         response = noticeOfChangeController.aboutToSubmitNoCRequest(authToken, callbackRequest);
         assertNotNull(response);
-    }
-
-    @Test
-    @Ignore
-    public void testSubmittedNoCRequest() {
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        CallbackResponse callbackResponse = noticeOfChangeController.submittedNoCRequest(authToken, callbackRequest);
-        assertNotNull(callbackResponse);
     }
 }
