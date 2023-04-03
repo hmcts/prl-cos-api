@@ -30,6 +30,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 
@@ -64,6 +65,9 @@ public class FL401SubmitApplicationService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private CourtSealFinderService courtSealFinderService;
+
     public Map<String, Object> fl401GenerateDocumentSubmitApplication(String authorisation,
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
         caseData = caseData.toBuilder()
@@ -81,6 +85,12 @@ public class FL401SubmitApplicationService {
         caseData = caseData.toBuilder().isCourtEmailFound("Yes").build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(courtDetailsMap);
+        if (courtVenue.isPresent()) {
+            String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
+            caseData = caseData.toBuilder().courtName(courtVenue.get().getCourtName())
+                .courtSeal(courtSeal).build();
+            caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
+        }
         if (courtVenue.isPresent()) {
             String postcode = courtVenue.get().getPostcode();
             String courtEmail = null;
