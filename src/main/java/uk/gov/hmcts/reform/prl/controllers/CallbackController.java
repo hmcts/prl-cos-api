@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,21 +48,28 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
@@ -73,7 +82,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -86,8 +94,7 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_STATE;
@@ -98,6 +105,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
 @Slf4j
 @RestController
@@ -126,12 +134,23 @@ public class CallbackController {
     private final CourtFinderService courtLocatorService;
     private final LocationRefDataService locationRefDataService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
+    private final PaymentRequestService paymentRequestService;
+    private final CourtSealFinderService courtSealFinderService;
 
     private final ConfidentialityTabService confidentialityTabService;
 
     private final LaunchDarklyClient launchDarklyClient;
 
     private final ApplicantsListGenerator applicantsListGenerator;
+
+    @Autowired
+    @Qualifier("caseSummaryTab")
+    private CaseSummaryTabService caseSummaryTabService;
+    @Autowired
+    RefDataUserService refDataUserService;
+
+    @Autowired
+    private GatekeepingDetailsService gatekeepingDetailsService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -228,7 +247,6 @@ public class CallbackController {
         } else {
             log.info("Court email not found for case id {}", caseData.getId());
         }
-        log.info("       ------------********--------------      ");
         List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
         caseDataUpdated.put("courtList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
             .build());
@@ -284,10 +302,18 @@ public class CallbackController {
 
         //Assign default court to all c100 cases for work allocation.
         caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-            .regionId(C100_DEFAULT_REGION_ID)
-            .baseLocationId(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
+            .region(C100_DEFAULT_REGION_ID)
+            .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
             .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
 
+        PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
+            callbackRequest,
+            authorisation
+        );
+        caseDataUpdated.put(
+            "paymentServiceRequestReferenceNumber",
+            paymentServiceResponse.getServiceRequestReference()
+        );
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -316,16 +342,12 @@ public class CallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String baseLocationId = caseData.getCourtList().getValue().getCode();
-        String[] venueDetails = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,authorisation).split("-");
-        String regionId = Arrays.stream(venueDetails).toArray()[1].toString();
-        String courtName = Arrays.stream(venueDetails).toArray()[2].toString();
-        caseDataUpdated.put(COURT_NAME_FIELD, courtName);
-        caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
-        String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
-        String baseLocationName = Arrays.stream(venueDetails).toArray()[5].toString();
-        caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-            .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
-            .baseLocationName(baseLocationName).build());
+        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
+        caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
+        if (courtVenue.isPresent()) {
+            String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
+            caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -361,8 +383,8 @@ public class CallbackController {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         List<String> stateList = List.of(DRAFT_STATE, "CLOSED",
-            PENDING_STATE,
-            SUBMITTED_STATE, RETURN_STATE
+                                         PENDING_STATE,
+                                         SUBMITTED_STATE, RETURN_STATE
         );
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
@@ -413,16 +435,20 @@ public class CallbackController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse sendEmailForSendToGatekeeper(
+    public AboutToStartOrSubmitCallbackResponse sendToGatekeeper(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("Gatekeeping details for the case id : {}", caseData.getId());
 
-        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseWorkerEmailService.sendEmailToGateKeeper(caseDetails);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
+        GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(caseDataUpdated,
+                                                                                                caseData.getLegalAdviserList(), refDataUserService);
+        caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
+
+        caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
 
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
@@ -495,7 +521,11 @@ public class CallbackController {
         }
 
         // Saving the logged-in Solicitor and Org details for the docs..
-        return AboutToStartOrSubmitCallbackResponse.builder().data(getSolicitorDetails(authorisation, caseDataUpdated, caseData)).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(getSolicitorDetails(
+            authorisation,
+            caseDataUpdated,
+            caseData
+        )).build();
     }
 
     @PostMapping(path = "/fl401-add-case-number", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -611,3 +641,4 @@ public class CallbackController {
     }
 
 }
+
