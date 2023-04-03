@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -24,13 +24,20 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DynamicMultiSelectListService {
 
-    public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData) {
+
+    public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData, String key) {
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (null != orders) {
             orders.forEach(order -> {
                 OrderDetails orderDetails = order.getValue();
-                listItems.add(DynamicMultiselectListElement.builder().code(orderDetails.getOrderTypeId())
+                if (ManageOrdersOptionsEnum.servedSavedOrders.getDisplayedValue().equals(key)
+                    && orderDetails.getOtherDetails() != null
+                    &&  orderDetails.getOtherDetails().getOrderServedDate() != null) {
+                    return;
+                }
+                listItems.add(DynamicMultiselectListElement.builder().code(orderDetails.getOrderTypeId() + "-"
+                                                                               + orderDetails.getDateCreated())
                                   .label(orderDetails.getLabelForDynamicList()).build());
             });
         }

@@ -8,7 +8,11 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+
+import java.util.List;
 
 
 @Service
@@ -17,6 +21,8 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 public class HearingService {
 
     private Hearings hearingDetails;
+
+    private List<CaseLinkedData> caseLinkedData;
 
     private final AuthTokenGenerator authTokenGenerator;
 
@@ -41,5 +47,17 @@ public class HearingService {
         }
         return null;
     }
+
+    public List<CaseLinkedData> getCaseLinkedData(String userToken, CaseLinkedRequest caseLinkedRequest) {
+
+        try {
+            caseLinkedData = hearingApiClient.getCaseLinkedData(userToken, authTokenGenerator.generate(), caseLinkedRequest);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return caseLinkedData;
+    }
+
+
 
 }

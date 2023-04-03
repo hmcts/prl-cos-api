@@ -60,9 +60,11 @@ public class ServiceOfApplicationController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<DynamicMultiselectListElement> listElements = new ArrayList<>();
-        caseDataUpdated.put("serviceOfApplicationScreen1", dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData));
-        log.info("***** listElements : {}", caseDataUpdated.get("serviceOfApplicationScreen1"));
-        log.info("***** listElements : {}", caseDataUpdated);
+
+        caseDataUpdated.put(
+            "serviceOfApplicationScreen1",
+            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, null)
+        );
 
         Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
             .getApplicantsMultiSelectList(caseData);
@@ -74,12 +76,7 @@ public class ServiceOfApplicationController {
         List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData);
 
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase("C100")) {
-            log.info("****** applicantList : {}", applicantList);
-            log.info("****** applicantSolicitorList : {}", applicantSolicitorList);
-            log.info("****** respondent list : {}", respondentList);
-            log.info("****** respondentSolicitorList : {}", respondentSolicitorList);
-        }
+
         ConfirmRecipients confirmRecipients = ConfirmRecipients.builder()
             .applicantsList(DynamicMultiSelectList.builder()
                                 .listItems(applicantList)
@@ -98,7 +95,7 @@ public class ServiceOfApplicationController {
                                  .build())
             .build();
         caseDataUpdated.put("confirmRecipients",confirmRecipients);
-        log.info("****** confirm recepietns : {}", confirmRecipients);
+
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
