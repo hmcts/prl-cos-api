@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -78,40 +77,6 @@ public class C100RespondentSolicitorController {
                 errorList
             ))
             .errors(errorList).build();
-    }
-
-    @PostMapping(path = "/populate-solicitor-respondent-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to populate the header")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Populated Headers"),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse populateSolicitorRespondentList(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-        log.info("populateSolicitorRespondentList: Callback for getting the respondent listing");
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(respondentSolicitorService.populateSolicitorRespondentList(callbackRequest, authorisation))
-            .build();
-    }
-
-    @PostMapping(path = "/respondent-selection-about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for Respondent Solicitor - submit active respondent selection")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleActiveRespondentSelection(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-
-        log.info("handleActiveRespondentSelection: Callback for Respondent Solicitor - handle select respondent");
-        return AboutToStartOrSubmitCallbackResponse
-            .builder()
-            .data(respondentSolicitorService.updateActiveRespondentSelectionBySolicitor(
-                callbackRequest,
-                authorisation
-            )).build();
     }
 
     @PostMapping(path = "/keep-details-private-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

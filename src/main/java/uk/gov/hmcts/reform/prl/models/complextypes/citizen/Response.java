@@ -70,7 +70,6 @@ public class Response {
     @Builder.Default
     private final ResSolInternationalElements resSolInternationalElements;
 
-    private final YesOrNo activeRespondent;
     private final YesOrNo c7ResponseSubmitted;
     private final YesOrNo c1AResponseSubmitted;
 }

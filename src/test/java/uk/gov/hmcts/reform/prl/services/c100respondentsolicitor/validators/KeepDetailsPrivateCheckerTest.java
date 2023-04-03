@@ -41,7 +41,6 @@ public class KeepDetailsPrivateCheckerTest {
         PartyDetails respondent = PartyDetails.builder()
             .response(Response
                           .builder()
-                          .activeRespondent(Yes)
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
                                                   .build())

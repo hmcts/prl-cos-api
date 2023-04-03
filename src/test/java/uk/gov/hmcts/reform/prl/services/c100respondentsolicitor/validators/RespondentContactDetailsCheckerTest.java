@@ -21,7 +21,6 @@ import java.util.List;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class RespondentContactDetailsCheckerTest {
@@ -60,7 +59,6 @@ public class RespondentContactDetailsCheckerTest {
                                                                   .previousAddressHistory(addressList)
                                                                   .build())
                                               .build())
-                          .activeRespondent(Yes)
                           .build())
             .build();
 
@@ -86,7 +84,6 @@ public class RespondentContactDetailsCheckerTest {
                                                                   .previousAddressHistory(addressList)
                                                                   .build())
                                               .build())
-                          .activeRespondent(Yes)
                           .build())
             .build();
 

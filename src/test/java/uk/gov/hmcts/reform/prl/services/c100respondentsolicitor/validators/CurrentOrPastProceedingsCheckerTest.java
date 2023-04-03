@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CurrentOrPastProceedingsCheckerTest {
@@ -43,7 +42,6 @@ public class CurrentOrPastProceedingsCheckerTest {
         PartyDetails respondent = PartyDetails.builder()
             .response(Response
                           .builder()
-                          .activeRespondent(Yes)
                           .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
                           .respondentExistingProceedings(proceedingsList)
                           .build())

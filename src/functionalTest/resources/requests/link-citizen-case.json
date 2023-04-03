@@ -635,7 +635,6 @@
             "parkingDetails": "string",
             "differentChairDetails": "string"
           },
-          "activeRespondent": "Yes",
           "c7ResponseSubmitted": "Yes",
           "c1AResponseSubmitted": "Yes"
         },
@@ -1220,7 +1219,6 @@
             "parkingDetails": "string",
             "differentChairDetails": "string"
           },
-          "activeRespondent": "Yes",
           "c7ResponseSubmitted": "Yes",
           "c1AResponseSubmitted": "Yes"
         },
@@ -1916,7 +1914,6 @@
             "parkingDetails": "string",
             "differentChairDetails": "string"
           },
-          "activeRespondent": "Yes",
           "c7ResponseSubmitted": "Yes",
           "c1AResponseSubmitted": "Yes"
         },
@@ -4117,18 +4114,6 @@
     }
   ],
   "draftOrdersDynamicList": {},
-  "chooseRespondentDynamicList": {
-    "value": {
-      "code": "string",
-      "label": "string"
-    },
-    "list_items": [
-      {
-        "code": "string",
-        "label": "string"
-      }
-    ]
-  },
   "respondent0": {
     "respondentFirstName": "string",
     "respondentLastName": "string",
@@ -4715,7 +4700,6 @@
         "parkingDetails": "string",
         "differentChairDetails": "string"
       },
-      "activeRespondent": "Yes",
       "c7ResponseSubmitted": "Yes",
       "c1AResponseSubmitted": "Yes"
     },
@@ -5234,7 +5218,6 @@
         "parkingDetails": "string",
         "differentChairDetails": "string"
       },
-      "activeRespondent": "Yes",
       "c7ResponseSubmitted": "Yes",
       "c1AResponseSubmitted": "Yes"
     },

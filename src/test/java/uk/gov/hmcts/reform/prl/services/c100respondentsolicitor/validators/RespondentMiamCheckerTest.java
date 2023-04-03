@@ -44,7 +44,6 @@ public class RespondentMiamCheckerTest {
                                                                    .reasonNotAttendingMiam("test")
                                                                    .build())
                                .build())
-            .activeRespondent(Yes)
             .build();
 
         PartyDetails respondents = PartyDetails.builder()
@@ -98,7 +97,6 @@ public class RespondentMiamCheckerTest {
                                                                .build())
 
                                .build())
-            .activeRespondent(Yes)
             .build();
 
         PartyDetails respondents = PartyDetails.builder()

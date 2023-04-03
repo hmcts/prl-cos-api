@@ -63,7 +63,6 @@ public class RespondentAllegationsOfHarmCheckerTest {
         PartyDetails respondent = PartyDetails.builder()
             .response(Response
                           .builder()
-                          .activeRespondent(Yes)
                           .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData
                                    .builder()
                                    .respDomesticAbuseInfo(behaviourList)

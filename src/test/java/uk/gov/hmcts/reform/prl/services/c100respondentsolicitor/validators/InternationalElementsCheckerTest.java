@@ -33,7 +33,6 @@ public class InternationalElementsCheckerTest {
             .builder()
             .response(Response
                           .builder()
-                          .activeRespondent(Yes)
                           .resSolInternationalElements(ResSolInternationalElements
                                                            .builder()
                                                            .internationalElementParentInfo(SolicitorInternationalElement

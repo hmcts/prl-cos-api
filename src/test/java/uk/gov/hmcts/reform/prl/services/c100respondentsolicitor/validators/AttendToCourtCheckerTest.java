@@ -49,7 +49,6 @@ public class AttendToCourtCheckerTest {
 
         PartyDetails respondent = PartyDetails.builder()
             .response(Response.builder()
-                          .activeRespondent(Yes)
                           .attendToCourt(AttendToCourt.builder()
                                              .respondentWelshNeeds(Yes)
                                              .respondentWelshNeedsList(welshNeedsListEnum)

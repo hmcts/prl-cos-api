@@ -92,6 +92,10 @@ public class CaseEventHandler {
         if (null == respondent || "".equalsIgnoreCase(respondent)) {
             return "";
         }
+
+        if (!caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
+            return "";
+        }
         final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(caseData, respondent);
         log.info("tasks found: " + tasks.size());
 

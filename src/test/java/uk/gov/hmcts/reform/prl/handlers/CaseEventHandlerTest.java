@@ -162,9 +162,6 @@ public class CaseEventHandlerTest {
             .build();
         final CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
 
-        final String respondentTaskListA = "<h3>Respond to the application for Respondent A";
-        final String respondentTaskListB = "<h3>Respond to the application for Respondent B";
-
         final List<Event> fl410Events = List.of(
             CASE_NAME,
             FL401_TYPE_OF_APPLICATION
@@ -202,8 +199,6 @@ public class CaseEventHandlerTest {
         when(taskListService.getRespondentSolicitorTasks(caseData, "A")).thenReturn(respondentTask);
         when(taskListService.getRespondentSolicitorTasks(caseData, "B")).thenReturn(respondentTask);
         when(taskListRenderer.render(fl401Tasks, eventsErrors, false, caseData)).thenReturn(fl410renderedTaskList);
-        when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "A")).thenReturn(respondentTaskListA);
-        when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "B")).thenReturn(respondentTaskListB);
         when(respondentTaskErrorService.getEventErrors(caseData)).thenReturn(resErrors);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
@@ -227,9 +222,9 @@ public class CaseEventHandlerTest {
                 "respondentTaskList",
                 "",
                 "respondentTaskListA",
-                respondentTaskListA,
+                "",
                 "respondentTaskListB",
-                respondentTaskListB,
+                "",
                 "id",
                 String.valueOf(caseData.getId())
             )
@@ -248,7 +243,6 @@ public class CaseEventHandlerTest {
             .solicitorEmail("test@test.com")
             .response(Response.builder()
                           .c7ResponseSubmitted(YesOrNo.Yes)
-                          .activeRespondent(YesOrNo.Yes)
                           .build())
             .build();
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();

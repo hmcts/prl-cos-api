@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
-import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -85,8 +84,6 @@ public class C100RespondentSolicitorServiceTest {
     @Mock
     DocumentGenService documentGenService;
 
-    FindUserCaseRolesResponse findUserCaseRolesResponse;
-
     boolean mandatoryFinished = false;
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -108,7 +105,6 @@ public class C100RespondentSolicitorServiceTest {
                           .consent(Consent.builder().build())
                           .citizenDetails(CitizenDetails.builder().build())
                           .c7ResponseSubmitted(No)
-                          .activeRespondent(Yes)
                           .solicitorKeepDetailsPriate(SolicitorKeepDetailsPrivate
                                                           .builder()
                                                           .respKeepDetailsPrivateConfidentiality(KeepDetailsPrivate
@@ -210,8 +206,6 @@ public class C100RespondentSolicitorServiceTest {
                              .caseId("12345")
                              .caseRole("[SOLICITORA]")
                              .userId("1afdfa01-8280-4e2c-b810-ab7cf741988a").build());
-        findUserCaseRolesResponse = new FindUserCaseRolesResponse();
-        findUserCaseRolesResponse.setCaseUsers(caseUserList);
 
         Address address = Address.builder()
             .addressLine1("test")
@@ -236,7 +230,6 @@ public class C100RespondentSolicitorServiceTest {
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
         caseData = CaseData.builder().respondents(respondentList).id(1)
-            .chooseRespondentDynamicList(chooseRespondent)
             .keepContactDetailsPrivateOther(KeepDetailsPrivate.builder()
                                            .confidentiality(Yes)
                                            .confidentialityList(confidentialityListEnums)
@@ -329,13 +322,11 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
-                                                   authToken)).thenReturn(findUserCaseRolesResponse);
-
         List<String> errorList = new ArrayList<>();
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .eventId("c100ResSolConsentingToApplicationA")
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -344,53 +335,6 @@ public class C100RespondentSolicitorServiceTest {
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
             callbackRequest, authToken, errorList
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateSolicitorRespondentListTest() {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.populateSolicitorRespondentList(
-            callbackRequest, authToken
-        );
-
-        assertTrue(response.containsKey("chooseRespondentDynamicList"));
-
-    }
-
-    @Test
-    public void updateActiveRespondentSelectionBySolicitor() {
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
-                                                   authToken)).thenReturn(findUserCaseRolesResponse);
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .eventId("c100ResSolSubmit")
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.updateActiveRespondentSelectionBySolicitor(
-            callbackRequest, authToken
         );
 
         assertTrue(response.containsKey("respondents"));
@@ -431,6 +375,7 @@ public class C100RespondentSolicitorServiceTest {
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .eventId("c100ResSolConsentingToApplicationA")
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -471,6 +416,7 @@ public class C100RespondentSolicitorServiceTest {
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .eventId("c100ResSolConsentingToApplicationA")
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -496,6 +442,7 @@ public class C100RespondentSolicitorServiceTest {
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .eventId("c100ResSolConsentingToApplicationA")
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -511,7 +458,7 @@ public class C100RespondentSolicitorServiceTest {
 
 
     @ParameterizedTest
-    @ValueSource(strings = { "c100ResSolConsentingToApplication", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
+    @ValueSource(strings = { "c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
         "c100ResSolAttendingTheCourt", "c100ResSolMiam", "c100ResSolCurrentOrPreviousProceedings", "c100ResSolAllegationsOfHarm",
         "c100ResSolInternationalElement", "c100ResSolAbilityToParticipate"})
     public void populateAboutToStartCaseDataConsentToApplicationEvent(String event) {
@@ -519,9 +466,6 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
-                                                   authToken)).thenReturn(findUserCaseRolesResponse);
 
         List<String> errorList = new ArrayList<>();
 

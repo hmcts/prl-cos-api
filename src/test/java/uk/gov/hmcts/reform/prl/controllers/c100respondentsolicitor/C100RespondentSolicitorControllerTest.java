@@ -122,7 +122,6 @@ public class C100RespondentSolicitorControllerTest {
             .applicants(applicantList)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .chooseRespondentDynamicList(chooseRespondent)
             .respondents(respondentList)
             .build();
     }
@@ -170,52 +169,6 @@ public class C100RespondentSolicitorControllerTest {
         when(respondentSolicitorService.populateAboutToSubmitCaseData(callbackRequest, authToken, errorList)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleAboutToSubmit(
-            authToken,
-            callbackRequest
-        );
-
-        assertTrue(response.getData().containsKey("state"));
-    }
-
-    @Test
-    public void testPopulateSolicitorRespondentList() throws Exception {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        when(respondentSolicitorService.populateSolicitorRespondentList(callbackRequest, authToken)).thenReturn(stringObjectMap);
-
-        AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.populateSolicitorRespondentList(
-            authToken,
-            callbackRequest
-        );
-
-        assertTrue(response.getData().containsKey("state"));;
-    }
-
-    @Test
-    public void testHandleActiveRespondentSelection() throws Exception {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        when(respondentSolicitorService.updateActiveRespondentSelectionBySolicitor(callbackRequest, authToken)).thenReturn(stringObjectMap);
-
-        AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleActiveRespondentSelection(
             authToken,
             callbackRequest
         );
