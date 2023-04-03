@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -19,6 +20,8 @@ public class NoticeOfChangeEmail extends EmailTemplateVars {
     private final String solicitorName;
     @JsonProperty("caseLink")
     private final String caseLink;
+    @JsonProperty("privacyNoticeLink")
+    private final Map<String,Object> privacyNoticeLink;
 
 
     @Builder
@@ -26,11 +29,13 @@ public class NoticeOfChangeEmail extends EmailTemplateVars {
                                String caseName,
                                LocalDate issueDate,
                                String solicitorName,
-                               String caseLink) {
+                               String caseLink,
+                               Map<String,Object> privacyNoticeLink) {
         super(caseReference);
         this.caseName = caseName;
         this.issueDate = issueDate;
         this.solicitorName = solicitorName;
         this.caseLink = caseLink;
+        this.privacyNoticeLink = privacyNoticeLink;
     }
 }
