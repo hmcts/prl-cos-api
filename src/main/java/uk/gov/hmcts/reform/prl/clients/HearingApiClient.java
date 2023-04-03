@@ -33,6 +33,7 @@ public interface HearingApiClient {
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestHeader("caseReference") String caseReference
+    );
 
     @PostMapping(value = "/serviceLinkedCases", consumes = "application/json")
     List<CaseLinkedData> getCaseLinkedData(

@@ -144,14 +144,9 @@ public class ManageOrderServiceTest {
             .isCaseWithdrawn(YesOrNo.No)
             .build();
 
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code(TEST_UUID).label(" ").build();
         dynamicList = DynamicList.builder()
             .listItems(List.of(dynamicListElement))
             .value(dynamicListElement)
-            .build();
-        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
-            .code(TEST_UUID)
-            .label("test")
             .build();
         dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
             .value(List.of(dynamicMultiselectListElement))

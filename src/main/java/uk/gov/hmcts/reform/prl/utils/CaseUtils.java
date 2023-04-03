@@ -96,6 +96,7 @@ public class CaseUtils {
         }
         return caseType;
     }
+
     public static Map<String, Object> getCourtDetails(Optional<CourtVenue> courtVenue, String baseLocationId) {
         Map<String, Object> caseDataMap = new HashMap<>();
         if (courtVenue.isPresent()) {
