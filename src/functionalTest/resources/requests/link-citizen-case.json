@@ -60,15 +60,9 @@
     "Country": "string",
     "PostCode": "string"
   },
-  "isChildrenKnownToAuthority": "Yes",
-  "childAndLocalAuthority": "string",
-  "isChildrenUnderChildProtection": "Yes",
   "isChildrenWithSameParents": "Yes",
   "parentsAndTheirChildren": "string",
   "parentalResponsibilities": "string",
-  "whoChildrenLiveWith": "Applicant(s)",
-  "childAddressAndAdultsLivingWith": "string",
-  "isExistingProceedings": "Yes",
   "childrenInProceeding": "string",
   "otherChildren": [
     {
