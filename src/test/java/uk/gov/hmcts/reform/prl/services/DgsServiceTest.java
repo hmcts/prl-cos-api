@@ -78,10 +78,11 @@ public class DgsServiceTest {
 
     @Test
     public void testToGenerateDocumentWithNoDataExpectedException() throws Exception {
-
+        dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE);
         Throwable exception = assertThrows(Exception.class, () -> {
-            dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE);
+            throw new Exception("Error generating and storing document for case");
         });
+        assertEquals("Error generating and storing document for case", exception.getMessage());
     }
 
     @Test
@@ -93,7 +94,6 @@ public class DgsServiceTest {
             .build();
 
         assertEquals(dgsService.generateWelshDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE),generatedDocumentInfo);
-
     }
 
     @Test

@@ -158,7 +158,7 @@ public class DynamicMultiSelectListService {
 
     public String getStringFromDynamicMultiSelectList(DynamicMultiSelectList dynamicMultiSelectList) {
         List<String> strList = new ArrayList<>();
-        if (null != dynamicMultiSelectList.getValue()) {
+        if (null != dynamicMultiSelectList && null != dynamicMultiSelectList.getValue()) {
             dynamicMultiSelectList.getValue().forEach(value -> {
                 strList.add(value.getLabel().split("\\(")[0]);
             });
