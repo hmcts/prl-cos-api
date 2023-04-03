@@ -9,13 +9,20 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
+import uk.gov.hmcts.reform.prl.models.user.UserInfo;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
 
@@ -24,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.RESPONDENT;
 import static uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest.decisionRequest;
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.BLANK;
@@ -39,6 +47,8 @@ public class NoticeOfChangePartiesService {
     private final AuthTokenGenerator tokenGenerator;
     private final AssignCaseAccessClient assignCaseAccessClient;
     private final ObjectMapper objectMapper;
+    @Autowired
+    private final UserService userService;
 
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing) {
         return generate(caseData, representing, POPULATE);
@@ -93,7 +103,7 @@ public class NoticeOfChangePartiesService {
         POPULATE, BLANK
     }
 
-    public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String userToken) {
+    public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String authorisation) {
         try {
             log.info("applyDecision start getCaseDetailsBefore json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetailsBefore()));
             log.info("applyDecision start getCaseDetails json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
@@ -102,25 +112,50 @@ public class NoticeOfChangePartiesService {
         }
 
         return assignCaseAccessClient.applyDecision(
-            userToken,
+            authorisation,
             tokenGenerator.generate(),
             decisionRequest(callbackRequest.getCaseDetails()));
     }
 
-    public void nocRequestSubmitted(CallbackRequest callbackRequest) {
+    public CaseData nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData oldCaseData = getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        List<Element<PartyDetails>> oldRepresentables = RESPONDENT.getTarget().apply(oldCaseData);
-        List<Element<PartyDetails>> currentRepresentables = RESPONDENT.getTarget().apply(newCaseData);
 
         try {
             log.info("callbackRequest.getCaseDetailsBefore() json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetailsBefore()));
             log.info("callbackRequest.getCaseDetails() json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
-            log.info("oldRepresentables json ===>" + objectMapper.writeValueAsString(oldRepresentables));
-            log.info("currentRepresentables json ===>" + objectMapper.writeValueAsString(currentRepresentables));
         } catch (JsonProcessingException e) {
             log.info("error");
         }
+
+        ChangeOrganisationRequest changeOrganisationRequest = oldCaseData.getChangeOrganisationRequestField();
+        if (changeOrganisationRequest != null
+            && changeOrganisationRequest.getCaseRoleId() != null
+            && changeOrganisationRequest.getCaseRoleId().getValue() != null) {
+            log.info("inside changeOrganisationRequest present");
+            String caseRoleLabel = changeOrganisationRequest.getCaseRoleId().getValue().getCode();
+            Optional<SolicitorRole> solicitorRole = SolicitorRole.from(caseRoleLabel);
+            if (solicitorRole.isPresent() && RESPONDENT.equals(solicitorRole.get().getRepresenting())) {
+                log.info("inside solicitorRole present");
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(newCaseData))) {
+                    int partyIndex = solicitorRole.get().getIndex();
+                    Element<PartyDetails> representedRespondentElement = newCaseData.getRespondents().get(partyIndex);
+                    UserInfo legalRepresentativeSolicitorInfo = userService.getUserInfo(
+                        authorisation,
+                        UserRoles.SOLICITOR
+                    );
+                    representedRespondentElement.getValue()
+                        .setUser(User.builder()
+                                     .idamId(legalRepresentativeSolicitorInfo.getIdamId())
+                                     .email(legalRepresentativeSolicitorInfo.getEmailAddress())
+                                     .solicitorRepresented(YesOrNo.Yes)
+                                     .build());
+                    log.info("updated representedRespondentElement ===> " + representedRespondentElement);
+                    newCaseData.getRespondents().set(partyIndex, representedRespondentElement);
+                }
+            }
+        }
+        log.info("return newCaseData ===> " + newCaseData);
+        return newCaseData;
     }
 }
