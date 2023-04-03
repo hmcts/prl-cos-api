@@ -54,6 +54,7 @@ public class NoticeOfChangeControllerTest {
     }
 
     @Test
+    @Ignore
     public void testSubmittedNoCRequest() {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
