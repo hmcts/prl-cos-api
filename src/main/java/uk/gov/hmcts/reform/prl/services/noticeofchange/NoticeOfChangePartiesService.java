@@ -115,6 +115,7 @@ public class NoticeOfChangePartiesService {
         List<Element<PartyDetails>> currentRepresentables = RESPONDENT.getTarget().apply(newCaseData);
 
         try {
+            log.info("callbackRequest.getCaseDetails() json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
             log.info("oldRepresentables json ===>" + objectMapper.writeValueAsString(oldRepresentables));
             log.info("currentRepresentables json ===>" + objectMapper.writeValueAsString(currentRepresentables));
         } catch (JsonProcessingException e) {
