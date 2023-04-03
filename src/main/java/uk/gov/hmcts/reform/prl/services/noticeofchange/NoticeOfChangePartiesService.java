@@ -122,7 +122,8 @@ public class NoticeOfChangePartiesService {
             tokenGenerator.generate(),
             decisionRequest(caseDetails)
         );
-        Map<String, Object> caseDataMap = aboutToStartOrSubmitCallbackResponse.getData();
+        log.info("applyDecision aboutToStartOrSubmitCallbackResponse ===> " + aboutToStartOrSubmitCallbackResponse);
+        Map<String, Object> caseDataMap = caseDetails.getData();
         caseDataMap.putAll(updateRepresentedPartyDetails(authorisation, caseDetails));
         log.info("applyDecision updated caseDataMap ===> " + caseDataMap);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
