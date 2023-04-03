@@ -116,12 +116,7 @@ public class NoticeOfChangePartiesService {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData originalCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = assignCaseAccessClient.applyDecision(
-            authorisation,
-            tokenGenerator.generate(),
-            decisionRequest(caseDetails));
-        log.info("aboutToStartOrSubmitCallbackResponse ===> " + aboutToStartOrSubmitCallbackResponse);
-        Map<String, Object> caseDataUpdated = aboutToStartOrSubmitCallbackResponse.getData();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         ChangeOrganisationRequest changeOrganisationRequest = originalCaseData.getChangeOrganisationRequestField();
         if (changeOrganisationRequest != null
             && changeOrganisationRequest.getCaseRoleId() != null
@@ -156,9 +151,14 @@ public class NoticeOfChangePartiesService {
                 }
             }
         }
-
-        log.info("return newCaseData ===> " + caseDataUpdated);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        log.info("caseDataUpdated ===> " + caseDataUpdated);
+        caseDetails.getData().putAll(caseDataUpdated);
+        log.info("caseDetails ===> " + caseDetails);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = assignCaseAccessClient.applyDecision(
+            authorisation,
+            tokenGenerator.generate(),
+            decisionRequest(caseDetails));
+        return aboutToStartOrSubmitCallbackResponse;
     }
 
     public CaseData nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
