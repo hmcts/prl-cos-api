@@ -22,7 +22,7 @@ public class NoticeOfChangeEventHandler {
 
     @Async
     @EventListener
-    public void notifyLegalRepresentative(final NoticeOfChangeEvent event) {
+    public void notifyLegalRepresentative(final NoticeOfChangeEvent event) throws Exception {
         CaseData caseData = event.getCaseData();
         log.info("inside notifyLegalRepresentative ===> " + event.getSolicitorEmailAddress());
         emailService.send(
