@@ -10,14 +10,19 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
 
@@ -26,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.RESPONDENT;
 import static uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest.decisionRequest;
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.BLANK;
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.POPULATE;
@@ -106,17 +113,13 @@ public class NoticeOfChangePartiesService {
         log.info("inside changeOrganisationRequest present");
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        //CaseData originalCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
+        CaseData originalCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = assignCaseAccessClient.applyDecision(
             authorisation,
             tokenGenerator.generate(),
             decisionRequest(caseDetails));
         log.info("aboutToStartOrSubmitCallbackResponse ===> " + aboutToStartOrSubmitCallbackResponse);
-
-        /*CaseData updatedCaseData = objectMapper.convertValue(
-            aboutToStartOrSubmitCallbackResponse.getData(),
-            CaseData.class
-        );
+        Map<String, Object> caseDataUpdated = aboutToStartOrSubmitCallbackResponse.getData();
         ChangeOrganisationRequest changeOrganisationRequest = originalCaseData.getChangeOrganisationRequestField();
         if (changeOrganisationRequest != null
             && changeOrganisationRequest.getCaseRoleId() != null
@@ -124,27 +127,33 @@ public class NoticeOfChangePartiesService {
             log.info("inside changeOrganisationRequest present");
             String caseRoleLabel = changeOrganisationRequest.getCaseRoleId().getValue().getCode();
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(caseRoleLabel);
-            if (solicitorRole.isPresent() && RESPONDENT.equals(solicitorRole.get().getRepresenting())) {
-                log.info("inside solicitorRole present");
-                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(updatedCaseData))) {
-                    int partyIndex = solicitorRole.get().getIndex();
-                    Element<PartyDetails> representedRespondentElement = updatedCaseData.getRespondents().get(partyIndex);
-                    UserDetails legalRepresentativeSolicitorInfo = userService.getUserDetails(
-                        authorisation
-                    );
-                    representedRespondentElement.getValue()
-                        .setUser(User.builder()
-                                     .idamId(legalRepresentativeSolicitorInfo.getId())
-                                     .email(legalRepresentativeSolicitorInfo.getEmail())
-                                     .solicitorRepresented(YesOrNo.Yes)
-                                     .build());
-                    log.info("updated representedRespondentElement ===> " + representedRespondentElement);
-                    updatedCaseData.getRespondents().set(partyIndex, representedRespondentElement);
+            if (solicitorRole.isPresent()) {
+                int partyIndex = solicitorRole.get().getIndex();
+                if (RESPONDENT.equals(solicitorRole.get().getRepresenting())) {
+                    List<Element<PartyDetails>> respondents = RESPONDENT.getTarget().apply(originalCaseData);
+                    log.info("inside solicitorRole present");
+                    if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(originalCaseData))) {
+                        Element<PartyDetails> representedRespondentElement = respondents.get(partyIndex);
+                        UserDetails legalRepresentativeSolicitorInfo = userService.getUserDetails(
+                            authorisation
+                        );
+                        representedRespondentElement.getValue()
+                            .setUser(User.builder()
+                                         .idamId(legalRepresentativeSolicitorInfo.getId())
+                                         .email(changeOrganisationRequest.getCreatedBy())
+                                         .solicitorRepresented(YesOrNo.Yes)
+                                         .build());
+                        log.info("updated representedRespondentElement ===> " + representedRespondentElement);
+                        respondents.set(partyIndex, representedRespondentElement);
+                        caseDataUpdated.put("respondents", respondents);
+                    }
+                    ;
                 }
             }
         }
-        log.info("return newCaseData ===> " + updatedCaseData);*/
-        return aboutToStartOrSubmitCallbackResponse;
+
+        log.info("return newCaseData ===> " + caseDataUpdated);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     public CaseData nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
