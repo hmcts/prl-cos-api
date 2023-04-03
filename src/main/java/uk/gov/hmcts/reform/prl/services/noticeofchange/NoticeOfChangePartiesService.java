@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
 
@@ -130,24 +132,27 @@ public class NoticeOfChangePartiesService {
             if (solicitorRole.isPresent()) {
                 int partyIndex = solicitorRole.get().getIndex();
                 if (RESPONDENT.equals(solicitorRole.get().getRepresenting())) {
-                    List<Element<PartyDetails>> respondents = RESPONDENT.getTarget().apply(originalCaseData);
+                    List<Element<PartyDetails>> respondents = originalCaseData.getRespondents();
                     log.info("inside solicitorRole present");
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(originalCaseData))) {
                         Element<PartyDetails> representedRespondentElement = respondents.get(partyIndex);
                         UserDetails legalRepresentativeSolicitorInfo = userService.getUserDetails(
                             authorisation
                         );
-                        representedRespondentElement.getValue()
-                            .setUser(User.builder()
+                        PartyDetails updPartyDetails = representedRespondentElement.getValue().toBuilder()
+                            .user(User.builder()
                                          .idamId(legalRepresentativeSolicitorInfo.getId())
                                          .email(changeOrganisationRequest.getCreatedBy())
                                          .solicitorRepresented(YesOrNo.Yes)
-                                         .build());
-                        log.info("updated representedRespondentElement ===> " + representedRespondentElement);
-                        respondents.set(partyIndex, representedRespondentElement);
+                                         .build())
+                            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                            .build();
+                        Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
+                            .element(representedRespondentElement.getId(), updPartyDetails);
+                        log.info("updated representedRespondentElement ===> " + updatedRepresentedRespondentElement);
+                        respondents.set(partyIndex, updatedRepresentedRespondentElement);
                         caseDataUpdated.put("respondents", respondents);
                     }
-                    ;
                 }
             }
         }
