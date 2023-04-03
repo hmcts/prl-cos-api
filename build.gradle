@@ -538,8 +538,10 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/*',
   '**uk/gov/hmcts/reform/prl/Application.*',
+  '**uk/gov/hmcts/reform/prl/constants/cafcass/CafcassAppConstants.java',
   '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java',
   '**uk/gov/hmcts/reform/prl/services/hearings/HearingService.java',
+  '**uk/gov/hmcts/reform/prl/services/cafcass/RefDataService.java',
   '**uk/gov/hmcts/reform/prl/services/HearingDataService.java',
   '**uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController.java'
 
