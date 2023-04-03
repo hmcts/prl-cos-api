@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.models.common.dynamic;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
@@ -15,7 +14,6 @@ import java.util.UUID;
  * Representation of a CCD Dynamic List which is then converted to a select dropdown list.
  */
 @Data
-@AllArgsConstructor
 @Jacksonized
 @Builder(toBuilder = true)
 public class DynamicMultiSelectList {

@@ -50,9 +50,9 @@ public class DynamicMultiselectListElement {
 
     public static DynamicMultiselectListElement defaultListItem(String label) {
         return DynamicMultiselectListElement.builder()
-                .code(DEFAULT_CODE)
-                .label(label)
-                .build();
+            .code(DEFAULT_CODE)
+            .label(label)
+            .build();
     }
 
     public static class DynamicListElementBuilder {
