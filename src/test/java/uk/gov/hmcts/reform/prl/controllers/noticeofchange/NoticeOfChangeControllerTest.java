@@ -49,8 +49,8 @@ public class NoticeOfChangeControllerTest {
     public void testAboutToSubmitNoCRequest() {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        CallbackResponse callbackResponse = noticeOfChangeController.aboutToSubmitNoCRequest(authToken, callbackRequest);
-        assertNotNull(callbackResponse);
+        response = noticeOfChangeController.aboutToSubmitNoCRequest(authToken, callbackRequest);
+        assertNotNull(response);
     }
 
     @Test

@@ -10,19 +10,14 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
 
@@ -31,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.RESPONDENT;
 import static uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest.decisionRequest;
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.BLANK;
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.POPULATE;
@@ -103,7 +96,7 @@ public class NoticeOfChangePartiesService {
         POPULATE, BLANK
     }
 
-    public CaseData applyDecision(CallbackRequest callbackRequest, String authorisation) {
+    public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String authorisation) {
         try {
             log.info("applyDecision start getCaseDetailsBefore json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetailsBefore()));
             log.info("applyDecision start getCaseDetails json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
@@ -113,14 +106,14 @@ public class NoticeOfChangePartiesService {
         log.info("inside changeOrganisationRequest present");
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData originalCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
+        //CaseData originalCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = assignCaseAccessClient.applyDecision(
             authorisation,
             tokenGenerator.generate(),
             decisionRequest(caseDetails));
         log.info("aboutToStartOrSubmitCallbackResponse ===> " + aboutToStartOrSubmitCallbackResponse);
 
-        CaseData updatedCaseData = objectMapper.convertValue(
+        /*CaseData updatedCaseData = objectMapper.convertValue(
             aboutToStartOrSubmitCallbackResponse.getData(),
             CaseData.class
         );
@@ -150,8 +143,8 @@ public class NoticeOfChangePartiesService {
                 }
             }
         }
-        log.info("return newCaseData ===> " + updatedCaseData);
-        return updatedCaseData;
+        log.info("return newCaseData ===> " + updatedCaseData);*/
+        return aboutToStartOrSubmitCallbackResponse;
     }
 
     public CaseData nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
