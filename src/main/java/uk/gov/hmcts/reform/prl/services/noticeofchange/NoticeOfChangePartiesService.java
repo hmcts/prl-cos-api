@@ -94,9 +94,10 @@ public class NoticeOfChangePartiesService {
         POPULATE, BLANK
     }
 
-    public AboutToStartOrSubmitCallbackResponse applyDecision(CaseDetails caseDetails, String userToken) {
+    public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String userToken) {
         try {
-            log.info("applyDecision start json ===>" + objectMapper.writeValueAsString(caseDetails));
+            log.info("applyDecision start getCaseDetailsBefore json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetailsBefore()));
+            log.info("applyDecision start getCaseDetails json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
         } catch (JsonProcessingException e) {
             log.info("error");
         }
@@ -104,7 +105,7 @@ public class NoticeOfChangePartiesService {
         return assignCaseAccessClient.applyDecision(
             userToken,
             tokenGenerator.generate(),
-            decisionRequest(caseDetails));
+            decisionRequest(callbackRequest.getCaseDetails()));
     }
 
     public void nocRequestSubmitted(CallbackRequest callbackRequest) {
