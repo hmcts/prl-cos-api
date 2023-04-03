@@ -536,9 +536,6 @@ public class ManageOrderService {
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
-        String test = dynamicMultiSelectListService
-            .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                     .getChildOption());
         return caseData.toBuilder()
             .childrenList(dynamicMultiSelectListService
                               .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
@@ -1387,13 +1384,9 @@ public class ManageOrderService {
         Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
         List<Child> children = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseData);
-        log.info("****Children in manage order service {}", children);
         if (children.size() != 0) {
-            log.info("****Children in manage order service 1 {}", caseData.getChildrenListForDocmosis());
             caseData.setChildrenListForDocmosis(children);
-            log.info("****Children in manage order service 2 {}", caseData.getChildrenListForDocmosis());
         }
-        log.info("****Children in manage order service 3 {}", caseData.getChildrenListForDocmosis());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
