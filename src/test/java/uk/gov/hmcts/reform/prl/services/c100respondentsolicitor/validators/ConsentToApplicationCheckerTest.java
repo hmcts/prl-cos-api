@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -30,12 +31,9 @@ public class ConsentToApplicationCheckerTest {
 
     @Before
     public void setUp() {
-
-
         PartyDetails respondent = PartyDetails.builder()
             .response(Response
                           .builder()
-                          .activeRespondent(Yes)
                           .consent(Consent
                                        .builder()
                                        .noConsentReason("test")
@@ -58,6 +56,31 @@ public class ConsentToApplicationCheckerTest {
         boolean anyNonEmpty = consentToApplicationChecker.isStarted(caseData, "A");
 
         assertTrue(anyNonEmpty);
+    }
+
+    @Test
+    public void isStartedTest_whenNot() {
+        PartyDetails respondent = PartyDetails.builder()
+            .response(Response
+                          .builder()
+                          .consent(Consent
+                                       .builder()
+                                       .noConsentReason(null)
+                                       .courtOrderDetails(null)
+                                       .consentToTheApplication(null)
+                                       .applicationReceivedDate(null)
+                                       .permissionFromCourt(null)
+                                       .build())
+                          .build())
+            .build();
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+
+        caseData = CaseData.builder().respondents(respondentList).build();
+        boolean anyNonEmpty = consentToApplicationChecker.isStarted(caseData, "A");
+
+        assertFalse(anyNonEmpty);
     }
 
     @Test

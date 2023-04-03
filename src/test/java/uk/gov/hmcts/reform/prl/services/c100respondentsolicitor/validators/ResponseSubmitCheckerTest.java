@@ -22,7 +22,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ResponseSubmitCheckerTest {
@@ -62,7 +61,6 @@ public class ResponseSubmitCheckerTest {
         PartyDetails respondent = PartyDetails.builder()
             .response(Response
                           .builder()
-                          .activeRespondent(Yes)
                           .consent(Consent
                                        .builder()
                                        .build())

@@ -17,7 +17,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AbilityToParticipateCheckerTest {
@@ -32,7 +31,7 @@ public class AbilityToParticipateCheckerTest {
 
 
         PartyDetails respondent = PartyDetails.builder()
-            .response(Response.builder().activeRespondent(Yes).abilityToParticipate(
+            .response(Response.builder().abilityToParticipate(
                 SolicitorAbilityToParticipateInProceedings.builder()
                     .factorsAffectingAbilityToParticipate(YesNoDontKnow.yes)
                     .build())

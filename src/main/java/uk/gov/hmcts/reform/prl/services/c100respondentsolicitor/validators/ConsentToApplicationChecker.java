@@ -23,7 +23,13 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
         Optional<Response> response = findResponse(caseData, respondent);
 
         return response
-            .filter(res -> anyNonEmpty(res.getConsent()))
+            .filter(res -> anyNonEmpty(
+                res.getConsent().getApplicationReceivedDate(),
+                res.getConsent().getConsentToTheApplication(),
+                res.getConsent().getCourtOrderDetails(),
+                res.getConsent().getNoConsentReason(),
+                res.getConsent().getPermissionFromCourt()
+            ))
             .isPresent();
     }
 

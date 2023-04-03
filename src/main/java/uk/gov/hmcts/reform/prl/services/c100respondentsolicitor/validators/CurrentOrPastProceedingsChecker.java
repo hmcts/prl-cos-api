@@ -19,7 +19,7 @@ public class CurrentOrPastProceedingsChecker implements RespondentEventChecker {
         Optional<Response> response = findResponse(caseData, respondent);
 
         return response
-            .filter(res -> anyNonEmpty(res.getActiveRespondent()))
+            .filter(res -> anyNonEmpty(res.getCurrentOrPastProceedingsForChildren()))
             .isPresent();
     }
 
