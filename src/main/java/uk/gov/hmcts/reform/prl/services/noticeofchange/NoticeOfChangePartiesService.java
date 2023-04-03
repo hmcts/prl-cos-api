@@ -113,17 +113,18 @@ public class NoticeOfChangePartiesService {
         log.info("inside changeOrganisationRequest present");
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData originalCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = assignCaseAccessClient.applyDecision(
             authorisation,
             tokenGenerator.generate(),
             decisionRequest(caseDetails));
         log.info("aboutToStartOrSubmitCallbackResponse ===> " + aboutToStartOrSubmitCallbackResponse);
 
-        CaseData caseData = objectMapper.convertValue(
+        CaseData updatedCaseData = objectMapper.convertValue(
             aboutToStartOrSubmitCallbackResponse.getData(),
             CaseData.class
         );
-        ChangeOrganisationRequest changeOrganisationRequest = caseData.getChangeOrganisationRequestField();
+        ChangeOrganisationRequest changeOrganisationRequest = originalCaseData.getChangeOrganisationRequestField();
         if (changeOrganisationRequest != null
             && changeOrganisationRequest.getCaseRoleId() != null
             && changeOrganisationRequest.getCaseRoleId().getValue() != null) {
@@ -132,9 +133,9 @@ public class NoticeOfChangePartiesService {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(caseRoleLabel);
             if (solicitorRole.isPresent() && RESPONDENT.equals(solicitorRole.get().getRepresenting())) {
                 log.info("inside solicitorRole present");
-                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(updatedCaseData))) {
                     int partyIndex = solicitorRole.get().getIndex();
-                    Element<PartyDetails> representedRespondentElement = caseData.getRespondents().get(partyIndex);
+                    Element<PartyDetails> representedRespondentElement = updatedCaseData.getRespondents().get(partyIndex);
                     UserDetails legalRepresentativeSolicitorInfo = userService.getUserDetails(
                         authorisation
                     );
@@ -145,12 +146,12 @@ public class NoticeOfChangePartiesService {
                                      .solicitorRepresented(YesOrNo.Yes)
                                      .build());
                     log.info("updated representedRespondentElement ===> " + representedRespondentElement);
-                    caseData.getRespondents().set(partyIndex, representedRespondentElement);
+                    updatedCaseData.getRespondents().set(partyIndex, representedRespondentElement);
                 }
             }
         }
-        log.info("return newCaseData ===> " + caseData);
-        return caseData;
+        log.info("return newCaseData ===> " + updatedCaseData);
+        return updatedCaseData;
     }
 
     public CaseData nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
