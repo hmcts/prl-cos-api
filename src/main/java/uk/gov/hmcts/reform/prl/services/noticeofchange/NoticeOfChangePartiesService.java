@@ -103,15 +103,26 @@ public class NoticeOfChangePartiesService {
         POPULATE, BLANK
     }
 
-    public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String authorisation) {
+    public CaseData applyDecision(CallbackRequest callbackRequest, String authorisation) {
         try {
             log.info("applyDecision start getCaseDetailsBefore json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetailsBefore()));
             log.info("applyDecision start getCaseDetails json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
         } catch (JsonProcessingException e) {
             log.info("error");
         }
+        log.info("inside changeOrganisationRequest present");
+
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = getCaseData(caseDetails, objectMapper);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = assignCaseAccessClient.applyDecision(
+            authorisation,
+            tokenGenerator.generate(),
+            decisionRequest(caseDetails));
+        log.info("aboutToStartOrSubmitCallbackResponse ===> " + aboutToStartOrSubmitCallbackResponse);
+
+        CaseData caseData = objectMapper.convertValue(
+            aboutToStartOrSubmitCallbackResponse.getData(),
+            CaseData.class
+        );
         ChangeOrganisationRequest changeOrganisationRequest = caseData.getChangeOrganisationRequestField();
         if (changeOrganisationRequest != null
             && changeOrganisationRequest.getCaseRoleId() != null
@@ -139,11 +150,7 @@ public class NoticeOfChangePartiesService {
             }
         }
         log.info("return newCaseData ===> " + caseData);
-        caseDetails.setData(caseData.toMap(objectMapper));
-        return assignCaseAccessClient.applyDecision(
-            authorisation,
-            tokenGenerator.generate(),
-            decisionRequest(caseDetails));
+        return caseData;
     }
 
     public CaseData nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {

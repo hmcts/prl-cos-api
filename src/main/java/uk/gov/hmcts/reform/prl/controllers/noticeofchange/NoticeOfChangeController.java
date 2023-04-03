@@ -41,12 +41,12 @@ public class NoticeOfChangeController extends AbstractCallbackController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse aboutToSubmitNoCRequest(
+    public CallbackResponse aboutToSubmitNoCRequest(
             @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         log.info("aboutToSubmitNoCRequest entered");
-        return noticeOfChangePartiesService.applyDecision(callbackRequest, authorisation);
+        return CallbackResponse.builder().data(noticeOfChangePartiesService.applyDecision(callbackRequest, authorisation)).build();
     }
 
     @PostMapping(path = "/submittedNoCRequest", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
