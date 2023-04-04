@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,31 +47,29 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseService {
 
     public static final String LINK_CASE = "linkCase";
     public static final String INVALID = "Invalid";
     @Autowired
-    CoreCaseDataApi coreCaseDataApi;
+    private final CoreCaseDataApi coreCaseDataApi;
 
     @Autowired
-    CaseRepository caseRepository;
+    private final CaseRepository caseRepository;
+
+    private final IdamClient idamClient;
 
     @Autowired
-    IdamClient idamClient;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private final SystemUserService systemUserService;
 
     @Autowired
-    SystemUserService systemUserService;
+    private final CaseDataMapper caseDataMapper;
 
-    @Autowired
-    CaseDataMapper caseDataMapper;
-
-
-    @Autowired
-    CcdCoreCaseDataService coreCaseDataService;
+    private final CcdCoreCaseDataService coreCaseDataService;
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
