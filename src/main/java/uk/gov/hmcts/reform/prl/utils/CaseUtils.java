@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
