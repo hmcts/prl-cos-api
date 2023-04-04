@@ -78,7 +78,7 @@ public class FL401SubmitApplicationService {
 
         log.info("****inside fl401GenerateDocumentSubmitApplication caseData:{}", caseData);
         String baseLocationId = caseData.getSubmitCountyCourtSelection().getValue().getCode();
-        log.info("****inside fl401GenerateDocumentSubmitApplication baseLocationId:{}", baseLocationId);
+            log.info("****inside fl401GenerateDocumentSubmitApplication baseLocationId:{}", baseLocationId);
         Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,
                                                                                              authorisation);
         Map<String, Object> courtDetailsMap = CaseUtils.getCourtDetails(courtVenue, baseLocationId);
@@ -136,6 +136,7 @@ public class FL401SubmitApplicationService {
 
 
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
+        log.info("****final caseDataUpdated {}", caseDataUpdated);
         return caseDataUpdated;
     }
 
