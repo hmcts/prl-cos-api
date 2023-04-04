@@ -50,6 +50,7 @@ public class FL404 {
     private final String fl404bAddMoreDetailsProperty;
     private final String fl404bAddSchool;
     private final String fl404bAddMoreDetailsSchool;
+    private final String fl404bAddFurtherDetailsSchool;
     private final String fl404bCourtName1;
     private final Address fl404bOtherCourtAddress;
     private final String fl404bCostOfApplication;
