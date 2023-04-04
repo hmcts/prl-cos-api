@@ -159,11 +159,11 @@ public class DynamicMultiSelectListService {
     public String getStringFromDynamicMultiSelectList(DynamicMultiSelectList dynamicMultiSelectList) {
         List<String> strList = new ArrayList<>();
         if (null != dynamicMultiSelectList && null != dynamicMultiSelectList.getValue()) {
-            dynamicMultiSelectList.getValue().forEach(value -> {
-                strList.add(value.getLabel().split("\\(")[0]);
-            });
+            dynamicMultiSelectList.getValue().forEach(value ->
+                strList.add(value.getLabel().split("\\(")[0])
+            );
         }
-        if (strList.size() > 0) {
+        if (!strList.isEmpty()) {
             return String.join(", ",strList);
         }
         return "";
@@ -171,21 +171,16 @@ public class DynamicMultiSelectListService {
 
     public List<Child> getChildrenForDocmosis(CaseData caseData) {
         List<Child> childList = new ArrayList<>();
-        log.info("*****Child options selected are : {}", caseData.getManageOrders().getChildOption());
-        if (null != caseData.getManageOrders()) {
-            if (null != caseData.getManageOrders().getChildOption()) {
-                if (null != caseData.getManageOrders().getChildOption().getValue()) {
-                    caseData.getManageOrders().getChildOption().getValue().forEach(value -> {
-                        Child child = getChildDetails(caseData, value.getCode());
-                        log.info("*****Child : {}", child);
-                        if (null != child) {
-                            childList.add(child);
-                        }
-                    });
+        if (null != caseData.getManageOrders()
+            && null != caseData.getManageOrders().getChildOption()
+            && null != caseData.getManageOrders().getChildOption().getValue()) {
+            caseData.getManageOrders().getChildOption().getValue().forEach(value -> {
+                Child child = getChildDetails(caseData, value.getCode());
+                if (null != child) {
+                    childList.add(child);
                 }
-            }
+            });
         }
-        log.info("*****Child list : {}", childList);
         return childList;
     }
 

@@ -1384,7 +1384,7 @@ public class ManageOrderService {
         Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
         List<Child> children = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseData);
-        if (children.size() != 0) {
+        if (!children.isEmpty()) {
             caseData.setChildrenListForDocmosis(children);
         }
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
