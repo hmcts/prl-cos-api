@@ -210,7 +210,7 @@ public class TestingSupportService {
                 ))
                 .build();
             tabService.updateAllTabsIncludingConfTab(caseData);
-            caseWorkerEmailService.sendEmailToGateKeeper(callbackRequest.getCaseDetails());
+            //caseWorkerEmailService.sendEmailToGateKeeper(callbackRequest.getCaseDetails());
             Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
             caseDataUpdated.putAll(allTabsFields);
 
