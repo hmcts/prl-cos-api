@@ -117,16 +117,13 @@ public class NoticeOfChangePartiesService {
         log.info("inside changeOrganisationRequest present");
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = assignCaseAccessClient.applyDecision(
+        caseDetails.getData().putAll(updateRepresentedPartyDetails(authorisation, caseDetails));
+        log.info("applyDecision updated caseDetails ===> " + caseDetails);
+        return assignCaseAccessClient.applyDecision(
             authorisation,
             tokenGenerator.generate(),
             decisionRequest(caseDetails)
         );
-        log.info("applyDecision aboutToStartOrSubmitCallbackResponse ===> " + aboutToStartOrSubmitCallbackResponse);
-        Map<String, Object> caseDataMap = caseDetails.getData();
-        caseDataMap.putAll(updateRepresentedPartyDetails(authorisation, caseDetails));
-        log.info("applyDecision updated caseDataMap ===> " + caseDataMap);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 
     private Map<String, Object> updateRepresentedPartyDetails(String authorisation, CaseDetails caseDetails) {
