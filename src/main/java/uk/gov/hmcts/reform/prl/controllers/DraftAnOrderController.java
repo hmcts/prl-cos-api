@@ -130,6 +130,8 @@ public class DraftAnOrderController {
                 ? manageOrders.getC21OrderOptions().getDisplayedValue() : null);
         }
 
+        log.info("Type of C21 order before  ------->{}", caseDataUpdated.get("typeOfC21Order"));
+
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
@@ -141,6 +143,9 @@ public class DraftAnOrderController {
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         }
+
+        log.info("Type of C21 order After   ------->{}", caseDataUpdated.get("typeOfC21Order"));
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
