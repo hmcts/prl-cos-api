@@ -24,9 +24,9 @@ public enum State {
     CASE_WITHDRAWN("CASE_WITHDRAWN", "Withdrawn"),
     JUDICIAL_REVIEW("JUDICIAL_REVIEW", "Gatekeeping"),
     ALL_FINAL_ORDERS_ISSUED("ALL_FINAL_ORDERS_ISSUED", "Closed"),
-    PREPARE_FOR_HEARING_CONDUCT_HEARING("PREPARE_FOR_HEARING_CONDUCT_HEARING","Prepare for hearing"),
+    PREPARE_FOR_HEARING_CONDUCT_HEARING("PREPARE_FOR_HEARING_CONDUCT_HEARING","Hearing"),
     DELETED("DELETED", "Deleted"),
-    DECISION_OUTCOME("DECISION_OUTCOME","Hearing outcome");
+    DECISION_OUTCOME("DECISION_OUTCOME","Hearing Outcome");
     private final String value;
     private final String label;
 
