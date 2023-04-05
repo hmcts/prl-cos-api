@@ -204,6 +204,7 @@ public class DraftAnOrderControllerTest {
     public void testPopulateFl404FieldsBlankOrder() throws Exception {
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
