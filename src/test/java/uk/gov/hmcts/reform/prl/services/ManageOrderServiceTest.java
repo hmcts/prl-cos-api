@@ -163,6 +163,7 @@ public class ManageOrderServiceTest {
             .build();
         manageOrders = ManageOrders.builder()
             .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
+            .childOption(dynamicMultiSelectList)
             .isCaseWithdrawn(YesOrNo.No)
             .build();
 

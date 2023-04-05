@@ -98,6 +98,7 @@ public class CaseUtils {
     }
 
     public static Map<String, Object> getCourtDetails(Optional<CourtVenue> courtVenue, String baseLocationId) {
+        log.info("****inside getCourtDetails courtVenue :{} and baseLocationId:{}", courtVenue, baseLocationId);
         Map<String, Object> caseDataMap = new HashMap<>();
         if (courtVenue.isPresent()) {
             String regionId = courtVenue.get().getRegionId();
@@ -112,6 +113,7 @@ public class CaseUtils {
             caseDataMap.put(COURT_ID_FIELD, baseLocationId);
 
         }
+        log.info("****inside caseDataMap :{}", caseDataMap);
         return caseDataMap;
     }
 
