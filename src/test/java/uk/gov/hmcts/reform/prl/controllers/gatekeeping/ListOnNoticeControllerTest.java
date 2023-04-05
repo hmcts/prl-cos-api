@@ -34,7 +34,7 @@ public class ListOnNoticeControllerTest {
     public static final String authToken = "Bearer TestAuthToken";
 
     @Test
-    public void testListWithoutNoticeSubmission() throws Exception {
+    public void testListOnNoticeMidEvent() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
@@ -63,7 +63,7 @@ public class ListOnNoticeControllerTest {
 
         caseDataUpdated.put(LIST_ON_NOTICE_REASONS_SELECTED,reasonsSelected);
 
-        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.serveOrderMidEvent(authToken,callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeMidEvent(authToken,callbackRequest);
         assertNotNull(response);
     }
 
