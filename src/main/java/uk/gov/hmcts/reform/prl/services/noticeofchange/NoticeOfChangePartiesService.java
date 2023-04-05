@@ -57,7 +57,7 @@ public class NoticeOfChangePartiesService {
     private final UserService userService;
     private final EventService eventPublisher;
     @Qualifier("allTabsService")
-    AllTabServiceImpl tabService;
+    private final AllTabServiceImpl tabService;
 
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing) {
         return generate(caseData, representing, POPULATE);
