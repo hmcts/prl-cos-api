@@ -119,6 +119,9 @@ public class DraftAnOrderController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
 
+        log.info("C21 Draft order options in callback:: {}", (null != caseData.getManageOrders())
+            ? caseData.getManageOrders().getC21OrderOptions() : null);
+
         if (null != caseData.getCreateSelectOrderOptions()
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
 
