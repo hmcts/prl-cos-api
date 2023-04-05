@@ -41,16 +41,16 @@ public class CitizenCoreCaseDataService {
         = "Failed linking case in CCD store for case id %s on event %s";
 
     @Autowired
-    IdamClient idamClient;
+    private final IdamClient idamClient;
     @Autowired
-    CoreCaseDataApi coreCaseDataApi;
+    private final CoreCaseDataApi coreCaseDataApi;
     @Autowired
-    AuthTokenGenerator authTokenGenerator;
+    private final AuthTokenGenerator authTokenGenerator;
     @Autowired
-    ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    CcdCoreCaseDataService ccdCoreCaseDataService;
+    private final CcdCoreCaseDataService ccdCoreCaseDataService;
 
     public CaseDetails linkDefendant(
         String anonymousUserToken,
@@ -107,35 +107,6 @@ public class CitizenCoreCaseDataService {
             .build();
     }
 
-    private StartEventResponse startUpdate(
-        String authorisation,
-        EventRequestData eventRequestData,
-        Long caseId,
-        boolean isRepresented
-    ) {
-        if (isRepresented) {
-            return coreCaseDataApi.startEventForCaseWorker(
-                authorisation,
-                authTokenGenerator.generate(),
-                eventRequestData.getUserId(),
-                eventRequestData.getJurisdictionId(),
-                eventRequestData.getCaseTypeId(),
-                caseId.toString(),
-                eventRequestData.getEventId()
-            );
-        } else {
-            return coreCaseDataApi.startEventForCitizen(
-                authorisation,
-                authTokenGenerator.generate(),
-                eventRequestData.getUserId(),
-                eventRequestData.getJurisdictionId(),
-                eventRequestData.getCaseTypeId(),
-                caseId.toString(),
-                eventRequestData.getEventId()
-            );
-        }
-    }
-
     public CaseDetails updateCase(
         String authorisation,
         Long caseId,
@@ -146,10 +117,10 @@ public class CitizenCoreCaseDataService {
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
             EventRequestData eventRequestData = eventRequest(caseEvent, userDetails.getId());
 
-            StartEventResponse startEventResponse = startUpdate(
+            StartEventResponse startEventResponse = ccdCoreCaseDataService.startUpdate(
                 authorisation,
                 eventRequestData,
-                caseId,
+                caseId.toString(),
                 !userDetails.getRoles().contains(CITIZEN_ROLE)
             );
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
@@ -186,10 +157,9 @@ public class CitizenCoreCaseDataService {
         if (userDetails.getRoles().contains(CITIZEN_ROLE)) {
             caseData.setCaseCreatedBy(CITIZEN);
         }
-        StartEventResponse startEventResponse = startSubmitCreate(
+        StartEventResponse startEventResponse = ccdCoreCaseDataService.startSubmitCreate(
             authorisation,
             cosApis2sToken,
-            userDetails.getId(),
             eventRequestData,
             !userDetails.getRoles().contains(CITIZEN_ROLE)
         );
@@ -198,71 +168,13 @@ public class CitizenCoreCaseDataService {
         Iterables.removeIf(caseDataMap.values(), Objects::isNull);
         CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataMap);
 
-        return submitCreate(
+        return ccdCoreCaseDataService.submitCreate(
             authorisation,
             cosApis2sToken,
             userDetails.getId(),
             caseDataContent,
             !userDetails.getRoles().contains(CITIZEN_ROLE)
         );
-    }
-
-    private StartEventResponse startSubmitCreate(
-        String authorisation,
-        String s2sToken,
-        String userId,
-        EventRequestData eventRequestData,
-        boolean isRepresented
-    ) {
-        if (isRepresented) {
-            return coreCaseDataApi.startForCaseworker(
-                authorisation,
-                s2sToken,
-                userId,
-                JURISDICTION,
-                CASE_TYPE,
-                eventRequestData.getEventId()
-            );
-        } else {
-            return coreCaseDataApi.startForCitizen(
-                authorisation,
-                s2sToken,
-                userId,
-                JURISDICTION,
-                CASE_TYPE,
-                eventRequestData.getEventId()
-            );
-        }
-    }
-
-    private CaseDetails submitCreate(
-        String authorisation,
-        String s2sToken,
-        String userId,
-        CaseDataContent caseDataContent,
-        boolean isRepresented
-    ) {
-        if (isRepresented) {
-            return coreCaseDataApi.submitForCaseworker(
-                authorisation,
-                s2sToken,
-                userId,
-                JURISDICTION,
-                CASE_TYPE,
-                isRepresented,
-                caseDataContent
-            );
-        } else {
-            return coreCaseDataApi.submitForCitizen(
-                authorisation,
-                s2sToken,
-                userId,
-                JURISDICTION,
-                CASE_TYPE,
-                isRepresented,
-                caseDataContent
-            );
-        }
     }
 
     public CaseDetails getCase(String authorisation, String caseId) {

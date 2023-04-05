@@ -40,9 +40,7 @@ import java.util.stream.Collectors;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADJOURNED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSTPONED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WAITING_TO_BE_LISTED;
@@ -94,7 +92,7 @@ public class HearingManagementService {
         switch (hmcStatus) {
             case LISTED:
                 fields.put("state", DECISION_OUTCOME.getValue());
-                customFields.put("eventId", HEARING_STATE_CHANGE_SUCCESS);
+                customFields.put("eventId", CaseEvent.HEARING_STATE_CHANGE_SUCCESS);
                 submitUpdate(fields, customFields);
                 caseData = updateTabsWithLatestData(customFields);
                 sendHearingDetailsEmail(caseData, hearingRequest);
@@ -102,7 +100,7 @@ public class HearingManagementService {
 
             case CANCELLED:
                 fields.put("state", PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue());
-                customFields.put("eventId", HEARING_STATE_CHANGE_FAILURE);
+                customFields.put("eventId", CaseEvent.HEARING_STATE_CHANGE_FAILURE);
                 submitUpdate(fields, customFields);
                 updateTabsWithLatestData(customFields);
                 caseData = updateTabsWithLatestData(customFields);
@@ -113,7 +111,7 @@ public class HearingManagementService {
             case POSTPONED:
             case ADJOURNED:
                 fields.put("state", PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue());
-                customFields.put("eventId", HEARING_STATE_CHANGE_FAILURE);
+                customFields.put("eventId", CaseEvent.HEARING_STATE_CHANGE_FAILURE);
                 submitUpdate(fields, customFields);
                 caseData = updateTabsWithLatestData(customFields);
                 sendHearingChangeDetailsEmail(caseData);

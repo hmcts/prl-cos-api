@@ -96,8 +96,6 @@ public class CourtNavCaseServiceTest {
         caseData = CaseData.builder().id(1234567891234567L).applicantCaseName("xyz").build();
         when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(randomUserId).build());
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
-        when(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any())
-        ).thenReturn(StartEventResponse.builder().eventId("courtnav-case-creation").token("eventToken").build());
         file = new MockMultipartFile(
             "file",
             "private-law.pdf",
