@@ -76,7 +76,7 @@ public class FL401SubmitApplicationService {
 
         final LocalDate localDate = LocalDate.now();
 
-        String baseLocationId = caseData.getSubmitCountyCourtSelection().getValue().getCode();
+        String baseLocationId = caseData.getSubmitCountyCourtSelection().getValue().getCode().split(":")[0];
         Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId,
                                                                                              authorisation);
         Map<String, Object> courtDetailsMap = CaseUtils.getCourtDetails(courtVenue, baseLocationId);
