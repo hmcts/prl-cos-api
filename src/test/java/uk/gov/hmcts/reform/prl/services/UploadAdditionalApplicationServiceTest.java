@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTy
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ParentalResponsibilityType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
@@ -48,7 +48,7 @@ public class UploadAdditionalApplicationServiceTest {
     public void testGetAdditionalApplicationElementsForBothC2AndOther() {
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com").build());
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-                .additionalApplicantsList(DynamicList.builder().build())
+                .additionalApplicantsList(DynamicMultiSelectList.builder().build())
                 .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order,
                                                            AdditionalApplicationTypeEnum.otherOrder))
                 .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
@@ -78,7 +78,7 @@ public class UploadAdditionalApplicationServiceTest {
             .supportingEvidenceBundle(List.of(element(SupportingEvidenceBundle.builder().build())))
             .build();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicantsList(DynamicList.builder().build())
+            .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(c2DocumentBundle)
