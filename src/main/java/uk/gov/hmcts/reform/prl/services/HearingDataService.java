@@ -243,7 +243,15 @@ public class HearingDataService {
             .respondentSolicitor("")
             .fillingFormRenderingInfo(CommonUtils.renderCollapsible())
             .applicantName1(0 < numberOfApplicant ? applicantNames.get(0) : "INVALID_DATA")
+            .applicantName2(0 < numberOfApplicant ? applicantNames.get(0) : "INVALID_DATA")
+            .applicantName3(0 < numberOfApplicant ? applicantNames.get(0) : "INVALID_DATA")
+            .applicantName4(0 < numberOfApplicant ? applicantNames.get(0) : "INVALID_DATA")
+            .applicantName5(0 < numberOfApplicant ? applicantNames.get(0) : "INVALID_DATA")
             .applicantHearingChannel1(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantHearingChannel2(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantHearingChannel3(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantHearingChannel4(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantHearingChannel5(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             .build();
     }
 
