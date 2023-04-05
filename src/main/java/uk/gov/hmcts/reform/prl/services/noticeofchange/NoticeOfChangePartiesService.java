@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
@@ -54,6 +56,8 @@ public class NoticeOfChangePartiesService {
     private final ObjectMapper objectMapper;
     private final UserService userService;
     private final EventService eventPublisher;
+    @Qualifier("allTabsService")
+    AllTabServiceImpl tabService;
 
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing) {
         return generate(caseData, representing, POPULATE);
@@ -117,7 +121,7 @@ public class NoticeOfChangePartiesService {
         log.info("inside changeOrganisationRequest present");
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseDetails.getData().putAll(updateRepresentedPartyDetails(authorisation, caseDetails));
+        //caseDetails.getData().putAll(updateRepresentedPartyDetails(authorisation, caseDetails));
         log.info("applyDecision updated caseDetails ===> " + caseDetails);
         return assignCaseAccessClient.applyDecision(
             authorisation,
@@ -126,9 +130,8 @@ public class NoticeOfChangePartiesService {
         );
     }
 
-    private Map<String, Object> updateRepresentedPartyDetails(String authorisation, CaseDetails caseDetails) {
-        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
-        ChangeOrganisationRequest changeOrganisationRequest = caseData.getChangeOrganisationRequestField();
+    private Map<String, Object> getRepresentedPartyDetails(String authorisation,
+                                                           ChangeOrganisationRequest changeOrganisationRequest, CaseData caseData) {
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         if (solicitorRole.isPresent()) {
             int partyIndex = solicitorRole.get().getIndex();
@@ -182,12 +185,14 @@ public class NoticeOfChangePartiesService {
     public void nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData oldCaseData = getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        ChangeOrganisationRequest changeOrganisationRequest = oldCaseData.getChangeOrganisationRequestField();
+
         UserDetails legalRepresentativeSolicitorInfo = userService.getUserDetails(
             authorisation
         );
         String representativeSolicitorName = legalRepresentativeSolicitorInfo.getForename()
             + EMPTY_SPACE_STRING + legalRepresentativeSolicitorInfo.getSurname();
-        ChangeOrganisationRequest changeOrganisationRequest = oldCaseData.getChangeOrganisationRequestField();
+
         NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
             newCaseData,
             changeOrganisationRequest,
@@ -195,6 +200,7 @@ public class NoticeOfChangePartiesService {
         );
         log.info("NoticeOfChangeEvent ===> " + noticeOfChangeEvent);
         eventPublisher.publishEvent(noticeOfChangeEvent);
+        tabService.updatePartyDetailsForNoc(newCaseData, getRepresentedPartyDetails(authorisation, changeOrganisationRequest, newCaseData));
     }
 
     private NoticeOfChangeEvent prepareNoticeOfChangeEvent(CaseData newCaseData,

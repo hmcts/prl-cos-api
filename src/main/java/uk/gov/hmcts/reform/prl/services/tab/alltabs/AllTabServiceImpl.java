@@ -55,6 +55,7 @@ public class AllTabServiceImpl implements AllTabsService {
     }
 
     private void refreshCcdUsingEvent(CaseData caseData, Map<String, Object> combinedFieldsMap) {
+        log.info("inside refreshCcdUsingEvent ===> " + combinedFieldsMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
@@ -113,6 +114,10 @@ public class AllTabServiceImpl implements AllTabsService {
     @Override
     public Map<String, Object> getAllTabsFields(CaseData caseData) {
         return getCombinedMap(caseData);
+    }
+
+    public void updatePartyDetailsForNoc(CaseData caseData, Map<String, Object> updatedPartyDetails) {
+        refreshCcdUsingEvent(caseData, updatedPartyDetails);
     }
 
 }
