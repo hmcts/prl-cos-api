@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DomesticAbuseOrdersEnum;
@@ -778,6 +777,4 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
-
-    private List<ListOnNoticeReasonsEnum> listOnNoticeReasonsEnum;
 }
