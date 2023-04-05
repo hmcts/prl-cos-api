@@ -306,7 +306,7 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "Any application for transfer should be made to the Court in writing within 5 working days of receipt of these directions.";
     public static final String DIO_APPLICATION_TO_APPLY_PERMISSION = " Any party intending at the FHDRA to apply for permission"
-         + " to instruct an expert must first comply fully with the requirements of Practice Direction 25C of the Family Procedure Rules.";
+        + " to instruct an expert must first comply fully with the requirements of Practice Direction 25C of the Family Procedure Rules.";
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
@@ -423,4 +423,6 @@ public class PrlAppsConstants {
     public static final String HEARING_PRIORITY_TYPE_ENUM = "hearingPriorityTypeEnum";
     public static final String CUSTOM_DETAILS = "customDetails";
     public static final String[] EMPTY_ARRAY = {};
+    //PRL-3254 - hearing status - Completed
+    public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 }

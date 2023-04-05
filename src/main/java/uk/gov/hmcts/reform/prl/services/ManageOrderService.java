@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.platform.commons.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -45,9 +48,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -56,6 +63,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -67,11 +76,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HMC_STATUS_COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -89,6 +100,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RequiredArgsConstructor
 public class ManageOrderService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ManageOrderService.class);
 
     public static final String IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE = "isOnlyC47aOrderSelectedToServe";
     public static final String OTHER_PEOPLE_PRESENT_IN_CASE_FLAG = "otherPeoplePresentInCaseFlag";
@@ -442,6 +454,9 @@ public class ManageOrderService {
     @Autowired
     private final UserService userService;
 
+    @Autowired
+    private final HearingService hearingService;
+
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
         if (caseData.getOrderCollection() != null) {
@@ -791,9 +806,9 @@ public class ManageOrderService {
                                        .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                                         ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
                                        .typeOfOrder(typeOfOrder != null
-                                                            ? typeOfOrder.getDisplayedValue() : null)
+                                                        ? typeOfOrder.getDisplayedValue() : null)
                                        .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
-                                           ? caseData.getDoesOrderClosesCase() : null)
+                                                            ? caseData.getDoesOrderClosesCase() : null)
                                        .serveOrderDetails(buildServeOrderDetails(serveOrderData))
                                        .build()));
         }
@@ -1048,7 +1063,7 @@ public class ManageOrderService {
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())
             .judgeNotes(caseData.getManageOrders() != null
-                        ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
+                            ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
             .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(null != caseData.getManageOrdersOptions()
@@ -1618,7 +1633,7 @@ public class ManageOrderService {
         return element(OrderDetails.builder().orderType(flagSelectedOrder)
                            .orderTypeId(flagSelectedOrderId)
                            .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
-                                                 ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
+                                                     ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
                            .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
                            .typeOfOrder(typeOfOrder != null
                                             ? typeOfOrder.getDisplayedValue() : null)
@@ -1635,10 +1650,10 @@ public class ManageOrderService {
                                               .documentHash(generatedDocumentInfo.getHashToken())
                                               .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
                            .orderDocumentWelsh(documentLanguage.isGenWelsh() ? Document.builder()
-                                                   .documentUrl(generatedDocumentInfoWelsh.getUrl())
-                                                   .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
-                                                   .documentHash(generatedDocumentInfoWelsh.getHashToken())
-                                                   .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build() : null)
+                               .documentUrl(generatedDocumentInfoWelsh.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
+                               .documentHash(generatedDocumentInfoWelsh.getHashToken())
+                               .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build() : null)
                            .otherDetails(OtherOrderDetails.builder()
                                              .createdBy(caseData.getJudgeOrMagistratesLastName())
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
@@ -1738,5 +1753,53 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
+    public CaseData populateHearingsDropdown(String authorization, CaseData caseData) {
+        LOGGER.info("Retrieving hearings for caseId: {}, tempCaseId: {} ", caseData.getId(), caseData.getTempCaseIdForHearing());
+        //fetch hearing details
+        Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(authorization, caseData.getTempCaseIdForHearing()));
+        //filer only completed hearings
+        List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
+        List<CaseHearing> completedHearings = caseHearings.stream()
+            .filter(caseHearing -> HMC_STATUS_COMPLETED.equalsIgnoreCase(caseHearing.getHmcStatus()))
+            .collect(Collectors.toList());
+        LOGGER.info("Total completed hearings: {}", completedHearings.size());
+
+        List<DynamicListElement> hearingDropdowns = completedHearings.stream()
+            .map(caseHearing -> {
+                //get hearingId
+                String hearingId = String.valueOf(caseHearing.getHearingID());
+                LOGGER.info("hearingId: {} ", hearingId);
+                //return hearingId concatenated with hearingDate
+                Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
+                return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
+                    if (null != hearingDaySchedule && null != hearingDaySchedule.getHearingStartDateTime()) {
+                        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        String hearingDate = hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter);
+                        LOGGER.info("hearingDate: {} ", hearingDate);
+                        return concat(concat(hearingId, " - "), hearingDate);
+                    }
+                    return null;
+                }).filter(Objects::nonNull).collect(Collectors.toList())).orElse(Collections.emptyList());
+            }).map(this::getDynamicListElements)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+
+        //if there are no hearings then dropdown would be empty
+        return caseData.toBuilder()
+            .manageOrders(caseData.getManageOrders().toBuilder()
+                              .hearingType(DynamicList.builder()
+                                               .value(DynamicListElement.EMPTY)
+                                               .listItems(hearingDropdowns.isEmpty()
+                                                              ? Collections.singletonList(DynamicListElement.defaultListItem("No Hearings"))
+                                                              : hearingDropdowns)
+                                               .build()
+                              ).build())
+            .build();
+    }
+
+    private List<DynamicListElement> getDynamicListElements(List<String> dropdowns) {
+        return dropdowns.stream().map(dropdown -> DynamicListElement.builder().code(dropdown).label(dropdown).build()).collect(
+            Collectors.toList());
+    }
 
 }

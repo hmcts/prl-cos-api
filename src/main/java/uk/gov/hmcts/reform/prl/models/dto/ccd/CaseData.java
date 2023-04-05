@@ -781,4 +781,7 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
 
+    //CASE_ID TO FETCH HEARINGS - REVERT BEFORE MERGING INTO MASTER
+    private String tempCaseIdForHearing;
+
 }
