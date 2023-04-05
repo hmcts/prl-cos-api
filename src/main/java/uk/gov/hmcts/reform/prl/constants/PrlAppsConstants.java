@@ -307,6 +307,31 @@ public class PrlAppsConstants {
         + "Any application for transfer should be made to the Court in writing within 5 working days of receipt of these directions.";
     public static final String DIO_APPLICATION_TO_APPLY_PERMISSION = " Any party intending at the FHDRA to apply for permission"
          + " to instruct an expert must first comply fully with the requirements of Practice Direction 25C of the Family Procedure Rules.";
+    public static final String DIO_PARTICIPATION_DIRECTION = "If they have not already done so, any party who considers that specific "
+        + "measures need to be taken to enable a party or witness to understand the proceedings and their "
+        + "role in them when in court, put their views to the court, instruct their representatives before, "
+        + "during, and after the hearing or attend the hearing without significant distress should file an application "
+        + "notice and include the following information as far as practicable:"
+        + System.lineSeparator()
+        + "a. why the party or witness would benefit from assistance; "
+        + System.lineSeparator()
+        + "b.the measure or measures that would be likely to maximise as far as practicable the quality of their evidence or participation and why;"
+        + System.lineSeparator()
+        + "c.written confirmation from any relevant witness of his/her views";
+    public static final String DIO_PERMISSION_HEARING_DIRECTION = "a. Whether the application should be dismissed;"
+        + System.lineSeparator()
+        + "b. If the application is not dismissed, further directions;"
+        + System.lineSeparator()
+        + "c. Whether an order under section 91 (14) of the Children Act 1989 should be made (such orders"
+        + " prevent the making of further applications without the court’s permission)."
+        + System.lineSeparator()
+        + "The Court or Applicant’s solicitor must serve the respondent by personal service/if unable to do "
+        + "this text messaging or email. In order to ensure that notice is given and ensure the hearing is "
+        + "effective.Please note that the Court will not consider making a Child Arrangements Order at that hearing "
+        + "without CAFCASS or CAFCASS Cymru safeguarding information.The parties and/or their respective legal representatives are "
+        + "required by the court to attend, remotely if necessary, a pre hearing discussions/negotiations to enable an effective "
+        + "commencement of the hearing at the allotted time.If either party fails to attend orders could be made in their absence.";
+
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
@@ -368,7 +393,12 @@ public class PrlAppsConstants {
     public static final String IS_CAFCASS = "isCafcass";
 
     public static final String ORDER_HEARING_DETAILS = "ordersHearingDetails";
-
+    public static final String DIO_CASEREVIEW_HEARING_DETAILS = "dioCaseReviewHearingDetails";
+    public static final String DIO_FHDRA_HEARING_DETAILS = "dioFhdraHearingDetails";
+    public static final String DIO_PERMISSION_HEARING_DETAILS = "dioPermissionHearingDetails";
+    public static final String DIO_URGENT_FIRST_HEARING_DETAILS = "dioUrgentFirstHearingDetails";
+    public static final String DIO_URGENT_HEARING_DETAILS = "dioUrgentHearingDetails";
+    public static final String DIO_WITHOUT_NOTICE_HEARING_DETAILS = "dioWithoutNoticeHearingDetails";
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
     public static final String CHILD_AND_CAFCASS_OFFICER_DETAILS = "childAndCafcassOfficers";
     public static final String CHILD_NAME = "Child name: ";

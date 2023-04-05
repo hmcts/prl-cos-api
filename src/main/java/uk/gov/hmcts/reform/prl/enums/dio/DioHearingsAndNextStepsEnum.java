@@ -16,7 +16,9 @@ public enum DioHearingsAndNextStepsEnum {
     @JsonProperty("allocationDecision")
     allocationDecision("allocationDecision", "Allocation decision"),
     @JsonProperty("allocateNamedJudge")
-    allocateNamedJudge("allocateNamedJudge", "Allocate a named judge"),
+    allocateNamedJudge("allocateNamedJudge", "Allocate or reserve to a named judge"),
+    @JsonProperty("urgentHearing")
+    urgentHearing("urgentHearing", "Urgent hearing"),
     @JsonProperty("urgentFirstHearing")
     urgentFirstHearing("urgentFirstHearing", "Urgent first hearing"),
     @JsonProperty("urgentHearingRefused")
