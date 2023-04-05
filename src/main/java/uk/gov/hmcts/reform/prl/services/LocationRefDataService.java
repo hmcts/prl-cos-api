@@ -140,7 +140,11 @@ public class LocationRefDataService {
             authTokenGenerator.generate(),
             SERVICE_ID
         );
-        log.info("****** inside getCourtDetailsFromEpimmsId  courtDetails {} baseLocationId : {}", courtDetails, baseLocationId);
+        log.info(
+            "****** inside getCourtDetailsFromEpimmsId  courtDetails {} baseLocationId : {}",
+            courtDetails,
+            baseLocationId
+        );
         Optional<CourtVenue> courtVenue = courtDetails.getCourtVenues().stream().filter(location -> !"Scotland".equals(
             location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
