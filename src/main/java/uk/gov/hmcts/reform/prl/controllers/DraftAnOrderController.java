@@ -119,6 +119,14 @@ public class DraftAnOrderController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
 
+        if (null != caseData.getCreateSelectOrderOptions()
+            && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
+
+            ManageOrders manageOrders = caseData.getManageOrders().toBuilder().build();
+            caseDataUpdated.put("typeOfC21Order", null != manageOrders.getC21OrderOptions()
+                ? manageOrders.getC21OrderOptions().getDisplayedValue() : null);
+        }
+
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
