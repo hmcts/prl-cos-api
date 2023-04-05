@@ -74,6 +74,7 @@ public class DraftAnOrderController {
             List<String> errorList = new ArrayList<>();
             errorList.add(
                 "This order is not available to be drafted");
+
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
