@@ -45,7 +45,7 @@ public class C100IssueCaseService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
-            String baseLocationId = caseData.getCourtList().getValue().getCode();
+            String baseLocationId = caseData.getCourtList().getValue().getCode().split(":")[0];
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
                 baseLocationId,
                 authorisation
