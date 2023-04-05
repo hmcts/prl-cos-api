@@ -13,7 +13,10 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
@@ -43,10 +46,13 @@ public class RequestUpdateCallbackServiceTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
+
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
+
     @Mock
     ObjectMapper objectMapper;
+
     @Mock
     private ServiceRequestUpdateDto serviceRequestUpdateDto;
 
@@ -69,17 +75,25 @@ public class RequestUpdateCallbackServiceTest {
     private Court court;
 
     @Mock
+    CcdCoreCaseDataService coreCaseDataService;
+
+    @Mock
     private CourtFinderService courtFinderService;
 
     @InjectMocks
     RequestUpdateCallbackService requestUpdateCallbackService;
+
+    private StartEventResponse startEventResponse;
 
     @Before
     public void setUp() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         when(systemUserService.getUserId(authToken)).thenReturn(systemUserId);
         when(systemUserService.getSysUserToken()).thenReturn(authToken);
-    }
+        when(coreCaseDataService.eventRequest(CaseEvent.PAYMENT_SUCCESS_CALLBACK, systemUserId)).thenReturn(
+            EventRequestData.builder().build());
+        when(coreCaseDataService.startUpdate(authToken, EventRequestData.builder().build(), caseId.toString(), true)).thenReturn(
+            startEventResponse);    }
 
     @Test(expected = NullPointerException.class)
     public void shouldStartAndSubmitEventWithCaseDetails() throws Exception {

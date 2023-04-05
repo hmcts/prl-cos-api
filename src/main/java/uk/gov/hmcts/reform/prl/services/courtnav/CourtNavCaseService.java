@@ -114,7 +114,7 @@ public class CourtNavCaseService {
                 authTokenGenerator.generate(),
                 PrlAppsConstants.CASE_TYPE,
                 PrlAppsConstants.JURISDICTION,
-                Arrays.asList(document)
+                List.of(document)
             );
             log.info("Document uploaded successfully through caseDocumentClient");
             updateCaseDataWithUploadedDocs(
@@ -139,7 +139,6 @@ public class CourtNavCaseService {
                                              true);
 
             log.info("Document has been saved in caseData {}", document.getOriginalFilename());
-
         } else {
             log.error("Un acceptable format/type of document {}", typeOfDocument);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
