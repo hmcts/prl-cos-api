@@ -40,16 +40,18 @@ public class ListOnNoticeController {
         log.info("*** mid event triggered for List ON Notice : {}", caseData.getId());
         log.info("*** selectedReasonsForListOnNotice : {}", callbackRequest);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<ListOnNoticeReasonsEnum> listOnNoticeReasonsEnums =
-            (List<ListOnNoticeReasonsEnum>)(caseDataUpdated.get("selectedReasonsForListOnNotice"));
+        List<String> listOnNoticeReasonsEnums =
+            (List<String>)(caseDataUpdated.get("selectedReasonsForListOnNotice"));
         log.info("*** inside null check for reasons Enum : {}", getReasonsSelected(listOnNoticeReasonsEnums));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    private String getReasonsSelected(List<ListOnNoticeReasonsEnum> listOnNoticeReasonsEnum) {
-        String reasonsSelected = "";
-        listOnNoticeReasonsEnum.stream().forEach(reason ->  reasonsSelected.concat(reason.getDisplayedValue() + "\n"));
-        return reasonsSelected;
+    private String getReasonsSelected(List<String> listOnNoticeReasonsEnum) {
+        final String[] reasonsSelected = {""};
+        listOnNoticeReasonsEnum.stream().forEach(reason ->  {
+            reasonsSelected[0] = reasonsSelected[0].concat(ListOnNoticeReasonsEnum.getValue(reason) + "\n");
+        });
+        return reasonsSelected[0];
     }
 }
