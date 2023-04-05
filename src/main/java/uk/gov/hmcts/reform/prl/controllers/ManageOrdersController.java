@@ -164,7 +164,7 @@ public class ManageOrdersController {
             ? caseData.getManageOrders().getC21OrderOptions() : null);
         caseData = caseData.toBuilder()
             .selectedC21Order((null != caseData.getManageOrders()
-                && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
+                                  && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
                                   ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ")
             .build();
         if (callbackRequest
@@ -191,10 +191,11 @@ public class ManageOrdersController {
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
             log.info("C21 Order:: *****{}******", manageOrders.getC21OrderOptions());
             manageOrders = manageOrders.toBuilder()
-                .typeOfC21Order(null != manageOrders.getC21OrderOptions()
-                                    ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
-                .build();
+                                  .typeOfC21Order(null != manageOrders.getC21OrderOptions()
+                                                      ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
+                                  .build();
         }
+
         //PRL-3254 - Populate hearing details dropdown for create order
         caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
 

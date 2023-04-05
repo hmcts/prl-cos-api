@@ -100,8 +100,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RequiredArgsConstructor
 public class ManageOrderService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ManageOrderService.class);
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ManageOrderService.class);
     public static final String IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE = "isOnlyC47aOrderSelectedToServe";
     public static final String OTHER_PEOPLE_PRESENT_IN_CASE_FLAG = "otherPeoplePresentInCaseFlag";
     public static final String C_47_A = "C47A";
@@ -806,9 +806,9 @@ public class ManageOrderService {
                                        .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                                         ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
                                        .typeOfOrder(typeOfOrder != null
-                                                        ? typeOfOrder.getDisplayedValue() : null)
+                                                            ? typeOfOrder.getDisplayedValue() : null)
                                        .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
-                                                            ? caseData.getDoesOrderClosesCase() : null)
+                                           ? caseData.getDoesOrderClosesCase() : null)
                                        .serveOrderDetails(buildServeOrderDetails(serveOrderData))
                                        .build()));
         }
@@ -1063,7 +1063,7 @@ public class ManageOrderService {
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())
             .judgeNotes(caseData.getManageOrders() != null
-                            ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
+                        ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
             .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(null != caseData.getManageOrdersOptions()
@@ -1633,7 +1633,7 @@ public class ManageOrderService {
         return element(OrderDetails.builder().orderType(flagSelectedOrder)
                            .orderTypeId(flagSelectedOrderId)
                            .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
-                                                     ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
+                                                 ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
                            .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
                            .typeOfOrder(typeOfOrder != null
                                             ? typeOfOrder.getDisplayedValue() : null)
@@ -1650,10 +1650,10 @@ public class ManageOrderService {
                                               .documentHash(generatedDocumentInfo.getHashToken())
                                               .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
                            .orderDocumentWelsh(documentLanguage.isGenWelsh() ? Document.builder()
-                               .documentUrl(generatedDocumentInfoWelsh.getUrl())
-                               .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
-                               .documentHash(generatedDocumentInfoWelsh.getHashToken())
-                               .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build() : null)
+                                                   .documentUrl(generatedDocumentInfoWelsh.getUrl())
+                                                   .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
+                                                   .documentHash(generatedDocumentInfoWelsh.getHashToken())
+                                                   .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build() : null)
                            .otherDetails(OtherOrderDetails.builder()
                                              .createdBy(caseData.getJudgeOrMagistratesLastName())
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
@@ -1801,5 +1801,4 @@ public class ManageOrderService {
         return dropdowns.stream().map(dropdown -> DynamicListElement.builder().code(dropdown).label(dropdown).build()).collect(
             Collectors.toList());
     }
-
 }
