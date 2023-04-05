@@ -120,7 +120,7 @@ public class ResubmitApplicationControllerTest {
 
         caseDataIssued = CaseData.builder()
             .id(12345L)
-            .state(State.CASE_ISSUE)
+            .state(State.CASE_ISSUED)
             .allegationOfHarm(allegationOfHarm)
             .build();
 
@@ -173,7 +173,7 @@ public class ResubmitApplicationControllerTest {
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.CASE_ISSUE.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.CASE_ISSUED.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
 
@@ -194,7 +194,7 @@ public class ResubmitApplicationControllerTest {
             ));
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
-        assertEquals(State.CASE_ISSUE, response.getData().get("state"));
+        assertEquals(State.CASE_ISSUED, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C1A));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL));
@@ -210,7 +210,7 @@ public class ResubmitApplicationControllerTest {
 
         CaseData caseDataNoAllegations = CaseData.builder()
             .id(12345L)
-            .state(State.CASE_ISSUE)
+            .state(State.CASE_ISSUED)
             .allegationOfHarm(allegationOfHarmNo)
             .build();
 
@@ -218,7 +218,7 @@ public class ResubmitApplicationControllerTest {
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.CASE_ISSUE.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.CASE_ISSUED.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
 
@@ -244,7 +244,7 @@ public class ResubmitApplicationControllerTest {
             callbackRequest
         );
 
-        assertEquals(State.CASE_ISSUE, response.getData().get("state"));
+        assertEquals(State.CASE_ISSUED, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL_WELSH));
         assertFalse(response.getData().containsKey(DOCUMENT_FIELD_C1A_WELSH));
@@ -260,7 +260,7 @@ public class ResubmitApplicationControllerTest {
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.CASE_ISSUE.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.CASE_ISSUED.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
 
@@ -282,7 +282,7 @@ public class ResubmitApplicationControllerTest {
 
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
-        assertEquals(State.CASE_ISSUE, response.getData().get("state"));
+        assertEquals(State.CASE_ISSUED, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL_WELSH));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C1A_WELSH));
@@ -324,7 +324,7 @@ public class ResubmitApplicationControllerTest {
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.CASE_ISSUE.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.CASE_ISSUED.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
