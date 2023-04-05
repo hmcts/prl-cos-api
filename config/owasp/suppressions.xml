@@ -59,8 +59,10 @@
     </suppress>
   <suppress>
     <notes><![CDATA[
-      jackson-databind-2.13.3.jar ]]></notes>
-    <cve>CVE-2022-42003</cve>
+      spring-core-5.3.20.jar ]]></notes>
+    <cve>CVE-2016-1000027</cve>
+    <cve>CVE-2021-37533</cve>
+    <cve>CVE-2023-20860</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[

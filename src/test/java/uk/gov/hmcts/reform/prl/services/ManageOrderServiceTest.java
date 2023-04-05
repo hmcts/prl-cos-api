@@ -126,6 +126,15 @@ public class ManageOrderServiceTest {
 
     @Before
     public void setup() {
+        manageOrders = ManageOrders.builder()
+            .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
+            .isCaseWithdrawn(YesOrNo.No)
+            .childOption(
+                DynamicMultiSelectList.builder()
+                    .value(List.of(DynamicMultiselectListElement.builder().label("John (Child 1)").build())).build()
+            )
+            .build();
+
         now = dateTime.now();
         DynamicListElement dynamicListElement = DynamicListElement.builder().code(TEST_UUID).label(" ").build();
         dynamicList = DynamicList.builder()
@@ -142,6 +151,7 @@ public class ManageOrderServiceTest {
         manageOrders = ManageOrders.builder()
             .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
             .isCaseWithdrawn(YesOrNo.No)
+            .childOption(dynamicMultiSelectList)
             .build();
 
         dynamicList = DynamicList.builder()
@@ -168,6 +178,8 @@ public class ManageOrderServiceTest {
             .thenReturn(dynamicMultiSelectList);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
+        when(dynamicMultiSelectListService.getStringFromDynamicMultiSelectList(Mockito.any(DynamicMultiSelectList.class)))
+            .thenReturn("testChild");
     }
 
     @Test
@@ -191,11 +203,12 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
+            .manageOrders(manageOrders)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
-        assertEquals("Test Name", caseData1.getChildrenList());
+        assertEquals("testChild", caseData1.getChildrenList());
         assertNotNull(caseData1.getSelectedOrder());
     }
 
@@ -222,6 +235,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .applicantChildDetails(listOfChildren)
+            .manageOrders(manageOrders)
             .home(Home.builder()
                       .children(listOfHomeChildren)
                       .build())
@@ -230,7 +244,7 @@ public class ManageOrderServiceTest {
 
         CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
 
-        assertEquals("TestName", caseData1.getChildrenList());
+        assertEquals("testChild", caseData1.getChildrenList());
         assertNotNull(caseData1.getSelectedOrder());
     }
 
@@ -366,6 +380,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -399,6 +414,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -434,6 +450,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.appointmentOfGuardian)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -469,6 +486,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.parentalResponsibility)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -504,6 +522,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.transferOfCaseToAnotherCourt)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -539,6 +558,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -574,6 +594,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.powerOfArrest)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -686,6 +707,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
+            .manageOrders(manageOrders)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
@@ -719,6 +741,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -753,6 +776,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -790,6 +814,7 @@ public class ManageOrderServiceTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrders(manageOrders)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
@@ -1112,6 +1137,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.amendDischargedVaried)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -1148,6 +1174,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -1180,6 +1207,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -1216,6 +1244,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.generalForm)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -1252,6 +1281,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .manageOrders(manageOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)

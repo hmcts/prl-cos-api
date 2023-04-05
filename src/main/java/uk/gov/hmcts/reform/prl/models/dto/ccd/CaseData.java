@@ -579,6 +579,9 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final ManageOrders manageOrders;
 
+    @JsonProperty("childrenListForDocmosis")
+    private List<Child> childrenListForDocmosis;
+
     @JsonUnwrapped
     @Builder.Default
     private final StandardDirectionOrder standardDirectionOrder;
