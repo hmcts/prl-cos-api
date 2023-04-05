@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
@@ -215,6 +216,8 @@ public class HearingDataService {
 
 
     public HearingData generateHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,CaseData caseData) {
+        List<String> applicantNames  = getApplicantNameList(caseData);
+        int numberOfApplicant = applicantNames.size();
         return HearingData.builder()
             .hearingTypes(hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes())
             .confirmedHearingDates(hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates())
@@ -239,6 +242,7 @@ public class HearingDataService {
             .respondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "")
             .respondentSolicitor("")
             .fillingFormRenderingInfo(CommonUtils.renderCollapsible())
+            .applicantName1(0 < numberOfApplicant ? applicantNames.get(0) : "INVALID_DATA")
             .build();
     }
 
@@ -319,4 +323,17 @@ public class HearingDataService {
         }
     }
 
+    private List<String> getApplicantNameList(CaseData caseData) {
+        List<String> applicantList = new ArrayList<>();
+
+        if (caseData.getApplicants() != null) {
+            applicantList = caseData.getApplicants().stream()
+                .map(Element::getValue)
+                .map(PartyDetails::getLabelForDynamicList)
+                .collect(Collectors.toList());
+        }
+
+        return applicantList;
+
+    }
 }

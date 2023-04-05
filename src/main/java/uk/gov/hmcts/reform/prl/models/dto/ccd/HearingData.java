@@ -139,4 +139,20 @@ public class HearingData {
 
     @JsonProperty("fillingFormRenderingInfo")
     private String fillingFormRenderingInfo;
+
+    // private final DynamicList applicantSolicitorHearingChannel1;
+
+    // private final DynamicList respondentHearingChannel1;
+
+    // private final DynamicList respondentSolicitorHearingChannel1;
+
+    private final DynamicList applicantHearingChannel1;
+
+    private final String applicantName1;
+
+    //private final String applicantSolicitor1;
+
+    // private final String respondentName1;
+
+    //private final String respondentSolicitor1;
 }
