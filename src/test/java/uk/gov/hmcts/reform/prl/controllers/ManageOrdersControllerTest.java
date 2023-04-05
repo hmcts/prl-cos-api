@@ -237,10 +237,10 @@ public class ManageOrdersControllerTest {
                                  .documentFileName("c21DraftFilename")
                                  .build())
             .uploadOrderDoc(Document.builder()
-                                .documentUrl(generatedDocumentInfo.getUrl())
-                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                .documentHash(generatedDocumentInfo.getHashToken())
-                                .documentFileName("c21DraftFilename")
+                                        .documentUrl(generatedDocumentInfo.getUrl())
+                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                        .documentHash(generatedDocumentInfo.getHashToken())
+                                        .documentFileName("c21DraftFilename")
                                 .build())
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
@@ -287,11 +287,11 @@ public class ManageOrdersControllerTest {
                                  .documentFileName("fl404bDraftFilename")
                                  .build())
             .uploadOrderDoc(Document.builder()
-                                .documentUrl(generatedDocumentInfo.getUrl())
-                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                .documentHash(generatedDocumentInfo.getHashToken())
-                                .documentFileName("fl404bDraftFilename")
-                                .build())
+                                        .documentUrl(generatedDocumentInfo.getUrl())
+                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                        .documentHash(generatedDocumentInfo.getHashToken())
+                                        .documentFileName("fl404bDraftFilename")
+                                        .build())
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
