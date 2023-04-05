@@ -1484,6 +1484,46 @@ public class DraftAnOrderServiceTest {
         assertNotNull(stringObjectMap);
     }
 
+    @Test
+    public void testCheckIfOrderCanReviewedIfNitApprovedInAdminApprove() {
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "Created by Admin");
+        response.put("reviewRequiredBy","A judge or legal adviser needs to check the order");
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder().data(stringObjectMap).build())
+            .eventId("adminEditAndApproveAnOrder")
+            .caseDetails(CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        String errorMessage = draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
+
+        assertNotNull(errorMessage);
+    }
+
+    @Test
+    public void testCheckIfOrderCanReviewedIfNitApprovedInEditApprove() {
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "Created by Judge");
+        response.put("reviewRequiredBy","A manager needs to check the order");
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder().data(stringObjectMap).build())
+            .eventId("editAndApproveAnOrder")
+            .caseDetails(CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        String errorMessage = draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
+
+        assertNotNull(errorMessage);
+    }
+
     private static <T> Element<T> customElement(T element) {
         return Element.<T>builder()
             .id(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
