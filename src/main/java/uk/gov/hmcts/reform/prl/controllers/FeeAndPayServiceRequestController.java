@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
+import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -28,6 +29,7 @@ import static org.springframework.http.ResponseEntity.ok;
 public class FeeAndPayServiceRequestController extends AbstractCallbackController {
 
     public static final String CONFIRMATION_HEADER = "# Please visit service request to make the payment";
+    private final SolicitorEmailService solicitorEmailService;
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The case will now display as 'Pending' in your case list. "
         + "You need to visit Service Request tab to make the payment"
         + "\n\n <a href='/cases/case-details/";
@@ -45,6 +47,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        solicitorEmailService.sendAwaitingPaymentEmail(callbackRequest.getCaseDetails());
         return ok(SubmittedCallbackResponse.builder().confirmationHeader(
             CONFIRMATION_HEADER).confirmationBody(
             CONFIRMATION_BODY_PREFIX + callbackRequest.getCaseDetails().getCaseId()
