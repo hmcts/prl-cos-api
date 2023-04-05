@@ -97,8 +97,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
@@ -551,7 +551,7 @@ public class CallbackController {
             && (!PENDING_STATE.equalsIgnoreCase(eachState))
             && (!SUBMITTED_STATE.equalsIgnoreCase(eachState)))
             || ISSUED_STATE.equalsIgnoreCase(eachState)
-            || GATEKEEPING_STATE.equalsIgnoreCase(eachState);
+            || JUDICIAL_REVIEW_STATE.equalsIgnoreCase(eachState);
     }
 
     @PostMapping(path = "/copy-manage-docs-for-tabs", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
