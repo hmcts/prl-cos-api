@@ -138,7 +138,7 @@ public class DraftAnOrderControllerTest {
             .build();
 
         Assert.assertEquals(
-            "Solicitors cannot draft a Direction On Issue order",
+            "This order is not available to be drafted",
             draftAnOrderController.populateHeader(callbackRequest).getErrors().get(0)
         );
     }
@@ -162,7 +162,7 @@ public class DraftAnOrderControllerTest {
             .build();
 
         Assert.assertEquals(
-            "Solicitors cannot draft a Standard Directions order",
+            "This order is not available to be drafted",
             draftAnOrderController.populateHeader(callbackRequest).getErrors().get(0)
         );
     }
