@@ -506,7 +506,7 @@ public class CaseData implements MappableObject {
     private final List<Element<Document>> fl401UploadWitnessDocuments;
     private final List<Element<Document>> fl401UploadSupportDocuments;
 
-    /**f
+    /**
      * Send to Gatekeeper.
      */
     private final List<Element<GatekeeperEmail>> gatekeeper;
@@ -777,4 +777,5 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
+
 }
