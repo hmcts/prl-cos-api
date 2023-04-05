@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TIER_OF_JUDICIARY;
 
 @Slf4j
 @RestController
@@ -41,7 +40,8 @@ public class ListOnNoticeController {
         log.info("*** mid event triggered for List ON Notice : {}", caseData.getId());
         log.info("*** selectedReasonsForListOnNotice : {}", callbackRequest);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<ListOnNoticeReasonsEnum> listOnNoticeReasonsEnums = (List<ListOnNoticeReasonsEnum>)(caseDataUpdated.get("selectedReasonsForListOnNotice"));
+        List<ListOnNoticeReasonsEnum> listOnNoticeReasonsEnums =
+            (List<ListOnNoticeReasonsEnum>)(caseDataUpdated.get("selectedReasonsForListOnNotice"));
         log.info("*** inside null check for reasons Enum : {}", getReasonsSelected(listOnNoticeReasonsEnums));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
