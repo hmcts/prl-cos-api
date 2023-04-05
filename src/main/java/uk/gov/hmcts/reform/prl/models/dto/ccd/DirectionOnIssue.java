@@ -79,6 +79,8 @@ public class DirectionOnIssue {
     private final String dioHearingUrgentCourtConsider;
     @JsonProperty("dioHearingUrgentTimeShortened")
     private final String dioHearingUrgentTimeShortened;
+    @JsonProperty("dioHearingUrgentDayShortened")
+    private final String dioHearingUrgentDayShortened;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dioHearingUrgentMustBeServedBy;
     @JsonProperty("dioHearingUrgentByWayOf")
@@ -140,5 +142,20 @@ public class DirectionOnIssue {
     private final String dioParentWithCare;
     @JsonProperty("dioApplicationToApplyPermission")
     private final List<Element<DioApplicationToApplyPermission>> dioApplicationToApplyPermission;
+
+    @JsonProperty("dioPermissionHearingDirections")
+    private final String dioPermissionHearingDirections;
+    @JsonProperty("dioCaseReviewHearingDetails")
+    private final HearingData dioCaseReviewHearingDetails;
+    @JsonProperty("dioFhdraHearingDetails")
+    private final HearingData dioFhdraHearingDetails;
+    @JsonProperty("dioPermissionHearingDetails")
+    private final HearingData dioPermissionHearingDetails;
+    @JsonProperty("dioUrgentFirstHearingDetails")
+    private final HearingData dioUrgentFirstHearingDetails;
+    @JsonProperty("dioUrgentHearingDetails")
+    private final HearingData dioUrgentHearingDetails;
+    @JsonProperty("dioWithoutNoticeHearingDetails")
+    private final HearingData dioWithoutNoticeHearingDetails;
 
 }
