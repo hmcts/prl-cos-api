@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
 
 @Slf4j
 @RestController
@@ -38,12 +39,14 @@ public class ListOnNoticeController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("*** mid event triggered for List ON Notice : {}", caseData.getId());
-        log.info("*** selectedReasonsForListOnNotice : {}", callbackRequest);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<String> listOnNoticeReasonsEnums =
-            (List<String>)(caseDataUpdated.get("selectedReasonsForListOnNotice"));
-        log.info("*** inside null check for reasons Enum : {}", getReasonsSelected(listOnNoticeReasonsEnums));
 
+        Object reasonsSelected = caseDataUpdated.get(LIST_ON_NOTICE_REASONS_SELECTED);
+        if (null != reasonsSelected) {
+            log.info("***Reasons selected for list on Notice : {}", getReasonsSelected((List<String>) reasonsSelected));
+        } else {
+            log.info("***No Reasons selected for list on Notice for the case id: {}", caseData.getId());
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
