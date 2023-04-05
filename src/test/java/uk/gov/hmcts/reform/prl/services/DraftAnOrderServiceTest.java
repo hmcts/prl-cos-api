@@ -725,7 +725,8 @@ public class DraftAnOrderServiceTest {
             .caseTypeOfApplication("C100")
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
-            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).build())
+            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).c21OrderOptions(
+                C21OrderOptionsEnum.c21NoOrderMade).build())
             .respondents(List.of(respondents))
             .build();
         when(elementUtils.getDynamicListSelectedValue(
@@ -781,7 +782,8 @@ public class DraftAnOrderServiceTest {
                                   .build())
 
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge)
-                              .fl404CustomFields(fl404).build())
+                              .fl404CustomFields(fl404).c21OrderOptions(
+                    C21OrderOptionsEnum.c21NoOrderMade).build())
             .respondents(List.of(respondents))
             .build();
         when(elementUtils.getDynamicListSelectedValue(
@@ -1463,7 +1465,8 @@ public class DraftAnOrderServiceTest {
             .caseTypeOfApplication("C100")
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
-            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).build())
+            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).c21OrderOptions(
+                C21OrderOptionsEnum.c21NoOrderMade).build())
             .respondents(List.of(respondents))
             .draftOrderCollection(draftOrderCollection)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
