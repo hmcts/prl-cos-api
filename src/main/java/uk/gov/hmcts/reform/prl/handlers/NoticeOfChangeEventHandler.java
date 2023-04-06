@@ -27,7 +27,7 @@ public class NoticeOfChangeEventHandler {
         log.info("inside notifyLegalRepresentative ===> " + event.getSolicitorEmailAddress());
         emailService.send(
             event.getSolicitorEmailAddress(),
-            EmailTemplateNames.APPLICANT_SOLICITOR_CA,
+            EmailTemplateNames.CA_DA_RESPONDENT_SOLICITOR_NOC,
             noticeOfChangeContentProvider.buildNoticeOfChangeEmail(caseData,event.getSolicitorName()),
             LanguagePreference.english
         );
