@@ -228,18 +228,6 @@ public class FL401SubmitApplicationServiceTest {
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder().orderType(List.of(FL401OrderTypeEnum.occupationOrder)).build())
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -260,6 +248,60 @@ public class FL401SubmitApplicationServiceTest {
         assertTrue(response.containsKey(DOCUMENT_FIELD_FINAL));
         assertTrue(response.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(response.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+    }
+
+    @Test
+    public void testtypeOfApplicationOrdersNull() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .phoneNumber("1234567890")
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        caseData = CaseData.builder()
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("FL401-Final.docx")
+                               .build())
+            .applicantsFL401(applicant)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .submitCountyCourtSelection(dynamicList)
+            .build();
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+            fl401DocsMap);
+
+        Map<String, Object> response = fl401SubmitApplicationService
+            .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
+
+        assertTrue(response.containsKey(COURT_EMAIL_ADDRESS_FIELD));
+        assertTrue(response.containsKey(COURT_NAME_FIELD));
+        assertTrue(response.containsKey(DOCUMENT_FIELD_C8));
     }
 
     @Test
@@ -336,19 +378,6 @@ public class FL401SubmitApplicationServiceTest {
             .submitCountyCourtSelection(dynamicList)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
-
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
 
         when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
             .thenReturn(stringObjectMap);
@@ -456,18 +485,6 @@ public class FL401SubmitApplicationServiceTest {
             .home(homefull)
             .submitCountyCourtSelection(dynamicList)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
-            .build();
-
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
             .build();
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model

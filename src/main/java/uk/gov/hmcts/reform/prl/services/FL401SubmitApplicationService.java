@@ -78,15 +78,18 @@ public class FL401SubmitApplicationService {
         caseDataUpdated.putAll(courtDetailsMap);
 
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
-        if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
-            caseData = caseData.toBuilder()
-                .respondentBehaviourData(null)
-                .build();
-        } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
-            caseData = caseData.toBuilder()
-                .home(null)
-                .build();
+        if (typeOfApplicationOrders.isPresent()){
+            if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
+                caseData = caseData.toBuilder()
+                    .respondentBehaviourData(null)
+                    .build();
+            } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
+                caseData = caseData.toBuilder()
+                    .home(null)
+                    .build();
+            }
         }
+
         caseData = caseData.setDateSubmittedDate();
 
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
