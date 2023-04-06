@@ -22,13 +22,13 @@ public class NoticeOfChangeEventHandler {
 
     @Async
     @EventListener
-    public void notifyLegalRepresentative(final NoticeOfChangeEvent event) throws Exception {
+    public void notifyLegalRepresentative(final NoticeOfChangeEvent event) {
         CaseData caseData = event.getCaseData();
         log.info("inside notifyLegalRepresentative ===> " + event.getSolicitorEmailAddress());
         emailService.send(
             event.getSolicitorEmailAddress(),
             EmailTemplateNames.CA_DA_RESPONDENT_SOLICITOR_NOC,
-            noticeOfChangeContentProvider.buildNoticeOfChangeEmail(caseData,event.getSolicitorName()),
+            noticeOfChangeContentProvider.buildNoticeOfChangeEmail(caseData, event.getSolicitorName()),
             LanguagePreference.english
         );
     }
