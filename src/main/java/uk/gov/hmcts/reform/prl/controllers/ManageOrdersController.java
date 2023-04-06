@@ -196,12 +196,13 @@ public class ManageOrdersController {
                                   .build();
         }
 
-        //PRL-3254 - Populate hearing details dropdown for create order
-        caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
-
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
+
+        //PRL-3254 - Populate hearing details dropdown for create order
+        caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
+
         return CallbackResponse.builder()
             .data(caseData)
             .build();
