@@ -234,12 +234,12 @@ public class ManageOrdersController {
             ElementUtils.wrapElements(
                 hearingData)
         );
-        caseDataUpdated.put(DIO_CASEREVIEW_HEARING_DETAILS, hearingData);
-        caseDataUpdated.put(DIO_PERMISSION_HEARING_DETAILS, hearingData);
-        caseDataUpdated.put(DIO_URGENT_HEARING_DETAILS, hearingData);
-        caseDataUpdated.put(DIO_URGENT_FIRST_HEARING_DETAILS, hearingData);
-        caseDataUpdated.put(DIO_FHDRA_HEARING_DETAILS, hearingData);
-        caseDataUpdated.put(DIO_WITHOUT_NOTICE_HEARING_DETAILS, hearingData);
+        caseDataUpdated.put(DIO_CASEREVIEW_HEARING_DETAILS, ElementUtils.element(hearingData));
+        caseDataUpdated.put(DIO_PERMISSION_HEARING_DETAILS, ElementUtils.element(hearingData));
+        caseDataUpdated.put(DIO_URGENT_HEARING_DETAILS, ElementUtils.element(hearingData));
+        caseDataUpdated.put(DIO_URGENT_FIRST_HEARING_DETAILS, ElementUtils.element(hearingData));
+        caseDataUpdated.put(DIO_FHDRA_HEARING_DETAILS, ElementUtils.element(hearingData));
+        caseDataUpdated.put(DIO_WITHOUT_NOTICE_HEARING_DETAILS, ElementUtils.element(hearingData));
         caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
