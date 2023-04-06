@@ -14,7 +14,7 @@ plugins {
   id 'info.solidsoft.pitest' version '1.7.4'
   id 'io.spring.dependency-management' version '1.0.11.RELEASE'
   id 'jacoco'
-  id 'org.owasp.dependencycheck' version '8.0.2'
+  id 'org.owasp.dependencycheck' version '8.2.1'
   id 'org.sonarqube' version '3.3'
   id 'org.springframework.boot' version '2.7.0'
   id 'au.com.dius.pact' version '4.2.6'
@@ -299,7 +299,7 @@ dependencies {
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
   compile group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
-  compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '5.10.2'
+  compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '6.0.6'
   compile group: 'org.elasticsearch', name: 'elasticsearch', version: '7.13.4'
   compile group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   compile group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
