@@ -78,7 +78,7 @@ public class FL401SubmitApplicationService {
         caseDataUpdated.putAll(courtDetailsMap);
 
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
-        if (typeOfApplicationOrders.isPresent()){
+        if (typeOfApplicationOrders.isPresent()) {
             if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
                 caseData = caseData.toBuilder()
                     .respondentBehaviourData(null)
