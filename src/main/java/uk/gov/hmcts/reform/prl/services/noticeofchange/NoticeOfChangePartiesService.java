@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -130,7 +131,7 @@ public class NoticeOfChangePartiesService {
     }
 
     private Map<String, Object> getRepresentedPartyDetails(ChangeOrganisationRequest changeOrganisationRequest,
-                                                           CaseData caseData) {
+                                                           CaseData caseData, UserDetails legalRepresentativeSolicitorDetails) {
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         if (solicitorRole.isPresent()) {
             int partyIndex = solicitorRole.get().getIndex();
@@ -138,14 +139,18 @@ public class NoticeOfChangePartiesService {
                 List<Element<PartyDetails>> respondents = RESPONDENT.getTarget().apply(caseData);
                 log.info("inside solicitorRole present");
                 if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                    return updateC100RespondentDetails(partyIndex, respondents);
+                    return updateC100RespondentDetails(partyIndex, respondents, legalRepresentativeSolicitorDetails,
+                                                       changeOrganisationRequest);
                 }
             }
         }
         return new HashMap<>();
     }
 
-    private Map<String, Object> updateC100RespondentDetails(int partyIndex, List<Element<PartyDetails>> respondents) {
+    private Map<String, Object> updateC100RespondentDetails(int partyIndex,
+                                                            List<Element<PartyDetails>> respondents,
+                                                            UserDetails legalRepresentativeSolicitorDetails,
+                                                            ChangeOrganisationRequest changeOrganisationRequest) {
         Map<String, Object> updatedPartyDetails = new HashMap<>();
         Element<PartyDetails> representedRespondentElement = respondents.get(partyIndex);
         PartyDetails updPartyDetails = representedRespondentElement.getValue().toBuilder()
@@ -153,6 +158,14 @@ public class NoticeOfChangePartiesService {
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorEmail(changeOrganisationRequest.getCreatedBy())
+            .representativeFirstName(legalRepresentativeSolicitorDetails.getFullName())
+            .representativeLastName(legalRepresentativeSolicitorDetails.getSurname().isPresent()
+                                        ? legalRepresentativeSolicitorDetails.getSurname().get() : "")
+            .organisations(Organisations.builder()
+                               .organisationIdentifier(changeOrganisationRequest.getOrganisationToAdd().getOrganisationID())
+                               .name(changeOrganisationRequest.getOrganisationToAdd().getOrganisationName())
+                               .build())
             .build();
         Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
             .element(representedRespondentElement.getId(), updPartyDetails);
@@ -180,12 +193,15 @@ public class NoticeOfChangePartiesService {
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         ChangeOrganisationRequest changeOrganisationRequest = oldCaseData.getChangeOrganisationRequestField();
 
-        UserDetails legalRepresentativeSolicitorInfo = userService.getUserDetails(
+        UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
             authorisation
         );
-        log.info("legalRepresentativeSolicitorInfo ==>" + legalRepresentativeSolicitorInfo);
-        String representativeSolicitorName = legalRepresentativeSolicitorInfo.getFullName()
-            + EMPTY_SPACE_STRING + legalRepresentativeSolicitorInfo.getSurname();
+        tabService.updatePartyDetailsForNoc(newCaseData, getRepresentedPartyDetails(changeOrganisationRequest,
+                                                                                    newCaseData,
+                                                                                    legalRepresentativeSolicitorDetails));
+
+        String representativeSolicitorName = legalRepresentativeSolicitorDetails.getFullName()
+            + EMPTY_SPACE_STRING + legalRepresentativeSolicitorDetails.getSurname();
 
         NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
             newCaseData,
@@ -194,7 +210,7 @@ public class NoticeOfChangePartiesService {
         );
         log.info("NoticeOfChangeEvent ===> " + noticeOfChangeEvent);
         eventPublisher.publishEvent(noticeOfChangeEvent);
-        tabService.updatePartyDetailsForNoc(newCaseData, getRepresentedPartyDetails(changeOrganisationRequest, newCaseData));
+
     }
 
     private NoticeOfChangeEvent prepareNoticeOfChangeEvent(CaseData newCaseData,
