@@ -154,9 +154,7 @@ public class NoticeOfChangePartiesService {
             authorisation
         );
         PartyDetails updPartyDetails = representedRespondentElement.getValue().toBuilder()
-            .user(User.builder()
-                      .idamId(legalRepresentativeSolicitorInfo.getId())
-                      .email(changeOrganisationRequest.getCreatedBy())
+            .user(representedRespondentElement.getValue().getUser().toBuilder()
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
