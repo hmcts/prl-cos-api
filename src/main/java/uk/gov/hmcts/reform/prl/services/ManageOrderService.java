@@ -810,6 +810,8 @@ public class ManageOrderService {
                                        .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
                                            ? caseData.getDoesOrderClosesCase() : null)
                                        .serveOrderDetails(buildServeOrderDetails(serveOrderData))
+                                       .hearingType(null != caseData.getManageOrders().getHearingType()
+                                                        ? caseData.getManageOrders().getHearingType().getValueCode() : null)
                                        .build()));
         }
     }
@@ -1040,6 +1042,8 @@ public class ManageOrderService {
             .isOrderUploadedByJudgeOrAdmin(No)
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
+            .hearingType(null != caseData.getManageOrders().getHearingType()
+                             ? caseData.getManageOrders().getHearingType().getValueCode() : null)
             .build();
     }
 
@@ -1676,6 +1680,8 @@ public class ManageOrderService {
                            .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                             ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
                            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
+                           .hearingType(null != caseData.getManageOrders().getHearingType()
+                                            ? caseData.getManageOrders().getHearingType().getValueCode() : null)
                            .build());
     }
 
