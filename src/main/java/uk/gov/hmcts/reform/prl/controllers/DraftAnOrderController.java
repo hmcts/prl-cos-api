@@ -72,6 +72,7 @@ public class DraftAnOrderController {
         if (caseDataUpdated.get("selectedOrder") == "Standard directions order"
             || caseDataUpdated.get("selectedOrder") == "Direction on issue") {
             List<String> errorList = new ArrayList<>();
+
             errorList.add(
                 "This order is not available to be drafted");
             return AboutToStartOrSubmitCallbackResponse.builder()
