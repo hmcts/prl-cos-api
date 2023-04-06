@@ -39,7 +39,7 @@ public enum ListOnNoticeReasonsEnum {
     }
 
     @JsonCreator
-    public static uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum getValue(String key) {
-        return uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum.valueOf(key);
+    public static ListOnNoticeReasonsEnum getValue(String key) {
+        return ListOnNoticeReasonsEnum.valueOf(key);
     }
 }
