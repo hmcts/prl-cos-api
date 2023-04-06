@@ -126,7 +126,7 @@ public class DraftOrder {
     private final YesOrNo isTheOrderAboutChildren;
     private final C21OrderOptionsEnum c21OrderOptions;
     //PRL-3254 - Added for storing selected hearing dropdown
-    private final String hearingType;
+    private final String selectedHearingType;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
