@@ -61,3 +61,5 @@ java:
         - filtered-court-ids
         - da-filtered-court-ids
         - postcode-lookup-token
+        - prl-rd-api-system-username
+        - prl-rd-api-system-user-password
