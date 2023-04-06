@@ -67,7 +67,8 @@ public class C100IssueCaseService {
                                                                .value(LocalCourtAdminEmail
                                                                           .builder()
                                                                           .email(caseData.getCourtList().getValue().getCode().split(
-                                                                              COLON_SEPERATOR)[1])
+                                                                              COLON_SEPERATOR).length > 1 ? caseData.getCourtList().getValue().getCode().split(
+                                                                              COLON_SEPERATOR)[1]: null)
                                                                           .build())
                                                                .build()));
 

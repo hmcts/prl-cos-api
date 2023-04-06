@@ -94,10 +94,6 @@ public class FL401SubmitApplicationServiceTest {
     @Mock
     private UserDetails userDetails;
 
-
-    @Mock
-    ConfidentialityTabService confidentialityTabService;
-
     @Mock
     AllTabServiceImpl allTabsService;
 
@@ -258,7 +254,7 @@ public class FL401SubmitApplicationServiceTest {
             .forename("test")
             .surname("test")
             .build();
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         Map<String, Object> response = fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
@@ -274,7 +270,7 @@ public class FL401SubmitApplicationServiceTest {
     }
 
     @Test
-    public void testC8Formgenerationbasedconconfidentiality() throws Exception {
+    public void testC8FormGenerationBasedConfidentiality() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -388,7 +384,7 @@ public class FL401SubmitApplicationServiceTest {
             .forename("test")
             .surname("test")
             .build();
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         fl401SubmitApplicationService
@@ -403,7 +399,7 @@ public class FL401SubmitApplicationServiceTest {
 
 
     @Test
-    public void testC8Formgenerationbasedconconfidentiality2() throws Exception {
+    public void testC8FormGenerationBasedConfidentiality2() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -515,7 +511,7 @@ public class FL401SubmitApplicationServiceTest {
             .forename("test")
             .surname("test")
             .build();
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         fl401SubmitApplicationService
@@ -640,7 +636,7 @@ public class FL401SubmitApplicationServiceTest {
             .forename("test")
             .surname("test")
             .build();
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
@@ -753,7 +749,7 @@ public class FL401SubmitApplicationServiceTest {
             .forename("test")
             .surname("test")
             .build();
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
@@ -854,7 +850,7 @@ public class FL401SubmitApplicationServiceTest {
             .forename("test")
             .surname("test")
             .build();
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
@@ -959,7 +955,7 @@ public class FL401SubmitApplicationServiceTest {
             .forename("test")
             .surname("test")
             .build();
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         Map<String, Object> response = fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
@@ -1003,7 +999,7 @@ public class FL401SubmitApplicationServiceTest {
         Map<String, Object> stringObjectMap = new HashMap<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -1041,7 +1037,7 @@ public class FL401SubmitApplicationServiceTest {
         Map<String, Object> stringObjectMap = new HashMap<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
