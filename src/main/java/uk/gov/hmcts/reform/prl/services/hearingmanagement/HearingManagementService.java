@@ -56,6 +56,12 @@ public class HearingManagementService {
     public static final String HEARING_STATE_CHANGE_SUCCESS = "hmcCaseUpdateSuccess";
     public static final String HEARING_STATE_CHANGE_FAILURE = "hmcCaseUpdateFailure";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
+    public static final String USER_TOKEN = "userToken";
+    public static final String SYSTEM_UPDATE_USER_ID = "systemUpdateUserId";
+    public static final String CASE_REF_ID = "id";
+    public static final String STATE = "state";
+    public static final String EVENT_ID = "eventId";
+    public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
 
     private final AuthorisationService authorisationService;
     private final ObjectMapper objectMapper;
@@ -75,7 +81,8 @@ public class HearingManagementService {
     public void caseStateChangeForHearingManagement(HearingRequest hearingRequest) throws Exception {
 
         log.info("Processing the callback for the caseId {} with HMC status {}", hearingRequest.getCaseRef(),
-                     hearingRequest.getHearingUpdate().getHmcStatus());
+                 hearingRequest.getHearingUpdate().getHmcStatus()
+        );
 
         String userToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(userToken);
@@ -83,24 +90,24 @@ public class HearingManagementService {
         );
 
         Map<String, Object> customFields = new HashMap<>();
-        customFields.put("userToken",userToken);
-        customFields.put("systemUpdateUserId",systemUpdateUserId);
-        customFields.put("id",hearingRequest.getCaseRef());
+        customFields.put(USER_TOKEN, userToken);
+        customFields.put(SYSTEM_UPDATE_USER_ID, systemUpdateUserId);
+        customFields.put(CASE_REF_ID, hearingRequest.getCaseRef());
         CaseData caseData;
         Map<String, String> fields = new HashMap<>();
         String hmcStatus = hearingRequest.getHearingUpdate().getHmcStatus();
         switch (hmcStatus) {
             case LISTED:
-                fields.put("state", DECISION_OUTCOME.getValue());
-                customFields.put("eventId", CaseEvent.HEARING_STATE_CHANGE_SUCCESS);
+                fields.put(STATE, DECISION_OUTCOME.getValue());
+                customFields.put(EVENT_ID, CaseEvent.HEARING_STATE_CHANGE_SUCCESS);
                 submitUpdate(fields, customFields);
                 caseData = updateTabsWithLatestData(customFields);
                 sendHearingDetailsEmail(caseData, hearingRequest);
                 break;
 
             case CANCELLED:
-                fields.put("state", PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue());
-                customFields.put("eventId", CaseEvent.HEARING_STATE_CHANGE_FAILURE);
+                fields.put(STATE, PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue());
+                customFields.put(EVENT_ID, CaseEvent.HEARING_STATE_CHANGE_FAILURE);
                 submitUpdate(fields, customFields);
                 updateTabsWithLatestData(customFields);
                 caseData = updateTabsWithLatestData(customFields);
@@ -110,8 +117,8 @@ public class HearingManagementService {
             case COMPLETED:
             case POSTPONED:
             case ADJOURNED:
-                fields.put("state", PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue());
-                customFields.put("eventId", CaseEvent.HEARING_STATE_CHANGE_FAILURE);
+                fields.put(STATE, PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue());
+                customFields.put(EVENT_ID, CaseEvent.HEARING_STATE_CHANGE_FAILURE);
                 submitUpdate(fields, customFields);
                 caseData = updateTabsWithLatestData(customFields);
                 sendHearingChangeDetailsEmail(caseData);
@@ -124,13 +131,13 @@ public class HearingManagementService {
     public CaseData updateTabsWithLatestData(Map<String, Object> fields) {
         EventRequestData allTabsUpdateEventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.UPDATE_ALL_TABS,
-            (String) fields.get("systemUpdateUserId")
+            (String) fields.get(SYSTEM_UPDATE_USER_ID)
         );
         StartEventResponse allTabsUpdateStartEventResponse =
             coreCaseDataService.startUpdate(
-                (String) fields.get("userToken"),
+                (String) fields.get(USER_TOKEN),
                 allTabsUpdateEventRequestData,
-                (String) fields.get("id"),
+                (String) fields.get(CASE_REF_ID),
                 true
             );
 
@@ -141,13 +148,13 @@ public class HearingManagementService {
         log.info("Refreshing tab based on the payment response for caseid {} ", fields.get("id"));
 
         allTabService.updateAllTabsIncludingConfTabRefactored(
-            (String) fields.get("userToken"),
-            (String) fields.get("id"),
+            (String) fields.get(USER_TOKEN),
+            (String) fields.get(CASE_REF_ID),
             allTabsUpdateStartEventResponse,
             allTabsUpdateEventRequestData,
             allTabsUpdateCaseData
         );
-        return  allTabsUpdateCaseData;
+        return allTabsUpdateCaseData;
     }
 
     private void submitUpdate(Map<String, String> data, Map<String, Object> fields) {
@@ -156,14 +163,14 @@ public class HearingManagementService {
         log.info("Following case event will be triggered {}", caseEvent.getValue());
 
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
-            (CaseEvent) fields.get("eventId"),
-            (String) fields.get("systemUpdateUserId")
+            (CaseEvent) fields.get(EVENT_ID),
+            (String) fields.get(SYSTEM_UPDATE_USER_ID)
         );
         StartEventResponse startEventResponse =
             coreCaseDataService.startUpdate(
-                (String) fields.get("userToken"),
+                (String) fields.get(USER_TOKEN),
                 eventRequestData,
-                (String) fields.get("id"),
+                (String) fields.get(CASE_REF_ID),
                 true
             );
         CaseData caseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
@@ -171,29 +178,19 @@ public class HearingManagementService {
             objectMapper
         );
 
-
-        // or return caseData
-        // then new method to submit the content, if u are modifying based on values from casedata
-
-        data.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        data.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
 
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
             startEventResponse,
             data
         );
         coreCaseDataService.submitUpdate(
-            (String) fields.get("userToken"),
+            (String) fields.get(USER_TOKEN),
             eventRequestData,
             caseDataContent,
-            (String) fields.get("id"),
+            (String) fields.get(CASE_REF_ID),
             true
         );
-    }
-
-    private void updateTabsAfterStateChange(Map<String, Object> data, Long id) {
-        data.put("id", String.valueOf(id));
-        CaseData caseData = objectMapper.convertValue(data, CaseData.class);
-        allTabService.updateAllTabsIncludingConfTab(caseData);
     }
 
     private void sendHearingChangeDetailsEmail(CaseData caseData) {
@@ -522,7 +519,7 @@ public class HearingManagementService {
     }
 
     private EmailTemplateVars buildApplicantOrRespondentSolicitorHearingEmail(CaseData caseData, HearingRequest hearingRequest,
-                                                                         String applicantSolicitorName) {
+                                                                              String applicantSolicitorName) {
 
         LocalDate issueDate = LocalDate.now();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
@@ -541,10 +538,10 @@ public class HearingManagementService {
     private EmailTemplateVars buildApplicantOrRespondentEmail(CaseData caseData, String partyName) {
 
         return HearingDetailsEmail.builder()
-                .caseReference(String.valueOf(caseData.getId()))
-                .caseName(caseData.getApplicantCaseName())
-                .partyName(partyName)
-                .hearingDetailsPageLink(dashboardUrl + "/dashboard")
-                .build();
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .partyName(partyName)
+            .hearingDetailsPageLink(dashboardUrl + "/dashboard")
+            .build();
     }
 }
