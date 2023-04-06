@@ -38,6 +38,8 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
         boolean mandatoryInfo = false;
         Optional<Response> response = findResponse(caseData, respondent);
 
+        log.info("caseData.getRespondents() =" + caseData.getRespondents());
+
         if (response.isPresent()) {
             Optional<Consent> consent = Optional.ofNullable(response.get().getConsent());
             if (!consent.isEmpty() && checkConsentMandatoryCompleted(consent)) {
