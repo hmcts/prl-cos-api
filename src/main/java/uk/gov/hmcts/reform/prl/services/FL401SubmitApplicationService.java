@@ -61,8 +61,9 @@ public class FL401SubmitApplicationService {
 
         Map<String, Object> courtDetailsMap = CaseUtils.getCourtDetails(courtVenue, baseLocationId);
         caseData = caseData.toBuilder().issueDate(localDate).courtName(courtDetailsMap.containsKey(COURT_NAME_FIELD) ? courtDetailsMap.get(
-            COURT_NAME_FIELD).toString() : null).build();
-        caseData = caseData.toBuilder().isCourtEmailFound(YES).build();
+            COURT_NAME_FIELD).toString() : null)
+            .isCourtEmailFound(YES)
+            .build();
 
         if (courtVenue.isPresent()) {
             String regionId = courtVenue.get().getRegionId();
@@ -77,11 +78,7 @@ public class FL401SubmitApplicationService {
         caseDataUpdated.putAll(courtDetailsMap);
 
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
-        if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(
-            FL401OrderTypeEnum.occupationOrder)
-            && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
-            caseData = caseData.toBuilder().build();
-        } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
+        if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
             caseData = caseData.toBuilder()
                 .respondentBehaviourData(null)
                 .build();

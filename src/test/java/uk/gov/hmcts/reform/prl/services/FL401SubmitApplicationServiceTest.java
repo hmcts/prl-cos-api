@@ -225,6 +225,7 @@ public class FL401SubmitApplicationServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .submitCountyCourtSelection(dynamicList)
+            .typeOfApplicationOrders(TypeOfApplicationOrders.builder().orderType(List.of(FL401OrderTypeEnum.occupationOrder)).build())
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -549,7 +550,7 @@ public class FL401SubmitApplicationServiceTest {
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
             .build();
 
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .typeOfApplicationOrders(null)
             .typeOfApplicationLinkToCA(linkToCA)
@@ -561,6 +562,7 @@ public class FL401SubmitApplicationServiceTest {
                                .build())
             .applicantsFL401(applicant)
             .home(homefull)
+            .typeOfApplicationOrders(TypeOfApplicationOrders.builder().orderType(List.of(FL401OrderTypeEnum.occupationOrder)).build())
             .submitCountyCourtSelection(dynamicList)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
