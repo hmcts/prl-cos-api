@@ -119,19 +119,6 @@ public class DraftAnOrderController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
 
-        log.info("C21 Draft order options in callback in populate-draft-order-fields:: {}", (null != caseData.getManageOrders())
-            ? caseData.getManageOrders().getC21OrderOptions() : null);
-
-        if (null != caseData.getCreateSelectOrderOptions()
-            && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-
-            ManageOrders manageOrders = caseData.getManageOrders().toBuilder().build();
-            caseDataUpdated.put("typeOfC21Order", null != manageOrders.getC21OrderOptions()
-                ? manageOrders.getC21OrderOptions().getDisplayedValue() : null);
-        }
-
-        log.info("Type of C21 order before  ------->{}", caseDataUpdated.get("typeOfC21Order"));
-
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
@@ -143,9 +130,6 @@ public class DraftAnOrderController {
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         }
-
-        log.info("Type of C21 order After   ------->{}", caseDataUpdated.get("typeOfC21Order"));
-
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
