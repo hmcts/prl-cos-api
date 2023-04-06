@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,9 @@ public class ListOnNoticeControllerTest {
 
     @InjectMocks
     ListOnNoticeController listOnNoticeController;
+
+    @Mock
+    ListOnNoticeService listOnNoticeService;
     @Mock
     private ObjectMapper objectMapper;
 
@@ -62,7 +66,10 @@ public class ListOnNoticeControllerTest {
         reasonsSelected.add("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice");
 
         caseDataUpdated.put(LIST_ON_NOTICE_REASONS_SELECTED,reasonsSelected);
-
+        String reasonsSelectedString =
+            "childrenResideWithApplicantAndBothProtectedByNonMolestationOrder"
+                + "\nnoEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice\n";
+        when(listOnNoticeService.getReasonsSelected(reasonsSelected, Long.valueOf("1099999999"))).thenReturn(reasonsSelectedString);
         AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeMidEvent(authToken,callbackRequest);
         assertNotNull(response);
     }
