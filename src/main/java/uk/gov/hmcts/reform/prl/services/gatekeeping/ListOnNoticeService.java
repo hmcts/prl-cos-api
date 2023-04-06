@@ -1,9 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.gatekeeping;
 
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum;
 
@@ -11,7 +9,6 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class ListOnNoticeService {
 
     public String getReasonsSelected(Object listOnNoticeReasonsEnum,long caseId) {
