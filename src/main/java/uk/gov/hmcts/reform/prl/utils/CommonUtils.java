@@ -133,7 +133,9 @@ public class CommonUtils {
 
     public static String formatDate(String pattern, LocalDate localDate) {
         try {
-            return localDate.format(DateTimeFormatter.ofPattern(pattern));
+            if (localDate != null) {
+                return localDate.format(DateTimeFormatter.ofPattern(pattern));
+            }
         } catch (Exception e) {
             log.error(ERROR_STRING + e.getMessage());
         }
