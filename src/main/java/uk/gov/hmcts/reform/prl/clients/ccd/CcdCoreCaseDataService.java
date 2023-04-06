@@ -14,8 +14,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
-import java.util.Map;
-
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
@@ -163,43 +161,5 @@ public class CcdCoreCaseDataService {
                 caseDataContent
             );
         }
-    }
-
-    public void triggerEvent(String jurisdiction,
-                             String caseType,
-                             Long caseId,
-                             String eventName,
-                             Map<String, Object> eventData) {
-
-        String userToken = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(userToken);
-
-        StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
-            userToken,
-            authTokenGenerator.generate(),
-            systemUpdateUserId,
-            jurisdiction,
-            caseType,
-            caseId.toString(),
-            eventName
-        );
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .eventToken(startEventResponse.getToken())
-            .event(Event.builder()
-                       .id(startEventResponse.getEventId())
-                       .build())
-            .data(eventData)
-            .build();
-
-        coreCaseDataApi.submitEventForCaseWorker(
-            userToken,
-            authTokenGenerator.generate(),
-            systemUpdateUserId,
-            jurisdiction,
-            caseType,
-            caseId.toString(),
-            true,
-            caseDataContent
-        );
     }
 }
