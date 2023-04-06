@@ -183,6 +183,7 @@ public class NoticeOfChangePartiesService {
         UserDetails legalRepresentativeSolicitorInfo = userService.getUserDetails(
             authorisation
         );
+        log.info("legalRepresentativeSolicitorInfo ==>" + legalRepresentativeSolicitorInfo);
         String representativeSolicitorName = legalRepresentativeSolicitorInfo.getFullName()
             + EMPTY_SPACE_STRING + legalRepresentativeSolicitorInfo.getSurname();
 
