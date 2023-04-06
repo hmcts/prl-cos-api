@@ -164,7 +164,8 @@
       "sdoHearingsAndNextStepsList": [],
       "sdoCourtList": [],
       "sdoLocalAuthorityList": [],
-      "sdoCafcassOrCymruList": []
+      "sdoCafcassOrCymruList": [],
+      "c21OrderOptions": "c21ApplicationRefused"
     }
   },
   "event_id": "litigationCapacity"
