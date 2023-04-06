@@ -27,7 +27,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.enums.CaseCreatedBy.CITIZEN;
 
 @Slf4j
 @Component
@@ -98,9 +97,6 @@ public class CaseEventHandler {
             return "";
         }
 
-        if (CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            return "";
-        }
         final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(caseData, respondent);
         log.info("tasks found: " + tasks.size());
 
