@@ -49,8 +49,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -134,12 +132,13 @@ public class FL401SubmitApplicationServiceTest {
 
     private static final Map<String, Object> fl401DocsMap = new HashMap<>();
     private DynamicList dynamicList;
+    private Map<String, Object> stringObjectMap;
 
     @Before
     public void setUp() {
 
         MockitoAnnotations.openMocks(this);
-
+        stringObjectMap = new HashMap<>();
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("brighton.breathingspace@justice.gov.uk")
             .description("Horsham Court")
@@ -185,6 +184,7 @@ public class FL401SubmitApplicationServiceTest {
                                         .siteName("test")
                                         .region("test")
                                         .build()));
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
     }
 
 
@@ -235,7 +235,7 @@ public class FL401SubmitApplicationServiceTest {
                       .build())
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
 
@@ -356,7 +356,7 @@ public class FL401SubmitApplicationServiceTest {
                       .build())
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
         when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
             .thenReturn(stringObjectMap);
 
@@ -485,7 +485,7 @@ public class FL401SubmitApplicationServiceTest {
                       .build())
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
@@ -607,7 +607,7 @@ public class FL401SubmitApplicationServiceTest {
                       .build())
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
 
         when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
             .thenReturn(stringObjectMap);
@@ -721,7 +721,7 @@ public class FL401SubmitApplicationServiceTest {
                       .build())
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
 
         when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
             .thenReturn(stringObjectMap);
@@ -824,7 +824,7 @@ public class FL401SubmitApplicationServiceTest {
                       .build())
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -834,10 +834,6 @@ public class FL401SubmitApplicationServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
-        Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
-            CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
-        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
 
         when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),
@@ -915,23 +911,9 @@ public class FL401SubmitApplicationServiceTest {
             .submitCountyCourtSelection(dynamicList)
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -940,16 +922,6 @@ public class FL401SubmitApplicationServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
-        Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
-            CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
-        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
-
-        when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
-            callbackRequest.getCaseDetails(),
-            objectMapper
-        )))
-            .thenReturn(court);
 
         UserDetails userDetails = UserDetails.builder()
             .forename("test")
@@ -975,16 +947,6 @@ public class FL401SubmitApplicationServiceTest {
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
 
-        String applicantNames = "TestFirst TestLast";
-
-        String isConfidential = "No";
-        if (fl401Applicant.getCanYouProvideEmailAddress().equals(YesOrNo.Yes)
-            || (fl401Applicant.getIsEmailAddressConfidential() != null
-            && fl401Applicant.getIsEmailAddressConfidential().equals(YesOrNo.Yes))
-            || (fl401Applicant.hasConfidentialInfo())) {
-            isConfidential = "Yes";
-        }
-
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -994,8 +956,6 @@ public class FL401SubmitApplicationServiceTest {
             .submitCountyCourtSelection(dynamicList)
             .build();
 
-        LocalDate issueDate = LocalDate.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         Map<String, Object> stringObjectMap = new HashMap<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
