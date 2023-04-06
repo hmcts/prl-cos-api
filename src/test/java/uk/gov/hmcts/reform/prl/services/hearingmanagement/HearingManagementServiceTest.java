@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -41,6 +42,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -249,6 +251,9 @@ public class HearingManagementServiceTest {
         verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                                                                    Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
                                                                    Mockito.any(CaseDataContent.class));
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
         assertTrue(true);
     }
 
@@ -304,6 +309,9 @@ public class HearingManagementServiceTest {
         verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                                                                    Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
                                                                    Mockito.any(CaseDataContent.class));
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
 
         assertTrue(true);
     }
@@ -356,6 +364,9 @@ public class HearingManagementServiceTest {
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME
         );
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
         verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                                                                    Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
                                                                    Mockito.any(CaseDataContent.class));
@@ -502,6 +513,9 @@ public class HearingManagementServiceTest {
         verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                                                                    Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
                                                                    Mockito.any(CaseDataContent.class));
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
         assertTrue(true);
     }
 
@@ -594,6 +608,9 @@ public class HearingManagementServiceTest {
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME
         );
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
         verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                                                                    Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
                                                                    Mockito.any(CaseDataContent.class));
