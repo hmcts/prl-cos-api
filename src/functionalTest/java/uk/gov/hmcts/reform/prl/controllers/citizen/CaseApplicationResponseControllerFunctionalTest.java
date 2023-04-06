@@ -72,7 +72,7 @@ public class CaseApplicationResponseControllerFunctionalTest {
         Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
 
         when(coreCaseDataApi.getCase(anyString(), anyString(), anyString())).thenReturn(CaseDetails.builder().data(
-                caseDataMap).state(State.GATE_KEEPING.getValue())
+                caseDataMap).state(State.JUDICIAL_REVIEW.getValue())
                                                                                             .id(123488888L).createdDate(
                 LocalDateTime.now()).lastModified(LocalDateTime.now()).build());
         mockMvc.perform(post("/1234/1234/generate-c7document")
@@ -95,7 +95,7 @@ public class CaseApplicationResponseControllerFunctionalTest {
         Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
 
         when(coreCaseDataApi.getCase(anyString(), anyString(), anyString())).thenReturn(CaseDetails.builder().data(
-                caseDataMap).state(State.GATE_KEEPING.getValue())
+                caseDataMap).state(State.JUDICIAL_REVIEW.getValue())
                                                                                             .id(123488888L).createdDate(
                 LocalDateTime.now()).lastModified(LocalDateTime.now()).build());
         mockMvc.perform(post("/1234/1234/generate-c7document-final")
