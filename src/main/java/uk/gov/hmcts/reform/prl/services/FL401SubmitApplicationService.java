@@ -70,8 +70,8 @@ public class FL401SubmitApplicationService {
             caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
         }
 
-        String courtEmail = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR).length > 1
-            ? caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[1] : null;
+        String courtEmail = caseData.getSubmitCountyCourtSelection().getValue().getCode().split(COLON_SEPERATOR).length > 1
+            ? caseData.getSubmitCountyCourtSelection().getValue().getCode().split(COLON_SEPERATOR)[1] : null;
         caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
 
         caseDataUpdated.putAll(courtDetailsMap);
