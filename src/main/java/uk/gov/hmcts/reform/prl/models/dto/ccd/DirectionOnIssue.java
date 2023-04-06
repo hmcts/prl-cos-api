@@ -146,16 +146,16 @@ public class DirectionOnIssue {
     @JsonProperty("dioPermissionHearingDirections")
     private final String dioPermissionHearingDirections;
     @JsonProperty("dioCaseReviewHearingDetails")
-    private final Element<HearingData> dioCaseReviewHearingDetails;
+    private final HearingData dioCaseReviewHearingDetails;
     @JsonProperty("dioFhdraHearingDetails")
-    private final Element<HearingData> dioFhdraHearingDetails;
+    private final HearingData dioFhdraHearingDetails;
     @JsonProperty("dioPermissionHearingDetails")
-    private final Element<HearingData> dioPermissionHearingDetails;
+    private final HearingData dioPermissionHearingDetails;
     @JsonProperty("dioUrgentFirstHearingDetails")
-    private final Element<HearingData> dioUrgentFirstHearingDetails;
+    private final HearingData dioUrgentFirstHearingDetails;
     @JsonProperty("dioUrgentHearingDetails")
-    private final Element<HearingData> dioUrgentHearingDetails;
+    private final HearingData dioUrgentHearingDetails;
     @JsonProperty("dioWithoutNoticeHearingDetails")
-    private final Element<HearingData> dioWithoutNoticeHearingDetails;
+    private final HearingData dioWithoutNoticeHearingDetails;
 
 }
