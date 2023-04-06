@@ -7,9 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -72,8 +70,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 
 public class FL401SubmitApplicationServiceTest {
 
-    private MockMvc mockMvc;
-
     @InjectMocks
     private FL401SubmitApplicationService fl401SubmitApplicationService;
 
@@ -88,9 +84,6 @@ public class FL401SubmitApplicationServiceTest {
 
     @Mock
     private CourtFinderService courtFinderService;
-
-    @Mock
-    private UserDetails userDetails;
 
     @Mock
     AllTabServiceImpl allTabsService;
@@ -111,9 +104,6 @@ public class FL401SubmitApplicationServiceTest {
     private CaseDetails caseDetails;
 
     @Mock
-    private CaseData caseData;
-
-    @Mock
     private DocumentGenService documentGenService;
 
     @Mock
@@ -125,19 +115,32 @@ public class FL401SubmitApplicationServiceTest {
     @Mock
     CourtSealFinderService courtSealFinderService;
 
+    @Mock
+    UserDetails userDetails;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     private TypeOfApplicationOrders orders;
     private LinkToCA linkToCA;
-
     private static final Map<String, Object> fl401DocsMap = new HashMap<>();
     private DynamicList dynamicList;
     private Map<String, Object> stringObjectMap;
+    private CaseData caseData;
 
     @Before
     public void setUp() {
+        caseData = CaseData.builder()
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("FL401-Final.docx")
+                               .build())
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .submitCountyCourtSelection(dynamicList)
+            .build();
 
-        MockitoAnnotations.openMocks(this);
         stringObjectMap = new HashMap<>();
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("brighton.breathingspace@justice.gov.uk")
@@ -153,7 +156,9 @@ public class FL401SubmitApplicationServiceTest {
         userDetails = UserDetails.builder()
             .email("solicitor@example.com")
             .surname("userLast")
+            .forename("foreName")
             .build();
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         fl401DocsMap.put(PrlAppsConstants.DOCUMENT_FIELD_C8, "test");
         fl401DocsMap.put(PrlAppsConstants.DOCUMENT_FIELD_FINAL, "test");
@@ -187,7 +192,6 @@ public class FL401SubmitApplicationServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
     }
 
-
     @Test
     public void testCourtNameAndEmailAddressReturnedWhileFamilyEmailAddressReturned() throws Exception {
 
@@ -210,7 +214,7 @@ public class FL401SubmitApplicationServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -235,10 +239,6 @@ public class FL401SubmitApplicationServiceTest {
                       .build())
             .build();
 
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -250,16 +250,8 @@ public class FL401SubmitApplicationServiceTest {
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
 
-        UserDetails userDetails = UserDetails.builder()
-            .forename("test")
-            .surname("test")
-            .build();
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-
         Map<String, Object> response = fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
-
-
 
         assertTrue(response.containsKey(COURT_EMAIL_ADDRESS_FIELD));
         assertTrue(response.containsKey(COURT_NAME_FIELD));
@@ -360,8 +352,6 @@ public class FL401SubmitApplicationServiceTest {
         when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
             .thenReturn(stringObjectMap);
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -379,12 +369,6 @@ public class FL401SubmitApplicationServiceTest {
             objectMapper
         )))
             .thenReturn(court);
-
-        UserDetails userDetails = UserDetails.builder()
-            .forename("test")
-            .surname("test")
-            .build();
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         fl401SubmitApplicationService
@@ -485,10 +469,6 @@ public class FL401SubmitApplicationServiceTest {
                       .build())
             .build();
 
-
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -497,21 +477,11 @@ public class FL401SubmitApplicationServiceTest {
                              .build())
             .build();
 
-        Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
-            CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
-        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
-
         when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),
             objectMapper
         )))
             .thenReturn(court);
-
-        UserDetails userDetails = UserDetails.builder()
-            .forename("test")
-            .surname("test")
-            .build();
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         fl401SubmitApplicationService
@@ -595,23 +565,8 @@ public class FL401SubmitApplicationServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
-
-
         when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
             .thenReturn(stringObjectMap);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -620,23 +575,6 @@ public class FL401SubmitApplicationServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
-        Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
-            CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
-        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
-
-        when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
-            callbackRequest.getCaseDetails(),
-            objectMapper
-        )))
-            .thenReturn(court);
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-
-        UserDetails userDetails = UserDetails.builder()
-            .forename("test")
-            .surname("test")
-            .build();
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
@@ -709,23 +647,8 @@ public class FL401SubmitApplicationServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
-
-
         when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
             .thenReturn(stringObjectMap);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -735,21 +658,11 @@ public class FL401SubmitApplicationServiceTest {
                              .build())
             .build();
 
-        Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
-            CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
-        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
-
         when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),
             objectMapper
         )))
             .thenReturn(court);
-
-        UserDetails userDetails = UserDetails.builder()
-            .forename("test")
-            .surname("test")
-            .build();
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
@@ -812,21 +725,6 @@ public class FL401SubmitApplicationServiceTest {
             .submitCountyCourtSelection(dynamicList)
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL401-Final.docx")
-                                         .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-                      .build())
-            .build();
-
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -840,13 +738,6 @@ public class FL401SubmitApplicationServiceTest {
             objectMapper
         )))
             .thenReturn(court);
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-
-        UserDetails userDetails = UserDetails.builder()
-            .forename("test")
-            .surname("test")
-            .build();
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
@@ -923,12 +814,6 @@ public class FL401SubmitApplicationServiceTest {
                              .build())
             .build();
 
-        UserDetails userDetails = UserDetails.builder()
-            .forename("test")
-            .surname("test")
-            .build();
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-
         Map<String, Object> response = fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
 
@@ -957,16 +842,11 @@ public class FL401SubmitApplicationServiceTest {
             .build();
 
         Map<String, Object> stringObjectMap = new HashMap<>();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         fl401SubmitApplicationService.fl401SendApplicationNotification(authToken, callbackRequest);
         verify(caseWorkerEmailService, times(0))
@@ -994,17 +874,11 @@ public class FL401SubmitApplicationServiceTest {
             .isNotificationSent("No")
             .build();
 
-        Map<String, Object> stringObjectMap = new HashMap<>();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         fl401SubmitApplicationService.fl401SendApplicationNotification(authToken, callbackRequest);
         verify(caseWorkerEmailService, times(0))
