@@ -11,7 +11,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -555,6 +557,7 @@ public class CaseWorkerEmailServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicantCaseName("TestCaseName")
             .applicants(listOfApplicants)
+            .rejectReason(Collections.singletonList(RejectReasonEnum.consentOrderNotProvided))
             .build();
 
         Map<String, Object> data = new HashMap<>();
@@ -592,6 +595,7 @@ public class CaseWorkerEmailServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .applicantCaseName("TestCaseName")
             .applicantsFL401(applicant)
+            .fl401RejectReason(Collections.singletonList(FL401RejectReasonEnum.consentOrderNotProvided))
             .build();
 
         Map<String, Object> data = new HashMap<>();
