@@ -245,7 +245,7 @@ public class DocumentGenServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
-            .state(State.CASE_ISSUE)
+            .state(State.CASE_ISSUED)
             //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
@@ -273,7 +273,7 @@ public class DocumentGenServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             //.allegationsOfHarmYesNo(Yes)
             .applicants(listOfApplicants)
-            .state(State.CASE_ISSUE)
+            .state(State.CASE_ISSUED)
             //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
@@ -287,7 +287,7 @@ public class DocumentGenServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
-            .state(State.CASE_ISSUE)
+            .state(State.CASE_ISSUED)
             //.allegationsOfHarmYesNo(Yes)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
@@ -2271,7 +2271,7 @@ public class DocumentGenServiceTest {
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationOfHarm(allegationOfHarmYes)
-            .state(State.CASE_ISSUE)
+            .state(State.CASE_ISSUED)
             .build();
 
         DocumentLanguage docLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).build();
