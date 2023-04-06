@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Map;
 
-@Tag(name = "respondent-task-list-controller")
+@Tag(name = "c100-respondent-task-list-controller")
 @Slf4j
 @RestController
 @RequestMapping("/update-res-task-list")
@@ -29,8 +29,9 @@ import java.util.Map;
 public class C100RespondentSolicitorTaskListController extends AbstractCallbackController {
 
     @PostMapping("/submitted")
-    public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestBody CallbackRequest callbackRequest,
-                                                                @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation) {
+    public AboutToStartOrSubmitCallbackResponse handleSubmitted(
+        @RequestBody CallbackRequest callbackRequest,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation) {
 
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
