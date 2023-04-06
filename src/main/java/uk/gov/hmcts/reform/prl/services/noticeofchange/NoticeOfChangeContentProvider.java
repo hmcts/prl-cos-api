@@ -19,13 +19,13 @@ public class NoticeOfChangeContentProvider {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
-    public EmailTemplateVars buildNoticeOfChangeEmail(CaseData caseData, String solicitorName) throws Exception {
+    public EmailTemplateVars buildNoticeOfChangeEmail(CaseData caseData, String solicitorName) {
         return NoticeOfChangeEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .solicitorName(solicitorName)
             .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
-            .issueDate(CommonUtils.formatDate(D_MMMM_YYYY,caseData.getIssueDate()))
+            .issueDate(CommonUtils.formatDate(D_MMMM_YYYY, caseData.getIssueDate()))
             .build();
     }
 }
