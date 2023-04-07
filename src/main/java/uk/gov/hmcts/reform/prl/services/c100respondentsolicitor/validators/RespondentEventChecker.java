@@ -6,6 +6,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
+
 public interface RespondentEventChecker {
 
     boolean isStarted(CaseData caseData, String respondent);
@@ -16,7 +18,7 @@ public interface RespondentEventChecker {
         Optional<SolicitorRole> solicitorRole = SolicitorRole.from(respondent);
         if (solicitorRole.isPresent()) {
             if (caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
-                return Optional.ofNullable(caseData.getRespondents().get(solicitorRole.get().getIndex()).getValue().getResponse());
+                return ofNullable(caseData.getRespondents().get(solicitorRole.get().getIndex()).getValue().getResponse());
             }
         }
         return Optional.empty();
