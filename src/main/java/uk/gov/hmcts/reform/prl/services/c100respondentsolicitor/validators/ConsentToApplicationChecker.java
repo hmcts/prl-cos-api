@@ -23,7 +23,7 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
         Optional<Response> response = findResponse(caseData, respondent);
 
         if (response.isPresent()) {
-            ofNullable(response.get().getConsent())
+            return ofNullable(response.get().getConsent())
                 .filter(consent -> anyNonEmpty(
                     consent.getConsentToTheApplication(),
                     consent.getNoConsentReason(),
