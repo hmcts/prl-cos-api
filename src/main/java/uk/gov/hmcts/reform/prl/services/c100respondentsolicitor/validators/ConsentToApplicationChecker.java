@@ -22,15 +22,17 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
     public boolean isStarted(CaseData caseData, String respondent) {
         Optional<Response> response = findResponse(caseData, respondent);
 
-        return response
-            .filter(res -> anyNonEmpty(
-                res.getConsent().getApplicationReceivedDate(),
-                res.getConsent().getConsentToTheApplication(),
-                res.getConsent().getCourtOrderDetails(),
-                res.getConsent().getNoConsentReason(),
-                res.getConsent().getPermissionFromCourt()
-            ))
-            .isPresent();
+        if (response.isPresent()) {
+            ofNullable(response.get().getConsent())
+                .filter(consent -> anyNonEmpty(
+                    consent.getConsentToTheApplication(),
+                    consent.getNoConsentReason(),
+                    consent.getApplicationReceivedDate(),
+                    consent.getPermissionFromCourt(),
+                    consent.getCourtOrderDetails()
+                )).isPresent();
+        }
+        return false;
     }
 
     @Override
