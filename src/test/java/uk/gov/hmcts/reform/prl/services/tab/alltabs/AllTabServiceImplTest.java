@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +39,9 @@ public class AllTabServiceImplTest {
 
     @Mock
     ConfidentialityTabService confidentialityTabService;
+
+    @Mock
+    ObjectMapper objectMapper;
 
     @Mock
     @Qualifier("caseSummaryTab")

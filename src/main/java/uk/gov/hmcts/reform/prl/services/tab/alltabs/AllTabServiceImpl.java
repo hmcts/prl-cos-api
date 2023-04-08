@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,8 @@ public class AllTabServiceImpl implements AllTabsService {
 
     @Autowired
     ConfidentialityTabService confidentialityTabService;
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Override
     public void updateAllTabs(CaseData caseData) {
@@ -116,8 +119,13 @@ public class AllTabServiceImpl implements AllTabsService {
         return getCombinedMap(caseData);
     }
 
-    public void updatePartyDetailsForNoc(CaseData caseData, Map<String, Object> updatedPartyDetails) {
-        refreshCcdUsingEvent(caseData, updatedPartyDetails);
+    public void updatePartyDetailsForNoc(CaseData caseData) {
+        if (caseData != null) {
+            Map<String, Object> caseDatObjectMap = caseData.toMap(objectMapper);
+            caseDatObjectMap.putAll(getCombinedMap(caseData));
+            refreshCcdUsingEvent(caseData, caseDatObjectMap);
+        }
+
     }
 
 }
