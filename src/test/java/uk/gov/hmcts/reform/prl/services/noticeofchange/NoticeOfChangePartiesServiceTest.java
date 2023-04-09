@@ -70,24 +70,26 @@ public class NoticeOfChangePartiesServiceTest {
         optionalParty = Optional.of(wrappedRespondents);
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
 
-        caseData = CaseData.builder().respondents(respondentList)
+        caseData = CaseData.builder()
+            .caseTypeOfApplication("c100")
+            .respondents(respondentList)
             .build();
 
-        role = SolicitorRole.SOLICITORA;
+        role = SolicitorRole.SOLICITORCARA;
     }
 
     @Test
     public void testGenerate() {
 
-        when(policyConverter.generate(role, optionalParty))
+        when(policyConverter.caGenerate(role, optionalParty))
             .thenReturn(organisationPolicy);
 
-        when(partiesConverter.generateForSubmission(wrappedRespondents))
+        when(partiesConverter.generateCaForSubmission(wrappedRespondents))
             .thenReturn(noticeOfChangeParties);
 
         Map<String, Object> test = noticeOfChangePartiesService.generate(caseData, role.getRepresenting());
 
-        assertTrue(test.containsKey("respondent0Policy"));
+        assertTrue(test.containsKey("caRespondent0Policy"));
 
     }
 
@@ -100,7 +102,7 @@ public class NoticeOfChangePartiesServiceTest {
 
         Map<String, Object> test = noticeOfChangePartiesService.generate(caseData, role.getRepresenting(), strategy);
 
-        assertTrue(test.containsKey("respondent0Policy"));
+        assertTrue(test.containsKey("caRespondent0Policy"));
 
     }
 }
