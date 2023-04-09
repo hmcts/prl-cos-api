@@ -47,7 +47,7 @@ public class RespondentSolicitorTaskListRendererTest {
     @Test
     public void renderTaskListTest() {
         List<RespondentEventValidationErrors> resErrors = new ArrayList<>();
-        String taskList = taskListRenderer.render(tasks, resErrors, "A");
+        String taskList = taskListRenderer.render(tasks, resErrors, "A", "test test");
 
         assertNotNull(taskList);
     }

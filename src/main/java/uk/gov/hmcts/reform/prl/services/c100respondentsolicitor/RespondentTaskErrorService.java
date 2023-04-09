@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +22,7 @@ public class RespondentTaskErrorService {
     Map<RespondentEventErrorsEnum, RespondentEventValidationErrors> eventErrors = new EnumMap<>(
         RespondentEventErrorsEnum.class);
 
-    public List<RespondentEventValidationErrors> getEventErrors(PartyDetails respondingParty) {
+    public List<RespondentEventValidationErrors> getEventErrors() {
 
         List<RespondentEventValidationErrors> eventErrorList = new ArrayList<>();
 
