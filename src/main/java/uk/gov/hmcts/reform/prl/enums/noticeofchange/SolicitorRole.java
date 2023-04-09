@@ -15,16 +15,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Getter
 public enum SolicitorRole {
-    SOLICITORA("[SOLICITORA]", 0, Representing.RESPONDENT, "A"),
-    SOLICITORB("[SOLICITORB]", 1, Representing.RESPONDENT, "B"),
-    SOLICITORC("[SOLICITORC]", 2, Representing.RESPONDENT, "C"),
-    SOLICITORD("[SOLICITORD]", 3, Representing.RESPONDENT,"D"),
-    SOLICITORE("[SOLICITORE]", 4, Representing.RESPONDENT,"E"),
-    SOLICITORF("[SOLICITORF]", 5, Representing.RESPONDENT,"F"),
-    SOLICITORG("[SOLICITORG]", 6, Representing.RESPONDENT,"G"),
-    SOLICITORH("[SOLICITORH]", 7, Representing.RESPONDENT, "H"),
-    SOLICITORI("[SOLICITORI]", 8, Representing.RESPONDENT, "I"),
-    SOLICITORJ("[SOLICITORJ]", 9, Representing.RESPONDENT, "J");
+    SOLICITORCAAA("[SOLICITORA]", 0, Representing.CAAPPLICANT, "A"),
+    SOLICITORCAAB("[SOLICITORB]", 1, Representing.CAAPPLICANT, "B"),
+    SOLICITORCAAC("[SOLICITORC]", 2, Representing.CAAPPLICANT, "C"),
+    SOLICITORCAAD("[SOLICITORD]", 3, Representing.CAAPPLICANT, "D"),
+    SOLICITORCAAE("[SOLICITORE]", 4, Representing.CAAPPLICANT, "E"),
+    SOLICITORCARA("[SOLICITORA]", 0, Representing.CARESPONDENT, "A"),
+    SOLICITORCARB("[SOLICITORB]", 1, Representing.CARESPONDENT, "B"),
+    SOLICITORCARC("[SOLICITORC]", 2, Representing.CARESPONDENT, "C"),
+    SOLICITORCARD("[SOLICITORD]", 3, Representing.CARESPONDENT, "D"),
+    SOLICITORCARE("[SOLICITORE]", 4, Representing.CARESPONDENT, "E"),
+    SOLICITORDAAA("[SOLICITORA]", 0, Representing.DAAPPLICANT, "A"),
+    SOLICITORDARB("[SOLICITORB]", 1, Representing.DARESPONDENT, "B");
 
     private final String caseRoleLabel;
     private final int index;
@@ -44,28 +46,57 @@ public enum SolicitorRole {
     }
 
     public enum Representing {
-        RESPONDENT(
+        CAAPPLICANT(
+            CaseData::getApplicants,
+            CaseData::getApplicantsFL401,
+            "caApplicant%dPolicy",
+            "caApplicant%d",
+            "caApplicants"
+        ),
+        CARESPONDENT(
             CaseData::getRespondents,
-            "respondent%dPolicy",
-            "respondent%d",
-            "respondents"
+            CaseData::getRespondentsFL401,
+            "caRespondent%dPolicy",
+            "caRespondent%d",
+            "caRespondents"
+        ),
+        DAAPPLICANT(
+            CaseData::getApplicants,
+            CaseData::getApplicantsFL401,
+            "daApplicantPolicy",
+            "daApplicant",
+            "daApplicants"
+        ),
+        DARESPONDENT(
+            CaseData::getRespondents,
+            CaseData::getRespondentsFL401,
+            "daRespondentPolicy",
+            "daRespondent",
+            "daRespondents"
         );
 
-        private final Function<CaseData, List<Element<PartyDetails>>> target;
+        private final Function<CaseData, List<Element<PartyDetails>>> caTarget;
+        private final Function<CaseData, PartyDetails> daTarget;
         private final String policyFieldTemplate;
         private final String nocAnswersTemplate;
         private final String caseField;
 
-        Representing(Function<CaseData, List<Element<PartyDetails>>> target,
+        Representing(Function<CaseData, List<Element<PartyDetails>>> caTarget,
+                     Function<CaseData, PartyDetails> daTarget,
                      String policyFieldTemplate, String nocAnswersTemplate, String caseField) {
-            this.target = target;
+            this.caTarget = caTarget;
+            this.daTarget = daTarget;
             this.policyFieldTemplate = policyFieldTemplate;
             this.nocAnswersTemplate = nocAnswersTemplate;
             this.caseField = caseField;
         }
 
-        public Function<CaseData, List<Element<PartyDetails>>> getTarget() {
-            return target;
+        public Function<CaseData, List<Element<PartyDetails>>> getCaTarget() {
+            return caTarget;
+        }
+
+        public Function<CaseData, PartyDetails> getDaTarget() {
+            return daTarget;
         }
 
         public String getPolicyFieldTemplate() {
