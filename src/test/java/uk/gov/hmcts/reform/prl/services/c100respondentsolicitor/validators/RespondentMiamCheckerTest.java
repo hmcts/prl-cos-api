@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -30,10 +31,12 @@ public class RespondentMiamCheckerTest {
     private RespondentMiamChecker respondentMiamChecker;
 
     private CaseData caseData;
+    PartyDetails respondents;
 
     @Before
     public void setup() {
-
+        User user = User.builder().email("respondent@example.net")
+            .idamId("1234-5678").solicitorRepresented(Yes).build();
         Response miamResponse = Response.builder()
             .solicitorMiam(SolicitorMiam.builder()
                                .respSolHaveYouAttendedMiam(Miam.builder()
@@ -46,7 +49,8 @@ public class RespondentMiamCheckerTest {
                                .build())
             .build();
 
-        PartyDetails respondents = PartyDetails.builder()
+        respondents = PartyDetails.builder()
+            .user(user)
             .firstName("x")
             .lastName("x")
             .gender(female)
@@ -75,14 +79,14 @@ public class RespondentMiamCheckerTest {
     public void testMiamAttendedIsStarted() {
 
         boolean isStarted;
-        isStarted = respondentMiamChecker.isStarted(caseData, "A");
+        isStarted = respondentMiamChecker.isStarted(respondents);
         assertTrue(isStarted);
 
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = respondentMiamChecker.isFinished(caseData, "A");
+        boolean anyNonEmpty = respondentMiamChecker.isFinished(respondents);
 
         Assert.assertTrue(anyNonEmpty);
     }
@@ -113,7 +117,7 @@ public class RespondentMiamCheckerTest {
             .respondents(respondentsList)
             .build();
 
-        boolean anyNonEmpty = respondentMiamChecker.isFinished(caseData1, "A");
+        boolean anyNonEmpty = respondentMiamChecker.isFinished(respondents);
 
         Assert.assertTrue(anyNonEmpty);
     }

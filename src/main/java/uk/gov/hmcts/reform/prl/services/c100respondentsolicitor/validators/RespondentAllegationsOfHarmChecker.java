@@ -5,9 +5,9 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.WhomConsistPassportList;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +20,8 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 @Service
 public class RespondentAllegationsOfHarmChecker implements RespondentEventChecker {
     @Override
-    public boolean isStarted(CaseData caseData, String respondent) {
-        Optional<Response> response = findResponse(caseData, respondent);
+    public boolean isStarted(PartyDetails respondingParty) {
+        Optional<Response> response = findResponse(respondingParty);
 
         return response
             .filter(res -> anyNonEmpty(res.getRespondentAllegationsOfHarmData()
@@ -29,9 +29,9 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
     }
 
     @Override
-    public boolean isFinished(CaseData caseData, String respondent) {
+    public boolean isFinished(PartyDetails respondingParty) {
+        Optional<Response> response = findResponse(respondingParty);
         boolean mandatoryInfo = false;
-        Optional<Response> response = findResponse(caseData, respondent);
 
         if (response.isPresent()) {
             Optional<RespondentAllegationsOfHarmData> respondentAllegationsOfHarm = Optional.ofNullable(response.get()

@@ -117,12 +117,17 @@ public class CaseEventHandlerTest {
         List<RespondentEventValidationErrors> resErrors = new ArrayList<>();
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
-        when(taskListService.getRespondentSolicitorTasks(caseData, "A")).thenReturn(respondentTask);
-        when(taskListService.getRespondentSolicitorTasks(caseData, "B")).thenReturn(respondentTask);
         when(taskListRenderer.render(c100Tasks, errors, true, caseData)).thenReturn(c100renderedTaskList);
-        when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "A")).thenReturn(respondentTaskListA);
-        when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "B")).thenReturn(respondentTaskListB);
-        when(respondentTaskErrorService.getEventErrors(caseData)).thenReturn(resErrors);
+        when(respondentSolicitorTaskListRenderer.render(
+            respondentTask,
+            resErrors,
+            "A"
+        )).thenReturn(respondentTaskListA);
+        when(respondentSolicitorTaskListRenderer.render(
+            respondentTask,
+            resErrors,
+            "B"
+        )).thenReturn(respondentTaskListB);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
@@ -145,9 +150,15 @@ public class CaseEventHandlerTest {
                 "respondentTaskList",
                 "",
                 "respondentTaskListA",
-                respondentTaskListA,
+                "",
                 "respondentTaskListB",
-                respondentTaskListB,
+                "",
+                "respondentTaskListC",
+                "",
+                "respondentTaskListD",
+                "",
+                "respondentTaskListE",
+                "",
                 "id",
                 String.valueOf(caseData.getId())
             )
@@ -196,10 +207,7 @@ public class CaseEventHandlerTest {
         final List<RespondentEventValidationErrors> resErrors = Collections.emptyList();
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(fl401Tasks);
-        when(taskListService.getRespondentSolicitorTasks(caseData, "A")).thenReturn(respondentTask);
-        when(taskListService.getRespondentSolicitorTasks(caseData, "B")).thenReturn(respondentTask);
         when(taskListRenderer.render(fl401Tasks, eventsErrors, false, caseData)).thenReturn(fl410renderedTaskList);
-        when(respondentTaskErrorService.getEventErrors(caseData)).thenReturn(resErrors);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
@@ -224,6 +232,12 @@ public class CaseEventHandlerTest {
                 "respondentTaskListA",
                 "",
                 "respondentTaskListB",
+                "",
+                "respondentTaskListC",
+                "",
+                "respondentTaskListD",
+                "",
+                "respondentTaskListE",
                 "",
                 "id",
                 String.valueOf(caseData.getId())
@@ -293,12 +307,17 @@ public class CaseEventHandlerTest {
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
         when(taskListService.getRespondentsEvents()).thenReturn(respondentEvents);
-        when(taskListService.getRespondentSolicitorTasks(caseData, "A")).thenReturn(respondentTask);
-        when(taskListService.getRespondentSolicitorTasks(caseData, "B")).thenReturn(respondentTask);
         when(taskListRenderer.render(c100Tasks, errors, true, caseData)).thenReturn(c100renderedTaskList);
-        when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "A")).thenReturn(respondentTaskListA);
-        when(respondentSolicitorTaskListRenderer.render(respondentTask, resErrors, "B")).thenReturn(respondentTaskListB);
-        when(respondentTaskErrorService.getEventErrors(caseData)).thenReturn(resErrors);
+        when(respondentSolicitorTaskListRenderer.render(
+            respondentTask,
+            resErrors,
+            "A"
+        )).thenReturn(respondentTaskListA);
+        when(respondentSolicitorTaskListRenderer.render(
+            respondentTask,
+            resErrors,
+            "B"
+        )).thenReturn(respondentTaskListB);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
@@ -321,9 +340,15 @@ public class CaseEventHandlerTest {
                 "respondentTaskList",
                 "",
                 "respondentTaskListA",
-                respondentTaskListA,
+                "",
                 "respondentTaskListB",
-                respondentTaskListB,
+                "",
+                "respondentTaskListC",
+                "",
+                "respondentTaskListD",
+                "",
+                "respondentTaskListE",
+                "",
                 "id",
                 String.valueOf(caseData.getId())
             )

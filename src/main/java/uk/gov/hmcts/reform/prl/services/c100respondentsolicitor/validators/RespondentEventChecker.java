@@ -1,8 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Optional;
 
@@ -10,16 +9,13 @@ import static java.util.Optional.ofNullable;
 
 public interface RespondentEventChecker {
 
-    boolean isStarted(CaseData caseData, String respondent);
+    boolean isStarted(PartyDetails respondingParty);
 
-    boolean isFinished(CaseData caseData, String respondent);
+    boolean isFinished(PartyDetails respondingParty);
 
-    default Optional<Response> findResponse(CaseData caseData, String respondent) {
-        Optional<SolicitorRole> solicitorRole = SolicitorRole.from(respondent);
-        if (solicitorRole.isPresent()) {
-            if (caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
-                return ofNullable(caseData.getRespondents().get(solicitorRole.get().getIndex()).getValue().getResponse());
-            }
+    default Optional<Response> findResponse(PartyDetails respondingParty) {
+        if (respondingParty != null) {
+            return ofNullable(respondingParty.getResponse());
         }
         return Optional.empty();
     }

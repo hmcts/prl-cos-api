@@ -30,6 +30,8 @@ public class KeepDetailsPrivateCheckerTest {
 
     CaseData caseData;
 
+    PartyDetails respondent;
+
     @Before
     public void setUp() {
 
@@ -38,7 +40,7 @@ public class KeepDetailsPrivateCheckerTest {
         confidentialityListEnums.add(ConfidentialityListEnum.email);
         confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
 
-        PartyDetails respondent = PartyDetails.builder()
+        respondent = PartyDetails.builder()
             .response(Response
                           .builder()
                           .keepDetailsPrivate(KeepDetailsPrivate
@@ -70,14 +72,14 @@ public class KeepDetailsPrivateCheckerTest {
 
     @Test
     public void isStartedTest() {
-        boolean anyNonEmpty = keepDetailsPrivateChecker.isStarted(caseData, "A");
+        boolean anyNonEmpty = keepDetailsPrivateChecker.isStarted(respondent);
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = keepDetailsPrivateChecker.isFinished(caseData, "A");
+        boolean anyNonEmpty = keepDetailsPrivateChecker.isFinished(respondent);
 
         Assert.assertTrue(anyNonEmpty);
     }

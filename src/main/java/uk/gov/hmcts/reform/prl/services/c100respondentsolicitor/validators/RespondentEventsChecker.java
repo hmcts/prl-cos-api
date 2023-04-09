@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -74,16 +74,14 @@ public class RespondentEventsChecker {
         eventStatus.put(CONFIRM_EDIT_CONTACT_DETAILS, respondentContactDetailsChecker);
         eventStatus.put(VIEW_DRAFT_RESPONSE, viewDraftResponseChecker);
         eventStatus.put(SUBMIT, responseSubmitChecker);
-
-
     }
 
-    public boolean isStarted(RespondentSolicitorEvents event, CaseData caseData, String respondent) {
-        return eventStatus.get(event).isStarted(caseData, respondent);
+    public boolean isStarted(RespondentSolicitorEvents event, PartyDetails respondingParty) {
+        return eventStatus.get(event).isStarted(respondingParty);
     }
 
-    public boolean isFinished(RespondentSolicitorEvents event, CaseData caseData, String respondent) {
-        return eventStatus.get(event).isFinished(caseData, respondent);
+    public boolean isFinished(RespondentSolicitorEvents event, PartyDetails respondingParty) {
+        return eventStatus.get(event).isFinished(respondingParty);
     }
 
     public Map<RespondentSolicitorEvents, RespondentEventChecker> getEventStatus() {

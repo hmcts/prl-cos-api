@@ -32,6 +32,10 @@ public class RespondentContactDetailsCheckerTest {
 
     CaseData noAddressData;
 
+    PartyDetails respondent;
+
+    PartyDetails noAddressRespondent;
+
     @Before
     public void setUp() {
 
@@ -43,7 +47,7 @@ public class RespondentContactDetailsCheckerTest {
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
 
-        PartyDetails respondent = PartyDetails.builder()
+        respondent = PartyDetails.builder()
             .response(Response.builder()
                           .citizenDetails(CitizenDetails
                                               .builder()
@@ -68,7 +72,7 @@ public class RespondentContactDetailsCheckerTest {
         Address noAddress = Address.builder()
             .build();
 
-        PartyDetails noAddressRespondent = PartyDetails.builder()
+        noAddressRespondent = PartyDetails.builder()
             .response(Response.builder()
                           .citizenDetails(CitizenDetails
                                               .builder()
@@ -97,19 +101,19 @@ public class RespondentContactDetailsCheckerTest {
 
     @Test
     public void isStartedTest() {
-        Boolean bool = respondentContactDetailsChecker.isStarted(caseData, "A");
+        Boolean bool = respondentContactDetailsChecker.isStarted(respondent);
         assertTrue(bool);
     }
 
     @Test
     public void mandatoryInformationTest() {
-        Boolean bool = respondentContactDetailsChecker.isFinished(caseData, "A");
+        Boolean bool = respondentContactDetailsChecker.isFinished(respondent);
         assertTrue(bool);
     }
 
     @Test
     public void noAddressTest() {
-        Boolean bool = respondentContactDetailsChecker.isFinished(noAddressData, "A");
+        Boolean bool = respondentContactDetailsChecker.isFinished(noAddressRespondent);
         assertFalse(bool);
     }
 }

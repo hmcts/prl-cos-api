@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -28,10 +29,14 @@ public class ConsentToApplicationCheckerTest {
     ConsentToApplicationChecker consentToApplicationChecker;
 
     CaseData caseData;
+    PartyDetails respondent;
 
     @Before
     public void setUp() {
-        PartyDetails respondent = PartyDetails.builder()
+        User user = User.builder().email("respondent@example.net")
+            .idamId("1234-5678").solicitorRepresented(Yes).build();
+        respondent = PartyDetails.builder()
+            .user(user)
             .response(Response
                           .builder()
                           .consent(Consent
@@ -53,7 +58,7 @@ public class ConsentToApplicationCheckerTest {
 
     @Test
     public void isStartedTest() {
-        boolean anyNonEmpty = consentToApplicationChecker.isStarted(caseData, "A");
+        boolean anyNonEmpty = consentToApplicationChecker.isStarted(respondent);
 
         assertTrue(anyNonEmpty);
     }
@@ -78,14 +83,14 @@ public class ConsentToApplicationCheckerTest {
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
 
         caseData = CaseData.builder().respondents(respondentList).build();
-        boolean anyNonEmpty = consentToApplicationChecker.isStarted(caseData, "A");
+        boolean anyNonEmpty = consentToApplicationChecker.isStarted(respondent);
 
         assertFalse(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = consentToApplicationChecker.isFinished(caseData, "A");
+        boolean anyNonEmpty = consentToApplicationChecker.isFinished(respondent);
 
         Assert.assertTrue(anyNonEmpty);
     }

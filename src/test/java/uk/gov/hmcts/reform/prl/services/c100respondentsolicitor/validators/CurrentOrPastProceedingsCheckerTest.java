@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CurrentOrPastProceedingsCheckerTest {
@@ -25,6 +27,8 @@ public class CurrentOrPastProceedingsCheckerTest {
     CurrentOrPastProceedingsChecker currentOrPastProceedingsChecker;
 
     CaseData caseData;
+
+    PartyDetails respondent;
 
     @Before
     public void setUp() {
@@ -39,7 +43,12 @@ public class CurrentOrPastProceedingsCheckerTest {
             .value(proceedingDetails).build();
         List<Element<RespondentProceedingDetails>> proceedingsList = Collections.singletonList(proceedingDetailsElement);
 
-        PartyDetails respondent = PartyDetails.builder()
+
+        User user = User.builder().email("respondent@example.net")
+            .idamId("1234-5678").solicitorRepresented(Yes).build();
+
+        respondent = PartyDetails.builder()
+            .user(user)
             .response(Response
                           .builder()
                           .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
@@ -55,14 +64,14 @@ public class CurrentOrPastProceedingsCheckerTest {
 
     @Test
     public void isStartedTest() {
-        boolean anyNonEmpty = currentOrPastProceedingsChecker.isStarted(caseData, "A");
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isStarted(respondent);
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(caseData, "A");
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent);
         Assert.assertTrue(anyNonEmpty);
     }
 }

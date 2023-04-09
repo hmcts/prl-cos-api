@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
@@ -76,11 +77,11 @@ public class TaskListService {
             .collect(toList());
     }
 
-    public List<RespondentTask> getRespondentSolicitorTasks(CaseData caseData, String respondent) {
+    public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty) {
         return getRespondentsEvents().stream()
             .map(event -> RespondentTask.builder()
                 .event(event)
-                .state(getRespondentTaskState(caseData, event, respondent))
+                .state(getRespondentTaskState(event, respondingParty))
                 .build())
             .collect(toList());
     }
@@ -98,11 +99,11 @@ public class TaskListService {
         return TaskState.NOT_STARTED;
     }
 
-    private TaskState getRespondentTaskState(CaseData caseData, RespondentSolicitorEvents event, String respondent) {
-        if (respondentEventsChecker.isFinished(event, caseData, respondent)) {
+    private TaskState getRespondentTaskState(RespondentSolicitorEvents event, PartyDetails respondingParty) {
+        if (respondentEventsChecker.isFinished(event, respondingParty)) {
             return TaskState.FINISHED;
         }
-        if (respondentEventsChecker.isStarted(event, caseData, respondent)) {
+        if (respondentEventsChecker.isStarted(event, respondingParty)) {
             return TaskState.IN_PROGRESS;
         }
         return TaskState.NOT_STARTED;

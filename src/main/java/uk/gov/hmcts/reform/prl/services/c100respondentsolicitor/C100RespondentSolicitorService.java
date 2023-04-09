@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
@@ -375,8 +376,19 @@ public class C100RespondentSolicitorService {
         String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
         log.info("Event name:::{}", callbackRequest.getEventId());
         boolean mandatoryFinished = false;
+        if (!caseData.getRespondents().isEmpty()) {
+            Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingRespondent);
+            if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
+                Element<PartyDetails> respondingParty = caseData.getRespondents().get(solicitorRole.get().getIndex());
 
-        mandatoryFinished = responseSubmitChecker.isFinished(caseData, invokingRespondent);
+                if (respondingParty.getValue() != null
+                    && respondingParty.getValue().getUser() != null
+                    && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
+
+                    mandatoryFinished = responseSubmitChecker.isFinished(respondingParty.getValue());
+                }
+            }
+        }
         if (!mandatoryFinished) {
             errorList.add(
                 "Response submission is not allowed for this case unless you finish all the mandatory information");

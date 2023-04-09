@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
@@ -30,6 +31,8 @@ public class RespondentAllegationsOfHarmCheckerTest {
     RespondentAllegationsOfHarmChecker respondentAllegationsOfHarmChecker;
 
     CaseData caseData;
+
+    PartyDetails respondent;
 
     @Before
     public void setUp() {
@@ -59,53 +62,79 @@ public class RespondentAllegationsOfHarmCheckerTest {
         List<Element<Behaviours>> behaviourChildList = Collections.singletonList(wrappedChildBehaviours);
 
         WhomConsistPassportList passportList = WhomConsistPassportList.otherPeople;
-
-        PartyDetails respondent = PartyDetails.builder()
+        User user = User.builder().email("respondent@example.net")
+            .idamId("1234-5678").solicitorRepresented(Yes).build();
+        respondent = PartyDetails.builder()
+            .user(user)
             .response(Response
                           .builder()
                           .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData
-                                   .builder()
-                                   .respDomesticAbuseInfo(behaviourList)
-                                   .respChildAbuseInfo(behaviourChildList)
-                                   .respChildAbductionInfo(RespondentChildAbduction
                                                                .builder()
-                                                               .previousThreatsForChildAbduction(Yes)
-                                                               .previousThreatsForChildAbductionDetails("Test")
-                                                               .reasonForChildAbductionBelief("Test")
-                                                               .whereIsChild("Test")
-                                                               .hasPassportOfficeNotified(Yes)
-                                                               .childrenHavePassport(Yes)
-                                                               .childrenHaveMoreThanOnePassport(Yes)
-                                                               .whoHasChildPassport(Collections.singletonList(
-                                                                   passportList))
-                                                               .whoHasChildPassportOther("father")
-                                                               .anyOrgInvolvedInPreviousAbduction(Yes)
-                                                               .anyOrgInvolvedInPreviousAbductionDetails("Test")
+                                                               .respDomesticAbuseInfo(behaviourList)
+                                                               .respChildAbuseInfo(behaviourChildList)
+                                                               .respChildAbductionInfo(RespondentChildAbduction
+                                                                                           .builder()
+                                                                                           .previousThreatsForChildAbduction(
+                                                                                               Yes)
+                                                                                           .previousThreatsForChildAbductionDetails(
+                                                                                               "Test")
+                                                                                           .reasonForChildAbductionBelief(
+                                                                                               "Test")
+                                                                                           .whereIsChild("Test")
+                                                                                           .hasPassportOfficeNotified(
+                                                                                               Yes)
+                                                                                           .childrenHavePassport(Yes)
+                                                                                           .childrenHaveMoreThanOnePassport(
+                                                                                               Yes)
+                                                                                           .whoHasChildPassport(
+                                                                                               Collections.singletonList(
+                                                                                                   passportList))
+                                                                                           .whoHasChildPassportOther(
+                                                                                               "father")
+                                                                                           .anyOrgInvolvedInPreviousAbduction(
+                                                                                               Yes)
+                                                                                           .anyOrgInvolvedInPreviousAbductionDetails(
+                                                                                               "Test")
+                                                                                           .build())
+                                                               .respOtherConcernsInfo(RespondentOtherConcerns
+                                                                                          .builder()
+                                                                                          .childHavingOtherFormOfContact(
+                                                                                              Yes)
+                                                                                          .childSpendingSupervisedTime(
+                                                                                              Yes)
+                                                                                          .ordersRespondentWantFromCourt(
+                                                                                              "Test")
+                                                                                          .childSpendingUnsupervisedTime(
+                                                                                              Yes)
+                                                                                          .build())
+                                                               .respAllegationsOfHarmInfo(RespondentAllegationsOfHarm
+                                                                                              .builder()
+                                                                                              .respondentChildAbuse(Yes)
+                                                                                              .isRespondentChildAbduction(
+                                                                                                  Yes)
+                                                                                              .respondentNonMolestationOrder(
+                                                                                                  Yes)
+                                                                                              .respondentOccupationOrder(
+                                                                                                  Yes)
+                                                                                              .respondentForcedMarriageOrder(
+                                                                                                  Yes)
+                                                                                              .respondentDrugOrAlcoholAbuse(
+                                                                                                  Yes)
+                                                                                              .respondentOtherInjunctiveOrder(
+                                                                                                  Yes)
+                                                                                              .respondentRestrainingOrder(
+                                                                                                  Yes)
+                                                                                              .respondentDomesticAbuse(
+                                                                                                  Yes)
+                                                                                              .respondentDrugOrAlcoholAbuseDetails(
+                                                                                                  "Test")
+                                                                                              .respondentOtherSafetyConcerns(
+                                                                                                  Yes)
+                                                                                              .respondentOtherSafetyConcernsDetails(
+                                                                                                  "Test")
+                                                                                              .build())
+                                                               .respAohYesOrNo(Yes)
                                                                .build())
-                                   .respOtherConcernsInfo(RespondentOtherConcerns
-                                                              .builder()
-                                                              .childHavingOtherFormOfContact(Yes)
-                                                              .childSpendingSupervisedTime(Yes)
-                                                              .ordersRespondentWantFromCourt("Test")
-                                                              .childSpendingUnsupervisedTime(Yes)
-                                                              .build())
-                                   .respAllegationsOfHarmInfo(RespondentAllegationsOfHarm
-                                                                  .builder()
-                                                                  .respondentChildAbuse(Yes)
-                                                                  .isRespondentChildAbduction(Yes)
-                                                                  .respondentNonMolestationOrder(Yes)
-                                                                  .respondentOccupationOrder(Yes)
-                                                                  .respondentForcedMarriageOrder(Yes)
-                                                                  .respondentDrugOrAlcoholAbuse(Yes)
-                                                                  .respondentOtherInjunctiveOrder(Yes)
-                                                                  .respondentRestrainingOrder(Yes)
-                                                                  .respondentDomesticAbuse(Yes)
-                                                                  .respondentDrugOrAlcoholAbuseDetails("Test")
-                                                                  .respondentOtherSafetyConcerns(Yes)
-                                                                  .respondentOtherSafetyConcernsDetails("Test")
-                                                                  .build())
-                                   .respAohYesOrNo(Yes)
-                                   .build())
                           .build())
             .build();
 
@@ -117,7 +146,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
 
     @Test
     public void isStarted() {
-        Boolean bool = respondentAllegationsOfHarmChecker.isStarted(caseData, "A");
+        Boolean bool = respondentAllegationsOfHarmChecker.isStarted(respondent);
 
         assertTrue(bool);
     }
@@ -125,7 +154,7 @@ public class RespondentAllegationsOfHarmCheckerTest {
     @Test
     public void hasMandatoryCompleted() {
 
-        Boolean bool = respondentAllegationsOfHarmChecker.isFinished(caseData, "A");
+        Boolean bool = respondentAllegationsOfHarmChecker.isFinished(respondent);
 
         assertTrue(bool);
     }

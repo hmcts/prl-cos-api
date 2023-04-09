@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static org.junit.Assert.assertTrue;
@@ -56,6 +57,8 @@ public class RespondentsEventsChekerTest {
 
     final CaseData caseData = CaseData.builder().build();
 
+    final PartyDetails respondent = PartyDetails.builder().build();
+
     @Before
     public void init() {
         respondentEventsChecker.init();
@@ -64,40 +67,40 @@ public class RespondentsEventsChekerTest {
 
     @Test
     public void whenConsentEventHasMandatory_thenReturnsTrue() {
-        when(consentToApplicationChecker.isFinished(caseData, "A")).thenReturn(true);
-        assertTrue(respondentEventsChecker.isFinished(CONSENT, caseData, "A"));
+        when(consentToApplicationChecker.isFinished(respondent)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(CONSENT, respondent));
 
     }
 
     @Test
     public void whenAllegationsOfHarmEventHasMandatoryCompleted_MandatoryReturnsTrue() {
-        when(respondentAllegationsOfHarmChecker.isFinished(caseData, "A")).thenReturn(true);
-        assertTrue(respondentEventsChecker.isFinished(ALLEGATION_OF_HARM, caseData, "A"));
+        when(respondentAllegationsOfHarmChecker.isFinished(respondent)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(ALLEGATION_OF_HARM, respondent));
 
     }
 
     @Test
     public void whenKeepDetailsPrivateEventIsStarted_thenEventCheckerStartedReturnsTrue() {
-        when(keepDetailsPrivateChecker.isStarted(caseData, "A")).thenReturn(true);
-        assertTrue(respondentEventsChecker.isStarted(KEEP_DETAILS_PRIVATE, caseData, "A"));
+        when(keepDetailsPrivateChecker.isStarted(respondent)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isStarted(KEEP_DETAILS_PRIVATE, respondent));
     }
 
     @Test
     public void whenInternationalElementEventIsStarted_thenEventCheckerStartedReturnsTrue() {
-        when(internationalElementsChecker.isStarted(caseData, "A")).thenReturn(true);
-        assertTrue(respondentEventsChecker.isStarted(INTERNATIONAL_ELEMENT, caseData, "A"));
+        when(internationalElementsChecker.isStarted(respondent)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isStarted(INTERNATIONAL_ELEMENT, respondent));
     }
 
     @Test
     public void checkGetMiamEventStatus() {
-        when(respondentMiamChecker.isFinished(caseData, "A")).thenReturn(true);
-        assertTrue(respondentEventsChecker.isFinished(MIAM, caseData, "A"));
+        when(respondentMiamChecker.isFinished(respondent)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(MIAM, respondent));
     }
 
     @Test
     public void checkAttendToCourtEventStatus() {
-        when(attendToCourtChecker.isFinished(caseData, "A")).thenReturn(true);
-        assertTrue(respondentEventsChecker.isFinished(ATTENDING_THE_COURT, caseData, "A"));
+        when(attendToCourtChecker.isFinished(respondent)).thenReturn(true);
+        assertTrue(respondentEventsChecker.isFinished(ATTENDING_THE_COURT, respondent));
     }
 
     @Test
