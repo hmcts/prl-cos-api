@@ -30,13 +30,6 @@
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[SOLICITORD]"
     },
-    "respondent9Policy": {
-      "Organisation": {
-
-      },
-      "OrgPolicyReference": null,
-      "OrgPolicyCaseAssignedRole": "[SOLICITORJ]"
-    },
     "dateOfSubmission": {
       "dateOfSubmission": "24 03 2023"
     },
@@ -72,13 +65,6 @@
     "taskList": "<div class='width-50'>\n\n<br/>\n\n## Add application details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/caseName/caseName1'>Case name</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/selectApplicationType/selectApplicationType1'>Type of application</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/hearingUrgency/hearingUrgency1'>Hearing urgency</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add people to the case\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/information-added.png' title='Information added'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetails/childDetails1'>Child details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add required details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## MIAM details\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/miam/miam1'>MIAM</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add additional information\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>Only complete if relevant</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCase/otherPeopleInTheCase1'>Other people in the case</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherProceedings/otherProceedings1'>Other proceedings</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/internationalElement/internationalElement1'>International element</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/litigationCapacity/litigationCapacity1'>Litigation capacity</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/welshLanguageRequirements/welshLanguageRequirements1'>Welsh language requirements</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## View PDF application\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/viewPdfDocument/viewPdfDocument1'>View PDF application</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Submit and pay\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/submitAndPay/submitAndPay1'>Submit and pay</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started yet'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n</div>",
     "agreeChildUnsupervisedTime": "No",
     "abductionChildPassportPosession": "father",
-    "respondent8Policy": {
-      "Organisation": {
-
-      },
-      "OrgPolicyReference": null,
-      "OrgPolicyCaseAssignedRole": "[SOLICITORI]"
-    },
     "caseSolicitorOrgName": "FPRL-test-organisation",
     "caseSolicitorName": "AAT Solicitor",
     "ordersNonMolestationDateIssued": null,
@@ -260,13 +246,6 @@
       "document_filename": "C1A_Document_Draft_Welsh.pdf",
       "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/bdc71b0a-d40e-4ef1-8125-ac0c1d82c83c/binary",
       "document_creation_date": null
-    },
-    "respondent7Policy": {
-      "Organisation": {
-
-      },
-      "OrgPolicyReference": null,
-      "OrgPolicyCaseAssignedRole": "[SOLICITORH]"
     },
     "childAbductionReasons": "There is no known whereabouts",
     "ordersUndertakingInPlace": "No",
@@ -589,13 +568,6 @@
         }
       }
     ],
-    "respondent5Policy": {
-      "Organisation": {
-
-      },
-      "OrgPolicyReference": null,
-      "OrgPolicyCaseAssignedRole": "[SOLICITORF]"
-    },
     "submitAndPayDownloadApplicationWelshLink": {
       "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8ab44b8b-afcc-4bba-b679-e908cf8159c3",
       "document_filename": "Draft_C100_application_welsh.pdf",
@@ -608,13 +580,6 @@
       "welshLanguageRequirementApplication": "english",
       "languageRequirementApplicationNeedWelsh": "Yes",
       "welshLanguageRequirementApplicationNeedEnglish": null
-    },
-    "respondent6Policy": {
-      "Organisation": {
-
-      },
-      "OrgPolicyReference": null,
-      "OrgPolicyCaseAssignedRole": "[SOLICITORG]"
     },
     "welshLanguageRequirementApplication": "english",
     "ordersApplyingFor": [
@@ -821,7 +786,7 @@
     "abductionPreviousPoliceInvolvement": "No",
     "allegationsOfHarmChildAbuseYesNo": "No",
     "courtId": "115",
-    "respondent0Policy": {
+    "caRespondent0Policy": {
       "Organisation": {
 
       },
@@ -1067,7 +1032,7 @@
         }
       }
     ],
-    "respondent1Policy": {
+    "caRespondent1Policy": {
       "Organisation": {
 
       },
@@ -5261,19 +5226,19 @@
       }
     ],
     "caseNameHmctsInternal": "John Doe Vs Mary Richards",
-    "respondent2": {
-      "respondentLastName": "Carman",
-      "respondentFirstName": "David"
+    "caRespondent2": {
+      "lastName": "Carman",
+      "firstName": "David"
     },
     "ordersUndertakingInPlaceCurrent": null,
     "ordersUndertakingInPlaceDocument": null,
-    "respondent0": {
-      "respondentLastName": "Richards",
-      "respondentFirstName": "Mary"
+    "caRespondent0": {
+      "lastName": "Richards",
+      "firstName": "Mary"
     },
-    "respondent1": {
-      "respondentLastName": "Lynn",
-      "respondentFirstName": "Elise"
+    "caRespondent1": {
+      "lastName": "Lynn",
+      "firstName": "Elise"
     },
     "applicationDetails": "The reason being it could not be sorted by discussion. We request the court to help us to come to a decision.",
     "ordersNonMolestation": "No",
