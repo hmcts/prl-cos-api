@@ -55,8 +55,13 @@ public class ResponseSubmitCheckerTest {
 
     CaseData emptyCaseData;
 
+    PartyDetails respondent;
+
+    PartyDetails emptyRespondent;
+
     @Before
     public void setup() {
+        emptyRespondent = PartyDetails.builder().build();
 
         PartyDetails respondent = PartyDetails.builder()
             .response(Response
@@ -91,7 +96,7 @@ public class ResponseSubmitCheckerTest {
     @Test
     public void isStarted() {
 
-        Boolean bool = responseSubmitChecker.isStarted(emptyCaseData, "A");
+        Boolean bool = responseSubmitChecker.isStarted(emptyRespondent);
         assertFalse(bool);
     }
 
@@ -107,7 +112,7 @@ public class ResponseSubmitCheckerTest {
         when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
 
 
-        Boolean bool = responseSubmitChecker.isFinished(emptyCaseData, "A");
+        Boolean bool = responseSubmitChecker.isFinished(emptyRespondent);
 
         assertFalse(bool);
     }

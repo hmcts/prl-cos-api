@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +16,8 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 @Service
 public class InternationalElementsChecker implements RespondentEventChecker {
     @Override
-    public boolean isStarted(CaseData caseData, String respondent) {
-        Optional<Response> response = findResponse(caseData, respondent);
+    public boolean isStarted(PartyDetails respondingParty) {
+        Optional<Response> response = findResponse(respondingParty);
 
         return response
             .filter(res -> anyNonEmpty(res.getResSolInternationalElements()
@@ -25,9 +25,9 @@ public class InternationalElementsChecker implements RespondentEventChecker {
     }
 
     @Override
-    public boolean isFinished(CaseData caseData, String respondent) {
+    public boolean isFinished(PartyDetails respondingParty) {
+        Optional<Response> response = findResponse(respondingParty);
         boolean mandatoryInfo = false;
-        Optional<Response> response = findResponse(caseData, respondent);
 
         if (response.isPresent()) {
             Optional<ResSolInternationalElements> solicitorInternationalElement

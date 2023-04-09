@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,18 +17,38 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 public class KeepDetailsPrivateChecker implements RespondentEventChecker {
 
     @Override
-    public boolean isStarted(CaseData caseData, String respondent) {
-        Optional<Response> response = findResponse(caseData, respondent);
+    public boolean isStarted(PartyDetails respondingParty) {
+        Optional<Response> response = findResponse(respondingParty);
+        boolean returnValue = false;
+        if (response.isPresent()) {
+            Optional<SolicitorKeepDetailsPrivate> solicitorKeepDetailsPrivate
+                = ofNullable(response.get().getSolicitorKeepDetailsPriate());
+            if (solicitorKeepDetailsPrivate.isPresent()) {
+                returnValue = ofNullable(solicitorKeepDetailsPrivate.get().getRespKeepDetailsPrivate())
+                    .filter(keepDetailsPrivate -> anyNonEmpty(
+                        keepDetailsPrivate.getConfidentiality(),
+                        keepDetailsPrivate.getOtherPeopleKnowYourContactDetails(),
+                        keepDetailsPrivate.getConfidentialityList()
+                    )).isPresent();
 
-        return response
-            .filter(res -> anyNonEmpty(res.getSolicitorKeepDetailsPriate()
-            )).isPresent();
+                if (!returnValue) {
+                    returnValue = ofNullable(solicitorKeepDetailsPrivate.get().getRespKeepDetailsPrivateConfidentiality())
+                        .filter(keepDetailsPrivate -> anyNonEmpty(
+                            keepDetailsPrivate.getConfidentiality(),
+                            keepDetailsPrivate.getOtherPeopleKnowYourContactDetails(),
+                            keepDetailsPrivate.getConfidentialityList()
+                        )).isPresent();
+                }
+            }
+        }
+
+        return returnValue;
     }
 
     @Override
-    public boolean isFinished(CaseData caseData, String respondent) {
+    public boolean isFinished(PartyDetails respondingParty) {
+        Optional<Response> response = findResponse(respondingParty);
         boolean mandatoryInfo = false;
-        Optional<Response> response = findResponse(caseData, respondent);
 
         if (response.isPresent()) {
 

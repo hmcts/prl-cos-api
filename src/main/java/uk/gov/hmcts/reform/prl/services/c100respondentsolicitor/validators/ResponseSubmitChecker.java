@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -29,13 +29,12 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
     RespondentEventsChecker respondentEventsChecker;
 
     @Override
-    public boolean isStarted(CaseData caseData, String respondent) {
+    public boolean isStarted(PartyDetails respondingParty) {
         return false;
     }
 
     @Override
-    public boolean isFinished(CaseData caseData, String respodent) {
-
+    public boolean isFinished(PartyDetails respondingParty) {
         EnumMap<RespondentSolicitorEvents, RespondentEventChecker> mandatoryEvents = new EnumMap<>(RespondentSolicitorEvents.class);
 
         mandatoryEvents.put(CONSENT, respondentEventsChecker.getConsentToApplicationChecker());
@@ -50,7 +49,7 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
         boolean mandatoryFinished;
 
         for (Map.Entry<RespondentSolicitorEvents, RespondentEventChecker> e : mandatoryEvents.entrySet()) {
-            mandatoryFinished = e.getValue().isFinished(caseData, respodent);
+            mandatoryFinished = e.getValue().isFinished(respondingParty);
             if (!mandatoryFinished) {
                 return false;
             }

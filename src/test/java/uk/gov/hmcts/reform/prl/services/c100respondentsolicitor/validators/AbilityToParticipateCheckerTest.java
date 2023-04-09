@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -17,6 +18,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AbilityToParticipateCheckerTest {
@@ -25,12 +27,15 @@ public class AbilityToParticipateCheckerTest {
     AbilityToParticipateChecker abilityToParticipateChecker;
 
     CaseData caseData;
+    PartyDetails respondent;
 
     @Before
     public void setUp() {
+        User user = User.builder().email("respondent@example.net")
+            .idamId("1234-5678").solicitorRepresented(Yes).build();
 
-
-        PartyDetails respondent = PartyDetails.builder()
+        respondent = PartyDetails.builder()
+            .user(user)
             .response(Response.builder().abilityToParticipate(
                 SolicitorAbilityToParticipateInProceedings.builder()
                     .factorsAffectingAbilityToParticipate(YesNoDontKnow.yes)
@@ -46,14 +51,14 @@ public class AbilityToParticipateCheckerTest {
 
     @Test
     public void isStartedTest() {
-        boolean anyNonEmpty = abilityToParticipateChecker.isStarted(caseData, "A");
+        boolean anyNonEmpty = abilityToParticipateChecker.isStarted(respondent);
 
         assertTrue(anyNonEmpty);
     }
 
     @Test
     public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = abilityToParticipateChecker.isFinished(caseData, "A");
+        boolean anyNonEmpty = abilityToParticipateChecker.isFinished(respondent);
 
         assertFalse(anyNonEmpty);
     }

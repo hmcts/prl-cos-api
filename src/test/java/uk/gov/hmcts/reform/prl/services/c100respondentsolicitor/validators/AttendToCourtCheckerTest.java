@@ -29,6 +29,8 @@ public class AttendToCourtCheckerTest {
 
     CaseData caseData;
 
+    PartyDetails respondent;
+
     @Before
     public void setUp() {
 
@@ -47,7 +49,7 @@ public class AttendToCourtCheckerTest {
         Element<RespondentInterpreterNeeds> wrappedInterpreter = Element.<RespondentInterpreterNeeds>builder().value(interpreterNeeds).build();
         List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
 
-        PartyDetails respondent = PartyDetails.builder()
+        respondent = PartyDetails.builder()
             .response(Response.builder()
                           .attendToCourt(AttendToCourt.builder()
                                              .respondentWelshNeeds(Yes)
@@ -73,14 +75,14 @@ public class AttendToCourtCheckerTest {
     @Test
     public void isStartedTest() {
 
-        Boolean bool = attendToCourtChecker.isStarted(caseData, "A");
+        Boolean bool = attendToCourtChecker.isStarted(respondent);
 
         assertTrue(bool);
     }
 
     @Test
     public void mandatoryCompletedTest() {
-        Boolean bool = attendToCourtChecker.isFinished(caseData, "A");
+        Boolean bool = attendToCourtChecker.isFinished(respondent);
 
         assertTrue(bool);
     }

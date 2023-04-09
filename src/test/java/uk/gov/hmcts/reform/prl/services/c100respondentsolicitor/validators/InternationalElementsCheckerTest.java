@@ -26,10 +26,12 @@ public class InternationalElementsCheckerTest {
 
     CaseData caseData;
 
+    PartyDetails respondent;
+
     @Before
     public void setUp() {
 
-        PartyDetails respondent = PartyDetails
+        respondent = PartyDetails
             .builder()
             .response(Response
                           .builder()
@@ -65,13 +67,13 @@ public class InternationalElementsCheckerTest {
 
     @Test
     public void isStarted() {
-        Boolean bool = internationalElementsChecker.isStarted(caseData, "A");
+        Boolean bool = internationalElementsChecker.isStarted(respondent);
         assertTrue(bool);
     }
 
     @Test
     public void mandatoryCompleted() {
-        Boolean bool = internationalElementsChecker.isFinished(caseData, "A");
+        Boolean bool = internationalElementsChecker.isFinished(respondent);
         assertTrue(bool);
     }
 
