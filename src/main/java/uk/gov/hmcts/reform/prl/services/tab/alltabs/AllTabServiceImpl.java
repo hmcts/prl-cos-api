@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -14,10 +16,14 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_TABLE;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.RESPONDENT;
 
 
 @Slf4j
@@ -25,7 +31,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Qualifier("allTabsService")
 public class AllTabServiceImpl implements AllTabsService {
-
     @Autowired
     ApplicationsTabService applicationsTabService;
 
@@ -119,13 +124,16 @@ public class AllTabServiceImpl implements AllTabsService {
         return getCombinedMap(caseData);
     }
 
-    public void updatePartyDetailsForNoc(CaseData caseData) {
+    public void updatePartyDetailsForNoc(CaseData caseData, Optional<SolicitorRole> solicitorRole) {
         if (caseData != null) {
-            Map<String, Object> caseDatObjectMap = caseData.toMap(objectMapper);
-            caseDatObjectMap.putAll(getCombinedMap(caseData));
-            refreshCcdUsingEvent(caseData, caseDatObjectMap);
+            Map<String, Object> caseDataUpdatedMap = new HashMap<>();
+            if (solicitorRole.isPresent() && RESPONDENT.equals(
+                solicitorRole.get().getRepresenting()) && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                caseDataUpdatedMap.put(RESPONDENTS, caseData.getRespondents());
+                caseDataUpdatedMap.put(RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
+            }
+            refreshCcdUsingEvent(caseData, caseDataUpdatedMap);
         }
-
     }
 
 }

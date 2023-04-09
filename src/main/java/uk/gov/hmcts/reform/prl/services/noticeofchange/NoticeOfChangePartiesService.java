@@ -190,17 +190,19 @@ public class NoticeOfChangePartiesService {
         UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
             authorisation
         );
-        tabService.updatePartyDetailsForNoc(getRepresentedPartyDetails(changeOrganisationRequest,
-                                                                                    newCaseData,
-                                                                                    legalRepresentativeSolicitorDetails));
+        newCaseData = getRepresentedPartyDetails(changeOrganisationRequest,
+                                   newCaseData,
+                                   legalRepresentativeSolicitorDetails);
+        Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
+        tabService.updatePartyDetailsForNoc(newCaseData, solicitorRole);
 
-        String representativeSolicitorName = legalRepresentativeSolicitorDetails.getFullName()
+        String solicitorName = legalRepresentativeSolicitorDetails.getFullName()
             + EMPTY_SPACE_STRING + legalRepresentativeSolicitorDetails.getSurname();
 
         NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
             newCaseData,
-            changeOrganisationRequest,
-            representativeSolicitorName
+            solicitorRole,
+            solicitorName, changeOrganisationRequest.getCreatedBy()
         );
         log.info("NoticeOfChangeEvent ===> " + noticeOfChangeEvent);
         eventPublisher.publishEvent(noticeOfChangeEvent);
@@ -208,15 +210,14 @@ public class NoticeOfChangePartiesService {
     }
 
     private NoticeOfChangeEvent prepareNoticeOfChangeEvent(CaseData newCaseData,
-                                                           ChangeOrganisationRequest changeOrganisationRequest, String representativeSolicitorName) {
-
-        Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
+                                                           Optional<SolicitorRole> solicitorRole, String solicitorName,
+                                                           String solicitorEmailAddress) {
         if (solicitorRole.isPresent()) {
             int partyIndex = solicitorRole.get().getIndex();
             return NoticeOfChangeEvent.builder()
                 .caseData(newCaseData)
-                .solicitorEmailAddress(changeOrganisationRequest.getCreatedBy())
-                .solicitorName(representativeSolicitorName)
+                .solicitorEmailAddress(solicitorEmailAddress)
+                .solicitorName(solicitorName)
                 .representedPartyIndex(partyIndex)
                 .representing(solicitorRole.get().getRepresenting())
                 .build();
