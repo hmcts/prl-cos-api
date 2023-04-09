@@ -22,14 +22,7 @@
     },
     "applicationTypeDetails": {
 
-    },
-    "respondent3Policy": {
-      "Organisation": {
-
-      },
-      "OrgPolicyReference": null,
-      "OrgPolicyCaseAssignedRole": "[SOLICITORD]"
-    },
+    }
     "dateOfSubmission": {
       "dateOfSubmission": "24 03 2023"
     },
@@ -402,13 +395,6 @@
     },
     "ordersRestrainingCurrent": null,
     "ordersForcedMarriageProtectionEndDate": null,
-    "respondent4Policy": {
-      "Organisation": {
-
-      },
-      "OrgPolicyReference": null,
-      "OrgPolicyCaseAssignedRole": "[SOLICITORE]"
-    },
     "childrenKnownToLocalAuthority": "no",
     "natureOfOrder": "Requesting for spending time with the child twice a week",
     "jurisdictionIssueGiveReason": "Yes,",

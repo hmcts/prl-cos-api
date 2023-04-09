@@ -37,13 +37,6 @@
     "c100ConfidentialityStatementDisclaimer": [
       "confidentialityStatementUnderstood"
     ],
-    "respondent3Policy": {
-      "Organisation": {
-
-      },
-      "OrgPolicyReference": null,
-      "OrgPolicyCaseAssignedRole": "[SOLICITORD]"
-    },
     "abductionChildPassportPosessionOtherDetail": null,
     "miamExemptionsChecklist": [
       "domesticViolence",
@@ -4725,13 +4718,6 @@
     "finalWelshDocument": null,
     "ordersRestrainingCurrent": null,
     "ordersForcedMarriageProtectionEndDate": null,
-    "respondent4Policy": {
-      "Organisation": {
-
-      },
-      "OrgPolicyReference": null,
-      "OrgPolicyCaseAssignedRole": "[SOLICITORE]"
-    },
     "hearingUrgencyTable": {
       "isCaseUrgent": "No",
       "setOutReasonsBelow": null,
