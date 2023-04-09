@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.noticeofchange;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,37 +64,30 @@ public class NoticeOfChangePartiesService {
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing,
                                         NoticeOfChangeAnswersPopulationStrategy strategy) {
         Map<String, Object> data = new HashMap<>();
-        log.info("Inside NoticeOfChangePartiesService: generate");
         List<Element<PartyDetails>> elements = representing.getTarget().apply(caseData);
-        log.info("representing.getTarget().apply(caseData) ==> " + elements);
         int numElements = null != elements ? elements.size() : 0;
 
         List<SolicitorRole> solicitorRoles = SolicitorRole.values(representing);
         for (int i = 0; i < solicitorRoles.size(); i++) {
             SolicitorRole solicitorRole = solicitorRoles.get(i);
-            log.info("solicitorRole" + i + " ==> " + solicitorRole);
             if (null != elements) {
                 Optional<Element<PartyDetails>> solicitorContainer = i < numElements
                     ? Optional.of(elements.get(i))
                     : Optional.empty();
-                log.info("solicitorContainer ==> " + solicitorContainer);
                 OrganisationPolicy organisationPolicy = policyConverter.generate(
                     solicitorRole, solicitorContainer
                 );
-                log.info("organisationPolicy ==> " + organisationPolicy);
                 data.put(String.format(representing.getPolicyFieldTemplate(), i), organisationPolicy);
 
                 Optional<NoticeOfChangeParties> possibleAnswer = populateAnswer(
                     strategy, solicitorContainer
                 );
-                log.info("possibleAnswer ==> " + possibleAnswer);
                 if (possibleAnswer.isPresent()) {
                     data.put(String.format(representing.getNocAnswersTemplate(), i), possibleAnswer.get());
                 }
 
             }
         }
-        log.info("Exit NoticeOfChangePartiesService ==> " + data);
         return data;
     }
 
@@ -112,16 +104,7 @@ public class NoticeOfChangePartiesService {
     }
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String authorisation) {
-        try {
-            log.info("applyDecision start getCaseDetails json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
-        log.info("inside changeOrganisationRequest present");
-
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        //caseDetails.getData().putAll(updateRepresentedPartyDetails(authorisation, caseDetails));
-        log.info("applyDecision updated caseDetails ===> " + caseDetails);
         return assignCaseAccessClient.applyDecision(
             authorisation,
             tokenGenerator.generate(),
@@ -136,7 +119,6 @@ public class NoticeOfChangePartiesService {
             int partyIndex = solicitorRole.get().getIndex();
             if (RESPONDENT.equals(solicitorRole.get().getRepresenting())) {
                 List<Element<PartyDetails>> respondents = RESPONDENT.getTarget().apply(caseData);
-                log.info("inside solicitorRole present");
                 if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                     return updateC100RespondentDetails(partyIndex, respondents, legalRepresentativeSolicitorDetails,
                                                        changeOrganisationRequest, caseData);
@@ -165,7 +147,6 @@ public class NoticeOfChangePartiesService {
             .build();
         Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
             .element(representedRespondentElement.getId(), updPartyDetails);
-        log.info("updated representedRespondentElement ===> " + updatedRepresentedRespondentElement);
         caseData.getRespondents().set(partyIndex, updatedRepresentedRespondentElement);
         return caseData;
     }
@@ -175,7 +156,6 @@ public class NoticeOfChangePartiesService {
         if (changeOrganisationRequest != null
             && changeOrganisationRequest.getCaseRoleId() != null
             && changeOrganisationRequest.getCaseRoleId().getValue() != null) {
-            log.info("inside changeOrganisationRequest present");
             String caseRoleLabel = changeOrganisationRequest.getCaseRoleId().getValue().getCode();
             solicitorRole = SolicitorRole.from(caseRoleLabel);
         }
@@ -204,7 +184,6 @@ public class NoticeOfChangePartiesService {
             solicitorRole,
             solicitorName, changeOrganisationRequest.getCreatedBy()
         );
-        log.info("NoticeOfChangeEvent ===> " + noticeOfChangeEvent);
         eventPublisher.publishEvent(noticeOfChangeEvent);
 
     }

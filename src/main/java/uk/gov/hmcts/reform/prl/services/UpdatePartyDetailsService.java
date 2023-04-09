@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,11 +36,7 @@ public class UpdatePartyDetailsService {
 
     public Map<String, Object> updateApplicantAndChildNames(CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        try {
-            log.info("updateApplicantAndChildNames start json ===>" + objectMapper.writeValueAsString(updatedCaseData));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
+
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         final Flags caseFlags = Flags.builder().build();
@@ -84,11 +79,7 @@ public class UpdatePartyDetailsService {
             setApplicantFlag(caseData, updatedCaseData);
             setRespondentFlag(caseData, updatedCaseData);
         }
-        try {
-            log.info("updateApplicantAndChildNames end json ===>" + objectMapper.writeValueAsString(updatedCaseData));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
+
         return updatedCaseData;
     }
 
