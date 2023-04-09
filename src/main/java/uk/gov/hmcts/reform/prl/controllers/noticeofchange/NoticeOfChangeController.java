@@ -42,7 +42,6 @@ public class NoticeOfChangeController extends AbstractCallbackController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        log.info("aboutToSubmitNoCRequest entered");
         return noticeOfChangePartiesService.applyDecision(callbackRequest, authorisation);
     }
 
@@ -56,7 +55,6 @@ public class NoticeOfChangeController extends AbstractCallbackController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        log.info("Calling submittedNoCRequest");
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, authorisation);
     }
 }
