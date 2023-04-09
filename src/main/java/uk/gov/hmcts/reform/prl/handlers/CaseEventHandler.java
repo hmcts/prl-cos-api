@@ -113,14 +113,19 @@ public class CaseEventHandler {
                     final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
                     log.info("tasks found: " + tasks.size());
 
-                    List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors(
-                        respondingParty.getValue());
+                    List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors();
+                    log.info("eventErrors found: " + eventErrors.size());
 
                     List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents();
+                    log.info("events found: " + events.size());
                     eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+                    log.info("eventErrors found following removal: " + eventErrors.size());
 
+                    String representedRespondentName = respondingParty.getValue().getFirstName().trim() + " "
+                        + respondingParty.getValue().getLastName().trim();
+                    log.info("representedRespondentName found: " + representedRespondentName);
                     return respondentSolicitorTaskListRenderer
-                        .render(tasks, eventErrors, respondent);
+                        .render(tasks, eventErrors, respondent, representedRespondentName);
                 }
             }
         }
