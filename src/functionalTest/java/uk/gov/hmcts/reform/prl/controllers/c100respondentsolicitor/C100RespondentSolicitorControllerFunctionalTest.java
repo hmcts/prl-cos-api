@@ -106,7 +106,7 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     @Test
     public void givenRequestBody_whenGenerate_c7response_draft_document_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        mockMvc.perform(post("/respondent-solicitor/generate-c7response-draft-document")
+        mockMvc.perform(post("/respondent-solicitor/generate-c7response-document")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
