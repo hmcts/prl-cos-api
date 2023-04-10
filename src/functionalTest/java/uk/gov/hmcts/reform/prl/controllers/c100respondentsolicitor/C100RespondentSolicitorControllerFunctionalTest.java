@@ -15,7 +15,6 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -35,8 +34,6 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     private C100RespondentSolicitorService respondentSolicitorService;
     @MockBean
     private DocumentGenService documentGenService;
-    @Autowired
-    IdamTokenGenerator idamTokenGenerator;
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
 
@@ -110,8 +107,8 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     public void givenRequestBody_whenGenerate_c7response_draft_document_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/respondent-solicitor/generate-c7response-draft-document")
-                            .contentType(MediaType.APPLICATION_JSON_VALUE)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
