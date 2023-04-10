@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -7,6 +8,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,17 +16,35 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.ATTENDING_THE_COURT_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
 public class AttendToCourtChecker implements RespondentEventChecker {
+    @Autowired
+    RespondentTaskErrorService respondentTaskErrorService;
+
     @Override
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
 
-        return response
-            .filter(res -> anyNonEmpty(res.getAttendToCourt()
-            )).isPresent();
+        if (response.isPresent()) {
+            return ofNullable(response.get().getAttendToCourt())
+                .filter(attendToCourt -> anyNonEmpty(
+                    attendToCourt.getRespondentWelshNeeds(),
+                    attendToCourt.getRespondentWelshNeedsList(),
+                    attendToCourt.getIsRespondentNeededInterpreter(),
+                    attendToCourt.getRespondentInterpreterNeeds(),
+                    attendToCourt.getHaveAnyDisability(),
+                    attendToCourt.getDisabilityNeeds(),
+                    attendToCourt.getRespondentSpecialArrangements(),
+                    attendToCourt.getRespondentSpecialArrangementDetails(),
+                    attendToCourt.getRespondentIntermediaryNeeds(),
+                    attendToCourt.getRespondentIntermediaryNeedDetails()
+                )).isPresent();
+        }
+        return false;
     }
 
     @Override
@@ -36,9 +56,15 @@ public class AttendToCourtChecker implements RespondentEventChecker {
             Optional<AttendToCourt> attendToCourt = Optional.ofNullable(response.get()
                                                                             .getAttendToCourt());
             if (!attendToCourt.isEmpty() && checkAttendToCourtMandatoryCompleted(attendToCourt)) {
+                respondentTaskErrorService.removeError(ATTENDING_THE_COURT_ERROR);
                 mandatoryInfo = true;
             }
         }
+        respondentTaskErrorService.addEventError(
+            ATTENDING_THE_COURT,
+            ATTENDING_THE_COURT_ERROR,
+            ATTENDING_THE_COURT_ERROR.getError()
+        );
         return mandatoryInfo;
     }
 

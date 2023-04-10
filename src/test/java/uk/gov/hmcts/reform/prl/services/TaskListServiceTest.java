@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;

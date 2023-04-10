@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.prl.models.tasklist;
 
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 
 import java.util.Optional;
 

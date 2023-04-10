@@ -1,13 +1,12 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +15,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentTaskErrorService {
@@ -23,15 +23,19 @@ public class RespondentTaskErrorService {
     Map<RespondentEventErrorsEnum, RespondentEventValidationErrors> eventErrors = new EnumMap<>(
         RespondentEventErrorsEnum.class);
 
-    public List<RespondentEventValidationErrors> getEventErrors(PartyDetails respondingParty) {
-
+    public List<RespondentEventValidationErrors> getEventErrors() {
+        log.info("finding errors");
         List<RespondentEventValidationErrors> eventErrorList = new ArrayList<>();
-
+        log.info("eventErrors size :: " + eventErrors.size());
         for (Map.Entry<RespondentEventErrorsEnum, RespondentEventValidationErrors> entry : eventErrors.entrySet()) {
+            log.info("entry key :: " + entry.getKey());
+            log.info("entry value :: " + entry.getValue());
             eventErrorList.add(entry.getValue());
         }
+        log.info("eventErrorList size :: " + eventErrorList.size());
         eventErrorList.sort(Comparator.comparingInt(x -> RespondentSolicitorEvents.getEventOrder()
             .indexOf(x.getEvent())));
+        log.info("eventErrorList size after :: " + eventErrorList.size());
         return eventErrorList;
     }
 
@@ -43,8 +47,7 @@ public class RespondentTaskErrorService {
             .build());
     }
 
-
-    public void removeError(EventErrorsEnum errorType) {
+    public void removeError(RespondentEventErrorsEnum errorType) {
         eventErrors.remove(errorType);
     }
 

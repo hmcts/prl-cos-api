@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.noticeofchange;
+package uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Getter
 public enum RespondentSolicitorEvents {
-    START_RESPONSE("c100ResSolStartingResponse", "Respond to the application", "c100ResSolStartingResponse"),
     CONSENT("c100ResSolConsentingToApplication", "Do you give your consent?", "respondentConsentToApplication"),
     KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "Keep your details private", "keepContactDetailsPrivate,"
         + "keepContactDetailsPrivateOther"),

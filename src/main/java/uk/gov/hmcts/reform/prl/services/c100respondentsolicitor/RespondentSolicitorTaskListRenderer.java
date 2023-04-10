@@ -1,9 +1,10 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection;
@@ -22,6 +23,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection.newSection;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentSolicitorTaskListRenderer {
@@ -37,11 +39,12 @@ public class RespondentSolicitorTaskListRenderer {
     private final TaskListRenderElements taskListRenderElements;
 
 
-    public String render(List<RespondentTask> allTasks, List<RespondentEventValidationErrors> tasksErrors, String respondent) {
+    public String render(List<RespondentTask> allTasks, List<RespondentEventValidationErrors> tasksErrors,
+                         String respondent, String representedRespondentName) {
         final List<String> lines = new LinkedList<>();
         lines.add(
             "<div class='width-50'>"
-                + "<h3>Respond to the application for Respondent " + respondent + "</h3>"
+                + "<h3>Respond to the application for Respondent " + representedRespondentName + "</h3>"
                 + "<p>This online response combines forms C7 and C8."
                 + " It also allows you to make your own allegations of harm and violence (C1A)"
                 + " in the section of safety concerns.</p>"
@@ -53,8 +56,9 @@ public class RespondentSolicitorTaskListRenderer {
             .forEach(section -> lines.addAll(renderSection(section, respondent)));
 
         lines.add("</div>");
-
+        log.info("task list now: " + String.join("\n\n", lines));
         lines.addAll(renderResSolTasksErrors(tasksErrors, respondent));
+        log.info("task list after: " + String.join("\n\n", lines));
 
         return String.join("\n\n", lines);
     }
@@ -162,8 +166,10 @@ public class RespondentSolicitorTaskListRenderer {
 
     private List<String> renderResSolTasksErrors(List<RespondentEventValidationErrors> taskErrors, String respondent) {
         if (isEmpty(taskErrors)) {
+            log.info("taskErrors is empty ");
             return emptyList();
         }
+        log.info("taskErrors found: " + taskErrors.size());
         final List<String> errors = taskErrors.stream()
             .flatMap(task -> task.getErrors()
                 .stream()
@@ -173,7 +179,7 @@ public class RespondentSolicitorTaskListRenderer {
                     taskListRenderElements.renderRespondentSolicitorLink(task.getEvent(), respondent)
                 )))
             .collect(toList());
-
+        log.info("errors found: " + errors.size());
         return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
     }
 }

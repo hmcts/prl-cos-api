@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.WhomConsistPassportList;
@@ -8,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,17 +17,31 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.ALLEGATION_OF_HARM_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ALLEGATION_OF_HARM;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
 public class RespondentAllegationsOfHarmChecker implements RespondentEventChecker {
+    @Autowired
+    RespondentTaskErrorService respondentTaskErrorService;
+
     @Override
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
 
-        return response
-            .filter(res -> anyNonEmpty(res.getRespondentAllegationsOfHarmData()
-            )).isPresent();
+        if (response.isPresent()) {
+            return ofNullable(response.get().getRespondentAllegationsOfHarmData())
+                .filter(allegations -> anyNonEmpty(
+                    allegations.getRespAllegationsOfHarmInfo(),
+                    allegations.getRespAohYesOrNo(),
+                    allegations.getRespChildAbductionInfo(),
+                    allegations.getRespChildAbuseInfo(),
+                    allegations.getRespDomesticAbuseInfo(),
+                    allegations.getRespOtherConcernsInfo()
+                )).isPresent();
+        }
+        return false;
     }
 
     @Override
@@ -38,10 +54,15 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                                                                                                             .getRespondentAllegationsOfHarmData());
             if (!respondentAllegationsOfHarm.isEmpty() && checkAllegationsOfHarmManadatoryCompleted(
                 respondentAllegationsOfHarm)) {
-
+                respondentTaskErrorService.removeError(ALLEGATION_OF_HARM_ERROR);
                 mandatoryInfo = true;
             }
         }
+        respondentTaskErrorService.addEventError(
+            ALLEGATION_OF_HARM,
+            ALLEGATION_OF_HARM_ERROR,
+            ALLEGATION_OF_HARM_ERROR.getError()
+        );
         return mandatoryInfo;
     }
 
