@@ -25,9 +25,13 @@ public class CurrentOrPastProceedingsChecker implements RespondentEventChecker {
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
 
-        return response
-            .filter(res -> anyNonEmpty(res.getCurrentOrPastProceedingsForChildren()))
-            .isPresent();
+        if (response.isPresent()) {
+            return ofNullable(response.get().getCurrentOrPastProceedingsForChildren())
+                .filter(proceedings -> anyNonEmpty(
+                    proceedings.getDisplayedValue()
+                )).isPresent();
+        }
+        return false;
     }
 
     @Override
@@ -55,7 +59,8 @@ public class CurrentOrPastProceedingsChecker implements RespondentEventChecker {
             respondentTaskErrorService.addEventError(
                 CURRENT_OR_PREVIOUS_PROCEEDINGS,
                 CURRENT_OR_PREVIOUS_PROCEEDINGS_ERROR,
-                CURRENT_OR_PREVIOUS_PROCEEDINGS_ERROR.getError());
+                CURRENT_OR_PREVIOUS_PROCEEDINGS_ERROR.getError()
+            );
             return false;
         }
     }

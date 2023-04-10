@@ -47,7 +47,6 @@ public class RespondentTaskErrorService {
             .build());
     }
 
-
     public void removeError(RespondentEventErrorsEnum errorType) {
         eventErrors.remove(errorType);
     }

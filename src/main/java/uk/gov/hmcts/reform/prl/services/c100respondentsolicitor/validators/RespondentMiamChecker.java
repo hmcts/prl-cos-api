@@ -28,9 +28,14 @@ public class RespondentMiamChecker implements RespondentEventChecker {
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
 
-        return response
-            .filter(res -> anyNonEmpty(res.getSolicitorMiam()
-            )).isPresent();
+        if (response.isPresent()) {
+            return ofNullable(response.get().getSolicitorMiam())
+                .filter(miam -> anyNonEmpty(
+                    miam.getRespSolHaveYouAttendedMiam(),
+                    miam.getRespSolWillingnessToAttendMiam()
+                )).isPresent();
+        }
+        return false;
     }
 
     @Override
@@ -51,7 +56,8 @@ public class RespondentMiamChecker implements RespondentEventChecker {
         respondentTaskErrorService.addEventError(
             MIAM,
             MIAM_ERROR,
-            MIAM_ERROR.getError());
+            MIAM_ERROR.getError()
+        );
         return mandatoryInfo;
     }
 
