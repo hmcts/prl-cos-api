@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.noticeofchange;
+package uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
