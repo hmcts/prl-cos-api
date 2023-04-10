@@ -1,27 +1,41 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.INTERNATIONAL_ELEMENT_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
 public class InternationalElementsChecker implements RespondentEventChecker {
+    @Autowired
+    RespondentTaskErrorService respondentTaskErrorService;
+
     @Override
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
 
-        return response
-            .filter(res -> anyNonEmpty(res.getResSolInternationalElements()
-            )).isPresent();
+        if (response.isPresent()) {
+            return ofNullable(response.get().getResSolInternationalElements())
+                .filter(resSolInternationalElements -> anyNonEmpty(
+                    resSolInternationalElements.getInternationalElementChildInfo(),
+                    resSolInternationalElements.getInternationalElementJurisdictionInfo(),
+                    resSolInternationalElements.getInternationalElementParentInfo(),
+                    resSolInternationalElements.getInternationalElementParentInfo()
+                )).isPresent();
+        }
+        return false;
     }
 
     @Override
@@ -34,9 +48,15 @@ public class InternationalElementsChecker implements RespondentEventChecker {
                 = Optional.ofNullable(response.get().getResSolInternationalElements());
             if (!solicitorInternationalElement.isEmpty() && checkInternationalElementMandatoryCompleted(
                 solicitorInternationalElement)) {
+                respondentTaskErrorService.removeError(INTERNATIONAL_ELEMENT_ERROR);
                 mandatoryInfo = true;
             }
         }
+        respondentTaskErrorService.addEventError(
+            INTERNATIONAL_ELEMENT,
+            INTERNATIONAL_ELEMENT_ERROR,
+            INTERNATIONAL_ELEMENT_ERROR.getError()
+        );
         return mandatoryInfo;
     }
 

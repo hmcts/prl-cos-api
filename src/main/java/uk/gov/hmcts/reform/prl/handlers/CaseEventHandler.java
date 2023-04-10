@@ -7,7 +7,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -116,14 +116,19 @@ public class CaseEventHandler {
                     final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
                     log.info("tasks found: " + tasks.size());
 
-                    List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors(
-                        respondingParty.getValue());
+                    List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors();
+                    log.info("eventErrors found: " + eventErrors.size());
 
                     List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents();
+                    log.info("events found: " + events.size());
                     eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+                    log.info("eventErrors found following removal: " + eventErrors.size());
 
+                    String representedRespondentName = respondingParty.getValue().getFirstName().trim() + " "
+                        + respondingParty.getValue().getLastName().trim();
+                    log.info("representedRespondentName found: " + representedRespondentName);
                     return respondentSolicitorTaskListRenderer
-                        .render(tasks, eventErrors, respondent);
+                        .render(tasks, eventErrors, respondent, representedRespondentName);
                 }
             }
         }
