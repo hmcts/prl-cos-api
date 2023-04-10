@@ -5,7 +5,7 @@ package uk.gov.hmcts.reform.prl.services;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Event;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 

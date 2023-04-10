@@ -1,21 +1,28 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.CONFIRM_EDIT_CONTACT_DETAILS_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
 public class RespondentContactDetailsChecker implements RespondentEventChecker {
+    @Autowired
+    RespondentTaskErrorService respondentTaskErrorService;
+
     @Override
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
@@ -40,9 +47,13 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
             Optional<CitizenDetails> citizenDetails = Optional.ofNullable(response.get()
                                                                               .getCitizenDetails());
             if (!citizenDetails.isEmpty() && checkContactDetailsMandatoryCompleted(citizenDetails)) {
+                respondentTaskErrorService.removeError(CONFIRM_EDIT_CONTACT_DETAILS_ERROR);
                 mandatoryInfo = true;
             }
         }
+        respondentTaskErrorService.addEventError(CONFIRM_EDIT_CONTACT_DETAILS,
+                                                 CONFIRM_EDIT_CONTACT_DETAILS_ERROR,
+                                                 CONFIRM_EDIT_CONTACT_DETAILS_ERROR.getError());
         return mandatoryInfo;
     }
 

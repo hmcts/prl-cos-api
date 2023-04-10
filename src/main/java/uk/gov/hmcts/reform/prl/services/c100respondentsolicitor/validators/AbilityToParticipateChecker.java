@@ -1,20 +1,27 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.ABILITY_TO_PARTICIPATE_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
 public class AbilityToParticipateChecker implements RespondentEventChecker {
+    @Autowired
+    RespondentTaskErrorService respondentTaskErrorService;
+
     @Override
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
@@ -35,9 +42,14 @@ public class AbilityToParticipateChecker implements RespondentEventChecker {
                 response.get()
                     .getAbilityToParticipate());
             if (!abilityToParticipate.isEmpty() && checkAbilityToParticipateMandatoryCompleted(abilityToParticipate)) {
+                respondentTaskErrorService.removeError(ABILITY_TO_PARTICIPATE_ERROR);
                 mandatoryInfo = true;
             }
         }
+        respondentTaskErrorService.addEventError(
+            ABILITY_TO_PARTICIPATE,
+            ABILITY_TO_PARTICIPATE_ERROR,
+            ABILITY_TO_PARTICIPATE_ERROR.getError());
         return mandatoryInfo;
     }
 

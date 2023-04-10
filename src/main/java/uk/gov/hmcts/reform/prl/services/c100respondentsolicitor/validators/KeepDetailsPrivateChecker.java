@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
@@ -15,6 +14,7 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.KEEP_DETAILS_PRIVATE_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
@@ -66,7 +66,7 @@ public class KeepDetailsPrivateChecker implements RespondentEventChecker {
                 mandatoryInfo = true;
             }
         }
-        respondentTaskErrorService.addEventError(RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE,
+        respondentTaskErrorService.addEventError(KEEP_DETAILS_PRIVATE,
                                                  KEEP_DETAILS_PRIVATE_ERROR,
                                                  KEEP_DETAILS_PRIVATE_ERROR.getError());
         return mandatoryInfo;

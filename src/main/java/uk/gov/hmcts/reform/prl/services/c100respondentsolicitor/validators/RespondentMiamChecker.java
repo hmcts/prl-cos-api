@@ -1,22 +1,29 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.MIAM_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.MIAM;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Slf4j
 @Service
 public class RespondentMiamChecker implements RespondentEventChecker {
+    @Autowired
+    RespondentTaskErrorService respondentTaskErrorService;
+
     @Override
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
@@ -35,13 +42,16 @@ public class RespondentMiamChecker implements RespondentEventChecker {
             Optional<SolicitorMiam> miam
                 = Optional.ofNullable(response.get().getSolicitorMiam());
             if (!miam.isEmpty()) {
-                log.info("before checking miam mandatory info if loop...");
                 if (checkMiamManadatoryCompleted(miam)) {
-                    log.info("inside checking miam mandatory info if loop...");
+                    respondentTaskErrorService.removeError(MIAM_ERROR);
                     mandatoryInfo = true;
                 }
             }
         }
+        respondentTaskErrorService.addEventError(
+            MIAM,
+            MIAM_ERROR,
+            MIAM_ERROR.getError());
         return mandatoryInfo;
     }
 

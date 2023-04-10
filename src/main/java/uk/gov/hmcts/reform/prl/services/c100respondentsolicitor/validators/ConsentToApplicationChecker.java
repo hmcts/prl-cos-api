@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
@@ -16,6 +15,7 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.CONSENT_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Slf4j
@@ -54,7 +54,7 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
                 mandatoryInfo = true;
             }
         }
-        respondentTaskErrorService.addEventError(RespondentSolicitorEvents.CONSENT, CONSENT_ERROR, CONSENT_ERROR.getError());
+        respondentTaskErrorService.addEventError(CONSENT, CONSENT_ERROR, CONSENT_ERROR.getError());
         return mandatoryInfo;
     }
 

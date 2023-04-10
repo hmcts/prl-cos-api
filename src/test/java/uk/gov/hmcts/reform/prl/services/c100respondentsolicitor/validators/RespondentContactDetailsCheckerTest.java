@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -13,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -20,6 +23,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -27,6 +31,9 @@ public class RespondentContactDetailsCheckerTest {
 
     @InjectMocks
     RespondentContactDetailsChecker respondentContactDetailsChecker;
+
+    @Mock
+    RespondentTaskErrorService respondentTaskErrorService;
 
     CaseData caseData;
 
@@ -107,12 +114,14 @@ public class RespondentContactDetailsCheckerTest {
 
     @Test
     public void mandatoryInformationTest() {
+        doNothing().when(respondentTaskErrorService).addEventError(Mockito.any(), Mockito.any(), Mockito.any());
         Boolean bool = respondentContactDetailsChecker.isFinished(respondent);
         assertTrue(bool);
     }
 
     @Test
     public void noAddressTest() {
+        doNothing().when(respondentTaskErrorService).addEventError(Mockito.any(), Mockito.any(), Mockito.any());
         Boolean bool = respondentContactDetailsChecker.isFinished(noAddressRespondent);
         assertFalse(bool);
     }
