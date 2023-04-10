@@ -5,6 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -12,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -19,6 +22,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -27,6 +31,9 @@ public class ConsentToApplicationCheckerTest {
 
     @InjectMocks
     ConsentToApplicationChecker consentToApplicationChecker;
+
+    @Mock
+    RespondentTaskErrorService respondentTaskErrorService;
 
     CaseData caseData;
     PartyDetails respondent;
@@ -83,6 +90,7 @@ public class ConsentToApplicationCheckerTest {
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
 
         caseData = CaseData.builder().respondents(respondentList).build();
+        doNothing().when(respondentTaskErrorService).addEventError(Mockito.any(),Mockito.any(),Mockito.any());
         boolean anyNonEmpty = consentToApplicationChecker.isStarted(respondent);
 
         assertFalse(anyNonEmpty);
