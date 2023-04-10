@@ -26,9 +26,14 @@ public class AbilityToParticipateChecker implements RespondentEventChecker {
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
 
-        return response
-            .filter(res -> anyNonEmpty(res.getAbilityToParticipate()
-            )).isPresent();
+        if (response.isPresent()) {
+            return ofNullable(response.get().getAbilityToParticipate())
+                .filter(ability -> anyNonEmpty(
+                    ability.getFactorsAffectingAbilityToParticipate(),
+                    ability.getProvideDetailsForFactorsAffectingAbilityToParticipate()
+                )).isPresent();
+        }
+        return false;
     }
 
     @Override
@@ -49,7 +54,8 @@ public class AbilityToParticipateChecker implements RespondentEventChecker {
         respondentTaskErrorService.addEventError(
             ABILITY_TO_PARTICIPATE,
             ABILITY_TO_PARTICIPATE_ERROR,
-            ABILITY_TO_PARTICIPATE_ERROR.getError());
+            ABILITY_TO_PARTICIPATE_ERROR.getError()
+        );
         return mandatoryInfo;
     }
 

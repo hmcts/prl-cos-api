@@ -26,9 +26,16 @@ public class InternationalElementsChecker implements RespondentEventChecker {
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
 
-        return response
-            .filter(res -> anyNonEmpty(res.getResSolInternationalElements()
-            )).isPresent();
+        if (response.isPresent()) {
+            return ofNullable(response.get().getResSolInternationalElements())
+                .filter(resSolInternationalElements -> anyNonEmpty(
+                    resSolInternationalElements.getInternationalElementChildInfo(),
+                    resSolInternationalElements.getInternationalElementJurisdictionInfo(),
+                    resSolInternationalElements.getInternationalElementParentInfo(),
+                    resSolInternationalElements.getInternationalElementParentInfo()
+                )).isPresent();
+        }
+        return false;
     }
 
     @Override
@@ -48,7 +55,8 @@ public class InternationalElementsChecker implements RespondentEventChecker {
         respondentTaskErrorService.addEventError(
             INTERNATIONAL_ELEMENT,
             INTERNATIONAL_ELEMENT_ERROR,
-            INTERNATIONAL_ELEMENT_ERROR.getError());
+            INTERNATIONAL_ELEMENT_ERROR.getError()
+        );
         return mandatoryInfo;
     }
 

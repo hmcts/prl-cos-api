@@ -29,9 +29,22 @@ public class AttendToCourtChecker implements RespondentEventChecker {
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
 
-        return response
-            .filter(res -> anyNonEmpty(res.getAttendToCourt()
-            )).isPresent();
+        if (response.isPresent()) {
+            return ofNullable(response.get().getAttendToCourt())
+                .filter(attendToCourt -> anyNonEmpty(
+                    attendToCourt.getRespondentWelshNeeds(),
+                    attendToCourt.getRespondentWelshNeedsList(),
+                    attendToCourt.getIsRespondentNeededInterpreter(),
+                    attendToCourt.getRespondentInterpreterNeeds(),
+                    attendToCourt.getHaveAnyDisability(),
+                    attendToCourt.getDisabilityNeeds(),
+                    attendToCourt.getRespondentSpecialArrangements(),
+                    attendToCourt.getRespondentSpecialArrangementDetails(),
+                    attendToCourt.getRespondentIntermediaryNeeds(),
+                    attendToCourt.getRespondentIntermediaryNeedDetails()
+                )).isPresent();
+        }
+        return false;
     }
 
     @Override
@@ -50,7 +63,8 @@ public class AttendToCourtChecker implements RespondentEventChecker {
         respondentTaskErrorService.addEventError(
             ATTENDING_THE_COURT,
             ATTENDING_THE_COURT_ERROR,
-            ATTENDING_THE_COURT_ERROR.getError());
+            ATTENDING_THE_COURT_ERROR.getError()
+        );
         return mandatoryInfo;
     }
 

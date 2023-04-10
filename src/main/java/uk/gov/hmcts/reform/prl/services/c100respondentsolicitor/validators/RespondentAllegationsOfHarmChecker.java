@@ -30,9 +30,18 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
 
-        return response
-            .filter(res -> anyNonEmpty(res.getRespondentAllegationsOfHarmData()
-            )).isPresent();
+        if (response.isPresent()) {
+            return ofNullable(response.get().getRespondentAllegationsOfHarmData())
+                .filter(allegations -> anyNonEmpty(
+                    allegations.getRespAllegationsOfHarmInfo(),
+                    allegations.getRespAohYesOrNo(),
+                    allegations.getRespChildAbductionInfo(),
+                    allegations.getRespChildAbuseInfo(),
+                    allegations.getRespDomesticAbuseInfo(),
+                    allegations.getRespOtherConcernsInfo()
+                )).isPresent();
+        }
+        return false;
     }
 
     @Override
@@ -49,9 +58,11 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                 mandatoryInfo = true;
             }
         }
-        respondentTaskErrorService.addEventError(ALLEGATION_OF_HARM,
-                                                 ALLEGATION_OF_HARM_ERROR,
-                                                 ALLEGATION_OF_HARM_ERROR.getError());
+        respondentTaskErrorService.addEventError(
+            ALLEGATION_OF_HARM,
+            ALLEGATION_OF_HARM_ERROR,
+            ALLEGATION_OF_HARM_ERROR.getError()
+        );
         return mandatoryInfo;
     }
 

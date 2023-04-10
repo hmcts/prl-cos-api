@@ -28,14 +28,20 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {
-            Optional<CitizenDetails> citizenDetails = ofNullable(response.get().getCitizenDetails());
-            if (citizenDetails.isPresent()) {
-                return true;
-            }
+            return ofNullable(response.get().getCitizenDetails())
+                .filter(contact -> anyNonEmpty(
+                    contact.getFirstName(),
+                    contact.getLastName(),
+                    contact.getPreviousName(),
+                    contact.getDateOfBirth(),
+                    contact.getPlaceOfBirth(),
+                    contact.getAddress(),
+                    contact.getAddressHistory(),
+                    contact.getContact().getEmail(),
+                    contact.getContact().getPhoneNumber()
+                )).isPresent();
         }
-        return response
-            .filter(res -> anyNonEmpty(res.getCitizenDetails()
-            )).isPresent();
+        return false;
     }
 
     @Override
@@ -51,9 +57,11 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
                 mandatoryInfo = true;
             }
         }
-        respondentTaskErrorService.addEventError(CONFIRM_EDIT_CONTACT_DETAILS,
-                                                 CONFIRM_EDIT_CONTACT_DETAILS_ERROR,
-                                                 CONFIRM_EDIT_CONTACT_DETAILS_ERROR.getError());
+        respondentTaskErrorService.addEventError(
+            CONFIRM_EDIT_CONTACT_DETAILS,
+            CONFIRM_EDIT_CONTACT_DETAILS_ERROR,
+            CONFIRM_EDIT_CONTACT_DETAILS_ERROR.getError()
+        );
         return mandatoryInfo;
     }
 
