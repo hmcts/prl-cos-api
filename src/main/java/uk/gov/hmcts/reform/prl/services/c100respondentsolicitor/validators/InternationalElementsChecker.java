@@ -41,7 +41,6 @@ public class InternationalElementsChecker implements RespondentEventChecker {
     @Override
     public boolean isFinished(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
-        boolean mandatoryInfo = false;
 
         if (response.isPresent()) {
             Optional<ResSolInternationalElements> solicitorInternationalElement
@@ -49,7 +48,7 @@ public class InternationalElementsChecker implements RespondentEventChecker {
             if (!solicitorInternationalElement.isEmpty() && checkInternationalElementMandatoryCompleted(
                 solicitorInternationalElement)) {
                 respondentTaskErrorService.removeError(INTERNATIONAL_ELEMENT_ERROR);
-                mandatoryInfo = true;
+                return true;
             }
         }
         respondentTaskErrorService.addEventError(
@@ -57,7 +56,7 @@ public class InternationalElementsChecker implements RespondentEventChecker {
             INTERNATIONAL_ELEMENT_ERROR,
             INTERNATIONAL_ELEMENT_ERROR.getError()
         );
-        return mandatoryInfo;
+        return false;
     }
 
     private boolean checkInternationalElementMandatoryCompleted(Optional<ResSolInternationalElements> internationalElements) {

@@ -47,7 +47,6 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
     @Override
     public boolean isFinished(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
-        boolean mandatoryInfo = false;
 
         if (response.isPresent()) {
             Optional<RespondentAllegationsOfHarmData> respondentAllegationsOfHarm = Optional.ofNullable(response.get()
@@ -55,7 +54,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
             if (!respondentAllegationsOfHarm.isEmpty() && checkAllegationsOfHarmManadatoryCompleted(
                 respondentAllegationsOfHarm)) {
                 respondentTaskErrorService.removeError(ALLEGATION_OF_HARM_ERROR);
-                mandatoryInfo = true;
+                return true;
             }
         }
         respondentTaskErrorService.addEventError(
@@ -63,7 +62,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
             ALLEGATION_OF_HARM_ERROR,
             ALLEGATION_OF_HARM_ERROR.getError()
         );
-        return mandatoryInfo;
+        return false;
     }
 
     private boolean checkAllegationsOfHarmManadatoryCompleted(Optional<RespondentAllegationsOfHarmData> respondentAllegationsOfHarmData) {
