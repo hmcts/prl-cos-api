@@ -842,8 +842,6 @@ public class DraftAnOrderService {
             "dioPermissionHearingCourtDynamicList", courtDynamicList);
         caseDataUpdated.put(
             "dioTransferApplicationCourtDynamicList", courtDynamicList);
-        caseDataUpdated.put(
-            "dioDisclosureCourtList", courtDynamicList);
     }
 
     public Map<String,Object> getDraftOrderInfo(String authorisation, CaseData caseData)  throws Exception {
