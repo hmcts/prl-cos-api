@@ -9,13 +9,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingServiceTest {
@@ -52,7 +58,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    @DisplayName("test case for HearingService.")
+    @DisplayName("test case for HearingService getHearings success.")
     public void getHearingsTestSuccess() {
 
         Hearings response =
@@ -62,12 +68,35 @@ public class HearingServiceTest {
     }
 
     @Test
-    @DisplayName("test case for HearingService.")
+    @DisplayName("test case for HearingService getHearings exception.")
     public void getHearingsTestException() {
-        hearingApiClient = null;
+
+        when(hearingApiClient.getHearingDetails(any(),any(),any())).thenThrow(new HttpServerErrorException(HttpStatus.BAD_GATEWAY));
 
         Hearings response =
             hearingService.getHearings(authToken, caseReferenceNumber);
+
+        Assert.assertEquals(null, response);
+    }
+
+    @Test
+    @DisplayName("test case for HearingService getNextHearingDate success.")
+    public void getNextHearingDateTestSuccess() {
+
+        NextHearingDetails response =
+            hearingService.getNextHearingDate(authToken, caseReferenceNumber);
+
+        Assert.assertEquals(null, response);
+    }
+
+    @Test
+    @DisplayName("test case for HearingService getNextHearingDate exception .")
+    public void getNextHearingDateTestException() {
+
+        when(hearingApiClient.getNextHearingDate(any(),any(),any())).thenThrow(new HttpServerErrorException(HttpStatus.BAD_GATEWAY));
+
+        NextHearingDetails response =
+            hearingService.getNextHearingDate(authToken, caseReferenceNumber);
 
         Assert.assertEquals(null, response);
     }
