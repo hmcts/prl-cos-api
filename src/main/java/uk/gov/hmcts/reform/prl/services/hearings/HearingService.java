@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -33,7 +34,7 @@ public class HearingService {
         try {
             hearingDetails = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Inside catch block getHearings{} ", Arrays.toString(e.getStackTrace()));
         }
         return hearingDetails;
     }
@@ -44,7 +45,7 @@ public class HearingService {
         try {
             caseLinkedData = hearingApiClient.getCaseLinkedData(userToken, authTokenGenerator.generate(), caseLinkedRequest);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Inside catch block getCaseLinkedData{} ", Arrays.toString(e.getStackTrace()));
         }
         return caseLinkedData;
     }
@@ -55,7 +56,7 @@ public class HearingService {
         try {
             return hearingApiClient.getNextHearingDate(userToken, authTokenGenerator.generate(), caseReferenceNumber);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Inside catch block getNextHearingDate{} ", Arrays.toString(e.getStackTrace()));
         }
         return null;
     }
