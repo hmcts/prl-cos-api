@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -56,6 +57,7 @@ public class C100IssueCaseService {
                 authorisation
             );
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
+            caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
             if (courtVenue.isPresent()) {
                 String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
                 caseData = caseData.toBuilder().courtName(courtVenue.get().getCourtName())
