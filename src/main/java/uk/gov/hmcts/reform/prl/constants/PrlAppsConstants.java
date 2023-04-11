@@ -425,6 +425,7 @@ public class PrlAppsConstants {
     public static final String[] EMPTY_ARRAY = {};
     public static final String LIST_ON_NOTICE_REASONS_SELECTED = "selectedReasonsForListOnNotice";
 
+    public static final String SELECTED_AND_ADDITIONAL_REASONS = "selectedAndAdditionalReasons";
     public static final String SUBJECT = "subject";
     public static final String CASE_NOTE = "caseNote";
 

@@ -23,6 +23,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTED_FOR_LIST_ON_NOTICE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
 
 @Slf4j
@@ -48,7 +49,8 @@ public class ListOnNoticeController {
         String reasonsSelectedForListOnNotice =
             listOnNoticeService.getReasonsSelected(caseDataUpdated.get(LIST_ON_NOTICE_REASONS_SELECTED),caseData.getId());
         if (null != reasonsSelectedForListOnNotice && reasonsSelectedForListOnNotice != "") {
-            caseDataUpdated.put(CASE_NOTE, reasonsSelectedForListOnNotice);
+            caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS,reasonsSelectedForListOnNotice);
+            caseDataUpdated.put(CASE_NOTE, caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
             caseDataUpdated.put(SUBJECT,REASONS_SELECTED_FOR_LIST_ON_NOTICE);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
