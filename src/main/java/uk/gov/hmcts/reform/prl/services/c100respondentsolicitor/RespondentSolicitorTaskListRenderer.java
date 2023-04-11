@@ -44,7 +44,7 @@ public class RespondentSolicitorTaskListRenderer {
         final List<String> lines = new LinkedList<>();
         lines.add(
             "<div class='width-50'>"
-                + "<h3>Respond to the application for Respondent " + representedRespondentName + "</h3>"
+                + "<h3>Respond to the application for respondent " + representedRespondentName + "</h3>"
                 + "<p>This online response combines forms C7 and C8."
                 + " It also allows you to make your own allegations of harm and violence (C1A)"
                 + " in the section of safety concerns.</p>"
