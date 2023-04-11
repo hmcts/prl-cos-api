@@ -786,9 +786,7 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
+    private NextHearingDetails nextHearingDetails;
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
-
-
-    private NextHearingDetails nextHearingDetails;
 }

@@ -43,6 +43,7 @@ public class AllTabServiceImpl implements AllTabsService {
 
     @Autowired
     ConfidentialityTabService confidentialityTabService;
+
     @Autowired
     ObjectMapper objectMapper;
 
@@ -63,7 +64,6 @@ public class AllTabServiceImpl implements AllTabsService {
     }
 
     private void refreshCcdUsingEvent(CaseData caseData, Map<String, Object> combinedFieldsMap) {
-        log.info("inside refreshCcdUsingEvent ===> " + combinedFieldsMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
