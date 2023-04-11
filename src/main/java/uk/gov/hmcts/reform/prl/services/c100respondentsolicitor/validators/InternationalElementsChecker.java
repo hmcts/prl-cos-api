@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -17,6 +18,7 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEv
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
+@Slf4j
 @Service
 public class InternationalElementsChecker implements RespondentEventChecker {
     @Autowired
@@ -89,7 +91,7 @@ public class InternationalElementsChecker implements RespondentEventChecker {
                 fields.add(ofNullable(internationalElements.get().getInternationalElementParentInfo().getRequestToAuthorityDetails()));
             }
         }
-
+        log.info("checkInternationalElementMandatoryCompleted fields ==> " + fields);
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 
