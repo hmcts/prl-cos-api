@@ -49,7 +49,6 @@ public class AttendToCourtChecker implements RespondentEventChecker {
 
     @Override
     public boolean isFinished(PartyDetails respondingParty) {
-        boolean mandatoryInfo = false;
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {
@@ -57,7 +56,7 @@ public class AttendToCourtChecker implements RespondentEventChecker {
                                                                             .getAttendToCourt());
             if (!attendToCourt.isEmpty() && checkAttendToCourtMandatoryCompleted(attendToCourt)) {
                 respondentTaskErrorService.removeError(ATTENDING_THE_COURT_ERROR);
-                mandatoryInfo = true;
+                return true;
             }
         }
         respondentTaskErrorService.addEventError(
@@ -65,7 +64,7 @@ public class AttendToCourtChecker implements RespondentEventChecker {
             ATTENDING_THE_COURT_ERROR,
             ATTENDING_THE_COURT_ERROR.getError()
         );
-        return mandatoryInfo;
+        return false;
     }
 
     private boolean checkAttendToCourtMandatoryCompleted(Optional<AttendToCourt> attendToCourt) {

@@ -41,7 +41,6 @@ public class RespondentMiamChecker implements RespondentEventChecker {
     @Override
     public boolean isFinished(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
-        boolean mandatoryInfo = false;
 
         if (response.isPresent()) {
             Optional<SolicitorMiam> miam
@@ -49,7 +48,7 @@ public class RespondentMiamChecker implements RespondentEventChecker {
             if (!miam.isEmpty()) {
                 if (checkMiamManadatoryCompleted(miam)) {
                     respondentTaskErrorService.removeError(MIAM_ERROR);
-                    mandatoryInfo = true;
+                    return true;
                 }
             }
         }
@@ -58,7 +57,7 @@ public class RespondentMiamChecker implements RespondentEventChecker {
             MIAM_ERROR,
             MIAM_ERROR.getError()
         );
-        return mandatoryInfo;
+        return false;
     }
 
     private boolean checkMiamManadatoryCompleted(Optional<SolicitorMiam> miam) {

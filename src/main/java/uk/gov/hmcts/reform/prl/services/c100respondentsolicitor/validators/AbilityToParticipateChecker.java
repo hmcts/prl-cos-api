@@ -38,7 +38,6 @@ public class AbilityToParticipateChecker implements RespondentEventChecker {
 
     @Override
     public boolean isFinished(PartyDetails respondingParty) {
-        boolean mandatoryInfo = false;
 
         Optional<Response> response = findResponse(respondingParty);
 
@@ -48,7 +47,7 @@ public class AbilityToParticipateChecker implements RespondentEventChecker {
                     .getAbilityToParticipate());
             if (!abilityToParticipate.isEmpty() && checkAbilityToParticipateMandatoryCompleted(abilityToParticipate)) {
                 respondentTaskErrorService.removeError(ABILITY_TO_PARTICIPATE_ERROR);
-                mandatoryInfo = true;
+                return true;
             }
         }
         respondentTaskErrorService.addEventError(
@@ -56,7 +55,7 @@ public class AbilityToParticipateChecker implements RespondentEventChecker {
             ABILITY_TO_PARTICIPATE_ERROR,
             ABILITY_TO_PARTICIPATE_ERROR.getError()
         );
-        return mandatoryInfo;
+        return false;
     }
 
     private boolean checkAbilityToParticipateMandatoryCompleted(Optional<SolicitorAbilityToParticipateInProceedings> abilityToParticipate) {
