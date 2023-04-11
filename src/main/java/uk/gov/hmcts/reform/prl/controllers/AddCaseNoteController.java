@@ -56,9 +56,14 @@ public class AddCaseNoteController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
         );
+        log.info("*** mid event triggered for List ON Notice to submit case note : {}",
+            null != caseData.getCaseNote() ? caseData.getCaseNote() : "");
+        log.info("*** mid event triggered for List ON Notice to submit case note with subject : {}",
+            null != caseData.getSubject() ? caseData.getSubject() : "");
         UserDetails userDetails = userService.getUserDetails(authorisation);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseNotes", addCaseNoteService.addCaseNoteDetails(caseData, userDetails));
+        log.info("*** updating caseNotes : {}", caseDataUpdated.get("caseNotes"));
         addCaseNoteService.clearFields(caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

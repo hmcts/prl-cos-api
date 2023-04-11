@@ -53,6 +53,9 @@ public class ListOnNoticeController {
             caseDataUpdated.put(CASE_NOTE, caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
             caseDataUpdated.put(SUBJECT,REASONS_SELECTED_FOR_LIST_ON_NOTICE);
         }
+        log.info("*** value of  SELECTED_AND_ADDITIONAL_REASONS : {}", caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
+        log.info("*** value of  CASE_NOTE : {}", caseDataUpdated.get(CASE_NOTE));
+        log.info("*** value of  CASE_NOTE : {}", caseDataUpdated.get(SUBJECT));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
