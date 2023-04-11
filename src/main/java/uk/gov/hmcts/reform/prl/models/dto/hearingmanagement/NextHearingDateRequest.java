@@ -10,15 +10,9 @@ import lombok.Getter;
 @Getter
 @Data
 @Builder(toBuilder = true)
-public class HearingRequest {
+public class NextHearingDateRequest {
 
-    @JsonProperty("hmctsServiceCode")
-    private final String hmctsServiceCode;
     @JsonProperty("caseRef")
     private final String caseRef;
-    @JsonProperty("hearingId")
-    private final String hearingId;
-    private final HearingsUpdate hearingUpdate;
-    private NextHearingDateRequest nextHearingDateRequest;
-
+    private final NextHearingDetails nextHearingDetails;
 }
