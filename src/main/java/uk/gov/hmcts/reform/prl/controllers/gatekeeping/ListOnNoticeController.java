@@ -1,26 +1,44 @@
 package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTED_FOR_LIST_ON_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
@@ -36,6 +54,12 @@ public class ListOnNoticeController {
 
     @Autowired
     private ListOnNoticeService listOnNoticeService;
+
+    @Autowired
+    private RefDataUserService refDataUserService;
+
+    @Autowired
+    private CoreCaseDataService coreCaseDataService;
 
     @PostMapping(path = "/listOnNotice/reasonUpdation/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to amend order mid-event")
@@ -58,4 +82,52 @@ public class ListOnNoticeController {
         log.info("*** value of  CASE_NOTE : {}", caseDataUpdated.get(SUBJECT));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+    @PostMapping(path = "/pre-populate-list-on-notice", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to populate list on notice")
+    public AboutToStartOrSubmitCallbackResponse prePopulateListOnNotice(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
+        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+        log.info("Inside Prepopulate prePopulate for the case id {}", caseReferenceNumber);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/listOnNotice", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "List On Notice submission flow")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "List ON notice submission is success"),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse listOnNoticeSubmission(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        Long id = callbackRequest.getCaseDetails().getId();
+        log.info("List on Notice Submission flow - case id : {}", id);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(CASE_NOTE, null != caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS)
+            ? (String)caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS) : null);
+        caseDataUpdated.put(SUBJECT,REASONS_SELECTED_FOR_LIST_ON_NOTICE);
+
+        if (null != caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS)) {
+            coreCaseDataService.triggerEvent(
+                JURISDICTION,
+                CASE_TYPE,
+                id,
+                "addCaseNote",
+                Map.of(
+                    CASE_NOTE,
+                    (String)caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS),
+                    SUBJECT,
+                    REASONS_SELECTED_FOR_LIST_ON_NOTICE,
+                    "id",
+                    String.valueOf(id)
+                )
+            );
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+
+
 }
