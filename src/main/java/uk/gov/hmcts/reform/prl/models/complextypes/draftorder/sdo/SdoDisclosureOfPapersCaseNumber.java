@@ -11,8 +11,13 @@ public class SdoDisclosureOfPapersCaseNumber {
     @JsonProperty("caseNumber")
     private final String caseNumber;
 
+    @JsonProperty("dioDisclosureCourtList")
+    private final String dioDisclosureCourtList;
+
     @JsonCreator
-    public SdoDisclosureOfPapersCaseNumber(String caseNumber) {
+    public SdoDisclosureOfPapersCaseNumber(String caseNumber, String dioDisclosureCourtList) {
         this.caseNumber  = caseNumber;
+        this.dioDisclosureCourtList = dioDisclosureCourtList;
     }
+
 }

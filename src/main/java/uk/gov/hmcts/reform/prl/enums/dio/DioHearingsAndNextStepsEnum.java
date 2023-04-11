@@ -34,7 +34,7 @@ public enum DioHearingsAndNextStepsEnum {
     @JsonProperty("positionStatement")
     positionStatement("positionStatement", "Position statements"),
     @JsonProperty("attendanceAtMIAM")
-    attendanceAtMIAM("attendanceAtMIAM", "Attendance at MIAM required"),
+    attendanceAtMIAM("attendanceAtMIAM", "Mediation Information and Assessment Meeting (MIAM)"),
     @JsonProperty("permissionHearing")
     permissionHearing("permissionHearing", "Permission hearing for Direction 91 (14)"),
     @JsonProperty("arrangeInterpreters")

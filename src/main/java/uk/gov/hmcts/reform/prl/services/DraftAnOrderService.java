@@ -64,6 +64,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASE_REVIEW
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PARENT_WITHCARE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PARTICIPATION_DIRECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PERMISSION_HEARING_DIRECTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_POSITION_STATEMENT_DIRECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_RIGHT_TO_ASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_SAFEGUARDING_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_SAFEGUARING_CAFCASS_CYMRU;
@@ -791,6 +792,11 @@ public class DraftAnOrderService {
             DioHearingsAndNextStepsEnum.permissionHearing)) {
             caseDataUpdated.put("dioPermissionHearingDirections", DIO_PERMISSION_HEARING_DIRECTION);
         }
+        if (!caseData.getDirectionOnIssue().getDioHearingsAndNextStepsList().isEmpty()
+            && caseData.getDirectionOnIssue().getDioHearingsAndNextStepsList().contains(
+            DioHearingsAndNextStepsEnum.positionStatement)) {
+            caseDataUpdated.put("dioPositionStatementDetails", DIO_POSITION_STATEMENT_DIRECTION);
+        }
         if (!caseData.getDirectionOnIssue().getDioCafcassOrCymruList().isEmpty()
             && caseData.getDirectionOnIssue().getDioCafcassOrCymruList().contains(
             DioCafcassOrCymruEnum.cafcassSafeguarding)) {
@@ -836,6 +842,8 @@ public class DraftAnOrderService {
             "dioPermissionHearingCourtDynamicList", courtDynamicList);
         caseDataUpdated.put(
             "dioTransferApplicationCourtDynamicList", courtDynamicList);
+        caseDataUpdated.put(
+            "dioDisclosureCourtList", courtDynamicList);
     }
 
     public Map<String,Object> getDraftOrderInfo(String authorisation, CaseData caseData)  throws Exception {
