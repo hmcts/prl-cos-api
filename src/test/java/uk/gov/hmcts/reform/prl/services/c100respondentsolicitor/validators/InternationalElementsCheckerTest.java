@@ -20,6 +20,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -46,6 +47,7 @@ public class InternationalElementsCheckerTest {
                                                            .builder()
                                                            .internationalElementParentInfo(SolicitorInternationalElement
                                                                                                .builder()
+                                                                                               .reasonForParent(Yes)
                                                                                                .reasonForParentDetails("Test")
                                                                                                .reasonForJurisdictionDetails("Test")
                                                                                                .requestToAuthorityDetails("Test")
@@ -61,6 +63,14 @@ public class InternationalElementsCheckerTest {
                                                                                               .requestToAuthority(Yes)
                                                                                               .requestToAuthorityDetails("Test")
                                                                                               .build())
+                                                           .internationalElementRequestInfo(SolicitorInternationalElement
+                                                                                                .builder()
+                                                                                                .requestToAuthority(No)
+                                                                                                .build())
+                                                           .internationalElementJurisdictionInfo(SolicitorInternationalElement
+                                                                                                .builder()
+                                                                                                     .reasonForJurisdiction(No)
+                                                                                                     .build())
                                                            .build())
                           .build())
             .build();
