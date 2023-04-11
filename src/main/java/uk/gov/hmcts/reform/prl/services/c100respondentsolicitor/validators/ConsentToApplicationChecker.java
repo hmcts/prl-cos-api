@@ -74,6 +74,7 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
                 fields.add(ofNullable(consent.get().getCourtOrderDetails()));
             }
         }
+        log.info("fields for ConsentToApplicationChecker ==> " + fields);
         boolean test = fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
         log.info("Consent to application result:: {}", test);
