@@ -85,7 +85,8 @@ public class InternationalElementsChecker implements RespondentEventChecker {
                 fields.add(ofNullable(internationalElements.get().getInternationalElementJurisdictionInfo().getReasonForJurisdictionDetails()));
             }
 
-            Optional<YesOrNo> requestToAuthority = ofNullable(internationalElements.get().getInternationalElementRequestInfo().getRequestToAuthority());
+            Optional<YesOrNo> requestToAuthority = ofNullable(internationalElements.get().getInternationalElementRequestInfo()
+                                                                  .getRequestToAuthority());
             fields.add(requestToAuthority);
             if (requestToAuthority.isPresent() && YesOrNo.Yes.equals(requestToAuthority.get())) {
                 fields.add(ofNullable(internationalElements.get().getInternationalElementRequestInfo().getRequestToAuthorityDetails()));
