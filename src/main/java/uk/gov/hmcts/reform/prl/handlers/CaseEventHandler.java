@@ -29,7 +29,6 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
@@ -51,7 +50,6 @@ public class CaseEventHandler {
 
         final String taskList = getUpdatedTaskList(caseData);
         final String respondentTaskListA = getRespondentTaskList(caseData, "A");
-        final String respondentNameA = getRespondentName(caseData, "A");
         final String respondentTaskListB = getRespondentTaskList(caseData, "B");
         final String respondentTaskListC = getRespondentTaskList(caseData, "C");
         final String respondentTaskListD = getRespondentTaskList(caseData, "D");
@@ -78,9 +76,7 @@ public class CaseEventHandler {
                 "respondentTaskListE",
                 respondentTaskListE,
                 "id",
-                String.valueOf(caseData.getId()),
-                "respondentA",
-                respondentNameA
+                String.valueOf(caseData.getId())
             )
         );
     }
@@ -134,24 +130,6 @@ public class CaseEventHandler {
             }
         }
         return respondentTaskList;
-    }
-
-    public String getRespondentName(CaseData caseData, String respondent) {
-        String respondentName = "";
-        if (caseData.getRespondents() != null
-            && !caseData.getRespondents().isEmpty()) {
-            Optional<SolicitorRole> solicitorRole = SolicitorRole.from(respondent);
-            if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
-                Element<PartyDetails> respondingParty = caseData.getRespondents().get(solicitorRole.get().getIndex());
-
-                if (respondingParty.getValue() != null) {
-                    respondentName = respondingParty.getValue().getFirstName() + EMPTY_SPACE_STRING
-                        + respondingParty.getValue().getLastName();
-                }
-            }
-        }
-        log.info("getRespondentName " + respondent + " " + respondentName);
-        return respondentName;
     }
 }
 

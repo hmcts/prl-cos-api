@@ -163,8 +163,7 @@ public class CaseEventHandlerTest {
                 "respondentTaskListE",
                 "",
                 "id",
-                String.valueOf(caseData.getId()),
-                "respondentA", ""
+                String.valueOf(caseData.getId())
             )
         );
     }
@@ -244,9 +243,7 @@ public class CaseEventHandlerTest {
                 "respondentTaskListE",
                 "",
                 "id",
-                String.valueOf(caseData.getId()),
-                "respondentA",
-                ""
+                String.valueOf(caseData.getId())
             )
         );
     }
