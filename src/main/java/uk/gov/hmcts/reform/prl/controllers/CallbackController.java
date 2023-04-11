@@ -331,6 +331,7 @@ public class CallbackController {
         String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
         Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
         caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
+        caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
         if (courtVenue.isPresent()) {
             String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
             caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
