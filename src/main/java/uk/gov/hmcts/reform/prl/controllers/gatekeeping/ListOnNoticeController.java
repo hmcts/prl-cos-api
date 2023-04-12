@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -15,11 +16,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -27,8 +30,6 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTED_FOR_LIST_ON_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
@@ -37,6 +38,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ListOnNoticeController {
 
     @Autowired
@@ -49,7 +51,13 @@ public class ListOnNoticeController {
     private RefDataUserService refDataUserService;
 
     @Autowired
-    private CoreCaseDataService coreCaseDataService;
+    private final AuthTokenGenerator authTokenGenerator;
+    @Autowired
+    private final CoreCaseDataApi coreCaseDataApi;
+
+    @Autowired
+    private final SystemUserService systemUserService;
+
 
     @PostMapping(path = "/listOnNotice/reasonUpdation/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = " mid-event for updating the reason")
@@ -115,25 +123,12 @@ public class ListOnNoticeController {
         Long id = callbackRequest.getCaseDetails().getId();
         log.info("List on Notice Submission flow - case id : {}", id);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("*** value of  CASE_NOTE in about to submit event : {}", caseDataUpdated.get(CASE_NOTE));
+        caseDataUpdated.put(CASE_NOTE, null != caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS)
+            ? (String)caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS) : null);
+        caseDataUpdated.put(SUBJECT,REASONS_SELECTED_FOR_LIST_ON_NOTICE);
+        log.info("*** value of  SELECTED_AND_ADDITIONAL_REASONS in about to submit event: {}", caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
+        log.info("*** value of  CASE_NOTE : {}", caseDataUpdated.get(CASE_NOTE));
         log.info("*** value of  SUBJECT : {}", caseDataUpdated.get(SUBJECT));
-        if (null != caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS)) {
-            coreCaseDataService.triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                id,
-                "addCaseNote",
-                Map.of(
-                    CASE_NOTE,
-                    (String)caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS),
-                    SUBJECT,
-                    REASONS_SELECTED_FOR_LIST_ON_NOTICE,
-                    "id",
-                    String.valueOf(id)
-                )
-            );
-        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
 }
