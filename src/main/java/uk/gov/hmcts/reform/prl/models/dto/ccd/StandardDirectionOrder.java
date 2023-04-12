@@ -6,28 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoApplicantRespondentEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoBeforeAEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtRequestedEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoCrossExaminationSittingBeforeEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoJudgeLaDecideByEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoNextStepsAllocationEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoRemoteHearingEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportSentByEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportsAlsoSentToEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportsSentToEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoScheduleOfAllegationsEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoWitnessStatementsSentToEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.*;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
@@ -56,6 +35,8 @@ public class StandardDirectionOrder {
     private final List<SdoCourtEnum> sdoCourtList;
     @JsonProperty("sdoDocumentationAndEvidenceList")
     private final List<SdoDocumentationAndEvidenceEnum> sdoDocumentationAndEvidenceList;
+    @JsonProperty("sdoFurtherList")
+    private final List<SdoFurtherinstructionsEnum> sdoFurtherinstructionsEnumList;
     @JsonProperty("sdoOtherList")
     private final List<SdoOtherEnum> sdoOtherList;
 
