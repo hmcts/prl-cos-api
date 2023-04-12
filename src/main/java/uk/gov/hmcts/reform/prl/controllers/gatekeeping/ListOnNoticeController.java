@@ -17,8 +17,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -44,6 +47,12 @@ public class ListOnNoticeController {
 
     @Autowired
     private RefDataUserService refDataUserService;
+
+    @Autowired
+    private AddCaseNoteService addCaseNoteService;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping(path = "/listOnNotice/reasonUpdation/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = " mid-event for updating the reason")
@@ -115,6 +124,16 @@ public class ListOnNoticeController {
         log.info("*** value of  SELECTED_AND_ADDITIONAL_REASONS in about to submit event: {}", caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
         log.info("*** value of  CASE_NOTE : {}", caseDataUpdated.get(CASE_NOTE));
         log.info("*** value of  SUBJECT : {}", caseDataUpdated.get(SUBJECT));
+
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        caseDataUpdated.put("caseNotes", addCaseNoteService.addCaseNoteDetails(caseData, userDetails));
+        log.info("*** updating caseNotes : {}", caseDataUpdated.get("caseNotes"));
+        addCaseNoteService.clearFields(caseDataUpdated);
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
