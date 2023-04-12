@@ -389,7 +389,6 @@ public class C100RespondentSolicitorService {
                 }
             }
         }
-        log.info("mandatoryFinished ==>" + mandatoryFinished);
         if (!mandatoryFinished) {
             errorList.add(
                 "Response submission is not allowed for this case unless you finish all the mandatory information");
@@ -402,8 +401,6 @@ public class C100RespondentSolicitorService {
             );
             caseDataUpdated.put("finalC7ResponseDoc", document);
         }
-        log.info("errorList ==>" + errorList);
-        log.info("caseDataUpdated ==>" + caseDataUpdated);
         return caseDataUpdated;
     }
 
