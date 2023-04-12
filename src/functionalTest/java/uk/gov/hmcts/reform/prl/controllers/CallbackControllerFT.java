@@ -175,7 +175,7 @@ public class CallbackControllerFT {
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
-            .state(State.CASE_ISSUE)
+            .state(State.CASE_ISSUED)
             .applicantsConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
             .build();

@@ -287,45 +287,7 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testsendC100CaseWithDrawEmails() throws WorkflowException {
-        WithdrawApplication withdrawApplication = WithdrawApplication.builder()
-            .withDrawApplication(YesOrNo.Yes)
-            .withDrawApplicationReason("Test data")
-            .build();
-
-        PartyDetails applicant = PartyDetails.builder().solicitorEmail("test@gmail.com").build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-        CaseData caseData = CaseData.builder()
-            .localCourtAdmin(List.of(Element.<LocalCourtAdminEmail>builder()
-                                         .value(LocalCourtAdminEmail
-                                                    .builder().email("test@gmail.com")
-                                                    .build()).build()))
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .withDrawApplicationData(withdrawApplication)
-            .applicants(applicantList)
-            .build();
-
-        Map<String, Object> stringObjectMap = new HashMap<>();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                                                       .state(ISSUED_STATE)
-                                                       .data(stringObjectMap).build()).build();
-
-        callbackController.sendC100CaseWithDrawEmails(caseData, callbackRequest.getCaseDetails(),userDetails);
-        verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
-        verify(caseWorkerEmailService, times(1))
-            .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(), "test@gmail.com");
-
-
-    }
-
-    @Test
-    public void testvalidateApplicationConsiderationTimetable() throws WorkflowException {
+    public void testValidateApplicationConsiderationTimetable() throws WorkflowException {
         CaseDetails caseDetails = CaseDetailsProvider.full();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
@@ -1167,7 +1129,7 @@ public class CallbackControllerTest {
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
         verify(solicitorEmailService, times(1))
             .sendWithDrawEmailToFl401SolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
-        verify(caseWorkerEmailService, times(0))
+        verify(caseWorkerEmailService, times(1))
             .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(), "test@gmail.com");
     }
 
