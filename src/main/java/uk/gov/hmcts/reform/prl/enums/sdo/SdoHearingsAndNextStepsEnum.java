@@ -16,7 +16,7 @@ public enum SdoHearingsAndNextStepsEnum {
     @JsonProperty("allocationDecision")
     allocationDecision("allocationDecision", "Allocation decision"),
     @JsonProperty("allocationDecisionNamedJudge")
-    allocateNamedJudge("allocationDecisionNamedJudge", "Allocate or reserve to a named judge"),
+    allocationDecisionNamedJudge("allocationDecisionNamedJudge", "Allocate or reserve to a named judge"),
     @JsonProperty("urgentHearing")
     urgentHearing("urgentHearing", "Urgent hearing"),
     @JsonProperty("hearingNotNeeded")
