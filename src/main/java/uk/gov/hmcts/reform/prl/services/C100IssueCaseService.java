@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
@@ -14,10 +16,13 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 
@@ -45,7 +50,7 @@ public class C100IssueCaseService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
-            String baseLocationId = caseData.getCourtList().getValue().getCode().split(":")[0];
+            String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
                 baseLocationId,
                 authorisation
@@ -57,6 +62,17 @@ public class C100IssueCaseService {
                     .courtSeal(courtSeal).build();
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
             }
+
+            caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
+                                                               .value(LocalCourtAdminEmail
+                                                                          .builder()
+                                                                          .email(caseData.getCourtList().getValue().getCode().split(
+                                                                              COLON_SEPERATOR).length > 1
+                                                                                     ? caseData.getCourtList().getValue().getCode().split(
+                                                                              COLON_SEPERATOR)[1] : null)
+                                                                          .build())
+                                                               .build()));
+
             caseData = caseData.toBuilder().issueDate(LocalDate.now())
                 .courtName(caseDataUpdated.containsKey(COURT_NAME_FIELD) ? caseDataUpdated.get(COURT_NAME_FIELD).toString() : null)
                 .build();
@@ -70,8 +86,14 @@ public class C100IssueCaseService {
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
+
+        try {
+            caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails().toBuilder().data(
+                caseDataUpdated).build());
+        } catch (Exception ex) {
+            log.error("Email notification could not be sent", ex);
+        }
+
         return caseDataUpdated;
     }
-
-
 }

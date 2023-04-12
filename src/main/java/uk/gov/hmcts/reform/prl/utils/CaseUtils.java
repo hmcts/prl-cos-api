@@ -107,7 +107,7 @@ public class CaseUtils {
             String regionName = courtVenue.get().getRegion();
             String baseLocationName = courtVenue.get().getSiteName();
             caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
-                .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
+                .region(regionId).baseLocation(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
             caseDataMap.put(PrlAppsConstants.IS_CAFCASS, CaseUtils.cafcassFlag(regionId));
             caseDataMap.put(COURT_NAME_FIELD, courtName);
