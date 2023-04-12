@@ -336,6 +336,16 @@ public class PrlAppsConstants {
         + "required by the court to attend, remotely if necessary, a pre hearing discussions/negotiations to enable an effective "
         + "commencement of the hearing at the allotted time.If either party fails to attend orders could be made in their absence.";
 
+    public static final String DIO_POSITION_STATEMENT_DIRECTION = "Each party’s statement must set out:"
+        + System.lineSeparator()
+        + "a. Any relevant background information;"
+        + System.lineSeparator()
+        + "b.The party’s position in relation to the Section 7 / Section 37 report"
+        + System.lineSeparator()
+        + "c. Any relevant facts they are asking the court to decide about matters which are not agreed;"
+        + System.lineSeparator()
+        + "d. And the party’s proposals for the arrangements for the child[ren]";
+
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
