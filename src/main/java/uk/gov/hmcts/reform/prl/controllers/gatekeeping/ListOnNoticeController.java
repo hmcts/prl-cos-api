@@ -52,7 +52,7 @@ public class ListOnNoticeController {
     private CoreCaseDataService coreCaseDataService;
 
     @PostMapping(path = "/listOnNotice/reasonUpdation/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to amend order mid-event")
+    @Operation(description = " mid-event for updating the reason")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse listOnNoticeMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
@@ -69,9 +69,29 @@ public class ListOnNoticeController {
         }
         log.info("*** value of  SELECTED_AND_ADDITIONAL_REASONS : {}", caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
         log.info("*** value of  CASE_NOTE : {}", caseDataUpdated.get(CASE_NOTE));
-        log.info("*** value of  CASE_NOTE : {}", caseDataUpdated.get(SUBJECT));
+        log.info("*** value of  SUBJECT : {}", caseDataUpdated.get(SUBJECT));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+    @PostMapping(path = "/listOnNotice/additionalReasons/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = " mid-event to update the additional reason")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse listOnNoticeAdditionalReasonsMidEvent(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("*** mid event triggered for List ON Notice to update the additional reasons : {}", caseData.getId());
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(CASE_NOTE, null != caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS)
+            ? (String)caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS) : null);
+        caseDataUpdated.put(SUBJECT,REASONS_SELECTED_FOR_LIST_ON_NOTICE);
+        log.info("*** value of  SELECTED_AND_ADDITIONAL_REASONS in second midevent: {}", caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
+        log.info("*** value of  CASE_NOTE : {}", caseDataUpdated.get(CASE_NOTE));
+        log.info("*** value of  SUBJECT : {}", caseDataUpdated.get(SUBJECT));
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+
 
     @PostMapping(path = "/pre-populate-list-on-notice", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate list on notice")
@@ -95,10 +115,8 @@ public class ListOnNoticeController {
         Long id = callbackRequest.getCaseDetails().getId();
         log.info("List on Notice Submission flow - case id : {}", id);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put(CASE_NOTE, null != caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS)
-            ? (String)caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS) : null);
-        caseDataUpdated.put(SUBJECT,REASONS_SELECTED_FOR_LIST_ON_NOTICE);
-
+        log.info("*** value of  CASE_NOTE in about to submit event : {}", caseDataUpdated.get(CASE_NOTE));
+        log.info("*** value of  SUBJECT : {}", caseDataUpdated.get(SUBJECT));
         if (null != caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS)) {
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
@@ -117,7 +135,5 @@ public class ListOnNoticeController {
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
-
 
 }
