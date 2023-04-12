@@ -66,8 +66,9 @@ public class BundlingController extends AbstractCallbackController {
             callbackRequest.getEventId(), authorization);
         if (null != bundleCreateResponse && null != bundleCreateResponse.getData() && null != bundleCreateResponse.getData().getCaseBundles()) {
             caseDataUpdated.put("bundleInformation",
-                BundlingInformation.builder().caseBundles(removeEmptyFolders(bundleCreateResponse.getData().getCaseBundles()))
-                    .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
+                BundlingInformation.builder()
+                    //.caseBundles(removeEmptyFolders(bundleCreateResponse.getData().getCaseBundles()))
+                    //.historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
                     .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration())
                     .bundleCreationDateAndTime(DateTimeFormatter.ISO_OFFSET_DATE_TIME
                         .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
