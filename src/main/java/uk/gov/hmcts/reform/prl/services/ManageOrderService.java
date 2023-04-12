@@ -752,7 +752,8 @@ public class ManageOrderService {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             List<Element<OrderDetails>> orderCollection = new ArrayList<>();
             orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
-                                                       fieldMap, caseData));
+                                                       fieldMap, caseData
+            ));
 
             return orderCollection;
         } else {
@@ -786,14 +787,19 @@ public class ManageOrderService {
                                                          .orderRecipients(caseData.getManageOrdersOptions().equals(
                                                              ManageOrdersOptionsEnum.createAnOrder) ? getAllRecipients(
                                                              caseData) : null)
-                                                         .status(getOrderStatus(orderSelectionType,loggedInUserType, null, null))
+                                                         .status(getOrderStatus(
+                                                             orderSelectionType,
+                                                             loggedInUserType,
+                                                             null,
+                                                             null
+                                                         ))
                                                          .build())
                                        .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                                         ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
                                        .typeOfOrder(typeOfOrder != null
-                                                            ? typeOfOrder.getDisplayedValue() : null)
+                                                        ? typeOfOrder.getDisplayedValue() : null)
                                        .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
-                                           ? caseData.getDoesOrderClosesCase() : null)
+                                                            ? caseData.getDoesOrderClosesCase() : null)
                                        .serveOrderDetails(buildServeOrderDetails(serveOrderData))
                                        .build()));
         }
@@ -968,7 +974,7 @@ public class ManageOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
-                              .status(getOrderStatus(orderSelectionType, loggedInUserType, null,null))
+                              .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
@@ -1048,7 +1054,7 @@ public class ManageOrderService {
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())
             .judgeNotes(caseData.getManageOrders() != null
-                        ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
+                            ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
             .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(null != caseData.getManageOrdersOptions()
@@ -1584,61 +1590,63 @@ public class ManageOrderService {
     private Element<OrderDetails> getOrderDetailsElement(String authorisation, String flagSelectedOrderId,
                                                          String flagSelectedOrder, Map<String, String> fieldMap,
                                                          CaseData caseData) throws Exception {
+        String loggedInUserType = getLoggedInUserType(authorisation);
+        SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
+        ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
+
+        OrderDetails orderDetails = OrderDetails.builder().orderType(flagSelectedOrder)
+            .orderTypeId(flagSelectedOrderId)
+            .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
+                                      ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
+            .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
+            .typeOfOrder(typeOfOrder != null
+                             ? typeOfOrder.getDisplayedValue() : null)
+            .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+            .childrenList(dynamicMultiSelectListService
+                              .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                                       .getChildOption()))
+            .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
+                                 ? caseData.getDoesOrderClosesCase() : null)
+            .serveOrderDetails(buildServeOrderDetails(serveOrderData))
+            .build();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
-        GeneratedDocumentInfo generatedDocumentInfoWelsh = GeneratedDocumentInfo.builder().build();
 
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
 
-            generatedDocumentInfo = dgsService.generateDocument(
+            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 CaseDetails.builder().caseData(caseData).build(),
                 template
             );
-            if (documentLanguage.isGenWelsh()) {
-                log.info("*** Generating Final order in Welsh ***");
-                String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
-                log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, welshTemplate);
-                if (welshTemplate != null && welshTemplate.contains("-WEL-")) {
-                    generatedDocumentInfoWelsh = dgsService.generateWelshDocument(
-                        authorisation,
-                        CaseDetails.builder().caseData(caseData).build(),
-                        welshTemplate
-                    );
-                }
+            orderDetails.builder().orderDocument(Document.builder()
+                                                     .documentUrl(generatedDocumentInfo.getUrl())
+                                                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                     .documentHash(generatedDocumentInfo.getHashToken())
+                                                     .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build()).build();
+        }
+        if (documentLanguage.isGenWelsh()) {
+            log.info("*** Generating Final order in Welsh ***");
+            String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
+            log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, welshTemplate);
+            if (welshTemplate != null && welshTemplate.contains("-WEL-")) {
+                GeneratedDocumentInfo generatedDocumentInfoWelsh = dgsService.generateWelshDocument(
+                    authorisation,
+                    CaseDetails.builder().caseData(caseData).build(),
+                    welshTemplate
+                );
+                orderDetails.builder().orderDocumentWelsh(Document.builder()
+                                                              .documentUrl(generatedDocumentInfoWelsh.getUrl())
+                                                              .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
+                                                              .documentHash(generatedDocumentInfoWelsh.getHashToken())
+                                                              .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build()).build();
             }
         }
-        String loggedInUserType = getLoggedInUserType(authorisation);
-        SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
-        String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
-        ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
-        return element(OrderDetails.builder().orderType(flagSelectedOrder)
-                           .orderTypeId(flagSelectedOrderId)
-                           .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
-                                                 ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
-                           .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
-                           .typeOfOrder(typeOfOrder != null
-                                            ? typeOfOrder.getDisplayedValue() : null)
-                           .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
-                           .childrenList(dynamicMultiSelectListService
-                                             .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                                                      .getChildOption()))
-                           .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
-                                                ? caseData.getDoesOrderClosesCase() : null)
-                           .serveOrderDetails(buildServeOrderDetails(serveOrderData))
-                           .orderDocument(Document.builder()
-                                              .documentUrl(generatedDocumentInfo.getUrl())
-                                              .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                              .documentHash(generatedDocumentInfo.getHashToken())
-                                              .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
-                           .orderDocumentWelsh(documentLanguage.isGenWelsh() ? Document.builder()
-                                                   .documentUrl(generatedDocumentInfoWelsh.getUrl())
-                                                   .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
-                                                   .documentHash(generatedDocumentInfoWelsh.getHashToken())
-                                                   .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build() : null)
+
+        return element(orderDetails.builder()
                            .otherDetails(OtherOrderDetails.builder()
                                              .createdBy(caseData.getJudgeOrMagistratesLastName())
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
@@ -1668,7 +1676,8 @@ public class ManageOrderService {
         String withdrawApproved = "";
 
         if (null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
-            && caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue().equals("Withdrawn application")) {
+            && caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue().equals(
+            "Withdrawn application")) {
             withdrawApproved = String.valueOf(caseData.getManageOrders().getIsCaseWithdrawn());
         }
 
