@@ -82,7 +82,7 @@ public class BundlingController extends AbstractCallbackController {
     }
 
 
-    private List<Bundle> removeEmptyFolders(List<Bundle> caseBundles) {
+    /*private List<Bundle> removeEmptyFolders(List<Bundle> caseBundles) {
         List<Bundle> caseBundlesPostEmptyfoldersRemoval = new ArrayList<>();
         if (!caseBundles.isEmpty()) {
             caseBundles.stream().forEach(bundle -> {
@@ -109,7 +109,7 @@ public class BundlingController extends AbstractCallbackController {
 
         }
         return caseBundlesPostEmptyfoldersRemoval;
-    }
+    }*/
 
     private void updateBundleWithNonEmptyfolders(Bundle bundle, List<BundleFolder> foldersAfterEmptyRemoval,
                                                  List<Bundle> caseBundlesPostEmptyfoldersRemoval) {
