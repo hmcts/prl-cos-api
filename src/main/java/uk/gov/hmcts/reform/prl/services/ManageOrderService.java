@@ -1622,7 +1622,7 @@ public class ManageOrderService {
                 CaseDetails.builder().caseData(caseData).build(),
                 template
             );
-            orderDetails.builder().orderDocument(Document.builder()
+            orderDetails = orderDetails.toBuilder().orderDocument(Document.builder()
                                                      .documentUrl(generatedDocumentInfo.getUrl())
                                                      .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                      .documentHash(generatedDocumentInfo.getHashToken())
@@ -1638,7 +1638,7 @@ public class ManageOrderService {
                     CaseDetails.builder().caseData(caseData).build(),
                     welshTemplate
                 );
-                orderDetails.builder().orderDocumentWelsh(Document.builder()
+                orderDetails = orderDetails.toBuilder().orderDocumentWelsh(Document.builder()
                                                               .documentUrl(generatedDocumentInfoWelsh.getUrl())
                                                               .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
                                                               .documentHash(generatedDocumentInfoWelsh.getHashToken())
@@ -1646,7 +1646,7 @@ public class ManageOrderService {
             }
         }
 
-        return element(orderDetails.builder()
+        return element(orderDetails.toBuilder()
                            .otherDetails(OtherOrderDetails.builder()
                                              .createdBy(caseData.getJudgeOrMagistratesLastName())
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
