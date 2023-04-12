@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -37,10 +39,11 @@ public class HearingRequestDataMapper {
         mapLocalAuthorityHearingChannelListItems(hearingData, isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
 
         hearingData.setFillingFormRenderingInfo(CommonUtils.renderCollapsible());
-        hearingData.setApplicantName(caseData.getApplicantName());
-        hearingData.setApplicantSolicitor(caseData.getApplicantsFL401().getRepresentativeFirstName()
-            + "," + caseData.getApplicantsFL401().getRepresentativeLastName());
-        hearingData.setRespondentName(caseData.getRespondentName());
+        hearingData.setApplicantName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getApplicantName() : "");
+        hearingData.setApplicantSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                              ? caseData.getApplicantsFL401().getRepresentativeFirstName()
+            + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "");
+        hearingData.setRespondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "");
         hearingData.setRespondentSolicitor("");
 
         log.info("**** applicant name******** {}", hearingData.getApplicantName());
