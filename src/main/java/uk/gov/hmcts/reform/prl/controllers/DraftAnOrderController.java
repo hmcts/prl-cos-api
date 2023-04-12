@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -142,9 +143,9 @@ public class DraftAnOrderController {
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
             caseDataUpdated.put(
                 ORDER_HEARING_DETAILS,
-                hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                  hearingDataPrePopulatedDynamicLists, caseData
-                )
+                ElementUtils.wrapElements(
+                    hearingDataService.generateHearingData(
+                        hearingDataPrePopulatedDynamicLists, caseData))
             );
         }
         if (caseData != null) {
