@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
@@ -109,7 +110,9 @@ public class CaseEventHandler {
             if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
                 Element<PartyDetails> respondingParty = caseData.getRespondents().get(solicitorRole.get().getIndex());
 
-                if (respondingParty.getValue() != null) {
+                if (respondingParty.getValue() != null
+                    && (respondingParty.getValue().getResponse() == null
+                        || !YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted()))) {
                     final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
                     log.info("tasks found: " + tasks.size());
 
