@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -16,13 +15,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -38,7 +34,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ListOnNoticeController {
 
     @Autowired
@@ -49,15 +44,6 @@ public class ListOnNoticeController {
 
     @Autowired
     private RefDataUserService refDataUserService;
-
-    @Autowired
-    private final AuthTokenGenerator authTokenGenerator;
-    @Autowired
-    private final CoreCaseDataApi coreCaseDataApi;
-
-    @Autowired
-    private final SystemUserService systemUserService;
-
 
     @PostMapping(path = "/listOnNotice/reasonUpdation/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = " mid-event for updating the reason")
