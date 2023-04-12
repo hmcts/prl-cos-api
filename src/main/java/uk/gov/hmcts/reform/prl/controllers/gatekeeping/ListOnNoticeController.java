@@ -17,18 +17,19 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTED_FOR_LIST_ON_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
@@ -101,6 +102,10 @@ public class ListOnNoticeController {
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
         log.info("Inside Prepopulate prePopulate for the case id {}", caseReferenceNumber);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        //populate legal advisor list
+        List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
+        caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
+            .build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -117,7 +122,7 @@ public class ListOnNoticeController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("*** value of  CASE_NOTE in about to submit event : {}", caseDataUpdated.get(CASE_NOTE));
         log.info("*** value of  SUBJECT : {}", caseDataUpdated.get(SUBJECT));
-        if (null != caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS)) {
+        /*   if (null != caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS)) {
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
@@ -132,7 +137,7 @@ public class ListOnNoticeController {
                     String.valueOf(id)
                 )
             );
-        }
+        }*/
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
