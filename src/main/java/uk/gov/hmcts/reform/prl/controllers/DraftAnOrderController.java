@@ -19,9 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
@@ -137,17 +135,14 @@ public class DraftAnOrderController {
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-        List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-            caseDataUpdated.put(
-                ORDER_HEARING_DETAILS,
-                ElementUtils.wrapElements(
-                    hearingDataService.generateHearingData(
-                        hearingDataPrePopulatedDynamicLists, caseData))
-            );
-        }
+        caseDataUpdated.put(
+            ORDER_HEARING_DETAILS,
+            ElementUtils.wrapElements(
+                hearingDataService.generateHearingData(
+                    hearingDataPrePopulatedDynamicLists, caseData))
+        );
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         }
