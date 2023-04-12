@@ -17,13 +17,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocument;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolder;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolderDetails;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1Details;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolder;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
