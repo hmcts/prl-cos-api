@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
@@ -45,12 +47,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADJOURNED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEXT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSTPONED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WAITING_TO_BE_LISTED;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
@@ -109,7 +110,7 @@ public class HearingManagementService {
         customFields.put(SYSTEM_UPDATE_USER_ID, systemUpdateUserId);
         customFields.put(CASE_REF_ID, hearingRequest.getCaseRef());
         CaseData caseData;
-        Map<String, String> fields = new HashMap<>();
+        Map<String, Object> fields = new HashMap<>();
         if (hearingRequest.getNextHearingDateRequest().getNextHearingDetails() != null) {
             fields.put(NEXT_HEARING_DETAILS, hearingRequest.getNextHearingDateRequest().getNextHearingDetails());
         }
@@ -174,7 +175,7 @@ public class HearingManagementService {
         return allTabsUpdateCaseData;
     }
 
-    private void submitUpdate(Map<String, String> data, Map<String, Object> fields) {
+    private void submitUpdate(Map<String, Object> data, Map<String, Object> fields) {
         CaseEvent caseEvent = CaseEvent.HEARING_STATE_CHANGE_SUCCESS;
 
         log.info("Following case event will be triggered {}", caseEvent.getValue());
@@ -211,10 +212,8 @@ public class HearingManagementService {
     }
 
     private void sendHearingChangeDetailsEmail(CaseData caseData) {
-
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             sendHearingChangeDetailsEmailForCA(caseData);
-
         } else {
             sendHearingChangeDetailsEmailForDA(caseData);
         }
