@@ -139,4 +139,7 @@ public class HearingData {
 
     @JsonProperty("fillingFormRenderingInfo")
     private String fillingFormRenderingInfo;
+
+    @JsonProperty("hasJudgeProvidedHearingDetails")
+    private String hasJudgeProvidedHearingDetails;
 }
