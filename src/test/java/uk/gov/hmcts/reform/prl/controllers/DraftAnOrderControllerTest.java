@@ -111,12 +111,7 @@ public class DraftAnOrderControllerTest {
 
         Assert.assertEquals(caseData.getApplicantCaseName(), updatedCaseData.getApplicantCaseName());
         Assert.assertEquals(caseData.getFamilymanCaseNumber(), updatedCaseData.getFamilymanCaseNumber());
-
-        if (updatedCaseData.getCreateSelectOrderOptions() != null) {
-            Assert.assertEquals(caseData.getCreateSelectOrderOptions(), updatedCaseData.getCreateSelectOrderOptions());
-        } else {
-            Assert.assertEquals("", updatedCaseData.getCreateSelectOrderOptions());
-        }
+        Assert.assertEquals(caseData.getCreateSelectOrderOptions(), updatedCaseData.getCreateSelectOrderOptions());
 
     }
 
