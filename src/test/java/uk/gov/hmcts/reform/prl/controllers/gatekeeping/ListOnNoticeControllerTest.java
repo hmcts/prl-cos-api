@@ -11,16 +11,30 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTED_FOR_LIST_ON_NOTICE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
 
 
 @Slf4j
@@ -36,6 +50,12 @@ public class ListOnNoticeControllerTest {
     private ObjectMapper objectMapper;
 
     public static final String authToken = "Bearer TestAuthToken";
+
+    @Mock
+    private AddCaseNoteService addCaseNoteService;
+
+    @Mock
+    private UserService userService;
 
     @Test
     public void testListOnNoticeMidEvent() throws Exception {
@@ -69,9 +89,59 @@ public class ListOnNoticeControllerTest {
         String reasonsSelectedString =
             "childrenResideWithApplicantAndBothProtectedByNonMolestationOrder"
                 + "\nnoEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice\n";
-        when(listOnNoticeService.getReasonsSelected(reasonsSelected, Long.valueOf("1099999999"))).thenReturn(reasonsSelectedString);
+        when(listOnNoticeService.getReasonsSelected(reasonsSelected, Long.valueOf("123"))).thenReturn(reasonsSelectedString);
         AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeMidEvent(authToken,callbackRequest);
         assertNotNull(response);
+        assertEquals(reasonsSelectedString,response.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
     }
 
+    @Test
+    public void testListOnNoticeSubmission() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(stringObjectMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        List<String> reasonsSelected = new ArrayList<>();
+        reasonsSelected.add("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder");
+        reasonsSelected.add("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice");
+
+        caseDataUpdated.put(LIST_ON_NOTICE_REASONS_SELECTED,reasonsSelected);
+        String reasonsSelectedString =
+            "childrenResideWithApplicantAndBothProtectedByNonMolestationOrder"
+                + "\nnoEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice\n";
+        caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS,reasonsSelectedString + "testAdditionalReasons\n");
+        List<Element<CaseNoteDetails>> caseNoteDetails = new ArrayList<>();
+        CaseNoteDetails caseNoteDetails1 = CaseNoteDetails.builder()
+            .subject(REASONS_SELECTED_FOR_LIST_ON_NOTICE).caseNote((String) caseDataUpdated.get("SELECTED_AND_ADDITIONAL_REASONS"))
+            .dateAdded(LocalDate.now().toString()).dateCreated(LocalDateTime.now()).build();
+        caseNoteDetails.add(ElementUtils.element(caseNoteDetails1));
+        when(listOnNoticeService.getReasonsSelected(reasonsSelected, Long.valueOf("123"))).thenReturn(reasonsSelectedString);
+        when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder().forename("PRL").surname("Judge").build());
+        when(addCaseNoteService.addCaseNoteDetails(caseData,UserDetails.builder().forename("PRL").surname("Judge").build())).thenReturn(caseNoteDetails);
+        Map<String, Object> caseDataUpdated1 = caseDataUpdated;
+        caseDataUpdated1.put(CASE_NOTE,null);
+        caseDataUpdated1.put(SUBJECT,null);
+        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeSubmission(authToken,callbackRequest);
+        assertNotNull(response);
+        assertEquals(reasonsSelectedString + "testAdditionalReasons\n",response.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
+        assertEquals(caseNoteDetails, response.getData().get("caseNotes"));
+    }
 }

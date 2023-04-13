@@ -66,28 +66,9 @@ public class ListOnNoticeController {
             listOnNoticeService.getReasonsSelected(caseDataUpdated.get(LIST_ON_NOTICE_REASONS_SELECTED),caseData.getId());
         if (null != reasonsSelectedForListOnNotice && reasonsSelectedForListOnNotice != "") {
             caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS,reasonsSelectedForListOnNotice);
-            caseDataUpdated.put(CASE_NOTE, caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
-            caseDataUpdated.put(SUBJECT,REASONS_SELECTED_FOR_LIST_ON_NOTICE);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
-    @PostMapping(path = "/listOnNotice/additionalReasons/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = " mid-event to update the additional reason")
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse listOnNoticeAdditionalReasonsMidEvent(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("*** mid event triggered for List ON Notice to update the additional reasons : {}", caseData.getId());
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (null != caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS)) {
-            caseDataUpdated.put(CASE_NOTE, caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
-            caseDataUpdated.put(SUBJECT, REASONS_SELECTED_FOR_LIST_ON_NOTICE);
-        }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
 
     @PostMapping(path = "/pre-populate-list-on-notice", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate list on notice")
