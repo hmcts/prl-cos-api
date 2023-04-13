@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -60,6 +61,8 @@ public class FL401SubmitApplicationService {
         );
 
         Map<String, Object> courtDetailsMap = CaseUtils.getCourtDetails(courtVenue, baseLocationId);
+        courtDetailsMap.put("submitCountyCourtSelection", DynamicList.builder()
+            .value(caseData.getSubmitCountyCourtSelection().getValue()).build());
         caseData = caseData.toBuilder().issueDate(localDate).courtName(courtDetailsMap.containsKey(COURT_NAME_FIELD) ? courtDetailsMap.get(
             COURT_NAME_FIELD).toString() : null)
             .isCourtEmailFound(YES)
