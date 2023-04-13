@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,12 +18,19 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -46,6 +54,16 @@ public class ListOnNoticeController {
 
     @Autowired
     private AddCaseNoteService addCaseNoteService;
+
+    @Autowired
+    RefDataUserService refDataUserService;
+
+    @Autowired
+    AllocatedJudgeService allocatedJudgeService;
+
+    @Autowired
+    @Qualifier("caseSummaryTab")
+    private CaseSummaryTabService caseSummaryTabService;
 
     @Autowired
     private UserService userService;
@@ -75,6 +93,10 @@ public class ListOnNoticeController {
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
         log.info("Inside Prepopulate prePopulate for the case id {}", caseReferenceNumber);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        //populate legal advisor list
+        List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
+        caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
+            .build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -99,6 +121,10 @@ public class ListOnNoticeController {
             CaseData.class
         );
         updateCaseNotes(caseData,caseDataUpdated,authorisation,selectedAndAdditonalReasons);
+        AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
+                                                                                       caseData.getLegalAdviserList(), refDataUserService);
+        caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
+        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
