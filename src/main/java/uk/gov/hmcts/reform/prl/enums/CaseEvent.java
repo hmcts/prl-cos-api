@@ -25,7 +25,10 @@ public enum CaseEvent {
     HEARING_STATE_CHANGE_FAILURE("hmcCaseUpdateFailure"),
     INTERNAL_UPDATE_TASK_LIST("internal-update-task-list"),
     CITIZEN_CASE_SUBMIT_WITH_HWF("citizenCaseSubmitWithHWF"),
-    CITIZEN_CASE_WITHDRAW("citizenCaseWithdraw");
+    CITIZEN_CASE_WITHDRAW("citizenCaseWithdraw"),
+    UPDATE_NEXT_HEARING_DATE_IN_CCD("updateNextHearingInfo"),
+    HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING("hmcCaseUpdPrepForHearing"),
+    HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME("hmcCaseUpdDecOutcome");
 
     private final String value;
 
