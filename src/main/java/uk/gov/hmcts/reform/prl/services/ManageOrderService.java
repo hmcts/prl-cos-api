@@ -810,8 +810,7 @@ public class ManageOrderService {
                                        .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
                                            ? caseData.getDoesOrderClosesCase() : null)
                                        .serveOrderDetails(buildServeOrderDetails(serveOrderData))
-                                       .selectedHearingType(null != caseData.getManageOrders().getHearingType()
-                                                        ? caseData.getManageOrders().getHearingType().getValueCode() : null)
+                                       .hearingType(caseData.getManageOrders().getHearingType())
                                        .build()));
         }
     }
@@ -1042,8 +1041,7 @@ public class ManageOrderService {
             .isOrderUploadedByJudgeOrAdmin(No)
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
-            .selectedHearingType(null != caseData.getManageOrders().getHearingType()
-                             ? caseData.getManageOrders().getHearingType().getValueCode() : null)
+            .hearingType(caseData.getManageOrders().getHearingType())
             .build();
     }
 
@@ -1683,8 +1681,7 @@ public class ManageOrderService {
                            .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                             ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
                            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
-                           .selectedHearingType(null != caseData.getManageOrders().getHearingType()
-                                            ? caseData.getManageOrders().getHearingType().getValueCode() : null)
+                           .hearingType(caseData.getManageOrders().getHearingType())
                            .build());
     }
 
@@ -1766,13 +1763,15 @@ public class ManageOrderService {
         LOGGER.info("Retrieving hearings for caseId: {}, tempCaseId: {} ", caseData.getId(), caseData.getTempCaseIdForHearing());
         //fetch hearing details
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(authorization, caseData.getTempCaseIdForHearing()));
-        //filer only completed hearings
+        //get case hearings
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
+        //filer only completed hearings
         List<CaseHearing> completedHearings = caseHearings.stream()
             .filter(caseHearing -> HMC_STATUS_COMPLETED.equalsIgnoreCase(caseHearing.getHmcStatus()))
             .collect(Collectors.toList());
         LOGGER.info("Total completed hearings: {}", completedHearings.size());
 
+        //get hearings dropdown
         List<DynamicListElement> hearingDropdowns = completedHearings.stream()
             .map(caseHearing -> {
                 //get hearingId

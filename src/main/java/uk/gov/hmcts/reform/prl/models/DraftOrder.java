@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
@@ -125,8 +126,8 @@ public class DraftOrder {
     private final List<Element<HearingData>> manageOrderHearingDetails;
     private final YesOrNo isTheOrderAboutChildren;
     private final C21OrderOptionsEnum c21OrderOptions;
-    //PRL-3254 - Added for storing selected hearing dropdown
-    private final String selectedHearingType;
+    //PRL-3318 - Added for storing hearing dropdown
+    private final DynamicList hearingType;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {

@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
@@ -40,8 +41,8 @@ public class OrderDetails {
     private final ServeOrderDetails serveOrderDetails;
     @JsonProperty("manageOrderHearingDetails")
     private final List<Element<HearingData>> manageOrderHearingDetails;
-    //PRL-3254 - Added for storing selected hearing dropdown
-    private final String selectedHearingType;
+    //PRL-3254 - Added for storing hearing dropdown
+    private final DynamicList hearingType;
 
 
     @JsonIgnore
