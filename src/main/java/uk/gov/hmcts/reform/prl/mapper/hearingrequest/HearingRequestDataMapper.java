@@ -18,9 +18,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 public class HearingRequestDataMapper {
 
     public void mapHearingData(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
-
-        log.info("*****Inside mapHearing data********");
-
         boolean isHearingDynamicListItemsNullifyReq = (null != hearingDataPrePopulatedDynamicLists) ? Boolean.FALSE  : Boolean.TRUE;
         mapHearingTypesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
         mapConfirmedHearingDatesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
@@ -45,10 +42,6 @@ public class HearingRequestDataMapper {
             + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "");
         hearingData.setRespondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "");
         hearingData.setRespondentSolicitor("");
-
-        log.info("**** applicant name******** {}", hearingData.getApplicantName());
-        log.info("**** applicant Solicitor******** {}", hearingData.getApplicantSolicitor());
-        log.info("**** Respondent name******** {}", hearingData.getRespondentName());
     }
 
 
