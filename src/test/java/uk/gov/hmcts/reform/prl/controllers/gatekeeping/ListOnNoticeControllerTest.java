@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
-import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -62,6 +62,7 @@ public class ListOnNoticeControllerTest {
     private Map<String, Object> stringObjectMap;
 
     private CallbackRequest callbackRequest;
+
     @Before
     public void setUp() {
         caseData = CaseData.builder()
@@ -75,7 +76,7 @@ public class ListOnNoticeControllerTest {
             .data(stringObjectMap)
             .build();
 
-         callbackRequest = CallbackRequest.builder()
+        callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
 
@@ -93,9 +94,8 @@ public class ListOnNoticeControllerTest {
         reasonsSelected.add("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice");
 
         caseDataUpdated.put(LIST_ON_NOTICE_REASONS_SELECTED,reasonsSelected);
-        String reasonsSelectedString =
-            "childrenResideWithApplicantAndBothProtectedByNonMolestationOrder"
-                + "\nnoEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice\n";
+        String reasonsSelectedString = ListOnNoticeReasonsEnum.getDisplayedValue("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder")
+            + "\n" + ListOnNoticeReasonsEnum.getDisplayedValue("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice") + "\n";
         when(listOnNoticeService.getReasonsSelected(reasonsSelected, Long.valueOf("123"))).thenReturn(reasonsSelectedString);
         AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeMidEvent(authToken,callbackRequest);
         assertNotNull(response);
@@ -110,23 +110,22 @@ public class ListOnNoticeControllerTest {
         reasonsSelected.add("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice");
 
         caseDataUpdated.put(LIST_ON_NOTICE_REASONS_SELECTED,reasonsSelected);
-        String reasonsSelectedString =
-            "childrenResideWithApplicantAndBothProtectedByNonMolestationOrder"
-                + "\nnoEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice\n";
+        String reasonsSelectedString = ListOnNoticeReasonsEnum.getDisplayedValue("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder")
+            + "\n" + ListOnNoticeReasonsEnum.getDisplayedValue("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice") + "\n";
         caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS,reasonsSelectedString + "testAdditionalReasons\n");
-        List<Element<CaseNoteDetails>> caseNoteDetails = new ArrayList<>();
+        List<CaseNoteDetails> caseNoteDetails = new ArrayList<>();
         CaseNoteDetails caseNoteDetails1 = CaseNoteDetails.builder()
             .subject(REASONS_SELECTED_FOR_LIST_ON_NOTICE).caseNote((String) caseDataUpdated.get("SELECTED_AND_ADDITIONAL_REASONS"))
             .dateAdded(LocalDate.now().toString()).dateCreated(LocalDateTime.now()).build();
-        caseNoteDetails.add(ElementUtils.element(caseNoteDetails1));
+        caseNoteDetails.add(caseNoteDetails1);
         when(listOnNoticeService.getReasonsSelected(reasonsSelected, Long.valueOf("123"))).thenReturn(reasonsSelectedString);
         when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder().forename("PRL").surname("Judge").build());
         when(addCaseNoteService.addCaseNoteDetails(caseData,UserDetails.builder().forename("PRL").surname("Judge").build()))
-            .thenReturn(caseNoteDetails);
+            .thenReturn(ElementUtils.wrapElements(caseNoteDetails));
         AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeSubmission(authToken,callbackRequest);
         assertNotNull(response);
         assertEquals(reasonsSelectedString + "testAdditionalReasons\n",response.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
-        assertEquals(caseNoteDetails, response.getData().get(CASE_NOTES));
+        assertEquals(ElementUtils.wrapElements(caseNoteDetails), response.getData().get(CASE_NOTES));
     }
 
     @Test
@@ -142,6 +141,14 @@ public class ListOnNoticeControllerTest {
         assertNotNull(response);
         assertNull(response.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
         assertNull(response.getData().get(CASE_NOTES));
+    }
+
+    @Test
+    public void testListOnNoticePrePopulateListOnNotice() throws Exception {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.prePopulateListOnNotice(authToken,callbackRequest);
+        assertNotNull(response);
+        //TODO: as per the stories need to amend this testcase in remaining stories
     }
 
 }

@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
-import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -44,9 +43,6 @@ public class ListOnNoticeController {
 
     @Autowired
     private ListOnNoticeService listOnNoticeService;
-
-    @Autowired
-    private RefDataUserService refDataUserService;
 
     @Autowired
     private AddCaseNoteService addCaseNoteService;
@@ -102,10 +98,14 @@ public class ListOnNoticeController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        updateCaseNotes(caseData,caseDataUpdated,authorisation,selectedAndAdditonalReasons);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private void updateCaseNotes(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation, String selectedAndAdditonalReasons) {
         if (null != selectedAndAdditonalReasons && selectedAndAdditonalReasons != "") {
             caseDataUpdated.put(CASE_NOTES, addCaseNoteService.addCaseNoteDetails(caseData, userService.getUserDetails(authorisation)));
             addCaseNoteService.clearFields(caseDataUpdated);
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
