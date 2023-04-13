@@ -94,7 +94,7 @@ public class ListOnNoticeController {
         log.info("List on Notice Submission flow - case id : {}", id);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String selectedAndAdditonalReasons = (String) caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS);
-        if (null != selectedAndAdditonalReasons) {
+        if (null != selectedAndAdditonalReasons && selectedAndAdditonalReasons != "") {
             caseDataUpdated.put(CASE_NOTE, selectedAndAdditonalReasons);
             caseDataUpdated.put(SUBJECT, REASONS_SELECTED_FOR_LIST_ON_NOTICE);
         }
@@ -102,7 +102,7 @@ public class ListOnNoticeController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        if (null != caseDataUpdated.get(CASE_NOTE)) {
+        if (null != selectedAndAdditonalReasons && selectedAndAdditonalReasons != "") {
             caseDataUpdated.put(CASE_NOTES, addCaseNoteService.addCaseNoteDetails(caseData, userService.getUserDetails(authorisation)));
             addCaseNoteService.clearFields(caseDataUpdated);
         }

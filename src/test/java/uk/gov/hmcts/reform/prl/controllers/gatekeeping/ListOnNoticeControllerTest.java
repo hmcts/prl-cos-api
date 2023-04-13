@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -28,13 +29,12 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTED_FOR_LIST_ON_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
 
 
 @Slf4j
@@ -57,10 +57,14 @@ public class ListOnNoticeControllerTest {
     @Mock
     private UserService userService;
 
-    @Test
-    public void testListOnNoticeMidEvent() throws Exception {
+    private CaseData caseData;
 
-        CaseData caseData = CaseData.builder()
+    private Map<String, Object> stringObjectMap;
+
+    private CallbackRequest callbackRequest;
+    @Before
+    public void setUp() {
+        caseData = CaseData.builder()
             .courtName("testcourt")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -71,7 +75,7 @@ public class ListOnNoticeControllerTest {
             .data(stringObjectMap)
             .build();
 
-        CallbackRequest callbackRequest = CallbackRequest.builder()
+         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
 
@@ -79,7 +83,10 @@ public class ListOnNoticeControllerTest {
             "field4", "value4",
             "field5", "value5"
         );
+    }
 
+    @Test
+    public void testListOnNoticeMidEvent() throws Exception {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<String> reasonsSelected = new ArrayList<>();
         reasonsSelected.add("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder");
@@ -97,27 +104,6 @@ public class ListOnNoticeControllerTest {
 
     @Test
     public void testListOnNoticeSubmission() throws Exception {
-
-        CaseData caseData = CaseData.builder()
-            .courtName("testcourt")
-            .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(stringObjectMap)
-            .build();
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-
-        Map<String, Object> summaryTabFields = Map.of(
-            "field4", "value4",
-            "field5", "value5"
-        );
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<String> reasonsSelected = new ArrayList<>();
         reasonsSelected.add("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder");
@@ -137,12 +123,25 @@ public class ListOnNoticeControllerTest {
         when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder().forename("PRL").surname("Judge").build());
         when(addCaseNoteService.addCaseNoteDetails(caseData,UserDetails.builder().forename("PRL").surname("Judge").build()))
             .thenReturn(caseNoteDetails);
-        Map<String, Object> caseDataUpdated1 = caseDataUpdated;
-        caseDataUpdated1.put(CASE_NOTE,null);
-        caseDataUpdated1.put(SUBJECT,null);
         AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeSubmission(authToken,callbackRequest);
         assertNotNull(response);
         assertEquals(reasonsSelectedString + "testAdditionalReasons\n",response.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
         assertEquals(caseNoteDetails, response.getData().get(CASE_NOTES));
     }
+
+    @Test
+    public void testListOnNoticeSubmissionWithoutSelectingAnyReasons() throws Exception {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(LIST_ON_NOTICE_REASONS_SELECTED,null);
+        caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS,null);
+        when(listOnNoticeService.getReasonsSelected(null, Long.valueOf("123"))).thenReturn("");
+        when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder().forename("PRL").surname("Judge").build());
+        when(addCaseNoteService.addCaseNoteDetails(caseData,UserDetails.builder().forename("PRL").surname("Judge").build()))
+            .thenReturn(null);
+        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeSubmission(authToken,callbackRequest);
+        assertNotNull(response);
+        assertNull(response.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
+        assertNull(response.getData().get(CASE_NOTES));
+    }
+
 }

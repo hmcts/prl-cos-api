@@ -20,7 +20,7 @@ public class ListOnNoticeService {
             return reasonsSelected[0];
         } else {
             log.info("***No Reasons selected for list on Notice for the case id: {}", caseId);
-            return "";
+            return null;
         }
     }
 }

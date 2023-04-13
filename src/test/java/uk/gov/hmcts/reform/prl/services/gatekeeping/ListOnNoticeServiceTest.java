@@ -29,7 +29,7 @@ public class ListOnNoticeServiceTest {
 
     @Test
     public void testReturnReasonsSelectedWhenNoReasonsSelected() {
-        assertEquals("",listOnNoticeService.getReasonsSelected(null,Long.valueOf("11111111111111")));
+        assertEquals(null,listOnNoticeService.getReasonsSelected(null,Long.valueOf("11111111111111")));
     }
 
 }
