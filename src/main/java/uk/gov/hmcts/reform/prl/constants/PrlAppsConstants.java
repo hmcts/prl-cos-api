@@ -429,6 +429,6 @@ public class PrlAppsConstants {
     public static final String SUBJECT = "subject";
     public static final String CASE_NOTE = "caseNote";
 
-    public static final String REASONS_SELECTED_FOR_LIST_ON_NOTICE = "Reasons selected for List On Notice ";
+    public static final String REASONS_SELECTED_FOR_LIST_ON_NOTICE = "List on notice ";
 
 }

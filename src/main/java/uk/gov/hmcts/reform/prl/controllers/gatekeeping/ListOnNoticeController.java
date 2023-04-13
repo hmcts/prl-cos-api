@@ -111,11 +111,6 @@ public class ListOnNoticeController {
         Long id = callbackRequest.getCaseDetails().getId();
         log.info("List on Notice Submission flow - case id : {}", id);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        log.info("*** value of  SELECTED_AND_ADDITIONAL_REASONS in about to submit event: {}", caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
-        log.info("*** value of  CASE_NOTE : {}", caseDataUpdated.get(CASE_NOTE));
-        log.info("*** value of  SUBJECT : {}", caseDataUpdated.get(SUBJECT));
-
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
