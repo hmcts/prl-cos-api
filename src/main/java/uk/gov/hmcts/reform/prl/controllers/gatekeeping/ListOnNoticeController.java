@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
@@ -70,9 +69,6 @@ public class ListOnNoticeController {
             caseDataUpdated.put(CASE_NOTE, caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
             caseDataUpdated.put(SUBJECT,REASONS_SELECTED_FOR_LIST_ON_NOTICE);
         }
-        log.info("*** value of  SELECTED_AND_ADDITIONAL_REASONS : {}", caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
-        log.info("*** value of  CASE_NOTE : {}", caseDataUpdated.get(CASE_NOTE));
-        log.info("*** value of  SUBJECT : {}", caseDataUpdated.get(SUBJECT));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -85,15 +81,12 @@ public class ListOnNoticeController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("*** mid event triggered for List ON Notice to update the additional reasons : {}", caseData.getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put(CASE_NOTE, null != caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS)
-            ? (String)caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS) : null);
-        caseDataUpdated.put(SUBJECT,REASONS_SELECTED_FOR_LIST_ON_NOTICE);
-        log.info("*** value of  SELECTED_AND_ADDITIONAL_REASONS in second midevent: {}", caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
-        log.info("*** value of  CASE_NOTE : {}", caseDataUpdated.get(CASE_NOTE));
-        log.info("*** value of  SUBJECT : {}", caseDataUpdated.get(SUBJECT));
+        if (null != caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS)) {
+            caseDataUpdated.put(CASE_NOTE, caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
+            caseDataUpdated.put(SUBJECT, REASONS_SELECTED_FOR_LIST_ON_NOTICE);
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
 
 
     @PostMapping(path = "/pre-populate-list-on-notice", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -118,22 +111,21 @@ public class ListOnNoticeController {
         Long id = callbackRequest.getCaseDetails().getId();
         log.info("List on Notice Submission flow - case id : {}", id);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put(CASE_NOTE, null != caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS)
-            ? (String)caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS) : null);
-        caseDataUpdated.put(SUBJECT,REASONS_SELECTED_FOR_LIST_ON_NOTICE);
+
         log.info("*** value of  SELECTED_AND_ADDITIONAL_REASONS in about to submit event: {}", caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
         log.info("*** value of  CASE_NOTE : {}", caseDataUpdated.get(CASE_NOTE));
         log.info("*** value of  SUBJECT : {}", caseDataUpdated.get(SUBJECT));
 
-        UserDetails userDetails = userService.getUserDetails(authorisation);
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        caseDataUpdated.put("caseNotes", addCaseNoteService.addCaseNoteDetails(caseData, userDetails));
-        log.info("*** updating caseNotes : {}", caseDataUpdated.get("caseNotes"));
-        addCaseNoteService.clearFields(caseDataUpdated);
-
+        if (null != caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS)) {
+            caseDataUpdated.put(CASE_NOTE, caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
+            caseDataUpdated.put(SUBJECT,REASONS_SELECTED_FOR_LIST_ON_NOTICE);
+            caseDataUpdated.put("caseNotes", addCaseNoteService.addCaseNoteDetails(caseData, userService.getUserDetails(authorisation)));
+            addCaseNoteService.clearFields(caseDataUpdated);
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
