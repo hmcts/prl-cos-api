@@ -108,9 +108,10 @@ public class ListOnNoticeControllerFT {
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
         Assert.assertNotNull(res);
-        String reasonsSelectedString = ListOnNoticeReasonsEnum.getDisplayedValue("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder")
-            + "\n" + ListOnNoticeReasonsEnum.getDisplayedValue("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice")
-            + "\n" + "testAdditionalReason\n";
+        String reasonsSelectedString = "The child[ren] reside with applicant and both are protected by a Non-Molestation Order"
+            + "\nThere is no evidence to suggest that the respondent seeks to remove the child[ren] from the applicant's care and therefore "
+            + "there is no genuine emergency"
+            + "\ntestAdditionalReason";
         Assert.assertEquals(reasonsSelectedString,res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
         Assert.assertNull(CASE_NOTE);
         Assert.assertNull(SUBJECT);
