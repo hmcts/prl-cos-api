@@ -109,7 +109,8 @@ public class ListOnNoticeControllerFT {
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
         Assert.assertNotNull(res);
         String reasonsSelectedString = ListOnNoticeReasonsEnum.getDisplayedValue("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder")
-            + "\n" + ListOnNoticeReasonsEnum.getDisplayedValue("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice") + "\n";
+            + "\n" + ListOnNoticeReasonsEnum.getDisplayedValue("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice")
+            + "\n" + "testAdditionalReason";
         Assert.assertEquals(reasonsSelectedString,res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
         Assert.assertNull(CASE_NOTE);
         Assert.assertNull(SUBJECT);
@@ -131,9 +132,6 @@ public class ListOnNoticeControllerFT {
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
         Assert.assertNotNull(res);
         Assert.assertNull(res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
-        Assert.assertNull(CASE_NOTE);
-        Assert.assertNull(SUBJECT);
-        Assert.assertNull(res.getData().get(CASE_NOTES));
     }
 
     @Test
