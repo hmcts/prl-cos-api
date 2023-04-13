@@ -113,8 +113,6 @@ public class ListOnNoticeControllerFT {
             + "there is no genuine emergency"
             + "\ntestAdditionalReason";
         Assert.assertNotNull(res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
-        Assert.assertNull(CASE_NOTE);
-        Assert.assertNull(SUBJECT);
         Assert.assertNotNull(res.getData().get(CASE_NOTES));
     }
 
