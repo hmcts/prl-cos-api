@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
@@ -28,6 +29,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 public class ListOnNoticeControllerFT {
+
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
+
     @Autowired
     ObjectMapper objectMapper;
 
@@ -95,7 +100,7 @@ public class ListOnNoticeControllerFT {
         String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_VALID_REQUEST_BODY);
 
         Response response = request
-            .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header(HttpHeaders.AUTHORIZATION,idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -114,10 +119,10 @@ public class ListOnNoticeControllerFT {
     @Test
     public void testListOnNoticeSubmissionWhenNoReasonsSelected() throws Exception {
 
-        String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_VALID_REQUEST_BODY);
+        String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_REQUEST_BODY_WITHOUT_ANY_REASONS_SELECTED);
 
         Response response = request
-            .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header(HttpHeaders.AUTHORIZATION,idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
             .when()
             .contentType("application/json")
