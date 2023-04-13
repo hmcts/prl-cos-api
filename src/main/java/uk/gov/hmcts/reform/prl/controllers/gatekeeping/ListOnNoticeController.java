@@ -28,6 +28,7 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTED_FOR_LIST_ON_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
@@ -102,7 +103,7 @@ public class ListOnNoticeController {
             CaseData.class
         );
         if (null != caseDataUpdated.get(CASE_NOTE)) {
-            caseDataUpdated.put("caseNotes", addCaseNoteService.addCaseNoteDetails(caseData, userService.getUserDetails(authorisation)));
+            caseDataUpdated.put(CASE_NOTES, addCaseNoteService.addCaseNoteDetails(caseData, userService.getUserDetails(authorisation)));
             addCaseNoteService.clearFields(caseDataUpdated);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
