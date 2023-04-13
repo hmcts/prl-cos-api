@@ -47,8 +47,8 @@ public class HearingRequestDataMapper {
         hearingData.setRespondentSolicitor("");
 
         log.info("**** applicant name******** {}", hearingData.getApplicantName());
-        log.info("**** applicant name******** {}", hearingData.getApplicantSolicitor());
-        log.info("**** applicant name******** {}", hearingData.getRespondentName());
+        log.info("**** applicant Solicitor******** {}", hearingData.getApplicantSolicitor());
+        log.info("**** Respondent name******** {}", hearingData.getRespondentName());
     }
 
 
