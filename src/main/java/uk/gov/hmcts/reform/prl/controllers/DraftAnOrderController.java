@@ -226,9 +226,8 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("verifying hearing data while submitting************* {} ", objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class));
+        log.info("verifying hearing data while submitting************* {} ",
+            callbackRequest.getCaseDetails().getData());
         return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.prepareDraftOrderCollection(
             authorisation,
             callbackRequest
