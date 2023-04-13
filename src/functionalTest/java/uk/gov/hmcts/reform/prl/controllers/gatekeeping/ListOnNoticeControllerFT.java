@@ -110,7 +110,7 @@ public class ListOnNoticeControllerFT {
         Assert.assertNotNull(res);
         String reasonsSelectedString = ListOnNoticeReasonsEnum.getDisplayedValue("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder")
             + "\n" + ListOnNoticeReasonsEnum.getDisplayedValue("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice")
-            + "\n" + "testAdditionalReason";
+            + "\n" + "testAdditionalReason\n";
         Assert.assertEquals(reasonsSelectedString,res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
         Assert.assertNull(CASE_NOTE);
         Assert.assertNull(SUBJECT);
