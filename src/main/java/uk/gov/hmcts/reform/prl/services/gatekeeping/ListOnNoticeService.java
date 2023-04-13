@@ -16,7 +16,6 @@ public class ListOnNoticeService {
             final String[] reasonsSelected = {""};
             ((List<String>) listOnNoticeReasonsEnum).stream().forEach(reason ->
                 reasonsSelected[0] = reasonsSelected[0].concat(ListOnNoticeReasonsEnum.getDisplayedValue(reason) + "\n"));
-            log.info("***Reasons selected for list on Notice : {}", reasonsSelected[0]);
             return reasonsSelected[0];
         } else {
             log.info("***No Reasons selected for list on Notice for the case id: {}", caseId);
