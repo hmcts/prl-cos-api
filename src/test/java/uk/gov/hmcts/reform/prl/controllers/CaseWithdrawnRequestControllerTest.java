@@ -53,7 +53,7 @@ public class CaseWithdrawnRequestControllerTest {
 
     @Test
     public void testAboutToSubmitCaseCreation() throws Exception {
-        caseWithdrawnRequestController.caseWithdrawnRequestSubmitted(auth, callbackRequest);
-        verify(caseWithdrawnRequestService, times(1)).caseWithdrawnRequestSubmitted(Mockito.any(CallbackRequest.class));
+        caseWithdrawnRequestController.caseWithdrawnEmailNotification(auth, callbackRequest);
+        verify(caseWithdrawnRequestService, times(1)).caseWithdrawnEmailNotification(Mockito.any(CallbackRequest.class), Mockito.anyString());
     }
 }

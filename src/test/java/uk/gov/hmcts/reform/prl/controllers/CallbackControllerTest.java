@@ -743,9 +743,7 @@ public class CallbackControllerTest {
                                                        .state(ISSUED_STATE)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
@@ -841,9 +839,7 @@ public class CallbackControllerTest {
                                                        .state(SUBMITTED_STATE)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(timesCalled))
-            .sendWithDrawEmailToSolicitor(callbackRequest.getCaseDetails(), userDetails);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
@@ -861,8 +857,7 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verifyNoMoreInteractions(solicitorEmailService);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
@@ -888,8 +883,7 @@ public class CallbackControllerTest {
                              .data(stringObjectMap).build())
             .build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verifyNoMoreInteractions(solicitorEmailService);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
@@ -1164,11 +1158,7 @@ public class CallbackControllerTest {
                                                        .state(ISSUED_STATE)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToFl401SolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
-        verify(caseWorkerEmailService, times(0))
-            .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(), "test@gmail.com");
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
@@ -1206,10 +1196,7 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToFl401Solicitor(callbackRequest.getCaseDetails(), userDetails);
-        verifyNoMoreInteractions(caseWorkerEmailService);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
