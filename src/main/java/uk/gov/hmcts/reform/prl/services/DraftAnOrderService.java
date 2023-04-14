@@ -219,7 +219,7 @@ public class DraftAnOrderService {
                     .build())
             .isTheOrderAboutChildren(draftOrder.getIsTheOrderAboutChildren())
             .childrenList(draftOrder.getChildrenList())
-            .hearingType(caseData.getManageOrders().getHearingType())
+            .selectedHearingType(null != draftOrder.getHearingType() ? draftOrder.getHearingType().getValueCode() : null)
             .build();
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
