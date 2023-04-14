@@ -1763,8 +1763,10 @@ public class ManageOrderService {
         LOGGER.info("Retrieving hearings for caseId: {}, tempCaseId: {} ", caseData.getId(), caseData.getTempCaseIdForHearing());
         //fetch hearing details
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(authorization, caseData.getTempCaseIdForHearing()));
+        LOGGER.info("Hearings: {} for caseId: {}", caseData.getTempCaseIdForHearing(), hearings);
         //get case hearings
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
+        LOGGER.info("Total case hearings: {}", caseHearings.size());
         //filer only completed hearings
         List<CaseHearing> completedHearings = caseHearings.stream()
             .filter(caseHearing -> HMC_STATUS_COMPLETED.equalsIgnoreCase(caseHearing.getHmcStatus()))

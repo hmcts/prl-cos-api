@@ -2440,7 +2440,7 @@ public class ManageOrderServiceTest {
         Map<String, Object> result = manageOrderService.populatePreviewOrder("test", callbackRequest, caseData);
         Assert.assertTrue(!result.isEmpty());
     }
-    
+
     @Test
     public void testPopulateFinalUploadOrderFromCaseDataWithMultipleOrdersForWelsh() throws Exception {
 
@@ -2542,7 +2542,8 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test")
             .manageOrders(ManageOrders.builder().build())
             .build();
-        CaseHearing caseHearing = CaseHearing.caseHearingWith().hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED).hearingID(123456L).build();
+        CaseHearing caseHearing = CaseHearing.caseHearingWith().hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED)
+            .hearingID(123456L).hearingDaySchedule(null).build();
         Hearings hearings = Hearings.hearingsWith()
             .caseRef("123")
             .hmctsServiceCode("ABA5")
@@ -2618,7 +2619,11 @@ public class ManageOrderServiceTest {
                 HearingDaySchedule.hearingDayScheduleWith().hearingStartDateTime(LocalDateTime.now().minusDays(5)).build()
             ))
             .build();
-        CaseHearing caseHearing3 = CaseHearing.caseHearingWith().hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED).hearingID(98765L).build();
+        CaseHearing caseHearing3 = CaseHearing.caseHearingWith()
+            .hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED)
+            .hearingID(98765L)
+            .hearingDaySchedule(null)
+            .build();
         Hearings hearings = Hearings.hearingsWith()
             .caseRef("123")
             .hmctsServiceCode("ABA5")
