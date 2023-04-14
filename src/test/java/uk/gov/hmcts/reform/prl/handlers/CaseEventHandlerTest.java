@@ -123,13 +123,13 @@ public class CaseEventHandlerTest {
             respondentTask,
             resErrors,
             "A",
-            "test test"
+            "test test", false, 123456L
         )).thenReturn(respondentTaskListA);
         when(respondentSolicitorTaskListRenderer.render(
             respondentTask,
             resErrors,
             "B",
-            "test test"
+            "test test", false, 123456L
         )).thenReturn(respondentTaskListB);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
@@ -316,13 +316,13 @@ public class CaseEventHandlerTest {
             respondentTask,
             resErrors,
             "A",
-            "test test"
+            "test test", false, 123456L
         )).thenReturn(respondentTaskListA);
         when(respondentSolicitorTaskListRenderer.render(
             respondentTask,
             resErrors,
             "B",
-            "test test"
+            "test test", false, 123456L
         )).thenReturn(respondentTaskListB);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
