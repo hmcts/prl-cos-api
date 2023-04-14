@@ -111,6 +111,8 @@ public class CaseEventHandler {
                 Element<PartyDetails> respondingParty = caseData.getRespondents().get(solicitorRole.get().getIndex());
 
                 if (respondingParty.getValue() != null
+                    && (respondingParty.getValue().getResponse() == null
+                    || !YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted()))
                     && respondingParty.getValue().getUser() != null
                     && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
                     final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
@@ -127,8 +129,10 @@ public class CaseEventHandler {
                     String representedRespondentName = respondingParty.getValue().getFirstName().trim() + " "
                         + respondingParty.getValue().getLastName().trim();
                     log.info("representedRespondentName found: " + representedRespondentName);
+                    final boolean hasSubmitted = respondingParty.getValue().getResponse() != null
+                        && YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted());
                     return respondentSolicitorTaskListRenderer
-                        .render(tasks, eventErrors, respondent, representedRespondentName);
+                        .render(tasks, eventErrors, respondent, representedRespondentName, hasSubmitted, caseData.getId());
                 }
             }
         }

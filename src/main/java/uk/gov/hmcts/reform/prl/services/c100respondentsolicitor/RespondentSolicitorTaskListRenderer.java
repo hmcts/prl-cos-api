@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
@@ -21,6 +22,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection.newSection;
 
 @Slf4j
@@ -35,30 +37,45 @@ public class RespondentSolicitorTaskListRenderer {
     private static final String IN_PROGRESS = "in-progress.png";
     private static final String INFORMATION_ADDED = "information-added.png";
     private static final String FINISHED = "finished.png";
+    public static final String DIV_CLASS_WIDTH_50 = "<div class='width-50'>";
+    public static final String DIV = "</div>";
 
     private final TaskListRenderElements taskListRenderElements;
 
+    @Value("${xui.url}")
+    private String manageCaseUrl;
+
 
     public String render(List<RespondentTask> allTasks, List<RespondentEventValidationErrors> tasksErrors,
-                         String respondent, String representedRespondentName) {
+                         String respondent, String representedRespondentName, boolean hasSubmitted, long caseId) {
         final List<String> lines = new LinkedList<>();
-        lines.add(
-            "<div class='width-50'>"
-                + "<h3>Respond to the application for Respondent " + representedRespondentName + "</h3>"
-                + "<p>This online response combines forms C7 and C8."
-                + " It also allows you to make your own allegations of harm and violence (C1A)"
-                + " in the section of safety concerns.</p>"
-                + "</div>");
+        if (!hasSubmitted) {
+            lines.add(
+                DIV_CLASS_WIDTH_50
+                    + "<h3>Respond to the application for respondent " + representedRespondentName + "</h3>"
+                    + "<p>This online response combines forms C7 and C8."
+                    + " It also allows you to make your own allegations of harm and violence (C1A)"
+                    + " in the section of safety concerns.</p>"
+                    + DIV);
 
-        lines.add("<div class='width-50'>");
+            lines.add(DIV_CLASS_WIDTH_50);
 
-        (groupInSections(allTasks))
-            .forEach(section -> lines.addAll(renderSection(section, respondent)));
+            (groupInSections(allTasks))
+                .forEach(section -> lines.addAll(renderSection(section, respondent)));
 
-        lines.add("</div>");
-        log.info("task list now: " + String.join("\n\n", lines));
-        lines.addAll(renderResSolTasksErrors(tasksErrors, respondent));
-        log.info("task list after: " + String.join("\n\n", lines));
+            lines.add(DIV);
+            log.info("task list now: " + String.join("\n\n", lines));
+            lines.addAll(renderResSolTasksErrors(tasksErrors, respondent));
+            log.info("task list after: " + String.join("\n\n", lines));
+        } else {
+            String caseDocumentsUrl = manageCaseUrl + URL_STRING + caseId + "#Case documents";
+            lines.add(
+                DIV_CLASS_WIDTH_50
+                    + "<h3>Response for " + representedRespondentName + " has been successfully submitted.</h3>"
+                    + "<p>You can find the response at <a href=\"" + caseDocumentsUrl + "\">Case Documents</a> tab"
+                    + " in the section of safety concerns.</p>"
+                    + DIV);
+        }
 
         return String.join("\n\n", lines);
     }

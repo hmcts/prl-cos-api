@@ -39,6 +39,12 @@ public enum SolicitorRole {
             .findFirst();
     }
 
+    public static Optional<SolicitorRole> fromCaseRoleLabel(String caseRoleLabel) {
+        return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
+            .filter(role -> role.caseRoleLabel.equals(caseRoleLabel))
+            .findFirst();
+    }
+
     public static List<SolicitorRole> values(Representing representing) {
         return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
             .filter(role -> role.representing == representing)

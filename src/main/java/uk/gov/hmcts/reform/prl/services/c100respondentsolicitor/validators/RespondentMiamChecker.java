@@ -28,29 +28,27 @@ public class RespondentMiamChecker implements RespondentEventChecker {
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
 
-        if (response.isPresent()) {
-            return ofNullable(response.get().getSolicitorMiam())
-                .filter(miam -> anyNonEmpty(
-                    miam.getRespSolHaveYouAttendedMiam(),
-                    miam.getRespSolWillingnessToAttendMiam()
-                )).isPresent();
-        }
-        return false;
+        return response.filter(value -> ofNullable(value.getSolicitorMiam())
+            .filter(miam -> anyNonEmpty(
+                miam.getRespSolHaveYouAttendedMiam().getAttendedMiam(),
+                miam.getRespSolHaveYouAttendedMiam().getReasonNotAttendingMiam(),
+                miam.getRespSolHaveYouAttendedMiam().getWillingToAttendMiam(),
+                miam.getRespSolWillingnessToAttendMiam().getAttendedMiam(),
+                miam.getRespSolWillingnessToAttendMiam().getReasonNotAttendingMiam(),
+                miam.getRespSolWillingnessToAttendMiam().getWillingToAttendMiam()
+            )).isPresent()).isPresent();
     }
 
     @Override
     public boolean isFinished(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
-        boolean mandatoryInfo = false;
 
         if (response.isPresent()) {
             Optional<SolicitorMiam> miam
                 = Optional.ofNullable(response.get().getSolicitorMiam());
-            if (!miam.isEmpty()) {
-                if (checkMiamManadatoryCompleted(miam)) {
-                    respondentTaskErrorService.removeError(MIAM_ERROR);
-                    mandatoryInfo = true;
-                }
+            if (miam.isPresent() && checkMiamManadatoryCompleted(miam)) {
+                respondentTaskErrorService.removeError(MIAM_ERROR);
+                return true;
             }
         }
         respondentTaskErrorService.addEventError(
@@ -58,7 +56,7 @@ public class RespondentMiamChecker implements RespondentEventChecker {
             MIAM_ERROR,
             MIAM_ERROR.getError()
         );
-        return mandatoryInfo;
+        return false;
     }
 
     private boolean checkMiamManadatoryCompleted(Optional<SolicitorMiam> miam) {
