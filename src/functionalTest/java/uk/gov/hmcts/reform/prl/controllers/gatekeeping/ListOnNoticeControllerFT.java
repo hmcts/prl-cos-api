@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TIER_OF_JUDICIARY;
 
 @Slf4j
 @SpringBootTest
@@ -112,6 +113,7 @@ public class ListOnNoticeControllerFT {
             + "\ntestAdditionalReason";
         Assert.assertNotNull(res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
         Assert.assertNotNull(res.getData().get(CASE_NOTES));
+        Assert.assertNotNull(res.getData().get(TIER_OF_JUDICIARY));
     }
 
     @Test
@@ -145,6 +147,6 @@ public class ListOnNoticeControllerFT {
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
         Assert.assertNotNull(res);
-        //TODO: Need to add more assertions as per the stories
+        Assert.assertTrue(res.getData().containsKey("legalAdviserList"));
     }
 }
