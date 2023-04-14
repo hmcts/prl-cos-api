@@ -230,7 +230,7 @@ public class CallbackControllerFT {
 
         when(allTabService.getAllTabsFields(any(CaseData.class))).thenReturn(caseDataMap);
 
-        MvcResult res = mockMvc.perform(post("/case-withdrawn-email-notification")
+        MvcResult res = mockMvc.perform(post("/case-withdrawn-about-to-submit")
                                           .contentType(MediaType.APPLICATION_JSON)
                                           .header("Authorization", "auth")
                                           .content(requestBody)
