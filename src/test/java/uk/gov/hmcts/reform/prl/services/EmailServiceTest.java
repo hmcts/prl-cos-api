@@ -114,7 +114,7 @@ public class EmailServiceTest {
     public void shouldGetCaseData() {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
-            .state(State.CASE_ISSUE.getValue())
+            .state(State.CASE_ISSUED.getValue())
             .build();
         CaseData caseData = CaseDetailsProvider.full().getCaseData();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);

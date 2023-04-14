@@ -13,6 +13,10 @@ public class PrlAppsConstants {
 
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
+    
+    public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
+    public static final String STATE = "state";
+
 
     public static final String YES = "Yes";
     public static final String NO = "No";
@@ -90,8 +94,8 @@ public class PrlAppsConstants {
     public static final String WITHDRAWN_STATE = State.CASE_WITHDRAWN.getValue();
     public static final String SUBMITTED_STATE = State.SUBMITTED_PAID.getValue();
     public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
-    public static final String ISSUED_STATE = State.CASE_ISSUE.getValue();
-    public static final String GATEKEEPING_STATE = State.GATE_KEEPING.getValue();
+    public static final String ISSUED_STATE = State.CASE_ISSUED.getValue();
+    public static final String JUDICIAL_REVIEW_STATE = State.JUDICIAL_REVIEW.getValue();
 
     public static final String C8_HINT = "C8";
     public static final String C1A_HINT = "C1A";
@@ -423,4 +427,5 @@ public class PrlAppsConstants {
     public static final String HEARING_PRIORITY_TYPE_ENUM = "hearingPriorityTypeEnum";
     public static final String CUSTOM_DETAILS = "customDetails";
     public static final String[] EMPTY_ARRAY = {};
+    public static final String COLON_SEPERATOR = ":";
 }

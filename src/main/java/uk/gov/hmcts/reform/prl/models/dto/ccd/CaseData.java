@@ -101,6 +101,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -580,6 +581,9 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final ManageOrders manageOrders;
 
+    @JsonProperty("childrenListForDocmosis")
+    private List<Child> childrenListForDocmosis;
+
     @JsonUnwrapped
     @Builder.Default
     private final StandardDirectionOrder standardDirectionOrder;
@@ -600,7 +604,6 @@ public class CaseData implements MappableObject {
     private String caseSolicitorOrgName;
     private String selectedOrder;
     private String selectedC21Order;
-
 
     /**
      * FL401 Court details for Pilot.
@@ -624,6 +627,7 @@ public class CaseData implements MappableObject {
 
         return this;
     }
+
 
     /**
      * Withdraw request flag.
@@ -703,6 +707,9 @@ public class CaseData implements MappableObject {
     private final RespondentChildAbduction respondentChildAbduction;
     private final RespondentOtherConcerns respondentOtherConcerns;
 
+    @JsonProperty("cafcassUploadedDocs")
+    private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
+
     /** Confirm or Edit your contact details. **/
     private final CitizenDetails resSolConfirmEditContactDetails;
 
@@ -778,4 +785,6 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
 
+
+    private NextHearingDetails nextHearingDetails;
 }
