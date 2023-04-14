@@ -600,6 +600,7 @@ public class DraftAnOrderService {
                                   .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
                                   .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
                                   .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
+                                  .hearingType(caseData.getManageOrders().getHearingType())
                                   .build()).build();
         } else {
             caseData = caseData.toBuilder()
@@ -618,6 +619,7 @@ public class DraftAnOrderService {
                                   .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                                   .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
                                   .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
+                                  .hearingType(caseData.getManageOrders().getHearingType())
                                   .build()).build();
         }
         return caseData;
