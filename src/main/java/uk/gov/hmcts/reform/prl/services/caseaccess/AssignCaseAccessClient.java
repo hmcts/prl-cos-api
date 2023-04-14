@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.AssignCaseAccessRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATION;
 
 @FeignClient(name = "aca-api-client", url = "${aca.api.url}")
 public interface AssignCaseAccessClient {

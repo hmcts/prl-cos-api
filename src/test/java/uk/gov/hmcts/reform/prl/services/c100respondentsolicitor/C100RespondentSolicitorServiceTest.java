@@ -345,7 +345,7 @@ public class C100RespondentSolicitorServiceTest {
             .build();
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest, authToken, errorList
+            callbackRequest
         );
 
         assertTrue(response.containsKey("respondents"));
@@ -405,7 +405,7 @@ public class C100RespondentSolicitorServiceTest {
     @ValueSource(strings = { "c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
         "c100ResSolAttendingTheCourt", "c100ResSolMiam", "c100ResSolCurrentOrPreviousProceedings", "c100ResSolAllegationsOfHarm",
         "c100ResSolInternationalElement", "c100ResSolAbilityToParticipate"})
-    public void populateAboutToStartCaseDataConsentToApplicationEvent(String event) {
+    void populateAboutToStartCaseDataConsentToApplicationEvent(String event) {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -423,7 +423,7 @@ public class C100RespondentSolicitorServiceTest {
             .build();
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest, authToken, errorList
+            callbackRequest
         );
 
         assertTrue(response.containsKey("respondents"));

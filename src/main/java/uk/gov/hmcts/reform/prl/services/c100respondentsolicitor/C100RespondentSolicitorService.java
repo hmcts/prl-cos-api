@@ -58,28 +58,29 @@ public class C100RespondentSolicitorService {
     @Autowired
     private final ResponseSubmitChecker responseSubmitChecker;
 
-    public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
+    public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         log.info("Inside prePopulateAboutToStartCaseData");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(
             callbackRequest
         );
+        if (solicitorRepresentedRespondent != null && solicitorRepresentedRespondent.getValue() != null) {
+            retrieveExistingResponseForSolicitor(
+                callbackRequest,
+                caseDataUpdated,
+                solicitorRepresentedRespondent
+            );
+            String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
+                + solicitorRepresentedRespondent.getValue().getLastName();
 
-        retrieveExistingResponseForSolicitor(
-            callbackRequest,
-            caseDataUpdated,
-            solicitorRepresentedRespondent
-        );
-
-        String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
-            + solicitorRepresentedRespondent.getValue().getLastName();
-
-        caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
+            caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
+        }
         return caseDataUpdated;
     }
 
-    private void retrieveExistingResponseForSolicitor(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated, Element<PartyDetails> x) {
+    private void retrieveExistingResponseForSolicitor(CallbackRequest callbackRequest, Map<String,
+        Object> caseDataUpdated, Element<PartyDetails> solicitorRepresentedRespondent) {
         log.info("finding respondentParty is present ");
         String invokedEvent = callbackRequest.getEventId().substring(0, callbackRequest.getEventId().length() - 1);
         RespondentSolicitorEvents.getCaseFieldName(invokedEvent).ifPresent(event -> {
@@ -87,26 +88,26 @@ public class C100RespondentSolicitorService {
                 case CONSENT:
                     caseDataUpdated.put(
                         event.getCaseFieldName(),
-                        x.getValue().getResponse().getConsent()
+                        solicitorRepresentedRespondent.getValue().getResponse().getConsent()
                     );
                     break;
                 case KEEP_DETAILS_PRIVATE:
                     String[] keepDetailsPrivateFields = event.getCaseFieldName().split(",");
-                    caseDataUpdated.put(keepDetailsPrivateFields[0], x.getValue().getResponse()
+                    caseDataUpdated.put(keepDetailsPrivateFields[0], solicitorRepresentedRespondent.getValue().getResponse()
                         .getSolicitorKeepDetailsPriate().getRespKeepDetailsPrivate());
-                    caseDataUpdated.put(keepDetailsPrivateFields[1], x.getValue().getResponse()
+                    caseDataUpdated.put(keepDetailsPrivateFields[1], solicitorRepresentedRespondent.getValue().getResponse()
                         .getSolicitorKeepDetailsPriate().getRespKeepDetailsPrivateConfidentiality());
                     break;
                 case CONFIRM_EDIT_CONTACT_DETAILS:
                     caseDataUpdated.put(
                         event.getCaseFieldName(),
-                        x.getValue().getResponse().getCitizenDetails()
+                        solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails()
                     );
                     break;
                 case ATTENDING_THE_COURT:
                     caseDataUpdated.put(
                         event.getCaseFieldName(),
-                        x.getValue().getResponse().getAttendToCourt()
+                        solicitorRepresentedRespondent.getValue().getResponse().getAttendToCourt()
                     );
                     break;
                 case MIAM:
@@ -114,11 +115,11 @@ public class C100RespondentSolicitorService {
                     log.info("MIAM fields, :::{}", (Object) miamFields);
                     caseDataUpdated.put(
                         miamFields[0],
-                        x.getValue().getResponse().getSolicitorMiam().getRespSolHaveYouAttendedMiam()
+                        solicitorRepresentedRespondent.getValue().getResponse().getSolicitorMiam().getRespSolHaveYouAttendedMiam()
                     );
                     caseDataUpdated.put(
                         miamFields[1],
-                        x.getValue().getResponse().getSolicitorMiam().getRespSolWillingnessToAttendMiam()
+                        solicitorRepresentedRespondent.getValue().getResponse().getSolicitorMiam().getRespSolWillingnessToAttendMiam()
                     );
                     caseDataUpdated.put(miamFields[2], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
                     caseDataUpdated.put(
@@ -130,64 +131,65 @@ public class C100RespondentSolicitorService {
                     String[] proceedingsFields = event.getCaseFieldName().split(",");
                     caseDataUpdated.put(
                         proceedingsFields[0],
-                        x.getValue().getResponse().getCurrentOrPastProceedingsForChildren()
+                        solicitorRepresentedRespondent.getValue().getResponse().getCurrentOrPastProceedingsForChildren()
                     );
                     caseDataUpdated.put(
                         proceedingsFields[1],
-                        x.getValue().getResponse().getRespondentExistingProceedings()
+                        solicitorRepresentedRespondent.getValue().getResponse().getRespondentExistingProceedings()
                     );
                     break;
                 case ALLEGATION_OF_HARM:
                     String[] allegationsOfHarmFields = event.getCaseFieldName().split(",");
                     caseDataUpdated.put(
                         allegationsOfHarmFields[0],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo()
+                        solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo()
                     );
                     caseDataUpdated.put(
                         allegationsOfHarmFields[1],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAllegationsOfHarmInfo()
+                        solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAllegationsOfHarmInfo()
                     );
                     caseDataUpdated.put(
                         allegationsOfHarmFields[2],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespDomesticAbuseInfo()
+                        solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespDomesticAbuseInfo()
                     );
                     caseDataUpdated.put(
                         allegationsOfHarmFields[3],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespChildAbuseInfo()
+                        solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespChildAbuseInfo()
                     );
                     caseDataUpdated.put(
                         allegationsOfHarmFields[4],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespChildAbductionInfo()
+                        solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespChildAbductionInfo()
                     );
                     caseDataUpdated.put(
                         allegationsOfHarmFields[5],
-                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespOtherConcernsInfo()
+                        solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespOtherConcernsInfo()
                     );
                     break;
                 case INTERNATIONAL_ELEMENT:
                     String[] internationalElementFields = event.getCaseFieldName().split(",");
                     caseDataUpdated.put(
                         internationalElementFields[0],
-                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementChildInfo()
+                        solicitorRepresentedRespondent.getValue().getResponse().getResSolInternationalElements().getInternationalElementChildInfo()
                     );
                     caseDataUpdated.put(
                         internationalElementFields[1],
-                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementParentInfo()
+                        solicitorRepresentedRespondent.getValue().getResponse().getResSolInternationalElements().getInternationalElementParentInfo()
                     );
                     caseDataUpdated.put(
                         internationalElementFields[2],
-                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementJurisdictionInfo()
+                        solicitorRepresentedRespondent.getValue().getResponse()
+                            .getResSolInternationalElements().getInternationalElementJurisdictionInfo()
                     );
                     caseDataUpdated.put(
                         internationalElementFields[3],
-                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementRequestInfo()
+                        solicitorRepresentedRespondent.getValue().getResponse().getResSolInternationalElements().getInternationalElementRequestInfo()
                     );
                     break;
                 case ABILITY_TO_PARTICIPATE:
                     String[] abilityToParticipateFields = event.getCaseFieldName().split(",");
                     caseDataUpdated.put(
                         abilityToParticipateFields[0],
-                        x.getValue().getResponse().getAbilityToParticipate()
+                        solicitorRepresentedRespondent.getValue().getResponse().getAbilityToParticipate()
                     );
                     break;
                 case VIEW_DRAFT_RESPONSE:
@@ -198,7 +200,7 @@ public class C100RespondentSolicitorService {
         });
     }
 
-    public Map<String, Object> populateAboutToSubmitCaseData(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
+    public Map<String, Object> populateAboutToSubmitCaseData(CallbackRequest callbackRequest) {
         log.info("Inside populateAboutToSubmitCaseData");
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
@@ -417,13 +419,15 @@ public class C100RespondentSolicitorService {
 
         Element<PartyDetails> representedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
 
-        PartyDetails amended = representedRespondent.getValue().toBuilder()
-            .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
-            .build();
+        if (representedRespondent != null && representedRespondent.getValue() != null) {
+            PartyDetails amended = representedRespondent.getValue().toBuilder()
+                .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
+                .build();
 
-        // respondents.set(respondents.indexOf(representedRespondent), element(representedRespondent.getId(), amended));
+            // respondents.set(respondents.indexOf(representedRespondent), element(representedRespondent.getId(), amended));
 
-        // updatedCaseData.put(RESPONDENTS, respondents);
+            // updatedCaseData.put(RESPONDENTS, respondents);
+        }
         return updatedCaseData;
     }
 

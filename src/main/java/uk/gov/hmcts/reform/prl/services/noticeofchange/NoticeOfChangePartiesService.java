@@ -138,13 +138,15 @@ public class NoticeOfChangePartiesService {
         String solicitorName = legalRepresentativeSolicitorDetails.getFullName()
             + EMPTY_SPACE_STRING + legalRepresentativeSolicitorDetails.getSurname();
 
-        NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
-            newCaseData,
-            solicitorRole,
-            solicitorName,
-            changeOrganisationRequest.getCreatedBy()
-        );
-        eventPublisher.publishEvent(noticeOfChangeEvent);
+        if (changeOrganisationRequest != null) {
+            NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
+                newCaseData,
+                solicitorRole,
+                solicitorName,
+                changeOrganisationRequest.getCreatedBy()
+            );
+            eventPublisher.publishEvent(noticeOfChangeEvent);
+        }
     }
 
     private CaseData getRepresentedPartyDetails(ChangeOrganisationRequest changeOrganisationRequest,

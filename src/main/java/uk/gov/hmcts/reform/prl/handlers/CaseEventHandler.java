@@ -128,7 +128,7 @@ public class CaseEventHandler {
                         + respondingParty.getValue().getLastName().trim();
                     log.info("representedRespondentName found: " + representedRespondentName);
                     final boolean hasSubmitted = respondingParty.getValue().getResponse() != null
-                        && YesOrNo.Yes.equals(respondingParty.getValue().getResponse()) ? true : false;
+                        && YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted());
                     return respondentSolicitorTaskListRenderer
                         .render(tasks, eventErrors, respondent, representedRespondentName, hasSubmitted, caseData.getId());
                 }

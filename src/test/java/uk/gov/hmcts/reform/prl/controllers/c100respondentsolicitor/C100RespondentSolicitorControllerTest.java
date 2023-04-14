@@ -141,7 +141,7 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
-        when(respondentSolicitorService.populateAboutToStartCaseData(callbackRequest, authToken, errorList)).thenReturn(stringObjectMap);
+        when(respondentSolicitorService.populateAboutToStartCaseData(callbackRequest)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleAboutToStart(
             authToken,
@@ -166,7 +166,7 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
-        when(respondentSolicitorService.populateAboutToSubmitCaseData(callbackRequest, authToken, errorList)).thenReturn(stringObjectMap);
+        when(respondentSolicitorService.populateAboutToSubmitCaseData(callbackRequest)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleAboutToSubmit(
             authToken,
