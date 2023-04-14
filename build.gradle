@@ -541,7 +541,9 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java',
   '**uk/gov/hmcts/reform/prl/services/hearings/HearingService.java',
   '**uk/gov/hmcts/reform/prl/services/HearingDataService.java',
-  '**uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController.java'
+  '**uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController.java',
+  '**uk/gov/hmcts/reform/prl/controllers/C100RespondentSolicitorTaskListController.java',
+  '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/RespondentTaskErrorService.java'
 
 ]
 

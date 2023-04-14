@@ -1,61 +1,64 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.MIAM_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.MIAM;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Slf4j
 @Service
 public class RespondentMiamChecker implements RespondentEventChecker {
+    @Autowired
+    RespondentTaskErrorService respondentTaskErrorService;
+
     @Override
-    public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent;
-        activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
-        return activeRespondent.filter(partyDetailsElement -> anyNonEmpty(partyDetailsElement
-                                                                              .getValue()
-                                                                              .getResponse()
-                                                                              .getSolicitorMiam()
-        )).isPresent();
+    public boolean isStarted(PartyDetails respondingParty) {
+        Optional<Response> response = findResponse(respondingParty);
+
+        return response.filter(value -> ofNullable(value.getSolicitorMiam())
+            .filter(miam -> anyNonEmpty(
+                miam.getRespSolHaveYouAttendedMiam().getAttendedMiam(),
+                miam.getRespSolHaveYouAttendedMiam().getReasonNotAttendingMiam(),
+                miam.getRespSolHaveYouAttendedMiam().getWillingToAttendMiam(),
+                miam.getRespSolWillingnessToAttendMiam().getAttendedMiam(),
+                miam.getRespSolWillingnessToAttendMiam().getReasonNotAttendingMiam(),
+                miam.getRespSolWillingnessToAttendMiam().getWillingToAttendMiam()
+            )).isPresent()).isPresent();
     }
 
     @Override
-    public boolean hasMandatoryCompleted(CaseData caseData) {
-        boolean mandatoryInfo = false;
+    public boolean isFinished(PartyDetails respondingParty) {
+        Optional<Response> response = findResponse(respondingParty);
 
-        Optional<Element<PartyDetails>> activeRespondent;
-        activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
-
-        if (activeRespondent.isPresent()) {
-            Optional<SolicitorMiam> miam = Optional.ofNullable(activeRespondent.get()
-                                                                   .getValue()
-                                                                   .getResponse()
-                                                                   .getSolicitorMiam());
-            if (!miam.isEmpty()) {
-                log.info("before checking miam mandatory info if loop...");
+        if (response.isPresent()) {
+            Optional<SolicitorMiam> miam
+                = Optional.ofNullable(response.get().getSolicitorMiam());
+            if (miam.isPresent()) {
                 if (checkMiamManadatoryCompleted(miam)) {
-                    log.info("inside checking miam mandatory info if loop...");
-                    mandatoryInfo = true;
+                    respondentTaskErrorService.removeError(MIAM_ERROR);
+                    return true;
                 }
             }
         }
-        return mandatoryInfo;
+        respondentTaskErrorService.addEventError(
+            MIAM,
+            MIAM_ERROR,
+            MIAM_ERROR.getError()
+        );
+        return false;
     }
 
     private boolean checkMiamManadatoryCompleted(Optional<SolicitorMiam> miam) {
@@ -64,10 +67,10 @@ public class RespondentMiamChecker implements RespondentEventChecker {
         if (miam.isPresent()) {
             fields.add(ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam()));
             YesOrNo attendMiam = miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam();
-            if (attendMiam.equals(YesOrNo.No)) {
+            if (YesOrNo.No.equals(attendMiam)) {
                 fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam()));
                 YesOrNo willingToAttendMiam = miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam();
-                if (willingToAttendMiam.equals(YesOrNo.No)) {
+                if (YesOrNo.No.equals(willingToAttendMiam)) {
                     fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getReasonNotAttendingMiam()));
                 }
             }

@@ -1,53 +1,67 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.CONFIRM_EDIT_CONTACT_DETAILS_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
 public class RespondentContactDetailsChecker implements RespondentEventChecker {
+    @Autowired
+    RespondentTaskErrorService respondentTaskErrorService;
+
     @Override
-    public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
-        return activeRespondent.filter(partyDetailsElement -> anyNonEmpty(partyDetailsElement
-                                                                              .getValue()
-                                                                              .getResponse()
-                                                                              .getCitizenDetails()
-        )).isPresent();
+    public boolean isStarted(PartyDetails respondingParty) {
+        Optional<Response> response = findResponse(respondingParty);
+
+        if (response.isPresent()) {
+            return ofNullable(response.get().getCitizenDetails())
+                .filter(contact -> anyNonEmpty(
+                    contact.getFirstName(),
+                    contact.getLastName(),
+                    contact.getPreviousName(),
+                    contact.getDateOfBirth(),
+                    contact.getPlaceOfBirth(),
+                    contact.getAddress(),
+                    contact.getAddressHistory(),
+                    contact.getContact().getEmail(),
+                    contact.getContact().getPhoneNumber()
+                )).isPresent();
+        }
+        return false;
     }
 
     @Override
-    public boolean hasMandatoryCompleted(CaseData caseData) {
-        boolean mandatoryInfo = false;
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
+    public boolean isFinished(PartyDetails respondingParty) {
+        Optional<Response> response = findResponse(respondingParty);
 
-        if (activeRespondent.isPresent()) {
-            Optional<CitizenDetails> citizenDetails = Optional.ofNullable(activeRespondent.get()
-                                                                              .getValue()
-                                                                              .getResponse()
+        if (response.isPresent()) {
+            Optional<CitizenDetails> citizenDetails = Optional.ofNullable(response.get()
                                                                               .getCitizenDetails());
             if (!citizenDetails.isEmpty() && checkContactDetailsMandatoryCompleted(citizenDetails)) {
-                mandatoryInfo = true;
+                respondentTaskErrorService.removeError(CONFIRM_EDIT_CONTACT_DETAILS_ERROR);
+                return true;
             }
         }
-        return mandatoryInfo;
+        respondentTaskErrorService.addEventError(
+            CONFIRM_EDIT_CONTACT_DETAILS,
+            CONFIRM_EDIT_CONTACT_DETAILS_ERROR,
+            CONFIRM_EDIT_CONTACT_DETAILS_ERROR.getError()
+        );
+        return false;
     }
 
     private boolean checkContactDetailsMandatoryCompleted(Optional<CitizenDetails> citizenDetails) {
@@ -62,8 +76,8 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
                 return false;
             }
             fields.add(ofNullable(citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years()));
-            if (citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years()
-                .equals(YesOrNo.No)) {
+            if (YesOrNo.No
+                .equals(citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years())) {
                 fields.add(ofNullable(citizenDetails.get().getAddressHistory().getPreviousAddressHistory()));
             }
             fields.add(ofNullable(citizenDetails.get().getContact().getPhoneNumber()));

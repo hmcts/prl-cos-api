@@ -7,12 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
+import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
-import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
@@ -24,41 +23,31 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMi
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
-import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.SUBMIT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class C100RespondentSolicitorService {
-    public static final String CHOOSE_RESPONDENT_DYNAMIC_LIST = "chooseRespondentDynamicList";
     public static final String RESPONDENTS = "respondents";
-    public static final String NO_ACTIVE_RESPONDENT_ERR_MSG
-        = "You must select an active respondent from the list to start representing through 'Select Respondent' event";
-    private final CcdDataStoreService ccdDataStoreService;
+    public static final String RESPONDENT_NAME_FOR_RESPONSE = "respondentNameForResponse";
+    public static final String TECH_ERROR = "This event cannot be started. Please contact support team";
+    public static final String RESPONSE_ALREADY_SUBMITTED_ERROR = "This event cannot be started as the response has already been submitted.";
 
     @Autowired
     private final RespondentSolicitorMiamService miamService;
-
-    @Autowired
-    private final ResponseSubmitChecker responseSubmitChecker;
 
     @Autowired
     private final ObjectMapper objectMapper;
@@ -66,32 +55,34 @@ public class C100RespondentSolicitorService {
     @Autowired
     private final DocumentGenService documentGenService;
 
+    @Autowired
+    private final ResponseSubmitChecker responseSubmitChecker;
+
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
         log.info("Inside prePopulateAboutToStartCaseData");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = objectMapper.convertValue(
-            caseDataUpdated,
-            CaseData.class
-        );
-        Optional<Element<PartyDetails>> getActiveRespondent = findActiveRespondent(caseData, authorisation);
 
-        getActiveRespondent.ifPresentOrElse(x -> retrieveExistingResponseForSolicitor(
+        Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(
+            callbackRequest
+        );
+
+        retrieveExistingResponseForSolicitor(
             callbackRequest,
             caseDataUpdated,
-            x), () -> errorList.add(
-            "You must select a respondent to represent through 'Respond to application' event"));
+            solicitorRepresentedRespondent
+        );
 
-        String activeRespondentName = getActiveRespondent.isPresent()
-            ? (getActiveRespondent.get().getValue().getFirstName() + " "
-            + getActiveRespondent.get().getValue().getLastName()) : null;
+        String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
+            + solicitorRepresentedRespondent.getValue().getLastName();
 
-        caseDataUpdated.put("respondentNameForResponse", activeRespondentName);
+        caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
         return caseDataUpdated;
     }
 
     private void retrieveExistingResponseForSolicitor(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated, Element<PartyDetails> x) {
         log.info("finding respondentParty is present ");
-        RespondentSolicitorEvents.getCaseFieldName(callbackRequest.getEventId()).ifPresent(event -> {
+        String invokedEvent = callbackRequest.getEventId().substring(0, callbackRequest.getEventId().length() - 1);
+        RespondentSolicitorEvents.getCaseFieldName(invokedEvent).ifPresent(event -> {
             switch (event) {
                 case CONSENT:
                     caseDataUpdated.put(
@@ -121,8 +112,14 @@ public class C100RespondentSolicitorService {
                 case MIAM:
                     String[] miamFields = event.getCaseFieldName().split(",");
                     log.info("MIAM fields, :::{}", (Object) miamFields);
-                    caseDataUpdated.put(miamFields[0], x.getValue().getResponse().getSolicitorMiam().getRespSolHaveYouAttendedMiam());
-                    caseDataUpdated.put(miamFields[1], x.getValue().getResponse().getSolicitorMiam().getRespSolWillingnessToAttendMiam());
+                    caseDataUpdated.put(
+                        miamFields[0],
+                        x.getValue().getResponse().getSolicitorMiam().getRespSolHaveYouAttendedMiam()
+                    );
+                    caseDataUpdated.put(
+                        miamFields[1],
+                        x.getValue().getResponse().getSolicitorMiam().getRespSolWillingnessToAttendMiam()
+                    );
                     caseDataUpdated.put(miamFields[2], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
                     caseDataUpdated.put(
                         miamFields[3],
@@ -210,16 +207,17 @@ public class C100RespondentSolicitorService {
         );
 
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
+        Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
 
-        findActiveRespondent(caseData, authorisation).ifPresentOrElse(
-            x -> respondents.stream()
-                .filter(party -> Objects.equals(party.getId(), x.getId()))
-                .findFirst()
-                .ifPresent(party -> {
-                    log.info("finding respondentParty is present ");
-                    RespondentSolicitorEvents.getCaseFieldName(callbackRequest.getEventId())
-                        .ifPresent(event -> buildResponseForRespondent(caseData, respondents, party, event));
-                }), () -> errorList.add(NO_ACTIVE_RESPONDENT_ERR_MSG));
+        String invokingEvent = callbackRequest.getEventId().substring(0, callbackRequest.getEventId().length() - 1);
+        RespondentSolicitorEvents.getCaseFieldName(invokingEvent)
+            .ifPresent(event -> buildResponseForRespondent(
+                caseData,
+                respondents,
+                solicitorRepresentedRespondent,
+                event
+            ));
+
         updatedCaseData.put(RESPONDENTS, respondents);
         return updatedCaseData;
     }
@@ -275,7 +273,7 @@ public class C100RespondentSolicitorService {
                     .solicitorMiam(SolicitorMiam.builder()
                                        .respSolHaveYouAttendedMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam())
                                        .respSolWillingnessToAttendMiam(caseData.getRespondentSolicitorWillingnessToAttendMiam())
-                              .build())
+                                       .build())
                     .build();
                 break;
             case CURRENT_OR_PREVIOUS_PROCEEDINGS:
@@ -322,115 +320,28 @@ public class C100RespondentSolicitorService {
         respondents.set(respondents.indexOf(party), element(party.getId(), amended));
     }
 
-    private Optional<Element<PartyDetails>> findActiveRespondent(CaseData caseData, String authorisation) {
-        Optional<Element<PartyDetails>> activeRespondent = Optional.empty();
-        List<Element<PartyDetails>> solicitorRepresentedRespondents
-            = findSolicitorRepresentedRespondents(caseData, authorisation);
+    private Element<PartyDetails> findSolicitorRepresentedRespondents(CallbackRequest callbackRequest) {
+        Element<PartyDetails> solicitorRepresentedRespondent = null;
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        if (solicitorRepresentedRespondents != null && !solicitorRepresentedRespondents.isEmpty()) {
-            activeRespondent = solicitorRepresentedRespondents
-                .stream()
-                .filter(x -> Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-                .findFirst();
-        }
-        return activeRespondent;
-    }
+        if (callbackRequest.getEventId().isEmpty()) {
+            throw new RespondentSolicitorException(TECH_ERROR);
+        } else {
+            String invokingSolicitor = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
+            log.info("****** invokingSolicitor is " + invokingSolicitor);
 
-    private List<Element<PartyDetails>> findSolicitorRepresentedRespondents(CaseData caseData, String authorisation) {
-        List<Element<PartyDetails>> solicitorRepresentedRespondents = new ArrayList<>();
-        FindUserCaseRolesResponse findUserCaseRolesResponse = findUserCaseRoles(caseData, authorisation);
+            Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingSolicitor);
 
-        if (findUserCaseRolesResponse != null) {
-            log.info("findUserCaseRolesResponse is not null ");
-            solicitorRepresentedRespondents = getSolicitorRepresentedRespondents(
-                caseData,
-                findUserCaseRolesResponse
-            );
-        }
-        return solicitorRepresentedRespondents;
-    }
-
-    private List<Element<PartyDetails>> getSolicitorRepresentedRespondents(CaseData caseData, FindUserCaseRolesResponse findUserCaseRolesResponse) {
-        List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
-        for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-            SolicitorRole.from(caseUser.getCaseRole()).ifPresent(
-                x -> {
-                    Element<PartyDetails> respondent;
-                    respondent = caseData.getRespondents().get(x.getIndex());
-                    if (respondent.getValue().getResponse() != null
-                        && !(Yes.equals(respondent.getValue().getResponse().getC7ResponseSubmitted()))) {
-                        solicitorRepresentedParties.add(respondent);
-                    } else if (respondent.getValue().getResponse() == null) {
-                        solicitorRepresentedParties.add(respondent);
-                    }
-                });
-        }
-        return solicitorRepresentedParties;
-    }
-
-    private FindUserCaseRolesResponse findUserCaseRoles(CaseData caseData, String authorisation) {
-        log.info("findUserCaseRoles : caseId is:: " + caseData.getId());
-        return ccdDataStoreService.findUserCaseRoles(
-            String.valueOf(caseData.getId()),
-            authorisation
-        );
-    }
-
-    public Map<String, Object> populateSolicitorRespondentList(CallbackRequest callbackRequest, String authorisation) {
-        Map<String, Object> headerMap = new HashMap<>();
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        headerMap.put(CHOOSE_RESPONDENT_DYNAMIC_LIST, ElementUtils.asDynamicList(
-            findSolicitorRepresentedRespondents(caseData, authorisation),
-            null,
-            PartyDetails::getLabelForDynamicList
-        ));
-        return headerMap;
-    }
-
-    public Map<String, Object> updateActiveRespondentSelectionBySolicitor(CallbackRequest callbackRequest, String authorisation) {
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = objectMapper.convertValue(
-            updatedCaseData,
-            CaseData.class
-        );
-
-        UUID selectedRespondentId = caseData.getChooseRespondentDynamicList().getValueCodeAsUuid();
-        log.info("updateRespondents:: selectedRespondentId" + selectedRespondentId);
-        List<Element<PartyDetails>> respondents = caseData.getRespondents();
-
-        respondents.stream()
-            .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
-            .findFirst()
-            .ifPresent(party -> {
-                PartyDetails amended = party.getValue().toBuilder()
-                    .response(party.getValue().getResponse().toBuilder().activeRespondent(Yes).build())
-                    .build();
-                if (callbackRequest.getEventId().equalsIgnoreCase(SUBMIT.getEventId())) {
-                    amended = party.getValue().toBuilder()
-                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
-                        .build();
+            if (solicitorRole.isPresent()) {
+                solicitorRepresentedRespondent = caseData.getRespondents().get(solicitorRole.get().getIndex());
+                if (solicitorRepresentedRespondent.getValue().getResponse() != null
+                    && Yes.equals(solicitorRepresentedRespondent.getValue().getResponse().getC7ResponseSubmitted())) {
+                    throw new RespondentSolicitorException(
+                        RESPONSE_ALREADY_SUBMITTED_ERROR);
                 }
-                respondents.set(respondents.indexOf(party), element(party.getId(), amended));
-            });
-
-        findSolicitorRepresentedRespondents(caseData, authorisation)
-            .forEach(solicitorRepresentedParty ->
-                respondents.stream()
-                    .filter(party -> Objects.equals(party.getId(), solicitorRepresentedParty.getId())
-                        && !Objects.equals(party.getId(), selectedRespondentId))
-                    .forEach(party -> {
-                        PartyDetails amended = party.getValue().toBuilder()
-                            .response(party.getValue().getResponse().toBuilder().activeRespondent(YesOrNo.No).build())
-                            .build();
-
-                        respondents.set(respondents.indexOf(party), element(party.getId(), amended));
-                    })
-            );
-        updatedCaseData.put(RESPONDENTS, respondents);
-        return updatedCaseData;
+            }
+        }
+        return solicitorRepresentedRespondent;
     }
 
     public Map<String, Object> generateConfidentialityDynamicSelectionDisplay(CallbackRequest callbackRequest) {
@@ -441,7 +352,7 @@ public class C100RespondentSolicitorService {
         StringBuilder selectedList = new StringBuilder();
 
         selectedList.append("<ul>");
-        for (ConfidentialityListEnum confidentiality: caseData.getKeepContactDetailsPrivateOther()
+        for (ConfidentialityListEnum confidentiality : caseData.getKeepContactDetailsPrivateOther()
             .getConfidentialityList()) {
             selectedList.append("<li>");
             selectedList.append(confidentiality.getDisplayedValue());
@@ -462,10 +373,22 @@ public class C100RespondentSolicitorService {
             caseDataUpdated,
             CaseData.class
         );
+        String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
         log.info("Event name:::{}", callbackRequest.getEventId());
         boolean mandatoryFinished = false;
+        if (!caseData.getRespondents().isEmpty()) {
+            Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingRespondent);
+            if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
+                Element<PartyDetails> respondingParty = caseData.getRespondents().get(solicitorRole.get().getIndex());
 
-        mandatoryFinished = responseSubmitChecker.hasMandatoryCompleted(caseData);
+                if (respondingParty.getValue() != null
+                    && respondingParty.getValue().getUser() != null
+                    && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
+
+                    mandatoryFinished = responseSubmitChecker.isFinished(respondingParty.getValue());
+                }
+            }
+        }
         if (!mandatoryFinished) {
             errorList.add(
                 "Response submission is not allowed for this case unless you finish all the mandatory information");
@@ -476,7 +399,10 @@ public class C100RespondentSolicitorService {
                 SOLICITOR_C7_FINAL_DOCUMENT,
                 false
             );
-            caseDataUpdated.put("finalC7ResponseDoc", document);
+            log.info("finalC7ResponseDoc " + document);
+            //Commenting out for the time being as C7 changes are not currently present in corresponding CCD pr
+            //Will revert it back later
+            //caseDataUpdated.put("finalC7ResponseDoc", document);
         }
         return caseDataUpdated;
     }
@@ -488,30 +414,15 @@ public class C100RespondentSolicitorService {
             CaseData.class
         );
 
-        UUID selectedRespondentId = caseData.getChooseRespondentDynamicList().getValueCodeAsUuid();
-        log.info("updateRespondents:: selectedRespondentId" + selectedRespondentId);
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
 
-        respondents.stream()
-            .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
-            .findFirst()
-            .ifPresent(party -> {
-                PartyDetails amended = party.getValue().toBuilder()
-                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
-                        .build();
+        Element<PartyDetails> representedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
 
-                respondents.set(respondents.indexOf(party), element(party.getId(), amended));
-            });
-        respondents.stream()
-            .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
-            .findFirst()
-            .ifPresent(party -> {
-                PartyDetails amended = party.getValue().toBuilder()
-                    .response(party.getValue().getResponse().toBuilder().activeRespondent(YesOrNo.No).build())
-                    .build();
+        PartyDetails amended = representedRespondent.getValue().toBuilder()
+            .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
+            .build();
 
-                respondents.set(respondents.indexOf(party), element(party.getId(), amended));
-            });
+        respondents.set(respondents.indexOf(representedRespondent), element(representedRespondent.getId(), amended));
 
         updatedCaseData.put(RESPONDENTS, respondents);
         return updatedCaseData;
