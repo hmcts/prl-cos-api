@@ -47,14 +47,13 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
     @Override
     public boolean isFinished(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
-        boolean mandatoryInfo = false;
 
         if (response.isPresent()) {
             Optional<CitizenDetails> citizenDetails = Optional.ofNullable(response.get()
                                                                               .getCitizenDetails());
             if (!citizenDetails.isEmpty() && checkContactDetailsMandatoryCompleted(citizenDetails)) {
                 respondentTaskErrorService.removeError(CONFIRM_EDIT_CONTACT_DETAILS_ERROR);
-                mandatoryInfo = true;
+                return true;
             }
         }
         respondentTaskErrorService.addEventError(
@@ -62,7 +61,7 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
             CONFIRM_EDIT_CONTACT_DETAILS_ERROR,
             CONFIRM_EDIT_CONTACT_DETAILS_ERROR.getError()
         );
-        return mandatoryInfo;
+        return false;
     }
 
     private boolean checkContactDetailsMandatoryCompleted(Optional<CitizenDetails> citizenDetails) {

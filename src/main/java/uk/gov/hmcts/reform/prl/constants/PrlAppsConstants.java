@@ -13,7 +13,7 @@ public class PrlAppsConstants {
 
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
-    
+
     public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
     public static final String STATE = "state";
 
@@ -393,6 +393,7 @@ public class PrlAppsConstants {
     public static final String TESTING_SUPPORT_LD_FLAG_ENABLED = "testing-support";
 
     public static final String CASE_DATA_ID = "id";
+
     public static final String LISTWITHOUTNOTICE_HEARINGDETAILS = "listWithoutNoticeHearingDetails";
 
     public static final String DATE_CONFIRMED_IN_HEARINGS_TAB = "dateConfirmedInHearingsTab";
@@ -431,4 +432,7 @@ public class PrlAppsConstants {
     public static final String CUSTOM_DETAILS = "customDetails";
     public static final String[] EMPTY_ARRAY = {};
     public static final String COLON_SEPERATOR = ":";
+
+    public static final String RESPONDENTS = "respondents";
+    public static final String RESPONDENT_TABLE = "respondentTable";
 }

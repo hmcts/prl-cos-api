@@ -55,7 +55,6 @@ public class KeepDetailsPrivateChecker implements RespondentEventChecker {
     @Override
     public boolean isFinished(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
-        boolean mandatoryInfo = false;
 
         if (response.isPresent()) {
 
@@ -63,13 +62,13 @@ public class KeepDetailsPrivateChecker implements RespondentEventChecker {
                                                                                                .getSolicitorKeepDetailsPriate());
             if (!keepDetailsPrivate.isEmpty() && checkKeepDetailsPrivateMandatoryCompleted(keepDetailsPrivate)) {
                 respondentTaskErrorService.removeError(KEEP_DETAILS_PRIVATE_ERROR);
-                mandatoryInfo = true;
+                return true;
             }
         }
         respondentTaskErrorService.addEventError(KEEP_DETAILS_PRIVATE,
                                                  KEEP_DETAILS_PRIVATE_ERROR,
                                                  KEEP_DETAILS_PRIVATE_ERROR.getError());
-        return mandatoryInfo;
+        return false;
     }
 
     private boolean checkKeepDetailsPrivateMandatoryCompleted(Optional<SolicitorKeepDetailsPrivate> keepDetailsPrivate) {

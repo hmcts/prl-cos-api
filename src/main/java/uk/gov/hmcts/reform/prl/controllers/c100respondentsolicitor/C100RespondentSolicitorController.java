@@ -52,9 +52,7 @@ public class C100RespondentSolicitorController {
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(respondentSolicitorService.populateAboutToStartCaseData(
-                callbackRequest,
-                authorisation,
-                errorList
+                callbackRequest
             )).errors(errorList).build();
     }
 
@@ -72,9 +70,7 @@ public class C100RespondentSolicitorController {
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(respondentSolicitorService.populateAboutToSubmitCaseData(
-                callbackRequest,
-                authorisation,
-                errorList
+                callbackRequest
             ))
             .errors(errorList).build();
     }

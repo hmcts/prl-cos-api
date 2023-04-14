@@ -113,6 +113,7 @@ uk:
             CA_APPLICANT_SOLICITOR_RES_NOTIFICATION: a08975e3-6438-4f58-a0f6-827c0dcab291
             CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION: b6224e6a-f55c-46f8-bfc7-631d273070a4
             CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
+            CA_DA_RESPONDENT_SOLICITOR_NOC: 68f0d268-8062-4199-8695-2661081a836a
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -400,6 +401,12 @@ document:
       prl_c6a_filename: Notice_Of_Parties_Order_C6a.pdf
       prl_c6a_draft_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Draft.docx
       prl_c6a_draft_filename: Notice_Of_Parties_Order_C6a_draft.pdf
+      prl_solicitor_c7_draft_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-DRAFT.docx
+      prl_solicitor_c7_draft_filename: C7_Response_Draft_Document.pdf
+      prl_solicitor_c7_final_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-FINAL.docx
+      prl_solicitor_c7_final_filename: C7_Response_Final_Document.pdf
+      prl_solicitor_c1a_draft_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-DRAFT.docx
+      prl_solicitor_c1a_draft_filename: C1A_Allegation_Of_Harm_Draft_Document.pdf
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf

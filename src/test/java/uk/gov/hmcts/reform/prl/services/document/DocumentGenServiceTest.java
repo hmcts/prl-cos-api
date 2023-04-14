@@ -2286,7 +2286,7 @@ public class DocumentGenServiceTest {
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C7_FINAL_DOCUMENT, false);
         verify(dgsService, times(2)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
-    
+
     @Test
     public void generateDocumentsForTestingSupportForC100Test() throws Exception {
 

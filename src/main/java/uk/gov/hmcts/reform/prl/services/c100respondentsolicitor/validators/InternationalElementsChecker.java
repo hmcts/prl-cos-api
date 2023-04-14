@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -17,6 +18,7 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEv
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
+@Slf4j
 @Service
 public class InternationalElementsChecker implements RespondentEventChecker {
     @Autowired
@@ -26,22 +28,18 @@ public class InternationalElementsChecker implements RespondentEventChecker {
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
 
-        if (response.isPresent()) {
-            return ofNullable(response.get().getResSolInternationalElements())
-                .filter(resSolInternationalElements -> anyNonEmpty(
-                    resSolInternationalElements.getInternationalElementChildInfo(),
-                    resSolInternationalElements.getInternationalElementJurisdictionInfo(),
-                    resSolInternationalElements.getInternationalElementParentInfo(),
-                    resSolInternationalElements.getInternationalElementParentInfo()
-                )).isPresent();
-        }
-        return false;
+        return response.filter(value -> ofNullable(value.getResSolInternationalElements())
+            .filter(resSolInternationalElements -> anyNonEmpty(
+                resSolInternationalElements.getInternationalElementChildInfo(),
+                resSolInternationalElements.getInternationalElementJurisdictionInfo(),
+                resSolInternationalElements.getInternationalElementParentInfo(),
+                resSolInternationalElements.getInternationalElementParentInfo()
+            )).isPresent()).isPresent();
     }
 
     @Override
     public boolean isFinished(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
-        boolean mandatoryInfo = false;
 
         if (response.isPresent()) {
             Optional<ResSolInternationalElements> solicitorInternationalElement
@@ -49,7 +47,7 @@ public class InternationalElementsChecker implements RespondentEventChecker {
             if (!solicitorInternationalElement.isEmpty() && checkInternationalElementMandatoryCompleted(
                 solicitorInternationalElement)) {
                 respondentTaskErrorService.removeError(INTERNATIONAL_ELEMENT_ERROR);
-                mandatoryInfo = true;
+                return true;
             }
         }
         respondentTaskErrorService.addEventError(
@@ -57,7 +55,7 @@ public class InternationalElementsChecker implements RespondentEventChecker {
             INTERNATIONAL_ELEMENT_ERROR,
             INTERNATIONAL_ELEMENT_ERROR.getError()
         );
-        return mandatoryInfo;
+        return false;
     }
 
     private boolean checkInternationalElementMandatoryCompleted(Optional<ResSolInternationalElements> internationalElements) {
@@ -71,26 +69,26 @@ public class InternationalElementsChecker implements RespondentEventChecker {
                 fields.add(ofNullable(internationalElements.get().getInternationalElementChildInfo().getReasonForChildDetails()));
             }
 
-            Optional<YesOrNo> reasonForParent = ofNullable(internationalElements.get().getInternationalElementChildInfo().getReasonForParent());
+            Optional<YesOrNo> reasonForParent = ofNullable(internationalElements.get().getInternationalElementParentInfo().getReasonForParent());
             fields.add(reasonForParent);
             if (reasonForParent.isPresent() && YesOrNo.Yes.equals(reasonForParent.get())) {
                 fields.add(ofNullable(internationalElements.get().getInternationalElementParentInfo().getReasonForParentDetails()));
             }
 
             Optional<YesOrNo> reasonForJurisdiction = ofNullable(internationalElements.get()
-                                                                     .getInternationalElementChildInfo().getReasonForJurisdiction());
+                                                                     .getInternationalElementJurisdictionInfo().getReasonForJurisdiction());
             fields.add(reasonForJurisdiction);
             if (reasonForJurisdiction.isPresent() && YesOrNo.Yes.equals(reasonForJurisdiction.get())) {
-                fields.add(ofNullable(internationalElements.get().getInternationalElementParentInfo().getReasonForJurisdictionDetails()));
+                fields.add(ofNullable(internationalElements.get().getInternationalElementJurisdictionInfo().getReasonForJurisdictionDetails()));
             }
 
-            Optional<YesOrNo> requestToAuthority = ofNullable(internationalElements.get().getInternationalElementChildInfo().getRequestToAuthority());
+            Optional<YesOrNo> requestToAuthority = ofNullable(internationalElements.get().getInternationalElementRequestInfo()
+                                                                  .getRequestToAuthority());
             fields.add(requestToAuthority);
             if (requestToAuthority.isPresent() && YesOrNo.Yes.equals(requestToAuthority.get())) {
-                fields.add(ofNullable(internationalElements.get().getInternationalElementParentInfo().getRequestToAuthorityDetails()));
+                fields.add(ofNullable(internationalElements.get().getInternationalElementRequestInfo().getRequestToAuthorityDetails()));
             }
         }
-
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 
