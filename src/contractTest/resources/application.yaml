@@ -327,6 +327,8 @@ document:
       prl_solicitor_c7_draft_filename: C7_Response_Draft_Document.pdf
       prl_solicitor_c7_final_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-FINAL.docx
       prl_solicitor_c7_final_filename: C7_Response_Final_Document.pdf
+      prl_solicitor_c1a_draft_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-DRAFT.docx
+      prl_solicitor_c1a_draft_filename: C1A_Allegation_Of_Harm_Draft_Document.pdf
       prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
       prl_c1a_blank_filename: C1ABlankDocument.pdf
       prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx

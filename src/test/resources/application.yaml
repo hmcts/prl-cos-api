@@ -147,6 +147,7 @@ uk:
             prl_c6a_filename: Notice_Of_Parties_Order_C6a.pdf
             prl_c6a_draft_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Draft.docx
             prl_c6a_draft_filename: Notice_Of_Parties_Order_C6a_draft.pdf
+            CA_DA_RESPONDENT_SOLICITOR_NOC: 68f0d268-8062-4199-8695-2661081a836a
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:

@@ -22,7 +22,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ResponseSubmitCheckerTest {
@@ -56,13 +55,17 @@ public class ResponseSubmitCheckerTest {
 
     CaseData emptyCaseData;
 
+    PartyDetails respondent;
+
+    PartyDetails emptyRespondent;
+
     @Before
     public void setup() {
+        emptyRespondent = PartyDetails.builder().build();
 
         PartyDetails respondent = PartyDetails.builder()
             .response(Response
                           .builder()
-                          .activeRespondent(Yes)
                           .consent(Consent
                                        .builder()
                                        .build())
@@ -93,7 +96,7 @@ public class ResponseSubmitCheckerTest {
     @Test
     public void isStarted() {
 
-        Boolean bool = responseSubmitChecker.isStarted(emptyCaseData);
+        Boolean bool = responseSubmitChecker.isStarted(emptyRespondent);
         assertFalse(bool);
     }
 
@@ -109,7 +112,7 @@ public class ResponseSubmitCheckerTest {
         when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
 
 
-        Boolean bool = responseSubmitChecker.hasMandatoryCompleted(emptyCaseData);
+        Boolean bool = responseSubmitChecker.isFinished(emptyRespondent);
 
         assertFalse(bool);
     }
