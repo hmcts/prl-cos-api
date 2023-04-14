@@ -388,10 +388,11 @@ public class DraftAnOrderService {
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
 
         //Set existing hearingType from draft order
+        ManageOrders manageOrders = null != caseData.getManageOrders()
+            ? caseData.getManageOrders().toBuilder().hearingType(selectedOrder.getHearingType()).build()
+            : ManageOrders.builder().hearingType(selectedOrder.getHearingType()).build();
         caseData = caseData.toBuilder()
-            .manageOrders(caseData.getManageOrders().toBuilder()
-                              .hearingType(selectedOrder.getHearingType())
-                              .build())
+            .manageOrders(manageOrders)
             .build();
         //PRL-3319 - Fetch hearings dropdown
         caseData = manageOrderService.populateHearingsDropdown(authorization, caseData);
