@@ -15,24 +15,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Getter
 public enum SolicitorRole {
-    SOLICITORA("[SOLICITORA]", 0, Representing.RESPONDENT),
-    SOLICITORB("[SOLICITORB]", 1, Representing.RESPONDENT),
-    SOLICITORC("[SOLICITORC]", 2, Representing.RESPONDENT),
-    SOLICITORD("[SOLICITORD]", 3, Representing.RESPONDENT),
-    SOLICITORE("[SOLICITORE]", 4, Representing.RESPONDENT),
-    SOLICITORF("[SOLICITORF]", 5, Representing.RESPONDENT),
-    SOLICITORG("[SOLICITORG]", 6, Representing.RESPONDENT),
-    SOLICITORH("[SOLICITORH]", 7, Representing.RESPONDENT),
-    SOLICITORI("[SOLICITORI]", 8, Representing.RESPONDENT),
-    SOLICITORJ("[SOLICITORJ]", 9, Representing.RESPONDENT);
+    SOLICITORA("[SOLICITORA]", 0, Representing.RESPONDENT, "A"),
+    SOLICITORB("[SOLICITORB]", 1, Representing.RESPONDENT, "B"),
+    SOLICITORC("[SOLICITORC]", 2, Representing.RESPONDENT, "C"),
+    SOLICITORD("[SOLICITORD]", 3, Representing.RESPONDENT,"D"),
+    SOLICITORE("[SOLICITORE]", 4, Representing.RESPONDENT,"E"),
+    SOLICITORF("[SOLICITORF]", 5, Representing.RESPONDENT,"F"),
+    SOLICITORG("[SOLICITORG]", 6, Representing.RESPONDENT,"G"),
+    SOLICITORH("[SOLICITORH]", 7, Representing.RESPONDENT, "H"),
+    SOLICITORI("[SOLICITORI]", 8, Representing.RESPONDENT, "I"),
+    SOLICITORJ("[SOLICITORJ]", 9, Representing.RESPONDENT, "J");
 
     private final String caseRoleLabel;
     private final int index;
     private final Representing representing;
+    private final String eventId;
 
-    public static Optional<SolicitorRole> from(String label) {
+    public static Optional<SolicitorRole> from(String eventId) {
         return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
-            .filter(role -> role.caseRoleLabel.equals(label))
+            .filter(role -> role.eventId.equals(eventId))
             .findFirst();
     }
 

@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
@@ -2429,5 +2430,52 @@ public class ManageOrderServiceTest {
             .build();
         Map<String, Object> result = manageOrderService.populatePreviewOrder("test", callbackRequest, caseData);
         Assert.assertTrue(!result.isEmpty());
+    }
+
+    @Test
+    public void testPopulateFinalUploadOrderFromCaseDataWithMultipleOrdersForWelsh() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(PartyDetails.builder().firstName("firstname")
+                                 .lastName("lastname")
+                                 .representativeFirstName("firstname")
+                                 .representativeLastName("lastname")
+                                 .build())
+            .respondentsFL401(PartyDetails.builder().firstName("firstname")
+                                  .lastName("lastname")
+                                  .representativeFirstName("firstname")
+                                  .representativeLastName("lastname")
+                                  .build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(new ArrayList<>())
+            .dateOrderMade(LocalDate.now())
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.interim)
+            .manageOrders(manageOrders.toBuilder()
+                              .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                              .build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .build();
+
+        ReflectionTestUtils.setField(manageOrderService, "c21WelshTemplate", "c21-WEL-template");
+
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
     }
 }
