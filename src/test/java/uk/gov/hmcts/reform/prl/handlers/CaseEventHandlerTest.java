@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
@@ -51,6 +53,7 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.FINISHED;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -359,5 +362,68 @@ public class CaseEventHandlerTest {
                 String.valueOf(caseData.getId())
             )
         );
+    }
+
+    @Test
+    public void testGetRespondentTaskList() {
+        List<Element<PartyDetails>> respondents = new ArrayList<>();
+        respondents.add(element(PartyDetails.builder()
+                                    .user(User.builder().build())
+                                    .firstName("test")
+                                    .lastName("test")
+                                    .email("test@hmcts.net")
+                                    .build()));
+
+        final CaseData caseData = CaseData.builder()
+            .id(nextLong())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(respondents)
+            .build();
+        List<EventValidationErrors> errors = new ArrayList<>();
+
+        EventValidationErrors error1 = EventValidationErrors.builder()
+            .event(FL401_TYPE_OF_APPLICATION)
+            .build();
+
+        EventValidationErrors error2 = EventValidationErrors.builder()
+            .event(ALLEGATIONS_OF_HARM)
+            .build();
+
+        errors.add(error1);
+        errors.add(error2);
+
+        when(taskErrorService.getEventErrors(caseData)).thenReturn(errors);
+
+        final List<Task> c100Tasks = List.of(
+            Task.builder().event(CASE_NAME).state(FINISHED).build(),
+            Task.builder().event(MIAM).state(NOT_STARTED).build()
+        );
+
+        final List<RespondentTask> respondentTask = List.of(
+            RespondentTask.builder().event(CONSENT).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS).build()
+        );
+
+        final String c100renderedTaskList = "<h1>Case Name</h1><h2>Miam</h2>";
+
+        final String respondentTaskListA = "<h3>Respond to the application for Respondent A";
+        final String respondentTaskListB = "<h3>Respond to the application for Respondent B";
+
+        List<RespondentEventValidationErrors> resErrors = new ArrayList<>();
+
+        when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
+        when(taskListRenderer.render(c100Tasks, errors, true, caseData)).thenReturn(c100renderedTaskList);
+        when(respondentSolicitorTaskListRenderer.render(
+            respondentTask,
+            resErrors,
+            "A",
+            "test test", false, 123456L
+        )).thenReturn(respondentTaskListA);
+
+        caseEventHandler.getRespondentTaskList(caseData, "A");
+
+        verify(respondentSolicitorTaskListRenderer).render(Mockito.anyList(), Mockito.anyList(), Mockito.anyString(),
+                                                           Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong());
+
     }
 }
