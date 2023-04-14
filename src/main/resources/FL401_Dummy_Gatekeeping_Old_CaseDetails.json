@@ -136,7 +136,9 @@
         }
       }
     ],
-    "respondentTaskList": "<div class='width-50'><h3>Respond to the application</h3><p>This online response combines forms C7 and C8. It also allows you to make your own allegations of harm and violence (C1A) in the section of safety concerns.</p><div>\n\n<div class='width-50'>\n\n<br/>\n\n## 1. Consent to the Application\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolConsentingToApplication/c100ResSolConsentingToApplication1'>Do you give your consent?</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## 2. Your details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolKeepDetailsPrivate/c100ResSolKeepDetailsPrivate1'>Keep your details private</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolConfirmOrEditContactDetails/c100ResSolConfirmOrEditContactDetails1'>Edit your contact details</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolAttendingTheCourt/c100ResSolAttendingTheCourt1'>Attending the court</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## 3. Application details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolMiam/c100ResSolMiam1'>MIAM</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolCurrentOrPreviousProceedings/c100ResSolCurrentOrPreviousProceedings1'>Current or past proceedings</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## 4. Safety Concerns\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolAllegationsOfHarm/c100ResSolAllegationsOfHarm1'>Allegations of harm</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## 5. Additional information\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolInternationalElement/c100ResSolInternationalElement1'>International element</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolAbilityToParticipate/c100ResSolAbilityToParticipate1'>Ability to participate</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## 6. View PDF response\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolViewResponseDraftDocument/c100ResSolViewResponseDraftDocument1'>View a draft of your response</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## 7. Submit\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolSubmit/c100ResSolSubmit1'>Submit</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n</div>",
+    "respondentTaskList": "",
+    "respondentTaskListA": "",
+    "respondentTaskListB": "",
     "respondentsFL401": {
       "user": {
         "email": null,
@@ -452,7 +454,6 @@
           "communicationSupportOther": null,
           "safetyArrangementsDetails": null
         },
-        "activeRespondent": null,
         "safeToCallOption": null,
         "keepDetailsPrivate": {
           "confidentiality": null,
@@ -1458,7 +1459,6 @@
           "communicationSupportOther": null,
           "safetyArrangementsDetails": null
         },
-        "activeRespondent": null,
         "safeToCallOption": null,
         "keepDetailsPrivate": {
           "confidentiality": null,

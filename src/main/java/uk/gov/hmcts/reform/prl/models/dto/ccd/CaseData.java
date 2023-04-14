@@ -742,7 +742,6 @@ public class CaseData implements MappableObject {
     private final List<Element<DraftOrder>> draftOrderCollection;
     private Object draftOrdersDynamicList;
 
-    private DynamicList chooseRespondentDynamicList;
     @JsonUnwrapped
     @Builder.Default
     private final NoticeOfChangeAnswersData noticeOfChangeAnswersData = NoticeOfChangeAnswersData.builder().build();
