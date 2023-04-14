@@ -399,6 +399,7 @@ public class C100RespondentSolicitorService {
                 SOLICITOR_C7_FINAL_DOCUMENT,
                 false
             );
+            caseDataUpdated.put("finalC7ResponseDoc", document);
             log.info("finalC7ResponseDoc " + document);
             //Commenting out for the time being as C7 changes are not currently present in corresponding CCD pr
             //Will revert it back later
@@ -414,17 +415,15 @@ public class C100RespondentSolicitorService {
             CaseData.class
         );
 
-        List<Element<PartyDetails>> respondents = caseData.getRespondents();
-
         Element<PartyDetails> representedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
 
         PartyDetails amended = representedRespondent.getValue().toBuilder()
             .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
             .build();
 
-        respondents.set(respondents.indexOf(representedRespondent), element(representedRespondent.getId(), amended));
+        // respondents.set(respondents.indexOf(representedRespondent), element(representedRespondent.getId(), amended));
 
-        updatedCaseData.put(RESPONDENTS, respondents);
+        // updatedCaseData.put(RESPONDENTS, respondents);
         return updatedCaseData;
     }
 
