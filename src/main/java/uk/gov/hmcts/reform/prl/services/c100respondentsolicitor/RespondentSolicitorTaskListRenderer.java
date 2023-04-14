@@ -37,6 +37,8 @@ public class RespondentSolicitorTaskListRenderer {
     private static final String IN_PROGRESS = "in-progress.png";
     private static final String INFORMATION_ADDED = "information-added.png";
     private static final String FINISHED = "finished.png";
+    public static final String DIV_CLASS_WIDTH_50 = "<div class='width-50'>";
+    public static final String DIV = "</div>";
 
     private final TaskListRenderElements taskListRenderElements;
 
@@ -49,30 +51,30 @@ public class RespondentSolicitorTaskListRenderer {
         final List<String> lines = new LinkedList<>();
         if (!hasSubmitted) {
             lines.add(
-                "<div class='width-50'>"
+                DIV_CLASS_WIDTH_50
                     + "<h3>Respond to the application for respondent " + representedRespondentName + "</h3>"
                     + "<p>This online response combines forms C7 and C8."
                     + " It also allows you to make your own allegations of harm and violence (C1A)"
                     + " in the section of safety concerns.</p>"
-                    + "</div>");
+                    + DIV);
 
-            lines.add("<div class='width-50'>");
+            lines.add(DIV_CLASS_WIDTH_50);
 
             (groupInSections(allTasks))
                 .forEach(section -> lines.addAll(renderSection(section, respondent)));
 
-            lines.add("</div>");
+            lines.add(DIV);
             log.info("task list now: " + String.join("\n\n", lines));
             lines.addAll(renderResSolTasksErrors(tasksErrors, respondent));
             log.info("task list after: " + String.join("\n\n", lines));
         } else {
             String caseDocumentsUrl = manageCaseUrl + URL_STRING + caseId + "#Case documents";
             lines.add(
-                "<div class='width-50'>"
+                DIV_CLASS_WIDTH_50
                     + "<h3>Response for " + representedRespondentName + " has been successfully submitted.</h3>"
                     + "<p>You can find the response at <a href=\"" + caseDocumentsUrl + "\">Case Documents</a> tab"
                     + " in the section of safety concerns.</p>"
-                    + "</div>");
+                    + DIV);
         }
 
         return String.join("\n\n", lines);

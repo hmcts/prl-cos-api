@@ -125,18 +125,23 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
             Optional<YesOrNo> childHasPassport = ofNullable(respondentAllegationsOfHarmData
                                                                 .getRespChildAbductionInfo().getChildrenHavePassport());
             fields.add(childHasPassport);
-            if (childHasPassport.isPresent() && YesOrNo.Yes.equals(childHasPassport.get())) {
-                fields.add(ofNullable(respondentAllegationsOfHarmData.getRespChildAbductionInfo()
-                                          .getChildrenHaveMoreThanOnePassport()));
-                List<WhomConsistPassportList> whoConsistPassportList = respondentAllegationsOfHarmData
-                    .getRespChildAbductionInfo().getWhoHasChildPassport();
-                fields.add(ofNullable(whoConsistPassportList));
-                for (WhomConsistPassportList whomConsistPassport : whoConsistPassportList) {
-                    if (whomConsistPassport.equals(WhomConsistPassportList.otherPeople)) {
-                        fields.add(ofNullable(respondentAllegationsOfHarmData
-                                                  .getRespChildAbductionInfo().getWhoHasChildPassportOther()));
+            populatePassportDetails(respondentAllegationsOfHarmData, fields, childHasPassport);
+        }
+    }
 
-                    }
+    private static void populatePassportDetails(RespondentAllegationsOfHarmData respondentAllegationsOfHarmData,
+                                                List<Optional<?>> fields, Optional<YesOrNo> childHasPassport) {
+        if (childHasPassport.isPresent() && YesOrNo.Yes.equals(childHasPassport.get())) {
+            fields.add(ofNullable(respondentAllegationsOfHarmData.getRespChildAbductionInfo()
+                                      .getChildrenHaveMoreThanOnePassport()));
+            List<WhomConsistPassportList> whoConsistPassportList = respondentAllegationsOfHarmData
+                .getRespChildAbductionInfo().getWhoHasChildPassport();
+            fields.add(ofNullable(whoConsistPassportList));
+            for (WhomConsistPassportList whomConsistPassport : whoConsistPassportList) {
+                if (whomConsistPassport.equals(WhomConsistPassportList.otherPeople)) {
+                    fields.add(ofNullable(respondentAllegationsOfHarmData
+                                              .getRespChildAbductionInfo().getWhoHasChildPassportOther()));
+
                 }
             }
         }
