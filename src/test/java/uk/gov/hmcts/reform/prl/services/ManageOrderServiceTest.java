@@ -2431,7 +2431,7 @@ public class ManageOrderServiceTest {
         Map<String, Object> result = manageOrderService.populatePreviewOrder("test", callbackRequest, caseData);
         Assert.assertTrue(!result.isEmpty());
     }
-    
+
     @Test
     public void testPopulateFinalUploadOrderFromCaseDataWithMultipleOrdersForWelsh() throws Exception {
 
@@ -2478,5 +2478,4 @@ public class ManageOrderServiceTest {
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
     }
-  
 }

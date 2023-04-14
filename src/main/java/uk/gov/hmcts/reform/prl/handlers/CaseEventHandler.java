@@ -6,19 +6,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
+import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
-import uk.gov.hmcts.reform.prl.services.RespondentSolicitorTaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorTaskListRenderer;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -35,13 +43,18 @@ public class CaseEventHandler {
     private final TaskListRenderer taskListRenderer;
     private final RespondentSolicitorTaskListRenderer respondentSolicitorTaskListRenderer;
     private final TaskErrorService taskErrorService;
+    private final RespondentTaskErrorService respondentTaskErrorService;
 
     @EventListener
     public void handleCaseDataChange(final CaseDataChanged event) {
         final CaseData caseData = event.getCaseData();
 
         final String taskList = getUpdatedTaskList(caseData);
-        final String respondentTaskList = getRespondentTaskList();
+        final String respondentTaskListA = getRespondentTaskList(caseData, "A");
+        final String respondentTaskListB = getRespondentTaskList(caseData, "B");
+        final String respondentTaskListC = getRespondentTaskList(caseData, "C");
+        final String respondentTaskListD = getRespondentTaskList(caseData, "D");
+        final String respondentTaskListE = getRespondentTaskList(caseData, "E");
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
@@ -52,7 +65,17 @@ public class CaseEventHandler {
                 "taskList",
                 taskList,
                 "respondentTaskList",
-                respondentTaskList,
+                "",
+                "respondentTaskListA",
+                respondentTaskListA,
+                "respondentTaskListB",
+                respondentTaskListB,
+                "respondentTaskListC",
+                respondentTaskListC,
+                "respondentTaskListD",
+                respondentTaskListD,
+                "respondentTaskListE",
+                respondentTaskListE,
                 "id",
                 String.valueOf(caseData.getId())
             )
@@ -79,13 +102,39 @@ public class CaseEventHandler {
 
     }
 
-    public String getRespondentTaskList() {
-        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks();
-        log.info("tasks found: " + tasks.size());
+    public String getRespondentTaskList(CaseData caseData, String respondent) {
+        String respondentTaskList = "";
+        if (caseData.getRespondents() != null
+            && !caseData.getRespondents().isEmpty()) {
+            Optional<SolicitorRole> solicitorRole = SolicitorRole.from(respondent);
+            if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
+                Element<PartyDetails> respondingParty = caseData.getRespondents().get(solicitorRole.get().getIndex());
 
-        return respondentSolicitorTaskListRenderer
-            .render(tasks);
+                if (respondingParty.getValue() != null
+                    && (respondingParty.getValue().getResponse() == null
+                        || !YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted()))) {
+                    final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
+                    log.info("tasks found: " + tasks.size());
 
+                    List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors();
+                    log.info("eventErrors found: " + eventErrors.size());
+
+                    List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents();
+                    log.info("events found: " + events.size());
+                    eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+                    log.info("eventErrors found following removal: " + eventErrors.size());
+
+                    String representedRespondentName = respondingParty.getValue().getFirstName().trim() + " "
+                        + respondingParty.getValue().getLastName().trim();
+                    log.info("representedRespondentName found: " + representedRespondentName);
+                    final boolean hasSubmitted = respondingParty.getValue().getResponse() != null
+                        && YesOrNo.Yes.equals(respondingParty.getValue().getResponse()) ? true : false;
+                    return respondentSolicitorTaskListRenderer
+                        .render(tasks, eventErrors, respondent, representedRespondentName, hasSubmitted, caseData.getId());
+                }
+            }
+        }
+        return respondentTaskList;
     }
 }
 

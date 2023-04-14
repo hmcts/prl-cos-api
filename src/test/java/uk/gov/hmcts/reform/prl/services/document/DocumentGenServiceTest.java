@@ -2281,6 +2281,13 @@ public class DocumentGenServiceTest {
     }
 
     @Test
+    public void testSingleDocGenerationForSolicitorC7() throws Exception {
+        documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C7_DRAFT_DOCUMENT, false);
+        documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C7_FINAL_DOCUMENT, false);
+        verify(dgsService, times(2)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+    }
+    
+    @Test
     public void generateDocumentsForTestingSupportForC100Test() throws Exception {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();

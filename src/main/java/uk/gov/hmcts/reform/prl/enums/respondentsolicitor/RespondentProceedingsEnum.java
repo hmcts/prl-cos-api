@@ -10,32 +10,11 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum RespondentProceedingsEnum {
-    @JsonProperty("emergencyProtectionOrder")
-    emergencyProtectionOrder("emergencyProtectionOrder", "Emergency Protection Order"),
-    @JsonProperty("supervisionOrder")
-    supervisionOrder("supervisionOrder", "Supervision Order"),
-    @JsonProperty("careOrder")
-    careOrder("careOrder", "Care Order"),
-    @JsonProperty("childAbduction")
-    childAbduction("childAbduction", "Child Abduction"),
-    @JsonProperty("familyLaw1996Part4")
-    familyLaw1996Part4("familyLaw1996Part4", "Family Law Act 1996 Part 4"),
-    @JsonProperty("contactOrResidenceOrder")
-    contactOrResidenceOrder(
-        "contactOrResidenceOrder",
-        "Contact or residence order made within proceedings for a divorce or dissolution of a civil partnership"
-    ),
-    @JsonProperty("contactOrResidenceOrderWithAdoption")
-    contactOrResidenceOrderWithAdoption(
-        "contactOrResidenceOrderWithAdoption",
-        "Contact or residence order made in connection with an Adoption Order"
-    ),
-    @JsonProperty("orderRelatingToChildMaintainance")
-    orderRelatingToChildMaintainance("orderRelatingToChildMaintainance", "Order relating to child maintenance"),
-    @JsonProperty("childArrangementsOrder")
-    childArrangementsOrder("childArrangementsOrder", "Child arrangements order"),
-    @JsonProperty("otherOrder")
-    otherOrder("otherOrder", "Other orders");
+
+    @JsonProperty("ongoing")
+    ongoing("ongoing", "Ongoing"),
+    @JsonProperty("previous")
+    previous("previous", "Previous");
 
     private final String id;
     private final String displayedValue;

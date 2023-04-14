@@ -1,56 +1,74 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.KEEP_DETAILS_PRIVATE_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
 public class KeepDetailsPrivateChecker implements RespondentEventChecker {
 
+    @Autowired
+    RespondentTaskErrorService respondentTaskErrorService;
+
     @Override
-    public boolean isStarted(CaseData caseData) {
-        Optional<Element<PartyDetails>> activeRespondent;
-        activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
-        return activeRespondent.filter(partyDetailsElement -> anyNonEmpty(partyDetailsElement
-                                                                              .getValue()
-                                                                              .getResponse()
-                                                                              .getSolicitorKeepDetailsPriate()
-        )).isPresent();
+    public boolean isStarted(PartyDetails respondingParty) {
+        Optional<Response> response = findResponse(respondingParty);
+        boolean returnValue = false;
+        if (response.isPresent()) {
+            Optional<SolicitorKeepDetailsPrivate> solicitorKeepDetailsPrivate
+                = ofNullable(response.get().getSolicitorKeepDetailsPriate());
+            if (solicitorKeepDetailsPrivate.isPresent()) {
+                returnValue = ofNullable(solicitorKeepDetailsPrivate.get().getRespKeepDetailsPrivate())
+                    .filter(keepDetailsPrivate -> anyNonEmpty(
+                        keepDetailsPrivate.getConfidentiality(),
+                        keepDetailsPrivate.getOtherPeopleKnowYourContactDetails(),
+                        keepDetailsPrivate.getConfidentialityList()
+                    )).isPresent();
+
+                if (!returnValue) {
+                    returnValue = ofNullable(solicitorKeepDetailsPrivate.get().getRespKeepDetailsPrivateConfidentiality())
+                        .filter(keepDetailsPrivate -> anyNonEmpty(
+                            keepDetailsPrivate.getConfidentiality(),
+                            keepDetailsPrivate.getOtherPeopleKnowYourContactDetails(),
+                            keepDetailsPrivate.getConfidentialityList()
+                        )).isPresent();
+                }
+            }
+        }
+
+        return returnValue;
     }
 
     @Override
-    public boolean hasMandatoryCompleted(CaseData caseData) {
-        boolean mandatoryInfo = false;
+    public boolean isFinished(PartyDetails respondingParty) {
+        Optional<Response> response = findResponse(respondingParty);
 
-        Optional<Element<PartyDetails>> activeRespondent = caseData.getRespondents()
-            .stream()
-            .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
-            .findFirst();
+        if (response.isPresent()) {
 
-        if (activeRespondent.isPresent()) {
-
-            Optional<SolicitorKeepDetailsPrivate> keepDetailsPrivate = Optional.ofNullable(activeRespondent.get()
-                                                                                               .getValue()
-                                                                                               .getResponse()
+            Optional<SolicitorKeepDetailsPrivate> keepDetailsPrivate = Optional.ofNullable(response.get()
                                                                                                .getSolicitorKeepDetailsPriate());
             if (!keepDetailsPrivate.isEmpty() && checkKeepDetailsPrivateMandatoryCompleted(keepDetailsPrivate)) {
-                mandatoryInfo = true;
+                respondentTaskErrorService.removeError(KEEP_DETAILS_PRIVATE_ERROR);
+                return true;
             }
         }
-        return mandatoryInfo;
+        respondentTaskErrorService.addEventError(KEEP_DETAILS_PRIVATE,
+                                                 KEEP_DETAILS_PRIVATE_ERROR,
+                                                 KEEP_DETAILS_PRIVATE_ERROR.getError());
+        return false;
     }
 
     private boolean checkKeepDetailsPrivateMandatoryCompleted(Optional<SolicitorKeepDetailsPrivate> keepDetailsPrivate) {

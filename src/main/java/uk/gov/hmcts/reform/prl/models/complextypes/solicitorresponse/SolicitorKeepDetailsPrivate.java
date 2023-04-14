@@ -9,8 +9,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class SolicitorKeepDetailsPrivate {
-
     private KeepDetailsPrivate respKeepDetailsPrivate;
     private KeepDetailsPrivate respKeepDetailsPrivateConfidentiality;
-
 }
