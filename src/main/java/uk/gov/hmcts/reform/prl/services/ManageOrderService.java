@@ -1761,9 +1761,10 @@ public class ManageOrderService {
 
     public CaseData populateHearingsDropdown(String authorization, CaseData caseData) {
         LOGGER.info("Retrieving hearings for caseId: {}, tempCaseId: {} ", caseData.getId(), caseData.getTempCaseIdForHearing());
+        hearingService.getHearings(authorization, caseData.getTempCaseIdForHearing());
         //fetch hearing details
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(authorization, caseData.getTempCaseIdForHearing()));
-        LOGGER.info("Hearings: {} for caseId: {}", caseData.getTempCaseIdForHearing(), hearings);
+        LOGGER.info("Hearings: {} for caseId: {}",hearings, caseData.getTempCaseIdForHearing());
         //get case hearings
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
         LOGGER.info("Total case hearings: {}", caseHearings.size());

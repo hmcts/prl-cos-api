@@ -2622,7 +2622,8 @@ public class ManageOrderServiceTest {
         CaseHearing caseHearing3 = CaseHearing.caseHearingWith()
             .hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED)
             .hearingID(98765L)
-            .hearingDaySchedule(null)
+            .hearingDaySchedule(Collections.singletonList(
+                    HearingDaySchedule.hearingDayScheduleWith().hearingStartDateTime(null).build()))
             .build();
         Hearings hearings = Hearings.hearingsWith()
             .caseRef("123")
