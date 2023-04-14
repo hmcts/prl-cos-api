@@ -39,7 +39,7 @@ public enum ListOnNoticeReasonsEnum {
     }
 
     @JsonCreator
-    public static ListOnNoticeReasonsEnum getValue(String key) {
-        return ListOnNoticeReasonsEnum.valueOf(key);
+    public static String getDisplayedValue(String key) {
+        return valueOf(key).displayedValue;
     }
 }
