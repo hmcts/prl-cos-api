@@ -29,6 +29,12 @@ public class CaseWitdrawnRequestServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private SolicitorEmailService solicitorEmailService;
+
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
     CaseData caseData;
@@ -53,7 +59,7 @@ public class CaseWitdrawnRequestServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnRequestSubmitted(callbackRequest);
+        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
         Assert.assertEquals("# Requested Application Withdrawal", response.getConfirmationHeader());
     }
 
@@ -75,7 +81,7 @@ public class CaseWitdrawnRequestServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnRequestSubmitted(callbackRequest);
+        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
         Assert.assertEquals("# Requested Application Withdrawal", response.getConfirmationHeader());
     }
 
@@ -97,7 +103,7 @@ public class CaseWitdrawnRequestServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnRequestSubmitted(callbackRequest);
+        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
         Assert.assertEquals("# Requested Application Withdrawal", response.getConfirmationHeader());
     }
 
@@ -119,7 +125,7 @@ public class CaseWitdrawnRequestServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnRequestSubmitted(callbackRequest);
+        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
         Assert.assertEquals("# Application withdrawn", response.getConfirmationHeader());
     }
 
@@ -141,7 +147,7 @@ public class CaseWitdrawnRequestServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnRequestSubmitted(callbackRequest);
+        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
         Assert.assertEquals("# Application withdrawn", response.getConfirmationHeader());
     }
 
@@ -163,7 +169,7 @@ public class CaseWitdrawnRequestServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnRequestSubmitted(callbackRequest);
+        SubmittedCallbackResponse response = caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, "testAuth");
         Assert.assertEquals("# Application withdrawn cancelled", response.getConfirmationHeader());
     }
 }

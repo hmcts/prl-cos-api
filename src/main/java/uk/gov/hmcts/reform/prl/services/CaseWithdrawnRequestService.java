@@ -5,7 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -22,6 +25,8 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RequiredArgsConstructor
 public class CaseWithdrawnRequestService {
 
+    private final UserService userService;
+    private final SolicitorEmailService solicitorEmailService;
     private final ObjectMapper objectMapper;
     public static final String APPLICATION_WITHDRAWN_SUCCESS_LABEL = "# Application withdrawn";
     public static final String APPLICATION_WITHDRAWN_STATUS_LABEL = "### What happens next \n\n This case will now display as “withdrawn” in "
@@ -33,21 +38,25 @@ public class CaseWithdrawnRequestService {
 
     public static final String APPLICATION_WITHDRAWN_CANCEL_REQUEST_LABEL = "# Application withdrawn cancelled";
 
-    public SubmittedCallbackResponse caseWithdrawnRequestSubmitted(CallbackRequest callbackRequest) {
+    public SubmittedCallbackResponse caseWithdrawnEmailNotification(CallbackRequest callbackRequest, String authorisation) {
 
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         String caseWithdrawnConfirmationHeader;
         String caseWithdrawnConfirmationBodyPrefix;
+        UserDetails userDetails = userService.getUserDetails(authorisation);
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
             if (State.CASE_ISSUE.equals(caseData.getState())
                 || State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState()) || State.GATE_KEEPING.equals(caseData.getState())) {
                 caseWithdrawnConfirmationHeader = APPLICATION_WITHDRAWN_REQUEST_LABEL;
                 caseWithdrawnConfirmationBodyPrefix = APPLICATION_WITHDRAWN_REQUEST_STATUS_LABEL;
+                sendWithdrawEmails(caseDetails, caseData, userDetails);
             } else {
                 caseWithdrawnConfirmationHeader = APPLICATION_WITHDRAWN_SUCCESS_LABEL;
                 caseWithdrawnConfirmationBodyPrefix = APPLICATION_WITHDRAWN_STATUS_LABEL;
+                sendWithdrawEmailsBeforeIssuedState(caseData, userDetails, caseDetails);
             }
         } else {
             caseWithdrawnConfirmationHeader = APPLICATION_WITHDRAWN_CANCEL_REQUEST_LABEL;
@@ -58,5 +67,29 @@ public class CaseWithdrawnRequestService {
             caseWithdrawnConfirmationHeader).confirmationBody(
             caseWithdrawnConfirmationBodyPrefix
         ).build();
+    }
+
+    private void sendWithdrawEmails(CaseDetails caseDetails, CaseData caseData, UserDetails userDetails) {
+        if (State.CASE_ISSUE.equals(caseData.getState()) || State.GATE_KEEPING.equals(caseData.getState())) {
+            sendWithdrawEmailsAfterIssuedState(caseData, userDetails, caseDetails);
+        } else {
+            sendWithdrawEmailsBeforeIssuedState(caseData, userDetails, caseDetails);
+        }
+    }
+
+    private void sendWithdrawEmailsAfterIssuedState(CaseData caseData, UserDetails userDetails, CaseDetails caseDetails) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
+        } else {
+            solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
+        }
+    }
+
+    private void sendWithdrawEmailsBeforeIssuedState(CaseData caseData, UserDetails userDetails, CaseDetails caseDetails) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
+        } else {
+            solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
+        }
     }
 }

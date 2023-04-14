@@ -30,7 +30,7 @@ public class CaseWithdrawnRequestController extends AbstractCallbackController {
 
     private final CaseWithdrawnRequestService caseWithdrawnRequestService;
 
-    @PostMapping(path = "/case-withdrawn-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/case-withdrawn-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "
         + "successful")
     @ApiResponses(value = {
@@ -38,10 +38,10 @@ public class CaseWithdrawnRequestController extends AbstractCallbackController {
             content = @Content(mediaType = "application/json",
                 schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public ResponseEntity<SubmittedCallbackResponse> caseWithdrawnRequestSubmitted(
+    public ResponseEntity<SubmittedCallbackResponse> caseWithdrawnEmailNotification(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        return ok(caseWithdrawnRequestService.caseWithdrawnRequestSubmitted(callbackRequest));
+        return ok(caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, authorisation));
     }
 }
