@@ -102,6 +102,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
+import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -784,7 +785,7 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
-
-
     private NextHearingDetails nextHearingDetails;
+
+    private final ChangeOrganisationRequest changeOrganisationRequestField;
 }

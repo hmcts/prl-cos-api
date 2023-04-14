@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
@@ -15,6 +18,7 @@ import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -38,6 +42,9 @@ public class AllTabServiceImplTest {
 
     @Mock
     ConfidentialityTabService confidentialityTabService;
+
+    @Mock
+    ObjectMapper objectMapper;
 
     @Mock
     @Qualifier("caseSummaryTab")
@@ -113,5 +120,12 @@ public class AllTabServiceImplTest {
         verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
         verify(applicationsTabService).updateTab(CASE_DATA);
         verify(caseSummaryTabService).updateTab(CASE_DATA);
+    }
+
+    @Test
+    public void testUpdatePartyDetailsForNoc() {
+        when(CASE_DATA.getCaseTypeOfApplication()).thenReturn(PrlAppsConstants.C100_CASE_TYPE);
+        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.SOLICITORA));
+        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
     }
 }
