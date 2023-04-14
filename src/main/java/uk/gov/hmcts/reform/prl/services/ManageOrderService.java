@@ -1795,12 +1795,14 @@ public class ManageOrderService {
             .collect(Collectors.toList());
 
         //if there are no hearings then dropdown would be empty
+        DynamicList existingHearingType = (null != caseData.getManageOrders() && null != caseData.getManageOrders().getHearingType())
+            ? caseData.getManageOrders().getHearingType() : null;
         return caseData.toBuilder()
             .manageOrders(caseData.getManageOrders().toBuilder()
                               .hearingType(DynamicList.builder()
-                                               .value(DynamicListElement.EMPTY)
+                                               .value(null != existingHearingType ? existingHearingType.getValue() : DynamicListElement.EMPTY)
                                                .listItems(hearingDropdowns.isEmpty()
-                                                              ? Collections.singletonList(DynamicListElement.defaultListItem("No Hearings"))
+                                                              ? Collections.singletonList(DynamicListElement.defaultListItem("No hearings available"))
                                                               : hearingDropdowns)
                                                .build()
                               ).build())

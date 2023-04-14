@@ -364,7 +364,7 @@ public class DraftAnOrderService {
         return caseDataMap;
     }
 
-    public Map<String, Object> populateCommonDraftOrderFields(CaseData caseData) {
+    public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("orderType", selectedOrder.getOrderType());
@@ -386,7 +386,17 @@ public class DraftAnOrderService {
         caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
         caseDataMap.put("reviewRequiredBy", selectedOrder.getOtherDetails().getReviewRequiredBy() != null
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
-        caseDataMap.put("hearingType", selectedOrder.getHearingType());
+
+        //Set existing hearingType from draft order
+        caseData = caseData.toBuilder()
+            .manageOrders(caseData.getManageOrders().toBuilder()
+                              .hearingType(selectedOrder.getHearingType())
+                              .build())
+            .build();
+        //PRL-3319 - Fetch hearings dropdown
+        caseData = manageOrderService.populateHearingsDropdown(authorization, caseData);
+        //Set hearings
+        caseDataMap.put("hearingType", caseData.getManageOrders().getHearingType());
         return caseDataMap;
     }
 
