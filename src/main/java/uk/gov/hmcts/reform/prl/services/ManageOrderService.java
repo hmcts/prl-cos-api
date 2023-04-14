@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.platform.commons.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -101,7 +99,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class ManageOrderService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ManageOrderService.class);
     public static final String IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE = "isOnlyC47aOrderSelectedToServe";
     public static final String OTHER_PEOPLE_PRESENT_IN_CASE_FLAG = "otherPeoplePresentInCaseFlag";
     public static final String C_47_A = "C47A";
@@ -1760,33 +1757,33 @@ public class ManageOrderService {
     }
 
     public CaseData populateHearingsDropdown(String authorization, CaseData caseData) {
-        LOGGER.info("Retrieving hearings for caseId: {}, tempCaseId: {} ", caseData.getId(), caseData.getTempCaseIdForHearing());
+        log.info("Retrieving hearings for caseId: {}, tempCaseId: {} ", caseData.getId(), caseData.getTempCaseIdForHearing());
         hearingService.getHearings(authorization, caseData.getTempCaseIdForHearing());
         //fetch hearing details
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(authorization, caseData.getTempCaseIdForHearing()));
-        LOGGER.info("Hearings: {} for caseId: {}",hearings, caseData.getTempCaseIdForHearing());
+        log.info("Hearings: {} for caseId: {}",hearings, caseData.getTempCaseIdForHearing());
         //get case hearings
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
-        LOGGER.info("Total case hearings: {}", caseHearings.size());
+        log.info("Total case hearings: {}", caseHearings.size());
         //filer only completed hearings
         List<CaseHearing> completedHearings = caseHearings.stream()
             .filter(caseHearing -> HMC_STATUS_COMPLETED.equalsIgnoreCase(caseHearing.getHmcStatus()))
             .collect(Collectors.toList());
-        LOGGER.info("Total completed hearings: {}", completedHearings.size());
+        log.info("Total completed hearings: {}", completedHearings.size());
 
         //get hearings dropdown
         List<DynamicListElement> hearingDropdowns = completedHearings.stream()
             .map(caseHearing -> {
                 //get hearingId
                 String hearingId = String.valueOf(caseHearing.getHearingID());
-                LOGGER.info("hearingId: {} ", hearingId);
+                log.info("hearingId: {} ", hearingId);
                 //return hearingId concatenated with hearingDate
                 Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
                 return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
                     if (null != hearingDaySchedule && null != hearingDaySchedule.getHearingStartDateTime()) {
                         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                         String hearingDate = hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter);
-                        LOGGER.info("hearingDate: {} ", hearingDate);
+                        log.info("hearingDate: {} ", hearingDate);
                         return concat(concat(hearingId, " - "), hearingDate);
                     }
                     return null;

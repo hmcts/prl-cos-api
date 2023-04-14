@@ -3,8 +3,6 @@ package uk.gov.hmcts.reform.prl.services.hearings;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -22,7 +20,6 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HearingService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HearingService.class);
     private Hearings hearingDetails;
 
     private List<CaseLinkedData> caseLinkedData;
@@ -35,11 +32,9 @@ public class HearingService {
 
         try {
             hearingDetails = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
-            LOGGER.info("Hearing details {}", hearingDetails);
 
         } catch (Exception e) {
-            LOGGER.info("Error in getting hearings", e);
-            log.error(e.getMessage());
+            log.error("Error in getting hearings ", e);
         }
         return hearingDetails;
     }
