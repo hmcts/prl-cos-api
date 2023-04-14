@@ -184,6 +184,10 @@ public class NoticeOfChangePartiesService {
                                                  ChangeOrganisationRequest changeOrganisationRequest,
                                                  CaseData caseData) {
         Element<PartyDetails> representedRespondentElement = respondents.get(partyIndex);
+        String surname = "";
+        if (legalRepresentativeSolicitorDetails != null && legalRepresentativeSolicitorDetails.getSurname().isPresent()) {
+            surname = legalRepresentativeSolicitorDetails.getSurname().get();
+        }
         PartyDetails updPartyDetails = representedRespondentElement.getValue().toBuilder()
             .user(representedRespondentElement.getValue().getUser().toBuilder()
                       .solicitorRepresented(YesOrNo.Yes)
@@ -191,8 +195,7 @@ public class NoticeOfChangePartiesService {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .solicitorEmail(changeOrganisationRequest.getCreatedBy())
             .representativeFirstName(legalRepresentativeSolicitorDetails.getFullName())
-            .representativeLastName(legalRepresentativeSolicitorDetails.getSurname().isPresent()
-                                        ? legalRepresentativeSolicitorDetails.getSurname().get() : "")
+            .representativeLastName(surname)
             .solicitorOrg(changeOrganisationRequest.getOrganisationToAdd())
             .build();
         Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
