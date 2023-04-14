@@ -28,16 +28,13 @@ public class InternationalElementsChecker implements RespondentEventChecker {
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
 
-        if (response.isPresent()) {
-            return ofNullable(response.get().getResSolInternationalElements())
-                .filter(resSolInternationalElements -> anyNonEmpty(
-                    resSolInternationalElements.getInternationalElementChildInfo(),
-                    resSolInternationalElements.getInternationalElementJurisdictionInfo(),
-                    resSolInternationalElements.getInternationalElementParentInfo(),
-                    resSolInternationalElements.getInternationalElementParentInfo()
-                )).isPresent();
-        }
-        return false;
+        return response.filter(value -> ofNullable(value.getResSolInternationalElements())
+            .filter(resSolInternationalElements -> anyNonEmpty(
+                resSolInternationalElements.getInternationalElementChildInfo(),
+                resSolInternationalElements.getInternationalElementJurisdictionInfo(),
+                resSolInternationalElements.getInternationalElementParentInfo(),
+                resSolInternationalElements.getInternationalElementParentInfo()
+            )).isPresent()).isPresent();
     }
 
     @Override
