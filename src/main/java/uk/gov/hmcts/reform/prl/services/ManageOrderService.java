@@ -1611,27 +1611,6 @@ public class ManageOrderService {
             .serveOrderDetails(buildServeOrderDetails(serveOrderData))
             .build();
 
-        String loggedInUserType = getLoggedInUserType(authorisation);
-        SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
-        String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
-        ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
-
-        OrderDetails orderDetails = OrderDetails.builder().orderType(flagSelectedOrder)
-            .orderTypeId(flagSelectedOrderId)
-            .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
-                                      ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
-            .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
-            .typeOfOrder(typeOfOrder != null
-                             ? typeOfOrder.getDisplayedValue() : null)
-            .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
-            .childrenList(dynamicMultiSelectListService
-                              .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                                       .getChildOption()))
-            .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
-                                 ? caseData.getDoesOrderClosesCase() : null)
-            .serveOrderDetails(buildServeOrderDetails(serveOrderData))
-            .build();
-
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         if (documentLanguage.isGenEng()) {

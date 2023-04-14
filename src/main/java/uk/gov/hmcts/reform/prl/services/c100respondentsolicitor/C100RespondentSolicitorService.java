@@ -23,10 +23,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMi
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
-import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -59,9 +57,6 @@ public class C100RespondentSolicitorService {
 
     @Autowired
     private final ResponseSubmitChecker responseSubmitChecker;
-
-    @Autowired
-    private final DocumentGenService documentGenService;
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
         log.info("Inside prePopulateAboutToStartCaseData");
@@ -337,17 +332,6 @@ public class C100RespondentSolicitorService {
 
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingSolicitor);
 
-        respondents.stream()
-            .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
-            .findFirst()
-            .ifPresent(party -> {
-                PartyDetails amended = party.getValue().toBuilder()
-                    .response(party.getValue().getResponse().toBuilder().activeRespondent(Yes).build())
-                    .build();
-                if (callbackRequest.getEventId().equalsIgnoreCase(SUBMIT.getEventId())) {
-                    amended = party.getValue().toBuilder()
-                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
-                        .build();
             if (solicitorRole.isPresent()) {
                 solicitorRepresentedRespondent = caseData.getRespondents().get(solicitorRole.get().getIndex());
                 if (solicitorRepresentedRespondent.getValue().getResponse() != null
@@ -431,34 +415,15 @@ public class C100RespondentSolicitorService {
             CaseData.class
         );
 
-        List<Element<PartyDetails>> respondents = caseData.getRespondents();
-
-        respondents.stream()
-            .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
-            .findFirst()
-            .ifPresent(party -> {
-                PartyDetails amended = party.getValue().toBuilder()
-                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
-                        .build();
-
-                respondents.set(respondents.indexOf(party), element(party.getId(), amended));
-            });
-        respondents.stream()
-            .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
-            .findFirst()
-            .ifPresent(party -> {
-                PartyDetails amended = party.getValue().toBuilder()
-                    .response(party.getValue().getResponse().toBuilder().activeRespondent(YesOrNo.No).build())
-                    .build();
         Element<PartyDetails> representedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
 
         PartyDetails amended = representedRespondent.getValue().toBuilder()
             .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
             .build();
 
-        respondents.set(respondents.indexOf(representedRespondent), element(representedRespondent.getId(), amended));
+        // respondents.set(respondents.indexOf(representedRespondent), element(representedRespondent.getId(), amended));
 
-        updatedCaseData.put(RESPONDENTS, respondents);
+        // updatedCaseData.put(RESPONDENTS, respondents);
         return updatedCaseData;
     }
 

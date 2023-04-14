@@ -58,7 +58,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -87,8 +86,6 @@ public class C100RespondentSolicitorServiceTest {
     @Mock
     DocumentGenService documentGenService;
 
-    FindUserCaseRolesResponse findUserCaseRolesResponse;
-
     boolean mandatoryFinished = false;
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -115,7 +112,6 @@ public class C100RespondentSolicitorServiceTest {
                           .consent(Consent.builder().build())
                           .citizenDetails(CitizenDetails.builder().build())
                           .c7ResponseSubmitted(No)
-                          .activeRespondent(Yes)
                           .solicitorKeepDetailsPriate(SolicitorKeepDetailsPrivate
                                                           .builder()
                                                           .respKeepDetailsPrivateConfidentiality(KeepDetailsPrivate
@@ -356,53 +352,6 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateSolicitorRespondentListTest() {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.populateSolicitorRespondentList(
-            callbackRequest, authToken
-        );
-
-        assertTrue(response.containsKey("chooseRespondentDynamicList"));
-
-    }
-
-    @Test
-    public void updateActiveRespondentSelectionBySolicitor() {
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
-                                                   authToken)).thenReturn(findUserCaseRolesResponse);
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .eventId("c100ResSolSubmit")
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.updateActiveRespondentSelectionBySolicitor(
-            callbackRequest, authToken
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
     public void generateConfidentialityDynamicSelectionDisplayTest() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -452,121 +401,6 @@ public class C100RespondentSolicitorServiceTest {
 
     }
 
-    @Test
-    public void validateActiveRespondentResponseWithDocument() throws Exception {
-
-        List<String> errorList = new ArrayList<>();
-
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
-        Document document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("C7_Response_Final_Document.pdf")
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
-        when(documentGenService.generateSingleDocument(authToken,caseData,SOLICITOR_C7_FINAL_DOCUMENT,false)).thenReturn(document);
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
-        when(documentGenService.generateSingleDocument(authToken,caseData,SOLICITOR_C7_FINAL_DOCUMENT,false)).thenReturn(document);
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .eventId("c100ResSolConsentingToApplicationA")
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
-            callbackRequest, errorList, authToken
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
-    @Test
-    public void submitC7ResponseForActiveRespondentTest() {
-
-        List<String> errorList = new ArrayList<>();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .eventId("c100ResSolConsentingToApplicationA")
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
-            callbackRequest, errorList, authToken
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
-    @Test
-    public void submitC7ResponseForActiveRespondentTest() {
-
-        List<String> errorList = new ArrayList<>();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest, authToken, errorList
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-
-    @ParameterizedTest
-    @ValueSource(strings = { "c100ResSolConsentingToApplication", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
-        "c100ResSolAttendingTheCourt", "c100ResSolMiam", "c100ResSolCurrentOrPreviousProceedings", "c100ResSolAllegationsOfHarm",
-        "c100ResSolInternationalElement", "c100ResSolAbilityToParticipate"})
-    public void populateAboutToStartCaseDataConsentToApplicationEvent(String event) {
-        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest, authToken, errorList
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-
     @ParameterizedTest
     @ValueSource(strings = { "c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
         "c100ResSolAttendingTheCourt", "c100ResSolMiam", "c100ResSolCurrentOrPreviousProceedings", "c100ResSolAllegationsOfHarm",
@@ -614,65 +448,6 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
-        when(documentGenService.generateSingleDocument(authToken,caseData,SOLICITOR_C7_DRAFT_DOCUMENT,false)).thenReturn(document);
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.generateDraftDocumentsForRespondent(
-            callbackRequest, authToken
-        );
-
-        assertTrue(response.containsKey("draftC7ResponseDoc"));
-
-    }
-
-    @Test
-    public void testC1ADraftDocument() throws Exception {
-        List<String> errorList = new ArrayList<>();
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .eventId(event)
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest, authToken, errorList
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void testC7DraftDocument() throws Exception {
-
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
-        Document document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("C7_Response_Draft_Document.pdf")
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(documentGenService.generateSingleDocument(authToken,caseData,SOLICITOR_C7_DRAFT_DOCUMENT,false)).thenReturn(document);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -693,16 +468,16 @@ public class C100RespondentSolicitorServiceTest {
             .respondentAohYesNo(Yes)
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        Document document = Document.builder()
+        document = Document.builder()
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
@@ -710,7 +485,7 @@ public class C100RespondentSolicitorServiceTest {
             .build();
         when(documentGenService.generateSingleDocument(authToken,caseData,SOLICITOR_C1A_DRAFT_DOCUMENT,false)).thenReturn(document);
 
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -718,7 +493,7 @@ public class C100RespondentSolicitorServiceTest {
                              .build())
             .build();
 
-        Map<String, Object> response = respondentSolicitorService.generateDraftDocumentsForRespondent(
+        response = respondentSolicitorService.generateDraftDocumentsForRespondent(
             callbackRequest, authToken
         );
 
