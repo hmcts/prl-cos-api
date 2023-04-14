@@ -171,7 +171,7 @@ public class NoticeOfChangePartiesService {
             && changeOrganisationRequest.getCaseRoleId() != null
             && changeOrganisationRequest.getCaseRoleId().getValue() != null) {
             String caseRoleLabel = changeOrganisationRequest.getCaseRoleId().getValue().getCode();
-            solicitorRole = SolicitorRole.from(caseRoleLabel);
+            solicitorRole = SolicitorRole.fromCaseRoleLabel(caseRoleLabel);
         }
         return solicitorRole;
     }
