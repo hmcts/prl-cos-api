@@ -79,7 +79,7 @@ public class ListOnNoticeController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String reasonsSelectedForListOnNotice =
             listOnNoticeService.getReasonsSelected(caseDataUpdated.get(LIST_ON_NOTICE_REASONS_SELECTED),caseData.getId());
-        if (null != reasonsSelectedForListOnNotice && reasonsSelectedForListOnNotice != "") {
+        if (null != reasonsSelectedForListOnNotice && !reasonsSelectedForListOnNotice.equals("")) {
             caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS,reasonsSelectedForListOnNotice);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -112,7 +112,7 @@ public class ListOnNoticeController {
         log.info("List on Notice Submission flow - case id : {}", id);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String selectedAndAdditonalReasons = (String) caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS);
-        if (null != selectedAndAdditonalReasons && selectedAndAdditonalReasons != "") {
+        if (null != selectedAndAdditonalReasons && !selectedAndAdditonalReasons.equals("")) {
             caseDataUpdated.put(CASE_NOTE, selectedAndAdditonalReasons);
             caseDataUpdated.put(SUBJECT, REASONS_SELECTED_FOR_LIST_ON_NOTICE);
         }
@@ -129,7 +129,7 @@ public class ListOnNoticeController {
     }
 
     private void updateCaseNotes(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation, String selectedAndAdditonalReasons) {
-        if (null != selectedAndAdditonalReasons && selectedAndAdditonalReasons != "") {
+        if (null != selectedAndAdditonalReasons && !selectedAndAdditonalReasons.equals("")) {
             caseDataUpdated.put(CASE_NOTES, addCaseNoteService.addCaseNoteDetails(caseData, userService.getUserDetails(authorisation)));
             addCaseNoteService.clearFields(caseDataUpdated);
         }
