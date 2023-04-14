@@ -48,8 +48,8 @@ public class CaseWithdrawnRequestService {
         String caseWithdrawnConfirmationBodyPrefix;
         UserDetails userDetails = userService.getUserDetails(authorisation);
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            if (State.CASE_ISSUE.equals(caseData.getState())
-                || State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState()) || State.GATE_KEEPING.equals(caseData.getState())) {
+            if (State.CASE_ISSUED.equals(caseData.getState())
+                || State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
                 caseWithdrawnConfirmationHeader = APPLICATION_WITHDRAWN_REQUEST_LABEL;
                 caseWithdrawnConfirmationBodyPrefix = APPLICATION_WITHDRAWN_REQUEST_STATUS_LABEL;
                 sendWithdrawEmails(caseDetails, caseData, userDetails);
@@ -70,7 +70,7 @@ public class CaseWithdrawnRequestService {
     }
 
     private void sendWithdrawEmails(CaseDetails caseDetails, CaseData caseData, UserDetails userDetails) {
-        if (State.CASE_ISSUE.equals(caseData.getState()) || State.GATE_KEEPING.equals(caseData.getState())) {
+        if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
             sendWithdrawEmailsAfterIssuedState(caseData, userDetails, caseDetails);
         } else {
             sendWithdrawEmailsBeforeIssuedState(caseData, userDetails, caseDetails);

@@ -47,12 +47,12 @@ public class CaseWitdrawnRequestServiceTest {
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .withDrawApplicationData(WithdrawApplication.builder().withDrawApplication(YesOrNo.Yes).build())
-            .state(State.CASE_ISSUE)
+            .state(State.CASE_ISSUED)
             .build();
         caseDataMap = caseData.toMap(new ObjectMapper());
         caseDetails = CaseDetails.builder()
             .id(12345678L)
-            .state(State.CASE_ISSUE.getValue())
+            .state(State.CASE_ISSUED.getValue())
             .data(caseDataMap)
             .build();
         callbackRequest = CallbackRequest.builder()
@@ -69,12 +69,12 @@ public class CaseWitdrawnRequestServiceTest {
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .withDrawApplicationData(WithdrawApplication.builder().withDrawApplication(YesOrNo.Yes).build())
-            .state(State.GATE_KEEPING)
+            .state(State.JUDICIAL_REVIEW)
             .build();
         caseDataMap = caseData.toMap(new ObjectMapper());
         caseDetails = CaseDetails.builder()
             .id(12345678L)
-            .state(State.GATE_KEEPING.getValue())
+            .state(State.JUDICIAL_REVIEW.getValue())
             .data(caseDataMap)
             .build();
         callbackRequest = CallbackRequest.builder()
