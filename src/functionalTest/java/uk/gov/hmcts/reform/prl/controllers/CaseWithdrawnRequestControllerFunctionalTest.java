@@ -30,7 +30,7 @@ public class CaseWithdrawnRequestControllerFunctionalTest {
     private WebApplicationContext webApplicationContext;
 
     @MockBean
-    private CaseWithdrawnRequestService CaseWithdrawnRequestService;
+    private CaseWithdrawnRequestService caseWithdrawnRequestService;
 
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
