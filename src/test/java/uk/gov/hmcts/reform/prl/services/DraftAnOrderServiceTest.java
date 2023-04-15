@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -14,7 +13,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
@@ -1150,7 +1148,6 @@ public class DraftAnOrderServiceTest {
         assertEquals(2, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
     }
 
-    @Ignore
     @Test
     public void testGenerateDraftOrderCollectionForFirstOrder() {
         Child child = Child.builder()
@@ -1163,27 +1160,8 @@ public class DraftAnOrderServiceTest {
             .parentalResponsibilityDetails("test")
             .build();
 
-
-        List<OrderTypeEnum> orderType = new ArrayList<>();
-        orderType.add(OrderTypeEnum.childArrangementsOrder);
-
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
-        LocalDateTime now = LocalDateTime.now();
-        System.out.println(dtf.format(now));
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-        DraftOrder draftOrder = DraftOrder.builder()
-            .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .otherDetails(OtherDraftOrderDetails.builder()
-                              .dateCreated(LocalDateTime.now())
-                              .createdBy("test")
-                              .build())
-            .orderCreatedBy(Roles.SOLICITOR.getValue())
-            .build();
-
-        Element<DraftOrder> draftOrderElement = element(draftOrder);
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        draftOrderCollection.add(draftOrderElement);
 
         MagistrateLastName magistrateLastName = MagistrateLastName.builder()
             .lastName("Magistrate last")
@@ -1192,6 +1170,14 @@ public class DraftAnOrderServiceTest {
         Element<MagistrateLastName> magistrateLastNameElement = Element.<MagistrateLastName>builder().value(
             magistrateLastName).build();
         List<Element<MagistrateLastName>> magistrateElementList = Collections.singletonList(magistrateLastNameElement);
+
+        List<OrderTypeEnum> orderType = new ArrayList<>();
+        orderType.add(OrderTypeEnum.childArrangementsOrder);
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+        LocalDateTime now = LocalDateTime.now();
+        System.out.println(dtf.format(now));
+
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -1224,7 +1210,6 @@ public class DraftAnOrderServiceTest {
                               .childArrangementsOrdersToIssue(orderType)
                               .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
                               .build())
-            .draftOrderCollection(draftOrderCollection)
             .judgeOrMagistratesLastName("judge last")
             .justiceLegalAdviserFullName("Judge full")
             .magistrateLastName(magistrateElementList)
