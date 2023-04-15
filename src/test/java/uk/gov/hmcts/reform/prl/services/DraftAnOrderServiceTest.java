@@ -812,7 +812,7 @@ public class DraftAnOrderServiceTest {
             .sdoHearingsAndNextStepsList(new ArrayList<>())
             .sdoDocumentationAndEvidenceList(new ArrayList<>())
             .sdoLocalAuthorityList(new ArrayList<>())
-            .sdoFurtherinstructionsEnumList(new ArrayList<>())
+            .sdoFurtherList(new ArrayList<>())
             .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -843,7 +843,7 @@ public class DraftAnOrderServiceTest {
                 SdoDocumentationAndEvidenceEnum.spipAttendance
             ))
             .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
-            .sdoFurtherinstructionsEnumList(List.of(SdoFurtherInstructionsEnum.newDirection))
+            .sdoFurtherList(List.of(SdoFurtherInstructionsEnum.newDirection))
             .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)

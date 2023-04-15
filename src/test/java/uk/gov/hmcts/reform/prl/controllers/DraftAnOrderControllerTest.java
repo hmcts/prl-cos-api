@@ -295,7 +295,7 @@ public class DraftAnOrderControllerTest {
             .sdoCourtList(List.of(SdoCourtEnum.crossExaminationEx740))
             .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
             .sdoOtherList(List.of(SdoOtherEnum.parentWithCare))
-            .sdoFurtherinstructionsEnumList(List.of(SdoFurtherInstructionsEnum.newDirection))
+            .sdoFurtherList(List.of(SdoFurtherInstructionsEnum.newDirection))
             .build();
         CaseData caseData = CaseData.builder()
             .id(123L)
@@ -330,7 +330,7 @@ public class DraftAnOrderControllerTest {
             .sdoCourtList(new ArrayList<>())
             .sdoDocumentationAndEvidenceList(new ArrayList<>())
             .sdoOtherList(new ArrayList<>())
-            .sdoFurtherinstructionsEnumList(new ArrayList<>())
+            .sdoFurtherList(new ArrayList<>())
             .build();
 
         CaseData caseData = CaseData.builder()

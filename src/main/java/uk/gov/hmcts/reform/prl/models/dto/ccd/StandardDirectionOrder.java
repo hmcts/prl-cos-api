@@ -58,7 +58,7 @@ public class StandardDirectionOrder {
     @JsonProperty("sdoDocumentationAndEvidenceList")
     private final List<SdoDocumentationAndEvidenceEnum> sdoDocumentationAndEvidenceList;
     @JsonProperty("sdoFurtherList")
-    private final List<SdoFurtherInstructionsEnum> sdoFurtherinstructionsEnumList;
+    private final List<SdoFurtherInstructionsEnum> sdoFurtherList;
     @JsonProperty("sdoOtherList")
     private final List<SdoOtherEnum> sdoOtherList;
 
