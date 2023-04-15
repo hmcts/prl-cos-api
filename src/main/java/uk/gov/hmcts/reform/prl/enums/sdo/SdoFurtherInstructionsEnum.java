@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum SdoFurtherinstructionsEnum {
+public enum SdoFurtherInstructionsEnum {
 
     @JsonProperty("newDirection")
     newDirection("newDirection", "Add a new direction");
@@ -24,8 +24,8 @@ public enum SdoFurtherinstructionsEnum {
     }
 
     @JsonCreator
-    public static AllocateOrReserveJudgeEnum getValue(String key) {
-        return AllocateOrReserveJudgeEnum.valueOf(key);
+    public static SdoFurtherInstructionsEnum getValue(String key) {
+        return SdoFurtherInstructionsEnum.valueOf(key);
     }
 
 }

@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtRequestedEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCrossExaminationSittingBeforeEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherinstructionsEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoJudgeLaDecideByEnum;
@@ -58,7 +58,7 @@ public class StandardDirectionOrder {
     @JsonProperty("sdoDocumentationAndEvidenceList")
     private final List<SdoDocumentationAndEvidenceEnum> sdoDocumentationAndEvidenceList;
     @JsonProperty("sdoFurtherList")
-    private final List<SdoFurtherinstructionsEnum> sdoFurtherinstructionsEnumList;
+    private final List<SdoFurtherInstructionsEnum> sdoFurtherinstructionsEnumList;
     @JsonProperty("sdoOtherList")
     private final List<SdoOtherEnum> sdoOtherList;
 
