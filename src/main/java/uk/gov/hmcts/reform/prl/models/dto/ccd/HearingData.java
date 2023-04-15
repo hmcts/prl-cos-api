@@ -142,6 +142,4 @@ public class HearingData {
 
     @JsonProperty("hasJudgeProvidedHearingDetails")
     private String hasJudgeProvidedHearingDetails;
-
-    private final YesOrNo isOrderCreatedBySolicitor;
 }
