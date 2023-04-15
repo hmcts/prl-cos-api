@@ -68,7 +68,7 @@ public class RespondentSolicitorTaskListRenderer {
             lines.addAll(renderResSolTasksErrors(tasksErrors, respondent));
             log.info("task list after: " + String.join("\n\n", lines));
         } else {
-            String caseDocumentsUrl = manageCaseUrl + URL_STRING + caseId + "#Case documents";
+            String caseDocumentsUrl = manageCaseUrl + URL_STRING + caseId + "#Case%20documents";
             lines.add(
                 DIV_CLASS_WIDTH_50
                     + "<h3>Response for " + representedRespondentName + " has been successfully submitted.</h3>"
