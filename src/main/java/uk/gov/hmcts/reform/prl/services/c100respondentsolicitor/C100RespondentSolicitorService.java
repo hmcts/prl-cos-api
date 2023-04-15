@@ -402,10 +402,6 @@ public class C100RespondentSolicitorService {
                 false
             );
             caseDataUpdated.put("finalC7ResponseDoc", document);
-            log.info("finalC7ResponseDoc " + document);
-            //Commenting out for the time being as C7 changes are not currently present in corresponding CCD pr
-            //Will revert it back later
-            //caseDataUpdated.put("finalC7ResponseDoc", document);
         }
         return caseDataUpdated;
     }
