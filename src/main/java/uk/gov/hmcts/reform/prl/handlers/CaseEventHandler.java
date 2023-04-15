@@ -110,9 +110,7 @@ public class CaseEventHandler {
             if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
                 Element<PartyDetails> respondingParty = caseData.getRespondents().get(solicitorRole.get().getIndex());
 
-                if (respondingParty.getValue() != null
-                    && (respondingParty.getValue().getResponse() == null
-                        || !YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted()))) {
+                if (respondingParty.getValue() != null) {
                     final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
                     log.info("tasks found: " + tasks.size());
 
