@@ -631,7 +631,8 @@ public class DraftAnOrderService {
             && caseData.getStandardDirectionOrder().getSdoLocalAuthorityList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty());
+            && caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoFurtherinstructionsEnumList().isEmpty());
     }
 
     public void populateStandardDirectionOrderFields(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {

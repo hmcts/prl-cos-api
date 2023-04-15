@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
@@ -811,6 +812,7 @@ public class DraftAnOrderServiceTest {
             .sdoHearingsAndNextStepsList(new ArrayList<>())
             .sdoDocumentationAndEvidenceList(new ArrayList<>())
             .sdoLocalAuthorityList(new ArrayList<>())
+            .sdoFurtherinstructionsEnumList(new ArrayList<>())
             .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -841,6 +843,7 @@ public class DraftAnOrderServiceTest {
                 SdoDocumentationAndEvidenceEnum.spipAttendance
             ))
             .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoFurtherinstructionsEnumList(List.of(SdoFurtherInstructionsEnum.newDirection))
             .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -959,7 +962,7 @@ public class DraftAnOrderServiceTest {
             .directionOnIssue(directionOnIssue)
             .build();
 
-        assertTrue(draftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+        assertTrue(draftAnOrderService.checkDirectionOnIssueOptionsSelected(caseData));
     }
 
     @Test
