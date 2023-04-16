@@ -103,7 +103,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
             );
 
             isFinished = isSectionsFinished(caseData, behavioursCompleted, previousOrders);
-
+            log.info("isFinished ===> " + isFinished);
         } else {
             isFinished = allegationsOfHarmYesNo.isPresent();
         }
