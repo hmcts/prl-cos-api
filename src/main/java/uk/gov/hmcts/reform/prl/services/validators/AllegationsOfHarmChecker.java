@@ -329,9 +329,12 @@ public class AllegationsOfHarmChecker implements EventChecker {
             fields.add(behavioursApplicantHelpAction);
         }
         log.info("Behaviour fields" + fields);
-        return fields.stream().noneMatch(Optional::isEmpty)
+        boolean flag = fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent)
             .map(Optional::get).noneMatch(field -> field.equals(""));
+        log.info("Behaviour flag" + flag);
+
+        return flag;
 
     }
 
