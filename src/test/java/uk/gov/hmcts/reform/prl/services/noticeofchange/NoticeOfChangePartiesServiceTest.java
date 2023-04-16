@@ -67,6 +67,8 @@ public class NoticeOfChangePartiesServiceTest {
 
     Optional<Element<PartyDetails>> optionalParty;
 
+    PartyDetails daParty;
+
     Element<PartyDetails> wrappedRespondents;
 
     NoticeOfChangeParties noticeOfChangeParties = NoticeOfChangeParties.builder().build();
@@ -111,12 +113,16 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
 
         role = SolicitorRole.SOLICITORCARA;
+
+        daParty = PartyDetails.builder().build();
     }
 
     @Test
     public void testGenerate() {
 
         when(policyConverter.caGenerate(role, optionalParty))
+            .thenReturn(organisationPolicy);
+        when(policyConverter.daGenerate(role, daParty))
             .thenReturn(organisationPolicy);
 
         when(partiesConverter.generateCaForSubmission(wrappedRespondents))

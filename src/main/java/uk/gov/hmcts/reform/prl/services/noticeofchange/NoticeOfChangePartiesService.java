@@ -97,7 +97,6 @@ public class NoticeOfChangePartiesService {
                 OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
                     solicitorRole, solicitorContainer
                 );
-                log.info("*** NoC testing organisationPolicy " + organisationPolicy.getOrgPolicyCaseAssignedRole());
                 data.put(String.format(representing.getPolicyFieldTemplate(), i), organisationPolicy);
 
                 Optional<NoticeOfChangeParties> possibleAnswer = populateCaAnswer(
@@ -344,13 +343,11 @@ public class NoticeOfChangePartiesService {
             if (CAAPPLICANT.equals(solicitorRole.getRepresenting()) || CARESPONDENT.equals(solicitorRole.getRepresenting())) {
                 OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
                     solicitorRole, Optional.empty());
-                log.info("*** NoC testing organisationPolicy " + organisationPolicy.getOrgPolicyCaseAssignedRole());
-                data.put(String.format(representing.getPolicyFieldTemplate(), solicitorRole.getIndex()), organisationPolicy);
+                data.put(String.format(solicitorRole.getRepresenting().getPolicyFieldTemplate(), solicitorRole.getIndex()), organisationPolicy);
             } else if (DAAPPLICANT.equals(solicitorRole.getRepresenting()) || DARESPONDENT.equals(solicitorRole.getRepresenting())) {
                 OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
                     solicitorRole, PartyDetails.builder().build());
-                log.info("*** NoC testing organisationPolicy " + organisationPolicy.getOrgPolicyCaseAssignedRole());
-                data.put(representing.getPolicyFieldTemplate(), organisationPolicy);
+                data.put(solicitorRole.getRepresenting().getPolicyFieldTemplate(), organisationPolicy);
             }
         }
     }
