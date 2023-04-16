@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
@@ -23,6 +24,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
+@Slf4j
 @Service
 public class AllegationsOfHarmChecker implements EventChecker {
 
@@ -324,7 +326,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
             fields.add(behavioursApplicantHelpSoughtWho);
             fields.add(behavioursApplicantHelpAction);
         }
-
+        log.info("Behaviour fields" + fields);
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent)
             .map(Optional::get).noneMatch(field -> field.equals(""));

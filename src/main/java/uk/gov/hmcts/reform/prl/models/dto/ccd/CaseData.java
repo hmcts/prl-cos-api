@@ -723,7 +723,7 @@ public class CaseData implements MappableObject {
     private final Document draftC7ResponseDoc;
     private final Document finalC7ResponseDoc;
 
-    private final SubmitConsentEnum respondentAgreeStatement;
+    private final List<SubmitConsentEnum> respondentAgreeStatement;
 
     private final Document draftC1ADoc;
 
