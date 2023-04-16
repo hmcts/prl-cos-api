@@ -75,6 +75,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFE_GUARDING_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_CROSS_EXAMINATION_EX741;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_PERMISSION_HEARING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
@@ -734,6 +736,16 @@ public class DraftAnOrderService {
                 "sdoUpdateContactDetails",
                 UPDATE_CONTACT_DETAILS
             );
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
+            SdoHearingsAndNextStepsEnum.permissionHearing)) {
+            caseDataUpdated.put("sdoPermissionHearingDirections", SDO_PERMISSION_HEARING);
+        }
+        if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
+            && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
+            SdoCourtEnum.crossExaminationEx741)) {
+            caseDataUpdated.put("sdoCrossExaminationEx741", SDO_CROSS_EXAMINATION_EX741);
         }
     }
 

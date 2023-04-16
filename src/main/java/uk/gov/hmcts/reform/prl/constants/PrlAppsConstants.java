@@ -13,7 +13,7 @@ public class PrlAppsConstants {
 
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
-    
+
     public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
     public static final String STATE = "state";
 
@@ -345,6 +345,32 @@ public class PrlAppsConstants {
         + "c. Any relevant facts they are asking the court to decide about matters which are not agreed;"
         + System.lineSeparator()
         + "d. And the party’s proposals for the arrangements for the child[ren]";
+
+    public static final String SDO_PERMISSION_HEARING = "List for hearing before district judge on ((date of hearing))"
+        + " for ((hours of hearing)) before ((tier of judge)) for the court to consider:"
+        + System.lineSeparator()
+        + System.lineSeparator()
+        + System.lineSeparator()
+        + "a) whether the application should be dismissed"
+        + System.lineSeparator()
+        + "b) if the application is not dismissed, any further directions "
+        + System.lineSeparator()
+        + "c) whether an order under section 91 (14) of the Children Act 1989 should be made. "
+        + " Such orders prevent the making of further applications without the court’s permission";
+
+    public static final String SDO_CROSS_EXAMINATION_EX741 = "Under Section 31U of the MFPA, it appears to the court "
+        + "that the quality of the party’s evidence on cross-examination is likely to be diminished if the "
+        + "cross-examination is conducted in person, or if the conduct of cross-examination in person would cause "
+        + "significant distress to a party, and it would not be contrary to the interests of justice to make the direction."
+        + System.lineSeparator()
+        + "It is ordered that:"
+        + System.lineSeparator()
+        + "a. The applicant and respondent (delete as appropriate) must notify the court by 4pm on [date] "
+        + "whether they intend to appoint their own qualified legal representative.\n"
+        + System.lineSeparator()
+        + "{_}b. If the applicant/respondent does not intend to appoint their own qualified legal representative, "
+        + "they (whichever party is the (alleged) perpetrator of domestic abuse) must complete form EX741 (name the form) "
+        + "and return it to the court by 4pm on [date{_}]";
 
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
