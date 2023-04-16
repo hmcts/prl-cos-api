@@ -36,9 +36,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest.decisionRequest;
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.BLANK;
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.POPULATE;
@@ -203,8 +206,29 @@ public class NoticeOfChangePartiesService {
             if (CARESPONDENT.equals(solicitorRole.get().getRepresenting())) {
                 List<Element<PartyDetails>> respondents = CARESPONDENT.getCaTarget().apply(caseData);
                 if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                    return updateC100RespondentDetails(partyIndex, respondents, legalRepresentativeSolicitorDetails,
-                                                       changeOrganisationRequest, caseData
+                    return updateC100PartyDetails(partyIndex, respondents, legalRepresentativeSolicitorDetails,
+                                                  changeOrganisationRequest, caseData, CARESPONDENT
+                    );
+                }
+            } else if (CAAPPLICANT.equals(solicitorRole.get().getRepresenting())) {
+                List<Element<PartyDetails>> applicants = CAAPPLICANT.getCaTarget().apply(caseData);
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    return updateC100PartyDetails(partyIndex, applicants, legalRepresentativeSolicitorDetails,
+                                                  changeOrganisationRequest, caseData, CAAPPLICANT
+                    );
+                }
+            } else if (DAAPPLICANT.equals(solicitorRole.get().getRepresenting())) {
+                if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    return updateFl401PartyDetails(legalRepresentativeSolicitorDetails,
+                                                   changeOrganisationRequest, caseData,
+                                                   DAAPPLICANT
+                    );
+                }
+            } else if (DARESPONDENT.equals(solicitorRole.get().getRepresenting())) {
+                if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    return updateFl401PartyDetails(legalRepresentativeSolicitorDetails,
+                                                   changeOrganisationRequest, caseData,
+                                                   DARESPONDENT
                     );
                 }
             }
@@ -223,14 +247,15 @@ public class NoticeOfChangePartiesService {
         return solicitorRole;
     }
 
-    private CaseData updateC100RespondentDetails(int partyIndex,
-                                                 List<Element<PartyDetails>> respondents,
-                                                 UserDetails legalRepresentativeSolicitorDetails,
-                                                 ChangeOrganisationRequest changeOrganisationRequest,
-                                                 CaseData caseData) {
-        Element<PartyDetails> representedRespondentElement = respondents.get(partyIndex);
-        PartyDetails updPartyDetails = representedRespondentElement.getValue().toBuilder()
-            .user(representedRespondentElement.getValue().getUser().toBuilder()
+    private CaseData updateC100PartyDetails(int partyIndex,
+                                            List<Element<PartyDetails>> parties,
+                                            UserDetails legalRepresentativeSolicitorDetails,
+                                            ChangeOrganisationRequest changeOrganisationRequest,
+                                            CaseData caseData,
+                                            SolicitorRole.Representing representing) {
+        Element<PartyDetails> partyDetailsElement = parties.get(partyIndex);
+        PartyDetails updPartyDetails = partyDetailsElement.getValue().toBuilder()
+            .user(partyDetailsElement.getValue().getUser().toBuilder()
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
@@ -240,9 +265,48 @@ public class NoticeOfChangePartiesService {
             .solicitorOrg(changeOrganisationRequest.getOrganisationToAdd())
             .build();
         Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
-            .element(representedRespondentElement.getId(), updPartyDetails);
-        caseData.getRespondents().set(partyIndex, updatedRepresentedRespondentElement);
+            .element(partyDetailsElement.getId(), updPartyDetails);
+        if (CAAPPLICANT.equals(representing)) {
+            caseData.getApplicants().set(partyIndex, updatedRepresentedRespondentElement);
+        } else if (CARESPONDENT.equals(representing)) {
+            caseData.getRespondents().set(partyIndex, updatedRepresentedRespondentElement);
+        }
         return caseData;
+    }
+
+    private CaseData updateFl401PartyDetails(UserDetails legalRepresentativeSolicitorDetails,
+                                             ChangeOrganisationRequest changeOrganisationRequest,
+                                             CaseData caseData,
+                                             SolicitorRole.Representing representing) {
+        CaseData updatedCaseData = null;
+
+        if (DAAPPLICANT.equals(representing)) {
+            PartyDetails updPartyDetails = caseData.getApplicantsFL401().toBuilder()
+                .user(caseData.getApplicantsFL401().getUser().toBuilder()
+                          .solicitorRepresented(YesOrNo.Yes)
+                          .build())
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .solicitorEmail(changeOrganisationRequest.getCreatedBy())
+                .representativeFirstName(legalRepresentativeSolicitorDetails.getFullName())
+                .representativeLastName(legalRepresentativeSolicitorDetails.getSurname().orElse(""))
+                .solicitorOrg(changeOrganisationRequest.getOrganisationToAdd())
+                .build();
+            updatedCaseData = caseData.toBuilder().applicantsFL401(updPartyDetails).build();
+        } else if (DARESPONDENT.equals(representing)) {
+            PartyDetails updPartyDetails = caseData.getRespondentsFL401().toBuilder()
+                .user(caseData.getRespondentsFL401().getUser().toBuilder()
+                          .solicitorRepresented(YesOrNo.Yes)
+                          .build())
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .solicitorEmail(changeOrganisationRequest.getCreatedBy())
+                .representativeFirstName(legalRepresentativeSolicitorDetails.getFullName())
+                .representativeLastName(legalRepresentativeSolicitorDetails.getSurname().orElse(""))
+                .solicitorOrg(changeOrganisationRequest.getOrganisationToAdd())
+                .build();
+            updatedCaseData = caseData.toBuilder().respondentsFL401(updPartyDetails).build();
+        }
+
+        return updatedCaseData;
     }
 
     private NoticeOfChangeEvent prepareNoticeOfChangeEvent(CaseData newCaseData,

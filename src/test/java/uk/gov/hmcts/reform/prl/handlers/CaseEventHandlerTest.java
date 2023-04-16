@@ -55,7 +55,6 @@ import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.FINISHED;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseEventHandlerTest {
 
@@ -368,7 +367,7 @@ public class CaseEventHandlerTest {
     public void testGetRespondentTaskList() {
         List<Element<PartyDetails>> respondents = new ArrayList<>();
         respondents.add(element(PartyDetails.builder()
-                                    .user(User.builder().build())
+                                    .user(User.builder().solicitorRepresented(YesOrNo.Yes).build())
                                     .firstName("test")
                                     .lastName("test")
                                     .email("test@hmcts.net")
