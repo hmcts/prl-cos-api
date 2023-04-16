@@ -1690,6 +1690,28 @@
 
       ],
       "isAtAddressLessThan5YearsWithDontKnow": null
+    },
+    "daApplicant": {
+      "firstName": "John",
+      "lastName": "Smith"
+    },
+    "daApplicantPolicy": {
+      "Organisation": {
+        "OrganisationID": "QO4A1Q8",
+        "OrganisationName": "FPRL-test-organisation"
+      },
+      "OrgPolicyCaseAssignedRole": "[SOLICITORA]",
+      "OrgPolicyReference": null
+    },
+    "daRespondent": {
+      "firstName": "Elise",
+      "lastName": "Lynn"
+    },
+    "daRespondentPolicy": {
+      "Organisation": {
+      },
+      "OrgPolicyCaseAssignedRole": "[SOLICITORB]",
+      "OrgPolicyReference": null
     }
   },
   "security_classification": "PUBLIC",
