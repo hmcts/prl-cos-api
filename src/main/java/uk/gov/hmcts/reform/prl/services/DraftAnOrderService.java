@@ -75,6 +75,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFE_GUARDING_L
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Roles.SOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -359,6 +361,7 @@ public class DraftAnOrderService {
         caseDataMap.put("underTakingDateExpiry", selectedOrder.getUnderTakingDateExpiry());
         caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
         caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
+        caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         return caseDataMap;
@@ -386,6 +389,10 @@ public class DraftAnOrderService {
         caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
         caseDataMap.put("reviewRequiredBy", selectedOrder.getOtherDetails().getReviewRequiredBy() != null
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
+        caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
+        caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
+        caseDataMap.put("isOrderCreatedBySolicitor", SOLICITOR.getId().equals(selectedOrder.getOrderCreatedBy()) ? Yes : No);
+        log.info("is Order created by solicitor:::{}:::", caseDataMap.get("isOrderCreatedBySolicitor"));
         return caseDataMap;
     }
 

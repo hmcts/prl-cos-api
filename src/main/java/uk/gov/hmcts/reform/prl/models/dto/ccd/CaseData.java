@@ -577,6 +577,11 @@ public class CaseData implements MappableObject {
 
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
 
+    @JsonProperty("ordersHearingDetails")
+    @JsonUnwrapped
+    @Builder.Default
+    private final List<Element<HearingData>> solicitorOrdersHearingDetails;
+
     @JsonUnwrapped
     @Builder.Default
     private final ManageOrders manageOrders;

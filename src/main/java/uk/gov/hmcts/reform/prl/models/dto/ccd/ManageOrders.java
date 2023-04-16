@@ -255,4 +255,6 @@ public class ManageOrders {
     @JsonUnwrapped
     @Builder.Default
     private final List<Element<HearingData>> ordersHearingDetails;
+
+    private YesOrNo isOrderCreatedBySolicitor;
 }
