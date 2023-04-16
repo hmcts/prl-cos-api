@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -124,8 +123,7 @@ public class AllTabServiceImplTest {
 
     @Test
     public void testUpdatePartyDetailsForNoc() {
-        when(CASE_DATA.getCaseTypeOfApplication()).thenReturn(PrlAppsConstants.C100_CASE_TYPE);
-        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.SOLICITORA));
+        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.SOLICITORCAAA));
         verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
     }
 }
