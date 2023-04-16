@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
@@ -402,10 +403,6 @@ public class C100RespondentSolicitorService {
                 false
             );
             caseDataUpdated.put("finalC7ResponseDoc", document);
-            log.info("finalC7ResponseDoc " + document);
-            //Commenting out for the time being as C7 changes are not currently present in corresponding CCD pr
-            //Will revert it back later
-            //caseDataUpdated.put("finalC7ResponseDoc", document);
         }
         return caseDataUpdated;
     }
@@ -419,14 +416,18 @@ public class C100RespondentSolicitorService {
 
         Element<PartyDetails> representedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
 
-        if (representedRespondent != null && representedRespondent.getValue() != null) {
+        if (representedRespondent != null && representedRespondent.getValue() != null && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(
+            caseData.getCaseTypeOfApplication())) {
             PartyDetails amended = representedRespondent.getValue().toBuilder()
                 .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
                 .build();
 
-            // respondents.set(respondents.indexOf(representedRespondent), element(representedRespondent.getId(), amended));
+            caseData.getRespondents().set(
+                caseData.getRespondents().indexOf(representedRespondent),
+                element(representedRespondent.getId(), amended)
+            );
 
-            // updatedCaseData.put(RESPONDENTS, respondents);
+            updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
         }
         return updatedCaseData;
     }
