@@ -163,7 +163,9 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                 fields.add(ofNullable(childAbuse.getNatureOfBehaviour()));
                 fields.add(ofNullable(childAbuse.getAbuseStartDateAndLength()));
                 fields.add(ofNullable(childAbuse.getRespondentSoughtHelp()));
-                fields.add(ofNullable(childAbuse.getRespondentTypeOfHelp()));
+                if (YesOrNo.Yes.equals(childAbuse.getRespondentSoughtHelp())) {
+                    fields.add(ofNullable(childAbuse.getRespondentTypeOfHelp()));
+                }
             }
         }
     }
@@ -184,7 +186,9 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                 fields.add(ofNullable(domesticAbuse.getNatureOfBehaviour()));
                 fields.add(ofNullable(domesticAbuse.getAbuseStartDateAndLength()));
                 fields.add(ofNullable(domesticAbuse.getRespondentSoughtHelp()));
-                fields.add(ofNullable(domesticAbuse.getRespondentTypeOfHelp()));
+                if (YesOrNo.Yes.equals(domesticAbuse.getRespondentSoughtHelp())) {
+                    fields.add(ofNullable(domesticAbuse.getRespondentTypeOfHelp()));
+                }
             }
         }
     }
