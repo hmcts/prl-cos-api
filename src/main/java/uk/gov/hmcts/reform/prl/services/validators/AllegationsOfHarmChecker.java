@@ -24,7 +24,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
-@Slf4j
 @Service
 public class AllegationsOfHarmChecker implements EventChecker {
 
@@ -65,17 +64,13 @@ public class AllegationsOfHarmChecker implements EventChecker {
         Optional<YesOrNo> allegationsOfHarmYesNo = ofNullable(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo());
 
         boolean isFinished;
-        log.info("AllegationsOfHarmChecker validateFields");
         if (allegationsOfHarmYesNo.isPresent() && allegationsOfHarmYesNo.get().equals(Yes)) {
-            log.info("AllegationsOfHarmChecker allegationsOfHarmYesNo ::" + allegationsOfHarmYesNo);
             boolean behavioursCompleted = true;
 
             if (abusePresent(caseData)) {
-                log.info("AllegationsOfHarmChecker abusePresent");
                 Optional<List<Element<Behaviours>>> behavioursWrapped = ofNullable(caseData.getAllegationOfHarm().getBehaviours());
                 if (behavioursWrapped.isPresent()
                     && !behavioursWrapped.get().isEmpty()) {
-                    log.info("AllegationsOfHarmChecker behavioursWrapped ::" + behavioursWrapped);
                     behavioursCompleted =  behavioursWrapped.get()
                             .stream().allMatch(behavioursElement -> validateBehaviour(behavioursElement.getValue()));
                     if (!behavioursCompleted) {
@@ -103,7 +98,6 @@ public class AllegationsOfHarmChecker implements EventChecker {
             );
 
             isFinished = isSectionsFinished(caseData, behavioursCompleted, previousOrders);
-            log.info("isFinished ===> " + isFinished);
         } else {
             isFinished = allegationsOfHarmYesNo.isPresent();
         }
@@ -328,13 +322,10 @@ public class AllegationsOfHarmChecker implements EventChecker {
             fields.add(behavioursApplicantHelpSoughtWho);
             fields.add(behavioursApplicantHelpAction);
         }
-        log.info("Behaviour fields" + fields);
-        boolean flag = fields.stream().noneMatch(Optional::isEmpty)
+
+        return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent)
             .map(Optional::get).noneMatch(field -> field.equals(""));
-        log.info("Behaviour flag" + flag);
-
-        return flag;
 
     }
 
