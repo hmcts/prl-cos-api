@@ -45,9 +45,15 @@ public enum SolicitorRole {
             .findFirst();
     }
 
-    public static List<SolicitorRole> values(Representing representing) {
+    public static List<SolicitorRole> matchingRoles(Representing representing) {
         return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
             .filter(role -> role.representing == representing)
+            .collect(Collectors.toList());
+    }
+
+    public static List<SolicitorRole> notMatchingRoles(Representing representing) {
+        return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
+            .filter(role -> role.representing != representing)
             .collect(Collectors.toList());
     }
 
