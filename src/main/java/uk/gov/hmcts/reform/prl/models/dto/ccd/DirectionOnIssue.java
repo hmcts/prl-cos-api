@@ -30,12 +30,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
-import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioDisclosureOtherDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioInterpreterOtherDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioLocalAuthorityDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioMiamOtherDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioTransferCourtDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.OtherDirectionPositionStatement;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoLanguageDialect;
@@ -176,30 +171,30 @@ public class DirectionOnIssue {
     @JsonProperty("dioPositionStatementOtherCheckDetails")
     private final OtherDirectionPositionStatementEnum dioPositionStatementOtherCheckDetails;
     @JsonProperty("dioPositionStatementOtherDetails")
-    private final List<Element<OtherDirectionPositionStatement>> dioPositionStatementOtherDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> dioPositionStatementOtherDetails;
 
     @JsonProperty("dioMiamOtherCheckDetails")
     private final MiamOtherDirectionEnum dioMiamOtherCheckDetails;
     @JsonProperty("dioMiamOtherDetails")
-    private final List<Element<DioMiamOtherDetails>> dioMiamOtherDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> dioMiamOtherDetails;
 
     @JsonProperty("dioInterpreterOtherDetailsCheck")
     private final DioOtherDirectionEnum dioInterpreterOtherDetailsCheck;
     @JsonProperty("dioInterpreterOtherDetails")
-    private final List<Element<DioInterpreterOtherDetails>> dioInterpreterOtherDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> dioInterpreterOtherDetails;
 
     @JsonProperty("dioLocalAuthorityDetailsCheck")
     private final DioLocalAuthorityDirectionEnum dioLocalAuthorityDetailsCheck;
     @JsonProperty("dioLocalAuthorityDetails")
-    private final List<Element<DioLocalAuthorityDetails>> dioLocalAuthorityDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> dioLocalAuthorityDetails;
 
     @JsonProperty("dioTransferCourtDetailsCheck")
     private final DioTransferCourtDirectionEnum dioTransferCourtDetailsCheck;
     @JsonProperty("dioTransferCourtDetails")
-    private final List<Element<DioTransferCourtDetails>> dioTransferCourtDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> dioTransferCourtDetails;
 
     @JsonProperty("dioDisclosureOtherDetailsCheck")
     private final DioDisclosureDirectionEnum dioDisclosureOtherDetailsCheck;
     @JsonProperty("dioDisclosureOtherDetails")
-    private final List<Element<DioDisclosureOtherDetails>> dioDisclosureOtherDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> dioDisclosureOtherDetails;
 }

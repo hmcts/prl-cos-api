@@ -7,13 +7,13 @@ import lombok.Data;
 
 @Data
 @Builder(toBuilder = true)
-public class DioTransferCourtDetails {
-    @JsonProperty("dioTransferCourtDetails")
-    private final String dioTransferCourtDetails;
+public class SdoDioProvideOtherDetails {
+
+    @JsonProperty("sdoDioOtherDetails")
+    private final String sdoDioOtherDetails;
 
     @JsonCreator
-    public DioTransferCourtDetails(String dioTransferCourtDetails) {
-        this.dioTransferCourtDetails  = dioTransferCourtDetails;
+    public SdoDioProvideOtherDetails(String sdoDioOtherDetails) {
+        this.sdoDioOtherDetails  = sdoDioOtherDetails;
     }
 }
-
