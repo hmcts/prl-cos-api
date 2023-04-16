@@ -65,15 +65,17 @@ public class AllegationsOfHarmChecker implements EventChecker {
         Optional<YesOrNo> allegationsOfHarmYesNo = ofNullable(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo());
 
         boolean isFinished;
-
+        log.info("AllegationsOfHarmChecker validateFields");
         if (allegationsOfHarmYesNo.isPresent() && allegationsOfHarmYesNo.get().equals(Yes)) {
-
+            log.info("AllegationsOfHarmChecker allegationsOfHarmYesNo ::" + allegationsOfHarmYesNo);
             boolean behavioursCompleted = true;
 
             if (abusePresent(caseData)) {
+                log.info("AllegationsOfHarmChecker abusePresent");
                 Optional<List<Element<Behaviours>>> behavioursWrapped = ofNullable(caseData.getAllegationOfHarm().getBehaviours());
                 if (behavioursWrapped.isPresent()
                     && !behavioursWrapped.get().isEmpty()) {
+                    log.info("AllegationsOfHarmChecker behavioursWrapped ::" + behavioursWrapped);
                     behavioursCompleted =  behavioursWrapped.get()
                             .stream().allMatch(behavioursElement -> validateBehaviour(behavioursElement.getValue()));
                     if (!behavioursCompleted) {
