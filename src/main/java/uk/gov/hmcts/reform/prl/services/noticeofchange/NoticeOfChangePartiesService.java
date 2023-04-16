@@ -81,39 +81,45 @@ public class NoticeOfChangePartiesService {
                                        NoticeOfChangeAnswersPopulationStrategy strategy, Map<String, Object> data) {
         List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(caseData);
         int numElements = null != caElements ? caElements.size() : 0;
-
-        List<SolicitorRole> solicitorRoles = SolicitorRole.values(representing);
+        log.info("*** NoC testing caElements size: " + numElements);
+        List<SolicitorRole> solicitorRoles = SolicitorRole.matchingRoles(representing);
         for (int i = 0; i < solicitorRoles.size(); i++) {
+            log.info("*** NoC testing solicitorRoles size: " + solicitorRoles.size());
+            log.info("*** NoC testing executing the item: " + i);
             SolicitorRole solicitorRole = solicitorRoles.get(i);
-
+            log.info("*** NoC testing Solicitor role found: " + solicitorRole.getCaseRoleLabel() + solicitorRole.getIndex());
             if (null != caElements) {
+                log.info("*** NoC testing CA elements is not null");
                 Optional<Element<PartyDetails>> solicitorContainer = i < numElements
                     ? Optional.of(caElements.get(i))
                     : Optional.empty();
-
-                if (solicitorContainer.isPresent()) {
-                    OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
-                        solicitorRole, solicitorContainer
-                    );
-                    data.put(String.format(representing.getPolicyFieldTemplate(), i), organisationPolicy);
-                }
+                log.info("*** NoC testing solicitorContainer " + solicitorContainer);
+                OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
+                    solicitorRole, solicitorContainer
+                );
+                log.info("*** NoC testing organisationPolicy " + organisationPolicy.getOrgPolicyCaseAssignedRole());
+                data.put(String.format(representing.getPolicyFieldTemplate(), i), organisationPolicy);
 
                 Optional<NoticeOfChangeParties> possibleAnswer = populateCaAnswer(
                     strategy, solicitorContainer
                 );
-
+                log.info("*** NoC testing possibleAnswer is set " + possibleAnswer);
                 if (possibleAnswer.isPresent()) {
+                    log.info("*** NoC testing possibleAnswer is set " + possibleAnswer.get());
                     data.put(String.format(representing.getNocAnswersTemplate(), i), possibleAnswer.get());
                 }
+                log.info("*** NoC testing finishing the process " );
             }
         }
+
+        generateRequiredOrgPoliciesForNoc(representing, data);
     }
 
     public void generateFl401NocDetails(CaseData caseData, SolicitorRole.Representing representing,
                                         NoticeOfChangeAnswersPopulationStrategy strategy, Map<String, Object> data) {
         PartyDetails daElements = representing.getDaTarget().apply(caseData);
 
-        List<SolicitorRole> solicitorRoles = SolicitorRole.values(representing);
+        List<SolicitorRole> solicitorRoles = SolicitorRole.matchingRoles(representing);
         for (int i = 0; i < solicitorRoles.size(); i++) {
             SolicitorRole solicitorRole = solicitorRoles.get(i);
 
@@ -123,18 +129,20 @@ public class NoticeOfChangePartiesService {
                     solicitorRole, daElements
                 );
 
-                data.put(String.format(representing.getPolicyFieldTemplate(), i), organisationPolicy);
+                data.put(representing.getPolicyFieldTemplate(), organisationPolicy);
 
                 Optional<NoticeOfChangeParties> possibleAnswer = populateDaAnswer(
                     strategy, daElements
                 );
 
                 if (possibleAnswer.isPresent()) {
-                    data.put(String.format(representing.getNocAnswersTemplate(), i), possibleAnswer.get());
+                    data.put(representing.getNocAnswersTemplate(), possibleAnswer.get());
                 }
 
             }
         }
+
+        generateRequiredOrgPoliciesForNoc(representing, data);
     }
 
     private Optional<NoticeOfChangeParties> populateCaAnswer(NoticeOfChangeAnswersPopulationStrategy strategy,
@@ -325,5 +333,25 @@ public class NoticeOfChangePartiesService {
 
         }
         return null;
+    }
+
+    private void generateRequiredOrgPoliciesForNoc(SolicitorRole.Representing representing, Map<String, Object> data) {
+        List<SolicitorRole> nonSolicitorRoles = SolicitorRole.notMatchingRoles(representing);
+        log.info("*** NoC testing nonSolicitorRoles size: " + nonSolicitorRoles.size());
+        for (int i = 0; i < nonSolicitorRoles.size(); i++) {
+            SolicitorRole solicitorRole = nonSolicitorRoles.get(i);
+            log.info("*** NoC testing Solicitor role found: " + solicitorRole.getCaseRoleLabel() + solicitorRole.getIndex());
+            if (CAAPPLICANT.equals(solicitorRole.getRepresenting()) || CARESPONDENT.equals(solicitorRole.getRepresenting())) {
+                OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
+                    solicitorRole, Optional.empty());
+                log.info("*** NoC testing organisationPolicy " + organisationPolicy.getOrgPolicyCaseAssignedRole());
+                data.put(String.format(representing.getPolicyFieldTemplate(), solicitorRole.getIndex()), organisationPolicy);
+            } else if (DAAPPLICANT.equals(solicitorRole.getRepresenting()) || DARESPONDENT.equals(solicitorRole.getRepresenting())) {
+                OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
+                    solicitorRole, PartyDetails.builder().build());
+                log.info("*** NoC testing organisationPolicy " + organisationPolicy.getOrgPolicyCaseAssignedRole());
+                data.put(representing.getPolicyFieldTemplate(), organisationPolicy);
+            }
+        }
     }
 }
