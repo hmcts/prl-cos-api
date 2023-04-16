@@ -108,7 +108,7 @@ public class NoticeOfChangePartiesService {
                     log.info("*** NoC testing possibleAnswer is set " + possibleAnswer.get());
                     data.put(String.format(representing.getNocAnswersTemplate(), i), possibleAnswer.get());
                 }
-                log.info("*** NoC testing finishing the process " );
+                log.info("*** NoC testing finishing the process ");
             }
         }
 
