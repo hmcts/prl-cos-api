@@ -100,6 +100,7 @@ public class C100RespondentSolicitorService {
                         .getSolicitorKeepDetailsPriate().getRespKeepDetailsPrivateConfidentiality());
                     break;
                 case CONFIRM_EDIT_CONTACT_DETAILS:
+                    log.info("***** Edit ***** {}", solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails());
                     caseDataUpdated.put(
                         event.getCaseFieldName(),
                         solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails()
