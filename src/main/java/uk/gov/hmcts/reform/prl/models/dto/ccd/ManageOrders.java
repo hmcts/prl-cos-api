@@ -256,5 +256,9 @@ public class ManageOrders {
     @Builder.Default
     private final List<Element<HearingData>> ordersHearingDetails;
 
+    @JsonUnwrapped
+    @Builder.Default
+    private final List<Element<HearingData>> solicitorOrdersHearingDetails;
+
     private YesOrNo isOrderCreatedBySolicitor;
 }
