@@ -81,7 +81,6 @@
       snakeyaml-1.32.jar ]]></notes>
     <cve>CVE-2021-4235</cve>
     <cve>CVE-2022-3064</cve>
-    <cve>CVE-2022-1471</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
