@@ -541,6 +541,9 @@ public class DraftAnOrderService {
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .approvalDate(draftOrder.getApprovalDate())
+            .manageOrderHearingDetails(SOLICITOR.getId().equals(loggedInUserType)
+                                           ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                                           : caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
             .build();
     }
