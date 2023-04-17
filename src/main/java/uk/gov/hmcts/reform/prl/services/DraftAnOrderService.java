@@ -315,6 +315,10 @@ public class DraftAnOrderService {
         }
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         log.info("orderUploadedAsDraftFlag value:: {} ", caseDataMap.get("orderUploadedAsDraftFlag"));
+        caseDataMap.put("isOrderCreatedBySolicitor", SOLICITOR.getId().equals(selectedOrder.getOrderCreatedBy())
+            ? Yes : No);
+        log.info("is Order created by solicitor in populateDraftOrderDocument:::{}:::", caseDataMap.get("isOrderCreatedBySolicitor"));
+
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
         DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
         if (language.isGenEng()) {
@@ -334,6 +338,7 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("isOrderCreatedBySolicitor", SOLICITOR.getId().equals(selectedOrder.getOrderCreatedBy()) ? Yes : No);
+        log.info("is Order created by solicitor in populateDraftOrderCustomFields:::{}:::", caseDataMap.get("isOrderCreatedBySolicitor"));
         caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
         caseDataMap.put("parentName", selectedOrder.getParentName());
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
@@ -399,7 +404,7 @@ public class DraftAnOrderService {
         caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("isOrderCreatedBySolicitor", SOLICITOR.getId().equals(selectedOrder.getOrderCreatedBy()) ? Yes : No);
-        log.info("is Order created by solicitor:::{}:::", caseDataMap.get("isOrderCreatedBySolicitor"));
+        log.info("is Order created by solicitor in populateCommonDraftOrderFields:::{}:::", caseDataMap.get("isOrderCreatedBySolicitor"));
         return caseDataMap;
     }
 
