@@ -118,7 +118,11 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType) {
-        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
+        DraftOrder draftOrder = manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);;
+
+        log.info("Draft order Hearing Details:::{}:::", null != draftOrder
+            ? draftOrder.getManageOrderHearingDetails() : null);
+        return draftOrder;
     }
 
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData) {
