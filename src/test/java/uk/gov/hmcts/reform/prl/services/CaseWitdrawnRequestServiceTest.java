@@ -13,12 +13,15 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseWitdrawnRequestServiceTest {
@@ -35,6 +38,9 @@ public class CaseWitdrawnRequestServiceTest {
     @Mock
     private SolicitorEmailService solicitorEmailService;
 
+    @Mock
+    private CaseWorkerEmailService caseWorkerEmailService;
+
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
     CaseData caseData;
@@ -47,6 +53,7 @@ public class CaseWitdrawnRequestServiceTest {
             .id(12345678L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .withDrawApplicationData(WithdrawApplication.builder().withDrawApplication(YesOrNo.Yes).build())
+            .localCourtAdmin(List.of(element(LocalCourtAdminEmail.builder().email("localCourtEmail@hmcts.com").build())))
             .state(State.CASE_ISSUED)
             .build();
         caseDataMap = caseData.toMap(new ObjectMapper());
@@ -67,7 +74,7 @@ public class CaseWitdrawnRequestServiceTest {
     public void testCaseWithdrawnRequestSubmittedInGateKeepingState() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .withDrawApplicationData(WithdrawApplication.builder().withDrawApplication(YesOrNo.Yes).build())
             .state(State.JUDICIAL_REVIEW)
             .build();
@@ -133,7 +140,7 @@ public class CaseWitdrawnRequestServiceTest {
     public void testCaseWithdrawnRequestSubmittedInSubmittedState() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .withDrawApplicationData(WithdrawApplication.builder().withDrawApplication(YesOrNo.Yes).build())
             .state(State.SUBMITTED_PAID)
             .build();
