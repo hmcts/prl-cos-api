@@ -38,7 +38,7 @@ public class CaseWithdrawnRequestController extends AbstractCallbackController {
             content = @Content(mediaType = "application/json",
                 schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public ResponseEntity<SubmittedCallbackResponse> caseWithdrawnEmailNotification(
+    public ResponseEntity<SubmittedCallbackResponse> caseWithdrawnEmailNotificationWhenSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
