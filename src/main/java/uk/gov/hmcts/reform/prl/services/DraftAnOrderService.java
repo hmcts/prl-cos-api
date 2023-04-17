@@ -363,6 +363,7 @@ public class DraftAnOrderService {
         caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
         caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
+        caseDataMap.put("isOrderCreatedBySolicitor", SOLICITOR.getId().equals(selectedOrder.getOrderCreatedBy()) ? Yes : No);
         caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
