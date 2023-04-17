@@ -101,7 +101,8 @@ public class DraftAnOrderService {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType));
-        log.info("Draft order Hearing Details:::{}:::", orderDetails.getValue().getManageOrderHearingDetails());
+        log.info("Draft order Hearing Details:::{}:::", null != orderDetails.getValue()
+            ? orderDetails.getValue().getManageOrderHearingDetails() : null);
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(orderDetails);
