@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -61,12 +62,14 @@ public class UploadAdditionalApplicationService {
         return additionalApplicationElements;
     }
 
-    private String getSelectedApplicantName(DynamicList applicantsList) {
+    private String getSelectedApplicantName(DynamicMultiSelectList applicantsList) {
         String applicantName = "";
         if (Objects.nonNull(applicantsList)) {
-            DynamicListElement selectedElement = applicantsList.getValue();
+            List<DynamicMultiselectListElement> selectedElement = applicantsList.getValue();
             if (isNotEmpty(selectedElement)) {
-                applicantName = selectedElement.getLabel();
+                List<String> appList = selectedElement.stream().map(DynamicMultiselectListElement::getLabel)
+                    .collect(Collectors.toList());
+                applicantName = String.join(",",appList);
             }
         }
         return applicantName;

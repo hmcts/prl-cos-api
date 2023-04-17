@@ -39,7 +39,12 @@ public enum Event {
     FL401_SOT_AND_SUBMIT("fl401StatementOfTruthAndSubmit", "Statement of truth and submit"),
     FL401_RESUBMIT("fl401resubmit", "Statement of Truth and submit"),
     FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings"),
-    FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents");
+    FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents"),
+    TS_SOLICITOR_APPLICATION("testingSupportDummySolicitorCreate", "TS-Solicitor application"),
+    TS_ADMIN_APPLICATION_NOC("testingSupportDummyAdminCreateNoc", "TS-Admin application-Noc"),
+    ADMIN_EDIT_AND_APPROVE_ORDER("adminEditAndApproveAnOrder", "Edit and serve a draft order"),
+    EDIT_AND_APPROVE_ORDER("editAndApproveAnOrder", "Edit and approve a draft order");
+
 
     private final String id;
     private final String name;

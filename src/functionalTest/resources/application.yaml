@@ -23,6 +23,9 @@ prl:
   document:
     generate:
       uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
+  refdata:
+    username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
+    password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
 
 management:
   endpoint:
@@ -226,6 +229,7 @@ locationfinder:
     url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
     endpoint: /refdata/location/court-venues/services
 
+
 launchdarkly:
   sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
 
@@ -236,13 +240,13 @@ rd_professional:
 document:
   templates:
     c100:
-      c100_final_template: PRL-C100-R1-Final-Document.docx
+      c100_final_template: FL-PRL-APP-ENG-C100-Final.docx
       c100_final_filename: C100FinalDocument.pdf
       c100_draft_template: PRL-C100-R1-Draft-Document.docx
       c100_draft_filename: Draft_C100_application.pdf
-      c100_c8_template: PRL-C8-Final-Changes.docx
+      c100_c8_template: FL-PRL-APP-ENG-C100-C8-Final.docx
       c100_c8_filename: C8Document.pdf
-      c100_c1a_template: PRL-C1A.docx
+      c100_c1a_template: FL-PRL-APP-ENG-C100-C1A-Final.docx
       c100_c1a_filename: C1A_Document.pdf
       c100_c8_draft_template: FL-PRL-CON-ENG-01118.docx
       c100_c8_draft_filename: C8DocumentDraft.pdf
@@ -261,11 +265,11 @@ document:
       c100_c1a_welsh_template: PRL-C1A-WelshLang.docx
       c100_c1a_welsh_filename: C1A_Document_Welsh.pdf
     fl401:
-      fl401_final_template: FL401-Final.docx
+      fl401_final_template: FL-PRL-APP-ENG-Fl401-Final.docx
       fl401_final_filename: FL401FinalDocument.pdf
       fl401_draft_template: FL401-draft.docx
       fl401_draft_filename: Draft_DA_application
-      fl401_c8_template: PRL-DA-C8.docx
+      fl401_c8_template: FL-PRL-APP-ENG-FL401-C8-Final.docx
       fl401_c8_filename: C8_Document.pdf
       fl401_final_welsh_template: FL401-Final-Welsh.docx
       fl401_final_welsh_filename: FL401FinalDocumentWelsh.pdf
@@ -390,6 +394,14 @@ document:
       prl_c1a_blank_filename: C1ABlankDocument.pdf
       prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
       prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
+      prl_c6_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Final.docx
+      prl_c6_filename: Notice_Of_Parties_Order_C6.pdf
+      prl_c6_draft_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Draft.docx
+      prl_c6_draft_filename: Notice_Of_Parties_Order_C6_draft.pdf
+      prl_c6a_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Final.docx
+      prl_c6a_filename: Notice_Of_Parties_Order_C6a.pdf
+      prl_c6a_draft_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Draft.docx
+      prl_c6a_draft_filename: Notice_Of_Parties_Order_C6a_draft.pdf
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf
@@ -414,6 +426,18 @@ courts:
 fis_hearing:
   api:
     url: ${HEARING_API_BASEURL:http://fis-hmc-api-demo.service.core-compute-demo.internal}
+staffDetails:
+  api:
+    url: ${STAFF_DETAILS_API:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}
+
+judicialUsers:
+  api:
+    url: ${JUDICIAL_USERS_API:http://rd-judicial-api-aat.service.core-compute-aat.internal}
+
+commonData:
+  api:
+    url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
+
 
 
 postcodelookup:
