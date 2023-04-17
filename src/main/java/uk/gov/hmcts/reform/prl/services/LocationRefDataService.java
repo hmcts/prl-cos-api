@@ -120,21 +120,22 @@ public class LocationRefDataService {
             if (code.isPresent()) {
                 key += Arrays.stream(code.get().split(":")).toArray().length > 1
                     ? Arrays.stream(code.get().split(":")).toArray()[1] : "";
+                log.info("** Court venue key: {}, value: {} ", key, value);
             }
         }
         return DynamicListElement.builder().code(key).label(value).build();
     }
 
-    public String getCourtDetailsFromEpimmsId(String baseLocationId, String authToken) {
+    public Optional<CourtVenue> getCourtDetailsFromEpimmsId(String baseLocationId, String authToken) {
         CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(authToken,
                                                                                 authTokenGenerator.generate(),
                                                                                 SERVICE_ID);
+
         Optional<CourtVenue> courtVenue = courtDetails.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> baseLocationId.equalsIgnoreCase(location.getCourtEpimmsId()))
             .findFirst();
-        return courtVenue.map(venue -> venue.getCourtEpimmsId() + "-" + venue.getRegionId()
-            + "-" + venue.getCourtName() + "-" + venue.getPostcode() + "-" + venue.getRegion()
-            + "-" + venue.getSiteName()).orElse("");
+
+        return courtVenue;
     }
 }

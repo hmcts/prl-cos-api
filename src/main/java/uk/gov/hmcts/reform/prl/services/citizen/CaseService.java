@@ -16,27 +16,28 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 
@@ -45,12 +46,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 public class CaseService {
 
     public static final String LINK_CASE = "linkCase";
-    public static final String CITIZEN_INTERNAL_CASE_UPDATE = "citizen-internal-case-update";
+    public static final String INVALID = "Invalid";
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
-
-    @Autowired
-    CaseDetailsConverter caseDetailsConverter;
 
     @Autowired
     CaseRepository caseRepository;
@@ -67,14 +65,6 @@ public class CaseService {
     @Autowired
     CaseDataMapper caseDataMapper;
 
-    @Autowired
-    CitizenEmailService citizenEmailService;
-
-    @Autowired
-    AllTabServiceImpl allTabsService;
-
-    @Autowired
-    CourtFinderService courtLocatorService;
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
@@ -209,11 +199,17 @@ public class CaseService {
             coreCaseDataApi.getCase(authorisation, s2sToken, caseId).getData(),
             CaseData.class
         );
+        if (null == caseData) {
+            return INVALID;
+        }
         return findAccessCodeStatus(accessCode, caseData);
     }
 
     private String findAccessCodeStatus(String accessCode, CaseData caseData) {
-        String accessCodeStatus = "Invalid";
+        String accessCodeStatus = INVALID;
+        if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()) {
+            return accessCodeStatus;
+        }
         List<CaseInvite> matchingCaseInvite = caseData.getCaseInvites()
             .stream()
             .map(Element::getValue)
@@ -237,6 +233,23 @@ public class CaseService {
 
     public CaseDetails createCase(CaseData caseData, String authToken) {
         return caseRepository.createCase(authToken, caseData);
+    }
+
+    public CaseDetails withdrawCase(CaseData caseData, String caseId, String authToken) {
+
+        WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
+        Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
+        CaseDetails caseDetails = getCase(authToken, caseId);
+        CaseData updatedCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+            .toBuilder().id(caseDetails.getId()).build();
+
+        if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
+            updatedCaseData = updatedCaseData.toBuilder()
+                .withDrawApplicationData(withDrawApplicationData)
+                .build();
+        }
+
+        return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
 }
