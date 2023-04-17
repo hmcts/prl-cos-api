@@ -315,10 +315,6 @@ public class DraftAnOrderService {
         }
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         log.info("orderUploadedAsDraftFlag value:: {} ", caseDataMap.get("orderUploadedAsDraftFlag"));
-        caseDataMap.put("isOrderCreatedBySolicitor", SOLICITOR.getId().equals(selectedOrder.getOrderCreatedBy())
-            ? Yes : No);
-        log.info("is Order created by solicitor in populateDraftOrderDocument:::{}:::", caseDataMap.get("isOrderCreatedBySolicitor"));
-
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
         DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
         if (language.isGenEng()) {
@@ -337,8 +333,6 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-        caseDataMap.put("isOrderCreatedBySolicitor", SOLICITOR.getId().equals(selectedOrder.getOrderCreatedBy()) ? Yes : No);
-        log.info("is Order created by solicitor in populateDraftOrderCustomFields:::{}:::", caseDataMap.get("isOrderCreatedBySolicitor"));
         caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
         caseDataMap.put("parentName", selectedOrder.getParentName());
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
@@ -403,8 +397,6 @@ public class DraftAnOrderService {
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
         caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
-        caseDataMap.put("isOrderCreatedBySolicitor", SOLICITOR.getId().equals(selectedOrder.getOrderCreatedBy()) ? Yes : No);
-        log.info("is Order created by solicitor in populateCommonDraftOrderFields:::{}:::", caseDataMap.get("isOrderCreatedBySolicitor"));
         return caseDataMap;
     }
 
@@ -857,7 +849,11 @@ public class DraftAnOrderService {
 
     public Map<String,Object> getDraftOrderInfo(String authorisation, CaseData caseData)  throws Exception {
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
-        return  getDraftOrderData(authorisation, caseData, draftOrder);
+
+        Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder);
+        caseDataMap.put("isOrderCreatedBySolicitor", SOLICITOR.getId().equals(draftOrder.getOrderCreatedBy()) ? Yes : No);
+        log.info("is Order created by solicitor in populateCommonDraftOrderFields:::{}:::", caseDataMap.get("isOrderCreatedBySolicitor"));
+        return  caseDataMap;
     }
 
     private Map<String, Object> getDraftOrderData(String authorisation, CaseData caseData, DraftOrder draftOrder) throws Exception {
