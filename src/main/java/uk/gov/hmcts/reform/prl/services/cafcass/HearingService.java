@@ -53,10 +53,10 @@ public class HearingService {
 
     private void filterHearingsForListOfCaseIds() {
 
-        for (Hearings hearingDetails : listOfHearingDetails) {
-            if (hearingDetails != null && hearingDetails.getCaseHearings() != null) {
+        for (Hearings hearingDetailsFromList : listOfHearingDetails) {
+            if (hearingDetailsFromList != null && hearingDetailsFromList.getCaseHearings() != null) {
 
-                final List<CaseHearing> caseHearings = hearingDetails.getCaseHearings();
+                final List<CaseHearing> caseHearings = hearingDetailsFromList.getCaseHearings();
 
                 final List<String> hearingStatuses = hearingStatusList.stream().map(String::trim).collect(Collectors.toList());
 
@@ -70,10 +70,8 @@ public class HearingService {
 
                 // if we find any hearing after filteration, change hmc status to null as it's not required in response.
                 if (hearings != null && !hearings.isEmpty()) {
-                    hearingDetails.setCaseHearings(hearings);
+                    hearingDetailsFromList.setCaseHearings(hearings);
                     log.debug("Hearings filtered based on Listed hearing");
-                } else {
-                    hearingDetails = null;
                 }
             }
         }
