@@ -1,14 +1,9 @@
 package uk.gov.hmcts.reform.prl.filter.cafcaas;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.Address;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
