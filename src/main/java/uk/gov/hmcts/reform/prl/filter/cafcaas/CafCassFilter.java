@@ -25,7 +25,6 @@ public class CafCassFilter {
 
     public void filter(CafCassResponse cafCassResponse) {
         setNonNullEmptyElementList(cafCassResponse);
-        //        filterCasesByApplicationValidPostcode(cafCassResponse);
         cafCassResponse.setTotal(cafCassResponse.getCases().size());
     }
 
@@ -71,29 +70,7 @@ public class CafCassFilter {
 
         return null;
     }
-
-    private void filterCasesByApplicationValidPostcode(CafCassResponse cafCassResponse) {
-
-        List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases()
-            .stream().filter(cafCassCaseDetail -> {
-                if (!ObjectUtils.isEmpty(cafCassCaseDetail.getCaseData().getApplicants())) {
-                    return hasApplicantValidPostcode(cafCassCaseDetail.getCaseData());
-                } else {
-                    return false;
-                }
-            }).collect(Collectors.toList());
-        cafCassResponse.setCases(cafCassCaseDetailList);
-    }
-
-    private boolean hasApplicantValidPostcode(CafCassCaseData cafCassCaseData) {
-        for (Element<ApplicantDetails> applicantDetails: cafCassCaseData.getApplicants()) {
-            if (isAddressValid(applicantDetails)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    
     private boolean isAddressValid(Element<ApplicantDetails> applicationDetails) {
         if (!ObjectUtils.isEmpty(applicationDetails.getValue())
             && !ObjectUtils.isEmpty(applicationDetails.getValue().getAddress())) {

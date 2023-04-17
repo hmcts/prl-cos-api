@@ -154,20 +154,6 @@ public class CaseDataService {
         return shoulds;
     }
 
-    /**
-     * Fetch the hearing data from fis hearing service.
-     *
-     * @param authorisation   //
-     * @param cafCassResponse //
-     */
-    private void getHearingDetails(String authorisation, CafCassResponse cafCassResponse) {
-
-        for (CafCassCaseDetail cafCassCaseDetail : cafCassResponse.getCases()) {
-            cafCassCaseDetail.getCaseData().setHearingData(hearingService.getHearings(authorisation,
-                    String.valueOf(cafCassCaseDetail.getId())));
-        }
-    }
-
     private CafCassResponse getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
         CafCassResponse filteredCafcassResponse = CafCassResponse.builder()
                 .cases(new ArrayList<CafCassCaseDetail>())
