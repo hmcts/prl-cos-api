@@ -235,7 +235,8 @@ public class C100RespondentSolicitorService {
         switch (event) {
             case CONSENT:
                 Consent respondentConsentToApplication = caseData.getRespondentConsentToApplication();
-                optimiseConsent(respondentConsentToApplication);
+                respondentConsentToApplication = optimiseConsent(respondentConsentToApplication);
+                log.info("*** respondentConsentToApplication **** {}", respondentConsentToApplication);
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .consent(respondentConsentToApplication).build();
                 break;
@@ -329,6 +330,7 @@ public class C100RespondentSolicitorService {
         if (YesOrNo.No.equals(consent.getPermissionFromCourt())) {
             courtOrderDetails = null;
         }
+        log.info("***no con rea*** {}", noConsentReason);
         return consent.toBuilder()
             .noConsentReason(noConsentReason)
             .courtOrderDetails(courtOrderDetails)
