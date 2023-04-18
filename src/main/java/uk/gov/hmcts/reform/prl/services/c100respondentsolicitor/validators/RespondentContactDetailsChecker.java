@@ -27,21 +27,18 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
 
-        if (response.isPresent()) {
-            return ofNullable(response.get().getCitizenDetails())
-                .filter(contact -> anyNonEmpty(
-                    contact.getFirstName(),
-                    contact.getLastName(),
-                    contact.getPreviousName(),
-                    contact.getDateOfBirth(),
-                    contact.getPlaceOfBirth(),
-                    contact.getAddress(),
-                    contact.getAddressHistory(),
-                    contact.getContact().getEmail(),
-                    contact.getContact().getPhoneNumber()
-                )).isPresent();
-        }
-        return false;
+        return response.filter(value -> ofNullable(value.getCitizenDetails())
+            .filter(contact -> anyNonEmpty(
+                contact.getFirstName(),
+                contact.getLastName(),
+                contact.getPreviousName(),
+                contact.getDateOfBirth(),
+                contact.getPlaceOfBirth(),
+                contact.getAddress(),
+                contact.getAddressHistory(),
+                contact.getContact().getEmail(),
+                contact.getContact().getPhoneNumber()
+            )).isPresent()).isPresent();
     }
 
     @Override
@@ -51,7 +48,7 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
         if (response.isPresent()) {
             Optional<CitizenDetails> citizenDetails = Optional.ofNullable(response.get()
                                                                               .getCitizenDetails());
-            if (!citizenDetails.isEmpty() && checkContactDetailsMandatoryCompleted(citizenDetails)) {
+            if (citizenDetails.isPresent() && checkContactDetailsMandatoryCompleted(citizenDetails)) {
                 respondentTaskErrorService.removeError(CONFIRM_EDIT_CONTACT_DETAILS_ERROR);
                 return true;
             }
