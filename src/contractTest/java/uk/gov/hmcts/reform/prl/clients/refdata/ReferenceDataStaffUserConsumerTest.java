@@ -58,7 +58,7 @@ public class ReferenceDataStaffUserConsumerTest {
             .method("GET")
             .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
             .path("/refdata/internal/staff/usersByServiceName")
-            .query("ccd_service_names=PRIVATELAW&sort_column=lastName&sort_direction=ASC")
+            .query("ccd_service_names=PRIVATELAW&sort_column=lastName&sort_direction=ASC&page_size=50&page_number=0")
             .willRespondWith()
             .status(HttpStatus.SC_OK)
             .body(ResourceLoader.loadJson(validResponseBody),"application/json")
@@ -72,7 +72,11 @@ public class ReferenceDataStaffUserConsumerTest {
         List<StaffResponse> staffResponseList = staffResponseDetailsApi.getAllStaffResponseDetails(
             AUTHORIZATION_TOKEN,
             SERVICE_AUTH_TOKEN,
-            "PRIVATELAW","lastName","ASC", RD_STAFF_PAGE_SIZE, RD_STAFF_FIRST_PAGE
+            "PRIVATELAW",
+            "lastName",
+            "ASC",
+            RD_STAFF_PAGE_SIZE,
+            RD_STAFF_FIRST_PAGE
         ).getBody();
         assertNotNull(staffResponseList);
         assertEquals("Rama",staffResponseList.get(0).getStaffProfile().getLastName());
