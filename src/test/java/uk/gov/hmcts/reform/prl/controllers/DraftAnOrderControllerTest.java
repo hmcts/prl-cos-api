@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DirectionOnIssue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +69,9 @@ public class DraftAnOrderControllerTest {
 
     @InjectMocks
     private DraftAnOrderController draftAnOrderController;
+
+    @Mock
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     @Before
     public void setUp() {
