@@ -129,7 +129,9 @@ public class DraftAnOrderController {
         ) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         } else {
+            log.info("Before generate document manageorder {}", caseData.getManageOrders());
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
+            log.info("Before generate document casedata {}", caseData.getManageOrders());
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
         if (caseData != null) {
