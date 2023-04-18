@@ -157,7 +157,8 @@ public class HearingServiceTest {
         listOfHearingDetails.add(hearings);
         ReflectionTestUtils.setField(hearingService, "hearingStatusList", List.of("LISTED"));
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
-        when(hearingApiClient.getHearingDetailsForAllCaseIds(authToken, authTokenGenerator.generate(),caseIdWithRegionIdMap)).thenReturn(listOfHearingDetails);
+        when(hearingApiClient.getHearingDetailsForAllCaseIds(authToken, authTokenGenerator.generate(),caseIdWithRegionIdMap))
+            .thenReturn(listOfHearingDetails);
         List<Hearings> response =
             hearingService.getHearingsForAllCases(authToken, caseIdWithRegionIdMap);
 
