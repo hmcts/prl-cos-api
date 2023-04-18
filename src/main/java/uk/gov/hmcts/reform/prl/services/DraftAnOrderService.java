@@ -374,7 +374,9 @@ public class DraftAnOrderService {
         caseDataMap.put("judgeOrMagistratesLastName", selectedOrder.getJudgeOrMagistratesLastName());
         caseDataMap.put("justiceLegalAdviserFullName", selectedOrder.getJusticeLegalAdviserFullName());
         caseDataMap.put("magistrateLastName", selectedOrder.getMagistrateLastName());
-        caseDataMap.put("isTheOrderAboutAllChildren", selectedOrder.getIsTheOrderAboutAllChildren());
+        caseDataMap.put("isTheOrderAboutChildren", selectedOrder.getIsTheOrderAboutChildren());
+        caseDataMap.put("childOption", Yes.equals(selectedOrder.getIsTheOrderAboutChildren())
+            ? selectedOrder.getChildOption() : null);
         caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
         caseDataMap.put("furtherDirectionsIfRequired", selectedOrder.getFurtherDirectionsIfRequired());
@@ -483,6 +485,8 @@ public class DraftAnOrderService {
             .magistrateLastName(caseData.getMagistrateLastName())
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+            .childOption(Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                             ? caseData.getManageOrders().getChildOption() : null)
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
@@ -537,7 +541,7 @@ public class DraftAnOrderService {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
-        if (!C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
             if (fl404CustomFields != null) {
                 fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
@@ -597,6 +601,9 @@ public class DraftAnOrderService {
                                   .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
                                   .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
                                   .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
+                                  .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
+                                  .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions() != null
+                                                      ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .build()).build();
         } else {
             caseData = caseData.toBuilder()
@@ -615,6 +622,9 @@ public class DraftAnOrderService {
                                   .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                                   .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
                                   .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
+                                  .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
+                                  .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions() != null
+                                                      ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .build()).build();
         }
         return caseData;
