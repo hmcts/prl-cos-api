@@ -139,6 +139,7 @@ public class DraftAnOrderController {
         }
 
         log.info("childrenListForDocmosis Data in populateFl404Fields {} end ", caseDataUpdated.get("childrenListForDocmosis"));
+        log.info("CaseDataUpdatedMap in populateFl404Fields {}  ", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
