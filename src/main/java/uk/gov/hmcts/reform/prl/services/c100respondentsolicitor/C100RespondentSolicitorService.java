@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
@@ -288,7 +289,13 @@ public class C100RespondentSolicitorService {
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .solicitorMiam(SolicitorMiam.builder()
                                        .respSolHaveYouAttendedMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam())
-                                       .respSolWillingnessToAttendMiam(caseData.getRespondentSolicitorWillingnessToAttendMiam())
+                                       .respSolWillingnessToAttendMiam(Miam.builder()
+                                       .reasonNotAttendingMiam(
+                                           YesOrNo.Yes.equals(caseData.getRespondentSolicitorWillingnessToAttendMiam()
+                                                                  .getWillingToAttendMiam()) ? null
+                                                                  : caseData.getRespondentSolicitorWillingnessToAttendMiam()
+                                               .getReasonNotAttendingMiam())
+                                                                           .build())
                                        .build())
                     .build();
                 break;
