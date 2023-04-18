@@ -192,7 +192,7 @@ public class DynamicMultiSelectListServiceTest {
 
     @Test
     public void testDynamicMultiSelectForDocmosis() {
-        List<Child> str = dynamicMultiSelectListService
+        List<Element<Child>> str = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseData);
         assertNotNull(str);
     }

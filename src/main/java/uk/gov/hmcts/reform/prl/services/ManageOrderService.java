@@ -1386,7 +1386,7 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         GeneratedDocumentInfo generatedDocumentInfo = null;
         Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
-        List<Child> children = dynamicMultiSelectListService
+        List<Element<Child>> children = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseData);
         if (!children.isEmpty()) {
             caseData.setChildrenListForDocmosis(children);
