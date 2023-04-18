@@ -13,6 +13,10 @@ public class PrlAppsConstants {
 
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
+    
+    public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
+    public static final String STATE = "state";
+
 
     public static final String YES = "Yes";
     public static final String NO = "No";
@@ -432,5 +436,5 @@ public class PrlAppsConstants {
     public static final String REASONS_SELECTED_FOR_LIST_ON_NOTICE = "List on notice ";
 
     public static final String CASE_NOTES = "caseNotes";
-
+    public static final String COLON_SEPERATOR = ":";
 }
