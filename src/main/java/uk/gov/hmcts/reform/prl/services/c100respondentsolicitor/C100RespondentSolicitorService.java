@@ -16,7 +16,9 @@ import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
@@ -107,12 +109,28 @@ public class C100RespondentSolicitorService {
                         .getSolicitorKeepDetailsPriate().getRespKeepDetailsPrivateConfidentiality());
                     break;
                 case CONFIRM_EDIT_CONTACT_DETAILS:
-                    log.info("***** Edit ***** {}", solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails());
-                    log.info("**** case field name *** {}", event.getCaseFieldName());
+                    CitizenDetails citizenDetails = solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails();
+                    PartyDetails partyDetails = solicitorRepresentedRespondent.getValue();
                     caseDataUpdated.put(
                         event.getCaseFieldName(),
-                        solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails()
-                    );
+                        CitizenDetails.builder()
+                            .address(Optional.ofNullable(citizenDetails.getAddress()).orElse(partyDetails.getAddress()))
+                            .addressHistory(Optional.ofNullable(citizenDetails.getAddressHistory()).orElse(
+                                AddressHistory.builder().isAtAddressLessThan5Years(partyDetails.getIsAtAddressLessThan5Years())
+                                    .build()
+                            ))
+                            .contact(Optional.ofNullable(citizenDetails.getContact()).orElse(Contact.builder()
+                                                                                                 .phoneNumber(partyDetails
+                                                                                                          .getPhoneNumber())
+                                                                                                 .email(partyDetails.getEmail())
+                                                                                                 .build()))
+                            .dateOfBirth(Optional.ofNullable(citizenDetails.getDateOfBirth()).orElse(partyDetails.getDateOfBirth()))
+                            .firstName(Optional.ofNullable(citizenDetails.getFirstName()).orElse(partyDetails.getFirstName()))
+                            .lastName(Optional.ofNullable(citizenDetails.getLastName()).orElse(partyDetails.getLastName()))
+                            .placeOfBirth(Optional.ofNullable(citizenDetails.getPlaceOfBirth()).orElse(partyDetails.getPlaceOfBirth()))
+                            .previousName(Optional.ofNullable(citizenDetails.getPreviousName()).orElse(partyDetails.getPreviousName()))
+                            .build());
+                    log.info("***** Edit ***** {}", caseDataUpdated.get(event.getCaseFieldName()));
                     break;
                 case ATTENDING_THE_COURT:
                     caseDataUpdated.put(
