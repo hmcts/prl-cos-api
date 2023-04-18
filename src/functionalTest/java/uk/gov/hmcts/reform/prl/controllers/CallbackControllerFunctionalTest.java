@@ -141,7 +141,7 @@ public class CallbackControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/case-withdrawn-email-notification")
+            .post("/case-withdrawn-about-to-submit")
             .then()
             .assertThat().statusCode(500);
     }
