@@ -234,14 +234,9 @@ public class C100RespondentSolicitorService {
         switch (event) {
             case CONSENT:
                 Consent respondentConsentToApplication = caseData.getRespondentConsentToApplication();
+                optimiseConsent(respondentConsentToApplication);
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .consent(buildResponseForRespondent.getConsent().toBuilder()
-                                 .consentToTheApplication(respondentConsentToApplication.getConsentToTheApplication())
-                                 .noConsentReason(respondentConsentToApplication.getNoConsentReason())
-                                 .applicationReceivedDate(respondentConsentToApplication.getApplicationReceivedDate())
-                                 .courtOrderDetails(respondentConsentToApplication.getCourtOrderDetails())
-                                 .permissionFromCourt(respondentConsentToApplication.getPermissionFromCourt())
-                                 .build()).build();
+                    .consent(respondentConsentToApplication).build();
                 break;
             case KEEP_DETAILS_PRIVATE:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
@@ -322,6 +317,21 @@ public class C100RespondentSolicitorService {
         PartyDetails amended = party.getValue().toBuilder()
             .response(buildResponseForRespondent).build();
         respondents.set(respondents.indexOf(party), element(party.getId(), amended));
+    }
+
+    private Consent optimiseConsent(Consent consent) {
+        String noConsentReason = consent.getNoConsentReason();
+        String courtOrderDetails = consent.getCourtOrderDetails();
+        if (YesOrNo.Yes.equals(consent.getConsentToTheApplication())) {
+            noConsentReason = null;
+        }
+        if (YesOrNo.No.equals(consent.getPermissionFromCourt())) {
+            courtOrderDetails = null;
+        }
+        return consent.toBuilder()
+            .noConsentReason(noConsentReason)
+            .courtOrderDetails(courtOrderDetails)
+            .build();
     }
 
     private Element<PartyDetails> findSolicitorRepresentedRespondents(CallbackRequest callbackRequest) {
