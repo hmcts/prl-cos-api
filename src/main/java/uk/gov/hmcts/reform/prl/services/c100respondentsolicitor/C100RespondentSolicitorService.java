@@ -108,6 +108,7 @@ public class C100RespondentSolicitorService {
                     break;
                 case CONFIRM_EDIT_CONTACT_DETAILS:
                     log.info("***** Edit ***** {}", solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails());
+                    log.info("**** case field name *** {}", event.getCaseFieldName());
                     caseDataUpdated.put(
                         event.getCaseFieldName(),
                         solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails()
