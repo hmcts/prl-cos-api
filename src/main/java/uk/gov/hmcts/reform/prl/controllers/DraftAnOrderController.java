@@ -135,8 +135,8 @@ public class DraftAnOrderController {
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         }
-        caseDataUpdated.put("childOption",  null != manageOrders ? manageOrders.getChildOption() : null);
-        log.info("ChildOption Data in populateFl404Fields {} end ", caseDataUpdated.get("childOption"));
+
+        log.info("childrenListForDocmosis Data in populateFl404Fields {} end ", caseDataUpdated.get("childrenListForDocmosis"));
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
