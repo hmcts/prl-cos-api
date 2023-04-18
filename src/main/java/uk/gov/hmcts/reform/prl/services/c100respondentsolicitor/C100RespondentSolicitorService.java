@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -100,6 +101,7 @@ public class C100RespondentSolicitorService {
                         .getSolicitorKeepDetailsPriate().getRespKeepDetailsPrivateConfidentiality());
                     break;
                 case CONFIRM_EDIT_CONTACT_DETAILS:
+                    log.info("***** Edit ***** {}", solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails());
                     caseDataUpdated.put(
                         event.getCaseFieldName(),
                         solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails()
@@ -437,6 +439,7 @@ public class C100RespondentSolicitorService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        setActiveRespondent(callbackRequest, caseData);
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
@@ -456,5 +459,22 @@ public class C100RespondentSolicitorService {
         }
 
         return caseDataUpdated;
+    }
+
+    private static void setActiveRespondent(CallbackRequest callbackRequest, CaseData caseData) {
+        String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
+        if (!caseData.getRespondents().isEmpty()) {
+            Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingRespondent);
+            if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
+                int activeRespondentIndex = solicitorRole.get().getIndex();
+                Element<PartyDetails> respondingParty = caseData.getRespondents().get(activeRespondentIndex);
+                Response response = respondingParty.getValue().getResponse();
+                PartyDetails respondent = respondingParty.getValue().toBuilder().response(response.toBuilder().activeRespondent(
+                    Yes).build()).build();
+                Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
+                    .element(respondingParty.getId(), respondent);
+                caseData.getRespondents().set(activeRespondentIndex, updatedRepresentedRespondentElement);
+            }
+        }
     }
 }
