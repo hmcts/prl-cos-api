@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder(toBuilder = true)
@@ -91,5 +92,7 @@ public class FL404 {
     private final List<Element<DirectionDetails>> addDirections;
 
     private DateOrderEndsTimeEnum orderEndDateAndTimeOptions;
+
+    private LocalDateTime orderSpecifiedDateTime;
 
 }
