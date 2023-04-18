@@ -19,12 +19,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -51,6 +53,9 @@ public class DraftAnOrderController {
 
     @Autowired
     private HearingDataService hearingDataService;
+
+    @Autowired
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to reset fields")
@@ -85,10 +90,12 @@ public class DraftAnOrderController {
         if (null != caseData.getCreateSelectOrderOptions()
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
 
-            ManageOrders manageOrders = caseData.getManageOrders().toBuilder().build();
+            ManageOrders manageOrders = caseData.getManageOrders();
             caseDataUpdated.put("typeOfC21Order", null != manageOrders.getC21OrderOptions()
                 ? manageOrders.getC21OrderOptions().getDisplayedValue() : null);
         }
+        caseDataUpdated.put("childOption",DynamicMultiSelectList.builder()
+            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
 
         if (caseDataUpdated.get("selectedOrder") == "Standard directions order") {
             List<String> errorList = new ArrayList<>();
