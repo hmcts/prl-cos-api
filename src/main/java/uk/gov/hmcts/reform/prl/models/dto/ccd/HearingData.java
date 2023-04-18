@@ -141,5 +141,5 @@ public class HearingData {
     private String fillingFormRenderingInfo;
 
     @JsonProperty("hasJudgeProvidedHearingDetails")
-    private String hasJudgeProvidedHearingDetails;
+    private YesOrNo hasJudgeProvidedHearingDetails;
 }
