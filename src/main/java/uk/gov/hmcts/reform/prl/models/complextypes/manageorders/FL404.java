@@ -90,6 +90,6 @@ public class FL404 {
     @JsonProperty("addDirections")
     private final List<Element<DirectionDetails>> addDirections;
 
-    private DateOrderEndsTimeEnum dateOrderEndsTimeEnum;
+    private DateOrderEndsTimeEnum orderEndDateAndTimeOptions;
 
 }
