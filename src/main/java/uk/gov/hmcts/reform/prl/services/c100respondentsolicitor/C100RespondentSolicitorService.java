@@ -254,10 +254,11 @@ public class C100RespondentSolicitorService {
                                                     .respKeepDetailsPrivate(caseData.getKeepContactDetailsPrivate())
                                                     .respKeepDetailsPrivateConfidentiality(KeepDetailsPrivate.builder()
                                                                                                .confidentiality(caseData
-                                                                                                                    .getKeepContactDetailsPrivateOther()
-                                                                                                                    .getConfidentiality())
+                                                                                        .getKeepContactDetailsPrivateOther()
+                                                                                        .getConfidentiality())
                                                                                                .confidentialityList(confList)
                                                                                                .build())
+
                                                     .build())
 
                     .build();
