@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -111,10 +112,17 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("ChildOption Data in populateFl404Fields {}", (null != caseData && null != caseData.getManageOrders())
-            ? caseData.getManageOrders().getChildOption() : null);
+        ManageOrders manageOrders = caseData.getManageOrders();
+        if (null != manageOrders) {
+            manageOrders = manageOrders.toBuilder()
+                .childOption(caseData.getManageOrders().getChildOption())
+                .build();
+        }
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+
+        log.info("ChildOption Data in populateFl404Fields {} start ", caseDataUpdated.get("childOption"));
 
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
@@ -127,8 +135,8 @@ public class DraftAnOrderController {
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         }
-        log.info("ChildOption Data in populateFl404Fields {} end ", (null != caseData && null != caseData.getManageOrders())
-            ? caseData.getManageOrders().getChildOption() : null);
+        caseDataUpdated.put("childOption",  null != manageOrders ? manageOrders.getChildOption() : null);
+        log.info("ChildOption Data in populateFl404Fields {} end ", caseDataUpdated.get("childOption"));
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
