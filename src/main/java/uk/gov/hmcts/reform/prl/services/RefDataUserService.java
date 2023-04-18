@@ -76,14 +76,14 @@ public class RefDataUserService {
                 if (totalRecords > 0 && totalRecords < RD_STAFF_PAGE_SIZE) {
                     return onlyLegalAdvisor(response.getBody());
                 } else {
-                    List<DynamicListElement> listOfStaffResponse = onlyLegalAdvisor(response.getBody());
+                    List<DynamicListElement> listOfLegalAdvisors = onlyLegalAdvisor(response.getBody());
                     int noOfPages = (int) Math.ceil(totalRecords / (double) RD_STAFF_PAGE_SIZE);
                     log.info("No. of pages: {} ", noOfPages);
                     for (int pageNumber = RD_STAFF_SECOND_PAGE; pageNumber < noOfPages; pageNumber++) {
-                        listOfStaffResponse.addAll(onlyLegalAdvisor(getStaffResponse(pageNumber).getBody()));
+                        listOfLegalAdvisors.addAll(onlyLegalAdvisor(getStaffResponse(pageNumber).getBody()));
                     }
-                    log.info("Total no. of entries: {} ", listOfStaffResponse.size());
-                    return listOfStaffResponse;
+                    log.info("Total no. of entries: {} ", listOfLegalAdvisors.size());
+                    return listOfLegalAdvisors;
                 }
 
             }
