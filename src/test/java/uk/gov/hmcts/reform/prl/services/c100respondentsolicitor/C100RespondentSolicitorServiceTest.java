@@ -456,6 +456,7 @@ public class C100RespondentSolicitorServiceTest {
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
+            .eventId("c100ResSolViewResponseDraftDocumentC")
             .build();
 
         Map<String, Object> response = respondentSolicitorService.generateDraftDocumentsForRespondent(
@@ -491,6 +492,7 @@ public class C100RespondentSolicitorServiceTest {
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
+            .eventId("c100ResSolViewResponseDraftDocumentC")
             .build();
 
         response = respondentSolicitorService.generateDraftDocumentsForRespondent(
