@@ -16,7 +16,9 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
@@ -236,15 +238,26 @@ public class C100RespondentSolicitorService {
             case CONSENT:
                 Consent respondentConsentToApplication = caseData.getRespondentConsentToApplication();
                 respondentConsentToApplication = optimiseConsent(respondentConsentToApplication);
-                log.info("*** respondentConsentToApplication **** {}", respondentConsentToApplication);
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .consent(respondentConsentToApplication).build();
                 break;
             case KEEP_DETAILS_PRIVATE:
+                List<ConfidentialityListEnum> confList = caseData.getKeepContactDetailsPrivateOther().getConfidentialityList();
+                if (null != caseData.getKeepContactDetailsPrivateOther()) {
+                    if (YesOrNo.No.equals(caseData.getKeepContactDetailsPrivateOther().getConfidentiality())) {
+                        confList = null;
+                    }
+                }
+                log.info("*** confList **** {}", confList);
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .solicitorKeepDetailsPriate(SolicitorKeepDetailsPrivate.builder()
                                                     .respKeepDetailsPrivate(caseData.getKeepContactDetailsPrivate())
-                                                    .respKeepDetailsPrivateConfidentiality(caseData.getKeepContactDetailsPrivateOther())
+                                                    .respKeepDetailsPrivateConfidentiality(KeepDetailsPrivate.builder()
+                                                                                               .confidentiality(caseData
+                                                                                                                    .getKeepContactDetailsPrivateOther()
+                                                                                                                    .getConfidentiality())
+                                                                                               .confidentialityList(confList)
+                                                                                               .build())
                                                     .build())
 
                     .build();
@@ -265,8 +278,9 @@ public class C100RespondentSolicitorService {
                     .build();
                 break;
             case ATTENDING_THE_COURT:
+                AttendToCourt attendToCourt = optimiseAttendingcourt(caseData.getRespondentAttendingTheCourt());
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .attendToCourt(caseData.getRespondentAttendingTheCourt())
+                    .attendToCourt(attendToCourt)
                     .build();
                 break;
             case MIAM:
@@ -319,6 +333,21 @@ public class C100RespondentSolicitorService {
         PartyDetails amended = party.getValue().toBuilder()
             .response(buildResponseForRespondent).build();
         respondents.set(respondents.indexOf(party), element(party.getId(), amended));
+    }
+
+    private AttendToCourt optimiseAttendingcourt(AttendToCourt attendToCourt) {
+        return attendToCourt.toBuilder()
+            .respondentWelshNeedsList(YesOrNo.No.equals(attendToCourt.getRespondentWelshNeeds()) ? null
+                                          : attendToCourt.getRespondentWelshNeedsList())
+            .respondentInterpreterNeeds(YesOrNo.No.equals(attendToCourt.getIsRespondentNeededInterpreter()) ? null
+                                            : attendToCourt.getRespondentInterpreterNeeds())
+            .disabilityNeeds(YesOrNo.No.equals(attendToCourt.getHaveAnyDisability()) ? null
+                                 : attendToCourt.getDisabilityNeeds())
+            .respondentSpecialArrangementDetails(YesOrNo.No.equals(attendToCourt.getRespondentSpecialArrangements()) ? null
+                                            : attendToCourt.getRespondentSpecialArrangementDetails())
+            .respondentIntermediaryNeedDetails(YesOrNo.No.equals(attendToCourt.getRespondentIntermediaryNeeds()) ? null
+                                 : attendToCourt.getRespondentIntermediaryNeedDetails())
+            .build();
     }
 
     private Consent optimiseConsent(Consent consent) {
