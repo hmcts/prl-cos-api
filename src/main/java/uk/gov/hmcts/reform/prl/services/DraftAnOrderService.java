@@ -939,6 +939,8 @@ public class DraftAnOrderService {
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
         } else {
+            log.info("Calling getCaseData...");
+            log.info("Getting caseData in generateOrderDocument {}", caseData);
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
         return caseDataUpdated;
