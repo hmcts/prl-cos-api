@@ -69,7 +69,6 @@ public class RefDataUserService {
         try {
             ResponseEntity<List<StaffResponse>> response = getStaffResponse(RD_STAFF_FIRST_PAGE);
             if (null != response) {
-                log.info("Response headers: {} ", response.getHeaders());
                 Optional<String> totalRecordsStr = Optional.ofNullable(response.getHeaders().getFirst(RD_STAFF_TOTAL_RECORDS_HEADER));
                 int totalRecords = totalRecordsStr.map(Integer::parseInt).orElse(0);
                 log.info("Total no. of records: {} ", totalRecords);
@@ -82,7 +81,6 @@ public class RefDataUserService {
                     for (int pageNumber = RD_STAFF_SECOND_PAGE; pageNumber < noOfPages; pageNumber++) {
                         listOfLegalAdvisors.addAll(onlyLegalAdvisor(getStaffResponse(pageNumber).getBody()));
                     }
-                    log.info("Total no. of entries: {} ", listOfLegalAdvisors.size());
                     return listOfLegalAdvisors;
                 }
 
