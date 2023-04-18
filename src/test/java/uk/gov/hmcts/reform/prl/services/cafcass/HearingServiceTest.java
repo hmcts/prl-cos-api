@@ -161,7 +161,6 @@ public class HearingServiceTest {
             .thenReturn(listOfHearingDetails);
         List<Hearings> response =
             hearingService.getHearingsForAllCases(authToken, caseIdWithRegionIdMap);
-
         Assert.assertNotNull(response);
 
     }
