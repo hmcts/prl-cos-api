@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
@@ -32,6 +33,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_N;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGALOFFICE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_FIRST_PAGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_PAGE_SIZE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFORDERASC;
@@ -86,7 +89,10 @@ public class RefDataUserServiceTest {
             authTokenGenerator.generate(),
             SERVICENAME,
             STAFFSORTCOLUMN,
-            STAFFORDERASC)).thenReturn(null);
+            STAFFORDERASC,
+            RD_STAFF_PAGE_SIZE,
+            RD_STAFF_FIRST_PAGE
+        )).thenReturn(null);
         List<DynamicListElement> staffDetails = refDataUserService.getLegalAdvisorList();
         assertNull(staffDetails.get(0).getCode());
     }
@@ -98,7 +104,10 @@ public class RefDataUserServiceTest {
             authTokenGenerator.generate(),
             SERVICENAME,
             STAFFSORTCOLUMN,
-            STAFFORDERASC))
+            STAFFORDERASC,
+            RD_STAFF_PAGE_SIZE,
+            RD_STAFF_FIRST_PAGE
+        ))
             .thenThrow(NullPointerException.class);
         List<DynamicListElement> legalAdvisor = refDataUserService.getLegalAdvisorList();
         assertNull(legalAdvisor.get(0).getCode());
@@ -118,6 +127,7 @@ public class RefDataUserServiceTest {
         List<StaffResponse> listOfStaffResponse = new ArrayList<>();
         listOfStaffResponse.add(staffResponse1);
         listOfStaffResponse.add(staffResponse2);
+        ResponseEntity<List<StaffResponse>> staffResponse = ResponseEntity.ok().body(listOfStaffResponse);
         when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
         when(authTokenGenerator.generate()).thenReturn("s2sToken");
         when(staffResponseDetailsApi.getAllStaffResponseDetails(
@@ -125,8 +135,10 @@ public class RefDataUserServiceTest {
             authTokenGenerator.generate(),
             SERVICENAME,
             STAFFSORTCOLUMN,
-            STAFFORDERASC))
-            .thenReturn(listOfStaffResponse);
+            STAFFORDERASC,
+            RD_STAFF_PAGE_SIZE,
+            RD_STAFF_FIRST_PAGE
+        )).thenReturn(staffResponse);
 
         List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
         assertNotNull(legalAdvisorList.get(0).getCode());

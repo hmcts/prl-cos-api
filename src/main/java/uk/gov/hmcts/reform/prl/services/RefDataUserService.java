@@ -5,6 +5,7 @@ package uk.gov.hmcts.reform.prl.services;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
@@ -22,10 +23,15 @@ import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffResponse;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGALOFFICE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_FIRST_PAGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_PAGE_SIZE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_SECOND_PAGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_TOTAL_RECORDS_HEADER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFORDERASC;
@@ -61,24 +67,41 @@ public class RefDataUserService {
 
     public List<DynamicListElement> getLegalAdvisorList() {
         try {
-            List<StaffResponse> listOfStaffResponse = getStaffResponse();
-            if (listOfStaffResponse != null) {
-                log.info(" size of staff details {}", listOfStaffResponse.size());
+            ResponseEntity<List<StaffResponse>> response = getStaffResponse(RD_STAFF_FIRST_PAGE);
+            if (null != response) {
+                log.info("Response headers: {} ", response.getHeaders());
+                Optional<String> totalRecordsStr = Optional.ofNullable(response.getHeaders().getFirst(RD_STAFF_TOTAL_RECORDS_HEADER));
+                int totalRecords = totalRecordsStr.map(Integer::parseInt).orElse(0);
+                log.info("Total no. of records: {} ", totalRecords);
+                if (totalRecords > 0 && totalRecords < RD_STAFF_PAGE_SIZE) {
+                    return onlyLegalAdvisor(response.getBody());
+                } else {
+                    List<DynamicListElement> listOfStaffResponse = onlyLegalAdvisor(response.getBody());
+                    int noOfPages = (int) Math.ceil(totalRecords / (double) RD_STAFF_PAGE_SIZE);
+                    log.info("No. of pages: {} ", noOfPages);
+                    for (int pageNumber = RD_STAFF_SECOND_PAGE; pageNumber < noOfPages; pageNumber++) {
+                        listOfStaffResponse.addAll(onlyLegalAdvisor(getStaffResponse(pageNumber).getBody()));
+                    }
+                    log.info("Total no. of entries: {} ", listOfStaffResponse.size());
+                    return listOfStaffResponse;
+                }
+
             }
-            return onlyLegalAdvisor(listOfStaffResponse);
         } catch (Exception e) {
             log.error("Staff details Lookup Failed - {}", e.getMessage());
         }
         return List.of(DynamicListElement.builder().build());
     }
 
-    public List<StaffResponse> getStaffResponse() {
+    public ResponseEntity<List<StaffResponse>> getStaffResponse(int pageNumber) {
         return staffResponseDetailsApi.getAllStaffResponseDetails(
             idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
             authTokenGenerator.generate(),
             SERVICENAME,
             STAFFSORTCOLUMN,
-            STAFFORDERASC
+            STAFFORDERASC,
+            RD_STAFF_PAGE_SIZE,
+            pageNumber
         );
     }
 
