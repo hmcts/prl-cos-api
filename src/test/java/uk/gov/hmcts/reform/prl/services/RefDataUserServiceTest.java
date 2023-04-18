@@ -309,6 +309,38 @@ public class RefDataUserServiceTest {
     }
 
     @Test
+    public void testGetStaffDetailsDataSizeLtPageSize() {
+
+        StaffProfile staffProfile1 = StaffProfile.builder().userType(LEGALOFFICE)
+            .lastName("David").emailId("test2@com").build();
+        StaffResponse staffResponse = StaffResponse.builder().ccdServiceName("PRIVATELAW").staffProfile(staffProfile1).build();
+        List<StaffResponse> listOfStaffFirstPage = new ArrayList<>();
+        listOfStaffFirstPage.add(staffResponse);
+        //add a response header for total entries
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(RD_STAFF_TOTAL_RECORDS_HEADER, "45");
+        ResponseEntity<List<StaffResponse>> staffResponseFirstPage = ResponseEntity.ok().headers(headers).body(listOfStaffFirstPage);
+
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
+        when(authTokenGenerator.generate()).thenReturn("s2sToken");
+        when(staffResponseDetailsApi.getAllStaffResponseDetails(
+            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
+            authTokenGenerator.generate(),
+            SERVICENAME,
+            STAFFSORTCOLUMN,
+            STAFFORDERASC,
+            RD_STAFF_PAGE_SIZE,
+            RD_STAFF_FIRST_PAGE
+        )).thenReturn(staffResponseFirstPage);
+
+        List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
+
+        assertNotNull(legalAdvisorList.get(0).getCode());
+        assertEquals("David(test2@com)",legalAdvisorList.get(0).getCode());
+        assertEquals(1, legalAdvisorList.size());
+    }
+
+    @Test
     public void testGetStaffDetailsDataSizeGtPageSize() {
 
         StaffProfile staffProfile1 = StaffProfile.builder().userType(LEGALOFFICE)
@@ -349,6 +381,7 @@ public class RefDataUserServiceTest {
         )).thenReturn(staffResponseSecondPage);
 
         List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
+
         assertNotNull(legalAdvisorList.get(0).getCode());
         assertEquals("David(test2@com)",legalAdvisorList.get(0).getCode());
         assertEquals(2, legalAdvisorList.size());
