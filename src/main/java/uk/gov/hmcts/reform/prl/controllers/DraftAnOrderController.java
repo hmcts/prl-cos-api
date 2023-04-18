@@ -111,7 +111,7 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("ChildOption Data in populateFl404Fields {}", null != caseData.getManageOrders()
+        log.info("ChildOption Data in populateFl404Fields {}", (null != caseData && null != caseData.getManageOrders())
             ? caseData.getManageOrders().getChildOption() : null);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
@@ -127,7 +127,7 @@ public class DraftAnOrderController {
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         }
-        log.info("ChildOption Data in populateFl404Fields {} end ", null != caseData.getManageOrders()
+        log.info("ChildOption Data in populateFl404Fields {} end ", (null != caseData && null != caseData.getManageOrders())
             ? caseData.getManageOrders().getChildOption() : null);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
