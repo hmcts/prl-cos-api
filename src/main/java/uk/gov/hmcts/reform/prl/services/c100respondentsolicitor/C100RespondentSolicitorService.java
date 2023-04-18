@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
@@ -303,7 +305,8 @@ public class C100RespondentSolicitorService {
             case CURRENT_OR_PREVIOUS_PROCEEDINGS:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .currentOrPastProceedingsForChildren(caseData.getCurrentOrPastProceedingsForChildren())
-                    .respondentExistingProceedings(caseData.getRespondentExistingProceedings())
+                    .respondentExistingProceedings(YesNoDontKnow.yes.equals(caseData.getCurrentOrPastProceedingsForChildren())
+                                                   ? caseData.getRespondentExistingProceedings() : null)
                     .build();
                 break;
             case ALLEGATION_OF_HARM:
@@ -340,16 +343,18 @@ public class C100RespondentSolicitorService {
                                                      .internationalElementJurisdictionInfo(SolicitorInternationalElement.builder()
                                                            .reasonForJurisdiction(caseData.getInternationalElementJurisdiction()
                                                                                 .getReasonForJurisdiction())
-                                                           .reasonForJurisdictionDetails(YesOrNo.No.equals(caseData.getInternationalElementJurisdiction()
-                                                                                                         .getReasonForJurisdiction())
+                                                           .reasonForJurisdictionDetails(YesOrNo.No.equals(caseData
+                                                                                           .getInternationalElementJurisdiction()
+                                                                                           .getReasonForJurisdiction())
                                                                                        ? null
                                                                                        : caseData.getInternationalElementJurisdiction()
                                                                .getReasonForJurisdictionDetails()).build())
                                                      .internationalElementRequestInfo(SolicitorInternationalElement.builder()
                                                           .requestToAuthority(caseData.getInternationalElementRequest()
                                                                                      .getReasonForJurisdiction())
-                                                          .requestToAuthorityDetails(YesOrNo.No.equals(caseData.getInternationalElementRequest()
-                                                                                                           .getRequestToAuthority())
+                                                          .requestToAuthorityDetails(YesOrNo.No.equals(caseData
+                                                                                           .getInternationalElementRequest()
+                                                                                           .getRequestToAuthority())
                                                                                             ? null
                                                                                             : caseData.getInternationalElementRequest()
                                                               .getRequestToAuthorityDetails()).build())
@@ -358,7 +363,16 @@ public class C100RespondentSolicitorService {
                 break;
             case ABILITY_TO_PARTICIPATE:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .abilityToParticipate(caseData.getAbilityToParticipateInProceedings())
+                    .abilityToParticipate(SolicitorAbilityToParticipateInProceedings.builder()
+                                              .factorsAffectingAbilityToParticipate(caseData.getAbilityToParticipateInProceedings()
+                                                                                        .getFactorsAffectingAbilityToParticipate())
+                                              .provideDetailsForFactorsAffectingAbilityToParticipate(YesNoDontKnow.yes
+                                                             .equals(caseData.getAbilityToParticipateInProceedings()
+                                                                         .getFactorsAffectingAbilityToParticipate())
+                                              ? caseData.getAbilityToParticipateInProceedings()
+                                                  .getProvideDetailsForFactorsAffectingAbilityToParticipate()
+                                                  : null)
+                                              .build())
                     .build();
                 break;
             case VIEW_DRAFT_RESPONSE:
