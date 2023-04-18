@@ -170,6 +170,7 @@ public class DynamicMultiSelectListService {
 
     public List<Child> getChildrenForDocmosis(CaseData caseData) {
         List<Child> childList = new ArrayList<>();
+        log.info("ManageOrders in getChildrenForDocmosis: {}", caseData.getManageOrders());
         if (null != caseData.getManageOrders()
             && null != caseData.getManageOrders().getChildOption()
             && null != caseData.getManageOrders().getChildOption().getValue()) {
@@ -180,6 +181,7 @@ public class DynamicMultiSelectListService {
                 }
             });
         }
+        log.info("after retrieving the children List for docmosis: {}", childList);
         return childList;
     }
 
