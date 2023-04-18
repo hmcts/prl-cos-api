@@ -16,7 +16,7 @@ public enum DateOrderEndsTimeEnum {
     @JsonProperty("untilNextHearing")
     untilNextHearing("untilNextHearing", "Until the next hearing"),
     @JsonProperty("specifiedDateAndTime")
-    c21NoOrderMade("specifiedDateAndTime", "Specific date and time");
+    specifiedDateAndTime("specifiedDateAndTime", "Specific date and time");
 
     private final String id;
     private final String displayedValue;
