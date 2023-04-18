@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DateOrderEndsTimeEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 
@@ -88,5 +89,7 @@ public class FL404 {
     //Draft order changes
     @JsonProperty("addDirections")
     private final List<Element<DirectionDetails>> addDirections;
+
+    private DateOrderEndsTimeEnum dateOrderEndsTimeEnum;
 
 }
