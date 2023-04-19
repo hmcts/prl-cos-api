@@ -107,11 +107,17 @@ public class ManageOrderService {
 
     public static final String OTHER_PARTIES = "otherParties";
 
-    @Value("${document.templates.common.prl_c21_draft_template}")
+    @Value("${document.templates.common.prl_sdo_draft_template}")
     protected String sdoDraftTemplate;
 
-    @Value("${document.templates.common.prl_c21_draft_filename}")
+    @Value("${document.templates.common.prl_sdo_draft_filename}")
     protected String sdoDraftFile;
+
+    @Value("${document.templates.common.prl_sdo_template}")
+    protected String sdoTemplate;
+
+    @Value("${document.templates.common.prl_sdo_filename}")
+    protected String sdoFile;
 
     @Value("${document.templates.common.prl_c21_draft_template}")
     protected String doiDraftTemplate;
@@ -575,6 +581,8 @@ public class ManageOrderService {
             case standardDirectionsOrder:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, sdoDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, sdoDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, sdoTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, sdoFile);
                 break;
             case directionOnIssue:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, doiDraftTemplate);
