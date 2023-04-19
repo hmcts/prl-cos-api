@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -94,9 +93,7 @@ public class DraftAnOrderService {
     private final DocumentLanguageService documentLanguageService;
     private final LocationRefDataService locationRefDataService;
     private final PartiesListGenerator partiesListGenerator;
-
-    @Autowired
-    private DynamicMultiSelectListService dynamicMultiSelectListService;
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
 
