@@ -155,7 +155,7 @@ public class CaseService {
             EventRequestData eventRequestData = coreCaseDataService.eventRequest(CaseEvent.LINK_CITIZEN, systemUpdateUserId);
             StartEventResponse startEventResponse =
                 coreCaseDataService.startUpdate(
-                    authorisation,
+                    systemAuthorisation,
                     eventRequestData,
                     caseId,
                     true
