@@ -375,8 +375,7 @@ public class DraftAnOrderService {
         caseDataMap.put("justiceLegalAdviserFullName", selectedOrder.getJusticeLegalAdviserFullName());
         caseDataMap.put("magistrateLastName", selectedOrder.getMagistrateLastName());
         caseDataMap.put("isTheOrderAboutChildren", selectedOrder.getIsTheOrderAboutChildren());
-        caseDataMap.put("childOption", Yes.equals(selectedOrder.getIsTheOrderAboutChildren())
-            ? selectedOrder.getChildOption() : null);
+        caseDataMap.put("childOption", selectedOrder.getChildOption());
         caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
         caseDataMap.put("furtherDirectionsIfRequired", selectedOrder.getFurtherDirectionsIfRequired());
@@ -485,8 +484,7 @@ public class DraftAnOrderService {
             .magistrateLastName(caseData.getMagistrateLastName())
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
-            .childOption(Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
-                             ? caseData.getManageOrders().getChildOption() : null)
+            .childOption(caseData.getManageOrders().getChildOption())
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
