@@ -130,6 +130,8 @@ public class CaseServiceTest {
         when(coreCaseDataApi.getCase(Mockito.any(),Mockito.any(), Mockito.any())).thenReturn(caseDetails);
         when(coreCaseDataService.startUpdate("", null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
+        when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
+            StartEventResponse.builder().caseDetails(caseDetails).build());
     }
 
     @Test
