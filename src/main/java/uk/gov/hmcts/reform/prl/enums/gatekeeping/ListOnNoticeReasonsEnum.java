@@ -17,7 +17,7 @@ public enum ListOnNoticeReasonsEnum {
     noEvidenceOfImmediateRiskOfHarmToTheChildren("There is no evidence of immediate risk of harm to the child[ren]"),
     @JsonProperty("bothPartiesInformationAndSafeguardingNecessaryToCourt")
     bothPartiesInformationAndSafeguardingNecessaryToCourt(
-        "Information from both parties and safegaurding is necessary to enable the court to determine the long-term arrangements."),
+        "Information from both parties and safeguarding is necessary to enable the court to determine the long-term arrangements."),
     @JsonProperty("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder")
     childrenResideWithApplicantAndBothProtectedByNonMolestationOrder(
         "The child[ren] reside with applicant and both are protected by a Non-Molestation Order"),
