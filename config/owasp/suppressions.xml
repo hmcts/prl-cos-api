@@ -32,7 +32,6 @@
     <cve>CVE-2021-4235</cve>
     <cve>CVE-2022-3064</cve>
     <cve>CVE-2022-45143</cve>
-    <cve>CVE-2023-20860</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
