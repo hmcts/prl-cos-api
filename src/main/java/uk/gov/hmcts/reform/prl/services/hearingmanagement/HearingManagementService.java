@@ -190,11 +190,11 @@ public class HearingManagementService {
         );
     }
 
-    private void updateTabsAfterStateChange(Map<String, Object> data, Long id) {
-        data.put("id", String.valueOf(id));
-        CaseData caseData = objectMapper.convertValue(data, CaseData.class);
-        allTabService.updateAllTabsIncludingConfTab(caseData);
-    }
+    //    private void updateTabsAfterStateChange(Map<String, Object> data, Long id) {
+    //        data.put("id", String.valueOf(id));
+    //        CaseData caseData = objectMapper.convertValue(data, CaseData.class);
+    //        allTabService.updateAllTabsIncludingConfTab(caseData);
+    //    }
 
     private void sendHearingChangeDetailsEmail(CaseData caseData) {
 
