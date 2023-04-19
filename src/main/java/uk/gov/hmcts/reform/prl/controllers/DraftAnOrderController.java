@@ -20,10 +20,13 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
+import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 
 @Slf4j
 @RestController
@@ -44,6 +48,9 @@ public class DraftAnOrderController {
 
     @Autowired
     private DraftAnOrderService draftAnOrderService;
+
+    @Autowired
+    private HearingDataService hearingDataService;
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to reset fields")
@@ -127,6 +134,15 @@ public class DraftAnOrderController {
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
+        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+        caseDataUpdated.put(
+            ORDER_HEARING_DETAILS,
+            ElementUtils.wrapElements(
+                hearingDataService.generateHearingData(
+                    hearingDataPrePopulatedDynamicLists, caseData))
+        );
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         }
@@ -210,6 +226,8 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("verifying hearing data while submitting************* {} ",
+            callbackRequest.getCaseDetails().getData());
         return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.prepareDraftOrderCollection(
             authorisation,
             callbackRequest
