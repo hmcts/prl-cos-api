@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DirectionOnIssue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
+import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 
 import java.util.ArrayList;
@@ -66,6 +67,9 @@ public class DraftAnOrderControllerTest {
 
     @Mock
     private UserDetails userDetails;
+
+    @Mock
+    private HearingDataService hearingDataService;
 
     @InjectMocks
     private DraftAnOrderController draftAnOrderController;
@@ -173,6 +177,7 @@ public class DraftAnOrderControllerTest {
     public void testPopulateFl404Fields() throws Exception {
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
