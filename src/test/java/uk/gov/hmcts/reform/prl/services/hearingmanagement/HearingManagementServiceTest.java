@@ -247,6 +247,19 @@ public class HearingManagementServiceTest {
                                             EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
                                             respondentSolicitorEmailvars,
                                             LanguagePreference.english);
+        hearingRequest = HearingRequest.builder()
+            .hearingId("123")
+            .caseRef("1669565933090179")
+            .hearingUpdate(HearingsUpdate.builder()
+                               .hearingResponseReceivedDateTime(LocalDate.parse("2022-11-27"))
+                               .hearingEventBroadcastDateTime(LocalDate.parse("2022-11-27"))
+                               .nextHearingDate(LocalDate.parse("2022-11-27"))
+                               .hearingVenueId("MRD-CRT-0817")
+                               .hearingVenueName("Aldershot")
+                               .hmcStatus("LISTED")
+                               .build())
+            .nextHearingDateRequest(null)
+            .build();
         hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,DECISION_OUTCOME);
 
         verify(coreCaseDataApi, times(1)).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
