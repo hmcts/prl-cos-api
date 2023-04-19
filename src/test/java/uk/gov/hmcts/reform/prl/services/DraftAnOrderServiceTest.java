@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -615,7 +614,7 @@ public class DraftAnOrderServiceTest {
         assertEquals("test", caseDataMap.get("parentName"));
     }
 
-    @Ignore
+
     @Test
     public void testPopulateCommonDraftOrderFields() {
         DraftOrder draftOrder = DraftOrder.builder()
@@ -634,9 +633,13 @@ public class DraftAnOrderServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
         Element<PartyDetails> respondents = element(partyDetails);
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                                                    .value(Child.builder().build()).build());
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
+            .children(children)
             .draftOrderCollection(draftOrderCollection)
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
@@ -644,6 +647,10 @@ public class DraftAnOrderServiceTest {
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
             caseData
         );
@@ -651,7 +658,7 @@ public class DraftAnOrderServiceTest {
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
     }
 
-    @Ignore
+
     @Test
     public void testUpdateDraftOrderCollection() {
         DraftOrder draftOrder = DraftOrder.builder()
@@ -745,7 +752,6 @@ public class DraftAnOrderServiceTest {
         assertNotNull(caseDataMap);
     }
 
-    @Ignore
     @Test
     public void testGenerateDocumentForC100() {
         DraftOrder draftOrder = DraftOrder.builder()
@@ -764,10 +770,17 @@ public class DraftAnOrderServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
         Element<PartyDetails> respondents = element(partyDetails);
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                                                    .value(Child.builder().build()).build());
+
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseData);
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .courtName("test")
             .caseTypeOfApplication("C100")
+            .children(children)
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).build())
@@ -784,6 +797,7 @@ public class DraftAnOrderServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
         CaseData caseDataUpdated = draftAnOrderService.generateDocument(
             callbackRequest,
@@ -1438,7 +1452,6 @@ public class DraftAnOrderServiceTest {
         assertNotNull(stringObjectMap);
     }
 
-    @Ignore
     @Test
     public void testGenerateOrderDocument() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
@@ -1456,10 +1469,15 @@ public class DraftAnOrderServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
         Element<PartyDetails> respondents = element(partyDetails);
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                                                    .value(Child.builder().build()).build());
+
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .courtName("test")
             .caseTypeOfApplication("C100")
+            .children(children)
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).build())
@@ -1480,12 +1498,15 @@ public class DraftAnOrderServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseData);
+
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
         stringObjectMap =  draftAnOrderService.generateOrderDocument(authToken, callbackRequest);
         assertNotNull(stringObjectMap);
     }
 
-    @Ignore
     @Test
     public void testGenerateOrderDocumentCaseId() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
@@ -1498,6 +1519,10 @@ public class DraftAnOrderServiceTest {
         Element<DraftOrder> draftOrderElement = element(draftOrder);
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
+
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                                                    .value(Child.builder().build()).build());
+
         PartyDetails partyDetails = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
@@ -1507,6 +1532,7 @@ public class DraftAnOrderServiceTest {
             .id(12345L)
             .courtName("test")
             .caseTypeOfApplication("C100")
+            .children(children)
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).build())
@@ -1527,6 +1553,9 @@ public class DraftAnOrderServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
         stringObjectMap =  draftAnOrderService.generateOrderDocument(authToken, callbackRequest);
         assertNotNull(stringObjectMap);
