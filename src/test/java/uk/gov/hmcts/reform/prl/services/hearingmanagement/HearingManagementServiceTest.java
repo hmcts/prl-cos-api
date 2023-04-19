@@ -247,7 +247,7 @@ public class HearingManagementServiceTest {
                                             EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
                                             respondentSolicitorEmailvars,
                                             LanguagePreference.english);
-        hearingRequest = HearingRequest.builder()
+        HearingRequest hearingRequest1 = HearingRequest.builder()
             .hearingId("123")
             .caseRef("1669565933090179")
             .hearingUpdate(HearingsUpdate.builder()
@@ -260,7 +260,7 @@ public class HearingManagementServiceTest {
                                .build())
             .nextHearingDateRequest(null)
             .build();
-        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,DECISION_OUTCOME);
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1,DECISION_OUTCOME);
 
         verify(coreCaseDataApi, times(1)).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                                   caseType, hearingRequest.getCaseRef(), HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME
