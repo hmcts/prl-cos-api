@@ -107,7 +107,8 @@ public class HearingManagementService {
         Map<String, Object> fields = new HashMap<>();
         fields.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
 
-        if (hearingRequest.getNextHearingDateRequest().getNextHearingDetails() != null) {
+        if (hearingRequest.getNextHearingDateRequest() != null &&
+                hearingRequest.getNextHearingDateRequest().getNextHearingDetails() != null) {
             fields.put(NEXT_HEARING_DETAILS, hearingRequest.getNextHearingDateRequest().getNextHearingDetails());
         }
 
