@@ -158,6 +158,12 @@
       "c1ADocument" : {
         "document_filename" : "C1A_Document.pdf",
         "document_id" : "dea53020-a737-4530-8d5a-94a16a72337d"
+      },
+      "caseManagementLocation": {
+        "regionId": "1",
+        "baseLocationId": "12",
+        "regionName": "London",
+        "baseLocationName": "Southampton"
       }
     }
   }, {
@@ -349,7 +355,13 @@
           "canYouProvidePhoneNumber" : "Yes",
           "phoneNumber" : "071867577657"
         }
-      } ]
+      } ],
+      "caseManagementLocation": {
+        "regionId": "1",
+        "baseLocationId": "12",
+        "regionName": "London",
+        "baseLocationName": "Southampton"
+      }
     }
   }, {
     "id" : 1674571599602276,
@@ -506,6 +518,12 @@
       "c1ADocument" : {
         "document_filename" : "C1A_Document.pdf",
         "document_id" : "b2f0b32c-b0f7-4c92-ba05-85d8dbdb9f02"
+      },
+      "caseManagementLocation": {
+        "regionId": "1",
+        "baseLocationId": "12",
+        "regionName": "London",
+        "baseLocationName": "Southampton"
       }
     }
   }, {
@@ -663,6 +681,12 @@
       "c1ADocument" : {
         "document_filename" : "C1A_Document.pdf",
         "document_id" : "f8da06eb-7725-429a-9015-126d89630ce2"
+      },
+      "caseManagementLocation": {
+        "regionId": "1",
+        "baseLocationId": "12",
+        "regionName": "London",
+        "baseLocationName": "Southampton"
       }
     }
   } ]
