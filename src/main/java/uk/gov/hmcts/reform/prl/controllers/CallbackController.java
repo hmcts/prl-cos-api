@@ -17,11 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
@@ -53,17 +51,14 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
-import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
-import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
-import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -115,11 +110,8 @@ public class CallbackController {
     public static final String C100_DEFAULT_REGION_ID = "2";
     private final CaseEventService caseEventService;
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
-    private final ExampleService exampleService;
     private final OrganisationService organisationService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
-    private final SolicitorEmailService solicitorEmailService;
-    private final CaseWorkerEmailService caseWorkerEmailService;
 
     private final ObjectMapper objectMapper;
     private final AllTabServiceImpl allTabsService;
@@ -128,7 +120,6 @@ public class CallbackController {
     private final DocumentGenService documentGenService;
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
-    private final AuthTokenGenerator authTokenGenerator;
     private final CourtFinderService courtLocatorService;
     private final LocationRefDataService locationRefDataService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
@@ -331,6 +322,7 @@ public class CallbackController {
         String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
         Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
         caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
+        caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
         if (courtVenue.isPresent()) {
             String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
             caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
@@ -349,14 +341,14 @@ public class CallbackController {
         allTabsService.updateAllTabs(caseData);
     }
 
-    @PostMapping(path = "/case-withdrawn-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/case-withdrawn-about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Send Email Notification on Case Withdraw")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse sendEmailNotificationOnCaseWithdraw(
+    public AboutToStartOrSubmitCallbackResponse caseWithdrawAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
@@ -367,8 +359,6 @@ public class CallbackController {
             .filter(
                 CallbackController::getPreviousState).findFirst();
 
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         List<String> stateList = List.of(DRAFT_STATE, "CLOSED",
                                          PENDING_STATE,
                                          SUBMITTED_STATE, RETURN_STATE
@@ -380,41 +370,21 @@ public class CallbackController {
             if (previousState.isPresent() && !stateList.contains(previousState.get())) {
                 caseDataUpdated.put("isWithdrawRequestSent", "Pending");
                 log.info("Case is updated as WithdrawRequestSent");
-                sendWithdrawEmails(caseData, userDetails, caseDetails);
             } else {
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                    solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
                     // Refreshing the page in the same event. Hence no external event call needed.
                     // Getting the tab fields and add it to the casedetails..
                     Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
                     caseDataUpdated.putAll(allTabsFields);
-                } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                    solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
                 }
-                caseDataUpdated.put("state", WITHDRAWN_STATE);
+                if (!State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState())) {
+                    caseDataUpdated.put("state", WITHDRAWN_STATE);
+                    caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
+                    caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+                }
             }
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    private void sendWithdrawEmails(CaseData caseData, UserDetails userDetails, CaseDetails caseDetails) {
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
-            Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
-            if (localCourtAdmin.isPresent()) {
-                Optional<LocalCourtAdminEmail> localCourtAdminEmail = localCourtAdmin.get().stream().map(Element::getValue)
-                    .findFirst();
-                if (localCourtAdminEmail.isPresent()) {
-                    String email = localCourtAdminEmail.get().getEmail();
-                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
-                }
-            }
-        } else {
-            solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
-            caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(
-                caseDetails,
-                caseData.getCourtEmailAddress());
-        }
     }
 
     @PostMapping(path = "/send-to-gatekeeper", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
