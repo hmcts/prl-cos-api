@@ -258,6 +258,107 @@ public class HearingManagementServiceTest {
     }
 
     @Test
+    public void testHmcStateAsListedAndStateChangeAndNotificationForC100PrepareForHearing() throws Exception {
+
+        Map<String, Object> stringObjectMap = c100CaseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(c100CaseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1669565933090179L).data(stringObjectMap).build();
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, hearingRequest.getCaseRef())).thenReturn(caseDetails);
+        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                     caseType, hearingRequest.getCaseRef(), HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING))
+            .thenReturn(buildStartEventResponse(HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING, eventToken));
+        when(coreCaseDataApi.submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                      Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                      Mockito.any(CaseDataContent.class)))
+            .thenReturn(caseDetails);
+
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab(c100CaseData);
+
+        doNothing().when(emailService).send(applicantEmail,
+                                            EmailTemplateNames.HEARING_DETAILS,
+                                            applicantEmailVars,
+                                            LanguagePreference.english);
+        doNothing().when(emailService).send(respondentEmail,
+                                            EmailTemplateNames.HEARING_DETAILS,
+                                            respondentEmailVars,
+                                            LanguagePreference.english);
+
+        doNothing().when(emailService).send(applicantSolicitorEmail,
+                                            EmailTemplateNames.APPLICANT_SOLICITOR_HEARING_DETAILS,
+                                            applicantSolicitorEmailvars,
+                                            LanguagePreference.english);
+
+        doNothing().when(emailService).send(respondentSolicitorEmail,
+                                            EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
+                                            respondentSolicitorEmailvars,
+                                            LanguagePreference.english);
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,PREPARE_FOR_HEARING_CONDUCT_HEARING);
+
+        verify(coreCaseDataApi, times(1)).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                                  caseType, hearingRequest.getCaseRef(), HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING
+        );
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
+        assertTrue(true);
+    }
+
+    @Test
+    public void testHmcStateAsListedAndStateChangeAndNotificationForC100DefaultState() throws Exception {
+
+        Map<String, Object> stringObjectMap = c100CaseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(c100CaseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1669565933090179L).data(stringObjectMap).build();
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, hearingRequest.getCaseRef())).thenReturn(caseDetails);
+        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                     caseType, hearingRequest.getCaseRef(), HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING))
+            .thenReturn(buildStartEventResponse(HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING, eventToken));
+        when(coreCaseDataApi.submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                      Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                      Mockito.any(CaseDataContent.class)))
+            .thenReturn(caseDetails);
+
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab(c100CaseData);
+
+        doNothing().when(emailService).send(applicantEmail,
+                                            EmailTemplateNames.HEARING_DETAILS,
+                                            applicantEmailVars,
+                                            LanguagePreference.english);
+        doNothing().when(emailService).send(respondentEmail,
+                                            EmailTemplateNames.HEARING_DETAILS,
+                                            respondentEmailVars,
+                                            LanguagePreference.english);
+
+        doNothing().when(emailService).send(applicantSolicitorEmail,
+                                            EmailTemplateNames.APPLICANT_SOLICITOR_HEARING_DETAILS,
+                                            applicantSolicitorEmailvars,
+                                            LanguagePreference.english);
+
+        doNothing().when(emailService).send(respondentSolicitorEmail,
+                                            EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
+                                            respondentSolicitorEmailvars,
+                                            LanguagePreference.english);
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest, State.valueOf("DefaultState"));
+
+        verify(coreCaseDataApi, times(1)).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                                  caseType, hearingRequest.getCaseRef(), HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING
+        );
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                                                                   Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(),
+                                                                   Mockito.any(CaseDataContent.class));
+        assertTrue(true);
+    }
+
+
+    @Test
     public void testHmcStatusAsChangedStateChangeAndNotificationForC100() throws Exception {
 
         HearingRequest hearingRequest1 = HearingRequest.builder()
