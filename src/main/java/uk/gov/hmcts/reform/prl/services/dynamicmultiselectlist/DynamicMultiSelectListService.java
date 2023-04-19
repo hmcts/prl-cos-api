@@ -148,8 +148,7 @@ public class DynamicMultiSelectListService {
                                                                              .code(others.getId().toString())
                                                                              .label(others.getValue().getFirstName()
                                                                                         + " "
-                                                                                        + others.getValue().getLastName()
-                                                                             + others.getValue())
+                                                                                        + others.getValue().getLastName())
                                                                              .build())
             );
         }
