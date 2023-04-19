@@ -32,6 +32,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -88,6 +89,9 @@ public class CaseDataServiceTest {
         hearings.setCaseRef("1673970714366224");
         hearings.setCaseHearings(caseHearings);
 
+        List<Hearings> listOfHearings = new ArrayList<>();
+        listOfHearings.add(hearings);
+
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
@@ -100,6 +104,7 @@ public class CaseDataServiceTest {
         when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
         Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
         when(hearingService.getHearings(anyString(),anyString())).thenReturn(hearings);
+        when(hearingService.getHearingsForAllCases(anyString(),anyMap())).thenReturn(listOfHearings);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");
