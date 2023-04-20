@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
@@ -37,11 +36,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 
@@ -91,16 +93,41 @@ public class CaseService {
 
             CaseData updatedCaseData = caseDataMapper
                 .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
-                                          .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
+                                          .courtName(C100_DEFAULT_COURT_NAME)
                                           .build());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
-    public List<CaseData> retrieveCases(String authToken, String s2sToken) {
-        Map<String, String> searchCriteria = new HashMap<>();
+    public CaseDetails updateCaseDetails(String authToken, PartyDetails partyDetails,
+                                    String caseId, String eventId, boolean isApplicant, String caseType) throws JsonProcessingException {
 
+        CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
+        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
+        if (caseType.equalsIgnoreCase(C100_CASE_TYPE)) {
+            if (isApplicant) {
+                List<Element<PartyDetails>> applicants = caseData.getApplicants();
+                caseData.getApplicants().stream().forEach(applicantElement -> {
+                    if (partyDetails.getUser().getIdamId().equalsIgnoreCase(applicantElement.getValue().getUser().getIdamId())) {
+                        applicants.set(applicants.indexOf(applicantElement), element(applicantElement.getId(), partyDetails));
+                    }
+                });
+            } else {
+                List<Element<PartyDetails>> respondents = caseData.getRespondents();
+                caseData.getRespondents().stream().forEach(respondentElement -> {
+                    if (partyDetails.getUser().getIdamId().equalsIgnoreCase(respondentElement.getValue().getUser().getIdamId())) {
+                        respondents.set(respondents.indexOf(respondentElement), element(respondentElement.getId(), partyDetails));
+                    }
+                });
+            }
+        }
+        return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
+    }
+
+    public List<CaseData> retrieveCases(String authToken, String s2sToken) {
+
+        Map<String, String> searchCriteria = new HashMap<>();
         searchCriteria.put("sortDirection", "desc");
         searchCriteria.put("page", "1");
 
