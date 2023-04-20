@@ -77,6 +77,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFE_GUARDING_L
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Roles.SOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -102,6 +104,8 @@ public class DraftAnOrderService {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType));
+        log.info("Draft order Hearing Details:::{}:::", null != orderDetails.getValue()
+            ? orderDetails.getValue().getManageOrderHearingDetails() : null);
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(orderDetails);
@@ -117,7 +121,11 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType) {
-        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
+        DraftOrder draftOrder = manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);;
+
+        log.info("Draft order Hearing Details:::{}:::", null != draftOrder
+            ? draftOrder.getManageOrderHearingDetails() : null);
+        return draftOrder;
     }
 
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData) {
@@ -362,6 +370,8 @@ public class DraftAnOrderService {
         caseDataMap.put("underTakingDateExpiry", selectedOrder.getUnderTakingDateExpiry());
         caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
         caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
+        caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
+        caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
@@ -391,6 +401,8 @@ public class DraftAnOrderService {
         caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
         caseDataMap.put("reviewRequiredBy", selectedOrder.getOtherDetails().getReviewRequiredBy() != null
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
+        caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
+        caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         return caseDataMap;
     }
 
@@ -535,6 +547,9 @@ public class DraftAnOrderService {
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .approvalDate(draftOrder.getApprovalDate())
+            .manageOrderHearingDetails(SOLICITOR.getId().equals(loggedInUserType)
+                                           ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                                           : caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
             .build();
     }
@@ -847,7 +862,11 @@ public class DraftAnOrderService {
 
     public Map<String,Object> getDraftOrderInfo(String authorisation, CaseData caseData)  throws Exception {
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
-        return  getDraftOrderData(authorisation, caseData, draftOrder);
+
+        Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder);
+        caseDataMap.put("isOrderCreatedBySolicitor", SOLICITOR.getId().equals(draftOrder.getOrderCreatedBy()) ? Yes : No);
+        log.info("is Order created by solicitor in populateCommonDraftOrderFields:::{}:::", caseDataMap.get("isOrderCreatedBySolicitor"));
+        return  caseDataMap;
     }
 
     private Map<String, Object> getDraftOrderData(String authorisation, CaseData caseData, DraftOrder draftOrder) throws Exception {
@@ -948,8 +967,6 @@ public class DraftAnOrderService {
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
         } else {
-            log.info("Calling getCaseData...");
-            log.info("Getting caseData in generateOrderDocument {}", caseData);
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
         return caseDataUpdated;
