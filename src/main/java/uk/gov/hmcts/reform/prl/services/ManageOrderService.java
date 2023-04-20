@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
+import uk.gov.hmcts.reform.prl.models.DirectionOrderDetails;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -1033,7 +1034,82 @@ public class ManageOrderService {
             .isOrderUploadedByJudgeOrAdmin(No)
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
+            .directionOrderDetails(populateDirectionOrderDetails(caseData))
             .build();
+    }
+
+    private DirectionOrderDetails populateDirectionOrderDetails(CaseData caseData) {
+        if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
+            && null != caseData.getStandardDirectionOrder()) {
+            List<String> preamblesList = new ArrayList<>();
+            List<String> hearingsAndNextStepsList = new ArrayList<>();
+            List<String> cafcassOrCymruList = new ArrayList<>();
+            List<String> localAuthorityList = new ArrayList<>();
+            List<String> courtList = new ArrayList<>();
+            List<String> documentationAndEvidenceList = new ArrayList<>();
+            List<String> furtherList = new ArrayList<>();
+            List<String> otherList = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoPreamblesList())) {
+                caseData.getStandardDirectionOrder().getSdoPreamblesList().stream().forEach(sdoPreamblesEnum ->
+                                                                                                preamblesList.add(
+                                                                                                    sdoPreamblesEnum.getDisplayedValue()));
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList())) {
+                caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().stream().forEach(
+                    sdoHearingsAndNextStepsEnum ->
+                        hearingsAndNextStepsList.add(
+                            sdoHearingsAndNextStepsEnum.getDisplayedValue()));
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList())) {
+                caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList().stream().forEach(sdoCafcassOrCymruEnum ->
+                                                                                                     cafcassOrCymruList.add(
+                                                                                                         sdoCafcassOrCymruEnum.getDisplayedValue()));
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoLocalAuthorityList())) {
+                caseData.getStandardDirectionOrder().getSdoLocalAuthorityList().stream().forEach(
+                    sdoLocalAuthorityEnum ->
+                        localAuthorityList.add(
+                            sdoLocalAuthorityEnum.getDisplayedValue()));
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoCourtList())) {
+                caseData.getStandardDirectionOrder().getSdoCourtList().stream().forEach(sdoCourtEnum ->
+                                                                                            courtList.add(
+                                                                                                sdoCourtEnum.getDisplayedValue()));
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList())) {
+                caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().stream().forEach(
+                    sdoDocumentationAndEvidenceEnum ->
+                        documentationAndEvidenceList.add(
+                            sdoDocumentationAndEvidenceEnum.getDisplayedValue()));
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoFurtherList())) {
+                caseData.getStandardDirectionOrder().getSdoFurtherList().stream().forEach(sdoFurtherInstructionsEnum ->
+                                                                                              furtherList.add(
+                                                                                                  sdoFurtherInstructionsEnum.getDisplayedValue()));
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoOtherList())) {
+                caseData.getStandardDirectionOrder().getSdoOtherList().stream().forEach(
+                    otherEnum ->
+                        otherList.add(
+                            otherEnum.getDisplayedValue()));
+            }
+            DirectionOrderDetails directionOrderDetails = DirectionOrderDetails.builder()
+                .preamblesList(String.join(",", preamblesList))
+                .hearingsAndNextStepsList(String.join(",", hearingsAndNextStepsList))
+                .cafcassOrCymruList(String.join(",", cafcassOrCymruList))
+                .localAuthorityList(String.join(",", localAuthorityList))
+                .courtList(String.join(",", courtList))
+                .documentationAndEvidenceList(String.join(",", documentationAndEvidenceList))
+                .furtherList(String.join(",", furtherList))
+                .otherList(String.join(",", otherList))
+                .permissionHearingDirectionsText(caseData.getStandardDirectionOrder().getSdoPermissionHearingDirections())
+                .permissionHearingDetails(caseData.getStandardDirectionOrder().getSdoPermissionHearingDetails())
+                .build();
+
+            return directionOrderDetails;
+        }
+
+        return null;
     }
 
     private DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType) {

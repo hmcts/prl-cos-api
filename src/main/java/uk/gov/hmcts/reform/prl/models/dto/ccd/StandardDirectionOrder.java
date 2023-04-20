@@ -211,4 +211,9 @@ public class StandardDirectionOrder {
     @JsonProperty("sdoParentWithCare")
     private final String sdoParentWithCare;
 
+    @JsonProperty("sdoPermissionHearingDirections")
+    private final String sdoPermissionHearingDirections;
+    @JsonProperty("sdoPermissionHearingDetails")
+    private final HearingData sdoPermissionHearingDetails;
+
 }
