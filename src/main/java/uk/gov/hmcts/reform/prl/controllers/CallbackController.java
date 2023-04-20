@@ -237,6 +237,8 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse generateDocumentSubmitApplication(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
+        log.info("Inside generate-document-submit-application ");
+        log.info("case state is now: " + callbackRequest.getCaseDetails().getState());
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -277,7 +279,6 @@ public class CallbackController {
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
             caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
         }
-
         //Assign default court to all c100 cases for work allocation.
         caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
             .region(C100_DEFAULT_REGION_ID)
@@ -292,6 +293,7 @@ public class CallbackController {
             "paymentServiceRequestReferenceNumber",
             paymentServiceResponse.getServiceRequestReference()
         );
+        log.info("Closing generateDocumentSubmitApplication");
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

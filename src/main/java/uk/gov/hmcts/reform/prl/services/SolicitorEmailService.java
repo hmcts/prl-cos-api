@@ -64,7 +64,6 @@ public class SolicitorEmailService {
                 .collect(Collectors.toList());
 
             String applicantNames = String.join(", ", applicantNamesList);
-
             Court court = null;
             court = courtLocatorService.getNearestFamilyCourt(caseData);
 
@@ -106,6 +105,24 @@ public class SolicitorEmailService {
         );
 
     }
+
+    public void sendAwaitingPaymentEmail(uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails caseDetails) {
+        String applicantSolicitorEmailAddress = caseDetails.getCaseData()
+            .getApplicantSolicitorEmailAddress();
+
+        emailService.send(
+            applicantSolicitorEmailAddress,
+            EmailTemplateNames.CA_AWAITING_PAYMENT,
+            buildEmail(CaseDetails.builder().state(caseDetails.getState())
+                           .id(Long.valueOf(caseDetails.getCaseId()))
+                           .data(caseDetails.getCaseData()
+                                     .toMap(objectMapper)).build()),
+            LanguagePreference.getPreferenceLanguage(caseDetails.getCaseData())
+        );
+
+    }
+
+
 
     private EmailTemplateVars buildCaseWithdrawEmail(CaseDetails caseDetails) {
 
