@@ -125,6 +125,8 @@ public class DraftAnOrderServiceTest {
     private List<Element<Child>> listOfChildren;
     private List<Element<MagistrateLastName>> magistrateElementList;
     private List<Element<DraftOrder>> draftOrderList;
+    @Mock
+    private HearingDataService hearingDataService;
 
     @Before
     public void setup() {

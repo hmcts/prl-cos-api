@@ -37,6 +37,8 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -98,6 +100,8 @@ public class DraftAnOrderService {
     private final PartiesListGenerator partiesListGenerator;
 
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
+
+    private final HearingDataService hearingDataService;
 
 
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
@@ -661,9 +665,17 @@ public class DraftAnOrderService {
             );
         }
         List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
-        populateCourtDynamicList(courtList, caseDataUpdated);
         DynamicList partiesList = partiesListGenerator.buildPartiesList(caseData, courtList);
         caseDataUpdated.put("sdoInstructionsFilingPartiesDynamicList", partiesList);
+
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            hearingDataService.populateHearingDynamicLists(authorisation, Long.toString(caseData.getId()), caseData);
+        HearingData hearingData = hearingDataService.generateHearingData(
+            hearingDataPrePopulatedDynamicLists, caseData);
+        caseDataUpdated.put(
+            "sdoPermissionHearingDetails",
+                hearingData
+        );
     }
 
     private static void populateDocumentAndEvidenceText(CaseData caseData, Map<String, Object> caseDataUpdated) {
