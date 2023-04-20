@@ -277,7 +277,6 @@ public class CallbackController {
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
             caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
         }
-
         //Assign default court to all c100 cases for work allocation.
         caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
             .region(C100_DEFAULT_REGION_ID)
