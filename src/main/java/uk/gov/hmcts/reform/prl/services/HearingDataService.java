@@ -152,7 +152,7 @@ public class HearingDataService {
 
             }
         } catch (Exception e) {
-            log.error("List of Hearing Start Date Values look up failed - " + e.getMessage(), e);
+            log.error("List of Hearing Start Date Values look up failed - {} {} ", e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
     }
