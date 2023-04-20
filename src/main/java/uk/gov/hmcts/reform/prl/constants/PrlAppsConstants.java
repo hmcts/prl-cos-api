@@ -496,4 +496,10 @@ public class PrlAppsConstants {
     public static final String CUSTOM_DETAILS = "customDetails";
     public static final String[] EMPTY_ARRAY = {};
     public static final String COLON_SEPERATOR = ":";
+    public static final String SDO_PERMISSION_HEARING_DETAILS = "sdoPermissionHearingDetails";
+    public static final String SDO_SECOND_HEARING_DETAILS = "sdoSecondHearingDetails";
+    public static final String SDO_URGENT_HEARING_DETAILS = "sdoUrgentHearingDetails";
+    public static final String SDO_FHDRA_HEARING_DETAILS = "sdoFhdraHearingDetails";
+    public static final String SDO_DRA_HEARING_DETAILS = "sdoDraHearingDetails";
+    public static final String SDO_SETTLEMENT_HEARING_DETAILS = "sdoSettlementHearingDetails";
 }

@@ -78,7 +78,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_D
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFE_GUARDING_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_CROSS_EXAMINATION_EX741;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_DRA_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_FHDRA_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_PERMISSION_HEARING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_PERMISSION_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_SECOND_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_SETTLEMENT_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
@@ -151,11 +157,14 @@ public class DraftAnOrderService {
                 updatedCaseData.put("orderUploadedAsDraftFlag", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
-                    draftOrder =  getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
+                    draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
-                updatedCaseData.put("orderCollection", getFinalOrderCollection(authorisation, caseData, draftOrder, eventId));
+                updatedCaseData.put(
+                    "orderCollection",
+                    getFinalOrderCollection(authorisation, caseData, draftOrder, eventId)
+                );
                 draftOrderCollection.remove(
                     draftOrderCollection.indexOf(e)
                 );
@@ -287,10 +296,10 @@ public class DraftAnOrderService {
                                           boolean isWelsh, Map<String, String> fieldMap) {
         if (generatedDocumentInfo != null) {
             return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName(!isWelsh ? fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)
-                                          : fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build();
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName(!isWelsh ? fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)
+                                      : fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build();
         }
         return null;
     }
@@ -340,16 +349,16 @@ public class DraftAnOrderService {
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
         caseDataMap.put("appointedGuardianName", selectedOrder.getAppointedGuardianName());
-        caseDataMap.put("manageOrdersFl402CourtName",selectedOrder.getManageOrdersFl402CourtName());
-        caseDataMap.put("manageOrdersFl402CourtAddress",selectedOrder.getManageOrdersFl402CourtAddress());
-        caseDataMap.put("manageOrdersFl402CaseNo",selectedOrder.getManageOrdersFl402CaseNo());
-        caseDataMap.put("manageOrdersFl402Applicant",selectedOrder.getManageOrdersFl402Applicant());
-        caseDataMap.put("manageOrdersFl402ApplicantRef",selectedOrder.getManageOrdersFl402ApplicantRef());
-        caseDataMap.put("fl402HearingCourtname",selectedOrder.getFl402HearingCourtname());
-        caseDataMap.put("fl402HearingCourtAddress",selectedOrder.getFl402HearingCourtAddress());
-        caseDataMap.put("manageOrdersDateOfhearing",selectedOrder.getManageOrdersDateOfhearing());
-        caseDataMap.put("dateOfHearingTime",selectedOrder.getDateOfHearingTime());
-        caseDataMap.put("dateOfHearingTimeEstimate",selectedOrder.getDateOfHearingTimeEstimate());
+        caseDataMap.put("manageOrdersFl402CourtName", selectedOrder.getManageOrdersFl402CourtName());
+        caseDataMap.put("manageOrdersFl402CourtAddress", selectedOrder.getManageOrdersFl402CourtAddress());
+        caseDataMap.put("manageOrdersFl402CaseNo", selectedOrder.getManageOrdersFl402CaseNo());
+        caseDataMap.put("manageOrdersFl402Applicant", selectedOrder.getManageOrdersFl402Applicant());
+        caseDataMap.put("manageOrdersFl402ApplicantRef", selectedOrder.getManageOrdersFl402ApplicantRef());
+        caseDataMap.put("fl402HearingCourtname", selectedOrder.getFl402HearingCourtname());
+        caseDataMap.put("fl402HearingCourtAddress", selectedOrder.getFl402HearingCourtAddress());
+        caseDataMap.put("manageOrdersDateOfhearing", selectedOrder.getManageOrdersDateOfhearing());
+        caseDataMap.put("dateOfHearingTime", selectedOrder.getDateOfHearingTime());
+        caseDataMap.put("dateOfHearingTimeEstimate", selectedOrder.getDateOfHearingTimeEstimate());
         caseDataMap.put("manageOrdersCourtName", selectedOrder.getManageOrdersCourtName());
         caseDataMap.put("manageOrdersCourtAddress", selectedOrder.getManageOrdersCourtAddress());
         caseDataMap.put("manageOrdersCaseNo", selectedOrder.getManageOrdersCaseNo());
@@ -472,7 +481,7 @@ public class DraftAnOrderService {
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderTypeId(null != draftOrder.getOrderTypeId()
-                              ? draftOrder.getOrderTypeId() : manageOrderService.getSelectedOrderInfoForUpload(caseData))
+                             ? draftOrder.getOrderTypeId() : manageOrderService.getSelectedOrderInfoForUpload(caseData))
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -554,9 +563,10 @@ public class DraftAnOrderService {
                         caseData.getApplicantsFL401().getFirstName(),
                         caseData.getApplicantsFL401().getLastName()
                     ))
-                    .fl404bRespondentName(String.format(PrlAppsConstants.FORMAT,
-                                                        caseData.getRespondentsFL401().getFirstName(),
-                                                        caseData.getRespondentsFL401().getLastName()
+                    .fl404bRespondentName(String.format(
+                        PrlAppsConstants.FORMAT,
+                        caseData.getRespondentsFL401().getFirstName(),
+                        caseData.getRespondentsFL401().getLastName()
                     )).build();
                 if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
                     fl404CustomFields = fl404CustomFields.toBuilder()
@@ -665,17 +675,24 @@ public class DraftAnOrderService {
             );
         }
         List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
+        populateCourtDynamicList(courtList, caseDataUpdated);
         DynamicList partiesList = partiesListGenerator.buildPartiesList(caseData, courtList);
         caseDataUpdated.put("sdoInstructionsFilingPartiesDynamicList", partiesList);
 
+        populateHearingDetails(authorisation, caseData, caseDataUpdated);
+    }
+
+    private void populateHearingDetails(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, Long.toString(caseData.getId()), caseData);
         HearingData hearingData = hearingDataService.generateHearingData(
             hearingDataPrePopulatedDynamicLists, caseData);
-        caseDataUpdated.put(
-            "sdoPermissionHearingDetails",
-                hearingData
-        );
+        caseDataUpdated.put(SDO_PERMISSION_HEARING_DETAILS, hearingData);
+        caseDataUpdated.put(SDO_SECOND_HEARING_DETAILS, hearingData);
+        caseDataUpdated.put(SDO_URGENT_HEARING_DETAILS, hearingData);
+        caseDataUpdated.put(SDO_FHDRA_HEARING_DETAILS, hearingData);
+        caseDataUpdated.put(SDO_DRA_HEARING_DETAILS, hearingData);
+        caseDataUpdated.put(SDO_SETTLEMENT_HEARING_DETAILS, hearingData);
     }
 
     private static void populateDocumentAndEvidenceText(CaseData caseData, Map<String, Object> caseDataUpdated) {
@@ -766,20 +783,10 @@ public class DraftAnOrderService {
     }
 
     private void populateCourtDynamicList(List<DynamicListElement> courtList, Map<String, Object> caseDataUpdated) {
-        DynamicList courtDynamicList =  DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+        DynamicList courtDynamicList = DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
             .build();
         caseDataUpdated.put(
-            "sdoUrgentHearingCourtDynamicList", courtDynamicList);
-        caseDataUpdated.put(
-            "sdoFhdraCourtDynamicList", courtDynamicList);
-        caseDataUpdated.put(
-            "sdoDirectionsDraCourtDynamicList", courtDynamicList);
-        caseDataUpdated.put(
-            "sdoSettlementConferenceCourtDynamicList", courtDynamicList);
-        caseDataUpdated.put(
             "sdoTransferApplicationCourtDynamicList", courtDynamicList);
-        caseDataUpdated.put(
-            "sdoCrossExaminationCourtDynamicList", courtDynamicList);
     }
 
     private List<DynamicListElement> getCourtDynamicList(String authorisation) {
@@ -813,7 +820,7 @@ public class DraftAnOrderService {
         }
         if (!caseData.getDirectionOnIssue().getDioHearingsAndNextStepsList().isEmpty()
             && caseData.getDirectionOnIssue().getDioHearingsAndNextStepsList().contains(
-                DioHearingsAndNextStepsEnum.participationDirections)) {
+            DioHearingsAndNextStepsEnum.participationDirections)) {
             caseDataUpdated.put("dioParticipationDirections", DIO_PARTICIPATION_DIRECTION);
         }
         if (!caseData.getDirectionOnIssue().getDioHearingsAndNextStepsList().isEmpty()
@@ -863,7 +870,7 @@ public class DraftAnOrderService {
     }
 
     private void populateDioCourtDynamicList(List<DynamicListElement> courtList, Map<String, Object> caseDataUpdated) {
-        DynamicList courtDynamicList =  DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+        DynamicList courtDynamicList = DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
             .build();
         caseDataUpdated.put(
             "dioFhdraCourtDynamicList", courtDynamicList);
@@ -873,9 +880,9 @@ public class DraftAnOrderService {
             "dioTransferApplicationCourtDynamicList", courtDynamicList);
     }
 
-    public Map<String,Object> getDraftOrderInfo(String authorisation, CaseData caseData)  throws Exception {
+    public Map<String, Object> getDraftOrderInfo(String authorisation, CaseData caseData) throws Exception {
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
-        return  getDraftOrderData(authorisation, caseData, draftOrder);
+        return getDraftOrderData(authorisation, caseData, draftOrder);
     }
 
     private Map<String, Object> getDraftOrderData(String authorisation, CaseData caseData, DraftOrder draftOrder) throws Exception {
@@ -910,7 +917,7 @@ public class DraftAnOrderService {
         return caseDataUpdated;
     }
 
-    public  Map<String, Object> judgeOrAdminEditApproveDraftOrderAboutToSubmit(String authorisation, CallbackRequest callbackRequest) {
+    public Map<String, Object> judgeOrAdminEditApproveDraftOrderAboutToSubmit(String authorisation, CallbackRequest callbackRequest) {
         String eventId = callbackRequest.getEventId();
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
@@ -976,7 +983,11 @@ public class DraftAnOrderService {
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
         } else {
-            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
+            caseDataUpdated.putAll(manageOrderService.getCaseData(
+                authorisation,
+                caseData,
+                caseData.getCreateSelectOrderOptions()
+            ));
         }
         return caseDataUpdated;
     }
