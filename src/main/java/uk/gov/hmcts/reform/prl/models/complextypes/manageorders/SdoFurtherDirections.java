@@ -12,7 +12,7 @@ public class SdoFurtherDirections {
     @JsonProperty("sdoFurtherDirectionTitle")
     private final String sdoFurtherDirectionTitle;
 
-    @JsonProperty("sdoFurtherDirectionTitle")
+    @JsonProperty("sdoFurtherDirectionDescription")
     private final String sdoFurtherDirectionDescription;
 
     @JsonCreator
