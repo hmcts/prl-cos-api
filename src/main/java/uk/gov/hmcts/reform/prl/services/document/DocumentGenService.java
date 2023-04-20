@@ -276,7 +276,7 @@ public class DocumentGenService {
     @Autowired
     IdamClient idamClient;
 
-    private CaseData fillOrgDetails(CaseData caseData) {
+    public CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = organisationService.getApplicantOrganisationDetails(caseData);
@@ -333,7 +333,7 @@ public class DocumentGenService {
             updatedCaseData.put("isWelshDocGen", Yes.toString());
             isConfidentialInformationPresentForC100Welsh(authorisation, caseData, updatedCaseData);
             isC100CaseTypeWelsh(authorisation, caseData, updatedCaseData);
-            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUE.equals(
+            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUED.equals(
                 caseData.getState())) {
                 updatedCaseData.put(
                     DOCUMENT_FIELD_FINAL_WELSH,
@@ -347,7 +347,7 @@ public class DocumentGenService {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && caseData.getAllegationOfHarm() != null
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
-            if (State.CASE_ISSUE.equals(caseData.getState())) {
+            if (State.CASE_ISSUED.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, getDocument(authorisation, caseData, C1A_HINT, true));
             } else {
                 updatedCaseData.put(
@@ -363,7 +363,7 @@ public class DocumentGenService {
     private void isConfidentialInformationPresentForC100Welsh(String authorisation, CaseData caseData,
                                                               Map<String, Object> updatedCaseData) throws Exception {
         if (isConfidentialInformationPresentForC100(caseData)) {
-            if (State.CASE_ISSUE.equals(caseData.getState())) {
+            if (State.CASE_ISSUED.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
             } else {
                 updatedCaseData.put(
@@ -385,7 +385,7 @@ public class DocumentGenService {
             updatedCaseData.put(ENGDOCGEN, Yes.toString());
             isConfidentialInformationPresentForC100Eng(authorisation, caseData, updatedCaseData);
             isC100CaseTypeEng(authorisation, caseData, updatedCaseData);
-            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUE.equals(
+            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUED.equals(
                 caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
             }
@@ -396,7 +396,7 @@ public class DocumentGenService {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && caseData.getAllegationOfHarm() != null
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
-            if (State.CASE_ISSUE.equals(caseData.getState())) {
+            if (State.CASE_ISSUED.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
             } else {
                 updatedCaseData.put(
@@ -413,7 +413,7 @@ public class DocumentGenService {
     private void isConfidentialInformationPresentForC100Eng(String authorisation, CaseData caseData,
                                                             Map<String, Object> updatedCaseData) throws Exception {
         if (isConfidentialInformationPresentForC100(caseData)) {
-            if (State.CASE_ISSUE.equals(caseData.getState())) {
+            if (State.CASE_ISSUED.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
             } else {
                 updatedCaseData.put(
@@ -966,6 +966,112 @@ public class DocumentGenService {
         } catch (Exception e) {
             log.error("Error while downloading  document ." + e.getMessage());
             throw e;
+        }
+    }
+
+    public Map<String, Object> generateDocumentsForTestingSupport(String authorisation, CaseData caseData) throws Exception {
+
+        Map<String, Object> updatedCaseData = new HashMap<>();
+
+        caseData = fillOrgDetails(caseData);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+
+        documentLanguageIsEngForTestingSupport(authorisation, caseData, updatedCaseData, documentLanguage);
+        documentLanguageIsWelshForTestingSupport(authorisation, caseData, updatedCaseData, documentLanguage);
+        if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, null);
+        } else if (!documentLanguage.isGenEng() && documentLanguage.isGenWelsh()) {
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C8, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
+        }
+        return updatedCaseData;
+    }
+
+    private void documentLanguageIsEngForTestingSupport(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData,
+                                                        DocumentLanguage documentLanguage) throws Exception {
+        if (documentLanguage.isGenEng()) {
+            updatedCaseData.put(ENGDOCGEN, Yes.toString());
+            isConfidentialInformationPresentForC100EngForTestingSupport(authorisation, caseData, updatedCaseData);
+            isC100CaseTypeEngForTestingSupport(authorisation, caseData, updatedCaseData);
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
+            updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
+        }
+    }
+
+    private void isConfidentialInformationPresentForC100EngForTestingSupport(String authorisation, CaseData caseData,
+                                                                             Map<String, Object> updatedCaseData) throws Exception {
+        if (isConfidentialInformationPresentForC100(caseData)) {
+            updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
+            updatedCaseData.put(
+                DOCUMENT_FIELD_DRAFT_C8,
+                getDocument(authorisation, caseData, C8_DRAFT_HINT, false)
+            );
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && isApplicantOrChildDetailsConfidential(caseData)) {
+            updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
+        } else {
+            updatedCaseData.put(DOCUMENT_FIELD_C8, null);
+        }
+    }
+
+    private void isC100CaseTypeEngForTestingSupport(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && caseData.getAllegationOfHarm() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
+            updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
+            updatedCaseData.put(
+                DOCUMENT_FIELD_DRAFT_C1A,
+                getDocument(authorisation, caseData, C1A_DRAFT_HINT, false)
+            );
+        } else {
+            updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
+        }
+    }
+
+    private void documentLanguageIsWelshForTestingSupport(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData,
+                                                          DocumentLanguage documentLanguage) throws Exception {
+        if (documentLanguage.isGenWelsh()) {
+            updatedCaseData.put("isWelshDocGen", Yes.toString());
+            isConfidentialInformationPresentForC100WelshForTestingSupport(authorisation, caseData, updatedCaseData);
+            isC100CaseTypeWelshForTestingSupport(authorisation, caseData, updatedCaseData);
+            updatedCaseData.put(
+                DOCUMENT_FIELD_FINAL_WELSH,
+                getDocument(authorisation, caseData, FINAL_HINT, true)
+            );
+            updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+        }
+    }
+
+    private void isConfidentialInformationPresentForC100WelshForTestingSupport(String authorisation, CaseData caseData,
+                                                                               Map<String, Object> updatedCaseData) throws Exception {
+        if (isConfidentialInformationPresentForC100(caseData)) {
+            updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
+            updatedCaseData.put(
+                DOCUMENT_FIELD_C8_DRAFT_WELSH,
+                getDocument(authorisation, caseData, C8_DRAFT_HINT, true)
+            );
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && isApplicantOrChildDetailsConfidential(caseData)) {
+            updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
+        } else {
+            updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, null);
+        }
+    }
+
+    private void isC100CaseTypeWelshForTestingSupport(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && caseData.getAllegationOfHarm() != null
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
+            updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, getDocument(authorisation, caseData, C1A_HINT, true));
+            updatedCaseData.put(
+                DOCUMENT_FIELD_C1A_DRAFT_WELSH,
+                getDocument(authorisation, caseData, C1A_DRAFT_HINT, true)
+            );
+        } else {
+            updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, null);
         }
     }
 }

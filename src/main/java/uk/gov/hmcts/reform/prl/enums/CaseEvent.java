@@ -16,7 +16,19 @@ public enum CaseEvent {
     LEGAL_REPRESENTATION("legalRepresentation"),
     SUPPORT_YOU_NEED("support-you-need"),
     REVIEW_AND_SUBMIT("reviewAndSubmit"),
-    CITIZEN_CASE_SUBMIT_WITH_HWF("citizenCaseSubmitWithHWF");
+    PAYMENT_SUCCESS_CALLBACK("paymentSuccessCallback"),
+    PAYMENT_FAILURE_CALLBACK("paymentFailureCallback"),
+    UPDATE_ALL_TABS("internal-update-all-tabs"),
+    COURTNAV_CASE_CREATION("courtnav-case-creation"),
+    COURTNAV_DOCUMENT_UPLOAD_EVENT_ID("courtnav-document-upload"),
+    HEARING_STATE_CHANGE_SUCCESS("hmcCaseUpdateSuccess"),
+    HEARING_STATE_CHANGE_FAILURE("hmcCaseUpdateFailure"),
+    INTERNAL_UPDATE_TASK_LIST("internal-update-task-list"),
+    CITIZEN_CASE_SUBMIT_WITH_HWF("citizenCaseSubmitWithHWF"),
+    CITIZEN_CASE_WITHDRAW("citizenCaseWithdraw"),
+    UPDATE_NEXT_HEARING_DATE_IN_CCD("updateNextHearingInfo"),
+    HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING("hmcCaseUpdPrepForHearing"),
+    HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME("hmcCaseUpdDecOutcome");
 
     private final String value;
 

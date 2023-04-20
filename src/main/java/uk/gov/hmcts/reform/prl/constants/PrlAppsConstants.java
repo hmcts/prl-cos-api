@@ -13,6 +13,10 @@ public class PrlAppsConstants {
 
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
+    
+    public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
+    public static final String STATE = "state";
+
 
     public static final String YES = "Yes";
     public static final String NO = "No";
@@ -52,6 +56,7 @@ public class PrlAppsConstants {
     public static final String C7_FINAL_WELSH = "c7FinalWelsh";
 
     public static final String COURT_NAME_FIELD = "courtName";
+    public static final String COURT_SEAL_FIELD = "courtSeal";
     public static final String COURT_ID_FIELD = "courtId";
     public static final String COURT_EMAIL_ADDRESS_FIELD = "courtEmailAddress";
     public static final String FINAL_DOCUMENT_FIELD = "finalDocument";
@@ -89,8 +94,8 @@ public class PrlAppsConstants {
     public static final String WITHDRAWN_STATE = State.CASE_WITHDRAWN.getValue();
     public static final String SUBMITTED_STATE = State.SUBMITTED_PAID.getValue();
     public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
-    public static final String ISSUED_STATE = State.CASE_ISSUE.getValue();
-    public static final String GATEKEEPING_STATE = State.GATE_KEEPING.getValue();
+    public static final String ISSUED_STATE = State.CASE_ISSUED.getValue();
+    public static final String JUDICIAL_REVIEW_STATE = State.JUDICIAL_REVIEW.getValue();
 
     public static final String C8_HINT = "C8";
     public static final String C1A_HINT = "C1A";
@@ -328,17 +333,101 @@ public class PrlAppsConstants {
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
-    public static final long CASE_SUBMISSION_THRESHOLD = 28;
 
+    public static final String COURTNAV = "COURTNAV";
+    public static final String NA_COURTNAV = "NA_COURTNAV";
+
+    public static final String DISTRICT_JUDGE = "districtJudge";
+
+    public static final String MAGISTRATES = "magistrates";
+
+    public static final String CIRCUIT_JUDGE = "circuitJudge";
+    public static final String HIGHCOURT_JUDGE = "highCourtJudge";
+
+    public static final String EMPTY_SPACE_STRING = " ";
+
+    public static final String SERVICENAME = "PRIVATELAW";
+    public static final String STAFFSORTCOLUMN = "lastName";
+    public static final String STAFFORDERASC = "ASC";
+    public static final String LEGALOFFICE = "Legal office";
+
+    public static final String TIER_OF_JUDICIARY = "tierOfJudiciary";
+
+    public static final String IS_JUDGE_OR_LEGAL_ADVISOR = "isJudgeOrLegalAdviser";
+
+    public static final String JUDGE_NAME_EMAIL = "judgeNameAndEmail";
+    public static final String IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING =  "isJudgeOrLegalAdviserGatekeeping";
+    public static final String JUDGE_NAME = "judgeName";
+
+    public static final String JUDGE = "Judge";
+    public static final String CASEWORKER = "CaseWorker";
+
+    public static final long CASE_SUBMISSION_THRESHOLD = 28;
+    public static final String HEARINGTYPE = "HearingType";
+    public static final String IS_HEARINGCHILDREQUIRED_Y = "Y";
+    public static final String IS_HEARINGCHILDREQUIRED_N = "N";
+    public static final String HEARINGCHANNEL = "HearingChannel";
+    public static final String VIDEOPLATFORM = "Video";
+    public static final String TELEPHONEPLATFORM = "Telephone";
+    public static final String VIDEOSUBCHANNELS = "videoSubChannels";
+    public static final String TELEPHONESUBCHANNELS = "telephoneSubChannels";
+    public static final String IS_CAFCASS = "isCafcass";
+
+    public static final String ORDER_HEARING_DETAILS = "ordersHearingDetails";
+
+    public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
     public static final String CHILD_AND_CAFCASS_OFFICER_DETAILS = "childAndCafcassOfficers";
     public static final String CHILD_NAME = "Child name: ";
     public static final String CHILD_DETAILS_TABLE = "childDetailsTable";
 
     public static final String CHILDREN = "children";
 
-    public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
     public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
     //C100 default court details
     public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
+    public static final String CITIZEN_DASHBOARD = "/dashboard";
 
+    public static final String DATE_OF_SUBMISSION = "dateOfSubmission";
+    public static final String FL_401_STMT_OF_TRUTH = "fl401StmtOfTruth";
+    public static final String TESTING_SUPPORT_LD_FLAG_ENABLED = "testing-support";
+
+    public static final String CASE_DATA_ID = "id";
+    public static final String LISTWITHOUTNOTICE_HEARINGDETAILS = "listWithoutNoticeHearingDetails";
+
+    public static final String DATE_CONFIRMED_IN_HEARINGS_TAB = "dateConfirmedInHearingsTab";
+    public static final String HEARING_DATE_CONFIRM_OPTION_ENUM = "hearingDateConfirmOptionEnum";
+    public static final String CONFIRMED_HEARING_DATES = "confirmedHearingDates";
+    public static final String APPLICANT_HEARING_CHANNEL = "applicantHearingChannel";
+    public static final String APPLICANT_SOLICITOR_HEARING_CHANNEL = "applicantSolicitorHearingChannel";
+    public static final String RESPONDENT_HEARING_CHANNEL = "respondentHearingChannel";
+    public static final String RESPONDENT_SOLICITOR_HEARING_CHANNEL = "respondentSolicitorHearingChannel";
+    public static final String CAFCASS_HEARING_CHANNEL = "cafcassHearingChannel";
+    public static final String CAFCASS_CYMRU_HEARING_CHANNEL = "cafcassCymruHearingChannel";
+    public static final String HEARING_LISTED_LINKED_CASES = "hearingListedLinkedCases";
+    public static final String LOCAL_AUTHORITY_HEARING_CHANNEL = "localAuthorityHearingChannel";
+    public static final String COURT_LIST = "courtList";
+    public static final String HEARING_VIDEO_CHANNELS = "hearingVideoChannels";
+    public static final String HEARING_TELEPHONE_CHANNELS = "hearingTelephoneChannels";
+    public static final String HEARING_DATE_TIMES = "hearingDateTimes";
+
+    public static final String HEARING_ESTIMATED_HOURS = "hearingEstimatedHours";
+    public static final String HEARING_ESTIMATED_MINUTES = "hearingEstimatedMinutes";
+    public static final String HEARING_ESTIMATED_DAYS = "hearingEstimatedDays";
+    public static final String ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY = "allPartiesAttendHearingSameWayYesOrNo";
+
+    public static final String HEARING_AUTHORITY = "hearingAuthority";
+    public static final String HEARING_CHANNELS_ENUM = "hearingChannelsEnum";
+
+    public static final String HEARING_JUDGE_NAME_AND_EMAIL  = "hearingJudgeNameAndEmail";
+    public static final String HEARING_SPECIFIC_DATES_OPTIONS_ENUM = "hearingSpecificDatesOptionsEnum";
+    public static final String FIRST_DATE_OF_THE_HEARING = "firstDateOfTheHearing";
+    public static final String HEARING_MUST_TAKE_PLACE_AT_HOUR = "hearingMustTakePlaceAtHour";
+    public static final String HEARING_MUST_TAKE_PLACE_AT_MINUTE = "hearingMustTakePlaceAtMinute";
+
+    public static final String EARLIEST_HEARING_DATE = "earliestHearingDate";
+    public static final String LATEST_HEARING_DATE = "latestHearingDate";
+    public static final String HEARING_PRIORITY_TYPE_ENUM = "hearingPriorityTypeEnum";
+    public static final String CUSTOM_DETAILS = "customDetails";
+    public static final String[] EMPTY_ARRAY = {};
+    public static final String COLON_SEPERATOR = ":";
 }
