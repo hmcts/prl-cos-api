@@ -986,7 +986,8 @@ public class ManageOrderService {
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .childOption(Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
-                             ? caseData.getManageOrders().getChildOption() : null)
+                             ? caseData.getManageOrders().getChildOption() : DynamicMultiSelectList.builder()
+                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
@@ -1043,7 +1044,8 @@ public class ManageOrderService {
             .orderDocument(caseData.getUploadOrderDoc())
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .childOption(Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
-                             ? caseData.getManageOrders().getChildOption() : null)
+                             ? caseData.getManageOrders().getChildOption() : DynamicMultiSelectList.builder()
+                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
             .childrenList(caseData.getManageOrders() != null
                               ? getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()) : null)
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -1388,7 +1390,7 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         GeneratedDocumentInfo generatedDocumentInfo = null;
         Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
-        List<Child> children = dynamicMultiSelectListService
+        List<Element<Child>> children = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseData);
         if (!children.isEmpty()) {
             caseData.setChildrenListForDocmosis(children);

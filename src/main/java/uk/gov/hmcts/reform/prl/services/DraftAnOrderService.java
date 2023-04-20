@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
@@ -40,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -93,6 +95,7 @@ public class DraftAnOrderService {
     private final DocumentLanguageService documentLanguageService;
     private final LocationRefDataService locationRefDataService;
     private final PartiesListGenerator partiesListGenerator;
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
 
@@ -384,7 +387,10 @@ public class DraftAnOrderService {
         caseDataMap.put("judgeOrMagistratesLastName", selectedOrder.getJudgeOrMagistratesLastName());
         caseDataMap.put("justiceLegalAdviserFullName", selectedOrder.getJusticeLegalAdviserFullName());
         caseDataMap.put("magistrateLastName", selectedOrder.getMagistrateLastName());
-        caseDataMap.put("isTheOrderAboutAllChildren", selectedOrder.getIsTheOrderAboutAllChildren());
+        caseDataMap.put("isTheOrderAboutChildren", selectedOrder.getIsTheOrderAboutChildren());
+        caseDataMap.put("childOption", Yes.equals(selectedOrder.getIsTheOrderAboutChildren())
+            ? selectedOrder.getChildOption() : DynamicMultiSelectList.builder()
+            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
         caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
         caseDataMap.put("furtherDirectionsIfRequired", selectedOrder.getFurtherDirectionsIfRequired());
@@ -496,7 +502,8 @@ public class DraftAnOrderService {
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .childOption(Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
-                             ? caseData.getManageOrders().getChildOption() : null)
+                             ? caseData.getManageOrders().getChildOption() : DynamicMultiSelectList.builder()
+                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
@@ -638,6 +645,10 @@ public class DraftAnOrderService {
                                   .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
                                   .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions() != null
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
+                                  .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                                  .childOption(Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                                                   ? caseData.getManageOrders().getChildOption() : DynamicMultiSelectList.builder()
+                                      .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
                                   .build()).build();
         }
         return caseData;
