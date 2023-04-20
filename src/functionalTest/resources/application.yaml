@@ -109,8 +109,9 @@ uk:
             CA_APPLICANT_SOLICITOR_RES_NOTIFICATION: a08975e3-6438-4f58-a0f6-827c0dcab291
             CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION: b6224e6a-f55c-46f8-bfc7-631d273070a4
             CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
+            CA_DA_RESPONDENT_SOLICITOR_NOC: 68f0d268-8062-4199-8695-2661081a836a
             CA_AWAITING_PAYMENT: 3cf67615-8b67-4814-9e61-1ce786b986a1
-            RETURN_APPLICATION_CONSENT_ORDER: 96e26a9a-ca28-4b63-bd59-38e8ad14e373            
+            RETURN_APPLICATION_CONSENT_ORDER: 96e26a9a-ca28-4b63-bd59-38e8ad14e373
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             CA_AWAITING_PAYMENT: 312019d9-54f4-4c9a-a8b0-2dc7e4008a9e
@@ -363,6 +364,14 @@ document:
       prl_fl402_welsh_draft_filename: Welsh_NoticeOfProceedings(FL402)Draft.pdf
       prl_fl402_welsh_final_template: PRL-HNO-WEL-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_welsh_final_filename: Welsh_NoticeOfProceedings(FL402).pdf
+      prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
+      prl_c7_blank_filename: C7BlankDocument.pdf
+      prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
+      prl_c8_blank_filename: C8BlankDocument.pdf
+      prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
+      prl_c1a_blank_filename: C1ABlankDocument.pdf
+      prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
+      prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
       prl_fl404_welsh_template: PRL-GOR-WEL-FL404-Occupation-Order-Final.docx
       prl_fl404_welsh_filename: welsh_occupation_order_FL404_final.pdf
       prl_fl404_welsh_draft_template: PRL-GOR-WEL-FL404-Occupation-Order-Draft.docx
@@ -391,14 +400,6 @@ document:
       prl_c45a_welsh_filename: Welsh_Parental_Responsibility_Order_C45A.pdf
       prl_c45a_welsh_draft_template: PRL-GOR-WEL-C45A-Parental-Responsibility-Order-Draft.docx
       prl_c45a_welsh_draft_filename: Welsh_Parental_Responsibility_Order_C45A_draft.pdf
-      prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
-      prl_c7_blank_filename: C7BlankDocument.pdf
-      prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
-      prl_c8_blank_filename: C8BlankDocument.pdf
-      prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
-      prl_c1a_blank_filename: C1ABlankDocument.pdf
-      prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
-      prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
       prl_c6_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Final.docx
       prl_c6_filename: Notice_Of_Parties_Order_C6.pdf
       prl_c6_draft_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Draft.docx
