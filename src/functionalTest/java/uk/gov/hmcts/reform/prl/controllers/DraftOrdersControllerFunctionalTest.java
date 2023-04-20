@@ -13,8 +13,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 
 import java.util.HashMap;
@@ -116,6 +118,8 @@ public class DraftOrdersControllerFunctionalTest {
     public void givenRequestBody_whenGenerate_doc() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().c21OrderOptions(
+                C21OrderOptionsEnum.c21NoOrderMade).build())
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .build();
         Map<String, Object> caseDataMap = new HashMap<>();
