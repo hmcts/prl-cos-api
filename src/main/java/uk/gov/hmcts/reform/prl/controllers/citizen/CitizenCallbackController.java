@@ -87,9 +87,12 @@ public class CitizenCallbackController extends AbstractCallbackController {
     public void updateCitizenApplication(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
+        log.info("Inside updateCitizenApplication");
+        log.info("case state is now: " + callbackRequest.getCaseDetails().getState());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         allTabsService.updateAllTabsIncludingConfTab(caseData);
         citizenEmailService.sendCitizenCaseSubmissionEmail(authorisation, caseData);
+        log.info("Closing updateCitizenApplication");
     }
 
     @PostMapping(path = "/citizen-case-withdrawn-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
