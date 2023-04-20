@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -168,18 +170,21 @@ public class DynamicMultiSelectListService {
         return "";
     }
 
-    public List<Child> getChildrenForDocmosis(CaseData caseData) {
-        List<Child> childList = new ArrayList<>();
+    public List<Element<Child>> getChildrenForDocmosis(CaseData caseData) {
+        List<Element<Child>> childList = new ArrayList<>();
+        log.info("ManageOrders in getChildrenForDocmosis: {}", caseData.getManageOrders());
         if (null != caseData.getManageOrders()
             && null != caseData.getManageOrders().getChildOption()
             && null != caseData.getManageOrders().getChildOption().getValue()) {
             caseData.getManageOrders().getChildOption().getValue().forEach(value -> {
                 Child child = getChildDetails(caseData, value.getCode());
                 if (null != child) {
-                    childList.add(child);
+                    childList.add(element(child));
+
                 }
             });
         }
+        log.info("after retrieving the children List for docmosis: {}", childList);
         return childList;
     }
 
