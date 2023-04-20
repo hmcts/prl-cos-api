@@ -597,6 +597,8 @@ public class DraftAnOrderService {
                                   .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
                                   .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
                                   .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
+                                  .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
+                                  .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions().getDisplayedValue())
                                   .build()).build();
         } else {
             caseData = caseData.toBuilder()
@@ -615,6 +617,8 @@ public class DraftAnOrderService {
                                   .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                                   .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
                                   .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
+                                  .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
+                                  .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions().getDisplayedValue())
                                   .build()).build();
         }
         return caseData;
