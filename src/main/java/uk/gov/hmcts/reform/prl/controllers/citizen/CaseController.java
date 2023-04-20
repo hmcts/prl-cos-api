@@ -94,6 +94,8 @@ public class CaseController {
                 eventId,
                 accessCode
             );
+            log.info("Done with case update with the event id " + eventId);
+            log.info("The state now is " + caseDetails.getState());
             return CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

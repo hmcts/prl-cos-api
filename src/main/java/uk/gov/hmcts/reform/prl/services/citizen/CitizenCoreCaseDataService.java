@@ -85,6 +85,7 @@ public class CitizenCoreCaseDataService {
     }
 
     private CaseDataContent caseDataContent(StartEventResponse startEventResponse, Object content) {
+        log.info("event I am calling :" + startEventResponse.getEventId());
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
@@ -114,9 +115,11 @@ public class CitizenCoreCaseDataService {
         CaseEvent caseEvent
     ) {
         try {
+            log.info("I am now inside update case method");
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
             EventRequestData eventRequestData = eventRequest(caseEvent, userDetails.getId());
-
+            log.info("I am now inside update case method");
+            log.info("my logged in user roles are " + userDetails.getRoles());
             StartEventResponse startEventResponse = ccdCoreCaseDataService.startUpdate(
                 authorisation,
                 eventRequestData,
