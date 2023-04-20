@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWitnessStatementsSentToEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
@@ -132,7 +133,7 @@ public class SdoDetails {
     private final HearingData sdoSecondHearingDetails;
     private final String sdoNextStepJudgeName;
     private final AllocateOrReserveJudgeEnum sdoAllocateOrReserveJudge;
-    private final String sdoAllocateOrReserveJudgeName;
+    private final JudicialUser sdoAllocateOrReserveJudgeName;
     private final HearingData sdoUrgentHearingDetails;
     private final HearingData sdoFhdraHearingDetails;
     private final List<OtherDirectionPositionStatementEnum> sdoPositionStatementOtherCheckDetails;
