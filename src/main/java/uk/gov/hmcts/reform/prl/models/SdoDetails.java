@@ -131,7 +131,7 @@ public class SdoDetails {
     private final String sdoPermissionHearingDirections;
     private final HearingData sdoPermissionHearingDetails;
     private final HearingData sdoSecondHearingDetails;
-    private final String sdoNextStepJudgeName;
+    private final JudicialUser sdoNextStepJudgeName;
     private final AllocateOrReserveJudgeEnum sdoAllocateOrReserveJudge;
     private final JudicialUser sdoAllocateOrReserveJudgeName;
     private final HearingData sdoUrgentHearingDetails;

@@ -194,7 +194,7 @@ public class StandardDirectionOrder {
     @JsonProperty("sdoSecondHearingDetails")
     private final HearingData sdoSecondHearingDetails;
     @JsonProperty("sdoNextStepJudgeName")
-    private final String sdoNextStepJudgeName;
+    private final JudicialUser sdoNextStepJudgeName;
     @JsonProperty("sdoAllocateOrReserveJudge")
     private final AllocateOrReserveJudgeEnum sdoAllocateOrReserveJudge;
     @JsonProperty("sdoAllocateOrReserveJudgeName")
