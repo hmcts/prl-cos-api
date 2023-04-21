@@ -109,12 +109,15 @@ public class CaseEventHandler {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(respondent);
             if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
                 Element<PartyDetails> respondingParty = caseData.getRespondents().get(solicitorRole.get().getIndex());
-
+                log.info("Generating task list for " + respondent + " and the index is " + solicitorRole.get().getIndex());
+                log.info("finding represented: " + respondingParty.getValue().getUser().getSolicitorRepresented());
+                log.info("finding C7 submitted: " + respondingParty.getValue().getResponse().getC7ResponseSubmitted());
                 if (respondingParty.getValue() != null
-                    && (respondingParty.getValue().getResponse() == null
-                    || !YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted()))
                     && respondingParty.getValue().getUser() != null
-                    && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
+                    && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())
+                    && respondingParty.getValue().getResponse() != null
+                    && !YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted())) {
+                    log.info("If logic completed");
                     final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
                     log.info("tasks found: " + tasks.size());
 
@@ -132,7 +135,14 @@ public class CaseEventHandler {
                     final boolean hasSubmitted = respondingParty.getValue().getResponse() != null
                         && YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted());
                     return respondentSolicitorTaskListRenderer
-                        .render(tasks, eventErrors, respondent, representedRespondentName, hasSubmitted, caseData.getId());
+                        .render(
+                            tasks,
+                            eventErrors,
+                            respondent,
+                            representedRespondentName,
+                            hasSubmitted,
+                            caseData.getId()
+                        );
                 }
             }
         }
