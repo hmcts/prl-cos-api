@@ -50,10 +50,15 @@ public class CaseEventHandler {
         final CaseData caseData = event.getCaseData();
 
         final String taskList = getUpdatedTaskList(caseData);
+        log.info("Generating task list for Respondent A");
         final String respondentTaskListA = getRespondentTaskList(caseData, "A");
+        log.info("Generating task list for Respondent B");
         final String respondentTaskListB = getRespondentTaskList(caseData, "B");
+        log.info("Generating task list for Respondent C");
         final String respondentTaskListC = getRespondentTaskList(caseData, "C");
+        log.info("Generating task list for Respondent D");
         final String respondentTaskListD = getRespondentTaskList(caseData, "D");
+        log.info("Generating task list for Respondent E");
         final String respondentTaskListE = getRespondentTaskList(caseData, "E");
 
         coreCaseDataService.triggerEvent(
@@ -104,6 +109,7 @@ public class CaseEventHandler {
 
     public String getRespondentTaskList(CaseData caseData, String respondent) {
         String respondentTaskList = "";
+        log.info("Generating task list for " + respondent);
         if (caseData.getRespondents() != null
             && !caseData.getRespondents().isEmpty()) {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(respondent);
