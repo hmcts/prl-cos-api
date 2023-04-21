@@ -373,6 +373,8 @@ public class DraftAnOrderService {
         caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        caseDataMap.put("isOrderCreatedBySolicitor", (null != selectedOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No);
+        caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
         return caseDataMap;
     }
 
@@ -403,6 +405,8 @@ public class DraftAnOrderService {
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
         caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
+        caseDataMap.put("isOrderCreatedBySolicitor", (null != selectedOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No);
+        caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
         return caseDataMap;
     }
 
@@ -551,6 +555,7 @@ public class DraftAnOrderService {
                                            ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
                                            : caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
+            .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .build();
     }
 
@@ -864,7 +869,7 @@ public class DraftAnOrderService {
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
 
         Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder);
-        caseDataMap.put("isOrderCreatedBySolicitor", SOLICITOR.getId().equals(draftOrder.getOrderCreatedBy()) ? Yes : No);
+        caseDataMap.put("isOrderCreatedBySolicitor", (null != draftOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No);
         log.info("is Order created by solicitor in populateCommonDraftOrderFields:::{}:::", caseDataMap.get("isOrderCreatedBySolicitor"));
         return  caseDataMap;
     }
