@@ -79,10 +79,11 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("selectedOrder", caseData.getCreateSelectOrderOptions() != null
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
+        caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
+            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
 
         log.info("C21 Draft order options in callback:: {}", (null != caseData.getManageOrders())
             ? caseData.getManageOrders().getC21OrderOptions() : null);
@@ -97,17 +98,11 @@ public class DraftAnOrderController {
         caseDataUpdated.put("childOption",DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
 
-        if (caseDataUpdated.get("selectedOrder") == "Standard directions order") {
+        if (caseDataUpdated.get("selectedOrder") == "Standard directions order"
+            || caseDataUpdated.get("selectedOrder") == "Direction on issue") {
             List<String> errorList = new ArrayList<>();
             errorList.add(
-                "Solicitors cannot draft a Standard Directions order");
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errorList)
-                .build();
-        } else if (caseDataUpdated.get("selectedOrder") == "Direction on issue") {
-            List<String> errorList = new ArrayList<>();
-            errorList.add(
-                "Solicitors cannot draft a Direction On Issue order");
+                "This order is not available to be drafted");
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
@@ -130,15 +125,26 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        ManageOrders manageOrders = caseData.getManageOrders();
+        if (null != manageOrders) {
+            manageOrders = manageOrders.toBuilder()
+                .childOption(caseData.getManageOrders().getChildOption())
+                .build();
+        }
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+
+        log.info("ChildOption Data in populateFl404Fields {} start ", caseDataUpdated.get("childOption"));
 
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         } else {
+            log.info("Before generate document manageorder {}", caseData.getManageOrders());
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
+            log.info("Before generate document casedata {}", caseData.getManageOrders());
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
@@ -153,6 +159,9 @@ public class DraftAnOrderController {
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         }
+
+        log.info("childrenListForDocmosis Data in populateFl404Fields {} end ", caseDataUpdated.get("childrenListForDocmosis"));
+        log.info("CaseDataUpdatedMap in populateFl404Fields {}  ", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
