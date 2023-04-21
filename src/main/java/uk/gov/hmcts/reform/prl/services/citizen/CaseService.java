@@ -120,7 +120,7 @@ public class CaseService {
                         applicants.set(applicants.indexOf(applicantElement), element(applicantElement.getId(), partyDetails));
                     }
                 });
-            } else if(partyType.equals(PartyEnum.respondent)) {
+            } else if (partyType.equals(PartyEnum.respondent)) {
                 List<Element<PartyDetails>> respondents = caseData.getRespondents();
                 caseData.getRespondents().stream().forEach(respondentElement -> {
                     if (partyDetails.getUser().getIdamId().equalsIgnoreCase(respondentElement.getValue().getUser().getIdamId())) {
