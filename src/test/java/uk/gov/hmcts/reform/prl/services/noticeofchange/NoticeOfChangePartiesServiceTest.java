@@ -112,7 +112,7 @@ public class NoticeOfChangePartiesServiceTest {
             .respondents(respondentList)
             .build();
 
-        role = SolicitorRole.SOLICITORCARA;
+        role = SolicitorRole.C100RESPONDENTSOLICITOR1;
 
         daParty = PartyDetails.builder().build();
     }
@@ -130,7 +130,7 @@ public class NoticeOfChangePartiesServiceTest {
 
         Map<String, Object> test = noticeOfChangePartiesService.generate(caseData, role.getRepresenting());
 
-        assertTrue(test.containsKey("caRespondent0Policy"));
+        assertTrue(test.containsKey("caRespondent1Policy"));
 
     }
 
@@ -143,7 +143,7 @@ public class NoticeOfChangePartiesServiceTest {
 
         Map<String, Object> test = noticeOfChangePartiesService.generate(caseData, role.getRepresenting(), strategy);
 
-        assertTrue(test.containsKey("caRespondent0Policy"));
+        assertTrue(test.containsKey("caRespondent1Policy"));
 
     }
 
@@ -159,7 +159,7 @@ public class NoticeOfChangePartiesServiceTest {
     @Ignore
     public void testNocRequestSubmitted() {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
-            .code("[SOLICITORA]")
+            .code("[C100RESPONDENTSOLICITOR1]")
             .label("Respondent solicitor A")
             .build();
 

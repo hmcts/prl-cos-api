@@ -215,7 +215,7 @@ public class C100RespondentSolicitorServiceTest {
         List<CaseUser> caseUserList  = new ArrayList<>();
         caseUserList.add(CaseUser.builder()
                              .caseId("12345")
-                             .caseRole("[SOLICITORA]")
+                             .caseRole("[C100RESPONDENTSOLICITOR1]")
                              .userId("1afdfa01-8280-4e2c-b810-ab7cf741988a").build());
 
         Address address = Address.builder()

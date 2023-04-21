@@ -406,7 +406,6 @@ public class CaseEventHandlerTest {
         final String c100renderedTaskList = "<h1>Case Name</h1><h2>Miam</h2>";
 
         final String respondentTaskListA = "<h3>Respond to the application for Respondent A";
-        final String respondentTaskListB = "<h3>Respond to the application for Respondent B";
 
         List<RespondentEventValidationErrors> resErrors = new ArrayList<>();
 

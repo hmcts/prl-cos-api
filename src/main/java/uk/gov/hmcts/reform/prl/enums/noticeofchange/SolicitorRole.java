@@ -15,23 +15,27 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Getter
 public enum SolicitorRole {
-    SOLICITORCAAA("[SOLICITORA]", 0, Representing.CAAPPLICANT, "A"),
-    SOLICITORCAAB("[SOLICITORB]", 1, Representing.CAAPPLICANT, "B"),
-    SOLICITORCAAC("[SOLICITORC]", 2, Representing.CAAPPLICANT, "C"),
-    SOLICITORCAAD("[SOLICITORD]", 3, Representing.CAAPPLICANT, "D"),
-    SOLICITORCAAE("[SOLICITORE]", 4, Representing.CAAPPLICANT, "E"),
-    SOLICITORCARA("[SOLICITORA]", 0, Representing.CARESPONDENT, "A"),
-    SOLICITORCARB("[SOLICITORB]", 1, Representing.CARESPONDENT, "B"),
-    SOLICITORCARC("[SOLICITORC]", 2, Representing.CARESPONDENT, "C"),
-    SOLICITORCARD("[SOLICITORD]", 3, Representing.CARESPONDENT, "D"),
-    SOLICITORCARE("[SOLICITORE]", 4, Representing.CARESPONDENT, "E"),
-    SOLICITORDAAA("[SOLICITORA]", 0, Representing.DAAPPLICANT, "A"),
-    SOLICITORDARB("[SOLICITORB]", 1, Representing.DARESPONDENT, "B");
+    C100APPLICANTSOLICITOR1("[C100APPLICANTSOLICITOR1]", 1, Representing.CAAPPLICANT, ""),
+    C100APPLICANTSOLICITOR2("[C100APPLICANTSOLICITOR2]", 2, Representing.CAAPPLICANT, ""),
+    C100APPLICANTSOLICITOR3("[C100APPLICANTSOLICITOR3]", 3, Representing.CAAPPLICANT, ""),
+    C100APPLICANTSOLICITOR4("[C100APPLICANTSOLICITOR4]", 4, Representing.CAAPPLICANT, ""),
+    C100APPLICANTSOLICITOR5("[C100APPLICANTSOLICITOR5]", 5, Representing.CAAPPLICANT, ""),
+    C100RESPONDENTSOLICITOR1("[C100RESPONDENTSOLICITOR1]", 1, Representing.CARESPONDENT, "A"),
+    C100RESPONDENTSOLICITOR2("[C100RESPONDENTSOLICITOR2]", 2, Representing.CARESPONDENT, "B"),
+    C100RESPONDENTSOLICITOR3("[C100RESPONDENTSOLICITOR3]", 3, Representing.CARESPONDENT, "C"),
+    C100RESPONDENTSOLICITOR4("[C100RESPONDENTSOLICITOR4]", 4, Representing.CARESPONDENT, "D"),
+    C100RESPONDENTSOLICITOR5("[C100RESPONDENTSOLICITOR5]", 5, Representing.CARESPONDENT, "E"),
+    FL401APPLICANTSOLICITOR("[FL401APPLICANTSOLICITOR]", 1, Representing.DAAPPLICANT, ""),
+    FL401RESPONDENTSOLICITOR("[FL401RESPONDENTSOLICITOR]", 1, Representing.DARESPONDENT, "");
 
     private final String caseRoleLabel;
     private final int index;
     private final Representing representing;
     private final String eventId;
+
+    public int getIndex() {
+        return index - 1;
+    }
 
     public static Optional<SolicitorRole> from(String eventId) {
         return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
