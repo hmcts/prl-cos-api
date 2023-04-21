@@ -97,7 +97,7 @@ public class NoticeOfChangePartiesService {
                 OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
                     solicitorRole, solicitorContainer
                 );
-                data.put(String.format(representing.getPolicyFieldTemplate(), i), organisationPolicy);
+                data.put(String.format(representing.getPolicyFieldTemplate(), (i + 1)), organisationPolicy);
 
                 Optional<NoticeOfChangeParties> possibleAnswer = populateCaAnswer(
                     strategy, solicitorContainer
@@ -105,7 +105,7 @@ public class NoticeOfChangePartiesService {
                 log.info("*** NoC testing possibleAnswer is set " + possibleAnswer);
                 if (possibleAnswer.isPresent()) {
                     log.info("*** NoC testing possibleAnswer is set " + possibleAnswer.get());
-                    data.put(String.format(representing.getNocAnswersTemplate(), i), possibleAnswer.get());
+                    data.put(String.format(representing.getNocAnswersTemplate(), (i + 1)), possibleAnswer.get());
                 }
                 log.info("*** NoC testing finishing the process ");
             }
@@ -343,7 +343,7 @@ public class NoticeOfChangePartiesService {
             if (CAAPPLICANT.equals(solicitorRole.getRepresenting()) || CARESPONDENT.equals(solicitorRole.getRepresenting())) {
                 OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
                     solicitorRole, Optional.empty());
-                data.put(String.format(solicitorRole.getRepresenting().getPolicyFieldTemplate(), solicitorRole.getIndex()), organisationPolicy);
+                data.put(String.format(solicitorRole.getRepresenting().getPolicyFieldTemplate(), (solicitorRole.getIndex() + 1)), organisationPolicy);
             } else if (DAAPPLICANT.equals(solicitorRole.getRepresenting()) || DARESPONDENT.equals(solicitorRole.getRepresenting())) {
                 OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
                     solicitorRole, PartyDetails.builder().build());
