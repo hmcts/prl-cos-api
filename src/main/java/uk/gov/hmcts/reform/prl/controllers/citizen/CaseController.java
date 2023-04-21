@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
@@ -109,24 +110,24 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody PartyDetails partyDetails,
         @PathVariable("caseId") String caseId,
-        @RequestBody boolean isApplicant,
+        @RequestBody PartyEnum partyType,
         @RequestBody String caseType
     ) throws JsonProcessingException {
+        log.info("At Case Controller for case-update / caseUpdate  / event Id is {}", eventId);
+        log.info("At Case Controller for case-update / caseUpdate  / auth string is {}", authorisation);
+        log.info("At Case Controller for case-update / caseUpdate  / s2s token is  {}", s2sToken);
+        log.info("At Case Controller for case-update / caseUpdate  / party details are {}", partyDetails);
+        log.info("At Case Controller for case-update / caseUpdate  / case Id is  {}", caseId);
+        log.info("At Case Controller for case-update / caseUpdate  / user type is  {}", partyType);
+        log.info("At Case Controller for case-update / caseUpdate  / case type is  {}", caseType);
         if (isAuthorized(authorisation, s2sToken)) {
-            log.info("At Case Controller for case-update / caseUpdate  / event Id is {}", eventId);
-            log.info("At Case Controller for case-update / caseUpdate  / auth string is {}", authorisation);
-            log.info("At Case Controller for case-update / caseUpdate  / s2s token is  {}", s2sToken);
-            log.info("At Case Controller for case-update / caseUpdate  / party details are {}", partyDetails);
-            log.info("At Case Controller for case-update / caseUpdate  / case Id is  {}", caseId);
-            log.info("At Case Controller for case-update / caseUpdate  / user type is  {}", isApplicant);
-            log.info("At Case Controller for case-update / caseUpdate  / case type is  {}", caseType);
             CaseDetails caseDetails = null;
             caseDetails = caseService.updateCaseDetails(
                 authorisation,
                 partyDetails,
                 caseId,
                 eventId,
-                isApplicant,
+                partyType,
                 caseType
             );
             return CaseUtils.getCaseData(caseDetails, objectMapper);

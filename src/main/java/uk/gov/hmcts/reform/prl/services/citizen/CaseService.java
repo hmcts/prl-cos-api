@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -101,7 +102,7 @@ public class CaseService {
     }
 
     public CaseDetails updateCaseDetails(String authToken, PartyDetails partyDetails,
-                                    String caseId, String eventId, boolean isApplicant, String caseType) throws JsonProcessingException {
+                                         String caseId, String eventId, PartyEnum partyType, String caseType) throws JsonProcessingException {
 
         CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
         CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
@@ -109,17 +110,17 @@ public class CaseService {
         log.info("At updateCaseDetails  / auth Token is {}", authToken);
         log.info("At updateCaseDetails  / party details are {}", partyDetails);
         log.info("At updateCaseDetails  / case Id is  {}", caseId);
-        log.info("At updateCaseDetails  / user type is  {}", isApplicant);
+        log.info("At updateCaseDetails  / user type is  {}", partyType);
         log.info("At updateCaseDetails  / case type is  {}", caseType);
         if (caseType.equalsIgnoreCase(C100_CASE_TYPE)) {
-            if (isApplicant) {
+            if (partyType.equals(PartyEnum.applicant)) {
                 List<Element<PartyDetails>> applicants = caseData.getApplicants();
                 caseData.getApplicants().stream().forEach(applicantElement -> {
                     if (partyDetails.getUser().getIdamId().equalsIgnoreCase(applicantElement.getValue().getUser().getIdamId())) {
                         applicants.set(applicants.indexOf(applicantElement), element(applicantElement.getId(), partyDetails));
                     }
                 });
-            } else {
+            } else if(partyType.equals(PartyEnum.respondent)) {
                 List<Element<PartyDetails>> respondents = caseData.getRespondents();
                 caseData.getRespondents().stream().forEach(respondentElement -> {
                     if (partyDetails.getUser().getIdamId().equalsIgnoreCase(respondentElement.getValue().getUser().getIdamId())) {
@@ -128,6 +129,7 @@ public class CaseService {
                 });
             }
         }
+
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
