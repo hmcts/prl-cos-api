@@ -378,6 +378,8 @@ public class DraftAnOrderService {
         caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
         caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
         caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        log.info("caseDataMap ===> " + caseDataMap);
+        caseDataMap.put("orderType", selectedOrder.getOrderType());
         return caseDataMap;
     }
 
