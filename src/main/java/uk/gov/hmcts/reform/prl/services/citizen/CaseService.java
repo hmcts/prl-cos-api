@@ -105,6 +105,12 @@ public class CaseService {
 
         CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
         CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
+        log.info("At updateCaseDetails  / event Id is {}", eventId);
+        log.info("At updateCaseDetails  / auth Token is {}", authToken);
+        log.info("At updateCaseDetails  / party details are {}", partyDetails);
+        log.info("At updateCaseDetails  / case Id is  {}", caseId);
+        log.info("At updateCaseDetails  / user type is  {}", isApplicant);
+        log.info("At updateCaseDetails  / case type is  {}", caseType);
         if (caseType.equalsIgnoreCase(C100_CASE_TYPE)) {
             if (isApplicant) {
                 List<Element<PartyDetails>> applicants = caseData.getApplicants();
