@@ -129,6 +129,9 @@ public class DraftOrder {
     private final DynamicMultiSelectList childOption;
     private final C21OrderOptionsEnum c21OrderOptions;
 
+    @JsonProperty("hasJudgeProvidedHearingDetails")
+    private YesOrNo hasJudgeProvidedHearingDetails;
+
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
         log.info("orderTypeId {},orderTypeId {}", this.orderType, this.orderTypeId);

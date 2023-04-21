@@ -460,6 +460,7 @@ public class DraftAnOrderService {
                                   draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
                               ))
                               .build())
+            .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .build();
     }
 
@@ -551,6 +552,7 @@ public class DraftAnOrderService {
                                            ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
                                            : caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
+            .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .build();
     }
 
@@ -864,7 +866,7 @@ public class DraftAnOrderService {
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
 
         Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder);
-        caseDataMap.put("isOrderCreatedBySolicitor", SOLICITOR.getId().equals(draftOrder.getOrderCreatedBy()) ? Yes : No);
+        caseDataMap.put("isOrderCreatedBySolicitor", (null != draftOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No);
         log.info("is Order created by solicitor in populateCommonDraftOrderFields:::{}:::", caseDataMap.get("isOrderCreatedBySolicitor"));
         return  caseDataMap;
     }
