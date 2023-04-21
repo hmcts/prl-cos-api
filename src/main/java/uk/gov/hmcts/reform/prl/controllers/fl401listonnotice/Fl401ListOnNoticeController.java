@@ -86,7 +86,7 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
                 hearingDataService.getHearingData(existingFl401ListOnNoticeHearingDetails,hearingDataPrePopulatedDynamicLists,caseData));
         } else {
             caseDataUpdated.put(
-                "existingFl401ListOnNoticeHearingDetails",
+                "fl401ListOnNoticeHearingDetails",
                 ElementUtils.wrapElements(hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists,caseData)));
 
         }
