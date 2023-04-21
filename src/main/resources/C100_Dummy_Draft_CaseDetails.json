@@ -4842,7 +4842,7 @@
       }
     ],
     "caseNameHmctsInternal": "John Doe Vs Mary Richards",
-    "caRespondent2": {
+    "caRespondent3": {
       "lastName": "Carman",
       "firstName": "David"
     },
@@ -4850,11 +4850,11 @@
     "finalDocument": null,
     "welshLanguageRequirementApplicationNeedEnglish": null,
     "ordersUndertakingInPlaceDocument": null,
-    "caRespondent0": {
+    "caRespondent1": {
       "lastName": "Richards",
       "firstName": "Mary"
     },
-    "caRespondent1": {
+    "caRespondent2": {
       "lastName": "Lynn",
       "firstName": "Elise"
     },

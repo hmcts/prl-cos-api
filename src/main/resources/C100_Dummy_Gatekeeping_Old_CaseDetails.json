@@ -5215,17 +5215,17 @@
       }
     ],
     "caseNameHmctsInternal": "John Doe Vs Mary Richards",
-    "caRespondent2": {
+    "caRespondent3": {
       "lastName": "Carman",
       "firstName": "David"
     },
     "ordersUndertakingInPlaceCurrent": null,
     "ordersUndertakingInPlaceDocument": null,
-    "caRespondent0": {
+    "caRespondent1": {
       "lastName": "Richards",
       "firstName": "Mary"
     },
-    "caRespondent1": {
+    "caRespondent2": {
       "lastName": "Lynn",
       "firstName": "Elise"
     },
