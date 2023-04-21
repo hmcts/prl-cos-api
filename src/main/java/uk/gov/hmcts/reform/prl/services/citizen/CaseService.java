@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -101,32 +102,39 @@ public class CaseService {
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
-    public CaseDetails updateCaseDetails(String authToken, PartyDetails partyDetails,
-                                         String caseId, String eventId, PartyEnum partyType, String caseType) throws JsonProcessingException {
+    public CaseDetails updateCaseDetails(String authToken,
+                                         String caseId, String eventId, UpdateCaseData updateCaseData) throws JsonProcessingException {
 
         CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
-        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("At updateCaseDetails  / event Id is {}", eventId);
         log.info("At updateCaseDetails  / auth Token is {}", authToken);
-        log.info("At updateCaseDetails  / party details are {}", partyDetails);
         log.info("At updateCaseDetails  / case Id is  {}", caseId);
-        log.info("At updateCaseDetails  / user type is  {}", partyType);
-        log.info("At updateCaseDetails  / case type is  {}", caseType);
-        if (caseType.equalsIgnoreCase(C100_CASE_TYPE)) {
-            if (partyType.equals(PartyEnum.applicant)) {
+        PartyDetails partyDetails = updateCaseData.getPartyDetails();
+        PartyEnum partyType = updateCaseData.getPartyType();
+        if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
+            if (PartyEnum.applicant.equals(partyType)) {
                 List<Element<PartyDetails>> applicants = caseData.getApplicants();
-                caseData.getApplicants().stream().forEach(applicantElement -> {
-                    if (partyDetails.getUser().getIdamId().equalsIgnoreCase(applicantElement.getValue().getUser().getIdamId())) {
-                        applicants.set(applicants.indexOf(applicantElement), element(applicantElement.getId(), partyDetails));
+                for (int index = 0; index < applicants.size(); index++) {
+                    if (partyDetails.getUser().getIdamId().equalsIgnoreCase(applicants.get(index).getValue().getUser().getIdamId())) {
+                        caseData.getApplicants().set(index, element(applicants.get(index).getId(), partyDetails));
+                        break;
                     }
-                });
-            } else if (partyType.equals(PartyEnum.respondent)) {
+                }
+            } else if (PartyEnum.respondent.equals(partyType)) {
                 List<Element<PartyDetails>> respondents = caseData.getRespondents();
-                caseData.getRespondents().stream().forEach(respondentElement -> {
-                    if (partyDetails.getUser().getIdamId().equalsIgnoreCase(respondentElement.getValue().getUser().getIdamId())) {
-                        respondents.set(respondents.indexOf(respondentElement), element(respondentElement.getId(), partyDetails));
+                for (int index = 0; index < respondents.size(); index++) {
+                    if (partyDetails.getUser().getIdamId().equalsIgnoreCase(respondents.get(index).getValue().getUser().getIdamId())) {
+                        caseData.getRespondents().set(index, element(respondents.get(index).getId(), partyDetails));
+                        break;
                     }
-                });
+                }
+            }
+        } else {
+            if (PartyEnum.applicant.equals(partyType)) {
+                caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
+            } else {
+                caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
             }
         }
 
