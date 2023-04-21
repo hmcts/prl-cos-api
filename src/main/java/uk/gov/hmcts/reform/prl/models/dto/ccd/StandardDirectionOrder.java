@@ -206,11 +206,11 @@ public class StandardDirectionOrder {
     @JsonProperty("sdoPositionStatementOtherCheckDetails")
     private final List<OtherDirectionPositionStatementEnum> sdoPositionStatementOtherCheckDetails;
     @JsonProperty("sdoPositionStatementOtherDetails")
-    private final List<SdoDioProvideOtherDetails> sdoPositionStatementOtherDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoPositionStatementOtherDetails;
     @JsonProperty("sdoMiamOtherCheckDetails")
     private final List<MiamOtherDirectionEnum> sdoMiamOtherCheckDetails;
     @JsonProperty("sdoMiamOtherDetails")
-    private final List<SdoDioProvideOtherDetails> sdoMiamOtherDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoMiamOtherDetails;
     @JsonProperty("sdoDraHearingDetails")
     private final HearingData sdoDraHearingDetails;
     @JsonProperty("sdoSettlementHearingDetails")
@@ -218,31 +218,31 @@ public class StandardDirectionOrder {
     @JsonProperty("sdoFactFindingOtherCheck")
     private final List<FactFindingOtherDirectionEnum> sdoFactFindingOtherCheck;
     @JsonProperty("sdoFactFindingOtherDetails")
-    private final List<SdoDioProvideOtherDetails> sdoFactFindingOtherDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoFactFindingOtherDetails;
     @JsonProperty("sdoInterpreterOtherDetailsCheck")
     private final List<DioOtherDirectionEnum> sdoInterpreterOtherDetailsCheck;
     @JsonProperty("sdoInterpreterOtherDetails")
-    private final List<SdoDioProvideOtherDetails> sdoInterpreterOtherDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoInterpreterOtherDetails;
     @JsonProperty("sdoCafcassFileAndServeCheck")
     private final List<SdoCafcassFileAndServeCheckEnum> sdoCafcassFileAndServeCheck;
     @JsonProperty("sdoCafcassFileAndServeDetails")
-    private final List<SdoDioProvideOtherDetails> sdoCafcassFileAndServeDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoCafcassFileAndServeDetails;
     @JsonProperty("safeguardingCafcassCymruCheck")
     private final List<SdoSafeguardingCafcassCymruEnum> safeguardingCafcassCymruCheck;
     @JsonProperty("safeguardingCafcassCymruDetails")
-    private final List<SdoDioProvideOtherDetails> safeguardingCafcassCymruDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> safeguardingCafcassCymruDetails;
     @JsonProperty("sdoPartyToProvideDetailsCheck")
     private final List<SdoPartyToProvideDetailsEnum> sdoPartyToProvideDetailsCheck;
     @JsonProperty("sdoPartyToProvideDetails")
-    private final List<SdoDioProvideOtherDetails> sdoPartyToProvideDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoPartyToProvideDetails;
     @JsonProperty("sdoNewPartnersToCafcassCheck")
     private final List<SdoNewPartnersToCafcassEnum> sdoNewPartnersToCafcassCheck;
     @JsonProperty("sdoNewPartnersToCafcassDetails")
-    private final List<SdoDioProvideOtherDetails> sdoNewPartnersToCafcassDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoNewPartnersToCafcassDetails;
     @JsonProperty("sdoSection7Check")
     private final List<SdoSection7CheckEnum> sdoSection7Check;
     @JsonProperty("sdoSection7CheckDetails")
-    private final List<SdoDioProvideOtherDetails> sdoSection7CheckDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoSection7CheckDetails;
     @JsonProperty("sdoLocalAuthorityCheck")
     private final List<SdoLocalAuthorityCheckEnum> sdoLocalAuthorityCheck;
     @JsonProperty("sdoLocalAuthorityDetails")
@@ -250,48 +250,48 @@ public class StandardDirectionOrder {
     @JsonProperty("sdoTransferCourtDetailsCheck")
     private final List<DioTransferCourtDirectionEnum> sdoTransferCourtDetailsCheck;
     @JsonProperty("sdoTransferCourtDetails")
-    private final List<SdoDioProvideOtherDetails> sdoTransferCourtDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoTransferCourtDetails;
     @JsonProperty("sdoCrossExaminationCourtCheck")
     private final List<SdoCrossExaminationCourtCheckEnum> sdoCrossExaminationCourtCheck;
     @JsonProperty("sdoCrossExaminationCourtDetails")
-    private final List<SdoDioProvideOtherDetails> sdoCrossExaminationCourtDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoCrossExaminationCourtDetails;
     @JsonProperty("sdoWitnessStatementsCheck")
     private final List<SdoWitnessStatementsCheckEnum> sdoWitnessStatementsCheck;
     @JsonProperty("sdoWitnessStatementsCheckDetails")
-    private final List<SdoDioProvideOtherDetails> sdoWitnessStatementsCheckDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoWitnessStatementsCheckDetails;
     @JsonProperty("sdoInstructionsFilingCheck")
     private final List<SdoInstructionsFilingPartiesCheck> sdoInstructionsFilingCheck;
     @JsonProperty("sdoInstructionsFilingDetails")
-    private final List<SdoDioProvideOtherDetails> sdoInstructionsFilingDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoInstructionsFilingDetails;
 
     @JsonProperty("sdoMedicalDiscApplicantName")
-    private final List<SdoNameOfApplicant> sdoMedicalDiscApplicantName;
+    private final List<Element<SdoNameOfApplicant>> sdoMedicalDiscApplicantName;
     @JsonProperty("sdoMedicalDiscRespondentName")
-    private final List<SdoNameOfRespondent> sdoMedicalDiscRespondentName;
+    private final List<Element<SdoNameOfRespondent>> sdoMedicalDiscRespondentName;
     @JsonProperty("sdoMedicalDiscFilingCheck")
     private final List<SdoMedicalDiscCheckEnum> sdoMedicalDiscFilingCheck;
     @JsonProperty("sdoMedicalDiscFilingDetails")
-    private final List<SdoDioProvideOtherDetails> sdoMedicalDiscFilingDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoMedicalDiscFilingDetails;
     @JsonProperty("sdoGpApplicantName")
-    private final List<SdoNameOfApplicant> sdoGpApplicantName;
+    private final List<Element<SdoNameOfApplicant>> sdoGpApplicantName;
     @JsonProperty("sdoGpRespondentName")
-    private final List<SdoNameOfRespondent> sdoGpRespondentName;
+    private final List<Element<SdoNameOfRespondent>> sdoGpRespondentName;
     @JsonProperty("sdoLetterFromDiscGpCheck")
     private final List<SdoLetterFromDiscGpCheckEnum> sdoLetterFromDiscGpCheck;
     @JsonProperty("sdoLetterFromGpDetails")
-    private final List<SdoDioProvideOtherDetails> sdoLetterFromGpDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoLetterFromGpDetails;
     @JsonProperty("sdoLsApplicantName")
-    private final List<SdoNameOfApplicant> sdoLsApplicantName;
+    private final List<Element<SdoNameOfApplicant>> sdoLsApplicantName;
     @JsonProperty("sdoLSRespondentName")
-    private final List<SdoNameOfRespondent> sdoLsRespondentName;
+    private final List<Element<SdoNameOfRespondent>> sdoLsRespondentName;
     @JsonProperty("sdoLetterFromSchoolCheck")
     private final List<SdoLetterFromSchoolCheck> sdoLetterFromSchoolCheck;
     @JsonProperty("sdoLetterFromSchoolDetails")
-    private final List<SdoDioProvideOtherDetails> sdoLetterFromSchoolDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoLetterFromSchoolDetails;
     @JsonProperty("sdoScheduleOfAllegationsCheck")
     private final List<SdoScheduleOfAllegationsCheck> sdoScheduleOfAllegationsCheck;
     @JsonProperty("sdoScheduleOfAllegationsDetails")
-    private final List<SdoDioProvideOtherDetails> sdoScheduleOfAllegationsDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoScheduleOfAllegationsDetails;
     @JsonProperty("sdoDisClosureProceedingCheck")
     private final List<SdoDisClosureProceedingCheck> sdoDisClosureProceedingCheck;
     @JsonProperty("sdoDisClosureProceedingDetails")
