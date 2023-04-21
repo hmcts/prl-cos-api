@@ -143,6 +143,7 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse populateCommonFields(
         @RequestBody CallbackRequest callbackRequest
     ) {
+        log.info("inside judge-or-admin-populate-draft-order-common-fields");
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class

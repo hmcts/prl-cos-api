@@ -403,6 +403,7 @@ public class DraftAnOrderService {
         caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
         caseDataMap.put("reviewRequiredBy", selectedOrder.getOtherDetails().getReviewRequiredBy() != null
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
+        log.info("selectedOrder.getOrderType() ===> " + selectedOrder.getOrderType());
         return caseDataMap;
     }
 
