@@ -261,4 +261,7 @@ public class ManageOrders {
     private final List<Element<HearingData>> solicitorOrdersHearingDetails;
 
     private YesOrNo isOrderCreatedBySolicitor;
+
+    @JsonProperty("hasJudgeProvidedHearingDetails")
+    private YesOrNo hasJudgeProvidedHearingDetails;
 }
