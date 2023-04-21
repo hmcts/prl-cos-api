@@ -12,26 +12,32 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
+
 @RequiredArgsConstructor
 @Getter
 public enum SolicitorRole {
-    SOLICITORCAAA("[SOLICITORA]", 0, Representing.CAAPPLICANT, "A"),
-    SOLICITORCAAB("[SOLICITORB]", 1, Representing.CAAPPLICANT, "B"),
-    SOLICITORCAAC("[SOLICITORC]", 2, Representing.CAAPPLICANT, "C"),
-    SOLICITORCAAD("[SOLICITORD]", 3, Representing.CAAPPLICANT, "D"),
-    SOLICITORCAAE("[SOLICITORE]", 4, Representing.CAAPPLICANT, "E"),
-    SOLICITORCARA("[SOLICITORA]", 0, Representing.CARESPONDENT, "A"),
-    SOLICITORCARB("[SOLICITORB]", 1, Representing.CARESPONDENT, "B"),
-    SOLICITORCARC("[SOLICITORC]", 2, Representing.CARESPONDENT, "C"),
-    SOLICITORCARD("[SOLICITORD]", 3, Representing.CARESPONDENT, "D"),
-    SOLICITORCARE("[SOLICITORE]", 4, Representing.CARESPONDENT, "E"),
-    SOLICITORDAAA("[SOLICITORA]", 0, Representing.DAAPPLICANT, "A"),
-    SOLICITORDARB("[SOLICITORB]", 1, Representing.DARESPONDENT, "B");
+    C100APPLICANTSOLICITOR1("[C100APPLICANTSOLICITOR1]", 1, Representing.CAAPPLICANT, BLANK_STRING),
+    C100APPLICANTSOLICITOR2("[C100APPLICANTSOLICITOR2]", 2, Representing.CAAPPLICANT, BLANK_STRING),
+    C100APPLICANTSOLICITOR3("[C100APPLICANTSOLICITOR3]", 3, Representing.CAAPPLICANT, BLANK_STRING),
+    C100APPLICANTSOLICITOR4("[C100APPLICANTSOLICITOR4]", 4, Representing.CAAPPLICANT, BLANK_STRING),
+    C100APPLICANTSOLICITOR5("[C100APPLICANTSOLICITOR5]", 5, Representing.CAAPPLICANT, BLANK_STRING),
+    C100RESPONDENTSOLICITOR1("[C100RESPONDENTSOLICITOR1]", 1, Representing.CARESPONDENT, "A"),
+    C100RESPONDENTSOLICITOR2("[C100RESPONDENTSOLICITOR2]", 2, Representing.CARESPONDENT, "B"),
+    C100RESPONDENTSOLICITOR3("[C100RESPONDENTSOLICITOR3]", 3, Representing.CARESPONDENT, "C"),
+    C100RESPONDENTSOLICITOR4("[C100RESPONDENTSOLICITOR4]", 4, Representing.CARESPONDENT, "D"),
+    C100RESPONDENTSOLICITOR5("[C100RESPONDENTSOLICITOR5]", 5, Representing.CARESPONDENT, "E"),
+    FL401APPLICANTSOLICITOR("[FL401APPLICANTSOLICITOR]", 1, Representing.DAAPPLICANT, BLANK_STRING),
+    FL401RESPONDENTSOLICITOR("[FL401RESPONDENTSOLICITOR]", 1, Representing.DARESPONDENT, BLANK_STRING);
 
     private final String caseRoleLabel;
     private final int index;
     private final Representing representing;
     private final String eventId;
+
+    public int getIndex() {
+        return index - 1;
+    }
 
     public static Optional<SolicitorRole> from(String eventId) {
         return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
@@ -61,30 +67,30 @@ public enum SolicitorRole {
         CAAPPLICANT(
             CaseData::getApplicants,
             CaseData::getApplicantsFL401,
-            "caApplicant%dPolicy",
-            "caApplicant%d",
-            "caApplicants"
+            Constants.CA_APPLICANT_POLICY,
+            Constants.CA_APPLICANT,
+            Constants.CA_APPLICANTS
         ),
         CARESPONDENT(
             CaseData::getRespondents,
             CaseData::getRespondentsFL401,
-            "caRespondent%dPolicy",
-            "caRespondent%d",
-            "caRespondents"
+            Constants.CA_RESPONDENT_POLICY,
+            Constants.CA_RESPONDENT,
+            Constants.CA_RESPONDENTS
         ),
         DAAPPLICANT(
             CaseData::getApplicants,
             CaseData::getApplicantsFL401,
-            "daApplicantPolicy",
-            "daApplicant",
-            "daApplicants"
+            Constants.DA_APPLICANT_POLICY,
+            Constants.DA_APPLICANT,
+            Constants.DA_APPLICANTS
         ),
         DARESPONDENT(
             CaseData::getRespondents,
             CaseData::getRespondentsFL401,
-            "daRespondentPolicy",
-            "daRespondent",
-            "daRespondents"
+            Constants.DA_RESPONDENT_POLICY,
+            Constants.DA_RESPONDENT,
+            Constants.DA_RESPONDENTS
         );
 
         private final Function<CaseData, List<Element<PartyDetails>>> caTarget;
@@ -121,6 +127,21 @@ public enum SolicitorRole {
 
         public String getCaseField() {
             return caseField;
+        }
+
+        private static class Constants {
+            public static final String CA_APPLICANT_POLICY = "caApplicant%dPolicy";
+            public static final String CA_APPLICANT = "caApplicant%d";
+            public static final String CA_APPLICANTS = "caApplicants";
+            public static final String CA_RESPONDENT_POLICY = "caRespondent%dPolicy";
+            public static final String CA_RESPONDENT = "caRespondent%d";
+            public static final String CA_RESPONDENTS = "caRespondents";
+            public static final String DA_APPLICANT_POLICY = "daApplicantPolicy";
+            public static final String DA_APPLICANT = "daApplicant";
+            public static final String DA_APPLICANTS = "daApplicants";
+            public static final String DA_RESPONDENT_POLICY = "daRespondentPolicy";
+            public static final String DA_RESPONDENT = "daRespondent";
+            public static final String DA_RESPONDENTS = "daRespondents";
         }
     }
 }

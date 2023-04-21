@@ -1700,7 +1700,7 @@
         "OrganisationID": "QO4A1Q8",
         "OrganisationName": "FPRL-test-organisation"
       },
-      "OrgPolicyCaseAssignedRole": "[SOLICITORA]",
+      "OrgPolicyCaseAssignedRole": "[FL401APPLICANTSOLICITOR]",
       "OrgPolicyReference": null
     },
     "daRespondent": {
@@ -1710,7 +1710,7 @@
     "daRespondentPolicy": {
       "Organisation": {
       },
-      "OrgPolicyCaseAssignedRole": "[SOLICITORB]",
+      "OrgPolicyCaseAssignedRole": "[FL401RESPODENTSOLICITOR]",
       "OrgPolicyReference": null
     }
   },

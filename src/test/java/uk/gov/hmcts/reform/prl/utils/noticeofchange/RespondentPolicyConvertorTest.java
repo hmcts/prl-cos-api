@@ -23,7 +23,7 @@ public class RespondentPolicyConvertorTest {
     @Test
     public void generatePolicyTest() {
 
-        SolicitorRole solicitorRole = SolicitorRole.SOLICITORCARA;
+        SolicitorRole solicitorRole = SolicitorRole.C100RESPONDENTSOLICITOR1;
 
         Organisation organisation = Organisation.builder().build();
 
@@ -38,6 +38,6 @@ public class RespondentPolicyConvertorTest {
         OrganisationPolicy organisationPolicy = respondentPolicyConverter
             .caGenerate(solicitorRole, optionalRespondentElement);
 
-        assertEquals("[SOLICITORA]", organisationPolicy.getOrgPolicyCaseAssignedRole());
+        assertEquals("[C100RESPONDENTSOLICITOR1]", organisationPolicy.getOrgPolicyCaseAssignedRole());
     }
 }
