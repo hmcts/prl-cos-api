@@ -371,6 +371,7 @@ public class CaseEventHandlerTest {
                                     .firstName("test")
                                     .lastName("test")
                                     .email("test@hmcts.net")
+                                    .response(Response.builder().build())
                                     .build()));
 
         final CaseData caseData = CaseData.builder()
@@ -421,7 +422,8 @@ public class CaseEventHandlerTest {
         caseEventHandler.getRespondentTaskList(caseData, "A");
 
         verify(respondentSolicitorTaskListRenderer).render(Mockito.anyList(), Mockito.anyList(), Mockito.anyString(),
-                                                           Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong());
+                                                           Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong()
+        );
 
     }
 }
