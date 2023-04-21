@@ -464,7 +464,6 @@ public class DraftAnOrderService {
                                   draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
                               ))
                               .build())
-            .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .build();
     }
 
