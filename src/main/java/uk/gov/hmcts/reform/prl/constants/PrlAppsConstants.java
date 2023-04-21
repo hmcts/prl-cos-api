@@ -209,8 +209,11 @@ public class PrlAppsConstants {
     public static final String UPDATE_CONTACT_DETAILS = "The parties must, if their contact details have changed or missing from "
         + "the applications, contact Cafcass or Cafcass Cymru quoting the case "
         + "number at [CafcassCymruCAT@gov.wales/ privatelawapplications@cafcass.gov.uk]"
+        + System.lineSeparator() + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "The email must include telephone contact details and email address so that they "
         + "may be contacted for safeguarding purposes."
+        + System.lineSeparator() + System.lineSeparator()
         + System.lineSeparator() + System.lineSeparator()
         + "Alternatively if any party is managing their case using the online dashboard, "
         + "they can update their contact details on the and donot have to also contact "
@@ -236,7 +239,7 @@ public class PrlAppsConstants {
         + "that it is neccessary to appoint such a qualified legal representative(s) to conduct "
         + "the cross examination."
         + System.lineSeparator() + System.lineSeparator()
-        + "1. The court is to appoint a qualified leagal representaive on behalf of [name/s] "
+        + "The court is to appoint a qualified leagal representaive on behalf of [name/s] "
         + "for the hearing listed on [date] at [time] at [name of court].";
     public static final String SPECIFIED_DOCUMENTS = "No document other than a document specified in an order or filled in accordance "
         + "with the Rules or any Practice Direction shall be filled without the court's permission.";
@@ -350,7 +353,6 @@ public class PrlAppsConstants {
         + " for ((hours of hearing)) before ((tier of judge)) for the court to consider:"
         + System.lineSeparator()
         + System.lineSeparator()
-        + System.lineSeparator()
         + "a) whether the application should be dismissed"
         + System.lineSeparator()
         + "b) if the application is not dismissed, any further directions "
@@ -363,14 +365,16 @@ public class PrlAppsConstants {
         + "cross-examination is conducted in person, or if the conduct of cross-examination in person would cause "
         + "significant distress to a party, and it would not be contrary to the interests of justice to make the direction."
         + System.lineSeparator()
+        + System.lineSeparator()
         + "It is ordered that:"
+        + System.lineSeparator()
         + System.lineSeparator()
         + "a. The applicant and respondent (delete as appropriate) must notify the court by 4pm on [date] "
         + "whether they intend to appoint their own qualified legal representative.\n"
         + System.lineSeparator()
-        + "{_}b. If the applicant/respondent does not intend to appoint their own qualified legal representative, "
+        + "b. If the applicant/respondent does not intend to appoint their own qualified legal representative, "
         + "they (whichever party is the (alleged) perpetrator of domestic abuse) must complete form EX741 (name the form) "
-        + "and return it to the court by 4pm on [date{_}]";
+        + "and return it to the court by 4pm on [date]";
 
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
