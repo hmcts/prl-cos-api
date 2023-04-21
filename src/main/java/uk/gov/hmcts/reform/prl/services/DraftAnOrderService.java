@@ -373,6 +373,8 @@ public class DraftAnOrderService {
         caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        caseDataMap.put("isOrderCreatedBySolicitor", (null != selectedOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No);
+        caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
         return caseDataMap;
     }
 
@@ -403,6 +405,8 @@ public class DraftAnOrderService {
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
         caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
+        caseDataMap.put("isOrderCreatedBySolicitor", (null != selectedOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No);
+        caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
         return caseDataMap;
     }
 
