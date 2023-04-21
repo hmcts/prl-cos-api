@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.platform.commons.util.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -1042,10 +1042,15 @@ public class ManageOrderService {
     private SdoDetails populateSdoDetails(CaseData caseData) {
         if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
             && null != caseData.getStandardDirectionOrder()) {
-            SdoDetails sdoDetails = SdoDetails.builder().build();
-            BeanUtils.copyProperties(caseData.getStandardDirectionOrder(), sdoDetails);
-            log.info("caseData.getStandardDirectionOrder() ===> " + caseData.getStandardDirectionOrder());
-            log.info("created SdoDetails ===> " + sdoDetails);
+            SdoDetails sdoDetails;
+            try {
+                String standardDirectionOrderObjectJson = objectMapper.writeValueAsString(caseData.getStandardDirectionOrder());
+                sdoDetails = objectMapper.readValue(standardDirectionOrderObjectJson, SdoDetails.class);
+                log.info("caseData.getStandardDirectionOrder() ===> " + standardDirectionOrderObjectJson);
+                log.info("created SdoDetails ===> " + sdoDetails);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
             return sdoDetails;
         }
         return null;
