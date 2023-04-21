@@ -123,7 +123,7 @@ public class AllTabServiceImplTest {
 
     @Test
     public void testUpdatePartyDetailsForNoc() {
-        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.SOLICITORCAAA));
+        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.C100APPLICANTSOLICITOR1));
         verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
     }
 }
