@@ -186,6 +186,7 @@ public class PrlAppsConstants {
     public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without hearing may ask the court to reconsider this order. "
         + "You must do that within seven days of receiving the order by writing to the court"
         + "(and notifying any other party) and asking the court to reconsider. "
+        + System.lineSeparator() + System.lineSeparator()
         + "Alternatively, the court may reconsider the directions at the first hearing";
     public static final String SAFE_GUARDING_LETTER = "The court has considered the safeguarding letter from Cafcass or Cafcass Cymru "
         + "and made a decision on how to progress your case.";
