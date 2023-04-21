@@ -1636,6 +1636,7 @@ public class ManageOrderService {
             .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
                                  ? caseData.getDoesOrderClosesCase() : null)
             .serveOrderDetails(buildServeOrderDetails(serveOrderData))
+            .sdoDetails(populateSdoDetails(caseData))
             .build();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
