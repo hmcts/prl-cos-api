@@ -1044,7 +1044,7 @@ public class ManageOrderService {
             && null != caseData.getStandardDirectionOrder()) {
             SdoDetails sdoDetails = SdoDetails.builder().build();
             BeanUtils.copyProperties(caseData.getStandardDirectionOrder(), sdoDetails);
-            log.info("created SdoDetails ===> "+ sdoDetails);
+            log.info("created SdoDetails ===> " + sdoDetails);
             return sdoDetails;
         }
         return null;
