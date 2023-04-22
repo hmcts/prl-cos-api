@@ -733,53 +733,53 @@ public class DraftAnOrderService {
             hearingDataService.populateHearingDynamicLists(authorisation, Long.toString(caseData.getId()), caseData);
         HearingData hearingData = hearingDataService.generateHearingData(
             hearingDataPrePopulatedDynamicLists, caseData);
-        populateSdoPermissionHearingDetails(caseData, caseDataUpdated, hearingData);
-        populateSdoSecondHearingDetails(caseData, caseDataUpdated, hearingData);
-        populateSdoUrgentHearingDetails(caseData, caseDataUpdated, hearingData);
-        populateSdoFhdraHearingDetails(caseData, caseDataUpdated, hearingData);
-        populateSdoDraHearingDetails(caseData, caseDataUpdated, hearingData);
-        populateSdoSettlementHearingDetails(caseData, caseDataUpdated, hearingData);
+        populateHearingData(
+            caseDataUpdated,
+            hearingData,
+            caseData.getStandardDirectionOrder().getSdoPermissionHearingDetails(),
+            SDO_PERMISSION_HEARING_DETAILS
+        );
+        populateHearingData(
+            caseDataUpdated,
+            hearingData,
+            caseData.getStandardDirectionOrder().getSdoSecondHearingDetails(),
+            SDO_SECOND_HEARING_DETAILS
+        );
+        populateHearingData(
+            caseDataUpdated,
+            hearingData,
+            caseData.getStandardDirectionOrder().getSdoUrgentHearingDetails(),
+            SDO_URGENT_HEARING_DETAILS
+        );
+        populateHearingData(
+            caseDataUpdated,
+            hearingData,
+            caseData.getStandardDirectionOrder().getSdoFhdraHearingDetails(),
+            SDO_FHDRA_HEARING_DETAILS
+        );
+        populateHearingData(
+            caseDataUpdated,
+            hearingData,
+            caseData.getStandardDirectionOrder().getSdoDraHearingDetails(),
+            SDO_DRA_HEARING_DETAILS
+        );
+        populateHearingData(
+            caseDataUpdated,
+            hearingData,
+            caseData.getStandardDirectionOrder().getSdoSettlementHearingDetails(),
+            SDO_SETTLEMENT_HEARING_DETAILS
+        );
     }
 
-    private static void populateSdoSettlementHearingDetails(CaseData caseData, Map<String, Object> caseDataUpdated, HearingData hearingData) {
-        if (caseData.getStandardDirectionOrder().getSdoSettlementHearingDetails() == null
-            || caseData.getStandardDirectionOrder().getSdoSettlementHearingDetails().getHearingDateConfirmOptionEnum() == null) {
-            caseDataUpdated.put(SDO_SETTLEMENT_HEARING_DETAILS, hearingData);
-        }
-    }
-
-    private static void populateSdoDraHearingDetails(CaseData caseData, Map<String, Object> caseDataUpdated, HearingData hearingData) {
-        if (caseData.getStandardDirectionOrder().getSdoDraHearingDetails() == null
-            || caseData.getStandardDirectionOrder().getSdoDraHearingDetails().getHearingDateConfirmOptionEnum() == null) {
-            caseDataUpdated.put(SDO_DRA_HEARING_DETAILS, hearingData);
-        }
-    }
-
-    private static void populateSdoFhdraHearingDetails(CaseData caseData, Map<String, Object> caseDataUpdated, HearingData hearingData) {
-        if (caseData.getStandardDirectionOrder().getSdoFhdraHearingDetails() == null
-            || caseData.getStandardDirectionOrder().getSdoFhdraHearingDetails().getHearingDateConfirmOptionEnum() == null) {
-            caseDataUpdated.put(SDO_FHDRA_HEARING_DETAILS, hearingData);
-        }
-    }
-
-    private static void populateSdoUrgentHearingDetails(CaseData caseData, Map<String, Object> caseDataUpdated, HearingData hearingData) {
-        if (caseData.getStandardDirectionOrder().getSdoUrgentHearingDetails() == null
-            || caseData.getStandardDirectionOrder().getSdoUrgentHearingDetails().getHearingDateConfirmOptionEnum() == null) {
-            caseDataUpdated.put(SDO_URGENT_HEARING_DETAILS, hearingData);
-        }
-    }
-
-    private static void populateSdoSecondHearingDetails(CaseData caseData, Map<String, Object> caseDataUpdated, HearingData hearingData) {
-        if (caseData.getStandardDirectionOrder().getSdoSecondHearingDetails() == null
-            || caseData.getStandardDirectionOrder().getSdoSecondHearingDetails().getHearingDateConfirmOptionEnum() == null) {
-            caseDataUpdated.put(SDO_SECOND_HEARING_DETAILS, hearingData);
-        }
-    }
-
-    private static void populateSdoPermissionHearingDetails(CaseData caseData, Map<String, Object> caseDataUpdated, HearingData hearingData) {
-        if (caseData.getStandardDirectionOrder().getSdoPermissionHearingDetails() == null
-            || caseData.getStandardDirectionOrder().getSdoPermissionHearingDetails().getHearingDateConfirmOptionEnum() == null) {
-            caseDataUpdated.put(SDO_PERMISSION_HEARING_DETAILS, hearingData);
+    private static void populateHearingData(Map<String, Object> caseDataUpdated, HearingData hearingData,
+                                                            HearingData existingHearingData, String hearingKey) {
+        if (existingHearingData == null
+            || existingHearingData.getHearingDateConfirmOptionEnum() == null) {
+            log.info("reset hearingData");
+            caseDataUpdated.put(hearingKey, hearingData);
+        } else {
+            log.info("set existing hearingData ==> " + existingHearingData);
+            caseDataUpdated.put(SDO_PERMISSION_HEARING_DETAILS, existingHearingData);
         }
     }
 
