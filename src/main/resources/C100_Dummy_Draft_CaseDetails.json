@@ -612,6 +612,18 @@
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[FL401APPLICANTSOLICITOR]"
     },
+    "caApplicant1": {
+      "lastName": "Doe",
+      "firstName": "John"
+    },
+    "caApplicant2": {
+      "lastName": "Anderson",
+      "firstName": "Jeremy"
+    },
+    "caApplicant3": {
+      "lastName": "Graham",
+      "firstName": "Martina"
+    },
     "miamExemptionsTable": {
       "urgencyEvidence": "",
       "otherGroundsEvidence": "",
