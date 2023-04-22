@@ -231,6 +231,8 @@ public class DraftAnOrderController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
+        ManageOrdersController.resetChildOptions(callbackRequest.getCaseDetails());
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.generateOrderDocument(
             authorisation,
             callbackRequest
@@ -244,13 +246,9 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("verifying hearing data while submitting************* {} ",
             callbackRequest.getCaseDetails().getData());
-        Map<String, Object> caseDataUpdated = draftAnOrderService.prepareDraftOrderCollection(
+        return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.prepareDraftOrderCollection(
             authorisation,
             callbackRequest
-        );
-        ManageOrdersController.resetChildOptions(callbackRequest.getCaseDetails());
-
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated).build();
+        )).build();
     }
 }
