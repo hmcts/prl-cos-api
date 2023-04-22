@@ -375,6 +375,10 @@ public class DraftAnOrderService {
         caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         caseDataMap.put("isOrderCreatedBySolicitor", (null != selectedOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No);
         caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
+        caseDataMap.put("isTheOrderAboutChildren", selectedOrder.getIsTheOrderAboutChildren());
+        caseDataMap.put("childOption", Yes.equals(selectedOrder.getIsTheOrderAboutChildren())
+            ? selectedOrder.getChildOption() : DynamicMultiSelectList.builder()
+            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
         return caseDataMap;
     }
 
