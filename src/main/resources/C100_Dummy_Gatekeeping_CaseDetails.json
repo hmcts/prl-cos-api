@@ -212,6 +212,18 @@
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[FL401APPLICANTSOLICITOR]"
     },
+    "caApplicant1": {
+      "lastName": "Doe",
+      "firstName": "John"
+    },
+    "caApplicant2": {
+      "lastName": "Anderson",
+      "firstName": "Jeremy"
+    },
+    "caApplicant3": {
+      "lastName": "Graham",
+      "firstName": "Martina"
+    },
     "behaviours": [
       {
         "id": "d4b3dc3a-1ff3-49b3-8b30-a00413c8ee4d",
