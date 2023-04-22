@@ -1039,7 +1039,7 @@ public class ManageOrderService {
             .build();
     }
 
-    private SdoDetails populateSdoDetails(CaseData caseData) {
+    public SdoDetails populateSdoDetails(CaseData caseData) {
         if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
             && null != caseData.getStandardDirectionOrder()) {
             SdoDetails sdoDetails;
@@ -1409,7 +1409,7 @@ public class ManageOrderService {
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         try {
-            GeneratedDocumentInfo generatedDocumentInfo = null;
+            GeneratedDocumentInfo generatedDocumentInfo;
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             List<Child> children = dynamicMultiSelectListService
                 .getChildrenForDocmosis(caseData);

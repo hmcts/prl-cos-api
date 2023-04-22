@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -167,5 +168,33 @@ public class EditAndApproveDraftOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.checkOnlyC47aOrderSelectedToServe(
             callbackRequest)).build();
+    }
+
+    @PostMapping(path = "/pre-populate-standard-direction-order-other-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to populate standard direction order fields")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Populated Headers"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse populateSdoOtherFields(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
+            draftAnOrderService.populateStandardDirectionOrderFields(authorisation, caseData, caseDataUpdated);
+        } else {
+            List<String> errorList = new ArrayList<>();
+            errorList.add(
+                "Please select at least one options from below");
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated).build();
     }
 }
