@@ -53,6 +53,7 @@ public class CaseEventHandler {
     public static final String TASK_LIST = "taskList";
     public static final String INTERNAL_UPDATE_TASK_LIST = "internal-update-task-list";
     public static final String ID = "id";
+
     private final CoreCaseDataService coreCaseDataService;
     private final TaskListService taskListService;
     private final TaskListRenderer taskListRenderer;
