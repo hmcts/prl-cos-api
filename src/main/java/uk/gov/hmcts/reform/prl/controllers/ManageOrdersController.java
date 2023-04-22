@@ -397,7 +397,7 @@ public class ManageOrdersController {
     }
 
 
-    private static void resetChildOptions(CaseDetails caseDetails) {
+    public static void resetChildOptions(CaseDetails caseDetails) {
         if (caseDetails.getData().containsKey(IS_THE_ORDER_ABOUT_ALL_CHILDREN) && caseDetails.getData().get(
             IS_THE_ORDER_ABOUT_ALL_CHILDREN) != null && !caseDetails.getData().get(
             IS_THE_ORDER_ABOUT_ALL_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
