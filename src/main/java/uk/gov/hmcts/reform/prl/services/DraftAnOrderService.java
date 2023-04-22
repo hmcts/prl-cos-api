@@ -979,6 +979,8 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> prepareDraftOrderCollection(String authorisation, CallbackRequest callbackRequest) {
+        log.info("Casedata inside prepareDraftOrderCollection {} ", null != callbackRequest.getCaseDetails()
+            ? callbackRequest.getCaseDetails().getData() : null);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));

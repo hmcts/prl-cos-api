@@ -244,10 +244,14 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("verifying hearing data while submitting************* {} ",
             callbackRequest.getCaseDetails().getData());
-        ManageOrdersController.resetChildOptions(callbackRequest.getCaseDetails());
-        return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.prepareDraftOrderCollection(
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated = draftAnOrderService.prepareDraftOrderCollection(
             authorisation,
             callbackRequest
-        )).build();
+        );
+        ManageOrdersController.resetChildOptions(callbackRequest.getCaseDetails());
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated).build();
     }
 }
