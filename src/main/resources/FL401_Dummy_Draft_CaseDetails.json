@@ -1502,7 +1502,89 @@
 
       ],
       "isAtAddressLessThan5YearsWithDontKnow": null
+    },
+    "daApplicant": {
+      "firstName": "John",
+      "lastName": "Smith"
+    },
+    "daApplicantPolicy": {
+      "Organisation": {
+        "OrganisationID": "QO4A1Q8",
+        "OrganisationName": "FPRL-test-organisation"
+      },
+      "OrgPolicyCaseAssignedRole": "[FL401APPLICANTSOLICITOR]",
+      "OrgPolicyReference": null
+    },
+    "daRespondent": {
+      "firstName": "Elise",
+      "lastName": "Lynn"
+    },
+    "daRespondentPolicy": {
+      "Organisation": {
+      },
+      "OrgPolicyCaseAssignedRole": "[FL401RESPONDENTSOLICITOR]",
+      "OrgPolicyReference": null
     }
+  },
+  "caRespondent1Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR1]"
+  },
+  "caRespondent2Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR2]"
+  },
+  "caRespondent3Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR3]"
+  },
+  "caRespondent4Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR4]"
+  },
+  "caRespondent5Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR5]"
+  },
+  "caApplicant1Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR1]"
+  },
+  "caApplicant2Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR2]"
+  },
+  "caApplicant3Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR3]"
+  },
+  "caApplicant4Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR4]"
+  },
+  "caApplicant5Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR5]"
   },
   "security_classification": "PUBLIC",
   "callback_response_status": null

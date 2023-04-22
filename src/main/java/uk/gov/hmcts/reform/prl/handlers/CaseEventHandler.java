@@ -33,10 +33,26 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
+
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseEventHandler {
+
+    public static final String C100_RESPONDENT_EVENTS_A = "A";
+    public static final String C100_RESPONDENT_EVENTS_B = "B";
+    public static final String C100_RESPONDENT_EVENTS_C = "C";
+    public static final String C100_RESPONDENT_EVENTS_D = "D";
+    public static final String C100_RESPONDENT_EVENTS_E = "E";
+    public static final String C100_RESPONDENT_TASK_LIST_A = "respondentTaskListA";
+    public static final String C100_RESPONDENT_TASK_LIST_B = "respondentTaskListB";
+    public static final String C100_RESPONDENT_TASK_LIST_C = "respondentTaskListC";
+    public static final String C100_RESPONDENT_TASK_LIST_D = "respondentTaskListD";
+    public static final String C100_RESPONDENT_TASK_LIST_E = "respondentTaskListE";
+    public static final String C100_RESPONDENT_TASK_LIST = "respondentTaskList";
+    public static final String TASK_LIST = "taskList";
+    public static final String INTERNAL_UPDATE_TASK_LIST = "internal-update-task-list";
+    public static final String ID = "id";
 
     private final CoreCaseDataService coreCaseDataService;
     private final TaskListService taskListService;
@@ -50,33 +66,33 @@ public class CaseEventHandler {
         final CaseData caseData = event.getCaseData();
 
         final String taskList = getUpdatedTaskList(caseData);
-        final String respondentTaskListA = getRespondentTaskList(caseData, "A");
-        final String respondentTaskListB = getRespondentTaskList(caseData, "B");
-        final String respondentTaskListC = getRespondentTaskList(caseData, "C");
-        final String respondentTaskListD = getRespondentTaskList(caseData, "D");
-        final String respondentTaskListE = getRespondentTaskList(caseData, "E");
+        final String respondentTaskListA = getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_A);
+        final String respondentTaskListB = getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_B);
+        final String respondentTaskListC = getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_C);
+        final String respondentTaskListD = getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_D);
+        final String respondentTaskListE = getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_E);
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
             caseData.getId(),
-            "internal-update-task-list",
+            INTERNAL_UPDATE_TASK_LIST,
             Map.of(
-                "taskList",
+                TASK_LIST,
                 taskList,
-                "respondentTaskList",
+                C100_RESPONDENT_TASK_LIST,
                 "",
-                "respondentTaskListA",
+                C100_RESPONDENT_TASK_LIST_A,
                 respondentTaskListA,
-                "respondentTaskListB",
+                C100_RESPONDENT_TASK_LIST_B,
                 respondentTaskListB,
-                "respondentTaskListC",
+                C100_RESPONDENT_TASK_LIST_C,
                 respondentTaskListC,
-                "respondentTaskListD",
+                C100_RESPONDENT_TASK_LIST_D,
                 respondentTaskListD,
-                "respondentTaskListE",
+                C100_RESPONDENT_TASK_LIST_E,
                 respondentTaskListE,
-                "id",
+                ID,
                 String.valueOf(caseData.getId())
             )
         );
@@ -109,26 +125,31 @@ public class CaseEventHandler {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(respondent);
             if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
                 Element<PartyDetails> respondingParty = caseData.getRespondents().get(solicitorRole.get().getIndex());
-
-                if (respondingParty.getValue() != null) {
+                if (respondingParty.getValue() != null
+                    && respondingParty.getValue().getUser() != null
+                    && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())
+                    && respondingParty.getValue().getResponse() != null
+                    && !YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted())) {
                     final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
-                    log.info("tasks found: " + tasks.size());
 
                     List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors();
-                    log.info("eventErrors found: " + eventErrors.size());
 
                     List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents();
-                    log.info("events found: " + events.size());
                     eventErrors.removeIf(e -> !events.contains(e.getEvent()));
-                    log.info("eventErrors found following removal: " + eventErrors.size());
 
                     String representedRespondentName = respondingParty.getValue().getFirstName().trim() + " "
                         + respondingParty.getValue().getLastName().trim();
-                    log.info("representedRespondentName found: " + representedRespondentName);
                     final boolean hasSubmitted = respondingParty.getValue().getResponse() != null
                         && YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted());
                     return respondentSolicitorTaskListRenderer
-                        .render(tasks, eventErrors, respondent, representedRespondentName, hasSubmitted, caseData.getId());
+                        .render(
+                            tasks,
+                            eventErrors,
+                            respondent,
+                            representedRespondentName,
+                            hasSubmitted,
+                            caseData.getId()
+                        );
                 }
             }
         }

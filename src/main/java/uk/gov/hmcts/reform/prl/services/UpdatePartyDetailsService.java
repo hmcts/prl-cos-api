@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +24,10 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.RESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -44,6 +46,9 @@ public class UpdatePartyDetailsService {
         updatedCaseData.put("caseFlags", caseFlags);
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
+            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
+
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
             PartyDetails fl401respondent = caseData
@@ -62,7 +67,8 @@ public class UpdatePartyDetailsService {
                 setFL401RespondentFlag(updatedCaseData, fl401respondent);
             }
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, RESPONDENT));
+            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
+            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
             if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
                 List<PartyDetails> applicants = applicantsWrapped.get()

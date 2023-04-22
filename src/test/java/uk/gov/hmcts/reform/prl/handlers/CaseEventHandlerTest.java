@@ -55,7 +55,6 @@ import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.FINISHED;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseEventHandlerTest {
 
@@ -368,10 +367,11 @@ public class CaseEventHandlerTest {
     public void testGetRespondentTaskList() {
         List<Element<PartyDetails>> respondents = new ArrayList<>();
         respondents.add(element(PartyDetails.builder()
-                                    .user(User.builder().build())
+                                    .user(User.builder().solicitorRepresented(YesOrNo.Yes).build())
                                     .firstName("test")
                                     .lastName("test")
                                     .email("test@hmcts.net")
+                                    .response(Response.builder().build())
                                     .build()));
 
         final CaseData caseData = CaseData.builder()
@@ -407,7 +407,6 @@ public class CaseEventHandlerTest {
         final String c100renderedTaskList = "<h1>Case Name</h1><h2>Miam</h2>";
 
         final String respondentTaskListA = "<h3>Respond to the application for Respondent A";
-        final String respondentTaskListB = "<h3>Respond to the application for Respondent B";
 
         List<RespondentEventValidationErrors> resErrors = new ArrayList<>();
 
@@ -423,7 +422,8 @@ public class CaseEventHandlerTest {
         caseEventHandler.getRespondentTaskList(caseData, "A");
 
         verify(respondentSolicitorTaskListRenderer).render(Mockito.anyList(), Mockito.anyList(), Mockito.anyString(),
-                                                           Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong());
+                                                           Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong()
+        );
 
     }
 }

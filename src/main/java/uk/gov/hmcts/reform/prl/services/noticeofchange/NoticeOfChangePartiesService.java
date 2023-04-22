@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
@@ -37,7 +38,11 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest.decisionRequest;
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.BLANK;
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.POPULATE;
@@ -65,44 +70,85 @@ public class NoticeOfChangePartiesService {
                                         NoticeOfChangeAnswersPopulationStrategy strategy) {
         Map<String, Object> data = new HashMap<>();
 
-        List<Element<PartyDetails>> elements = representing.getTarget().apply(caseData);
-        int numElements = null != elements ? elements.size() : 0;
-
-        List<SolicitorRole> solicitorRoles = SolicitorRole.values(representing);
-        for (int i = 0; i < solicitorRoles.size(); i++) {
-            SolicitorRole solicitorRole = solicitorRoles.get(i);
-
-            if (null != elements) {
-                Optional<Element<PartyDetails>> solicitorContainer = i < numElements
-                    ? Optional.of(elements.get(i))
-                    : Optional.empty();
-
-                OrganisationPolicy organisationPolicy = policyConverter.generate(
-                    solicitorRole, solicitorContainer
-                );
-
-                data.put(String.format(representing.getPolicyFieldTemplate(), i), organisationPolicy);
-
-                Optional<NoticeOfChangeParties> possibleAnswer = populateAnswer(
-                    strategy, solicitorContainer
-                );
-
-                if (possibleAnswer.isPresent()) {
-                    data.put(String.format(representing.getNocAnswersTemplate(), i), possibleAnswer.get());
-                }
-
-            }
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            generateC100NocDetails(caseData, representing, strategy, data);
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            generateFl401NocDetails(caseData, representing, strategy, data);
         }
-
         return data;
     }
 
-    private Optional<NoticeOfChangeParties> populateAnswer(NoticeOfChangeAnswersPopulationStrategy strategy,
-                                                           Optional<Element<PartyDetails>> element) {
+    public void generateC100NocDetails(CaseData caseData, SolicitorRole.Representing representing,
+                                       NoticeOfChangeAnswersPopulationStrategy strategy, Map<String, Object> data) {
+        List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(caseData);
+        int numElements = null != caElements ? caElements.size() : 0;
+        List<SolicitorRole> solicitorRoles = SolicitorRole.matchingRoles(representing);
+
+        for (int i = 0; i < solicitorRoles.size(); i++) {
+            SolicitorRole solicitorRole = solicitorRoles.get(i);
+
+            if (null != caElements) {
+                Optional<Element<PartyDetails>> solicitorContainer = i < numElements
+                    ? Optional.of(caElements.get(i))
+                    : Optional.empty();
+
+                OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
+                    solicitorRole, solicitorContainer
+                );
+                data.put(String.format(representing.getPolicyFieldTemplate(), (i + 1)), organisationPolicy);
+
+                Optional<NoticeOfChangeParties> possibleAnswer = populateCaAnswer(
+                    strategy, solicitorContainer
+                );
+                if (possibleAnswer.isPresent()) {
+                    data.put(String.format(representing.getNocAnswersTemplate(), (i + 1)), possibleAnswer.get());
+                }
+            }
+        }
+
+        generateRequiredOrgPoliciesForNoc(representing, data);
+    }
+
+    public void generateFl401NocDetails(CaseData caseData, SolicitorRole.Representing representing,
+                                        NoticeOfChangeAnswersPopulationStrategy strategy, Map<String, Object> data) {
+        PartyDetails daElements = representing.getDaTarget().apply(caseData);
+
+        List<SolicitorRole> solicitorRoles = SolicitorRole.matchingRoles(representing);
+        for (int i = 0; i < solicitorRoles.size(); i++) {
+            SolicitorRole solicitorRole = solicitorRoles.get(i);
+
+            if (null != daElements) {
+                OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
+                    solicitorRole, daElements
+                );
+                data.put(representing.getPolicyFieldTemplate(), organisationPolicy);
+
+                Optional<NoticeOfChangeParties> possibleAnswer = populateDaAnswer(
+                    strategy, daElements
+                );
+                if (possibleAnswer.isPresent()) {
+                    data.put(representing.getNocAnswersTemplate(), possibleAnswer.get());
+                }
+            }
+        }
+
+        generateRequiredOrgPoliciesForNoc(representing, data);
+    }
+
+    private Optional<NoticeOfChangeParties> populateCaAnswer(NoticeOfChangeAnswersPopulationStrategy strategy,
+                                                             Optional<Element<PartyDetails>> element) {
         if (BLANK == strategy) {
             return Optional.of(NoticeOfChangeParties.builder().build());
         }
-        return element.map(partiesConverter::generateForSubmission);
+        return element.map(partiesConverter::generateCaForSubmission);
+    }
+
+    private Optional<NoticeOfChangeParties> populateDaAnswer(NoticeOfChangeAnswersPopulationStrategy strategy,
+                                                             PartyDetails partyDetails) {
+        if (BLANK == strategy) {
+            return Optional.of(NoticeOfChangeParties.builder().build());
+        }
+        return Optional.of(partiesConverter.generateDaForSubmission(partyDetails));
     }
 
     public enum NoticeOfChangeAnswersPopulationStrategy {
@@ -147,6 +193,8 @@ public class NoticeOfChangePartiesService {
             );
             eventPublisher.publishEvent(noticeOfChangeEvent);
         }
+
+        eventPublisher.publishEvent(new CaseDataChanged(newCaseData));
     }
 
     private CaseData getRepresentedPartyDetails(ChangeOrganisationRequest changeOrganisationRequest,
@@ -155,13 +203,30 @@ public class NoticeOfChangePartiesService {
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         if (solicitorRole.isPresent()) {
             int partyIndex = solicitorRole.get().getIndex();
-            if (RESPONDENT.equals(solicitorRole.get().getRepresenting())) {
-                List<Element<PartyDetails>> respondents = RESPONDENT.getTarget().apply(caseData);
-                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                    return updateC100RespondentDetails(partyIndex, respondents, legalRepresentativeSolicitorDetails,
-                                                       changeOrganisationRequest, caseData
-                    );
-                }
+            if (CARESPONDENT.equals(solicitorRole.get().getRepresenting())
+                && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                List<Element<PartyDetails>> respondents = CARESPONDENT.getCaTarget().apply(caseData);
+                return updateC100PartyDetails(partyIndex, respondents, legalRepresentativeSolicitorDetails,
+                                              changeOrganisationRequest, caseData, CARESPONDENT
+                );
+            } else if (CAAPPLICANT.equals(solicitorRole.get().getRepresenting())
+                && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                List<Element<PartyDetails>> applicants = CAAPPLICANT.getCaTarget().apply(caseData);
+                return updateC100PartyDetails(partyIndex, applicants, legalRepresentativeSolicitorDetails,
+                                              changeOrganisationRequest, caseData, CAAPPLICANT
+                );
+            } else if (DAAPPLICANT.equals(solicitorRole.get().getRepresenting())
+                && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                return updateFl401PartyDetails(legalRepresentativeSolicitorDetails,
+                                               changeOrganisationRequest, caseData,
+                                               DAAPPLICANT
+                );
+            } else if (DARESPONDENT.equals(solicitorRole.get().getRepresenting())
+                && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                return updateFl401PartyDetails(legalRepresentativeSolicitorDetails,
+                                               changeOrganisationRequest, caseData,
+                                               DARESPONDENT
+                );
             }
         }
         return null;
@@ -178,14 +243,15 @@ public class NoticeOfChangePartiesService {
         return solicitorRole;
     }
 
-    private CaseData updateC100RespondentDetails(int partyIndex,
-                                                 List<Element<PartyDetails>> respondents,
-                                                 UserDetails legalRepresentativeSolicitorDetails,
-                                                 ChangeOrganisationRequest changeOrganisationRequest,
-                                                 CaseData caseData) {
-        Element<PartyDetails> representedRespondentElement = respondents.get(partyIndex);
-        PartyDetails updPartyDetails = representedRespondentElement.getValue().toBuilder()
-            .user(representedRespondentElement.getValue().getUser().toBuilder()
+    private CaseData updateC100PartyDetails(int partyIndex,
+                                            List<Element<PartyDetails>> parties,
+                                            UserDetails legalRepresentativeSolicitorDetails,
+                                            ChangeOrganisationRequest changeOrganisationRequest,
+                                            CaseData caseData,
+                                            SolicitorRole.Representing representing) {
+        Element<PartyDetails> partyDetailsElement = parties.get(partyIndex);
+        PartyDetails updPartyDetails = partyDetailsElement.getValue().toBuilder()
+            .user(partyDetailsElement.getValue().getUser().toBuilder()
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
@@ -195,9 +261,48 @@ public class NoticeOfChangePartiesService {
             .solicitorOrg(changeOrganisationRequest.getOrganisationToAdd())
             .build();
         Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
-            .element(representedRespondentElement.getId(), updPartyDetails);
-        caseData.getRespondents().set(partyIndex, updatedRepresentedRespondentElement);
+            .element(partyDetailsElement.getId(), updPartyDetails);
+        if (CAAPPLICANT.equals(representing)) {
+            caseData.getApplicants().set(partyIndex, updatedRepresentedRespondentElement);
+        } else if (CARESPONDENT.equals(representing)) {
+            caseData.getRespondents().set(partyIndex, updatedRepresentedRespondentElement);
+        }
         return caseData;
+    }
+
+    private CaseData updateFl401PartyDetails(UserDetails legalRepresentativeSolicitorDetails,
+                                             ChangeOrganisationRequest changeOrganisationRequest,
+                                             CaseData caseData,
+                                             SolicitorRole.Representing representing) {
+        CaseData updatedCaseData = null;
+
+        if (DAAPPLICANT.equals(representing)) {
+            PartyDetails updPartyDetails = caseData.getApplicantsFL401().toBuilder()
+                .user(caseData.getApplicantsFL401().getUser().toBuilder()
+                          .solicitorRepresented(YesOrNo.Yes)
+                          .build())
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .solicitorEmail(changeOrganisationRequest.getCreatedBy())
+                .representativeFirstName(legalRepresentativeSolicitorDetails.getFullName())
+                .representativeLastName(legalRepresentativeSolicitorDetails.getSurname().orElse(""))
+                .solicitorOrg(changeOrganisationRequest.getOrganisationToAdd())
+                .build();
+            updatedCaseData = caseData.toBuilder().applicantsFL401(updPartyDetails).build();
+        } else if (DARESPONDENT.equals(representing)) {
+            PartyDetails updPartyDetails = caseData.getRespondentsFL401().toBuilder()
+                .user(caseData.getRespondentsFL401().getUser().toBuilder()
+                          .solicitorRepresented(YesOrNo.Yes)
+                          .build())
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .solicitorEmail(changeOrganisationRequest.getCreatedBy())
+                .representativeFirstName(legalRepresentativeSolicitorDetails.getFullName())
+                .representativeLastName(legalRepresentativeSolicitorDetails.getSurname().orElse(""))
+                .solicitorOrg(changeOrganisationRequest.getOrganisationToAdd())
+                .build();
+            updatedCaseData = caseData.toBuilder().respondentsFL401(updPartyDetails).build();
+        }
+
+        return updatedCaseData;
     }
 
     private NoticeOfChangeEvent prepareNoticeOfChangeEvent(CaseData newCaseData,
@@ -216,5 +321,24 @@ public class NoticeOfChangePartiesService {
 
         }
         return null;
+    }
+
+    private void generateRequiredOrgPoliciesForNoc(SolicitorRole.Representing representing, Map<String, Object> data) {
+        List<SolicitorRole> nonSolicitorRoles = SolicitorRole.notMatchingRoles(representing);
+        for (int i = 0; i < nonSolicitorRoles.size(); i++) {
+            SolicitorRole solicitorRole = nonSolicitorRoles.get(i);
+            if (CAAPPLICANT.equals(solicitorRole.getRepresenting()) || CARESPONDENT.equals(solicitorRole.getRepresenting())) {
+                OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
+                    solicitorRole, Optional.empty());
+                data.put(String.format(
+                    solicitorRole.getRepresenting().getPolicyFieldTemplate(),
+                    (solicitorRole.getIndex() + 1)
+                ), organisationPolicy);
+            } else if (DAAPPLICANT.equals(solicitorRole.getRepresenting()) || DARESPONDENT.equals(solicitorRole.getRepresenting())) {
+                OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
+                    solicitorRole, PartyDetails.builder().build());
+                data.put(solicitorRole.getRepresenting().getPolicyFieldTemplate(), organisationPolicy);
+            }
+        }
     }
 }
