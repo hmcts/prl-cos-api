@@ -393,6 +393,7 @@ public class DraftAnOrderService {
     }
 
     private Map<String, Object> populateStandardDirectionOrder(DraftOrder draftOrder) {
+        Map<String, Object> standardDirectionOrderMap = new HashMap<>();
         if (null != draftOrder.getSdoDetails()) {
             StandardDirectionOrder standardDirectionOrder;
             try {
@@ -403,9 +404,9 @@ public class DraftAnOrderService {
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
-            return objectMapper.convertValue(standardDirectionOrder, Map.class);
+            standardDirectionOrderMap = objectMapper.convertValue(standardDirectionOrder, Map.class);
         }
-        return null;
+        return standardDirectionOrderMap;
     }
 
     public Map<String, Object> populateCommonDraftOrderFields(CaseData caseData) {

@@ -1035,13 +1035,13 @@ public class ManageOrderService {
             .isOrderUploadedByJudgeOrAdmin(No)
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
-            .sdoDetails(populateSdoDetails(caseData))
+            .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions()) ? populateSdoDetails(
+                caseData) : null)
             .build();
     }
 
     public SdoDetails populateSdoDetails(CaseData caseData) {
-        if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
-            && null != caseData.getStandardDirectionOrder()) {
+        if (null != caseData.getStandardDirectionOrder()) {
             SdoDetails sdoDetails;
             try {
                 String standardDirectionOrderObjectJson = objectMapper.writeValueAsString(caseData.getStandardDirectionOrder());
@@ -1636,7 +1636,8 @@ public class ManageOrderService {
             .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
                                  ? caseData.getDoesOrderClosesCase() : null)
             .serveOrderDetails(buildServeOrderDetails(serveOrderData))
-            .sdoDetails(populateSdoDetails(caseData))
+            .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions()) ? populateSdoDetails(
+                caseData) : null)
             .build();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
