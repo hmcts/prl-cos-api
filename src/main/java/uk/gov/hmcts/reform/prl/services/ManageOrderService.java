@@ -1399,6 +1399,7 @@ public class ManageOrderService {
                 caseData.setChildrenListForDocmosis(children);
             }
         }
+        log.info("inside getCaseData before generating document casedata {}", caseData);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -1492,6 +1493,7 @@ public class ManageOrderService {
 
     private CaseData getFl404bFields(CaseData caseData) {
 
+        log.info("Before calling casedata {}", caseData);
         FL404 orderData = FL404.builder()
             .fl404bCaseNumber(String.valueOf(caseData.getId()))
             .fl404bCourtName(caseData.getCourtName())
@@ -1533,6 +1535,7 @@ public class ManageOrderService {
                               .fl404CustomFields(orderData)
                               .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
+        log.info("after calling casedata {}", caseData);
         return caseData;
     }
 
