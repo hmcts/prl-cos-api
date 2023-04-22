@@ -386,13 +386,13 @@ public class DraftAnOrderService {
             caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
         } else {
             log.info("inside populate custom SDO fields");
-            caseDataMap.put("standardDirectionOrder", populateStandardDirectionOrder(selectedOrder));
+            caseDataMap.putAll(populateStandardDirectionOrder(selectedOrder));
         }
         caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
 
-    private StandardDirectionOrder populateStandardDirectionOrder(DraftOrder draftOrder) {
+    private Map<String, Object> populateStandardDirectionOrder(DraftOrder draftOrder) {
         if (null != draftOrder.getSdoDetails()) {
             StandardDirectionOrder standardDirectionOrder;
             try {
@@ -403,7 +403,7 @@ public class DraftAnOrderService {
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
-            return standardDirectionOrder;
+            return objectMapper.convertValue(standardDirectionOrder, Map.class);
         }
         return null;
     }
