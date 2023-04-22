@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -74,6 +75,23 @@ public class DraftAnOrderController {
                                ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
             .build();
         if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("selectedOrder", caseData.getCreateSelectOrderOptions() != null
+            ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
+
+        log.info("C21 Draft order options in callback:: {}", (null != caseData.getManageOrders())
+            ? caseData.getManageOrders().getC21OrderOptions() : null);
+
+        if (null != caseData.getCreateSelectOrderOptions()
+            && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
+
+            ManageOrders manageOrders = caseData.getManageOrders().toBuilder().build();
+            caseDataUpdated.put("typeOfC21Order", null != manageOrders.getC21OrderOptions()
+                ? manageOrders.getC21OrderOptions().getDisplayedValue() : null);
+        }
+
+        if (caseDataUpdated.get("selectedOrder") == "Standard directions order") {
             List<String> errorList = new ArrayList<>();
             errorList.add(
                 "Solicitors cannot draft a Standard Directions order");
