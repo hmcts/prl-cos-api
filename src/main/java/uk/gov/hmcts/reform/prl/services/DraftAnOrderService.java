@@ -713,6 +713,7 @@ public class DraftAnOrderService {
     }
 
     private static void populateParentWithCare(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        log.info("getSdoParentWithCare()" + caseData.getStandardDirectionOrder().getSdoParentWithCare());
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoParentWithCare())) {
             caseDataUpdated.put(
                 "sdoParentWithCare",
