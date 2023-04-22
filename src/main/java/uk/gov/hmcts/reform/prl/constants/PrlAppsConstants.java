@@ -133,7 +133,6 @@ public class PrlAppsConstants {
     public static final List<String> ROLES = List.of("caseworker-privatelaw-courtadmin",
                                                      "caseworker-privatelaw-judge",
                                                      "caseworker-privatelaw-la");
-
     public static final String PREVIOUS_OR_ONGOING_PROCEEDINGS = "previousOrOngoingProceedings";
 
     public static final String FORMAT = "%s %s";
@@ -334,6 +333,9 @@ public class PrlAppsConstants {
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
+
+    public static final String COURTNAV = "COURTNAV";
+    public static final String NA_COURTNAV = "NA_COURTNAV";
 
     public static final String DISTRICT_JUDGE = "districtJudge";
 
