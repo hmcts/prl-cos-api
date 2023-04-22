@@ -375,17 +375,13 @@ public class DraftAnOrderService {
         caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         caseDataMap.put("isOrderCreatedBySolicitor", (null != selectedOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No);
         caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
-        caseDataMap.put("isTheOrderAboutChildren", selectedOrder.getIsTheOrderAboutChildren());
-        caseDataMap.put("childOption", Yes.equals(selectedOrder.getIsTheOrderAboutChildren())
-            ? selectedOrder.getChildOption() : DynamicMultiSelectList.builder()
-            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
         return caseDataMap;
     }
 
     public Map<String, Object> populateCommonDraftOrderFields(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-        caseDataMap.put("orderName", selectedOrder.getOrderType().getDisplayedValue());
+        caseDataMap.put("orderName", selectedOrder.getTypeOfOrder());
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put("dateOrderMade", selectedOrder.getDateOrderMade());
