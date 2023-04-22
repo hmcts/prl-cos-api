@@ -22,7 +22,6 @@
       "previousOrOngoingProceedings": ""
     },
     "applicationTypeDetails": {
-
     }
     "dateOfSubmission": {
       "dateOfSubmission": "28 03 2023"
@@ -155,10 +154,63 @@
     ],
     "caRespondent3Policy": {
       "Organisation": {
-
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR3]"
+    },
+    "caRespondent4Policy": {
+      "Organisation": {
+      },
+      "OrgPolicyReference": null,
+      "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR4]"
+    },
+    "caRespondent5Policy": {
+      "Organisation": {
+      },
+      "OrgPolicyReference": null,
+      "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR5]"
+    },
+    "caApplicant1Policy": {
+      "Organisation": {
+      },
+      "OrgPolicyReference": null,
+      "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR1]"
+    },
+    "caApplicant2Policy": {
+      "Organisation": {
+      },
+      "OrgPolicyReference": null,
+      "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR2]"
+    },
+    "caApplicant3Policy": {
+      "Organisation": {
+      },
+      "OrgPolicyReference": null,
+      "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR3]"
+    },
+    "caApplicant4Policy": {
+      "Organisation": {
+      },
+      "OrgPolicyReference": null,
+      "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR4]"
+    },
+    "caApplicant5Policy": {
+      "Organisation": {
+      },
+      "OrgPolicyReference": null,
+      "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR5]"
+    },
+    "daRespondentPolicy": {
+      "Organisation": {
+      },
+      "OrgPolicyReference": null,
+      "OrgPolicyCaseAssignedRole": "[FL401RESPONDENTSOLICITOR]"
+    },
+    "daApplicantPolicy": {
+      "Organisation": {
+      },
+      "OrgPolicyReference": null,
+      "OrgPolicyCaseAssignedRole": "[FL401APPLICANTSOLICITOR]"
     },
     "behaviours": [
       {
@@ -429,7 +481,6 @@
       "abductionPreviousPoliceInvolvementDetails": null
     },
     "emotionalAbuseVictim": [
-
     ],
     "ordersRestrainingDateIssued": null,
     "finalDocument": {
@@ -463,7 +514,6 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-
           },
           "solicitorEmail": null,
           "solicitorReference": null,
@@ -501,7 +551,6 @@
           "placeOfBirth": null,
           "previousName": null,
           "solicitorOrg": {
-
           },
           "solicitorEmail": null,
           "solicitorReference": null,
@@ -539,7 +588,6 @@
           "placeOfBirth": null,
           "previousName": null,
           "solicitorOrg": {
-
           },
           "solicitorEmail": null,
           "solicitorReference": null,
@@ -614,7 +662,6 @@
           ],
           "isDateOfBirthUnknown": null,
           "personWhoLivesWithChild": [
-
           ],
           "relationshipToApplicant": null,
           "relationshipToRespondent": null,
@@ -644,7 +691,6 @@
           ],
           "isDateOfBirthUnknown": null,
           "personWhoLivesWithChild": [
-
           ],
           "relationshipToApplicant": null,
           "relationshipToRespondent": null,
@@ -674,7 +720,6 @@
           ],
           "isDateOfBirthUnknown": null,
           "personWhoLivesWithChild": [
-
           ],
           "relationshipToApplicant": null,
           "relationshipToRespondent": null,
@@ -704,7 +749,6 @@
           ],
           "isDateOfBirthUnknown": null,
           "personWhoLivesWithChild": [
-
           ],
           "relationshipToApplicant": null,
           "relationshipToRespondent": null,
@@ -775,7 +819,6 @@
     "courtId": "115",
     "caRespondent1Policy": {
       "Organisation": {
-
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR1]"
@@ -818,7 +861,6 @@
           "cafcassOfficerAdded": "No",
           "cafcassOfficerPhoneNo": null,
           "personWhoLivesWithChild": [
-
           ],
           "cafcassOfficerEmailAddress": null,
           "applicantsRelationshipToChild": "Father",
@@ -842,7 +884,6 @@
           "cafcassOfficerAdded": "No",
           "cafcassOfficerPhoneNo": null,
           "personWhoLivesWithChild": [
-
           ],
           "cafcassOfficerEmailAddress": null,
           "applicantsRelationshipToChild": "Father",
@@ -866,7 +907,6 @@
           "cafcassOfficerAdded": "No",
           "cafcassOfficerPhoneNo": null,
           "personWhoLivesWithChild": [
-
           ],
           "cafcassOfficerEmailAddress": null,
           "applicantsRelationshipToChild": "Father",
@@ -890,7 +930,6 @@
           "cafcassOfficerAdded": "No",
           "cafcassOfficerPhoneNo": null,
           "personWhoLivesWithChild": [
-
           ],
           "cafcassOfficerEmailAddress": null,
           "applicantsRelationshipToChild": "Mother",
@@ -1023,14 +1062,12 @@
     ],
     "caRespondent2Policy": {
       "Organisation": {
-
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR2]"
     },
     "requestToForeignAuthority": "Yes",
     "psychologicalAbuseVictim": [
-
     ],
     "ordersOtherInjunctiveDateIssued": null,
     "isCaseUrgent": "No",
@@ -1064,7 +1101,6 @@
     "applicantCaseName": "John Doe Vs Mary Richards",
     "abductionPreviousPoliceInvolvementDetails": null,
     "sexualAbuseVictim": [
-
     ],
     "summaryTabForOrderAppliedFor": {
       "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
@@ -1118,10 +1154,8 @@
               "haveAnyDisability": null,
               "respondentWelshNeeds": null,
               "respondentWelshNeedsList": [
-
               ],
               "respondentInterpreterNeeds": [
-
               ],
               "respondentIntermediaryNeeds": null,
               "isRespondentNeededInterpreter": null,
@@ -1150,7 +1184,6 @@
               "previousName": null,
               "addressHistory": {
                 "previousAddressHistory": [
-
                 ],
                 "isAtAddressLessThan5Years": null
               }
@@ -1264,7 +1297,6 @@
                 "c1AchildsCurrentLocation": null,
                 "c1AabductionReasonOutsideUk": null,
                 "c1ApossessionChildrenPassport": [
-
                 ],
                 "c1AchildrenMoreThanOnePassport": null,
                 "c1ApreviousAbductionsShortDesc": null,
@@ -1332,26 +1364,20 @@
                 "c1AsupervisionAgreementDetails": null
               },
               "concernAboutChild": [
-
               ],
               "haveSafetyConcerns": null,
               "safetyConcernAbout": [
-
               ],
               "concernAboutRespondent": [
-
               ]
             },
             "supportYouNeed": {
               "docsDetails": null,
               "docsSupport": [
-
               ],
               "courtComfort": [
-
               ],
               "courtHearing": [
-
               ],
               "otherDetails": null,
               "hearingDetails": null,
@@ -1360,29 +1386,23 @@
               "languageDetails": null,
               "lightingDetails": null,
               "attendingToCourt": [
-
               ],
               "describeOtherNeed": null,
               "helpCommunication": [
-
               ],
               "largePrintDetails": null,
               "travellingToCourt": [
-
               ],
               "safetyArrangements": [
-
               ],
               "otherProvideDetails": null,
               "signLanguageDetails": null,
               "languageRequirements": [
-
               ],
               "supportWorkerDetails": null,
               "differentChairDetails": null,
               "familyProviderDetails": null,
               "reasonableAdjustments": [
-
               ],
               "travellingOtherDetails": null,
               "communicationSupportOther": null,
@@ -1392,18 +1412,15 @@
             "keepDetailsPrivate": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
             "respChildAbuseInfo": [
-
             ],
             "c7ResponseSubmitted": null,
             "legalRepresentation": null,
             "c1AResponseSubmitted": null,
             "respDomesticAbuseInfo": [
-
             ],
             "respOtherConcernsInfo": {
               "childSpendingSupervisedTime": null,
@@ -1414,7 +1431,6 @@
             "respChildAbductionInfo": {
               "whereIsChild": null,
               "whoHasChildPassport": [
-
               ],
               "childrenHavePassport": null,
               "whoHasChildPassportOther": null,
@@ -1429,7 +1445,6 @@
             "respKeepDetailsPrivate": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
@@ -1495,7 +1510,6 @@
             },
             "currentOrPreviousProceedings": {
               "proceedingsList": [
-
               ],
               "courtOrderMadeForProtection": null,
               "haveChildrenBeenInvolvedInCourtCase": null
@@ -1511,7 +1525,6 @@
               "reasonForJurisdictionDetails": null
             },
             "respondentExistingProceedings": [
-
             ],
             "internationalElementParentInfo": {
               "reasonForChild": null,
@@ -1553,7 +1566,6 @@
             "respKeepDetailsPrivateConfidentiality": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
@@ -1571,7 +1583,6 @@
           },
           "partyLevelFlag": {
             "details": [
-
             ],
             "partyName": "John Doe",
             "roleOnCase": "Applicant"
@@ -1604,7 +1615,6 @@
           "representativeFirstName": "Legal",
           "canYouProvidePhoneNumber": null,
           "applicantPreferredContact": [
-
           ],
           "canYouProvideEmailAddress": "Yes",
           "isAtAddressLessThan5Years": "No",
@@ -1615,7 +1625,6 @@
           "doTheyHaveLegalRepresentation": null,
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [
-
           ],
           "isAtAddressLessThan5YearsWithDontKnow": null
         }
@@ -1667,10 +1676,8 @@
               "haveAnyDisability": null,
               "respondentWelshNeeds": null,
               "respondentWelshNeedsList": [
-
               ],
               "respondentInterpreterNeeds": [
-
               ],
               "respondentIntermediaryNeeds": null,
               "isRespondentNeededInterpreter": null,
@@ -1699,7 +1706,6 @@
               "previousName": null,
               "addressHistory": {
                 "previousAddressHistory": [
-
                 ],
                 "isAtAddressLessThan5Years": null
               }
@@ -1813,7 +1819,6 @@
                 "c1AchildsCurrentLocation": null,
                 "c1AabductionReasonOutsideUk": null,
                 "c1ApossessionChildrenPassport": [
-
                 ],
                 "c1AchildrenMoreThanOnePassport": null,
                 "c1ApreviousAbductionsShortDesc": null,
@@ -1881,26 +1886,20 @@
                 "c1AsupervisionAgreementDetails": null
               },
               "concernAboutChild": [
-
               ],
               "haveSafetyConcerns": null,
               "safetyConcernAbout": [
-
               ],
               "concernAboutRespondent": [
-
               ]
             },
             "supportYouNeed": {
               "docsDetails": null,
               "docsSupport": [
-
               ],
               "courtComfort": [
-
               ],
               "courtHearing": [
-
               ],
               "otherDetails": null,
               "hearingDetails": null,
@@ -1909,29 +1908,23 @@
               "languageDetails": null,
               "lightingDetails": null,
               "attendingToCourt": [
-
               ],
               "describeOtherNeed": null,
               "helpCommunication": [
-
               ],
               "largePrintDetails": null,
               "travellingToCourt": [
-
               ],
               "safetyArrangements": [
-
               ],
               "otherProvideDetails": null,
               "signLanguageDetails": null,
               "languageRequirements": [
-
               ],
               "supportWorkerDetails": null,
               "differentChairDetails": null,
               "familyProviderDetails": null,
               "reasonableAdjustments": [
-
               ],
               "travellingOtherDetails": null,
               "communicationSupportOther": null,
@@ -1941,18 +1934,15 @@
             "keepDetailsPrivate": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
             "respChildAbuseInfo": [
-
             ],
             "c7ResponseSubmitted": null,
             "legalRepresentation": null,
             "c1AResponseSubmitted": null,
             "respDomesticAbuseInfo": [
-
             ],
             "respOtherConcernsInfo": {
               "childSpendingSupervisedTime": null,
@@ -1963,7 +1953,6 @@
             "respChildAbductionInfo": {
               "whereIsChild": null,
               "whoHasChildPassport": [
-
               ],
               "childrenHavePassport": null,
               "whoHasChildPassportOther": null,
@@ -1978,7 +1967,6 @@
             "respKeepDetailsPrivate": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
@@ -2044,7 +2032,6 @@
             },
             "currentOrPreviousProceedings": {
               "proceedingsList": [
-
               ],
               "courtOrderMadeForProtection": null,
               "haveChildrenBeenInvolvedInCourtCase": null
@@ -2060,7 +2047,6 @@
               "reasonForJurisdictionDetails": null
             },
             "respondentExistingProceedings": [
-
             ],
             "internationalElementParentInfo": {
               "reasonForChild": null,
@@ -2102,7 +2088,6 @@
             "respKeepDetailsPrivateConfidentiality": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
@@ -2120,7 +2105,6 @@
           },
           "partyLevelFlag": {
             "details": [
-
             ],
             "partyName": "Jeremy Anderson",
             "roleOnCase": "Applicant"
@@ -2153,7 +2137,6 @@
           "representativeFirstName": "Legal",
           "canYouProvidePhoneNumber": null,
           "applicantPreferredContact": [
-
           ],
           "canYouProvideEmailAddress": "Yes",
           "isAtAddressLessThan5Years": "No",
@@ -2164,7 +2147,6 @@
           "doTheyHaveLegalRepresentation": null,
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [
-
           ],
           "isAtAddressLessThan5YearsWithDontKnow": null
         }
@@ -2216,10 +2198,8 @@
               "haveAnyDisability": null,
               "respondentWelshNeeds": null,
               "respondentWelshNeedsList": [
-
               ],
               "respondentInterpreterNeeds": [
-
               ],
               "respondentIntermediaryNeeds": null,
               "isRespondentNeededInterpreter": null,
@@ -2248,7 +2228,6 @@
               "previousName": null,
               "addressHistory": {
                 "previousAddressHistory": [
-
                 ],
                 "isAtAddressLessThan5Years": null
               }
@@ -2362,7 +2341,6 @@
                 "c1AchildsCurrentLocation": null,
                 "c1AabductionReasonOutsideUk": null,
                 "c1ApossessionChildrenPassport": [
-
                 ],
                 "c1AchildrenMoreThanOnePassport": null,
                 "c1ApreviousAbductionsShortDesc": null,
@@ -2430,26 +2408,20 @@
                 "c1AsupervisionAgreementDetails": null
               },
               "concernAboutChild": [
-
               ],
               "haveSafetyConcerns": null,
               "safetyConcernAbout": [
-
               ],
               "concernAboutRespondent": [
-
               ]
             },
             "supportYouNeed": {
               "docsDetails": null,
               "docsSupport": [
-
               ],
               "courtComfort": [
-
               ],
               "courtHearing": [
-
               ],
               "otherDetails": null,
               "hearingDetails": null,
@@ -2458,29 +2430,23 @@
               "languageDetails": null,
               "lightingDetails": null,
               "attendingToCourt": [
-
               ],
               "describeOtherNeed": null,
               "helpCommunication": [
-
               ],
               "largePrintDetails": null,
               "travellingToCourt": [
-
               ],
               "safetyArrangements": [
-
               ],
               "otherProvideDetails": null,
               "signLanguageDetails": null,
               "languageRequirements": [
-
               ],
               "supportWorkerDetails": null,
               "differentChairDetails": null,
               "familyProviderDetails": null,
               "reasonableAdjustments": [
-
               ],
               "travellingOtherDetails": null,
               "communicationSupportOther": null,
@@ -2490,18 +2456,15 @@
             "keepDetailsPrivate": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
             "respChildAbuseInfo": [
-
             ],
             "c7ResponseSubmitted": null,
             "legalRepresentation": null,
             "c1AResponseSubmitted": null,
             "respDomesticAbuseInfo": [
-
             ],
             "respOtherConcernsInfo": {
               "childSpendingSupervisedTime": null,
@@ -2512,7 +2475,6 @@
             "respChildAbductionInfo": {
               "whereIsChild": null,
               "whoHasChildPassport": [
-
               ],
               "childrenHavePassport": null,
               "whoHasChildPassportOther": null,
@@ -2527,7 +2489,6 @@
             "respKeepDetailsPrivate": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
@@ -2593,7 +2554,6 @@
             },
             "currentOrPreviousProceedings": {
               "proceedingsList": [
-
               ],
               "courtOrderMadeForProtection": null,
               "haveChildrenBeenInvolvedInCourtCase": null
@@ -2609,7 +2569,6 @@
               "reasonForJurisdictionDetails": null
             },
             "respondentExistingProceedings": [
-
             ],
             "internationalElementParentInfo": {
               "reasonForChild": null,
@@ -2651,7 +2610,6 @@
             "respKeepDetailsPrivateConfidentiality": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
@@ -2669,7 +2627,6 @@
           },
           "partyLevelFlag": {
             "details": [
-
             ],
             "partyName": "Martina Graham",
             "roleOnCase": "Applicant"
@@ -2702,7 +2659,6 @@
           "representativeFirstName": "Sr Legal",
           "canYouProvidePhoneNumber": null,
           "applicantPreferredContact": [
-
           ],
           "canYouProvideEmailAddress": "Yes",
           "isAtAddressLessThan5Years": "No",
@@ -2713,7 +2669,6 @@
           "doTheyHaveLegalRepresentation": null,
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [
-
           ],
           "isAtAddressLessThan5YearsWithDontKnow": null
         }
@@ -2786,10 +2741,8 @@
               "haveAnyDisability": null,
               "respondentWelshNeeds": null,
               "respondentWelshNeedsList": [
-
               ],
               "respondentInterpreterNeeds": [
-
               ],
               "respondentIntermediaryNeeds": null,
               "isRespondentNeededInterpreter": null,
@@ -2818,7 +2771,6 @@
               "previousName": null,
               "addressHistory": {
                 "previousAddressHistory": [
-
                 ],
                 "isAtAddressLessThan5Years": null
               }
@@ -2932,7 +2884,6 @@
                 "c1AchildsCurrentLocation": null,
                 "c1AabductionReasonOutsideUk": null,
                 "c1ApossessionChildrenPassport": [
-
                 ],
                 "c1AchildrenMoreThanOnePassport": null,
                 "c1ApreviousAbductionsShortDesc": null,
@@ -3000,26 +2951,20 @@
                 "c1AsupervisionAgreementDetails": null
               },
               "concernAboutChild": [
-
               ],
               "haveSafetyConcerns": null,
               "safetyConcernAbout": [
-
               ],
               "concernAboutRespondent": [
-
               ]
             },
             "supportYouNeed": {
               "docsDetails": null,
               "docsSupport": [
-
               ],
               "courtComfort": [
-
               ],
               "courtHearing": [
-
               ],
               "otherDetails": null,
               "hearingDetails": null,
@@ -3028,29 +2973,23 @@
               "languageDetails": null,
               "lightingDetails": null,
               "attendingToCourt": [
-
               ],
               "describeOtherNeed": null,
               "helpCommunication": [
-
               ],
               "largePrintDetails": null,
               "travellingToCourt": [
-
               ],
               "safetyArrangements": [
-
               ],
               "otherProvideDetails": null,
               "signLanguageDetails": null,
               "languageRequirements": [
-
               ],
               "supportWorkerDetails": null,
               "differentChairDetails": null,
               "familyProviderDetails": null,
               "reasonableAdjustments": [
-
               ],
               "travellingOtherDetails": null,
               "communicationSupportOther": null,
@@ -3060,18 +2999,15 @@
             "keepDetailsPrivate": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
             "respChildAbuseInfo": [
-
             ],
             "c7ResponseSubmitted": null,
             "legalRepresentation": null,
             "c1AResponseSubmitted": null,
             "respDomesticAbuseInfo": [
-
             ],
             "respOtherConcernsInfo": {
               "childSpendingSupervisedTime": null,
@@ -3082,7 +3018,6 @@
             "respChildAbductionInfo": {
               "whereIsChild": null,
               "whoHasChildPassport": [
-
               ],
               "childrenHavePassport": null,
               "whoHasChildPassportOther": null,
@@ -3097,7 +3032,6 @@
             "respKeepDetailsPrivate": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
@@ -3169,7 +3103,6 @@
             },
             "currentOrPreviousProceedings": {
               "proceedingsList": [
-
               ],
               "courtOrderMadeForProtection": null,
               "haveChildrenBeenInvolvedInCourtCase": null
@@ -3185,7 +3118,6 @@
               "reasonForJurisdictionDetails": null
             },
             "respondentExistingProceedings": [
-
             ],
             "internationalElementParentInfo": {
               "reasonForChild": null,
@@ -3233,7 +3165,6 @@
             "respKeepDetailsPrivateConfidentiality": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
@@ -3251,7 +3182,6 @@
           },
           "partyLevelFlag": {
             "details": [
-
             ],
             "partyName": null,
             "roleOnCase": null
@@ -3284,7 +3214,6 @@
           "representativeFirstName": null,
           "canYouProvidePhoneNumber": "No",
           "applicantPreferredContact": [
-
           ],
           "canYouProvideEmailAddress": "Yes",
           "isAtAddressLessThan5Years": null,
@@ -3389,7 +3318,6 @@
     "childrenKnownToLocalAuthorityTextArea": null,
     "caseFlags": {
       "details": [
-
       ],
       "partyName": null,
       "roleOnCase": null
@@ -3442,10 +3370,8 @@
               "haveAnyDisability": null,
               "respondentWelshNeeds": null,
               "respondentWelshNeedsList": [
-
               ],
               "respondentInterpreterNeeds": [
-
               ],
               "respondentIntermediaryNeeds": null,
               "isRespondentNeededInterpreter": null,
@@ -3474,7 +3400,6 @@
               "previousName": null,
               "addressHistory": {
                 "previousAddressHistory": [
-
                 ],
                 "isAtAddressLessThan5Years": null
               }
@@ -3588,7 +3513,6 @@
                 "c1AchildsCurrentLocation": null,
                 "c1AabductionReasonOutsideUk": null,
                 "c1ApossessionChildrenPassport": [
-
                 ],
                 "c1AchildrenMoreThanOnePassport": null,
                 "c1ApreviousAbductionsShortDesc": null,
@@ -3656,26 +3580,20 @@
                 "c1AsupervisionAgreementDetails": null
               },
               "concernAboutChild": [
-
               ],
               "haveSafetyConcerns": null,
               "safetyConcernAbout": [
-
               ],
               "concernAboutRespondent": [
-
               ]
             },
             "supportYouNeed": {
               "docsDetails": null,
               "docsSupport": [
-
               ],
               "courtComfort": [
-
               ],
               "courtHearing": [
-
               ],
               "otherDetails": null,
               "hearingDetails": null,
@@ -3684,29 +3602,23 @@
               "languageDetails": null,
               "lightingDetails": null,
               "attendingToCourt": [
-
               ],
               "describeOtherNeed": null,
               "helpCommunication": [
-
               ],
               "largePrintDetails": null,
               "travellingToCourt": [
-
               ],
               "safetyArrangements": [
-
               ],
               "otherProvideDetails": null,
               "signLanguageDetails": null,
               "languageRequirements": [
-
               ],
               "supportWorkerDetails": null,
               "differentChairDetails": null,
               "familyProviderDetails": null,
               "reasonableAdjustments": [
-
               ],
               "travellingOtherDetails": null,
               "communicationSupportOther": null,
@@ -3716,18 +3628,15 @@
             "keepDetailsPrivate": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
             "respChildAbuseInfo": [
-
             ],
             "c7ResponseSubmitted": null,
             "legalRepresentation": null,
             "c1AResponseSubmitted": null,
             "respDomesticAbuseInfo": [
-
             ],
             "respOtherConcernsInfo": {
               "childSpendingSupervisedTime": null,
@@ -3738,7 +3647,6 @@
             "respChildAbductionInfo": {
               "whereIsChild": null,
               "whoHasChildPassport": [
-
               ],
               "childrenHavePassport": null,
               "whoHasChildPassportOther": null,
@@ -3753,7 +3661,6 @@
             "respKeepDetailsPrivate": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
@@ -3819,7 +3726,6 @@
             },
             "currentOrPreviousProceedings": {
               "proceedingsList": [
-
               ],
               "courtOrderMadeForProtection": null,
               "haveChildrenBeenInvolvedInCourtCase": null
@@ -3835,7 +3741,6 @@
               "reasonForJurisdictionDetails": null
             },
             "respondentExistingProceedings": [
-
             ],
             "internationalElementParentInfo": {
               "reasonForChild": null,
@@ -3877,7 +3782,6 @@
             "respKeepDetailsPrivateConfidentiality": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
@@ -3890,11 +3794,9 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-
           },
           "partyLevelFlag": {
             "details": [
-
             ],
             "partyName": "Mary Richards",
             "roleOnCase": "Respondent"
@@ -3927,7 +3829,6 @@
           "representativeFirstName": null,
           "canYouProvidePhoneNumber": "No",
           "applicantPreferredContact": [
-
           ],
           "canYouProvideEmailAddress": "Yes",
           "isAtAddressLessThan5Years": null,
@@ -3938,7 +3839,6 @@
           "doTheyHaveLegalRepresentation": "no",
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [
-
           ],
           "isAtAddressLessThan5YearsWithDontKnow": "no"
         }
@@ -3990,10 +3890,8 @@
               "haveAnyDisability": null,
               "respondentWelshNeeds": null,
               "respondentWelshNeedsList": [
-
               ],
               "respondentInterpreterNeeds": [
-
               ],
               "respondentIntermediaryNeeds": null,
               "isRespondentNeededInterpreter": null,
@@ -4022,7 +3920,6 @@
               "previousName": null,
               "addressHistory": {
                 "previousAddressHistory": [
-
                 ],
                 "isAtAddressLessThan5Years": null
               }
@@ -4136,7 +4033,6 @@
                 "c1AchildsCurrentLocation": null,
                 "c1AabductionReasonOutsideUk": null,
                 "c1ApossessionChildrenPassport": [
-
                 ],
                 "c1AchildrenMoreThanOnePassport": null,
                 "c1ApreviousAbductionsShortDesc": null,
@@ -4204,26 +4100,20 @@
                 "c1AsupervisionAgreementDetails": null
               },
               "concernAboutChild": [
-
               ],
               "haveSafetyConcerns": null,
               "safetyConcernAbout": [
-
               ],
               "concernAboutRespondent": [
-
               ]
             },
             "supportYouNeed": {
               "docsDetails": null,
               "docsSupport": [
-
               ],
               "courtComfort": [
-
               ],
               "courtHearing": [
-
               ],
               "otherDetails": null,
               "hearingDetails": null,
@@ -4232,29 +4122,23 @@
               "languageDetails": null,
               "lightingDetails": null,
               "attendingToCourt": [
-
               ],
               "describeOtherNeed": null,
               "helpCommunication": [
-
               ],
               "largePrintDetails": null,
               "travellingToCourt": [
-
               ],
               "safetyArrangements": [
-
               ],
               "otherProvideDetails": null,
               "signLanguageDetails": null,
               "languageRequirements": [
-
               ],
               "supportWorkerDetails": null,
               "differentChairDetails": null,
               "familyProviderDetails": null,
               "reasonableAdjustments": [
-
               ],
               "travellingOtherDetails": null,
               "communicationSupportOther": null,
@@ -4264,18 +4148,15 @@
             "keepDetailsPrivate": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
             "respChildAbuseInfo": [
-
             ],
             "c7ResponseSubmitted": null,
             "legalRepresentation": null,
             "c1AResponseSubmitted": null,
             "respDomesticAbuseInfo": [
-
             ],
             "respOtherConcernsInfo": {
               "childSpendingSupervisedTime": null,
@@ -4286,7 +4167,6 @@
             "respChildAbductionInfo": {
               "whereIsChild": null,
               "whoHasChildPassport": [
-
               ],
               "childrenHavePassport": null,
               "whoHasChildPassportOther": null,
@@ -4301,7 +4181,6 @@
             "respKeepDetailsPrivate": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
@@ -4367,7 +4246,6 @@
             },
             "currentOrPreviousProceedings": {
               "proceedingsList": [
-
               ],
               "courtOrderMadeForProtection": null,
               "haveChildrenBeenInvolvedInCourtCase": null
@@ -4383,7 +4261,6 @@
               "reasonForJurisdictionDetails": null
             },
             "respondentExistingProceedings": [
-
             ],
             "internationalElementParentInfo": {
               "reasonForChild": null,
@@ -4425,7 +4302,6 @@
             "respKeepDetailsPrivateConfidentiality": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
@@ -4438,11 +4314,9 @@
           "placeOfBirth": null,
           "previousName": null,
           "solicitorOrg": {
-
           },
           "partyLevelFlag": {
             "details": [
-
             ],
             "partyName": "Elise Lynn",
             "roleOnCase": "Respondent"
@@ -4475,7 +4349,6 @@
           "representativeFirstName": null,
           "canYouProvidePhoneNumber": "No",
           "applicantPreferredContact": [
-
           ],
           "canYouProvideEmailAddress": "Yes",
           "isAtAddressLessThan5Years": null,
@@ -4486,7 +4359,6 @@
           "doTheyHaveLegalRepresentation": "no",
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [
-
           ],
           "isAtAddressLessThan5YearsWithDontKnow": "no"
         }
@@ -4538,10 +4410,8 @@
               "haveAnyDisability": null,
               "respondentWelshNeeds": null,
               "respondentWelshNeedsList": [
-
               ],
               "respondentInterpreterNeeds": [
-
               ],
               "respondentIntermediaryNeeds": null,
               "isRespondentNeededInterpreter": null,
@@ -4570,7 +4440,6 @@
               "previousName": null,
               "addressHistory": {
                 "previousAddressHistory": [
-
                 ],
                 "isAtAddressLessThan5Years": null
               }
@@ -4684,7 +4553,6 @@
                 "c1AchildsCurrentLocation": null,
                 "c1AabductionReasonOutsideUk": null,
                 "c1ApossessionChildrenPassport": [
-
                 ],
                 "c1AchildrenMoreThanOnePassport": null,
                 "c1ApreviousAbductionsShortDesc": null,
@@ -4752,26 +4620,20 @@
                 "c1AsupervisionAgreementDetails": null
               },
               "concernAboutChild": [
-
               ],
               "haveSafetyConcerns": null,
               "safetyConcernAbout": [
-
               ],
               "concernAboutRespondent": [
-
               ]
             },
             "supportYouNeed": {
               "docsDetails": null,
               "docsSupport": [
-
               ],
               "courtComfort": [
-
               ],
               "courtHearing": [
-
               ],
               "otherDetails": null,
               "hearingDetails": null,
@@ -4780,29 +4642,23 @@
               "languageDetails": null,
               "lightingDetails": null,
               "attendingToCourt": [
-
               ],
               "describeOtherNeed": null,
               "helpCommunication": [
-
               ],
               "largePrintDetails": null,
               "travellingToCourt": [
-
               ],
               "safetyArrangements": [
-
               ],
               "otherProvideDetails": null,
               "signLanguageDetails": null,
               "languageRequirements": [
-
               ],
               "supportWorkerDetails": null,
               "differentChairDetails": null,
               "familyProviderDetails": null,
               "reasonableAdjustments": [
-
               ],
               "travellingOtherDetails": null,
               "communicationSupportOther": null,
@@ -4812,18 +4668,15 @@
             "keepDetailsPrivate": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
             "respChildAbuseInfo": [
-
             ],
             "c7ResponseSubmitted": null,
             "legalRepresentation": null,
             "c1AResponseSubmitted": null,
             "respDomesticAbuseInfo": [
-
             ],
             "respOtherConcernsInfo": {
               "childSpendingSupervisedTime": null,
@@ -4834,7 +4687,6 @@
             "respChildAbductionInfo": {
               "whereIsChild": null,
               "whoHasChildPassport": [
-
               ],
               "childrenHavePassport": null,
               "whoHasChildPassportOther": null,
@@ -4849,7 +4701,6 @@
             "respKeepDetailsPrivate": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
@@ -4915,7 +4766,6 @@
             },
             "currentOrPreviousProceedings": {
               "proceedingsList": [
-
               ],
               "courtOrderMadeForProtection": null,
               "haveChildrenBeenInvolvedInCourtCase": null
@@ -4931,7 +4781,6 @@
               "reasonForJurisdictionDetails": null
             },
             "respondentExistingProceedings": [
-
             ],
             "internationalElementParentInfo": {
               "reasonForChild": null,
@@ -4973,7 +4822,6 @@
             "respKeepDetailsPrivateConfidentiality": {
               "confidentiality": null,
               "confidentialityList": [
-
               ],
               "otherPeopleKnowYourContactDetails": null
             },
@@ -4986,11 +4834,9 @@
           "placeOfBirth": null,
           "previousName": null,
           "solicitorOrg": {
-
           },
           "partyLevelFlag": {
             "details": [
-
             ],
             "partyName": "David Carman",
             "roleOnCase": "Respondent"
@@ -5023,7 +4869,6 @@
           "representativeFirstName": null,
           "canYouProvidePhoneNumber": "No",
           "applicantPreferredContact": [
-
           ],
           "canYouProvideEmailAddress": "Yes",
           "isAtAddressLessThan5Years": null,
@@ -5034,7 +4879,6 @@
           "doTheyHaveLegalRepresentation": "no",
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [
-
           ],
           "isAtAddressLessThan5YearsWithDontKnow": "no"
         }
@@ -5058,7 +4902,6 @@
         "value": {
           "email": "applicant1@example.net",
           "address": {
-
           },
           "lastName": "Doe",
           "firstName": "John",
@@ -5176,32 +5019,25 @@
     "ordersOtherInjunctive": "No",
     "allegationsOfHarmOrdersTable": {
       "occupationOrder": {
-
       },
       "ordersOccupation": "No",
       "restrainingOrder": {
-
       },
       "ordersRestraining": "No",
       "nonMolestationOrder": {
-
       },
       "ordersNonMolestation": "No",
       "otherInjunctiveOrder": {
-
       },
       "ordersOtherInjunctive": "No",
       "undertakingInPlaceOrder": {
-
       },
       "ordersUndertakingInPlace": "No",
       "forcedMarriageProtectionOrder": {
-
       },
       "ordersForcedMarriageProtection": "No"
     },
     "judgeName": {
-
     },
     "otherProceedingsForSummaryTab": [
       {

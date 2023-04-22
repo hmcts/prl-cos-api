@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
@@ -22,14 +21,25 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANT_TABLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT_TABLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_TABLE;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 
 @Slf4j
 @Service
@@ -165,13 +175,32 @@ public class AllTabServiceImpl implements AllTabsService {
     }
 
     public void updatePartyDetailsForNoc(CaseData caseData, Optional<SolicitorRole> solicitorRole) {
-        if (caseData != null) {
-            Map<String, Object> caseDataUpdatedMap = new HashMap<>();
-            if (solicitorRole.isPresent() && CARESPONDENT.equals(
-                solicitorRole.get().getRepresenting()) && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                caseDataUpdatedMap.put(RESPONDENTS, caseData.getRespondents());
-                caseDataUpdatedMap.put(RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
+        Map<String, Object> caseDataUpdatedMap = new HashMap<>();
+        if (caseData != null && solicitorRole.isPresent()) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                if (CARESPONDENT.equals(solicitorRole.get().getRepresenting())) {
+                    caseDataUpdatedMap.put(C100_RESPONDENTS, caseData.getRespondents());
+                    caseDataUpdatedMap.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
+                } else if (CAAPPLICANT.equals(solicitorRole.get().getRepresenting())) {
+                    caseDataUpdatedMap.put(C100_APPLICANTS, caseData.getApplicants());
+                    caseDataUpdatedMap.put(C100_APPLICANT_TABLE, applicationsTabService.getApplicantsTable(caseData));
+                }
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                if (DAAPPLICANT.equals(solicitorRole.get().getRepresenting())) {
+                    caseDataUpdatedMap.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
+                    caseDataUpdatedMap.put(
+                        FL401_APPLICANT_TABLE,
+                        applicationsTabService.getFl401ApplicantsTable(caseData)
+                    );
+                } else if (DARESPONDENT.equals(solicitorRole.get().getRepresenting())) {
+                    caseDataUpdatedMap.put(FL401_RESPONDENTS, caseData.getApplicantsFL401());
+                    caseDataUpdatedMap.put(
+                        FL401_RESPONDENT_TABLE,
+                        applicationsTabService.getFl401RespondentTable(caseData)
+                    );
+                }
             }
+
             refreshCcdUsingEvent(caseData, caseDataUpdatedMap);
         }
     }
