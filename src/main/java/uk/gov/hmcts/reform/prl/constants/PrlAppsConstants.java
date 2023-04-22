@@ -13,7 +13,7 @@ public class PrlAppsConstants {
 
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
-    
+
     public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
     public static final String STATE = "state";
 
@@ -437,4 +437,5 @@ public class PrlAppsConstants {
 
     public static final String CASE_NOTES = "caseNotes";
     public static final String COLON_SEPERATOR = ":";
+    public static final String FL404B_DRAFT_DOCUMENT = "FL404B_DRAFT_DOCUMENT";
 }

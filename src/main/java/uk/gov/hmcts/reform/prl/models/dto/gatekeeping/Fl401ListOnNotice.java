@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.util.List;
@@ -20,5 +21,7 @@ public class Fl401ListOnNotice {
     private final Fl401ListOnNoticeDirections fl401ListOnNoticeAdditionalDirections;
     private final List<Element<HearingData>> fl401ListOnNoticeHearingDetails;
     private final String fl401ListOnNoticeDirectionsToAdmin;
+    private Fl401ListOnNoticeAllocatedJudge fl401ListOnNoticeAllocatedJudge;
+    private final Document fl401ListOnNoticeDocument;
 
 }
