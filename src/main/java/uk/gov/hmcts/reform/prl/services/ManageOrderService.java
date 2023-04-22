@@ -1392,10 +1392,12 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         GeneratedDocumentInfo generatedDocumentInfo = null;
         Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
-        List<Element<Child>> children = dynamicMultiSelectListService
-            .getChildrenForDocmosis(caseData);
-        if (!children.isEmpty()) {
-            caseData.setChildrenListForDocmosis(children);
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            List<Element<Child>> children = dynamicMultiSelectListService
+                .getChildrenForDocmosis(caseData);
+            if (!children.isEmpty()) {
+                caseData.setChildrenListForDocmosis(children);
+            }
         }
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
