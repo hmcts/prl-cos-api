@@ -381,6 +381,7 @@ public class DraftAnOrderService {
     public Map<String, Object> populateCommonDraftOrderFields(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        caseDataMap.put("orderNameLabel", selectedOrder.getTypeOfOrder());
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put("dateOrderMade", selectedOrder.getDateOrderMade());
