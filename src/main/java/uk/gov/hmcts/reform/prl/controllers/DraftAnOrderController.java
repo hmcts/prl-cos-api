@@ -74,11 +74,8 @@ public class DraftAnOrderController {
             .selectedOrder(null != caseData.getCreateSelectOrderOptions()
                                ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
             .build();
-        if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("selectedOrder", caseData.getCreateSelectOrderOptions() != null
-            ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
 
         log.info("C21 Draft order options in callback:: {}", (null != caseData.getManageOrders())
             ? caseData.getManageOrders().getC21OrderOptions() : null);
@@ -91,7 +88,7 @@ public class DraftAnOrderController {
                 ? manageOrders.getC21OrderOptions().getDisplayedValue() : null);
         }
 
-        if (caseDataUpdated.get("selectedOrder") == "Standard directions order") {
+        if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
             List<String> errorList = new ArrayList<>();
             errorList.add(
                 "Solicitors cannot draft a Standard Directions order");
@@ -108,10 +105,10 @@ public class DraftAnOrderController {
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
             caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
-
             return CallbackResponse.builder()
                 .data(caseData).build();
         }
+
     }
 
     @PostMapping(path = "/populate-draft-order-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -136,7 +133,11 @@ public class DraftAnOrderController {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         } else {
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
-            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
+            caseDataUpdated.putAll(manageOrderService.getCaseData(
+                authorisation,
+                caseData,
+                caseData.getCreateSelectOrderOptions()
+            ));
         }
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
