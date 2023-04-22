@@ -386,16 +386,18 @@ public class DraftAnOrderService {
             caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
         } else {
             log.info("inside populate custom SDO fields");
-            caseDataMap.putAll(populateStandardDirectionOrder(selectedOrder));
+            caseData = caseData.toBuilder().standardDirectionOrder(populateStandardDirectionOrder(selectedOrder)).build();
+            caseDataMap = objectMapper.convertValue(caseData, Map.class);
+
         }
         caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        log.info("caseDataMap ===== =====> " + caseDataMap);
         return caseDataMap;
     }
 
-    private Map<String, Object> populateStandardDirectionOrder(DraftOrder draftOrder) {
-        Map<String, Object> standardDirectionOrderMap = new HashMap<>();
+    private StandardDirectionOrder populateStandardDirectionOrder(DraftOrder draftOrder) {
+        StandardDirectionOrder standardDirectionOrder = null;
         if (null != draftOrder.getSdoDetails()) {
-            StandardDirectionOrder standardDirectionOrder;
             try {
                 String sdoDetailsJson = objectMapper.writeValueAsString(draftOrder.getSdoDetails());
                 standardDirectionOrder = objectMapper.readValue(sdoDetailsJson, StandardDirectionOrder.class);
@@ -404,9 +406,8 @@ public class DraftAnOrderService {
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
-            standardDirectionOrderMap = objectMapper.convertValue(standardDirectionOrder, Map.class);
         }
-        return standardDirectionOrderMap;
+        return standardDirectionOrder;
     }
 
     public Map<String, Object> populateCommonDraftOrderFields(CaseData caseData) {
@@ -778,9 +779,10 @@ public class DraftAnOrderService {
             log.info("reset hearingData");
             caseDataUpdated.put(hearingKey, hearingData);
         } else {
-            log.info("set existing hearingData ==> " + existingHearingData);
+            log.info("set existing hearingData");
             caseDataUpdated.put(SDO_PERMISSION_HEARING_DETAILS, existingHearingData);
         }
+        log.info("existing hearingData ==> " + existingHearingData);
     }
 
     private static void populateDocumentAndEvidenceText(CaseData caseData, Map<String, Object> caseDataUpdated) {
