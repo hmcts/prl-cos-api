@@ -189,7 +189,7 @@ public class HearingDataService {
 
     }
 
-    protected List<DynamicListElement> getLinkedCases(String authorisation, CaseData caseData) {
+    public List<DynamicListElement> getLinkedCases(String authorisation, CaseData caseData) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         try {
             log.info("Linked case method ", caseData.getId());

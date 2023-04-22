@@ -74,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGDOCGEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL404B_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH_DOC_GEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
@@ -260,6 +261,13 @@ public class DocumentGenService {
 
     @Value("${document.templates.citizen.prl_citizen_upload_filename}")
     protected String prlCitizenUploadFileName;
+
+    @Value("${document.templates.common.prl_fl404b_draft_template}")
+    protected String fl404bDraftTemplate;
+
+    @Value("${document.templates.common.prl_fl404b_draft_filename}")
+    protected String fl404bDraftFile;
+
 
     @Autowired
     private DgsService dgsService;
@@ -670,6 +678,9 @@ public class DocumentGenService {
             case C7_FINAL_WELSH:
                 fileName = docC7FinalWelshFilename;
                 break;
+            case FL404B_DRAFT_DOCUMENT:
+                fileName = fl404bDraftFile;
+                break;
             default:
                 fileName = "";
         }
@@ -758,6 +769,9 @@ public class DocumentGenService {
                 break;
             case C7_FINAL_WELSH:
                 template = docC7FinalWelshTemplate;
+                break;
+            case FL404B_DRAFT_DOCUMENT:
+                template = fl404bDraftTemplate;
                 break;
             default:
                 template = "";

@@ -14,8 +14,8 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum FL401ListOnNoticeDirectionsEnum {
     @JsonProperty("reducedNoticedPeriod")
     reducedNoticedPeriod("reducedNoticedPeriod", "Reduced notice period"),
-    @JsonProperty("listWithChildArrangementsCase")
-    listWithChildArrangementsCase("listWithChildArrangementsCase", "List with Child arrangements case"),
+    @JsonProperty("listWithChildArrangementCases")
+    listWithChildArrangementCases("listWithChildArrangementCases", "List with Child arrangements case"),
     @JsonProperty("applicantNeedsToProvideInfo")
     applicantNeedsToProvideInfo("applicantNeedsToProvideInfo", "Applicant needs to provide further information"),
     @JsonProperty("respondentNeedsToFileStatement")
