@@ -402,13 +402,17 @@ public class ManageOrdersController {
             IS_THE_ORDER_ABOUT_ALL_CHILDREN) != null && !caseDetails.getData().get(
             IS_THE_ORDER_ABOUT_ALL_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
             caseDetails.getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
-                .listItems(List.of(DynamicMultiselectListElement.EMPTY)).build());
+                .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+                .value(List.of(DynamicMultiselectListElement.EMPTY))
+                .build());
         }
         if (caseDetails.getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN) && caseDetails.getData().get(
             IS_THE_ORDER_ABOUT_CHILDREN) != null && caseDetails.getData().get(
             IS_THE_ORDER_ABOUT_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
             caseDetails.getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
-                .listItems(List.of(DynamicMultiselectListElement.EMPTY)).build());
+                .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+                    .value(List.of(DynamicMultiselectListElement.EMPTY))
+                .build());
         }
     }
 }
