@@ -325,7 +325,6 @@ public class DraftAnOrderService {
             caseDataMap.put("uploadOrAmendDirectionsFromJudge", selectedOrder.getJudgeNotes());
         }
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
-        log.info("orderUploadedAsDraftFlag value:: {} ", caseDataMap.get("orderUploadedAsDraftFlag"));
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
         DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
         if (language.isGenEng()) {
@@ -384,7 +383,6 @@ public class DraftAnOrderService {
             caseDataMap.putAll(populateStandardDirectionOrder(selectedOrder, caseData, authorisation));
         }
         caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
-        log.info("caseDataMap ===== =====> " + caseDataMap);
         return caseDataMap;
     }
 
@@ -704,7 +702,6 @@ public class DraftAnOrderService {
     }
 
     private static void populateRightToAskCourt(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        log.info("getSdoRightToAskCourt() ====" + caseData.getStandardDirectionOrder().getSdoRightToAskCourt());
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoRightToAskCourt())) {
             caseDataUpdated.put(
                 "sdoRightToAskCourt",
@@ -769,27 +766,20 @@ public class DraftAnOrderService {
                                                             HearingData existingHearingData, String hearingKey) {
         if (existingHearingData == null
             || existingHearingData.getHearingDateConfirmOptionEnum() == null) {
-            log.info("reset hearingData");
             caseDataUpdated.put(hearingKey, hearingData);
         } else {
-            log.info("set existing hearingData");
             caseDataUpdated.put(SDO_PERMISSION_HEARING_DETAILS, existingHearingData);
         }
-        log.info("existing hearingData ==> " + existingHearingData);
     }
 
     private static void populateDocumentAndEvidenceText(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        log.info("sdoSpecifiedDocuments ===>" + caseData.getStandardDirectionOrder().getSdoSpecifiedDocuments());
-        log.info("sdoSpipAttendance ===>" + caseData.getStandardDirectionOrder().getSdoSpipAttendance());
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSpecifiedDocuments())) {
-            log.info("inside sdoCrossExaminationEx740 ===>");
             caseDataUpdated.put(
                 "sdoSpecifiedDocuments",
                 SPECIFIED_DOCUMENTS
             );
         }
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSpipAttendance())) {
-            log.info("inside sdoSpipAttendance ===>");
             caseDataUpdated.put(
                 "sdoSpipAttendance",
                 SPIP_ATTENDANCE
@@ -798,52 +788,34 @@ public class DraftAnOrderService {
     }
 
     private static void populateCourtText(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        log.info("getSdoCrossExaminationEx740 ===>" + caseData.getStandardDirectionOrder().getSdoCrossExaminationEx740());
-        log.info("sdoCrossExaminationQualifiedLegal ===>" + caseData.getStandardDirectionOrder().getSdoCrossExaminationQualifiedLegal());
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoCrossExaminationEx740())) {
-            log.info("inside sdoCrossExaminationEx740 ===>");
             caseDataUpdated.put("sdoCrossExaminationEx740", CROSS_EXAMINATION_EX740);
         }
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoCrossExaminationQualifiedLegal())) {
-            log.info("inside sdoCrossExaminationQualifiedLegal ===>");
             caseDataUpdated.put("sdoCrossExaminationQualifiedLegal", CROSS_EXAMINATION_QUALIFIED_LEGAL);
         }
     }
 
     private static void populateHearingAndNextStepsText(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        log.info("SdoNextStepsAfterSecondGK ===>" + caseData.getStandardDirectionOrder().getSdoNextStepsAfterSecondGK());
-        log.info("sdoHearingNotNeeded ===>" + caseData.getStandardDirectionOrder().getSdoHearingNotNeeded());
-        log.info("sdoParticipationDirections ===>" + caseData.getStandardDirectionOrder().getSdoParticipationDirections());
-        log.info("sdoJoiningInstructionsForRH ===>" + caseData.getStandardDirectionOrder().getSdoJoiningInstructionsForRH());
-        log.info("sdoUpdateContactDetails ===>" + caseData.getStandardDirectionOrder().getSdoUpdateContactDetails());
-        log.info("sdoPermissionHearingDirections ===>" + caseData.getStandardDirectionOrder().getSdoPermissionHearingDirections());
-        log.info("sdoCrossExaminationEx741 ===>" + caseData.getStandardDirectionOrder().getSdoCrossExaminationEx741());
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoNextStepsAfterSecondGK())) {
-            log.info("inside sdoNextStepsAfterSecondGK ===>");
             caseDataUpdated.put("sdoNextStepsAfterSecondGK", SAFE_GUARDING_LETTER);
         }
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoHearingNotNeeded())) {
-            log.info("inside sdoHearingNotNeeded ===>");
             caseDataUpdated.put("sdoHearingNotNeeded", HEARING_NOT_NEEDED);
         }
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoParticipationDirections())) {
-            log.info("inside sdoParticipationDirections ===>");
             caseDataUpdated.put("sdoParticipationDirections", PARTICIPATION_DIRECTIONS);
         }
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoJoiningInstructionsForRH())) {
-            log.info("inside sdoJoiningInstructionsForRH ===>");
             caseDataUpdated.put("sdoJoiningInstructionsForRH", JOINING_INSTRUCTIONS);
         }
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoUpdateContactDetails())) {
-            log.info("inside sdoUpdateContactDetails ===>");
             caseDataUpdated.put("sdoUpdateContactDetails", UPDATE_CONTACT_DETAILS);
         }
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoPermissionHearingDirections())) {
-            log.info("inside sdoPermissionHearingDirections ===>");
             caseDataUpdated.put("sdoPermissionHearingDirections", SDO_PERMISSION_HEARING);
         }
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoCrossExaminationEx741())) {
-            log.info("inside sdoCrossExaminationEx741 ===>");
             caseDataUpdated.put("sdoCrossExaminationEx741", SDO_CROSS_EXAMINATION_EX741);
         }
     }
