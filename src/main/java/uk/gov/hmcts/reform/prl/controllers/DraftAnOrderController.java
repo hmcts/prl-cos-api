@@ -149,7 +149,7 @@ public class DraftAnOrderController {
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
-            draftAnOrderService.populateStandardDirectionOrderFields(authorisation, caseData, caseDataUpdated);
+            draftAnOrderService.populateStandardDirectionOrderDefaultFields(authorisation, caseData, caseDataUpdated);
         } else {
             List<String> errorList = new ArrayList<>();
             errorList.add(

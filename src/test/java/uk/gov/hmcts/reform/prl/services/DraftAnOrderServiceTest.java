@@ -576,7 +576,8 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(
-            caseData
+            caseData,
+            "testAuth"
         );
 
         assertEquals("test", caseDataMap.get("parentName"));
@@ -892,7 +893,7 @@ public class DraftAnOrderServiceTest {
             new ArrayList<>()
         )).thenReturn(DynamicList.builder().build());
 
-        draftAnOrderService.populateStandardDirectionOrderFields("test-token", caseData, caseDataUpdated);
+        draftAnOrderService.populateStandardDirectionOrderDefaultFields("test-token", caseData, caseDataUpdated);
 
         assertEquals(RIGHT_TO_ASK_COURT, caseDataUpdated.get("sdoRightToAskCourt"));
     }
@@ -922,9 +923,9 @@ public class DraftAnOrderServiceTest {
             new ArrayList<>()
         )).thenReturn(DynamicList.builder().build());
 
-        draftAnOrderService.populateStandardDirectionOrderFields("test-token", caseData, caseDataUpdated);
+        draftAnOrderService.populateStandardDirectionOrderDefaultFields("test-token", caseData, caseDataUpdated);
 
-        assertNull(caseDataUpdated.get("sdoRightToAskCourt"));
+        assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
     }
 
     @Test

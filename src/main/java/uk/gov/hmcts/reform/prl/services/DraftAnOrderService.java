@@ -20,11 +20,6 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -346,7 +341,7 @@ public class DraftAnOrderService {
         return caseDataMap;
     }
 
-    public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData) {
+    public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData, String authorisation) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectedOrder.getOrderType())) {
@@ -386,28 +381,30 @@ public class DraftAnOrderService {
             caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
         } else {
             log.info("inside populate custom SDO fields");
-            caseData = caseData.toBuilder().standardDirectionOrder(populateStandardDirectionOrder(selectedOrder)).build();
-            caseDataMap = objectMapper.convertValue(caseData, Map.class);
-
+            caseDataMap.putAll(populateStandardDirectionOrder(selectedOrder, caseData, authorisation));
         }
         caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         log.info("caseDataMap ===== =====> " + caseDataMap);
         return caseDataMap;
     }
 
-    private StandardDirectionOrder populateStandardDirectionOrder(DraftOrder draftOrder) {
-        StandardDirectionOrder standardDirectionOrder = null;
+    private Map<String, Object> populateStandardDirectionOrder(DraftOrder draftOrder, CaseData caseData, String authorisation) {
+        Map<String, Object> standardDirectionOrderMap = new HashMap<>();
         if (null != draftOrder.getSdoDetails()) {
+            StandardDirectionOrder standardDirectionOrder;
             try {
                 String sdoDetailsJson = objectMapper.writeValueAsString(draftOrder.getSdoDetails());
                 standardDirectionOrder = objectMapper.readValue(sdoDetailsJson, StandardDirectionOrder.class);
+                caseData = caseData.toBuilder().standardDirectionOrder(standardDirectionOrder).build();
+                standardDirectionOrderMap = objectMapper.convertValue(standardDirectionOrder, Map.class);
+                populateStandardDirectionOrderDefaultFields(authorisation, caseData, standardDirectionOrderMap);
                 log.info("sdoDetailsJson ===> " + sdoDetailsJson);
-                log.info("standardDirectionOrder ===> " + standardDirectionOrder);
+                log.info("standardDirectionOrderMap ===> " + standardDirectionOrderMap);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
         }
-        return standardDirectionOrder;
+        return standardDirectionOrderMap;
     }
 
     public Map<String, Object> populateCommonDraftOrderFields(CaseData caseData) {
@@ -687,7 +684,7 @@ public class DraftAnOrderService {
             && caseData.getStandardDirectionOrder().getSdoFurtherList().isEmpty());
     }
 
-    public void populateStandardDirectionOrderFields(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+    public void populateStandardDirectionOrderDefaultFields(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
         populateRightToAskCourt(caseData, caseDataUpdated);
         populateHearingAndNextStepsText(caseData, caseDataUpdated);
         populateCourtText(caseData, caseDataUpdated);
@@ -707,9 +704,7 @@ public class DraftAnOrderService {
     }
 
     private static void populateRightToAskCourt(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (!caseData.getStandardDirectionOrder().getSdoPreamblesList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoPreamblesList().contains(SdoPreamblesEnum.rightToAskCourt)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoRightToAskCourt())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoRightToAskCourt())) {
             caseDataUpdated.put(
                 "sdoRightToAskCourt",
                 RIGHT_TO_ASK_COURT
@@ -718,10 +713,7 @@ public class DraftAnOrderService {
     }
 
     private static void populateParentWithCare(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (!caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoOtherList().contains(
-            SdoOtherEnum.parentWithCare)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoParentWithCare())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoParentWithCare())) {
             caseDataUpdated.put(
                 "sdoParentWithCare",
                 PARENT_WITHCARE
@@ -786,19 +778,13 @@ public class DraftAnOrderService {
     }
 
     private static void populateDocumentAndEvidenceText(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
-            SdoDocumentationAndEvidenceEnum.specifiedDocuments)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSpecifiedDocuments())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSpecifiedDocuments())) {
             caseDataUpdated.put(
                 "sdoSpecifiedDocuments",
                 SPECIFIED_DOCUMENTS
             );
         }
-        if (!caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().contains(
-            SdoDocumentationAndEvidenceEnum.spipAttendance)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSpipAttendance())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSpipAttendance())) {
             caseDataUpdated.put(
                 "sdoSpipAttendance",
                 SPIP_ATTENDANCE
@@ -807,19 +793,13 @@ public class DraftAnOrderService {
     }
 
     private static void populateCourtText(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
-            SdoCourtEnum.crossExaminationEx740)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoCrossExaminationEx740())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoCrossExaminationEx740())) {
             caseDataUpdated.put(
                 "sdoCrossExaminationEx740",
                 CROSS_EXAMINATION_EX740
             );
         }
-        if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
-            SdoCourtEnum.crossExaminationQualifiedLegal)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoCrossExaminationQualifiedLegal())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoCrossExaminationQualifiedLegal())) {
             caseDataUpdated.put(
                 "sdoCrossExaminationQualifiedLegal",
                 CROSS_EXAMINATION_QUALIFIED_LEGAL
@@ -828,19 +808,13 @@ public class DraftAnOrderService {
     }
 
     private static void populateHearingAndNextStepsText(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
-            SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoNextStepsAfterSecondGK())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoNextStepsAfterSecondGK())) {
             caseDataUpdated.put(
                 "sdoNextStepsAfterSecondGK",
                 SAFE_GUARDING_LETTER
             );
         }
-        if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
-            SdoHearingsAndNextStepsEnum.hearingNotNeeded)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoHearingNotNeeded())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoHearingNotNeeded())) {
             caseDataUpdated.put(
                 "sdoHearingNotNeeded",
                 HEARING_NOT_NEEDED
@@ -850,34 +824,22 @@ public class DraftAnOrderService {
                 PARTICIPATION_DIRECTIONS
             );
         }
-        if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
-            SdoHearingsAndNextStepsEnum.joiningInstructions)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoJoiningInstructionsForRH())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoJoiningInstructionsForRH())) {
             caseDataUpdated.put(
                 "sdoJoiningInstructionsForRH",
                 JOINING_INSTRUCTIONS
             );
         }
-        if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
-            SdoHearingsAndNextStepsEnum.updateContactDetails)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoUpdateContactDetails())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoUpdateContactDetails())) {
             caseDataUpdated.put(
                 "sdoUpdateContactDetails",
                 UPDATE_CONTACT_DETAILS
             );
         }
-        if (!caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(
-            SdoHearingsAndNextStepsEnum.permissionHearing)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoPermissionHearingDirections())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoPermissionHearingDirections())) {
             caseDataUpdated.put("sdoPermissionHearingDirections", SDO_PERMISSION_HEARING);
         }
-        if (!caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoCourtList().contains(
-            SdoCourtEnum.crossExaminationEx741)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoCrossExaminationEx741())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoCrossExaminationEx741())) {
             caseDataUpdated.put("sdoCrossExaminationEx741", SDO_CROSS_EXAMINATION_EX741);
         }
     }
