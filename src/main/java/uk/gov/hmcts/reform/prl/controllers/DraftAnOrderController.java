@@ -244,8 +244,7 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("verifying hearing data while submitting************* {} ",
             callbackRequest.getCaseDetails().getData());
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated = draftAnOrderService.prepareDraftOrderCollection(
+        Map<String, Object> caseDataUpdated = draftAnOrderService.prepareDraftOrderCollection(
             authorisation,
             callbackRequest
         );
