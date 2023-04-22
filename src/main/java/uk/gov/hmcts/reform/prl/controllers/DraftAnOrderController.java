@@ -231,8 +231,6 @@ public class DraftAnOrderController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        ManageOrdersController.resetChildOptions(callbackRequest.getCaseDetails());
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.generateOrderDocument(
             authorisation,
             callbackRequest
