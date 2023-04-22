@@ -435,6 +435,15 @@ public class PrlAppsConstants {
     public static final String[] EMPTY_ARRAY = {};
     public static final String COLON_SEPERATOR = ":";
 
-    public static final String RESPONDENTS = "respondents";
-    public static final String RESPONDENT_TABLE = "respondentTable";
+    public static final String C100_RESPONDENTS = "respondents";
+    public static final String C100_RESPONDENT_TABLE = "respondentTable";
+
+    public static final String C100_APPLICANTS = "applicants";
+    public static final String C100_APPLICANT_TABLE = "applicantTable";
+
+    public static final String FL401_RESPONDENTS = "respondentsFL401";
+    public static final String FL401_RESPONDENT_TABLE = "fl401RespondentTable";
+
+    public static final String FL401_APPLICANTS = "applicantsFL401";
+    public static final String FL401_APPLICANT_TABLE = "fl401ApplicantTable";
 }
