@@ -410,8 +410,8 @@ public class ManageOrdersController {
             IS_THE_ORDER_ABOUT_CHILDREN) != null && caseDetails.getData().get(
             IS_THE_ORDER_ABOUT_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
             caseDetails.getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
-                .listItems(null)
-                    .value(null)
+                .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+                    .value(List.of(DynamicMultiselectListElement.EMPTY))
                 .build());
         }
     }
