@@ -1645,7 +1645,7 @@
     "daRespondentPolicy": {
       "Organisation": {
       },
-      "OrgPolicyCaseAssignedRole": "[FL401RESPODENTSOLICITOR]",
+      "OrgPolicyCaseAssignedRole": "[FL401RESPONDENTSOLICITOR]",
       "OrgPolicyReference": null
     }
   },
