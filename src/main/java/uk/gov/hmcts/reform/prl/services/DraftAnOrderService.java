@@ -575,6 +575,7 @@ public class DraftAnOrderService {
                         caseData.getApplicantsFL401().getFirstName(),
                         caseData.getApplicantsFL401().getLastName()
                     ))
+                    .fl404bCourtName(caseData.getCourtName())
                     .fl404bRespondentName(String.format(PrlAppsConstants.FORMAT,
                                                         caseData.getRespondentsFL401().getFirstName(),
                                                         caseData.getRespondentsFL401().getLastName()
