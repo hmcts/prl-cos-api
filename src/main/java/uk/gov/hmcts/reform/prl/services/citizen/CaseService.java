@@ -155,7 +155,10 @@ public class CaseService {
 
             String systemAuthorisation = systemUserService.getSysUserToken();
             String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
-            EventRequestData eventRequestData = coreCaseDataService.eventRequest(CaseEvent.LINK_CITIZEN, systemUpdateUserId);
+            EventRequestData eventRequestData = coreCaseDataService.eventRequest(
+                CaseEvent.LINK_CITIZEN,
+                systemUpdateUserId
+            );
             StartEventResponse startEventResponse =
                 coreCaseDataService.startUpdate(
                     systemAuthorisation,
@@ -189,29 +192,35 @@ public class CaseService {
         //Assumption is for C100 case PartyDetails will be part of list
         // and will always contain the partyId
         // whereas FL401 will have only one party details without any partyId
-        User user = User.builder().email(emailId)
-            .idamId(userId).build();
         if (partyId != null) {
-            getValuesFromPartyDetails(caseData, partyId, isApplicant, user);
+            getValuesFromPartyDetails(caseData, partyId, isApplicant, userId, emailId);
         } else {
             if (YesOrNo.Yes.equals(isApplicant)) {
+                User user = caseData.getApplicantsFL401().getUser().toBuilder().email(emailId)
+                    .idamId(userId).build();
                 caseData.getApplicantsFL401().setUser(user);
             } else {
+                User user = caseData.getRespondentsFL401().getUser().toBuilder().email(emailId)
+                    .idamId(userId).build();
                 caseData.getRespondentsFL401().setUser(user);
             }
         }
     }
 
-    private void getValuesFromPartyDetails(CaseData caseData, UUID partyId, YesOrNo isApplicant, User user) {
+    private void getValuesFromPartyDetails(CaseData caseData, UUID partyId, YesOrNo isApplicant, String userId, String emailId) {
         if (YesOrNo.Yes.equals(isApplicant)) {
             for (Element<PartyDetails> partyDetails : caseData.getApplicants()) {
                 if (partyId.equals(partyDetails.getId())) {
+                    User user = partyDetails.getValue().getUser().toBuilder().email(emailId)
+                        .idamId(userId).build();
                     partyDetails.getValue().setUser(user);
                 }
             }
         } else {
             for (Element<PartyDetails> partyDetails : caseData.getRespondents()) {
                 if (partyId.equals(partyDetails.getId())) {
+                    User user = partyDetails.getValue().getUser().toBuilder().email(emailId)
+                        .idamId(userId).build();
                     partyDetails.getValue().setUser(user);
                 }
             }
