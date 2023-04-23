@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.models.SdoDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -380,29 +381,47 @@ public class DraftAnOrderService {
             caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
         } else {
             log.info("inside populate custom SDO fields");
-            caseDataMap.putAll(populateStandardDirectionOrder(selectedOrder, caseData, authorisation));
+            caseDataMap.putAll(objectMapper.convertValue(selectedOrder.getSdoDetails(), Map.class));
         }
         caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
 
-    private Map<String, Object> populateStandardDirectionOrder(DraftOrder draftOrder, CaseData caseData, String authorisation) {
+    public Map<String, Object> populateStandardDirectionOrder(String authorisation, CaseData caseData) {
         Map<String, Object> standardDirectionOrderMap = new HashMap<>();
-        if (null != draftOrder.getSdoDetails()) {
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        if (null != selectedOrder.getSdoDetails()) {
             StandardDirectionOrder standardDirectionOrder;
             try {
-                String sdoDetailsJson = objectMapper.writeValueAsString(draftOrder.getSdoDetails());
-                standardDirectionOrder = objectMapper.readValue(sdoDetailsJson, StandardDirectionOrder.class);
+                SdoDetails updatedSdoDetails = selectedOrder.getSdoDetails().toBuilder()
+                    .sdoPreamblesList(caseData.getStandardDirectionOrder().getSdoPreamblesList())
+                    .sdoHearingsAndNextStepsList(caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList())
+                    .sdoCafcassOrCymruList(caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList())
+                    .sdoLocalAuthorityList(caseData.getStandardDirectionOrder().getSdoLocalAuthorityList())
+                    .sdoCourtList(caseData.getStandardDirectionOrder().getSdoCourtList())
+                    .sdoDocumentationAndEvidenceList(caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList())
+                    .sdoFurtherList(caseData.getStandardDirectionOrder().getSdoFurtherList())
+                    .sdoOtherList(caseData.getStandardDirectionOrder().getSdoOtherList())
+                    .build();
+
+                standardDirectionOrder = copyPropertiesToStandardDirectionOrder(updatedSdoDetails);
                 caseData = caseData.toBuilder().standardDirectionOrder(standardDirectionOrder).build();
                 standardDirectionOrderMap = objectMapper.convertValue(standardDirectionOrder, Map.class);
                 populateStandardDirectionOrderDefaultFields(authorisation, caseData, standardDirectionOrderMap);
-                log.info("sdoDetailsJson ===> " + sdoDetailsJson);
                 log.info("standardDirectionOrderMap ===> " + standardDirectionOrderMap);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
         }
         return standardDirectionOrderMap;
+    }
+
+    public StandardDirectionOrder copyPropertiesToStandardDirectionOrder(SdoDetails updatedSdoDetails) throws JsonProcessingException {
+        StandardDirectionOrder standardDirectionOrder;
+        String sdoDetailsJson = objectMapper.writeValueAsString(updatedSdoDetails);
+        standardDirectionOrder = objectMapper.readValue(sdoDetailsJson, StandardDirectionOrder.class);
+        log.info("sdoDetailsJson ===> " + sdoDetailsJson);
+        return standardDirectionOrder;
     }
 
     public Map<String, Object> populateCommonDraftOrderFields(CaseData caseData) {
@@ -570,7 +589,7 @@ public class DraftAnOrderService {
             .approvalDate(draftOrder.getApprovalDate())
             .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
             .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())
-                            ? manageOrderService.populateSdoDetails(caseData) : null)
+                            ? manageOrderService.copyPropertiesToSdoDetails(caseData) : null)
             .build();
     }
 

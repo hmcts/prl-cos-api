@@ -1035,12 +1035,12 @@ public class ManageOrderService {
             .isOrderUploadedByJudgeOrAdmin(No)
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
-            .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions()) ? populateSdoDetails(
-                caseData) : null)
+            .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
+                            ? copyPropertiesToSdoDetails(caseData) : null)
             .build();
     }
 
-    public SdoDetails populateSdoDetails(CaseData caseData) {
+    public SdoDetails copyPropertiesToSdoDetails(CaseData caseData) {
         if (null != caseData.getStandardDirectionOrder()) {
             SdoDetails sdoDetails;
             try {
@@ -1080,8 +1080,7 @@ public class ManageOrderService {
             .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(null != caseData.getManageOrdersOptions()
-                                               && caseData.getManageOrdersOptions().equals(uploadAnOrder)
-                                               ? Yes : No)
+                                               && caseData.getManageOrdersOptions().equals(uploadAnOrder) ? Yes : No)
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .build();
     }
@@ -1636,8 +1635,8 @@ public class ManageOrderService {
             .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
                                  ? caseData.getDoesOrderClosesCase() : null)
             .serveOrderDetails(buildServeOrderDetails(serveOrderData))
-            .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions()) ? populateSdoDetails(
-                caseData) : null)
+            .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
+                            ? copyPropertiesToSdoDetails(caseData) : null)
             .build();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
