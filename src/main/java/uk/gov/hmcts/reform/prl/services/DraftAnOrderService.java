@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
@@ -87,6 +88,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class DraftAnOrderService {
 
+    public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
+    public static final String CHILD_OPTION = "childOption";
     private final Time dateTime;
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
@@ -963,9 +966,7 @@ public class DraftAnOrderService {
 
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("Before generateOrderDocument caseData {}", caseData);
         caseData = generateDocument(callbackRequest, caseData);
-        log.info("After generateOrderDocument caseData {}", caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getCreateSelectOrderOptions() != null
             && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
@@ -985,6 +986,16 @@ public class DraftAnOrderService {
     public Map<String, Object> prepareDraftOrderCollection(String authorisation, CallbackRequest callbackRequest) {
         log.info("Casedata inside prepareDraftOrderCollection {} ", null != callbackRequest.getCaseDetails()
             ? callbackRequest.getCaseDetails().getData() : null);
+        if (callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN) && callbackRequest.getCaseDetails().getData().get(
+            IS_THE_ORDER_ABOUT_CHILDREN) != null && callbackRequest.getCaseDetails().getData().get(
+            IS_THE_ORDER_ABOUT_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
+            log.info("Before  modifying {}", callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
+            callbackRequest.getCaseDetails().getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
+                .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+                .value(List.of(DynamicMultiselectListElement.EMPTY))
+                .build());
+            log.info("after  modifying {}", callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
+        }
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
