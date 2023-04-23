@@ -148,7 +148,7 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
             FL404B_DRAFT_DOCUMENT,
             false
         );
-        caseDataUpdated.put("finalC7ResponseDoc", document);
+        caseDataUpdated.put("fl401ListOnNoticeDocument", document);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
