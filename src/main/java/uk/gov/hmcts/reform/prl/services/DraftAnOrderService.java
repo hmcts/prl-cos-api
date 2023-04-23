@@ -561,6 +561,7 @@ public class DraftAnOrderService {
     }
 
     public CaseData generateDocument(@RequestBody CallbackRequest callbackRequest, CaseData caseData) {
+
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -962,7 +963,9 @@ public class DraftAnOrderService {
 
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("Before generateOrderDocument caseData {}", caseData);
         caseData = generateDocument(callbackRequest, caseData);
+        log.info("After generateOrderDocument caseData {}", caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getCreateSelectOrderOptions() != null
             && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
