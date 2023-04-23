@@ -1533,6 +1533,7 @@ public class ManageOrderService {
                               .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
                               .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
                               .fl404CustomFields(orderData)
+                              .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                               .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
         log.info("after calling casedata {}", caseData);
