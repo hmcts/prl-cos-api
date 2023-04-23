@@ -101,6 +101,24 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
                 ElementUtils.wrapElements(hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists,caseData)));
 
         }
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/populate-ca-linked-cases-and-legal-adviser", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "List Without Notice submission flow")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "List Without notice submission is success"),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse populateLinkedCasesAndLegalAdviserDetails(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
         List<DynamicListElement> linkedCasesList = hearingDataService.getLinkedCases(authorisation, caseData);
         caseDataUpdated.put(
             "linkedCaCasesList",
@@ -109,6 +127,7 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
         List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
         caseDataUpdated.put("fl401LonLegalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
             .build());
+
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -133,7 +152,7 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
             FL404B_DRAFT_DOCUMENT,
             false
         );
-        caseDataUpdated.put("finalC7ResponseDoc", document);
+        caseDataUpdated.put("fl401ListOnNoticeDocument", document);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
