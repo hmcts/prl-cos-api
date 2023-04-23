@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
@@ -260,12 +261,23 @@ public class NoticeOfChangePartiesService {
             .representativeLastName(legalRepresentativeSolicitorDetails.getSurname().orElse(""))
             .solicitorOrg(changeOrganisationRequest.getOrganisationToAdd())
             .build();
-        Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
-            .element(partyDetailsElement.getId(), updPartyDetails);
-        if (CAAPPLICANT.equals(representing)) {
-            caseData.getApplicants().set(partyIndex, updatedRepresentedRespondentElement);
-        } else if (CARESPONDENT.equals(representing)) {
+
+        Element<PartyDetails> updatedRepresentedRespondentElement;
+        if (CARESPONDENT.equals(representing)) {
+            if (updPartyDetails.getResponse() != null
+                && !YesOrNo.Yes.equals(updPartyDetails.getResponse().getC7ResponseSubmitted())) {
+                PartyDetails respondingParty = updPartyDetails.toBuilder().response(Response.builder().build()).build();
+                updatedRepresentedRespondentElement = ElementUtils
+                    .element(partyDetailsElement.getId(), respondingParty);
+            } else {
+                updatedRepresentedRespondentElement = ElementUtils
+                    .element(partyDetailsElement.getId(), updPartyDetails);
+            }
             caseData.getRespondents().set(partyIndex, updatedRepresentedRespondentElement);
+        } else if (CAAPPLICANT.equals(representing)) {
+            updatedRepresentedRespondentElement = ElementUtils
+                .element(partyDetailsElement.getId(), updPartyDetails);
+            caseData.getApplicants().set(partyIndex, updatedRepresentedRespondentElement);
         }
         return caseData;
     }
