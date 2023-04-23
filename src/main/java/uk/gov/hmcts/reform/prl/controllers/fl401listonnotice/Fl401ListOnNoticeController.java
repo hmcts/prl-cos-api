@@ -120,9 +120,6 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
             CaseData.class
         );
         List<DynamicListElement> linkedCasesList = hearingDataService.getLinkedCases(authorisation, caseData);
-        caseDataUpdated.put(
-            "linkedCaCasesList",
-            hearingDataService.getDynamicList(linkedCasesList));
 
         List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
         caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
