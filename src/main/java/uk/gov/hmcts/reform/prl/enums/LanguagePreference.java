@@ -22,7 +22,6 @@ public enum LanguagePreference {
     welsh("Welsh");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CcdCaseApi.class);
-
     private final String displayedValue;
 
     public static LanguagePreference getLanguagePreference(CaseData caseData) {

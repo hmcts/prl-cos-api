@@ -64,7 +64,6 @@ public class SolicitorEmailService {
                 .collect(Collectors.toList());
 
             String applicantNames = String.join(", ", applicantNamesList);
-            log.info("****************The Applicant/Applicants name/names we want to see for email is ***************: {}", applicantNames);
             Court court = null;
             court = courtLocatorService.getNearestFamilyCourt(caseData);
             log.info("****************The court name we want to see for email is ***************: {}", court.getCourtName());
@@ -109,18 +108,18 @@ public class SolicitorEmailService {
 
     }
 
-    public void sendAwaitingPaymentEmail(CaseDetails caseDetails) {
-        CaseData caseData = emailService.getCaseData(caseDetails);
-        String applicantSolicitorEmailAddress = caseDetails.getData()
-            .get(PrlAppsConstants.APPLICANT_SOLICITOR_EMAIL_ADDRESS).toString();
-        log.info("****************The Language preference for "
-                     + "email I received is ***************: "
-                     + "{}", LanguagePreference.getLanguagePreference(caseData));
+    public void sendAwaitingPaymentEmail(uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails caseDetails) {
+        String applicantSolicitorEmailAddress = caseDetails.getCaseData()
+            .getApplicantSolicitorEmailAddress();
+
         emailService.send(
             applicantSolicitorEmailAddress,
-            EmailTemplateNames.C100_AWAITING_PAYMENT,
-            buildEmail(caseDetails),
-            LanguagePreference.getLanguagePreference(caseData)
+            EmailTemplateNames.CA_AWAITING_PAYMENT,
+            buildEmail(CaseDetails.builder().state(caseDetails.getState())
+                           .id(Long.valueOf(caseDetails.getCaseId()))
+                           .data(caseDetails.getCaseData()
+                                     .toMap(objectMapper)).build()),
+            LanguagePreference.getPreferenceLanguage(caseDetails.getCaseData())
         );
 
     }

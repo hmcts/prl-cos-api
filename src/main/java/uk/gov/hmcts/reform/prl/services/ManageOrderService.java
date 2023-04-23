@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +33,6 @@ import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -539,10 +537,14 @@ public class ManageOrderService {
     public CaseData getUpdatedCaseData(CaseData caseData) {
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         return caseData.toBuilder()
-            .childrenList(getChildInfoFromCaseData(caseData))
+            .childrenList(dynamicMultiSelectListService
+                              .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                                       .getChildOption()))
             .caseTypeOfApplication(caseTypeOfApplication)
             .manageOrders(ManageOrders.builder()
-                              .childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)).build())
+                              .childListForSpecialGuardianship(dynamicMultiSelectListService
+                                                                   .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                                                                            .getChildOption())).build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
@@ -730,37 +732,6 @@ public class ManageOrderService {
         }
         selectedOrder.append("\n\n");
         return selectedOrder.toString();
-    }
-
-    private String getChildInfoFromCaseData(CaseData caseData) {
-        String childNames = "";
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            List<Child> children = new ArrayList<>();
-            if (caseData.getChildren() != null) {
-                children = caseData.getChildren().stream()
-                    .map(Element::getValue)
-                    .collect(Collectors.toList());
-            }
-            List<String> childList = children.stream()
-                .map(element -> element.getFirstName() + " " + element.getLastName())
-                .collect(Collectors.toList());
-            childNames = String.join(", ", childList);
-
-        } else {
-            Optional<List<Element<ApplicantChild>>> applicantChildDetails =
-                ofNullable(caseData.getApplicantChildDetails());
-            if (applicantChildDetails.isPresent()) {
-                List<ApplicantChild> children = applicantChildDetails.get().stream()
-                    .map(Element::getValue)
-                    .collect(Collectors.toList());
-                List<String> childList = children.stream()
-                    .map(ApplicantChild::getFullName)
-                    .collect(Collectors.toList());
-                childNames = String.join(", ", childList);
-
-            }
-        }
-        return childNames;
     }
 
     private List<Element<OrderDetails>> getCurrentOrderDetails(String authorisation, CaseData caseData)
@@ -1411,6 +1382,11 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         GeneratedDocumentInfo generatedDocumentInfo = null;
         Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
+        List<Child> children = dynamicMultiSelectListService
+            .getChildrenForDocmosis(caseData);
+        if (!children.isEmpty()) {
+            caseData.setChildrenListForDocmosis(children);
+        }
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -1609,58 +1585,63 @@ public class ManageOrderService {
                                                          String flagSelectedOrder, Map<String, String> fieldMap,
                                                          CaseData caseData) throws Exception {
 
+        String loggedInUserType = getLoggedInUserType(authorisation);
+        SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
+        ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
+
+        OrderDetails orderDetails = OrderDetails.builder().orderType(flagSelectedOrder)
+            .orderTypeId(flagSelectedOrderId)
+            .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
+                                      ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
+            .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
+            .typeOfOrder(typeOfOrder != null
+                             ? typeOfOrder.getDisplayedValue() : null)
+            .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+            .childrenList(dynamicMultiSelectListService
+                              .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                                       .getChildOption()))
+            .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
+                                 ? caseData.getDoesOrderClosesCase() : null)
+            .serveOrderDetails(buildServeOrderDetails(serveOrderData))
+            .build();
+
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
-        GeneratedDocumentInfo generatedDocumentInfoWelsh = GeneratedDocumentInfo.builder().build();
 
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
 
-            generatedDocumentInfo = dgsService.generateDocument(
+            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 CaseDetails.builder().caseData(caseData).build(),
                 template
             );
-            if (documentLanguage.isGenWelsh()) {
-                log.info("*** Generating Final order in Welsh ***");
-                String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
-                log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, welshTemplate);
-                if (welshTemplate != null && welshTemplate.contains("-WEL-")) {
-                    generatedDocumentInfoWelsh = dgsService.generateWelshDocument(
-                        authorisation,
-                        CaseDetails.builder().caseData(caseData).build(),
-                        welshTemplate
-                    );
-                }
+            orderDetails = orderDetails.toBuilder().orderDocument(Document.builder()
+                                                     .documentUrl(generatedDocumentInfo.getUrl())
+                                                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                     .documentHash(generatedDocumentInfo.getHashToken())
+                                                     .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build()).build();
+        }
+        if (documentLanguage.isGenWelsh()) {
+            log.info("*** Generating Final order in Welsh ***");
+            String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
+            log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, welshTemplate);
+            if (welshTemplate != null && welshTemplate.contains("-WEL-")) {
+                GeneratedDocumentInfo generatedDocumentInfoWelsh = dgsService.generateWelshDocument(
+                    authorisation,
+                    CaseDetails.builder().caseData(caseData).build(),
+                    welshTemplate
+                );
+                orderDetails = orderDetails.toBuilder().orderDocumentWelsh(Document.builder()
+                                                              .documentUrl(generatedDocumentInfoWelsh.getUrl())
+                                                              .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
+                                                              .documentHash(generatedDocumentInfoWelsh.getHashToken())
+                                                              .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build()).build();
             }
         }
-        String loggedInUserType = getLoggedInUserType(authorisation);
-        SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
-        String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
-        ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
-        return element(OrderDetails.builder().orderType(flagSelectedOrder)
-                           .orderTypeId(flagSelectedOrderId)
-                           .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
-                                                 ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
-                           .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
-                           .typeOfOrder(typeOfOrder != null
-                                            ? typeOfOrder.getDisplayedValue() : null)
-                           .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
-                           .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
-                           .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
-                                                ? caseData.getDoesOrderClosesCase() : null)
-                           .serveOrderDetails(buildServeOrderDetails(serveOrderData))
-                           .orderDocument(Document.builder()
-                                              .documentUrl(generatedDocumentInfo.getUrl())
-                                              .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                              .documentHash(generatedDocumentInfo.getHashToken())
-                                              .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
-                           .orderDocumentWelsh(documentLanguage.isGenWelsh() ? Document.builder()
-                                                   .documentUrl(generatedDocumentInfoWelsh.getUrl())
-                                                   .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
-                                                   .documentHash(generatedDocumentInfoWelsh.getHashToken())
-                                                   .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build() : null)
+
+        return element(orderDetails.toBuilder()
                            .otherDetails(OtherOrderDetails.builder()
                                              .createdBy(caseData.getJudgeOrMagistratesLastName())
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(

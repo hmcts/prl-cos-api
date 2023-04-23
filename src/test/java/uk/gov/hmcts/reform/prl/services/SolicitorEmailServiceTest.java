@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
@@ -68,6 +69,8 @@ public class SolicitorEmailServiceTest {
 
     @Mock
     private ServiceArea serviceArea;
+    @Mock
+    private ObjectMapper objectMapper;
 
     CaseData caseData;
 
@@ -742,7 +745,6 @@ public class SolicitorEmailServiceTest {
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 
-
     @Test
     public void sendAwaitingPaymentEmailSuccessfully() throws NotFoundException {
         PartyDetails applicant = PartyDetails.builder()
@@ -767,45 +769,24 @@ public class SolicitorEmailServiceTest {
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .applicantSolicitorEmailAddress("test@test.com")
-            .applicants(listOfApplicants)
-            .children(listOfChildren)
-            .courtName("testcourt")
-            .build();
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("applicantSolicitorEmailAddress", "test@test.com");
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(caseData.getId())
-            .data(data)
-            .build();
-        UserDetails userDetails = UserDetails.builder()
-            .forename("userFirst")
-            .surname("userLast")
-            .build();
-        String applicantNames = "TestFirst TestLast";
-
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = SolicitorEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-            .applicantName(applicantNames)
-            .courtName(court.getCourtName())
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
-            .build();
-
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails caseDetails = uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
+            .state("PENDING").caseId("123").caseData(
+            CaseData.builder()
+                .id(12345L)
+                .applicantCaseName("TestCaseName")
+                .applicants(listOfApplicants)
+                .children(listOfChildren)
+                .courtName("testcourt")
+                .applicantSolicitorEmailAddress("hello@gmail.com").build()).build();
+        CaseDetails caseDetails1 = CaseDetails.builder().state(caseDetails.getState())
+            .id(Long.valueOf(caseDetails.getCaseId()))
+            .data(caseDetails.getCaseData()
+                      .toMap(objectMapper)).build();
+        when(emailService.getCaseData(caseDetails1)).thenReturn(caseData);
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
-
         solicitorEmailService.sendAwaitingPaymentEmail(caseDetails);
-        assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+        assertEquals("hello@gmail.com", caseDetails.getCaseData().getApplicantSolicitorEmailAddress());
     }
-
 
 }
 

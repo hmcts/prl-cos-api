@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -185,11 +187,28 @@ public class CaseWorkerEmailService {
             if (applicants.size() > 1) {
                 email = caseData.getApplicantSolicitorEmailAddress();
             }
+            if (caseData.getRejectReason().contains(RejectReasonEnum.consentOrderNotProvided)) {
+                emailService.send(
+                    email,
+                    EmailTemplateNames.RETURN_APPLICATION_CONSENT_ORDER,
+                    buildReturnApplicationEmail(caseDetails),
+                    LanguagePreference.getPreferenceLanguage(caseData)
+                );
+            }
+
         } else {
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
 
             email = fl401Applicant.getSolicitorEmail();
+            if (caseData.getFl401RejectReason().contains(FL401RejectReasonEnum.consentOrderNotProvided)) {
+                emailService.send(
+                    email,
+                    EmailTemplateNames.RETURN_APPLICATION_CONSENT_ORDER,
+                    buildReturnApplicationEmail(caseDetails),
+                    LanguagePreference.getPreferenceLanguage(caseData)
+                );
+            }
         }
         log.info("Return Applicant email: {}", LanguagePreference.getLanguagePreference(caseData));
         emailService.send(
