@@ -177,6 +177,7 @@ public class DraftAnOrderService {
             Comparator.reverseOrder()
         ));
         updatedCaseData.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
+        log.info("removeDraftOrderAndAddToFinalOrder" + updatedCaseData);
         return updatedCaseData;
 
     }
