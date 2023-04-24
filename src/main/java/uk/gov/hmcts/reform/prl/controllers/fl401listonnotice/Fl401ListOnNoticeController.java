@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
-import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
@@ -53,9 +52,6 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
     HearingDataService hearingDataService;
 
     @Autowired
-    LocationRefDataService locationRefDataService;
-
-    @Autowired
     RefDataUserService refDataUserService;
 
     @Autowired
@@ -63,7 +59,6 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
 
     @Autowired
     private DocumentGenService documentGenService;
-
 
     @Autowired
     @Qualifier("caseSummaryTab")
@@ -91,7 +86,8 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
                                                     .getOrderWithoutGivingNotice())
             ? Yes : No);
         caseDataUpdated.put("isFl401CaseCreatedForWithOutNotice", isCaseWithOutNotice);
-        log.info("Check case is created withOUTNotice {}",isCaseWithOutNotice);
+        log.info("Check case is created without Notice::====: {}",caseDataUpdated.get("isFl401CaseCreatedForWithOutNotice"));
+
         if (caseDataUpdated.containsKey("fl401ListOnNoticeHearingDetails")) {
             caseDataUpdated.put(
                 "fl401ListOnNoticeHearingDetails",
@@ -109,7 +105,7 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
         log.info("Linked CA cases List:::: {}",caseDataUpdated.get("linkedCaCasesList"));
 
         List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
-        caseDataUpdated.put("fl401LonLegalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
+        caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
             .build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
