@@ -115,7 +115,8 @@ public class EditAndApproveDraftOrderController {
         List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+        if (caseData.getManageOrders().getSolicitorOrdersHearingDetails() != null) {
+            log.info("Inside genearted doc ---->{}",caseData.getManageOrders().getSolicitorOrdersHearingDetails());
             caseDataUpdated.put(
                 ORDER_HEARING_DETAILS,
                 hearingDataService.getHearingData(existingOrderHearingDetails,
