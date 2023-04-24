@@ -1418,7 +1418,7 @@ public class ManageOrderService {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
-                log.info("**** Case Data **** {}", caseData);
+                log.info("**** Case Data **** {}", caseData.getStandardDirectionOrder());
                 generatedDocumentInfo = dgsService.generateDocument(
                     authorisation,
                     CaseDetails.builder().caseData(caseData).build(),
@@ -1743,6 +1743,7 @@ public class ManageOrderService {
 
     public Map<String, Object> populatePreviewOrder(String authorisation, CallbackRequest callbackRequest, CaseData caseData) throws Exception {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("*** sdoHearingsAndNextStepsList *** {}", caseDataUpdated.get("sdoHearingsAndNextStepsList"));
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -1753,6 +1754,7 @@ public class ManageOrderService {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData);
             }
+            log.info("*** Before getCaseData *** {}", caseData.getStandardDirectionOrder());
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getUploadOrderDoc());
