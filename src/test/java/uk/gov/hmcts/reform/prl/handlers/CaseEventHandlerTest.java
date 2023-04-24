@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -251,7 +250,6 @@ public class CaseEventHandlerTest {
     }
 
     @Test
-    @Ignore
     public void shouldUpdateTaskListForCasesInOpenStateC100WithRespondents() {
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
