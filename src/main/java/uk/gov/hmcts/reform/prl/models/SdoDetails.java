@@ -181,7 +181,6 @@ public class SdoDetails {
     private final List<Element<SdoNameOfRespondent>> sdoLsRespondentName;
     private final List<SdoLetterFromSchoolCheck> sdoLetterFromSchoolCheck;
     private final List<Element<SdoDioProvideOtherDetails>> sdoLetterFromSchoolDetails;
-    private final List<SdoScheduleOfAllegationsCheck> sdoScheduleOfAllegationsCheck;
     private final List<Element<SdoDioProvideOtherDetails>> sdoScheduleOfAllegationsDetails;
     private final List<SdoDisClosureProceedingCheck> sdoDisClosureProceedingCheck;
     private final List<Element<SdoDioProvideOtherDetails>> sdoDisClosureProceedingDetails;

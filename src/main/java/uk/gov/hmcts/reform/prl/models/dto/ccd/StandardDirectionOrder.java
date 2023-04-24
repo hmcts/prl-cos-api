@@ -291,8 +291,6 @@ public class StandardDirectionOrder {
     private final List<SdoLetterFromSchoolCheck> sdoLetterFromSchoolCheck;
     @JsonProperty("sdoLetterFromSchoolDetails")
     private final List<Element<SdoDioProvideOtherDetails>> sdoLetterFromSchoolDetails;
-    @JsonProperty("sdoScheduleOfAllegationsCheck")
-    private final List<SdoScheduleOfAllegationsCheck> sdoScheduleOfAllegationsCheck;
     @JsonProperty("sdoScheduleOfAllegationsDetails")
     private final List<Element<SdoDioProvideOtherDetails>> sdoScheduleOfAllegationsDetails;
     @JsonProperty("sdoDisClosureProceedingCheck")
