@@ -1,15 +1,15 @@
 package uk.gov.hmcts.reform.prl.events;
 
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 
-@Data
 @Getter
+@Setter
 @RequiredArgsConstructor
 @Builder
 public class NoticeOfChangeEvent {
@@ -19,3 +19,4 @@ public class NoticeOfChangeEvent {
     private final int representedPartyIndex;
     private final SolicitorRole.Representing representing;
 }
+//log.info("My changes");

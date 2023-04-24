@@ -21,7 +21,10 @@ public class NoticeOfChangeEventHandler {
 
     @EventListener
     public void notifyLegalRepresentative(final NoticeOfChangeEvent event) {
+        log.info("My changes");
         CaseData caseData = event.getCaseData();
+        log.debug("Solicitor representing {}",event.getRepresenting());
+        log.debug("Represented Party Index {}",event.getRepresentedPartyIndex());
         emailService.send(
             event.getSolicitorEmailAddress(),
             EmailTemplateNames.CA_DA_RESPONDENT_SOLICITOR_NOC,
