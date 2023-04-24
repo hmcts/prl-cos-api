@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.utils.noticeofchange;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Slf4j
 public class NoticeOfChangePartiesConverterTest {
 
     @InjectMocks
@@ -33,6 +35,14 @@ public class NoticeOfChangePartiesConverterTest {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(partyDetails).build();
 
         NoticeOfChangeParties submission = noticeOfChangePartiesConverter.generateCaForSubmission(wrappedApplicant);
+
+        assertEquals("Test", submission.getFirstName());
+    }
+
+    @Test
+    public void generateDaForSubmissionTest() {
+        log.info("My changes");
+        NoticeOfChangeParties submission = noticeOfChangePartiesConverter.generateDaForSubmission(partyDetails);
 
         assertEquals("Test", submission.getFirstName());
     }
