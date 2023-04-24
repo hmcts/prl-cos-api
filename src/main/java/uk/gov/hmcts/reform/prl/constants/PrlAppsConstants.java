@@ -218,20 +218,24 @@ public class PrlAppsConstants {
         + "Alternatively if any party is managing their case using the online dashboard, "
         + "they can update their contact details on the and donot have to also contact "
         + "Cafcass or Cafcass Cymru.";
-    public static final String CROSS_EXAMINATION_EX740 = "Under Section 31U of the MFPA, it appears to the court that the quality of "
-        + "the party's evidence on cross-examination is likely to be diminshed if the "
-        + "cross examination is conducted in person, or if the conduct of cross-examination "
+    public static final String CROSS_EXAMINATION_EX740 = "Under Section 31U of the Matrimonial and Family Proceedings Act 1984 (MFPA),"
+        + " it appears to the court that the quality of "
+        + "the party's evidence on cross-examination is likely to be diminished if:"
+        + System.lineSeparator() + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
+        + "a) the cross examination is conducted in person, or"
+        + "b) if the conduct of cross-examination "
         + "in person would cause significant distress to a party and it would not be "
         + "contrary of justice to make the direction."
         + System.lineSeparator() + System.lineSeparator()
         + "It is ordered that:"
         + System.lineSeparator() + System.lineSeparator()
-        + "a. The applicant and respondent(delete as appropriate) must notify the court by "
-        + "4pm on[date] whether they intend to appoint their own qualified legal representative."
+        + "a. The ((applicant / respondent / both)) must notify the court by "
+        + "4pm ((date that the deadline has been set)) whether they intend to appoint their own qualified legal representative."
         + System.lineSeparator()
-        + "b. If the applicant/respondent does not intend to appoint their own qulaified leagl "
+        + "b. If the ((applicant / respondent)) does not intend to appoint their own qulaified leagl "
         + "representative, they (whichever party is the (alleged) victim of domestic abuse) "
-        + "must complete form EX740 (name the form) and return it to the court by 4pm on [date]";
+        + "must complete form EX740 and return it to the court by 4pm on ((date that the deadline has been set))";
     public static final String CROSS_EXAMINATION_QUALIFIED_LEGAL = "Should a qualified legal representative be appointed by the court "
         + System.lineSeparator()
         + "The court has considered whether it necessary in the interest of justice for the "
