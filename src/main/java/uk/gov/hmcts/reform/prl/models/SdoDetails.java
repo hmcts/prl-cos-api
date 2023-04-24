@@ -78,6 +78,7 @@ public class SdoDetails {
     private final String sdoNextStepsAfterSecondGK;
     private final SdoNextStepsAllocationEnum sdoNextStepsAllocationTo;
     private final List<SdoHearingUrgentCheckListEnum> sdoHearingUrgentCheckList;
+    private final String sdoHearingUrgentAnotherReason;
     private final String sdoHearingUrgentCourtConsider;
     private final String sdoHearingUrgentTimeShortened;
     private final LocalDate sdoHearingUrgentMustBeServedBy;

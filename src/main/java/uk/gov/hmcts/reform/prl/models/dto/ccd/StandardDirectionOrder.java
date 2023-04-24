@@ -92,6 +92,8 @@ public class StandardDirectionOrder {
     private final SdoNextStepsAllocationEnum sdoNextStepsAllocationTo;
     @JsonProperty("sdoHearingUrgentCheckList")
     private final List<SdoHearingUrgentCheckListEnum> sdoHearingUrgentCheckList;
+    @JsonProperty("sdoHearingUrgentAnotherReason")
+    private final String sdoHearingUrgentAnotherReason;
     @JsonProperty("sdoHearingUrgentCourtConsider")
     private final String sdoHearingUrgentCourtConsider;
     @JsonProperty("sdoHearingUrgentTimeShortened")
