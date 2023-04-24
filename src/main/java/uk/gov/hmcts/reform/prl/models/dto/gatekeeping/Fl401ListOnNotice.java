@@ -5,12 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.FL401ListOnNoticeDirectionsEnum;
-import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
@@ -33,11 +30,6 @@ public class Fl401ListOnNotice {
     private final List<Element<HearingData>> fl401ListOnNoticeHearingDetails;
     private final String fl401ListOnNoticeDirectionsToAdmin;
     private final YesOrNo fl401LonOrderCompleteToServe;
-    private final YesOrNo fl401LonAllocateSpecificJudgeOrLa;
-    private final AllocatedJudgeTypeEnum fl401LonIsJudgeOrLegalAdviser;
-    private final JudicialUser fl401LonJudgeNameAndEmail;
-    private final DynamicList fl401LonLegalAdviserList;
-    private final TierOfJudiciaryEnum fl401LonTierOfJudiciary;
     private final Document fl401ListOnNoticeDocument;
 
 }
