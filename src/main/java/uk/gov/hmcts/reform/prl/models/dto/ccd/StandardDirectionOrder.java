@@ -107,7 +107,6 @@ public class StandardDirectionOrder {
     private final LocalDate sdoPositionStatementDeadlineDate;
     @JsonProperty("sdoPositionStatementWritten")
     private final SdoWrittenStatementEnum sdoPositionStatementWritten;
-    @JsonProperty("sdoMiamAttendingPerson")
     private final List<Element<MiamAttendingPersonName>> sdoMiamAttendingPerson;
     @JsonProperty("sdoJoiningInstructionsForRH")
     private final String sdoJoiningInstructionsForRH;
