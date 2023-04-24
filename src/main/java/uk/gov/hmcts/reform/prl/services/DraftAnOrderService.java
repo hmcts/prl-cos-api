@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -710,10 +711,8 @@ public class DraftAnOrderService {
         populateDocumentAndEvidenceText(caseData, caseDataUpdated);
         populateParentWithCare(caseData, caseDataUpdated);
         List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
-        if (caseData.getStandardDirectionOrder().getSdoTransferApplicationCourtDynamicList() == null
-            || CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoTransferApplicationCourtDynamicList().getListItems())) {
-            populateCourtDynamicList(courtList, caseDataUpdated);
-        }
+        populateCourtDynamicList(courtList, caseDataUpdated,caseData);
+
         if (caseData.getStandardDirectionOrder().getSdoInstructionsFilingPartiesDynamicList() == null
             || CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInstructionsFilingPartiesDynamicList().getListItems())) {
             DynamicList partiesList = partiesListGenerator.buildPartiesList(caseData, courtList);
@@ -841,11 +840,23 @@ public class DraftAnOrderService {
         }
     }
 
-    private void populateCourtDynamicList(List<DynamicListElement> courtList, Map<String, Object> caseDataUpdated) {
+    private void populateCourtDynamicList(List<DynamicListElement> courtList, Map<String, Object> caseDataUpdated, CaseData caseData) {
         DynamicList courtDynamicList = DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
             .build();
-        caseDataUpdated.put(
-            "sdoTransferApplicationCourtDynamicList", courtDynamicList);
+        if (caseData.getStandardDirectionOrder().getSdoTransferApplicationCourtDynamicList() == null
+            || CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoTransferApplicationCourtDynamicList().getListItems())) {
+            caseDataUpdated.put(
+                "sdoTransferApplicationCourtDynamicList", courtDynamicList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoDisclosureOfPapersCaseNumbers())) {
+            List<Element<SdoDisclosureOfPapersCaseNumber>> elementList = new ArrayList<>();
+            SdoDisclosureOfPapersCaseNumber sdoDisclosureOfPapersCaseNumbers = SdoDisclosureOfPapersCaseNumber.builder()
+                .sdoDisclosureCourtList(courtDynamicList)
+                .build();
+            elementList.add(element(sdoDisclosureOfPapersCaseNumbers));
+            caseDataUpdated.put(
+                "sdoDisclosureOfPapersCaseNumbers", elementList);
+        }
     }
 
     private List<DynamicListElement> getCourtDynamicList(String authorisation) {
