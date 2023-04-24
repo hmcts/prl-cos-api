@@ -149,7 +149,11 @@ public class NoticeOfChangePartiesService {
         if (BLANK == strategy) {
             return Optional.of(NoticeOfChangeParties.builder().build());
         }
-        return Optional.of(partiesConverter.generateDaForSubmission(partyDetails));
+        if (partiesConverter.generateDaForSubmission(partyDetails) == null) {
+            return Optional.of(NoticeOfChangeParties.builder().build());
+        } else {
+            return Optional.of(partiesConverter.generateDaForSubmission(partyDetails));
+        }
     }
 
     public enum NoticeOfChangeAnswersPopulationStrategy {
@@ -212,6 +216,7 @@ public class NoticeOfChangePartiesService {
                 );
             } else if (CAAPPLICANT.equals(solicitorRole.get().getRepresenting())
                 && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+
                 List<Element<PartyDetails>> applicants = CAAPPLICANT.getCaTarget().apply(caseData);
                 return updateC100PartyDetails(partyIndex, applicants, legalRepresentativeSolicitorDetails,
                                               changeOrganisationRequest, caseData, CAAPPLICANT
