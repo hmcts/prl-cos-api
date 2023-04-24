@@ -19,8 +19,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
@@ -231,10 +233,29 @@ public class DraftAnOrderController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.generateOrderDocument(
+
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+        List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+            caseDataUpdated.put(
+                ORDER_HEARING_DETAILS,
+                hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                  hearingDataPrePopulatedDynamicLists, caseData
+                )
+            );
+        }
+        caseDataUpdated.putAll(draftAnOrderService.generateOrderDocument(
             authorisation,
             callbackRequest
-        )).build();
+        ));
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
