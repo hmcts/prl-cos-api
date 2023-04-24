@@ -387,7 +387,7 @@ public class DraftAnOrderService {
         caseDataMap.put("reviewRequiredBy", selectedOrder.getOtherDetails().getReviewRequiredBy() != null
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
 
-        //Set existing hearingType from draft order
+        //Set existing hearingsType from draft order
         ManageOrders manageOrders = null != caseData.getManageOrders()
             ? caseData.getManageOrders().toBuilder().hearingsType(selectedOrder.getHearingsType()).build()
             : ManageOrders.builder().hearingsType(selectedOrder.getHearingsType()).build();
@@ -397,7 +397,7 @@ public class DraftAnOrderService {
         //PRL-3319 - Fetch hearings dropdown
         caseData = manageOrderService.populateHearingsDropdown(authorization, caseData);
         //Set hearings
-        caseDataMap.put("hearingType", caseData.getManageOrders().getHearingsType());
+        caseDataMap.put("hearingsType", caseData.getManageOrders().getHearingsType());
         return caseDataMap;
     }
 
