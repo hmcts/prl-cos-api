@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoWitnessStatementsSentToEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.MiamAttendingPersonName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
@@ -84,7 +85,7 @@ public class SdoDetails {
     private final String sdoParticipationDirections;
     private final LocalDate sdoPositionStatementDeadlineDate;
     private final SdoWrittenStatementEnum sdoPositionStatementWritten;
-    private final String sdoMiamAttendingPerson;
+    private final List<Element<MiamAttendingPersonName>> sdoMiamAttendingPerson;
     private final String sdoJoiningInstructionsForRH;
     private final List<SdoApplicantRespondentEnum> sdoHearingAllegationsMadeBy;
     private final List<SdoCourtRequestedEnum> sdoHearingCourtHasRequested;

@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.MiamAttendingPersonName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
@@ -106,7 +107,7 @@ public class StandardDirectionOrder {
     @JsonProperty("sdoPositionStatementWritten")
     private final SdoWrittenStatementEnum sdoPositionStatementWritten;
     @JsonProperty("sdoMiamAttendingPerson")
-    private final String sdoMiamAttendingPerson;
+    private final List<Element<MiamAttendingPersonName>> sdoMiamAttendingPerson;
     @JsonProperty("sdoJoiningInstructionsForRH")
     private final String sdoJoiningInstructionsForRH;
     @JsonProperty("sdoHearingAllegationsMadeBy")

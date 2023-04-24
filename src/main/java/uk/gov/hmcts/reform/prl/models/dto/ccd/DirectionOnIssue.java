@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.complextypes.MiamAttendingPersonName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
@@ -119,7 +120,7 @@ public class DirectionOnIssue {
     @JsonProperty("dioPositionStatementWritten")
     private final SdoWrittenStatementEnum dioPositionStatementWritten;
     @JsonProperty("dioMiamAttendingPerson")
-    private final String dioMiamAttendingPerson;
+    private final List<Element<MiamAttendingPersonName>> dioMiamAttendingPerson;
 
     @JsonProperty("dioPersonWhoRequiresInterpreter")
     private final String dioPersonWhoRequiresInterpreter;
