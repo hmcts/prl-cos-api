@@ -257,5 +257,5 @@ public class ManageOrders {
     private final List<Element<HearingData>> ordersHearingDetails;
 
     //PRL-3254 - Added for populating hearing dropdown
-    private DynamicList hearingType;
+    private DynamicList hearingsType;
 }

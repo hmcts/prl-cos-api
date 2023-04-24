@@ -219,7 +219,7 @@ public class DraftAnOrderService {
                     .build())
             .isTheOrderAboutChildren(draftOrder.getIsTheOrderAboutChildren())
             .childrenList(draftOrder.getChildrenList())
-            .selectedHearingType(null != draftOrder.getHearingType() ? draftOrder.getHearingType().getValueCode() : null)
+            .selectedHearingType(null != draftOrder.getHearingsType() ? draftOrder.getHearingsType().getValueCode() : null)
             .build();
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
@@ -389,15 +389,15 @@ public class DraftAnOrderService {
 
         //Set existing hearingType from draft order
         ManageOrders manageOrders = null != caseData.getManageOrders()
-            ? caseData.getManageOrders().toBuilder().hearingType(selectedOrder.getHearingType()).build()
-            : ManageOrders.builder().hearingType(selectedOrder.getHearingType()).build();
+            ? caseData.getManageOrders().toBuilder().hearingsType(selectedOrder.getHearingsType()).build()
+            : ManageOrders.builder().hearingsType(selectedOrder.getHearingsType()).build();
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
         //PRL-3319 - Fetch hearings dropdown
         caseData = manageOrderService.populateHearingsDropdown(authorization, caseData);
         //Set hearings
-        caseDataMap.put("hearingType", caseData.getManageOrders().getHearingType());
+        caseDataMap.put("hearingType", caseData.getManageOrders().getHearingsType());
         return caseDataMap;
     }
 
@@ -540,7 +540,7 @@ public class DraftAnOrderService {
             .isOrderUploadedByJudgeOrAdmin(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .approvalDate(draftOrder.getApprovalDate())
             .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
-            .hearingType(caseData.getManageOrders().getHearingType())
+            .hearingsType(caseData.getManageOrders().getHearingsType())
             .build();
     }
 
@@ -611,7 +611,7 @@ public class DraftAnOrderService {
                                   .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
                                   .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
                                   .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
-                                  .hearingType(caseData.getManageOrders().getHearingType())
+                                  .hearingsType(caseData.getManageOrders().getHearingsType())
                                   .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
                                   .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
@@ -633,7 +633,7 @@ public class DraftAnOrderService {
                                   .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                                   .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
                                   .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
-                                  .hearingType(caseData.getManageOrders().getHearingType())
+                                  .hearingsType(caseData.getManageOrders().getHearingsType())
                                   .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
                                   .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)

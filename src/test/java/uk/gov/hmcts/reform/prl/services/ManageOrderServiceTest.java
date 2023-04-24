@@ -2504,7 +2504,7 @@ public class ManageOrderServiceTest {
         caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
 
         //asserts
-        assertNotNull(caseData.getManageOrders().getHearingType());
+        assertNotNull(caseData.getManageOrders().getHearingsType());
     }
 
     @Test
@@ -2530,7 +2530,7 @@ public class ManageOrderServiceTest {
         caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
 
         //asserts
-        assertNotNull(caseData.getManageOrders().getHearingType());
+        assertNotNull(caseData.getManageOrders().getHearingsType());
     }
 
     @Test
@@ -2557,8 +2557,8 @@ public class ManageOrderServiceTest {
         caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
 
         //asserts
-        assertNotNull(caseData.getManageOrders().getHearingType());
-        assertEquals(1, caseData.getManageOrders().getHearingType().getListItems().size());
+        assertNotNull(caseData.getManageOrders().getHearingsType());
+        assertEquals(1, caseData.getManageOrders().getHearingsType().getListItems().size());
     }
 
     @Test
@@ -2591,8 +2591,8 @@ public class ManageOrderServiceTest {
         caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
 
         //asserts
-        assertNotNull(caseData.getManageOrders().getHearingType());
-        assertEquals(2, caseData.getManageOrders().getHearingType().getListItems().size());
+        assertNotNull(caseData.getManageOrders().getHearingsType());
+        assertEquals(2, caseData.getManageOrders().getHearingsType().getListItems().size());
     }
 
     @Test
@@ -2638,8 +2638,8 @@ public class ManageOrderServiceTest {
         caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
 
         //asserts
-        assertNotNull(caseData.getManageOrders().getHearingType());
-        assertEquals(3, caseData.getManageOrders().getHearingType().getListItems().size());
+        assertNotNull(caseData.getManageOrders().getHearingsType());
+        assertEquals(3, caseData.getManageOrders().getHearingsType().getListItems().size());
     }
 
 }

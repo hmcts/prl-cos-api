@@ -807,8 +807,8 @@ public class ManageOrderService {
                                        .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
                                            ? caseData.getDoesOrderClosesCase() : null)
                                        .serveOrderDetails(buildServeOrderDetails(serveOrderData))
-                                       .selectedHearingType(null != caseData.getManageOrders().getHearingType()
-                                                           ? caseData.getManageOrders().getHearingType().getValueCode() : null)
+                                       .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
+                                                           ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
                                        .build()));
         }
     }
@@ -1039,7 +1039,7 @@ public class ManageOrderService {
             .isOrderUploadedByJudgeOrAdmin(No)
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
-            .hearingType(caseData.getManageOrders().getHearingType())
+            .hearingsType(caseData.getManageOrders().getHearingsType())
             .build();
     }
 
@@ -1679,8 +1679,8 @@ public class ManageOrderService {
                            .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                             ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
                            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
-                           .selectedHearingType(null != caseData.getManageOrders().getHearingType()
-                                                    ? caseData.getManageOrders().getHearingType().getValueCode() : null)
+                           .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
+                                                    ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
                            .build());
     }
 
@@ -1794,12 +1794,12 @@ public class ManageOrderService {
             .collect(Collectors.toList());
 
         //if there are no hearings then dropdown would be empty
-        DynamicList existingHearingType = (null != caseData.getManageOrders() && null != caseData.getManageOrders().getHearingType())
-            ? caseData.getManageOrders().getHearingType() : null;
+        DynamicList existingHearingsType = (null != caseData.getManageOrders() && null != caseData.getManageOrders().getHearingsType())
+            ? caseData.getManageOrders().getHearingsType() : null;
         return caseData.toBuilder()
             .manageOrders(caseData.getManageOrders().toBuilder()
-                              .hearingType(DynamicList.builder()
-                                               .value(null != existingHearingType ? existingHearingType.getValue() : DynamicListElement.EMPTY)
+                              .hearingsType(DynamicList.builder()
+                                               .value(null != existingHearingsType ? existingHearingsType.getValue() : DynamicListElement.EMPTY)
                                                .listItems(hearingDropdowns.isEmpty()
                                                               ? Collections.singletonList(DynamicListElement.defaultListItem("No hearings available"))
                                                               : hearingDropdowns)
