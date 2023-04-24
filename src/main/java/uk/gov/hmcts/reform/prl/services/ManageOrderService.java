@@ -1760,7 +1760,6 @@ public class ManageOrderService {
 
     public CaseData populateHearingsDropdown(String authorization, CaseData caseData) {
         log.info("Retrieving hearings for caseId: {}, tempCaseId: {} ", caseData.getId(), caseData.getTempCaseIdForHearing());
-        hearingService.getHearings(authorization, caseData.getTempCaseIdForHearing());
         //fetch hearing details
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(authorization, caseData.getTempCaseIdForHearing()));
         log.info("Hearings: {} for caseId: {}",hearings, caseData.getTempCaseIdForHearing());

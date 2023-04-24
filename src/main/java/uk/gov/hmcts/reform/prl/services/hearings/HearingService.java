@@ -20,8 +20,6 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HearingService {
 
-    private Hearings hearingDetails;
-
     private List<CaseLinkedData> caseLinkedData;
 
     private final AuthTokenGenerator authTokenGenerator;
@@ -31,12 +29,12 @@ public class HearingService {
     public Hearings getHearings(String userToken, String caseReferenceNumber) {
 
         try {
-            hearingDetails = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
+            return hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
 
         } catch (Exception e) {
             log.error("Error in getting hearings ", e);
         }
-        return hearingDetails;
+        return null;
     }
 
 
