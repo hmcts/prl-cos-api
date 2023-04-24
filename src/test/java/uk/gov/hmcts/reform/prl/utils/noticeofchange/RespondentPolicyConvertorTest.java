@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.utils.noticeofchange;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -15,6 +16,7 @@ import java.util.Optional;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Slf4j
 public class RespondentPolicyConvertorTest {
 
     @InjectMocks
@@ -39,5 +41,23 @@ public class RespondentPolicyConvertorTest {
             .caGenerate(solicitorRole, optionalRespondentElement);
 
         assertEquals("[C100RESPONDENTSOLICITOR1]", organisationPolicy.getOrgPolicyCaseAssignedRole());
+    }
+
+    @Test
+    public void generatePolicyForDaTest() {
+        log.info("My changes");
+        SolicitorRole solicitorRole = SolicitorRole.FL401RESPONDENTSOLICITOR;
+
+        Organisation organisation = Organisation.builder().build();
+
+        PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .solicitorOrg(organisation)
+            .build();
+
+        OrganisationPolicy organisationPolicy = respondentPolicyConverter
+            .daGenerate(solicitorRole, respondent);
+
+        assertEquals("[FL401RESPONDENTSOLICITOR]", organisationPolicy.getOrgPolicyCaseAssignedRole());
     }
 }
