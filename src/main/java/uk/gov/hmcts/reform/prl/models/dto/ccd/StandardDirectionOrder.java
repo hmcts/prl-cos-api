@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.enums.SdoMedicalDiscCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoNewPartnersToCafcassEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoPartyToProvideDetailsEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoSafeguardingCafcassCymruEnum;
-import uk.gov.hmcts.reform.prl.enums.SdoScheduleOfAllegationsCheck;
 import uk.gov.hmcts.reform.prl.enums.SdoSection7CheckEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoWitnessStatementsCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherDirectionEnum;
