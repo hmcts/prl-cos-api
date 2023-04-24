@@ -222,7 +222,6 @@ public class PrlAppsConstants {
         + " it appears to the court that the quality of "
         + "the party's evidence on cross-examination is likely to be diminished if:"
         + System.lineSeparator() + System.lineSeparator()
-        + System.lineSeparator() + System.lineSeparator()
         + "a) the cross examination is conducted in person, or"
         + "b) if the conduct of cross-examination "
         + "in person would cause significant distress to a party and it would not be "
