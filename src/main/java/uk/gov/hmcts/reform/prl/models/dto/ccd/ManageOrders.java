@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
@@ -216,9 +217,9 @@ public class ManageOrders {
     @JsonProperty("amendOrderSelectJudgeOrLa")
     private final JudgeOrLegalAdvisorCheckEnum amendOrderSelectJudgeOrLa;
     @JsonProperty("nameOfJudgeAmendOrder")
-    private final String nameOfJudgeAmendOrder;
+    private final JudicialUser nameOfJudgeAmendOrder;
     @JsonProperty("nameOfLaAmendOrder")
-    private final String nameOfLaAmendOrder;
+    private final DynamicList nameOfLaAmendOrder;
 
     @JsonProperty("previewUploadedOrder")
     private Document previewUploadedOrder;
