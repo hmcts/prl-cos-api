@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.models.dto.ccd;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -252,9 +253,12 @@ public class ManageOrders {
     private final List<Element<PostalInformation>> postalInformationCaOnlyC47a;
 
     @JsonProperty("ordersHearingDetails")
+    @JsonUnwrapped
+    @Builder.Default
     private final List<Element<HearingData>> ordersHearingDetails;
 
-    @JsonProperty("solicitorOrdersHearingDetails")
+    @JsonUnwrapped
+    @Builder.Default
     private final List<Element<HearingData>> solicitorOrdersHearingDetails;
 
     private YesOrNo isOrderCreatedBySolicitor;
