@@ -460,6 +460,7 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getDraftOrderWithUpdatedStatus(CaseData caseData, String eventId, String loggedInUserType, DraftOrder draftOrder) {
+        log.info("control is with in getDraftOrderWithUpdatedStatus caseData{}", caseData);
         return draftOrder.toBuilder()
             .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .adminNotes(caseData.getCourtAdminNotes())

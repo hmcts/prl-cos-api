@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -97,7 +98,7 @@ public class DraftAnOrderController {
             caseDataUpdated.put("typeOfC21Order", null != manageOrders.getC21OrderOptions()
                 ? manageOrders.getC21OrderOptions().getDisplayedValue() : null);
         }
-        caseDataUpdated.put("childOption",DynamicMultiSelectList.builder()
+        caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
 
         if (caseDataUpdated.get("selectedOrder") == "Standard directions order"
@@ -147,7 +148,11 @@ public class DraftAnOrderController {
             log.info("Before generate document manageorder {}", caseData.getManageOrders());
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
             log.info("Before generate document casedata {}", caseData.getManageOrders());
-            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
+            caseDataUpdated.putAll(manageOrderService.getCaseData(
+                authorisation,
+                caseData,
+                caseData.getCreateSelectOrderOptions()
+            ));
         }
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
@@ -162,7 +167,10 @@ public class DraftAnOrderController {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         }
 
-        log.info("childrenListForDocmosis Data in populateFl404Fields {} end ", caseDataUpdated.get("childrenListForDocmosis"));
+        log.info(
+            "childrenListForDocmosis Data in populateFl404Fields {} end ",
+            caseDataUpdated.get("childrenListForDocmosis")
+        );
         log.info("CaseDataUpdatedMap in populateFl404Fields {}  ", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
@@ -240,10 +248,14 @@ public class DraftAnOrderController {
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-        List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+        List<Element<HearingData>> existingOrderHearingDetails = (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(callbackRequest.getEventId())) ? caseData.getManageOrders()
+            .getSolicitorOrdersHearingDetails() : caseData.getManageOrders().getOrdersHearingDetails();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+        log.info("existing hearing details {}", existingOrderHearingDetails);
+        if (existingOrderHearingDetails != null) {
             caseDataUpdated.put(
                 ORDER_HEARING_DETAILS,
                 hearingDataService.getHearingData(existingOrderHearingDetails,
@@ -263,8 +275,10 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("verifying hearing data while submitting************* {} ",
-            callbackRequest.getCaseDetails().getData());
+        log.info(
+            "verifying hearing data while submitting************* {} ",
+            callbackRequest.getCaseDetails().getData()
+        );
         return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.prepareDraftOrderCollection(
             authorisation,
             callbackRequest
