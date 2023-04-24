@@ -250,6 +250,7 @@ public class HearingDataService {
             Optional<JudicialUser> judgeDetailsSelected = ofNullable(hearingData.getHearingJudgeNameAndEmail());
             if (judgeDetailsSelected.isPresent() && !judgeDetailsSelected.get().getPersonalCode().isEmpty()) {
                 Optional<List<JudicialUsersApiResponse>> judgeApiResponse = ofNullable(getJudgeDetails(hearingData.getHearingJudgeNameAndEmail()));
+                log.info("JudgeAPI response {}", judgeApiResponse);
                 if (!judgeApiResponse.get().isEmpty()) {
                     hearingData.setHearingJudgeLastName(judgeApiResponse.get().stream().findFirst().get().getSurname());
                     hearingData.setHearingJudgeEmailAddress(judgeApiResponse.get().stream().findFirst().get().getEmailId());
