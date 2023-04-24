@@ -1418,6 +1418,7 @@ public class ManageOrderService {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
+                log.info("**** Case Data **** {}", caseData);
                 generatedDocumentInfo = dgsService.generateDocument(
                     authorisation,
                     CaseDetails.builder().caseData(caseData).build(),
