@@ -546,7 +546,6 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/**/*',
   'src/main/java/uk/gov/hmcts/reform/prl/utils/noticeofchange/**/*',
   '**uk/gov/hmcts/reform/prl/services/noticeofchange/**/*',
-  '**uk/gov/hmcts/reform/prl/services/TaskListService.java',
   '**uk/gov/hmcts/reform/prl/handlers/NoticeOfChangeEventHandler.java',
   '**uk/gov/hmcts/reform/prl/handlers/CaseEventHandler.java',
   '**uk/gov/hmcts/reform/prl/events/NoticeOfChangeEvent.java',
