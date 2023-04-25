@@ -271,7 +271,7 @@ public class DraftAnOrderService {
                         fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
                     );
                 }
-                if (documentLanguage.isGenWelsh()) {
+                if (documentLanguage.isGenWelsh() && fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH) != null) {
                     log.info("before generating welsh document");
                     generatedDocumentInfoWelsh = dgsService.generateDocument(
                         auth,
