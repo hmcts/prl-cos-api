@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
@@ -51,7 +50,18 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
-import uk.gov.hmcts.reform.prl.services.*;
+import uk.gov.hmcts.reform.prl.services.CaseEventService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
+import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.SendgridService;
+import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -124,8 +134,8 @@ public class CallbackController {
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces =
         APPLICATION_JSON)
-    @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if " +
-        "validation fails.")
+    @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if "
+        + "validation fails.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType =
             "application/json",
@@ -145,8 +155,8 @@ public class CallbackController {
 
     @PostMapping(path = "/validate-miam-application-or-exemption", consumes = APPLICATION_JSON, produces =
         APPLICATION_JSON)
-    @Operation(description = "Callback to confirm that a MIAM has been attended or applicant is exempt. Returns error" +
-        " message if confirmation fails")
+    @Operation(description = "Callback to confirm that a MIAM has been attended or applicant is exempt. Returns error"
+        + " message if confirmation fails")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation =
@@ -215,7 +225,7 @@ public class CallbackController {
             .getNearestFamilyCourt(caseData);
         Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() :
             courtLocatorService
-            .getEmailAddress(closestChildArrangementsCourt);
+                .getEmailAddress(closestChildArrangementsCourt);
         if (courtEmailAddress.isPresent()) {
             log.info("Found court email for case id {}", caseData.getId());
             caseDataUpdated.put("localCourtAdmin", List.of(
@@ -408,9 +418,10 @@ public class CallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(caseDataUpdated,
-                                                                                                caseData.getLegalAdviserList(),
-                                                                                                refDataUserService
+        GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(
+            caseDataUpdated,
+            caseData.getLegalAdviserList(),
+            refDataUserService
         );
         caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
 
@@ -524,11 +535,10 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse updateDocumentsAndCategories(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-       // @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        caseData.put("tempDocumentList",coreCaseDataService.getCategoriesAndDocuments(
+        caseData.put("tempDocumentList", coreCaseDataService.getCategoriesAndDocuments(
             authorisation,
             String.valueOf(callbackRequest.getCaseDetails().getId())
         ));

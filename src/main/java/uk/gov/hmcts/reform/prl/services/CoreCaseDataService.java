@@ -6,7 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.*;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 
 import java.util.ArrayList;
@@ -83,7 +87,8 @@ public class CoreCaseDataService {
         List<DynamicListElement> dynamicListElementList = new ArrayList<>();
         String parentString = null;
         dynamicListElementList = createDynamicListFromSubCategories(parentCategories, dynamicListElementList,
-            parentString, null);
+                                                                    parentString, null
+        );
         System.out.println("Done");
         return dynamicListElementList;
     }
@@ -114,8 +119,10 @@ public class CoreCaseDataService {
                 if (category.getDocuments() != null) {
                     category.getDocuments().stream().forEach(document -> {
                         dynamicListElementList.add(
-                            DynamicListElement.builder().code(parentCodeString  + " -> " + category.getCategoryId() + "___" + document.getDocumentURL())
-                                .label(parentLabelString + " -> " + category.getCategoryName() + " --- " + document.getDocumentFilename()).build()
+                            DynamicListElement.builder()
+                                .code(parentCodeString + " -> " + category.getCategoryId() + "___" + document.getDocumentURL())
+                                .label(parentLabelString + " -> " + category.getCategoryName() + " --- "
+                                           + document.getDocumentFilename()).build()
                         );
                     });
                 }
