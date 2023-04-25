@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.fl401listonnotice;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -37,6 +39,7 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_LISTONNOTICE_HEARINGDETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -63,6 +66,7 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
     @Autowired
     @Qualifier("caseSummaryTab")
     private CaseSummaryTabService caseSummaryTabService;
+
     public static final String CONFIRMATION_HEADER = "# Listing directions sent";
 
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
@@ -88,13 +92,13 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
         caseDataUpdated.put("isFl401CaseCreatedForWithOutNotice", isCaseWithOutNotice);
         log.info("Check case is created without Notice::====: {}",caseDataUpdated.get("isFl401CaseCreatedForWithOutNotice"));
 
-        if (caseDataUpdated.containsKey("fl401ListOnNoticeHearingDetails")) {
+        if (caseDataUpdated.containsKey(FL401_LISTONNOTICE_HEARINGDETAILS)) {
             caseDataUpdated.put(
-                "fl401ListOnNoticeHearingDetails",
+                FL401_LISTONNOTICE_HEARINGDETAILS,
                 hearingDataService.getHearingData(existingFl401ListOnNoticeHearingDetails,hearingDataPrePopulatedDynamicLists,caseData));
         } else {
             caseDataUpdated.put(
-                "fl401ListOnNoticeHearingDetails",
+                FL401_LISTONNOTICE_HEARINGDETAILS,
                 ElementUtils.wrapElements(hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists,caseData)));
 
         }
@@ -135,4 +139,29 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+    @PostMapping(path = "/fl401-list-on-notice/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "List Without Notice submission flow")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "List Without notice submission is success"),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse fl401ListOnNoticeSubmission(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Object listWithoutNoticeHeardetailsObj = caseDataUpdated.get(FL401_LISTONNOTICE_HEARINGDETAILS);
+        hearingDataService.nullifyUnncessaryFieldsPopulated(listWithoutNoticeHeardetailsObj);
+        objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
+                                                                                       caseData.getLegalAdviserList(), refDataUserService);
+        caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
+        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+        caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, hearingDataService
+            .getHearingData(caseData.getListWithoutNoticeHearingDetails(),null,caseData));
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
 }
