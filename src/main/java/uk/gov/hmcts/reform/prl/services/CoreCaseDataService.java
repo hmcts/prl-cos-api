@@ -91,9 +91,15 @@ public class CoreCaseDataService {
                                                                     parentString, null
         );
         System.out.println("Done");
-
+        List<DynamicListElement> finalDynamicListElementList = dynamicListElementList;
+        categoriesAndDocuments.getUncategorisedDocuments().stream().forEach(document -> {
+            finalDynamicListElementList.add(
+                DynamicListElement.builder().code(fetchdocumentidfromurl(document.getDocumentURL()))
+                    .label(document.getDocumentFilename()).build()
+            );
+        });
         return DynamicList.builder().value(DynamicListElement.EMPTY)
-            .listItems(dynamicListElementList).build();
+            .listItems(finalDynamicListElementList).build();
     }
 
     private List<DynamicListElement> createDynamicListFromSubCategories(List<Category> categoryList,
