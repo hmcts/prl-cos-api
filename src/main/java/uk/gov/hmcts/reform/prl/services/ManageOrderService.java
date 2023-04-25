@@ -1445,7 +1445,7 @@ public class ManageOrderService {
                     .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
 
             }
-            if (documentLanguage.isGenWelsh()) {
+            if (documentLanguage.isGenWelsh() && fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
                 caseDataUpdated.put("isWelshDocGen", Yes.toString());
                 generatedDocumentInfo = dgsService.generateWelshDocument(
                     authorisation,
@@ -1460,7 +1460,7 @@ public class ManageOrderService {
 
             }
         } catch (Exception ex) {
-            log.info("Error occured while generating Drfat document ==> " + ex.getMessage());
+            log.info("Error occured while generating Draft document ==> " + ex.getMessage());
         }
         return caseDataUpdated;
     }
