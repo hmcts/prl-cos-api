@@ -1567,6 +1567,9 @@ public class ManageOrderService {
                               .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
                               .fl404CustomFields(orderData)
                               .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                              .childOption(Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                                                            ? caseData.getManageOrders().getChildOption() : DynamicMultiSelectList.builder()
+                                    .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
                               .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
         log.info("after calling casedata {}", caseData);
