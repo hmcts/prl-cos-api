@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -96,12 +97,17 @@ public class SdoDetails {
     private final String sdoHearingMaximumPages;
     private final List<Element<SdoLanguageDialect>> sdoInterpreterDialectRequired;
     private final String sdoUpdateContactDetails;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoCafcassFileAndServe;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoCafcassCymruFileAndServe;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoNewPartnersToCafcass;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoNewPartnersToCafcassCymru;
     private final SdoReportSentByEnum sdoSection7ChildImpactAnalysis;
     private final String sdoNameOfCouncil;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoCafcassCymruReportSentByDate;
     private final String sdoLocalAuthorityName;
     private final LocalDate sdoLocalAuthorityReportSubmitByDate;
