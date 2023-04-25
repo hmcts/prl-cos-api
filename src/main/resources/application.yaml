@@ -423,6 +423,9 @@ document:
     citizen:
       prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
+    fl401listonnotice:
+      prl_fl404b_for_da_list_on_notice_template: PRL-GOR-ENG-FL401-LIST-ON-NOTICE-FL404B.docx
+      prl_fl404b_for_da_list_on_notice_filename: fl401-list-on-notice-fl404b.pdf
 
 southampton:
   court:

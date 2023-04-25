@@ -50,6 +50,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
@@ -74,7 +75,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGDOCGEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL404B_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH_DOC_GEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
@@ -262,11 +262,11 @@ public class DocumentGenService {
     @Value("${document.templates.citizen.prl_citizen_upload_filename}")
     protected String prlCitizenUploadFileName;
 
-    @Value("${document.templates.common.prl_fl404b_draft_template}")
-    protected String fl404bDraftTemplate;
+    @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_template}")
+    protected String daListOnNoticeFl404bTemplate;
 
-    @Value("${document.templates.common.prl_fl404b_draft_filename}")
-    protected String fl404bDraftFile;
+    @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_filename}")
+    protected String daListOnNoticeFl404bFile;
 
 
     @Autowired
@@ -678,8 +678,8 @@ public class DocumentGenService {
             case C7_FINAL_WELSH:
                 fileName = docC7FinalWelshFilename;
                 break;
-            case FL404B_DRAFT_DOCUMENT:
-                fileName = fl404bDraftFile;
+            case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
+                fileName = daListOnNoticeFl404bFile;
                 break;
             default:
                 fileName = "";
@@ -770,8 +770,8 @@ public class DocumentGenService {
             case C7_FINAL_WELSH:
                 template = docC7FinalWelshTemplate;
                 break;
-            case FL404B_DRAFT_DOCUMENT:
-                template = fl404bDraftTemplate;
+            case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
+                template = daListOnNoticeFl404bTemplate;
                 break;
             default:
                 template = "";
