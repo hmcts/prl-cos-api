@@ -126,6 +126,8 @@ public class DraftOrder {
     private final YesOrNo isTheOrderAboutChildren;
     private final C21OrderOptionsEnum c21OrderOptions;
 
+    private final SdoDetails sdoDetails;
+
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
         log.info("orderTypeId {},orderTypeId {}", this.orderType, this.orderTypeId);

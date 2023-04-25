@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.enums.sdo;
 
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -9,13 +10,10 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum SdoPreamblesEnum {
+public enum SdoFurtherInstructionsEnum {
 
-    @JsonProperty("rightToAskCourt")
-    rightToAskCourt("rightToAskCourt", "Right to ask court to reconsider this order"),
-
-    @JsonProperty("partyRaisedDomesticAbuse")
-    partyRaisedDomesticAbuse("partyRaisedDomesticAbuse", "Party or parties raising domestic abuse issues");
+    @JsonProperty("newDirection")
+    newDirection("newDirection", "Add a new direction");
 
     private final String id;
     private final String displayedValue;
@@ -26,8 +24,8 @@ public enum SdoPreamblesEnum {
     }
 
     @JsonCreator
-    public static SdoPreamblesEnum getValue(String key) {
-        return SdoPreamblesEnum.valueOf(key);
+    public static SdoFurtherInstructionsEnum getValue(String key) {
+        return SdoFurtherInstructionsEnum.valueOf(key);
     }
 
 }

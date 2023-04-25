@@ -41,6 +41,8 @@ public class OrderDetails {
     @JsonProperty("manageOrderHearingDetails")
     private final List<Element<HearingData>> manageOrderHearingDetails;
 
+    private final SdoDetails sdoDetails;
+
 
     @JsonIgnore
     public String getLabelForDynamicList() {
