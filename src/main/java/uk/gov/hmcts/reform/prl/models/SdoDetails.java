@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -133,7 +132,6 @@ public class SdoDetails {
     private final LocalDate sdoLetterFromSchoolDeadlineDate;
     private final List<SdoApplicantRespondentEnum> sdoLetterFromSchoolUploadedBy;
     private final List<SdoScheduleOfAllegationsEnum> sdoScheduleOfAllegationsOption;
-    @JsonProperty("sdoDisclosureOfPapersCaseNumbers")
     private final List<Element<SdoDisclosureOfPapersCaseNumber>> sdoDisclosureOfPapersCaseNumbers;
     private final String sdoParentWithCare;
 
@@ -190,7 +188,6 @@ public class SdoDetails {
     private final List<Element<SdoDioProvideOtherDetails>> sdoLetterFromSchoolDetails;
     private final List<Element<SdoDioProvideOtherDetails>> sdoScheduleOfAllegationsDetails;
     private final List<SdoDisClosureProceedingCheck> sdoDisClosureProceedingCheck;
-    @JsonProperty("sdoDisClosureProceedingDetails")
     private final List<Element<SdoDioProvideOtherDetails>> sdoDisClosureProceedingDetails;
     private final List<Element<SdoFurtherDirections>> sdoFurtherDirectionDetails;
 

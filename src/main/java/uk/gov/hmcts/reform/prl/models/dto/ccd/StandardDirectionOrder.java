@@ -247,7 +247,7 @@ public class StandardDirectionOrder {
     @JsonProperty("sdoLocalAuthorityCheck")
     private final List<SdoLocalAuthorityCheckEnum> sdoLocalAuthorityCheck;
     @JsonProperty("sdoLocalAuthorityDetails")
-    private final List<SdoDioProvideOtherDetails> sdoLocalAuthorityDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoLocalAuthorityDetails;
     @JsonProperty("sdoTransferCourtDetailsCheck")
     private final List<DioTransferCourtDirectionEnum> sdoTransferCourtDetailsCheck;
     @JsonProperty("sdoTransferCourtDetails")
@@ -294,7 +294,7 @@ public class StandardDirectionOrder {
     @JsonProperty("sdoDisClosureProceedingCheck")
     private final List<SdoDisClosureProceedingCheck> sdoDisClosureProceedingCheck;
     @JsonProperty("sdoDisClosureProceedingDetails")
-    private final List<SdoDioProvideOtherDetails> sdoDisClosureProceedingDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoDisClosureProceedingDetails;
     private final List<Element<SdoFurtherDirections>> sdoFurtherDirectionDetails;
 
 }
