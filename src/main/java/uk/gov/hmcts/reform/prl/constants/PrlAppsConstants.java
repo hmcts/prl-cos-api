@@ -510,4 +510,10 @@ public class PrlAppsConstants {
     public static final String SDO_FHDRA_HEARING_DETAILS = "sdoFhdraHearingDetails";
     public static final String SDO_DRA_HEARING_DETAILS = "sdoDraHearingDetails";
     public static final String SDO_SETTLEMENT_HEARING_DETAILS = "sdoSettlementHearingDetails";
+
+    //PRL-3504 - pagination for RD staff data
+    public static final String RD_STAFF_TOTAL_RECORDS_HEADER = "total_records";
+    public static final int RD_STAFF_PAGE_SIZE = 50;
+    public static final int RD_STAFF_FIRST_PAGE = 0;
+    public static final int RD_STAFF_SECOND_PAGE = 1;
 }

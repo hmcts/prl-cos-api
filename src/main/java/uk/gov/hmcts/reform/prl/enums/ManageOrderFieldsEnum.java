@@ -21,7 +21,8 @@ public enum ManageOrderFieldsEnum {
     judgeOrMagistratesLastName("judgeOrMagistratesLastName"),
     magistrateLastName("magistrateLastName"),
     justiceLegalAdviserFullName("justiceLegalAdviserFullName"),
-    dateOrderMade("dateOrderMade");
+    dateOrderMade("dateOrderMade"),
+    hasJudgeProvidedHearingDetails("hasJudgeProvidedHearingDetails");
 
     private final String value;
 
