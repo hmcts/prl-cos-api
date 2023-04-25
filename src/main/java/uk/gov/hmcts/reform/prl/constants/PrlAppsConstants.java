@@ -437,5 +437,5 @@ public class PrlAppsConstants {
 
     public static final String CASE_NOTES = "caseNotes";
     public static final String COLON_SEPERATOR = ":";
-    public static final String FL404B_DRAFT_DOCUMENT = "FL404B_DRAFT_DOCUMENT";
+    public static final String DA_LIST_ON_NOTICE_FL404B_DOCUMENT = "DA_LIST_ON_NOTICE_FL404B_DOCUMENT";
 }

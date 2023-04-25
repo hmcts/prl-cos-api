@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL404B_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -127,7 +127,7 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
-            FL404B_DRAFT_DOCUMENT,
+            DA_LIST_ON_NOTICE_FL404B_DOCUMENT,
             false
         );
         caseDataUpdated.put("fl401ListOnNoticeDocument", document);
