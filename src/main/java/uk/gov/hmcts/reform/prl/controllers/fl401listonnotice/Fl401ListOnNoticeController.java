@@ -161,7 +161,7 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, hearingDataService
-            .getHearingData(caseData.getListWithoutNoticeHearingDetails(),null,caseData));
+            .getHearingData(caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails(),null,caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
