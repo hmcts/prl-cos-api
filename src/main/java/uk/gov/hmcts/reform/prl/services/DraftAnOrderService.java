@@ -1109,8 +1109,8 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> prepareDraftOrderCollection(String authorisation, CallbackRequest callbackRequest) {
-        log.info("is the order about all children present? " , callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN));
-        log.info("is the order about all children present value? " , callbackRequest.getCaseDetails().getData().get(IS_THE_ORDER_ABOUT_CHILDREN));
+        log.info("is the order about all children present? {} ", callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN));
+        log.info("is the order about all children present value? {}", callbackRequest.getCaseDetails().getData().get(IS_THE_ORDER_ABOUT_CHILDREN));
         if (callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN) && callbackRequest.getCaseDetails().getData().get(
             IS_THE_ORDER_ABOUT_CHILDREN) != null && callbackRequest.getCaseDetails().getData().get(
             IS_THE_ORDER_ABOUT_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
