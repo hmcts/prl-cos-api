@@ -268,7 +268,6 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        resetChildOptions(caseDetails);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
@@ -286,6 +285,7 @@ public class ManageOrdersController {
                 caseData
             ));
         }
+        resetChildOptions(caseDetails);
         manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
