@@ -202,7 +202,7 @@ public class DraftAnOrderService {
         String loggedInUserType = manageOrderService.getLoggedInUserType(auth);
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
-
+        log.info("*** Draft to final for {} ***", typeOfOrder);
         OrderDetails orderDetails = OrderDetails.builder()
             .orderType(draftOrder.getOrderTypeId())
             .orderTypeId(draftOrder.getOrderTypeId())
@@ -273,6 +273,7 @@ public class DraftAnOrderService {
                     ))
                     .build();
             } catch (Exception e) {
+                log.info("*** Exception while generating final {} ***", e.getStackTrace());
                 log.error(
                     "Error while generating the final document for case {} and  order {}",
                     caseData.getId(),
