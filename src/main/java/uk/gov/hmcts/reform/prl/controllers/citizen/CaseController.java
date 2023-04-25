@@ -110,11 +110,6 @@ public class CaseController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) throws JsonProcessingException {
-        log.info("At Case Controller for case-update / caseUpdate  / event Id is {}", eventId);
-        log.info("At Case Controller for case-update / caseUpdate  / auth string is {}", authorisation);
-        log.info("At Case Controller for case-update / caseUpdate  / s2s token is  {}", s2sToken);
-        log.info("At Case Controller for case-update / caseUpdate  / party details are {}", updateCaseData.getPartyDetails());
-        log.info("At Case Controller for case-update / caseUpdate  / case Id is  {}", caseId);
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = null;
             caseDetails = caseService.updateCaseDetails(

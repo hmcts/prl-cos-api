@@ -107,9 +107,6 @@ public class CaseService {
 
         CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("At updateCaseDetails  / event Id is {}", eventId);
-        log.info("At updateCaseDetails  / auth Token is {}", authToken);
-        log.info("At updateCaseDetails  / case Id is  {}", caseId);
         PartyDetails partyDetails = updateCaseData.getPartyDetails();
         PartyEnum partyType = updateCaseData.getPartyType();
         if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
@@ -132,9 +129,13 @@ public class CaseService {
             }
         } else {
             if (PartyEnum.applicant.equals(partyType)) {
-                caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
+                if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
+                    caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
+                }
             } else {
-                caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
+                if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
+                    caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
+                }
             }
         }
 
