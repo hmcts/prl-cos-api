@@ -43,7 +43,7 @@ public class NoticeOfChangeContentProvider {
             .caseName(caseData.getApplicantCaseName())
             .solicitorName(solicitorName)
             .litigantName(litigantName)
-            .caseLink(isOtherPerson ? null : (citizenUrl + CITIZEN_DASHBOARD))
+            .caseLink(isOtherPerson ? String.valueOf(caseData.getId()) : (citizenUrl + CITIZEN_DASHBOARD))
             .build();
     }
 }
