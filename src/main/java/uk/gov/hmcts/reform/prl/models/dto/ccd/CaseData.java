@@ -7,10 +7,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
@@ -22,7 +20,6 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -103,6 +100,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -119,16 +117,9 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Getter
-@Setter
-@Builder(toBuilder = true)
-public class CaseData implements MappableObject {
+@SuperBuilder(toBuilder = true)
+public class CaseData extends BaseCaseData implements MappableObject {
 
-    private final long id;
-
-    private final State state;
-
-    private final String taskListVersion;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime createdDate;
@@ -286,7 +277,6 @@ public class CaseData implements MappableObject {
      * MIAM.
      */
     @JsonUnwrapped
-    @Builder.Default
     private final MiamDetails miamDetails;
 
     /**
@@ -324,7 +314,6 @@ public class CaseData implements MappableObject {
      * Attending the hearing.
      */
     @JsonUnwrapped
-    @Builder.Default
     private final AttendHearing attendHearing;
 
     /**
@@ -611,19 +600,18 @@ public class CaseData implements MappableObject {
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
 
     @JsonUnwrapped
-    @Builder.Default
     private final ManageOrders manageOrders;
 
+    @JsonProperty("childrenListForDocmosis")
+    private List<Child> childrenListForDocmosis;
+
     @JsonUnwrapped
-    @Builder.Default
     private final StandardDirectionOrder standardDirectionOrder;
 
     @JsonUnwrapped
-    @Builder.Default
     private final DirectionOnIssue directionOnIssue;
 
     @JsonUnwrapped
-    @Builder.Default
     private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
 
 
@@ -634,7 +622,6 @@ public class CaseData implements MappableObject {
     private String caseSolicitorOrgName;
     private String selectedOrder;
     private String selectedC21Order;
-
 
     /**
      * FL401 Court details for Pilot.
@@ -658,6 +645,7 @@ public class CaseData implements MappableObject {
 
         return this;
     }
+
 
     /**
      * Withdraw request flag.
@@ -737,6 +725,9 @@ public class CaseData implements MappableObject {
     private final RespondentChildAbduction respondentChildAbduction;
     private final RespondentOtherConcerns respondentOtherConcerns;
 
+    @JsonProperty("cafcassUploadedDocs")
+    private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
+
     /** Confirm or Edit your contact details. **/
     private final CitizenDetails resSolConfirmEditContactDetails;
 
@@ -760,7 +751,6 @@ public class CaseData implements MappableObject {
 
     // C100 Rebuild
     @JsonUnwrapped
-    @Builder.Default
     private final C100RebuildData c100RebuildData;
 
 
@@ -769,7 +759,6 @@ public class CaseData implements MappableObject {
 
     private DynamicList chooseRespondentDynamicList;
     @JsonUnwrapped
-    @Builder.Default
     private final NoticeOfChangeAnswersData noticeOfChangeAnswersData = NoticeOfChangeAnswersData.builder().build();
     @JsonProperty("bundleInformation")
     private BundlingInformation bundleInformation;
@@ -782,7 +771,6 @@ public class CaseData implements MappableObject {
 
 
     @JsonUnwrapped
-    @Builder.Default
     private final ServeOrderData serveOrderData;
 
     private final List<CaseLinksElement<CaseLink>> caseLinks;
@@ -791,7 +779,6 @@ public class CaseData implements MappableObject {
 
 
     @JsonUnwrapped
-    @Builder.Default
     private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
     private final DraftOrderOptionsEnum draftOrderOptions;
@@ -809,7 +796,8 @@ public class CaseData implements MappableObject {
     private GatekeepingDetails gatekeepingDetails;
 
     @JsonUnwrapped
-    @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
 
+
+    private NextHearingDetails nextHearingDetails;
 }
