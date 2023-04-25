@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -112,20 +113,20 @@ public class CaseService {
         if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
             if (PartyEnum.applicant.equals(partyType)) {
                 List<Element<PartyDetails>> applicants = caseData.getApplicants();
-                for (int index = 0; index < applicants.size(); index++) {
-                    if (partyDetails.getUser().getIdamId().equalsIgnoreCase(applicants.get(index).getValue().getUser().getIdamId())) {
-                        caseData.getApplicants().set(index, element(applicants.get(index).getId(), partyDetails));
-                        break;
-                    }
-                }
+                applicants.stream()
+                    .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
+                    .findFirst()
+                    .ifPresent(party -> {
+                        applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails));
+                    });
             } else if (PartyEnum.respondent.equals(partyType)) {
                 List<Element<PartyDetails>> respondents = caseData.getRespondents();
-                for (int index = 0; index < respondents.size(); index++) {
-                    if (partyDetails.getUser().getIdamId().equalsIgnoreCase(respondents.get(index).getValue().getUser().getIdamId())) {
-                        caseData.getRespondents().set(index, element(respondents.get(index).getId(), partyDetails));
-                        break;
-                    }
-                }
+                respondents.stream()
+                    .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
+                    .findFirst()
+                    .ifPresent(party -> {
+                        respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails));
+                    });
             }
         } else {
             if (PartyEnum.applicant.equals(partyType)) {
