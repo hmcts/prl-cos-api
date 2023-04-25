@@ -259,16 +259,16 @@ public class DraftAnOrderController {
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
         log.info("existing hearing details {}", existingOrderHearingDetails);
         if (existingOrderHearingDetails != null) {
-           if((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            if ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId()))){
-               caseDataUpdated.put(
-                   "solicitorOrdersHearingDetails",
-                   hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                     hearingDataPrePopulatedDynamicLists, caseData
-                   )
-               );
-           }
+                .equalsIgnoreCase(callbackRequest.getEventId()))) {
+                caseDataUpdated.put(
+                    "solicitorOrdersHearingDetails",
+                    hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                      hearingDataPrePopulatedDynamicLists, caseData
+                    )
+                );
+            }
             caseDataUpdated.put(
                 ORDER_HEARING_DETAILS,
                 hearingDataService.getHearingData(existingOrderHearingDetails,
