@@ -127,7 +127,6 @@ public class SdoDetails {
     private final LocalDate sdoLetterFromSchoolDeadlineDate;
     private final List<SdoApplicantRespondentEnum> sdoLetterFromSchoolUploadedBy;
     private final List<SdoScheduleOfAllegationsEnum> sdoScheduleOfAllegationsOption;
-    @JsonProperty("sdoDisclosureOfPapersCaseNumbers")
     private final List<Element<SdoDisclosureOfPapersCaseNumber>> sdoDisclosureOfPapersCaseNumbers;
     private final String sdoParentWithCare;
 
