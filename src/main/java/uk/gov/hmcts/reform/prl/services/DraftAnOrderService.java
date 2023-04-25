@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -78,7 +79,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFE_GUARDING_L
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Roles.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -87,6 +87,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Service
 @RequiredArgsConstructor
 public class DraftAnOrderService {
+
+    @Autowired
+    private HearingDataService hearingDataService;
 
     public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
     public static final String CHILD_OPTION = "childOption";
@@ -457,6 +460,7 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getDraftOrderWithUpdatedStatus(CaseData caseData, String eventId, String loggedInUserType, DraftOrder draftOrder) {
+        log.info("control is with in getDraftOrderWithUpdatedStatus caseData{}", caseData);
         return draftOrder.toBuilder()
             .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .adminNotes(caseData.getCourtAdminNotes())
@@ -555,9 +559,7 @@ public class DraftAnOrderService {
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .approvalDate(draftOrder.getApprovalDate())
-            .manageOrderHearingDetails(SOLICITOR.getId().equals(loggedInUserType)
-                                           ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                                           : caseData.getManageOrders().getOrdersHearingDetails())
+            .manageOrderHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
             .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
             .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .build();
@@ -980,6 +982,7 @@ public class DraftAnOrderService {
         } else {
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
+
         return caseDataUpdated;
     }
 
