@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
@@ -219,6 +220,10 @@ public class ManageOrders {
     private final String nameOfJudgeAmendOrder;
     @JsonProperty("nameOfLaAmendOrder")
     private final String nameOfLaAmendOrder;
+    @JsonProperty("nameOfJudgeToReviewOrder")
+    private final JudicialUser nameOfJudgeToReviewOrder;
+    @JsonProperty("nameOfLaToReviewOrder")
+    private final DynamicList nameOfLaToReviewOrder;
 
     @JsonProperty("previewUploadedOrder")
     private Document previewUploadedOrder;
@@ -255,4 +260,14 @@ public class ManageOrders {
     @JsonUnwrapped
     @Builder.Default
     private final List<Element<HearingData>> ordersHearingDetails;
+
+    @JsonProperty("solicitorOrdersHearingDetails")
+    @JsonUnwrapped
+    @Builder.Default
+    private final List<Element<HearingData>> solicitorOrdersHearingDetails;
+
+    private YesOrNo isOrderCreatedBySolicitor;
+
+    @JsonProperty("hasJudgeProvidedHearingDetails")
+    private YesOrNo hasJudgeProvidedHearingDetails;
 }

@@ -967,6 +967,8 @@ public class ManageOrderService {
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType) {
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        log.info("Order Hearing details from ordersHearingDetails:: {}:::", null != caseData.getManageOrders()
+            ? caseData.getManageOrders().getOrdersHearingDetails() : null);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .c21OrderOptions(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
                                  ? caseData.getManageOrders().getC21OrderOptions() : null)
@@ -982,6 +984,8 @@ public class ManageOrderService {
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
+                              .nameOfJudgeForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfJudgeToReviewOrder()))
+                              .nameOfLaForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder()))
                               .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .dateOrderMade(caseData.getDateOrderMade())
@@ -993,6 +997,9 @@ public class ManageOrderService {
             .magistrateLastName(caseData.getMagistrateLastName())
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+            .childOption(Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                             ? caseData.getManageOrders().getChildOption() : DynamicMultiSelectList.builder()
+                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
@@ -1035,6 +1042,7 @@ public class ManageOrderService {
             .isOrderUploadedByJudgeOrAdmin(No)
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
+            .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
                             ? copyPropertiesToSdoDetails(caseData) : null)
             .build();
@@ -1066,6 +1074,9 @@ public class ManageOrderService {
             .orderTypeId(flagSelectedOrderId)
             .orderDocument(caseData.getUploadOrderDoc())
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+            .childOption(Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                             ? caseData.getManageOrders().getChildOption() : DynamicMultiSelectList.builder()
+                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
             .childrenList(caseData.getManageOrders() != null
                               ? getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()) : null)
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -1082,6 +1093,7 @@ public class ManageOrderService {
             .isOrderUploadedByJudgeOrAdmin(null != caseData.getManageOrdersOptions()
                                                && caseData.getManageOrdersOptions().equals(uploadAnOrder) ? Yes : No)
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
+            .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .build();
     }
 
@@ -1410,10 +1422,12 @@ public class ManageOrderService {
         try {
             GeneratedDocumentInfo generatedDocumentInfo;
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
-            List<Child> children = dynamicMultiSelectListService
-                .getChildrenForDocmosis(caseData);
-            if (!children.isEmpty()) {
-                caseData.setChildrenListForDocmosis(children);
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                List<Child> children = dynamicMultiSelectListService
+                    .getChildrenForDocmosis(caseData);
+                if (!children.isEmpty()) {
+                    caseData.setChildrenListForDocmosis(children);
+                }
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
@@ -1512,6 +1526,7 @@ public class ManageOrderService {
 
     private CaseData getFl404bFields(CaseData caseData) {
 
+        log.info("Before calling casedata {}", caseData);
         FL404 orderData = FL404.builder()
             .fl404bCaseNumber(String.valueOf(caseData.getId()))
             .fl404bCourtName(caseData.getCourtName())
@@ -1551,8 +1566,10 @@ public class ManageOrderService {
                               .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
                               .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
                               .fl404CustomFields(orderData)
+                              .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                               .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
+        log.info("after calling casedata {}", caseData);
         return caseData;
     }
 
@@ -1616,10 +1633,8 @@ public class ManageOrderService {
     private Element<OrderDetails> getOrderDetailsElement(String authorisation, String flagSelectedOrderId,
                                                          String flagSelectedOrder, Map<String, String> fieldMap,
                                                          CaseData caseData) throws Exception {
-
-        String loggedInUserType = getLoggedInUserType(authorisation);
+        log.info("Child Option inside getOrderDetailsElement::{}", caseData.getManageOrders().getChildOption());
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
-        String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
 
         OrderDetails orderDetails = OrderDetails.builder().orderType(flagSelectedOrder)
@@ -1630,9 +1645,13 @@ public class ManageOrderService {
             .typeOfOrder(typeOfOrder != null
                              ? typeOfOrder.getDisplayedValue() : null)
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
-            .childrenList(dynamicMultiSelectListService
+            .childrenList(Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                          ? dynamicMultiSelectListService
                               .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                                       .getChildOption()))
+                                                                       .getChildOption())
+                              : dynamicMultiSelectListService
+                .getStringFromDynamicMultiSelectListFromListItems(caseData.getManageOrders()
+                                                         .getChildOption()))
             .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
                                  ? caseData.getDoesOrderClosesCase() : null)
             .serveOrderDetails(buildServeOrderDetails(serveOrderData))
@@ -1640,8 +1659,19 @@ public class ManageOrderService {
                             ? copyPropertiesToSdoDetails(caseData) : null)
             .build();
 
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        log.info("Children list for docmosis in before :: {}", caseData.getChildrenListForDocmosis());
 
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            List<Element<Child>> children = dynamicMultiSelectListService
+                .getChildrenForDocmosis(caseData);
+            if (!children.isEmpty()) {
+                caseData.setChildrenListForDocmosis(children);
+            }
+        }
+
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        log.info("Children list for docmosis in after :: {}", caseData.getChildrenListForDocmosis());
+        log.info("Children list for tab in :: {}", caseData.getChildrenList());
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
@@ -1693,7 +1723,8 @@ public class ManageOrderService {
                                                      Locale.UK
                                                  )) : null)
                                              .orderRecipients(getAllRecipients(caseData))
-                                             .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
+                                             .status(getOrderStatus(CaseUtils.getOrderSelectionType(caseData),
+                                                                    getLoggedInUserType(authorisation), null, null))
                                              .build())
                            .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                             ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
