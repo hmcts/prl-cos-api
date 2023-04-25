@@ -206,6 +206,60 @@ public class CaseControllerTest {
 
     }
 
+    @Test(expected = RuntimeException.class)
+    public void testCitizenUpdatingCaseForInvalidAuthToken() throws JsonProcessingException, NotFoundException {
+
+        PartyDetails partyDetails1 = PartyDetails.builder()
+            .firstName("Test")
+            .lastName("User")
+            .user(User.builder()
+                      .email("test@gmail.com")
+                      .idamId("123")
+                      .solicitorRepresented(YesOrNo.Yes)
+                      .build())
+            .build();
+
+        PartyDetails partyDetails2 = PartyDetails.builder()
+            .firstName("Test2")
+            .lastName("User2")
+            .user(User.builder()
+                      .email("test2@gmail.com")
+                      .idamId("123")
+                      .solicitorRepresented(YesOrNo.Yes)
+                      .build())
+            .build();
+        updateCaseData = UpdateCaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .partyDetails(partyDetails1)
+            .partyType(PartyEnum.applicant)
+            .build();
+
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .applicantsFL401(partyDetails2)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .state("Submitted")
+            .lastModified(LocalDateTime.now())
+            .createdDate(LocalDateTime.now())
+            .id(1234567891234567L).data(stringObjectMap).build();
+
+
+        String caseId = "1234567891234567";
+        String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
+        when(caseService.updateCaseDetails(authToken, caseId, eventId, updateCaseData)).thenReturn(caseDetails);
+        CaseData caseData1 = caseController.caseUpdate(
+            updateCaseData,
+            eventId,
+            caseId,
+            "authToken",
+           " servAuthToken"
+        );
+    }
+
     @Test
     public void testCitizenRetrieveCases() {
 
