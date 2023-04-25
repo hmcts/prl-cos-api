@@ -52,6 +52,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
+import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
@@ -129,11 +130,15 @@ public class CallbackController {
     private final LaunchDarklyClient launchDarklyClient;
     private final RefDataUserService refDataUserService;
     private final GatekeepingDetailsService gatekeepingDetailsService;
+    private final CoreCaseDataService coreCaseDataService;
 
-    @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
+    @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces =
+        APPLICATION_JSON)
+    @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if "
+        + "validation fails.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
+        @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType =
+            "application/json",
             schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public ResponseEntity<CallbackResponse> validateApplicationConsiderationTimetable(
@@ -148,11 +153,14 @@ public class CallbackController {
         );
     }
 
-    @PostMapping(path = "/validate-miam-application-or-exemption", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to confirm that a MIAM has been attended or applicant is exempt. Returns error message if confirmation fails")
+    @PostMapping(path = "/validate-miam-application-or-exemption", consumes = APPLICATION_JSON, produces =
+        APPLICATION_JSON)
+    @Operation(description = "Callback to confirm that a MIAM has been attended or applicant is exempt. Returns error"
+        + " message if confirmation fails")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public ResponseEntity<CallbackResponse> validateMiamApplicationOrExemption(
         @RequestBody CallbackRequest callbackRequest
@@ -215,8 +223,9 @@ public class CallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Court closestChildArrangementsCourt = courtLocatorService
             .getNearestFamilyCourt(caseData);
-        Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() : courtLocatorService
-            .getEmailAddress(closestChildArrangementsCourt);
+        Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() :
+            courtLocatorService
+                .getEmailAddress(closestChildArrangementsCourt);
         if (courtEmailAddress.isPresent()) {
             log.info("Found court email for case id {}", caseData.getId());
             caseDataUpdated.put("localCourtAdmin", List.of(
@@ -231,7 +240,8 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/generate-document-submit-application", consumes = APPLICATION_JSON, produces =
+        APPLICATION_JSON)
     @Operation(description = "Callback to Issue and send to local court")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse generateDocumentSubmitApplication(
@@ -308,7 +318,8 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/amend-court-details/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/amend-court-details/about-to-submit", consumes = APPLICATION_JSON, produces =
+        APPLICATION_JSON)
     @Operation(description = "Callback to Issue and send to local court")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse amendCourtAboutToSubmit(
@@ -319,7 +330,10 @@ public class CallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
-        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
+        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
+            baseLocationId,
+            authorisation
+        );
         caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
         caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
         if (courtVenue.isPresent()) {
@@ -344,7 +358,8 @@ public class CallbackController {
     @Operation(description = "Send Email Notification on Case Withdraw")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse caseWithdrawAboutToSubmit(
@@ -390,7 +405,8 @@ public class CallbackController {
     @Operation(description = "Send Email Notification on Send to gatekeeper ")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse sendToGatekeeper(
@@ -402,8 +418,11 @@ public class CallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(caseDataUpdated,
-                                                                                                caseData.getLegalAdviserList(), refDataUserService);
+        GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(
+            caseDataUpdated,
+            caseData.getLegalAdviserList(),
+            refDataUserService
+        );
         caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
 
         caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
@@ -418,7 +437,8 @@ public class CallbackController {
     @Operation(description = "Resend case data json to RPA")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse resendNotificationToRpa(
@@ -437,7 +457,8 @@ public class CallbackController {
     @Operation(description = "Update Applicants, Children and Respondents details for future processing")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse updatePartyDetails(
@@ -454,7 +475,8 @@ public class CallbackController {
     @Operation(description = "Copy fl401 case name to C100 Case name")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse aboutToSubmitCaseCreation(
@@ -490,7 +512,8 @@ public class CallbackController {
     @Operation(description = "Callback for add case number submit event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse addCaseNumberSubmitted(
@@ -500,6 +523,26 @@ public class CallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("issueDate", LocalDate.now());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/update-category-documents", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback for add case number submit event")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse updateDocumentsAndCategories(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        caseData.put("tempDocumentList", coreCaseDataService.getCategoriesAndDocuments(
+            authorisation,
+            String.valueOf(callbackRequest.getCaseDetails().getId())
+        ));
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 
     private static boolean getPreviousState(String eachState) {
@@ -516,7 +559,8 @@ public class CallbackController {
     @Operation(description = "Copy manage docs for tabs")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse copyManageDocsForTabs(
@@ -567,7 +611,8 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated, CaseData caseData) {
+    private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated,
+                                                    CaseData caseData) {
 
         log.info("Fetching the user and Org Details ");
         try {
