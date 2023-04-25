@@ -60,7 +60,7 @@ public class ServiceOfApplicationPostService {
                     );
                     sentDocs.addAll(docs);
                 } catch (Exception e) {
-                    log.info("The bulk print service has failed: " + e);
+                    log.info("The bulk print service has failed: {}", e.getMessage());
                 }
             });
         return sentDocs;
@@ -178,7 +178,7 @@ public class ServiceOfApplicationPostService {
             log.info("ID in the queue from bulk print service : {}",bulkPrintId);
             sentDocs.addAll(docs);
         } catch (Exception e) {
-            log.info("The bulk print service has failed: " + e);
+            log.info("The bulk print service has failed: {}", e);
         }
         return sentDocs;
     }

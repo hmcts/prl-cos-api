@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.models.dto.ccd;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -56,6 +57,8 @@ public class ManageOrders {
     private final String orderDirections;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
+    @JsonProperty("furtherInformationIfRequired")
+    private final String furtherInformationIfRequired;
     private final String courtName1;
     private final Address courtAddress;
     private final String caseNumber;
@@ -233,7 +236,6 @@ public class ManageOrders {
     private final C21OrderOptionsEnum c21OrderOptions;
     @JsonProperty("typeOfC21Order")
     private String typeOfC21Order;
-    private final String furtherInformationIfRequired;
     private final YesOrNo isOnlyC47aOrderSelectedToServe;
     private final YesOrNo otherPeoplePresentInCaseFlag;
 
@@ -248,4 +250,9 @@ public class ManageOrders {
     private final List<Element<EmailInformation>> emailInformationCaOnlyC47a;
     @JsonProperty("postalInformationCaOnlyC47a")
     private final List<Element<PostalInformation>> postalInformationCaOnlyC47a;
+
+    @JsonProperty("ordersHearingDetails")
+    @JsonUnwrapped
+    @Builder.Default
+    private final List<Element<HearingData>> ordersHearingDetails;
 }

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.citizen;
+package uk.gov.hmcts.reform.prl.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -13,24 +13,24 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
+import uk.gov.hmcts.reform.prl.services.AddCafcassOfficerService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
+
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class CaseSubmissionNotificationCallbackControllerFunctionalTest {
+public class AddCafcassOfficerControllerFunctionalTest {
+
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
-    @MockBean
-    private CitizenEmailService citizenEmailService;
 
-    private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
+    private static final String VALID_REQUEST_BODY = "requests/add-cafcass-officer.json";
 
 
     @Before
@@ -38,12 +38,14 @@ public class CaseSubmissionNotificationCallbackControllerFunctionalTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
+    @MockBean
+    private AddCafcassOfficerService addCafcassOfficerService;
+
     @Test
-    public void givenRequestBody_whenNotified_then200Response() throws Exception {
+    public void givenRequestBody_whenAdd_cafcass_officer_about_to_submit_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        mockMvc.perform(post("/case-submission-notification-callback/notified")
+        mockMvc.perform(post("/add-cafcass-officer/about-to-submit")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())

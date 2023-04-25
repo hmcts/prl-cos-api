@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DirectionOnIssue;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -88,6 +89,7 @@ public class DraftAnOrderControllerTest {
     @Test
     public void testPopulateHeader() {
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
@@ -117,6 +119,54 @@ public class DraftAnOrderControllerTest {
                                 draftAnOrderController.populateHeader(callbackRequest).getData().get("createSelectOrderOptions"));
         }
 
+    }
+
+    @Test
+    public void testPopulateHeaderDio() {
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.directionOnIssue)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Assert.assertEquals(
+            "Solicitors cannot draft a Direction On Issue order",
+            draftAnOrderController.populateHeader(callbackRequest).getErrors().get(0)
+        );
+    }
+
+    @Test
+    public void testPopulateHeaderSdo() {
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Assert.assertEquals(
+            "Solicitors cannot draft a Standard Directions order",
+            draftAnOrderController.populateHeader(callbackRequest).getErrors().get(0)
+        );
     }
 
     @Test
@@ -154,6 +204,7 @@ public class DraftAnOrderControllerTest {
     public void testPopulateFl404FieldsBlankOrder() throws Exception {
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")

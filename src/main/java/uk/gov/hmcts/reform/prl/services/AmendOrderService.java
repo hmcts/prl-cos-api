@@ -42,9 +42,7 @@ public class AmendOrderService {
     private final AmendedOrderStamper stamper;
     private final  UploadDocumentService uploadService;
     private final Time time;
-
-    @Autowired
-    private ManageOrderService manageOrderService;
+    private final ManageOrderService manageOrderService;
 
     public Map<String, Object> updateOrder(CaseData caseData, String authorisation) throws IOException {
         ManageOrders eventData = caseData.getManageOrders();
@@ -60,7 +58,6 @@ public class AmendOrderService {
             .documentUrl(stampedDocument.links.self.href)
             .documentBinaryUrl(stampedDocument.links.binary.href)
             .build();
-
 
         return updateAmendedOrderDetails(caseData, updatedDocument, loggedInUserType);
 
@@ -102,6 +99,7 @@ public class AmendOrderService {
                                           .status(manageOrderService.getOrderStatus(
                                               orderSelectionType,
                                               loggedInUserType,
+                                              null,
                                               null
                                           ))
                                           .build())
@@ -154,7 +152,7 @@ public class AmendOrderService {
         Optional<Element<OrderDetails>> orderDetails  = orders.stream()
             .filter(order -> Objects.equals(order.getId(), selectedOrderId))
             .findFirst();
-        String orderType = orderDetails.get().getValue().getOrderType();
+        String orderType = orderDetails.isPresent() ? orderDetails.get().getValue().getOrderType() : null;
 
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         return DraftOrder.builder()
@@ -166,12 +164,13 @@ public class AmendOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(time.now())
-                              .status(manageOrderService.getOrderStatus(orderSelectionType, loggedInUserType, null))
+                              .status(manageOrderService.getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
+            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .build();
     }
 }

@@ -2,13 +2,17 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
@@ -23,12 +27,20 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
 @Slf4j
 public class CaseUtils {
-
     private CaseUtils() {
 
+    }
+
+    public static CaseData getCaseDataFromStartUpdateEventResponse(StartEventResponse startEventResponse, ObjectMapper objectMapper) {
+        CaseDetails caseDetails = startEventResponse.getCaseDetails();
+        if (caseDetails == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return getCaseData(caseDetails, objectMapper);
     }
 
     public static CaseData getCaseData(CaseDetails caseDetails, ObjectMapper objectMapper) {
@@ -95,7 +107,7 @@ public class CaseUtils {
             String regionName = courtVenue.get().getRegion();
             String baseLocationName = courtVenue.get().getSiteName();
             caseDataMap.put("caseManagementLocation", CaseManagementLocation.builder()
-                .regionId(regionId).baseLocationId(baseLocationId).regionName(regionName)
+                .region(regionId).baseLocation(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
             caseDataMap.put(PrlAppsConstants.IS_CAFCASS, CaseUtils.cafcassFlag(regionId));
             caseDataMap.put(COURT_NAME_FIELD, courtName);
@@ -108,11 +120,11 @@ public class CaseUtils {
     public static YesOrNo cafcassFlag(String regionId) {
         log.info("regionId ===> " + regionId);
         YesOrNo cafcassFlag = YesOrNo.No; //wales
-
-        int intRegionId = Integer.parseInt(regionId);
-
-        if (intRegionId > 0 && intRegionId < 7) {
-            cafcassFlag = YesOrNo.Yes; //english regions
+        if (regionId != null) {
+            int intRegionId = Integer.parseInt(regionId);
+            if (intRegionId > 0 && intRegionId < 7) {
+                cafcassFlag = YesOrNo.Yes; //english regions
+            }
         }
         log.info("is cafcass flag set ===> " + cafcassFlag);
         return cafcassFlag;
@@ -126,5 +138,9 @@ public class CaseUtils {
             serveOrderData = ServeOrderData.builder().build();
         }
         return serveOrderData;
+    }
+
+    public static boolean hasLegalRepresentation(PartyDetails partyDetails) {
+        return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
     }
 }

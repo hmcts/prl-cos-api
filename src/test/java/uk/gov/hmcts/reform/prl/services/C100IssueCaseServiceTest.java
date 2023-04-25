@@ -121,6 +121,9 @@ public class C100IssueCaseServiceTest {
     @Mock
     LocationRefDataService locationRefDataService;
 
+    @Mock
+    CourtSealFinderService courtSealFinderService;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     private static final Map<String, Object> c100DraftMap = new HashMap<>();

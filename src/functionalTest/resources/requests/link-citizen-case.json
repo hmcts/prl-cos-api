@@ -60,15 +60,9 @@
     "Country": "string",
     "PostCode": "string"
   },
-  "isChildrenKnownToAuthority": "Yes",
-  "childAndLocalAuthority": "string",
-  "isChildrenUnderChildProtection": "Yes",
   "isChildrenWithSameParents": "Yes",
   "parentsAndTheirChildren": "string",
   "parentalResponsibilities": "string",
-  "whoChildrenLiveWith": "Applicant(s)",
-  "childAddressAndAdultsLivingWith": "string",
-  "isExistingProceedings": "Yes",
   "childrenInProceeding": "string",
   "otherChildren": [
     {
@@ -2288,8 +2282,8 @@
     ]
   },
   "caseManagementLocation": {
-    "regionId": "string",
-    "baseLocationId": "string",
+    "region": "string",
+    "baseLocation": "string",
     "regionName": "string",
     "baseLocationName": "string"
   },
@@ -2751,6 +2745,7 @@
   "recitalsOrPreamble": "string",
   "orderDirections": "string",
   "furtherDirectionsIfRequired": "string",
+  "furtherInformationIfRequired": "string",
   "courtDeclares2": [
     "Is entitled to occupy the address as their home"
   ],
@@ -4085,6 +4080,7 @@
         ],
         "orderDirections": "string",
         "furtherDirectionsIfRequired": "string",
+        "furtherInformationIfRequired": "string",
         "childArrangementsOrdersToIssue": [
           "Child Arrangements Order"
         ],

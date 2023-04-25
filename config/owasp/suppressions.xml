@@ -9,6 +9,8 @@
       tomcat-embed-core-9.0.63.jar ]]></notes>
     <cve>CVE-2022-34305</cve>
     <cve>CVE-2021-37533</cve>
+    <cve>CVE-2023-28708</cve>
+    <cve>CVE-2023-20860</cve>
   </suppress>
   <suppress>
     <notes>Temporary Suppression</notes>
@@ -21,6 +23,8 @@
     <cve>CVE-2022-31690</cve>
     <cve>CVE-2022-45688</cve>
     <cve>CVE-2023-24998</cve>
+    <cve>CVE-2023-28708</cve>
+    <cve>CVE-2023-20861</cve>
   </suppress>
   <suppress>
     <notes>Temporary Suppression</notes>
@@ -34,10 +38,12 @@
       spring-core-5.3.20.jar ]]></notes>
     <cve>CVE-2016-1000027</cve>
     <cve>CVE-2021-37533</cve>
+    <cve>CVE-2023-20860</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
       snakeyaml_project:snakeyaml ]]></notes>
+    <cve>CVE-2022-1471</cve>
     <cve>CVE-2022-25857</cve>
     <cve>CVE-2022-38751</cve>
     <cve>CVE-2022-38750</cve>
@@ -60,6 +66,7 @@
     <cve>CVE-2022-38752</cve>
     <cve>CVE-2021-4277</cve>
     <cve>CVE-2022-45688</cve>
+    <cve>CVE-2023-20863</cve>
   </suppress>
   <suppress base="true">
     <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml@.*$</packageUrl>
@@ -83,32 +90,7 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
-      spring-security-core-5.6.2.jar, spring-security-crypto-5.4.5.jar ]]></notes>
-    <cve>CVE-2022-22978</cve>
-  </suppress>
-  <suppress>
-    <notes><![CDATA[
-      spring-security-core-5.6.2.jar ]]></notes>
-    <cve>CVE-2022-22976</cve>
-  </suppress>
-  <suppress>
-    <notes><![CDATA[
-      spring-security-crypto-5.4.5.jar ]]></notes>
-    <cve>CVE-2021-22119</cve>
-  </suppress>
-  <suppress>
-    <notes><![CDATA[
-      bcprov-jdk15on-1.64.jar ]]></notes>
-    <cve>CVE-2020-15522</cve>
-  </suppress>
-  <suppress>
-    <notes><![CDATA[
-      spring-security-core-5.6.2.jar, spring-security-web-5.7.1.jar ]]></notes>
-    <cve>CVE-2022-31692</cve>
-  </suppress>
-  <suppress>
-    <notes><![CDATA[
-      spring-security-core-5.6.2.jar, spring-security-web-5.7.1.jar ]]></notes>
-    <cve>CVE-2022-31690</cve>
+      spring-aop-5.3.20.jar ]]></notes>
+    <cve>CVE-2023-20860</cve>
   </suppress>
 </suppressions>

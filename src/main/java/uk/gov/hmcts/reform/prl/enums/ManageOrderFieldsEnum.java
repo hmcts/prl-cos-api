@@ -16,7 +16,12 @@ public enum ManageOrderFieldsEnum {
     whatDoWithOrder("whatDoWithOrder"),
     currentOrderCreatedDateTime("currentOrderCreatedDateTime"),
     approvalDate("approvalDate"),
-    previewOrderDoc("previewOrderDoc");
+    previewOrderDoc("previewOrderDoc"),
+    wasTheOrderApprovedAtHearing("wasTheOrderApprovedAtHearing"),
+    judgeOrMagistratesLastName("judgeOrMagistratesLastName"),
+    magistrateLastName("magistrateLastName"),
+    justiceLegalAdviserFullName("justiceLegalAdviserFullName"),
+    dateOrderMade("dateOrderMade");
 
     private final String value;
 

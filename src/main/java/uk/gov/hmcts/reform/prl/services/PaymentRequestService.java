@@ -98,7 +98,7 @@ public class PaymentRequestService {
         log.info("Case Data retrieved for caseId : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
-        String paymentReferenceNumber = caseData.getC100RebuildData().getPaymentReferenceNumber();
+        String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
 
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {

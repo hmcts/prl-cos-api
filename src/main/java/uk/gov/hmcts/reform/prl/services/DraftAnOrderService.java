@@ -210,7 +210,12 @@ public class DraftAnOrderService {
                             Locale.UK
                         )) : null)
                     .orderRecipients(manageOrderService.getAllRecipients(caseData))
-                    .status(manageOrderService.getOrderStatus(draftOrder.getOrderSelectionType(),loggedInUserType, eventId))
+                    .status(manageOrderService.getOrderStatus(
+                        draftOrder.getOrderSelectionType(),
+                        loggedInUserType,
+                        eventId,
+                        draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
+                    ))
                     .build())
             .isTheOrderAboutChildren(draftOrder.getIsTheOrderAboutChildren())
             .childrenList(draftOrder.getChildrenList())
@@ -388,7 +393,6 @@ public class DraftAnOrderService {
             caseData.getDraftOrdersDynamicList(), objectMapper);
         return caseData.getDraftOrderCollection().stream()
             .filter(element -> {
-                log.info("Order collection id:: {}", element.getId());
                 return element.getId().equals(orderId);
             })
             .map(Element::getValue)
@@ -434,7 +438,8 @@ public class DraftAnOrderService {
                               .status(manageOrderService.getOrderStatus(
                                   draftOrder.getOrderSelectionType(),
                                   loggedInUserType,
-                                  eventId
+                                  eventId,
+                                  draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
                               ))
                               .build())
             .build();
@@ -464,7 +469,12 @@ public class DraftAnOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getDateCreated() : dateTime.now())
-                              .status(manageOrderService.getOrderStatus(draftOrder.getOrderSelectionType(), loggedInUserType, eventId)).build())
+                              .status(manageOrderService.getOrderStatus(
+                                  draftOrder.getOrderSelectionType(),
+                                  loggedInUserType,
+                                  eventId,
+                                  draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
+                              )).build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
             .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
@@ -587,6 +597,8 @@ public class DraftAnOrderService {
                                   .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
                                   .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
                                   .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
+                                  .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
+                                  .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions().getDisplayedValue())
                                   .build()).build();
         } else {
             caseData = caseData.toBuilder()
@@ -605,6 +617,8 @@ public class DraftAnOrderService {
                                   .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                                   .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
                                   .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
+                                  .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
+                                  .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions().getDisplayedValue())
                                   .build()).build();
         }
         return caseData;

@@ -3,13 +3,16 @@ package uk.gov.hmcts.reform.prl.models;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Data
@@ -35,6 +38,8 @@ public class OrderDetails {
     private final String judgeNotes;
     private final String adminNotes;
     private final ServeOrderDetails serveOrderDetails;
+    @JsonProperty("manageOrderHearingDetails")
+    private final List<Element<HearingData>> manageOrderHearingDetails;
 
 
     @JsonIgnore

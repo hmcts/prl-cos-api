@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
@@ -39,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -109,6 +111,9 @@ public class ManageOrdersControllerTest {
     private IdamClient idamClient;
     @Mock
     private AmendOrderService amendOrderService;
+    
+    @Mock
+    private HearingDataService hearingDataService;
 
     PartyDetails applicant;
 
@@ -137,12 +142,14 @@ public class ManageOrdersControllerTest {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .courtName("Horsham Court")
+            .manageOrders(ManageOrders.builder().build())
             .uploadOrderDoc(Document.builder().build())
             .build();
 
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .previewOrderDoc(Document.builder()
                                  .documentUrl(generatedDocumentInfo.getUrl())
                                  .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -173,6 +180,7 @@ public class ManageOrdersControllerTest {
     public void testPopulatePreviewOrderWhenOrderUploaded() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .dateOrderMade(LocalDate.now())
@@ -184,6 +192,7 @@ public class ManageOrdersControllerTest {
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(objectMapper1);
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .previewOrderDoc(Document.builder()
                                  .documentUrl(generatedDocumentInfo.getUrl())
                                  .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -212,12 +221,14 @@ public class ManageOrdersControllerTest {
 
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .previewOrderDoc(Document.builder()
                                  .documentUrl(generatedDocumentInfo.getUrl())
@@ -260,12 +271,14 @@ public class ManageOrdersControllerTest {
 
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .build();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .previewOrderDoc(Document.builder()
                                  .documentUrl(generatedDocumentInfo.getUrl())
@@ -320,6 +333,7 @@ public class ManageOrdersControllerTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
@@ -330,6 +344,7 @@ public class ManageOrdersControllerTest {
 
         CaseData updatedCaseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
@@ -378,6 +393,7 @@ public class ManageOrdersControllerTest {
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -389,6 +405,7 @@ public class ManageOrdersControllerTest {
 
         CaseData updatedCaseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
@@ -437,6 +454,7 @@ public class ManageOrdersControllerTest {
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -449,6 +467,7 @@ public class ManageOrdersControllerTest {
 
         CaseData updatedCaseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .manageOrders(ManageOrders.builder().build())
@@ -500,6 +519,7 @@ public class ManageOrdersControllerTest {
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
@@ -511,6 +531,7 @@ public class ManageOrdersControllerTest {
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
@@ -561,6 +582,7 @@ public class ManageOrdersControllerTest {
         List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -568,11 +590,14 @@ public class ManageOrdersControllerTest {
             .courtName("testCourt")
             .home(Home.builder().children(listOfChildren).build())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
@@ -623,6 +648,7 @@ public class ManageOrdersControllerTest {
         List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -632,6 +658,7 @@ public class ManageOrdersControllerTest {
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -797,6 +824,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -845,18 +873,22 @@ public class ManageOrdersControllerTest {
     public void populateHeaderTest() throws Exception {
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .previewOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("manageOrderHeader1","test");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(caseData);
         when(manageOrderService.populateHeader(caseData))
             .thenReturn(stringObjectMap);
+        List<DynamicListElement> elements = new ArrayList<>();
+        when(hearingDataService.prePopulateHearingType(authToken)).thenReturn(elements);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -866,7 +898,7 @@ public class ManageOrdersControllerTest {
             .build();
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateHeader(
-            callbackRequest
+            callbackRequest, authToken
         );
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("manageOrderHeader1"));
     }
@@ -912,6 +944,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1004,6 +1037,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1096,6 +1130,7 @@ public class ManageOrdersControllerTest {
 
 
         caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(12345L)
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
@@ -1193,6 +1228,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)

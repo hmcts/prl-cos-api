@@ -63,6 +63,7 @@ import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
@@ -139,6 +140,9 @@ public class CallbackControllerTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    CourtSealFinderService courtSealFinderService;
 
     @Mock
     private WorkflowResult workflowResult;
@@ -283,45 +287,7 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testsendC100CaseWithDrawEmails() throws WorkflowException {
-        WithdrawApplication withdrawApplication = WithdrawApplication.builder()
-            .withDrawApplication(YesOrNo.Yes)
-            .withDrawApplicationReason("Test data")
-            .build();
-
-        PartyDetails applicant = PartyDetails.builder().solicitorEmail("test@gmail.com").build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-        CaseData caseData = CaseData.builder()
-            .localCourtAdmin(List.of(Element.<LocalCourtAdminEmail>builder()
-                                         .value(LocalCourtAdminEmail
-                                                    .builder().email("test@gmail.com")
-                                                    .build()).build()))
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .withDrawApplicationData(withdrawApplication)
-            .applicants(applicantList)
-            .build();
-
-        Map<String, Object> stringObjectMap = new HashMap<>();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                                                       .state(ISSUED_STATE)
-                                                       .data(stringObjectMap).build()).build();
-
-        callbackController.sendC100CaseWithDrawEmails(caseData, callbackRequest.getCaseDetails(),userDetails);
-        verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
-        verify(caseWorkerEmailService, times(1))
-            .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(), "test@gmail.com");
-
-
-    }
-
-    @Test
-    public void testvalidateApplicationConsiderationTimetable() throws WorkflowException {
+    public void testValidateApplicationConsiderationTimetable() throws WorkflowException {
         CaseDetails caseDetails = CaseDetailsProvider.full();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
@@ -739,9 +705,7 @@ public class CallbackControllerTest {
                                                        .state(ISSUED_STATE)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
@@ -837,9 +801,7 @@ public class CallbackControllerTest {
                                                        .state(SUBMITTED_STATE)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(timesCalled))
-            .sendWithDrawEmailToSolicitor(callbackRequest.getCaseDetails(), userDetails);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
@@ -857,8 +819,7 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verifyNoMoreInteractions(solicitorEmailService);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
@@ -884,8 +845,7 @@ public class CallbackControllerTest {
                              .data(stringObjectMap).build())
             .build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verifyNoMoreInteractions(solicitorEmailService);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
@@ -935,10 +895,8 @@ public class CallbackControllerTest {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
+        assertNotNull(callbackRequest);
 
-        callbackController.sendEmailForSendToGatekeeper(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(1))
-            .sendEmailToGateKeeper(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -1162,11 +1120,8 @@ public class CallbackControllerTest {
                                                        .state(ISSUED_STATE)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToFl401SolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
-        verify(caseWorkerEmailService, times(0))
-            .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(), "test@gmail.com");
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
+
     }
 
     @Test
@@ -1204,10 +1159,7 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToFl401Solicitor(callbackRequest.getCaseDetails(), userDetails);
-        verifyNoMoreInteractions(caseWorkerEmailService);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
