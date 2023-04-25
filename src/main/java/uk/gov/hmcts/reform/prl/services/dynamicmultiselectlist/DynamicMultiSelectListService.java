@@ -170,6 +170,19 @@ public class DynamicMultiSelectListService {
         return "";
     }
 
+    public String getStringFromDynamicMultiSelectListFromListItems(DynamicMultiSelectList dynamicMultiSelectList) {
+        List<String> strList = new ArrayList<>();
+        if (null != dynamicMultiSelectList && null != dynamicMultiSelectList.getListItems()) {
+            dynamicMultiSelectList.getListItems().forEach(value ->
+                                                          strList.add(value.getLabel().split("\\(")[0])
+            );
+        }
+        if (!strList.isEmpty()) {
+            return String.join(", ",strList);
+        }
+        return "";
+    }
+
     public List<Element<Child>> getChildrenForDocmosis(CaseData caseData) {
         List<Element<Child>> childList = new ArrayList<>();
         log.info("ManageOrders in getChildrenForDocmosis: {}", caseData.getManageOrders());

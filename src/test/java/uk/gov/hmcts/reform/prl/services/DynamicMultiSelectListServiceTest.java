@@ -191,6 +191,19 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
+    public void testGetStringFromDynMultiSelectListFromListItems() {
+        DynamicMultiselectListElement listElement = DynamicMultiselectListElement.builder()
+            .label("Child (Child 1)")
+            .build();
+        String str = dynamicMultiSelectListService
+            .getStringFromDynamicMultiSelectListFromListItems(DynamicMultiSelectList
+                                                     .builder()
+                                                     .listItems(List.of(listElement, listElement))
+                                                     .build());
+        assertEquals("Child , Child ", str);
+    }
+
+    @Test
     public void testDynamicMultiSelectForDocmosis() {
         List<Element<Child>> str = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseData);

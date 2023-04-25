@@ -1616,9 +1616,13 @@ public class ManageOrderService {
             .typeOfOrder(typeOfOrder != null
                              ? typeOfOrder.getDisplayedValue() : null)
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
-            .childrenList(dynamicMultiSelectListService
+            .childrenList(Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                          ? dynamicMultiSelectListService
                               .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                                       .getChildOption()))
+                                                                       .getChildOption())
+                              : dynamicMultiSelectListService
+                .getStringFromDynamicMultiSelectListFromListItems(caseData.getManageOrders()
+                                                         .getChildOption()))
             .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
                                  ? caseData.getDoesOrderClosesCase() : null)
             .serveOrderDetails(buildServeOrderDetails(serveOrderData))
@@ -1626,6 +1630,8 @@ public class ManageOrderService {
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
+        log.info("Children list for docmosis in :: {}", caseData.getChildrenList());
+        log.info("Children list for docmosis in :: {}", caseData.getChildrenListForDocmosis());
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
