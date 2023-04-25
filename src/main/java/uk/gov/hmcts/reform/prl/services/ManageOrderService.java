@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.models.SdoDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -107,11 +109,17 @@ public class ManageOrderService {
 
     public static final String OTHER_PARTIES = "otherParties";
 
-    @Value("${document.templates.common.prl_c21_draft_template}")
+    @Value("${document.templates.common.prl_sdo_draft_template}")
     protected String sdoDraftTemplate;
 
-    @Value("${document.templates.common.prl_c21_draft_filename}")
+    @Value("${document.templates.common.prl_sdo_draft_filename}")
     protected String sdoDraftFile;
+
+    @Value("${document.templates.common.prl_sdo_template}")
+    protected String sdoTemplate;
+
+    @Value("${document.templates.common.prl_sdo_filename}")
+    protected String sdoFile;
 
     @Value("${document.templates.common.prl_c21_draft_template}")
     protected String doiDraftTemplate;
@@ -575,6 +583,8 @@ public class ManageOrderService {
             case standardDirectionsOrder:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, sdoDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, sdoDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, sdoTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, sdoFile);
                 break;
             case directionOnIssue:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, doiDraftTemplate);
@@ -1025,7 +1035,25 @@ public class ManageOrderService {
             .isOrderUploadedByJudgeOrAdmin(No)
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
+            .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
+                            ? copyPropertiesToSdoDetails(caseData) : null)
             .build();
+    }
+
+    public SdoDetails copyPropertiesToSdoDetails(CaseData caseData) {
+        if (null != caseData.getStandardDirectionOrder()) {
+            SdoDetails sdoDetails;
+            try {
+                String standardDirectionOrderObjectJson = objectMapper.writeValueAsString(caseData.getStandardDirectionOrder());
+                sdoDetails = objectMapper.readValue(standardDirectionOrderObjectJson, SdoDetails.class);
+                log.info("caseData.getStandardDirectionOrder() ===> " + standardDirectionOrderObjectJson);
+                log.info("created SdoDetails ===> " + sdoDetails);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            return sdoDetails;
+        }
+        return null;
     }
 
     private DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType) {
@@ -1052,8 +1080,7 @@ public class ManageOrderService {
             .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(null != caseData.getManageOrdersOptions()
-                                               && caseData.getManageOrdersOptions().equals(uploadAnOrder)
-                                               ? Yes : No)
+                                               && caseData.getManageOrdersOptions().equals(uploadAnOrder) ? Yes : No)
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .build();
     }
@@ -1380,41 +1407,46 @@ public class ManageOrderService {
     public Map<String, Object> getCaseData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum selectOrderOption)
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        GeneratedDocumentInfo generatedDocumentInfo = null;
-        Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
-        List<Child> children = dynamicMultiSelectListService
-            .getChildrenForDocmosis(caseData);
-        if (!children.isEmpty()) {
-            caseData.setChildrenListForDocmosis(children);
-        }
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        if (documentLanguage.isGenEng()) {
-            caseDataUpdated.put("isEngDocGen", Yes.toString());
-            generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                CaseDetails.builder().caseData(caseData).build(),
-                fieldsMap.get(PrlAppsConstants.TEMPLATE)
-            );
-            caseDataUpdated.put("previewOrderDoc", Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+        try {
+            GeneratedDocumentInfo generatedDocumentInfo;
+            Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
+            List<Child> children = dynamicMultiSelectListService
+                .getChildrenForDocmosis(caseData);
+            if (!children.isEmpty()) {
+                caseData.setChildrenListForDocmosis(children);
+            }
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            if (documentLanguage.isGenEng()) {
+                caseDataUpdated.put("isEngDocGen", Yes.toString());
+                log.info("**** Case Data **** {}", caseData.getStandardDirectionOrder());
+                generatedDocumentInfo = dgsService.generateDocument(
+                    authorisation,
+                    CaseDetails.builder().caseData(caseData).build(),
+                    fieldsMap.get(PrlAppsConstants.TEMPLATE)
+                );
+                caseDataUpdated.put("previewOrderDoc", Document.builder()
+                    .documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedDocumentInfo.getHashToken())
+                    .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
 
-        }
-        if (documentLanguage.isGenWelsh()) {
-            caseDataUpdated.put("isWelshDocGen", Yes.toString());
-            generatedDocumentInfo = dgsService.generateWelshDocument(
-                authorisation,
-                CaseDetails.builder().caseData(caseData).build(),
-                fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
-            );
-            caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
+            }
+            if (documentLanguage.isGenWelsh()) {
+                caseDataUpdated.put("isWelshDocGen", Yes.toString());
+                generatedDocumentInfo = dgsService.generateWelshDocument(
+                    authorisation,
+                    CaseDetails.builder().caseData(caseData).build(),
+                    fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
+                );
+                caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
+                    .documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedDocumentInfo.getHashToken())
+                    .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
 
+            }
+        } catch (Exception ex) {
+            log.info("Error occured while generating Drfat document ==> " + ex.getMessage());
         }
         return caseDataUpdated;
     }
@@ -1604,6 +1636,8 @@ public class ManageOrderService {
             .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
                                  ? caseData.getDoesOrderClosesCase() : null)
             .serveOrderDetails(buildServeOrderDetails(serveOrderData))
+            .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
+                            ? copyPropertiesToSdoDetails(caseData) : null)
             .build();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -1709,6 +1743,7 @@ public class ManageOrderService {
 
     public Map<String, Object> populatePreviewOrder(String authorisation, CallbackRequest callbackRequest, CaseData caseData) throws Exception {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("*** sdoHearingsAndNextStepsList *** {}", caseDataUpdated.get("sdoHearingsAndNextStepsList"));
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -1719,6 +1754,7 @@ public class ManageOrderService {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData);
             }
+            log.info("*** Before getCaseData *** {}", caseData.getStandardDirectionOrder());
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getUploadOrderDoc());

@@ -9,13 +9,12 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum SdoPreamblesEnum {
+public enum AllocateOrReserveJudgeEnum {
 
-    @JsonProperty("rightToAskCourt")
-    rightToAskCourt("rightToAskCourt", "Right to ask court to reconsider this order"),
-
-    @JsonProperty("partyRaisedDomesticAbuse")
-    partyRaisedDomesticAbuse("partyRaisedDomesticAbuse", "Party or parties raising domestic abuse issues");
+    @JsonProperty("allocatedTo")
+    allocatedTo("allocatedTo", "Allocated to"),
+    @JsonProperty("reservedTo")
+    reservedTo("reservedTo", "Reserved to");
 
     private final String id;
     private final String displayedValue;
@@ -26,9 +25,8 @@ public enum SdoPreamblesEnum {
     }
 
     @JsonCreator
-    public static SdoPreamblesEnum getValue(String key) {
-        return SdoPreamblesEnum.valueOf(key);
+    public static AllocateOrReserveJudgeEnum getValue(String key) {
+        return AllocateOrReserveJudgeEnum.valueOf(key);
     }
 
 }
-

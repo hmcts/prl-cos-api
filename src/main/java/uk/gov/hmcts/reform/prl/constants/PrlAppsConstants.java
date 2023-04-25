@@ -13,7 +13,7 @@ public class PrlAppsConstants {
 
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
-    
+
     public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
     public static final String STATE = "state";
 
@@ -186,6 +186,7 @@ public class PrlAppsConstants {
     public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without hearing may ask the court to reconsider this order. "
         + "You must do that within seven days of receiving the order by writing to the court"
         + "(and notifying any other party) and asking the court to reconsider. "
+        + System.lineSeparator() + System.lineSeparator()
         + "Alternatively, the court may reconsider the directions at the first hearing";
     public static final String SAFE_GUARDING_LETTER = "The court has considered the safeguarding letter from Cafcass or Cafcass Cymru "
         + "and made a decision on how to progress your case.";
@@ -208,26 +209,32 @@ public class PrlAppsConstants {
     public static final String UPDATE_CONTACT_DETAILS = "The parties must, if their contact details have changed or missing from "
         + "the applications, contact Cafcass or Cafcass Cymru quoting the case "
         + "number at [CafcassCymruCAT@gov.wales/ privatelawapplications@cafcass.gov.uk]"
+        + System.lineSeparator() + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "The email must include telephone contact details and email address so that they "
         + "may be contacted for safeguarding purposes."
+        + System.lineSeparator() + System.lineSeparator()
         + System.lineSeparator() + System.lineSeparator()
         + "Alternatively if any party is managing their case using the online dashboard, "
         + "they can update their contact details on the and donot have to also contact "
         + "Cafcass or Cafcass Cymru.";
-    public static final String CROSS_EXAMINATION_EX740 = "Under Section 31U of the MFPA, it appears to the court that the quality of "
-        + "the party's evidence on cross-examination is likely to be diminshed if the "
-        + "cross examination is conducted in person, or if the conduct of cross-examination "
+    public static final String CROSS_EXAMINATION_EX740 = "Under Section 31U of the Matrimonial and Family Proceedings Act 1984 (MFPA),"
+        + " it appears to the court that the quality of "
+        + "the party's evidence on cross-examination is likely to be diminished if:"
+        + System.lineSeparator() + System.lineSeparator()
+        + "a) the cross examination is conducted in person, or"
+        + "b) if the conduct of cross-examination "
         + "in person would cause significant distress to a party and it would not be "
         + "contrary of justice to make the direction."
         + System.lineSeparator() + System.lineSeparator()
         + "It is ordered that:"
         + System.lineSeparator() + System.lineSeparator()
-        + "a. The applicant and respondent(delete as appropriate) must notify the court by "
-        + "4pm on[date] whether they intend to appoint their own qualified legal representative."
+        + "a. The ((applicant / respondent / both)) must notify the court by "
+        + "4pm ((date that the deadline has been set)) whether they intend to appoint their own qualified legal representative."
         + System.lineSeparator()
-        + "b. If the applicant/respondent does not intend to appoint their own qulaified leagl "
+        + "b. If the ((applicant / respondent)) does not intend to appoint their own qulaified leagl "
         + "representative, they (whichever party is the (alleged) victim of domestic abuse) "
-        + "must complete form EX740 (name the form) and return it to the court by 4pm on [date]";
+        + "must complete form EX740 and return it to the court by 4pm on ((date that the deadline has been set))";
     public static final String CROSS_EXAMINATION_QUALIFIED_LEGAL = "Should a qualified legal representative be appointed by the court "
         + System.lineSeparator()
         + "The court has considered whether it necessary in the interest of justice for the "
@@ -235,7 +242,7 @@ public class PrlAppsConstants {
         + "that it is neccessary to appoint such a qualified legal representative(s) to conduct "
         + "the cross examination."
         + System.lineSeparator() + System.lineSeparator()
-        + "1. The court is to appoint a qualified leagal representaive on behalf of [name/s] "
+        + "The court is to appoint a qualified leagal representaive on behalf of [name/s] "
         + "for the hearing listed on [date] at [time] at [name of court].";
     public static final String SPECIFIED_DOCUMENTS = "No document other than a document specified in an order or filled in accordance "
         + "with the Rules or any Practice Direction shall be filled without the court's permission.";
@@ -344,6 +351,33 @@ public class PrlAppsConstants {
         + "c. Any relevant facts they are asking the court to decide about matters which are not agreed;"
         + System.lineSeparator()
         + "d. And the party’s proposals for the arrangements for the child[ren]";
+
+    public static final String SDO_PERMISSION_HEARING = "List for hearing before district judge on ((date of hearing))"
+        + " for ((hours of hearing)) before ((tier of judge)) for the court to consider:"
+        + System.lineSeparator()
+        + System.lineSeparator()
+        + "a) whether the application should be dismissed"
+        + System.lineSeparator()
+        + "b) if the application is not dismissed, any further directions "
+        + System.lineSeparator()
+        + "c) whether an order under section 91 (14) of the Children Act 1989 should be made. "
+        + " Such orders prevent the making of further applications without the court’s permission";
+
+    public static final String SDO_CROSS_EXAMINATION_EX741 = "Under Section 31U of the MFPA, it appears to the court "
+        + "that the quality of the party’s evidence on cross-examination is likely to be diminished if the "
+        + "cross-examination is conducted in person, or if the conduct of cross-examination in person would cause "
+        + "significant distress to a party, and it would not be contrary to the interests of justice to make the direction."
+        + System.lineSeparator()
+        + System.lineSeparator()
+        + "It is ordered that:"
+        + System.lineSeparator()
+        + System.lineSeparator()
+        + "a. The applicant and respondent (delete as appropriate) must notify the court by 4pm on [date] "
+        + "whether they intend to appoint their own qualified legal representative.\n"
+        + System.lineSeparator()
+        + "b. If the applicant/respondent does not intend to appoint their own qualified legal representative, "
+        + "they (whichever party is the (alleged) perpetrator of domestic abuse) must complete form EX741 (name the form) "
+        + "and return it to the court by 4pm on [date]";
 
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
@@ -470,4 +504,10 @@ public class PrlAppsConstants {
     public static final String CUSTOM_DETAILS = "customDetails";
     public static final String[] EMPTY_ARRAY = {};
     public static final String COLON_SEPERATOR = ":";
+    public static final String SDO_PERMISSION_HEARING_DETAILS = "sdoPermissionHearingDetails";
+    public static final String SDO_SECOND_HEARING_DETAILS = "sdoSecondHearingDetails";
+    public static final String SDO_URGENT_HEARING_DETAILS = "sdoUrgentHearingDetails";
+    public static final String SDO_FHDRA_HEARING_DETAILS = "sdoFhdraHearingDetails";
+    public static final String SDO_DRA_HEARING_DETAILS = "sdoDraHearingDetails";
+    public static final String SDO_SETTLEMENT_HEARING_DETAILS = "sdoSettlementHearingDetails";
 }
