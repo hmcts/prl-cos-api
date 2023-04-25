@@ -105,7 +105,8 @@ public class CoreCaseDataService {
                 if (category.getDocuments() != null) {
                     category.getDocuments().stream().forEach(document -> {
                         dynamicListElementList.add(
-                            DynamicListElement.builder().code(category.getCategoryId() + "___" + document.getDocumentURL())
+                            DynamicListElement.builder().code(category.getCategoryId() + "___"
+                                                                  + fetchDocumentIdFromURL(document.getDocumentURL()))
                                 .label(category.getCategoryName() + " --- " + document.getDocumentFilename()).build()
                         );
                     });
@@ -123,7 +124,8 @@ public class CoreCaseDataService {
                     category.getDocuments().stream().forEach(document -> {
                         dynamicListElementList.add(
                             DynamicListElement.builder()
-                                .code(parentCodeString + " -> " + category.getCategoryId() + "___" + document.getDocumentURL())
+                                .code(parentCodeString + " -> " + category.getCategoryId() + "___"
+                                          + fetchDocumentIdFromURL(document.getDocumentURL()))
                                 .label(parentLabelString + " -> " + category.getCategoryName() + " --- "
                                            + document.getDocumentFilename()).build()
                         );
@@ -140,6 +142,12 @@ public class CoreCaseDataService {
 
         });
         return dynamicListElementList;
+    }
+
+    private String fetchDocumentIdFromURL(String documentUrl) {
+
+        return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
+
     }
 
 
