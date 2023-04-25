@@ -19,4 +19,3 @@ public class NoticeOfChangeEvent {
     private final int representedPartyIndex;
     private final SolicitorRole.Representing representing;
 }
-//log.info("My changes");

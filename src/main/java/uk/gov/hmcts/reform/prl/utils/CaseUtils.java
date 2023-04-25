@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -157,7 +158,7 @@ public class CaseUtils {
                 && Yes.equals(applicant.getCanYouProvideEmailAddress()))
             .collect(Collectors.toMap(
                 PartyDetails::getEmail,
-                party -> party.getFirstName() + " " + party.getLastName(),
+                party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
                 (x, y) -> x
             ));
     }
@@ -170,7 +171,7 @@ public class CaseUtils {
                 && Yes.equals(respondent.getCanYouProvideEmailAddress()))
             .collect(Collectors.toMap(
                 PartyDetails::getEmail,
-                party -> party.getFirstName() + " " + party.getLastName(),
+                party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
                 (x, y) -> x
             ));
     }
@@ -181,7 +182,7 @@ public class CaseUtils {
             .filter(other -> Yes.equals(other.getCanYouProvideEmailAddress()))
             .collect(Collectors.toMap(
                 PartyDetails::getEmail,
-                party -> party.getFirstName() + " " + party.getLastName(),
+                party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
                 (x, y) -> x
             ));
     }
@@ -192,7 +193,7 @@ public class CaseUtils {
             .filter(CaseUtils::hasLegalRepresentation)
             .collect(Collectors.toMap(
                 PartyDetails::getSolicitorEmail,
-                applicant -> applicant.getRepresentativeFirstName() + " " + applicant.getRepresentativeLastName(),
+                applicant -> applicant.getRepresentativeFirstName() + EMPTY_SPACE_STRING + applicant.getRepresentativeLastName(),
                 (x, y) -> x
             ));
     }
@@ -203,7 +204,7 @@ public class CaseUtils {
             .filter(CaseUtils::hasLegalRepresentation)
             .collect(Collectors.toMap(
                 PartyDetails::getSolicitorEmail,
-                respondent -> respondent.getRepresentativeFirstName() + " " + respondent.getRepresentativeLastName(),
+                respondent -> respondent.getRepresentativeFirstName() + EMPTY_SPACE_STRING + respondent.getRepresentativeLastName(),
                 (x, y) -> x
             ));
     }

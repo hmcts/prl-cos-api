@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -185,8 +184,7 @@ public class NoticeOfChangePartiesService {
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         tabService.updatePartyDetailsForNoc(newCaseData, solicitorRole);
 
-        String solicitorName = legalRepresentativeSolicitorDetails.getFullName()
-            + EMPTY_SPACE_STRING + legalRepresentativeSolicitorDetails.getSurname();
+        String solicitorName = legalRepresentativeSolicitorDetails.getFullName();
 
         if (changeOrganisationRequest != null) {
             NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
