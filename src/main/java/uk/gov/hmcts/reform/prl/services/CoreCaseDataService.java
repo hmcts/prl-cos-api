@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public class CoreCaseDataService {
         );
     }
 
-    public List<DynamicListElement> getCategoriesAndDocuments(String authorisation, String caseReference) {
+    public DynamicList getCategoriesAndDocuments(String authorisation, String caseReference) {
         CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
             authorisation,
             authTokenGenerator.generate(),
@@ -78,7 +79,7 @@ public class CoreCaseDataService {
 
     }
 
-    private List<DynamicListElement> createDynamicList(CategoriesAndDocuments categoriesAndDocuments) {
+    private DynamicList createDynamicList(CategoriesAndDocuments categoriesAndDocuments) {
 
         List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
             .sorted(Comparator.comparing(Category::getCategoryName))
@@ -90,7 +91,9 @@ public class CoreCaseDataService {
                                                                     parentString, null
         );
         System.out.println("Done");
-        return dynamicListElementList;
+
+        return DynamicList.builder().value(DynamicListElement.EMPTY)
+            .listItems(dynamicListElementList).build();
     }
 
     private List<DynamicListElement> createDynamicListFromSubCategories(List<Category> categoryList,
