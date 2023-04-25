@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.enums.SdoMedicalDiscCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoNewPartnersToCafcassEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoPartyToProvideDetailsEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoSafeguardingCafcassCymruEnum;
-import uk.gov.hmcts.reform.prl.enums.SdoScheduleOfAllegationsCheck;
 import uk.gov.hmcts.reform.prl.enums.SdoSection7CheckEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoWitnessStatementsCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherDirectionEnum;
@@ -79,6 +78,7 @@ public class SdoDetails {
     private final String sdoNextStepsAfterSecondGK;
     private final SdoNextStepsAllocationEnum sdoNextStepsAllocationTo;
     private final List<SdoHearingUrgentCheckListEnum> sdoHearingUrgentCheckList;
+    private final String sdoHearingUrgentAnotherReason;
     private final String sdoHearingUrgentCourtConsider;
     private final String sdoHearingUrgentTimeShortened;
     private final LocalDate sdoHearingUrgentMustBeServedBy;
@@ -182,7 +182,6 @@ public class SdoDetails {
     private final List<Element<SdoNameOfRespondent>> sdoLsRespondentName;
     private final List<SdoLetterFromSchoolCheck> sdoLetterFromSchoolCheck;
     private final List<Element<SdoDioProvideOtherDetails>> sdoLetterFromSchoolDetails;
-    private final List<SdoScheduleOfAllegationsCheck> sdoScheduleOfAllegationsCheck;
     private final List<Element<SdoDioProvideOtherDetails>> sdoScheduleOfAllegationsDetails;
     private final List<SdoDisClosureProceedingCheck> sdoDisClosureProceedingCheck;
     @JsonProperty("sdoDisClosureProceedingDetails")

@@ -12,13 +12,13 @@ public class SdoDisclosureOfPapersCaseNumber {
     @JsonProperty("caseNumber")
     private final String caseNumber;
 
-    @JsonProperty("dioDisclosureCourtList")
-    private final DynamicList dioDisclosureCourtList;
+    @JsonProperty("sdoDisclosureCourtList")
+    private final DynamicList sdoDisclosureCourtList;
 
     @JsonCreator
-    public SdoDisclosureOfPapersCaseNumber(String caseNumber, DynamicList dioDisclosureCourtList) {
-        this.caseNumber  = caseNumber;
-        this.dioDisclosureCourtList = dioDisclosureCourtList;
+    public SdoDisclosureOfPapersCaseNumber(String caseNumber, DynamicList sdoDisclosureCourtList) {
+        this.caseNumber = caseNumber;
+        this.sdoDisclosureCourtList = sdoDisclosureCourtList;
     }
 
 }

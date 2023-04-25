@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.enums.SdoMedicalDiscCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoNewPartnersToCafcassEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoPartyToProvideDetailsEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoSafeguardingCafcassCymruEnum;
-import uk.gov.hmcts.reform.prl.enums.SdoScheduleOfAllegationsCheck;
 import uk.gov.hmcts.reform.prl.enums.SdoSection7CheckEnum;
 import uk.gov.hmcts.reform.prl.enums.SdoWitnessStatementsCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherDirectionEnum;
@@ -92,6 +91,8 @@ public class StandardDirectionOrder {
     private final SdoNextStepsAllocationEnum sdoNextStepsAllocationTo;
     @JsonProperty("sdoHearingUrgentCheckList")
     private final List<SdoHearingUrgentCheckListEnum> sdoHearingUrgentCheckList;
+    @JsonProperty("sdoHearingUrgentAnotherReason")
+    private final String sdoHearingUrgentAnotherReason;
     @JsonProperty("sdoHearingUrgentCourtConsider")
     private final String sdoHearingUrgentCourtConsider;
     @JsonProperty("sdoHearingUrgentTimeShortened")
@@ -106,7 +107,6 @@ public class StandardDirectionOrder {
     private final LocalDate sdoPositionStatementDeadlineDate;
     @JsonProperty("sdoPositionStatementWritten")
     private final SdoWrittenStatementEnum sdoPositionStatementWritten;
-    @JsonProperty("sdoMiamAttendingPerson")
     private final List<Element<MiamAttendingPersonName>> sdoMiamAttendingPerson;
     @JsonProperty("sdoJoiningInstructionsForRH")
     private final String sdoJoiningInstructionsForRH;
@@ -289,8 +289,6 @@ public class StandardDirectionOrder {
     private final List<SdoLetterFromSchoolCheck> sdoLetterFromSchoolCheck;
     @JsonProperty("sdoLetterFromSchoolDetails")
     private final List<Element<SdoDioProvideOtherDetails>> sdoLetterFromSchoolDetails;
-    @JsonProperty("sdoScheduleOfAllegationsCheck")
-    private final List<SdoScheduleOfAllegationsCheck> sdoScheduleOfAllegationsCheck;
     @JsonProperty("sdoScheduleOfAllegationsDetails")
     private final List<Element<SdoDioProvideOtherDetails>> sdoScheduleOfAllegationsDetails;
     @JsonProperty("sdoDisClosureProceedingCheck")
