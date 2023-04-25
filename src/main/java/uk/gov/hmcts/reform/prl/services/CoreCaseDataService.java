@@ -106,7 +106,7 @@ public class CoreCaseDataService {
                     category.getDocuments().stream().forEach(document -> {
                         dynamicListElementList.add(
                             DynamicListElement.builder().code(category.getCategoryId() + "___"
-                                                                  + fetchDocumentIdFromURL(document.getDocumentURL()))
+                                                                  + fetchdocumentidfromurl(document.getDocumentURL()))
                                 .label(category.getCategoryName() + " --- " + document.getDocumentFilename()).build()
                         );
                     });
@@ -125,7 +125,7 @@ public class CoreCaseDataService {
                         dynamicListElementList.add(
                             DynamicListElement.builder()
                                 .code(parentCodeString + " -> " + category.getCategoryId() + "___"
-                                          + fetchDocumentIdFromURL(document.getDocumentURL()))
+                                          + fetchdocumentidfromurl(document.getDocumentURL()))
                                 .label(parentLabelString + " -> " + category.getCategoryName() + " --- "
                                            + document.getDocumentFilename()).build()
                         );
@@ -144,7 +144,7 @@ public class CoreCaseDataService {
         return dynamicListElementList;
     }
 
-    private String fetchDocumentIdFromURL(String documentUrl) {
+    private String fetchdocumentidfromurl(String documentUrl) {
 
         return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
 
