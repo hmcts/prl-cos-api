@@ -138,7 +138,8 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType) {
-        DraftOrder draftOrder = manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);;
+        DraftOrder draftOrder = manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
+        ;
 
         log.info("Draft order Hearing Details:::{}:::", null != draftOrder
             ? draftOrder.getManageOrderHearingDetails() : null);
@@ -401,7 +402,10 @@ public class DraftAnOrderService {
             caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
             caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
             caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
-            caseDataMap.put("isOrderCreatedBySolicitor", (null != selectedOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No);
+            caseDataMap.put(
+                "isOrderCreatedBySolicitor",
+                (null != selectedOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No
+            );
             caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
         } else {
             log.info("inside populate custom SDO fields");
@@ -475,7 +479,10 @@ public class DraftAnOrderService {
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
         caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
-        caseDataMap.put("isOrderCreatedBySolicitor", (null != selectedOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No);
+        caseDataMap.put(
+            "isOrderCreatedBySolicitor",
+            (null != selectedOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No
+        );
         caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
         return caseDataMap;
     }
@@ -642,10 +649,10 @@ public class DraftAnOrderService {
             FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
             if (fl404CustomFields != null) {
                 fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
-                        PrlAppsConstants.FORMAT,
-                        caseData.getApplicantsFL401().getFirstName(),
-                        caseData.getApplicantsFL401().getLastName()
-                    ))
+                    PrlAppsConstants.FORMAT,
+                    caseData.getApplicantsFL401().getFirstName(),
+                    caseData.getApplicantsFL401().getLastName()
+                ))
                     .fl404bCourtName(caseData.getCourtName())
                     .fl404bRespondentName(String.format(
                         PrlAppsConstants.FORMAT,
@@ -752,7 +759,7 @@ public class DraftAnOrderService {
         populateDocumentAndEvidenceText(caseData, caseDataUpdated);
         populateParentWithCare(caseData, caseDataUpdated);
         List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
-        populateCourtDynamicList(courtList, caseDataUpdated,caseData);
+        populateCourtDynamicList(courtList, caseDataUpdated, caseData);
 
         if (caseData.getStandardDirectionOrder().getSdoInstructionsFilingPartiesDynamicList() == null
             || CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInstructionsFilingPartiesDynamicList().getListItems())) {
@@ -824,7 +831,7 @@ public class DraftAnOrderService {
     }
 
     private static void populateHearingData(Map<String, Object> caseDataUpdated, HearingData hearingData,
-                                                            HearingData existingHearingData, String hearingKey) {
+                                            HearingData existingHearingData, String hearingKey) {
         if (existingHearingData == null
             || existingHearingData.getHearingDateConfirmOptionEnum() == null) {
             caseDataUpdated.put(hearingKey, hearingData);
@@ -995,9 +1002,15 @@ public class DraftAnOrderService {
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
 
         Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder);
-        caseDataMap.put("isOrderCreatedBySolicitor", (null != draftOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No);
-        log.info("is Order created by solicitor in populateCommonDraftOrderFields:::{}:::", caseDataMap.get("isOrderCreatedBySolicitor"));
-        return  caseDataMap;
+        caseDataMap.put(
+            "isOrderCreatedBySolicitor",
+            (null != draftOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No
+        );
+        log.info(
+            "is Order created by solicitor in populateCommonDraftOrderFields:::{}:::",
+            caseDataMap.get("isOrderCreatedBySolicitor")
+        );
+        return caseDataMap;
     }
 
     private Map<String, Object> getDraftOrderData(String authorisation, CaseData caseData, DraftOrder draftOrder) throws Exception {
@@ -1109,8 +1122,10 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> prepareDraftOrderCollection(String authorisation, CallbackRequest callbackRequest) {
-        log.info("is the order about all children present? " , callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN));
-        log.info("is the order about all children present value? " , callbackRequest.getCaseDetails().getData().get(IS_THE_ORDER_ABOUT_CHILDREN));
+        log.info("is the order about all children present? ",
+                 callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN));
+        log.info("is the order about all children present value? ",
+                 callbackRequest.getCaseDetails().getData().get(IS_THE_ORDER_ABOUT_CHILDREN));
         if (callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN) && callbackRequest.getCaseDetails().getData().get(
             IS_THE_ORDER_ABOUT_CHILDREN) != null && callbackRequest.getCaseDetails().getData().get(
             IS_THE_ORDER_ABOUT_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
