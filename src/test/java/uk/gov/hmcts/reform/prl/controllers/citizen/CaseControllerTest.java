@@ -256,7 +256,7 @@ public class CaseControllerTest {
             eventId,
             caseId,
             "authToken",
-           " servAuthToken"
+            "servAuthToken"
         );
     }
 
