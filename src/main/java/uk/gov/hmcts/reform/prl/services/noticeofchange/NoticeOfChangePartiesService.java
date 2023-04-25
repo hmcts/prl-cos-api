@@ -149,11 +149,10 @@ public class NoticeOfChangePartiesService {
         if (BLANK == strategy) {
             return Optional.of(NoticeOfChangeParties.builder().build());
         }
-        if (partiesConverter.generateDaForSubmission(partyDetails) == null) {
-            return Optional.of(NoticeOfChangeParties.builder().build());
-        } else {
-            return Optional.of(partiesConverter.generateDaForSubmission(partyDetails));
-        }
+
+        return partiesConverter.generateDaForSubmission(partyDetails) == null
+            ? Optional.of(NoticeOfChangeParties.builder().build())
+            : Optional.of(partiesConverter.generateDaForSubmission(partyDetails));
     }
 
     public enum NoticeOfChangeAnswersPopulationStrategy {
