@@ -217,9 +217,13 @@ public class ManageOrders {
     @JsonProperty("amendOrderSelectJudgeOrLa")
     private final JudgeOrLegalAdvisorCheckEnum amendOrderSelectJudgeOrLa;
     @JsonProperty("nameOfJudgeAmendOrder")
-    private final JudicialUser nameOfJudgeAmendOrder;
+    private final String nameOfJudgeAmendOrder;
     @JsonProperty("nameOfLaAmendOrder")
-    private final DynamicList nameOfLaAmendOrder;
+    private final String nameOfLaAmendOrder;
+    @JsonProperty("nameOfJudgeToReviewOrder")
+    private final JudicialUser nameOfJudgeToReviewOrder;
+    @JsonProperty("nameOfLaToReviewOrder")
+    private final DynamicList nameOfLaToReviewOrder;
 
     @JsonProperty("previewUploadedOrder")
     private Document previewUploadedOrder;

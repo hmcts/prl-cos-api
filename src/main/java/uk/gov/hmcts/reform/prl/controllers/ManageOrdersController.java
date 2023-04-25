@@ -411,7 +411,7 @@ public class ManageOrdersController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
-        caseDataUpdated.put("nameOfLaAmendOrder", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
+        caseDataUpdated.put("nameOfLaToReviewOrder", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
             .build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
