@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
 import java.util.ArrayList;
@@ -184,9 +186,12 @@ public class DynamicMultiSelectListService {
     }
 
     private Child getChildDetails(CaseData caseData, String id) {
-        Optional<Child> child = caseData.getChildren().stream().filter(element -> element.getId().toString().equalsIgnoreCase(id))
-            .map(Element::getValue)
-            .findFirst();
+        Optional<Child> child = Optional.empty();
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            child = caseData.getChildren().stream().filter(element -> element.getId().toString().equalsIgnoreCase(id))
+                .map(Element::getValue)
+                .findFirst();
+        }
         return child.orElseGet(() -> null);
     }
 }
