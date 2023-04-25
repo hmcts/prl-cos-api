@@ -244,12 +244,14 @@ public class HearingDataService {
 
     public List<Element<HearingData>> getHearingData(List<Element<HearingData>> hearingDatas,
                                                      HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,CaseData caseData) {
+        log.info("hearing datas {}", hearingDatas);
         hearingDatas.stream().parallel().forEach(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             hearingRequestDataMapper.mapHearingData(hearingData,hearingDataPrePopulatedDynamicLists,caseData);
             Optional<JudicialUser> judgeDetailsSelected = ofNullable(hearingData.getHearingJudgeNameAndEmail());
             if (judgeDetailsSelected.isPresent() && !judgeDetailsSelected.get().getPersonalCode().isEmpty()) {
                 Optional<List<JudicialUsersApiResponse>> judgeApiResponse = ofNullable(getJudgeDetails(hearingData.getHearingJudgeNameAndEmail()));
+                log.info("JudgeAPI response {}", judgeApiResponse);
                 if (!judgeApiResponse.get().isEmpty()) {
                     hearingData.setHearingJudgeLastName(judgeApiResponse.get().stream().findFirst().get().getSurname());
                     hearingData.setHearingJudgeEmailAddress(judgeApiResponse.get().stream().findFirst().get().getEmailId());

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -68,8 +69,8 @@ public class HearingData {
 
     @JsonProperty("instructionsForRemoteHearing")
     private String instructionsForRemoteHearing;
-
-    @JsonProperty("hearingDateTimes")
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private List<Element<LocalDateTime>> hearingDateTimes;
 
     @JsonProperty("hearingEstimatedHours")

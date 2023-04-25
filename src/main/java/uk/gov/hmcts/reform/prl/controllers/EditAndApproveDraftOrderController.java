@@ -18,8 +18,12 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
+import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 
@@ -27,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 
 @Slf4j
 @RestController
@@ -36,6 +41,7 @@ public class EditAndApproveDraftOrderController {
     private final DraftAnOrderService draftAnOrderService;
     private final ManageOrderService manageOrderService;
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
+    private final HearingDataService hearingDataService;
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
@@ -99,11 +105,33 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse saveServeOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
+
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+        List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+        if (caseData.getManageOrders().getSolicitorOrdersHearingDetails() != null) {
+            log.info("Inside genearted doc ---->{}",caseData.getManageOrders().getSolicitorOrdersHearingDetails());
+            caseDataUpdated.put(
+                ORDER_HEARING_DETAILS,
+                hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                  hearingDataPrePopulatedDynamicLists, caseData
+                )
+            );
+        }
+
+        caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
+            authorisation,
+            callbackRequest
+        ));
+
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
-                authorisation,
-                callbackRequest
-            )).build();
+            .data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON,
