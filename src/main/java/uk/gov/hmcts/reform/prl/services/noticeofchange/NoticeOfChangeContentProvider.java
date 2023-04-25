@@ -23,14 +23,27 @@ public class NoticeOfChangeContentProvider {
     @Value("${citizen.url}")
     private String citizenUrl;
 
-    public EmailTemplateVars buildNoticeOfChangeEmail(CaseData caseData, String solicitorName, String litigantName, boolean isCitizen) {
+    public EmailTemplateVars buildNocEmailSolicitor(CaseData caseData,
+                                                    String solicitorName) {
+        return NoticeOfChangeEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .solicitorName(solicitorName)
+            .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
+            .issueDate(CommonUtils.formatDate(D_MMMM_YYYY, caseData.getIssueDate()))
+            .build();
+    }
+
+    public EmailTemplateVars buildNocEmailCitizen(CaseData caseData,
+                                                  String solicitorName,
+                                                  String litigantName,
+                                                  boolean isOtherPerson) {
         return NoticeOfChangeEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .solicitorName(solicitorName)
             .litigantName(litigantName)
-            .caseLink(isCitizen ? (citizenUrl + CITIZEN_DASHBOARD) : (manageCaseUrl + URL_STRING + caseData.getId()))
-            .issueDate(CommonUtils.formatDate(D_MMMM_YYYY, caseData.getIssueDate()))
+            .caseLink(isOtherPerson ? null : (citizenUrl + CITIZEN_DASHBOARD))
             .build();
     }
 }
