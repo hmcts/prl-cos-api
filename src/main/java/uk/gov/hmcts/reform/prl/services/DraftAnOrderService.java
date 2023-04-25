@@ -261,8 +261,10 @@ public class DraftAnOrderService {
         } else {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
+            log.info("before generating document fieldmap {}", fieldMap);
             try {
                 if (documentLanguage.isGenEng()) {
+                    log.info("before generating english document");
                     generatedDocumentInfo = dgsService.generateDocument(
                         auth,
                         CaseDetails.builder().caseData(caseData).build(),
@@ -270,12 +272,14 @@ public class DraftAnOrderService {
                     );
                 }
                 if (documentLanguage.isGenWelsh()) {
+                    log.info("before generating welsh document");
                     generatedDocumentInfoWelsh = dgsService.generateDocument(
                         auth,
                         CaseDetails.builder().caseData(caseData).build(),
                         fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH)
                     );
                 }
+                log.info("after generating document generatedDocumentInfo {}", generatedDocumentInfo);
                 orderDetails = orderDetails.toBuilder()
                     .orderDocument(getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
                     .orderDocumentWelsh(getGeneratedDocument(
