@@ -14,6 +14,10 @@ public class PrlAppsConstants {
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
 
+    public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
+    public static final String STATE = "state";
+
+
     public static final String YES = "Yes";
     public static final String NO = "No";
 
@@ -90,8 +94,8 @@ public class PrlAppsConstants {
     public static final String WITHDRAWN_STATE = State.CASE_WITHDRAWN.getValue();
     public static final String SUBMITTED_STATE = State.SUBMITTED_PAID.getValue();
     public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
-    public static final String ISSUED_STATE = State.CASE_ISSUE.getValue();
-    public static final String GATEKEEPING_STATE = State.GATE_KEEPING.getValue();
+    public static final String ISSUED_STATE = State.CASE_ISSUED.getValue();
+    public static final String JUDICIAL_REVIEW_STATE = State.JUDICIAL_REVIEW.getValue();
 
     public static final String C8_HINT = "C8";
     public static final String C1A_HINT = "C1A";
@@ -129,7 +133,6 @@ public class PrlAppsConstants {
     public static final List<String> ROLES = List.of("caseworker-privatelaw-courtadmin",
                                                      "caseworker-privatelaw-judge",
                                                      "caseworker-privatelaw-la");
-
     public static final String PREVIOUS_OR_ONGOING_PROCEEDINGS = "previousOrOngoingProceedings";
 
     public static final String FORMAT = "%s %s";
@@ -331,6 +334,9 @@ public class PrlAppsConstants {
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
 
+    public static final String COURTNAV = "COURTNAV";
+    public static final String NA_COURTNAV = "NA_COURTNAV";
+
     public static final String DISTRICT_JUDGE = "districtJudge";
 
     public static final String MAGISTRATES = "magistrates";
@@ -423,6 +429,13 @@ public class PrlAppsConstants {
     public static final String HEARING_PRIORITY_TYPE_ENUM = "hearingPriorityTypeEnum";
     public static final String CUSTOM_DETAILS = "customDetails";
     public static final String[] EMPTY_ARRAY = {};
+    public static final String COLON_SEPERATOR = ":";
+
+    //PRL-3504 - pagination for RD staff data
+    public static final String RD_STAFF_TOTAL_RECORDS_HEADER = "total_records";
+    public static final int RD_STAFF_PAGE_SIZE = 50;
+    public static final int RD_STAFF_FIRST_PAGE = 0;
+    public static final int RD_STAFF_SECOND_PAGE = 1;
 
     public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case";
     public static final String ONLY_COMPLETE_IF_RELEVANT = "Only complete if relevant";
