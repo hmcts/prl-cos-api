@@ -17,18 +17,21 @@ public class NoticeOfChangeEmail extends EmailTemplateVars {
     private final String solicitorName;
     @JsonProperty("caseLink")
     private final String caseLink;
-
+    @JsonProperty("litigantName")
+    private final String litigantName;
 
     @Builder
     public NoticeOfChangeEmail(String caseReference,
                                String caseName,
                                String issueDate,
                                String solicitorName,
-                               String caseLink) {
+                               String caseLink,
+                               String litigantName) {
         super(caseReference);
         this.caseName = caseName;
         this.issueDate = issueDate;
         this.solicitorName = solicitorName;
         this.caseLink = caseLink;
+        this.litigantName = litigantName;
     }
 }

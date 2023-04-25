@@ -50,7 +50,7 @@ public class NoticeOfChangeContentProviderTest {
     @Test
     public void testBuildNoticeOfChangeEmail() {
         log.info("My changes");
-        EmailTemplateVars emailTemplateVars = noticeOfChangeContentProvider.buildNoticeOfChangeEmail(caseData, "Solicitor Name");
+        EmailTemplateVars emailTemplateVars = noticeOfChangeContentProvider.buildNoticeOfChangeEmail(caseData, "Solicitor Name", "test", false);
         assertEquals("123455",emailTemplateVars.getCaseReference());
     }
 

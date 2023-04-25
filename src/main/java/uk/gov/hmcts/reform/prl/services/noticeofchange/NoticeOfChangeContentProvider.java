@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.NoticeOfChangeEmail;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 
@@ -19,12 +20,16 @@ public class NoticeOfChangeContentProvider {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
-    public EmailTemplateVars buildNoticeOfChangeEmail(CaseData caseData, String solicitorName) {
+    @Value("${citizen.url}")
+    private String citizenUrl;
+
+    public EmailTemplateVars buildNoticeOfChangeEmail(CaseData caseData, String solicitorName, String litigantName, boolean isCitizen) {
         return NoticeOfChangeEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .solicitorName(solicitorName)
-            .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
+            .litigantName(litigantName)
+            .caseLink(isCitizen ? (citizenUrl + CITIZEN_DASHBOARD) : (manageCaseUrl + URL_STRING + caseData.getId()))
             .issueDate(CommonUtils.formatDate(D_MMMM_YYYY, caseData.getIssueDate()))
             .build();
     }
