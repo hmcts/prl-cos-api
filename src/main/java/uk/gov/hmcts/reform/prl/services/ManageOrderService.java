@@ -1759,10 +1759,9 @@ public class ManageOrderService {
     }
 
     public CaseData populateHearingsDropdown(String authorization, CaseData caseData) {
-        log.info("Retrieving hearings for caseId: {}, tempCaseId: {} ", caseData.getId(), caseData.getTempCaseIdForHearing());
+        log.info("Retrieving hearings for caseId: {}", caseData.getId());
         //fetch hearing details
-        Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(authorization, caseData.getTempCaseIdForHearing()));
-        log.info("Hearings: {} for caseId: {}",hearings, caseData.getTempCaseIdForHearing());
+        Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(authorization, String.valueOf(caseData.getId())));
         //get case hearings
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
         log.info("Total case hearings: {}", caseHearings.size());
@@ -1777,14 +1776,12 @@ public class ManageOrderService {
             .map(caseHearing -> {
                 //get hearingId
                 String hearingId = String.valueOf(caseHearing.getHearingID());
-                log.info("hearingId: {} ", hearingId);
                 //return hearingId concatenated with hearingDate
                 Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
                 return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
                     if (null != hearingDaySchedule && null != hearingDaySchedule.getHearingStartDateTime()) {
                         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                         String hearingDate = hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter);
-                        log.info("hearingDate: {} ", hearingDate);
                         return concat(concat(hearingId, " - "), hearingDate);
                     }
                     return null;

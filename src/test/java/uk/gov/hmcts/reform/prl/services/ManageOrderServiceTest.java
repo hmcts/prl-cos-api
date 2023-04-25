@@ -2512,7 +2512,6 @@ public class ManageOrderServiceTest {
         //when
         CaseData caseData = CaseData.builder()
             .id(123L)
-            .tempCaseIdForHearing("123")
             .applicantCaseName("Test")
             .manageOrders(ManageOrders.builder().build())
             .build();
@@ -2538,7 +2537,6 @@ public class ManageOrderServiceTest {
         //when
         CaseData caseData = CaseData.builder()
             .id(123L)
-            .tempCaseIdForHearing("123")
             .applicantCaseName("Test")
             .manageOrders(ManageOrders.builder().build())
             .build();
@@ -2566,7 +2564,6 @@ public class ManageOrderServiceTest {
         //when
         CaseData caseData = CaseData.builder()
             .id(123L)
-            .tempCaseIdForHearing("123")
             .applicantCaseName("Test")
             .manageOrders(ManageOrders.builder().build())
             .build();
@@ -2600,7 +2597,6 @@ public class ManageOrderServiceTest {
         //when
         CaseData caseData = CaseData.builder()
             .id(123L)
-            .tempCaseIdForHearing("123")
             .applicantCaseName("Test")
             .manageOrders(ManageOrders.builder().build())
             .build();

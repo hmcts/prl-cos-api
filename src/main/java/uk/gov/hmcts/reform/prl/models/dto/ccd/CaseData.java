@@ -786,7 +786,4 @@ public class CaseData implements MappableObject {
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
     private NextHearingDetails nextHearingDetails;
 
-    //CASE_ID TO FETCH HEARINGS - REVERT BEFORE MERGING INTO MASTER
-    private String tempCaseIdForHearing;
-
 }
