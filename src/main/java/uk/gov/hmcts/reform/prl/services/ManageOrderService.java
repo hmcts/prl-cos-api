@@ -1603,9 +1603,7 @@ public class ManageOrderService {
                                                          String flagSelectedOrder, Map<String, String> fieldMap,
                                                          CaseData caseData) throws Exception {
 
-        String loggedInUserType = getLoggedInUserType(authorisation);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
-        String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
 
         OrderDetails orderDetails = OrderDetails.builder().orderType(flagSelectedOrder)
@@ -1628,10 +1626,19 @@ public class ManageOrderService {
             .serveOrderDetails(buildServeOrderDetails(serveOrderData))
             .build();
 
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        log.info("Children list for docmosis in before :: {}", caseData.getChildrenListForDocmosis());
 
-        log.info("Children list for docmosis in :: {}", caseData.getChildrenList());
-        log.info("Children list for docmosis in :: {}", caseData.getChildrenListForDocmosis());
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            List<Element<Child>> children = dynamicMultiSelectListService
+                .getChildrenForDocmosis(caseData);
+            if (!children.isEmpty()) {
+                caseData.setChildrenListForDocmosis(children);
+            }
+        }
+
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        log.info("Children list for docmosis in after :: {}", caseData.getChildrenListForDocmosis());
+        log.info("Children list for tab in :: {}", caseData.getChildrenList());
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
@@ -1683,7 +1690,8 @@ public class ManageOrderService {
                                                      Locale.UK
                                                  )) : null)
                                              .orderRecipients(getAllRecipients(caseData))
-                                             .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
+                                             .status(getOrderStatus(CaseUtils.getOrderSelectionType(caseData),
+                                                                    getLoggedInUserType(authorisation), null, null))
                                              .build())
                            .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                             ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
