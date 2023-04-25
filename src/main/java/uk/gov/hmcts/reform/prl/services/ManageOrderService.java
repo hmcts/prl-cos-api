@@ -1423,7 +1423,7 @@ public class ManageOrderService {
             GeneratedDocumentInfo generatedDocumentInfo;
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                List<Child> children = dynamicMultiSelectListService
+                List<Element<Child>> children = dynamicMultiSelectListService
                     .getChildrenForDocmosis(caseData);
                 if (!children.isEmpty()) {
                     caseData.setChildrenListForDocmosis(children);

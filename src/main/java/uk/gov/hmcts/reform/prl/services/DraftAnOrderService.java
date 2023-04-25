@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -102,9 +101,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class DraftAnOrderService {
 
-    @Autowired
-    private HearingDataService hearingDataService;
-
     public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
     public static final String CHILD_OPTION = "childOption";
     private final Time dateTime;
@@ -116,10 +112,9 @@ public class DraftAnOrderService {
     private final LocationRefDataService locationRefDataService;
     private final PartiesListGenerator partiesListGenerator;
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
+    private final HearingDataService hearingDataService;
 
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
-
-    private final HearingDataService hearingDataService;
 
 
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
