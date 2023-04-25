@@ -294,7 +294,7 @@ public class StandardDirectionOrder {
     @JsonProperty("sdoDisClosureProceedingCheck")
     private final List<SdoDisClosureProceedingCheck> sdoDisClosureProceedingCheck;
     @JsonProperty("sdoDisClosureProceedingDetails")
-    private final List<SdoDioProvideOtherDetails> sdoDisClosureProceedingDetails;
+    private final List<Element<SdoDioProvideOtherDetails>> sdoDisClosureProceedingDetails;
     private final List<Element<SdoFurtherDirections>> sdoFurtherDirectionDetails;
 
 }

@@ -184,7 +184,6 @@ public class SdoDetails {
     private final List<Element<SdoDioProvideOtherDetails>> sdoLetterFromSchoolDetails;
     private final List<Element<SdoDioProvideOtherDetails>> sdoScheduleOfAllegationsDetails;
     private final List<SdoDisClosureProceedingCheck> sdoDisClosureProceedingCheck;
-    @JsonProperty("sdoDisClosureProceedingDetails")
     private final List<Element<SdoDioProvideOtherDetails>> sdoDisClosureProceedingDetails;
     private final List<Element<SdoFurtherDirections>> sdoFurtherDirectionDetails;
 
