@@ -66,6 +66,7 @@
     <cve>CVE-2022-38752</cve>
     <cve>CVE-2021-4277</cve>
     <cve>CVE-2022-45688</cve>
+    <cve>CVE-2023-20863</cve>
   </suppress>
   <suppress base="true">
     <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml@.*$</packageUrl>
@@ -86,5 +87,10 @@
     <notes><![CDATA[
       tomcat-embed-core-9.0.68.jar ]]></notes>
     <cve>CVE-2022-45143</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      spring-aop-5.3.20.jar ]]></notes>
+    <cve>CVE-2023-20860</cve>
   </suppress>
 </suppressions>

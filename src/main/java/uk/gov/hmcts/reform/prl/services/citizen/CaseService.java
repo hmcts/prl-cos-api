@@ -2,13 +2,17 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -43,28 +47,29 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseService {
 
     public static final String LINK_CASE = "linkCase";
     public static final String INVALID = "Invalid";
     @Autowired
-    CoreCaseDataApi coreCaseDataApi;
+    private final CoreCaseDataApi coreCaseDataApi;
 
     @Autowired
-    CaseRepository caseRepository;
+    private final CaseRepository caseRepository;
+
+    private final IdamClient idamClient;
 
     @Autowired
-    IdamClient idamClient;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private final SystemUserService systemUserService;
 
     @Autowired
-    SystemUserService systemUserService;
+    private final CaseDataMapper caseDataMapper;
 
-    @Autowired
-    CaseDataMapper caseDataMapper;
-
+    private final CcdCoreCaseDataService coreCaseDataService;
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
@@ -136,14 +141,30 @@ public class CaseService {
         String userId = userDetails.getId();
         String emailId = userDetails.getEmail();
 
-        CaseData caseData = objectMapper.convertValue(
+        CaseData currentCaseData = objectMapper.convertValue(
             coreCaseDataApi.getCase(anonymousUserToken, s2sToken, caseId).getData(),
             CaseData.class
         );
         log.info("caseId {}", caseId);
-        if ("Valid".equalsIgnoreCase(findAccessCodeStatus(accessCode, caseData))) {
+        if ("Valid".equalsIgnoreCase(findAccessCodeStatus(accessCode, currentCaseData))) {
             UUID partyId = null;
             YesOrNo isApplicant = YesOrNo.Yes;
+
+            String systemAuthorisation = systemUserService.getSysUserToken();
+            String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+            EventRequestData eventRequestData = coreCaseDataService.eventRequest(CaseEvent.LINK_CITIZEN, systemUpdateUserId);
+            StartEventResponse startEventResponse =
+                coreCaseDataService.startUpdate(
+                    systemAuthorisation,
+                    eventRequestData,
+                    caseId,
+                    true
+                );
+
+            CaseData caseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
+                startEventResponse,
+                objectMapper
+            );
 
             for (Element<CaseInvite> invite : caseData.getCaseInvites()) {
                 if (accessCode.equals(invite.getValue().getAccessCode())) {
@@ -156,7 +177,7 @@ public class CaseService {
 
             processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant);
 
-            caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData);
+            caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData, startEventResponse);
         }
     }
 
