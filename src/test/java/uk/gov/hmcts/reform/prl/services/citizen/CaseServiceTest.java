@@ -361,7 +361,7 @@ public class CaseServiceTest {
         PartyDetails respondent1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
         PartyDetails respondent2 = PartyDetails.builder().email("test@hmcts.net").firstName("test").build();
         caseData = CaseData.builder()
-            .applicants(Arrays.asList(element(respondent1), element(respondent2)))
+            .respondents(Arrays.asList(element(respondent1), element(respondent2)))
             .build();
         caseDataMap = caseData.toMap(objectMapper);
 
@@ -382,7 +382,7 @@ public class CaseServiceTest {
         updateCaseData = UpdateCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .partyDetails(partyDetails1)
-            .partyType(PartyEnum.applicant)
+            .partyType(PartyEnum.respondent)
             .build();
 
 
