@@ -141,13 +141,14 @@ public class EditAndApproveDraftOrderController {
         @ApiResponse(responseCode = "200", description = "Populated common fields"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse populateCommonFields(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(caseData);
+        Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
         String errorMessage = draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
         if (errorMessage != null) {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(

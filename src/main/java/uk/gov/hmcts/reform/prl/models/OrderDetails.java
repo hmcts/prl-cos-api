@@ -40,6 +40,8 @@ public class OrderDetails {
     private final ServeOrderDetails serveOrderDetails;
     @JsonProperty("manageOrderHearingDetails")
     private final List<Element<HearingData>> manageOrderHearingDetails;
+    //PRL-3254 - Added for storing selected hearing dropdown
+    private String selectedHearingType;
 
 
     @JsonIgnore
