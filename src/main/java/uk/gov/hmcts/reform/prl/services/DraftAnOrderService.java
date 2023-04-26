@@ -251,7 +251,6 @@ public class DraftAnOrderService {
                     ))
                     .build())
             .isTheOrderAboutChildren(draftOrder.getIsTheOrderAboutChildren())
-            .isTheOrderAboutAllChildren(draftOrder.getIsTheOrderAboutAllChildren())
             .childrenList(draftOrder.getChildrenList())
             .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())
                             ? draftOrder.getSdoDetails() : null)
@@ -465,10 +464,8 @@ public class DraftAnOrderService {
         caseDataMap.put("judgeOrMagistratesLastName", selectedOrder.getJudgeOrMagistratesLastName());
         caseDataMap.put("justiceLegalAdviserFullName", selectedOrder.getJusticeLegalAdviserFullName());
         caseDataMap.put("magistrateLastName", selectedOrder.getMagistrateLastName());
-        caseDataMap.put("isTheOrderAboutAllChildren", selectedOrder.getIsTheOrderAboutAllChildren());
         caseDataMap.put("isTheOrderAboutChildren", selectedOrder.getIsTheOrderAboutChildren());
-        caseDataMap.put("childOption", (Yes.equals(selectedOrder.getIsTheOrderAboutChildren())
-            || No.equals(selectedOrder.getIsTheOrderAboutAllChildren()))
+        caseDataMap.put("childOption", Yes.equals(selectedOrder.getIsTheOrderAboutChildren())
             ? selectedOrder.getChildOption() : DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
         caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
@@ -598,9 +595,10 @@ public class DraftAnOrderService {
             .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
             .magistrateLastName(caseData.getMagistrateLastName())
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
-            .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
-            .childOption(manageOrderService.getChildOption(caseData))
+            .childOption(Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                             ? caseData.getManageOrders().getChildOption() : DynamicMultiSelectList.builder()
+                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
@@ -726,7 +724,9 @@ public class DraftAnOrderService {
                                   .hearingsType(caseData.getManageOrders().getHearingsType())
                                   .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
                                   .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
-                                  .childOption(manageOrderService.getChildOption(caseData))
+                                  .childOption(Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                                                   ? caseData.getManageOrders().getChildOption() : DynamicMultiSelectList.builder()
+                                      .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
                                   .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .build()).build();
@@ -751,8 +751,10 @@ public class DraftAnOrderService {
                                   .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
                                   .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions() != null
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
-                                  .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
-                                  .childOption(manageOrderService.getChildOption(caseData))
+                                  .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                                  .childOption(Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                                                   ? caseData.getManageOrders().getChildOption() : DynamicMultiSelectList.builder()
+                                      .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
                                   .build()).build();
         }
         return caseData;
