@@ -10,6 +10,7 @@ public enum CaseEvent {
     CITIZEN_CASE_SUBMIT("citizen-case-submit"),
     DELETE_CASE("deleteApplication"),
     EVENT_RESPONDENT_MIAM("respondentMiam"),
+    EVENT_RESPONDENT_SAFETY_CONCERNS("citizenSafetyConcerns"),
     KEEP_DETAILS_PRIVATE("keepYourDetailsPrivate"),
     CONSENT_TO_APPLICATION("consentToTheApplication"),
     EVENT_INTERNATIONAL_ELEMENT("citizenInternationalElement"),
