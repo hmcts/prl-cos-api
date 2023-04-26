@@ -148,7 +148,7 @@ public class DraftAnOrderControllerTest {
 
         Assert.assertEquals(
             "This order is not available to be drafted",
-            draftAnOrderController.populateHeader(callbackRequest).getErrors().get(0)
+            draftAnOrderController.populateHeader(authToken, callbackRequest).getErrors().get(0)
         );
     }
 
@@ -172,7 +172,7 @@ public class DraftAnOrderControllerTest {
 
         Assert.assertEquals(
             "This order is not available to be drafted",
-            draftAnOrderController.populateHeader(callbackRequest).getErrors().get(0)
+            draftAnOrderController.populateHeader(authToken, callbackRequest).getErrors().get(0)
         );
     }
 
