@@ -33,7 +33,7 @@ public class HearingServiceTest {
     private String caseReferenceNumber;
 
     @Mock
-    HearingApiClient hearingApiClient;
+    private HearingApiClient hearingApiClient;
 
     private  Hearings hearings;
 

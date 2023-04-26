@@ -59,15 +59,20 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -124,6 +129,10 @@ public class ManageOrderServiceTest {
     private UserService userService;
 
     private LocalDateTime now;
+    @Mock
+    private HearingService hearingService;
+
+    public static final String authToken = "Bearer TestAuthToken";
 
     @Before
     public void setup() {
@@ -2431,7 +2440,7 @@ public class ManageOrderServiceTest {
         Map<String, Object> result = manageOrderService.populatePreviewOrder("test", callbackRequest, caseData);
         Assert.assertTrue(!result.isEmpty());
     }
-    
+
     @Test
     public void testPopulateFinalUploadOrderFromCaseDataWithMultipleOrdersForWelsh() throws Exception {
 
@@ -2478,5 +2487,155 @@ public class ManageOrderServiceTest {
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
     }
-  
+
+    @Test
+    public void testHearingsDropdownWhenNoHearings() {
+        //when
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Test")
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+
+        //mocks
+        when(hearingService.getHearings(authToken, "123")).thenReturn(Hearings.hearingsWith().build());
+
+        //invoke
+        caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
+
+        //asserts
+        assertNotNull(caseData.getManageOrders().getHearingsType());
+    }
+
+    @Test
+    public void testHearingsDropdownWhenNoCompletedHearings() {
+        //when
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Test")
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+        CaseHearing caseHearing = CaseHearing.caseHearingWith().hmcStatus("CANCELLED").hearingID(123456L).build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseRef("123")
+            .hmctsServiceCode("ABA5")
+            .caseHearings(Collections.singletonList(caseHearing))
+            .build();
+
+        //mocks
+        when(hearingService.getHearings(authToken, "123")).thenReturn(hearings);
+
+        //invoke
+        caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
+
+        //asserts
+        assertNotNull(caseData.getManageOrders().getHearingsType());
+    }
+
+    @Test
+    public void testHearingsDropdownWhenNoHearingDate() {
+        //when
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Test")
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+        CaseHearing caseHearing = CaseHearing.caseHearingWith().hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED)
+            .hearingID(123456L).hearingDaySchedule(null).build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseRef("123")
+            .hmctsServiceCode("ABA5")
+            .caseHearings(Collections.singletonList(caseHearing))
+            .build();
+
+        //mocks
+        when(hearingService.getHearings(authToken, "123")).thenReturn(hearings);
+
+        //invoke
+        caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
+
+        //asserts
+        assertNotNull(caseData.getManageOrders().getHearingsType());
+        assertEquals(1, caseData.getManageOrders().getHearingsType().getListItems().size());
+    }
+
+    @Test
+    public void testHearingsDropdownWhenCompletedHearingsAvailable() {
+        //when
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Test")
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+        CaseHearing caseHearing = CaseHearing.caseHearingWith()
+            .hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED)
+            .hearingID(123456L)
+            .hearingDaySchedule(Arrays.asList(
+                HearingDaySchedule.hearingDayScheduleWith().hearingStartDateTime(LocalDateTime.now().minusDays(30)).build(),
+                HearingDaySchedule.hearingDayScheduleWith().hearingStartDateTime(LocalDateTime.now().minusDays(15)).build()
+            ))
+            .build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseRef("123")
+            .hmctsServiceCode("ABA5")
+            .caseHearings(Collections.singletonList(caseHearing))
+            .build();
+
+        //mocks
+        when(hearingService.getHearings(authToken, "123")).thenReturn(hearings);
+
+        //invoke
+        caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
+
+        //asserts
+        assertNotNull(caseData.getManageOrders().getHearingsType());
+        assertEquals(2, caseData.getManageOrders().getHearingsType().getListItems().size());
+    }
+
+    @Test
+    public void testHearingsDropdownWhenMultipleHearingsAvailable() {
+        //when
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Test")
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+        CaseHearing caseHearing1 = CaseHearing.caseHearingWith()
+            .hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED)
+            .hearingID(12345L)
+            .hearingDaySchedule(Arrays.asList(
+                HearingDaySchedule.hearingDayScheduleWith().hearingStartDateTime(LocalDateTime.now().minusDays(30)).build(),
+                HearingDaySchedule.hearingDayScheduleWith().hearingStartDateTime(LocalDateTime.now().minusDays(15)).build()
+            ))
+            .build();
+        CaseHearing caseHearing2 = CaseHearing.caseHearingWith()
+            .hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED)
+            .hearingID(67890L)
+            .hearingDaySchedule(Collections.singletonList(
+                HearingDaySchedule.hearingDayScheduleWith().hearingStartDateTime(LocalDateTime.now().minusDays(5)).build()
+            ))
+            .build();
+        CaseHearing caseHearing3 = CaseHearing.caseHearingWith()
+            .hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED)
+            .hearingID(98765L)
+            .hearingDaySchedule(Collections.singletonList(
+                    HearingDaySchedule.hearingDayScheduleWith().hearingStartDateTime(null).build()))
+            .build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseRef("123")
+            .hmctsServiceCode("ABA5")
+            .caseHearings(Arrays.asList(caseHearing1, caseHearing2, caseHearing3))
+            .build();
+
+        //mocks
+        when(hearingService.getHearings(authToken, "123")).thenReturn(hearings);
+
+        //invoke
+        caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
+
+        //asserts
+        assertNotNull(caseData.getManageOrders().getHearingsType());
+        assertEquals(3, caseData.getManageOrders().getHearingsType().getListItems().size());
+    }
+
 }
