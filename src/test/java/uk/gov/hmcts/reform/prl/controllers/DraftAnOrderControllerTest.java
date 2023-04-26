@@ -80,6 +80,8 @@ public class DraftAnOrderControllerTest {
     @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
 
+    public static final String authToken = "Bearer TestAuthToken";
+
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -104,10 +106,12 @@ public class DraftAnOrderControllerTest {
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .selectedOrder(CreateSelectOrderOptionsEnum.blankOrderOrDirections.getDisplayedValue())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.populateHearingsDropdown(authToken, caseData)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -115,19 +119,11 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
 
-        Assert.assertEquals(stringObjectMap.get("applicantCaseName"),
-                            draftAnOrderController.populateHeader(callbackRequest).getData().get("applicantCaseName"));
-        Assert.assertEquals(stringObjectMap.get("familymanCaseNumber"),
-                            draftAnOrderController.populateHeader(callbackRequest).getData().get("familymanCaseNumber"));
+        CaseData updatedCaseData = draftAnOrderController.populateHeader(authToken, callbackRequest).getData();
 
-        if (draftAnOrderController.populateHeader(callbackRequest)
-            .getData().get("createSelectOrderOptions") != null) {
-            Assert.assertEquals(stringObjectMap.get("createSelectOrderOptions"),
-                                draftAnOrderController.populateHeader(callbackRequest).getData().get("createSelectOrderOptions"));
-        } else {
-            Assert.assertEquals("",
-                                draftAnOrderController.populateHeader(callbackRequest).getData().get("createSelectOrderOptions"));
-        }
+        Assert.assertEquals(caseData.getApplicantCaseName(), updatedCaseData.getApplicantCaseName());
+        Assert.assertEquals(caseData.getFamilymanCaseNumber(), updatedCaseData.getFamilymanCaseNumber());
+        Assert.assertEquals(caseData.getCreateSelectOrderOptions(), updatedCaseData.getCreateSelectOrderOptions());
 
     }
 
@@ -138,6 +134,7 @@ public class DraftAnOrderControllerTest {
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.directionOnIssue)
+            .selectedOrder(CreateSelectOrderOptionsEnum.blankOrderOrDirections.getDisplayedValue())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());

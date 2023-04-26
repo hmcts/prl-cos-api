@@ -111,7 +111,7 @@ public class ManageOrdersControllerTest {
     private IdamClient idamClient;
     @Mock
     private AmendOrderService amendOrderService;
-    
+
     @Mock
     private HearingDataService hearingDataService;
 
@@ -496,6 +496,8 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
+        when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(updatedCaseData);
+
         CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test",  callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
@@ -564,6 +566,8 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
+        when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(updatedCaseData);
+
         CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test", callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
@@ -630,6 +634,8 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
+        when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(updatedCaseData);
+
         CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test", callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(

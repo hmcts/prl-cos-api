@@ -422,6 +422,7 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Test
     public void  shouldPopulateCommonFields() throws Exception {
+        final String authorisation = "Bearer someAuthorisationToken";
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -465,9 +466,10 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.populateCommonDraftOrderFields(caseData)).thenReturn(caseDataMap);
+        when(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData)).thenReturn(caseDataMap);
+
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateCommonFields(callbackRequest);
+            .populateCommonFields(authorisation, callbackRequest);
         Assert.assertNotNull(response);
     }
 

@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -75,13 +77,19 @@ public class DraftAnOrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Populated Headers"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public AboutToStartOrSubmitCallbackResponse populateHeader(
+    public CallbackResponse populateHeader(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        caseData = caseData.toBuilder()
+            .selectedOrder(null != caseData.getCreateSelectOrderOptions()
+                               ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
+            .build();
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("selectedOrder", caseData.getCreateSelectOrderOptions() != null
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
@@ -101,18 +109,31 @@ public class DraftAnOrderController {
         caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
 
+        if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
         if (caseDataUpdated.get("selectedOrder") == "Standard directions order"
             || caseDataUpdated.get("selectedOrder") == "Direction on issue") {
             List<String> errorList = new ArrayList<>();
             errorList.add(
                 "This order is not available to be drafted");
-            return AboutToStartOrSubmitCallbackResponse.builder()
+            return CallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        } else if (ChildArrangementOrdersEnum.directionOnIssueOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+            List<String> errorList = new ArrayList<>();
+            errorList.add(
+                "Solicitors cannot draft a Direction On Issue order");
+            return CallbackResponse.builder()
+                "This order is not available to be drafted");
+            return CallbackResponse.builder()
                 .errors(errorList)
                 .build();
         } else {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated).build();
+            //PRL-3254 - Populate hearing details dropdown for create order
+            caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
+            return CallbackResponse.builder()
+                .data(caseData).build();
         }
+
     }
 
     @PostMapping(path = "/populate-draft-order-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -147,7 +168,6 @@ public class DraftAnOrderController {
         } else {
             log.info("Before generate document manageorder {}", caseData.getManageOrders());
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
-            log.info("Before generate document casedata {}", caseData.getManageOrders());
             caseDataUpdated.putAll(manageOrderService.getCaseData(
                 authorisation,
                 caseData,
