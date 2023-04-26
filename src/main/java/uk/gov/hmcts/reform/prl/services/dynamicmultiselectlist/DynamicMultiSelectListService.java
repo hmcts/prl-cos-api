@@ -205,11 +205,13 @@ public class DynamicMultiSelectListService {
 
     private Child getChildDetails(CaseData caseData, String id) {
         Optional<Child> child = Optional.empty();
+        log.info("***Case type of application {} ***", CaseUtils.getCaseTypeOfApplication(caseData));
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             child = caseData.getChildren().stream().filter(element -> element.getId().toString().equalsIgnoreCase(id))
                 .map(Element::getValue)
                 .findFirst();
         }
+        log.info("*** returning child to be added to list {} ***", child);
         return child.orElseGet(() -> null);
     }
 }
