@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInter
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -103,10 +102,16 @@ public class C100RespondentSolicitorService {
                     break;
                 case KEEP_DETAILS_PRIVATE:
                     String[] keepDetailsPrivateFields = event.getCaseFieldName().split(",");
-                    caseDataUpdated.put(keepDetailsPrivateFields[0], solicitorRepresentedRespondent.getValue().getResponse()
-                        .getSolicitorKeepDetailsPriate().getRespKeepDetailsPrivate());
-                    caseDataUpdated.put(keepDetailsPrivateFields[1], solicitorRepresentedRespondent.getValue().getResponse()
-                        .getSolicitorKeepDetailsPriate().getRespKeepDetailsPrivateConfidentiality());
+                    caseDataUpdated.put(
+                        keepDetailsPrivateFields[0],
+                        solicitorRepresentedRespondent.getValue().getResponse()
+                            .getKeepDetailsPrivate()
+                    );
+                    caseDataUpdated.put(
+                        keepDetailsPrivateFields[1],
+                        solicitorRepresentedRespondent.getValue().getResponse()
+                            .getKeepDetailsPrivate().getConfidentiality()
+                    );
                     break;
                 case CONFIRM_EDIT_CONTACT_DETAILS:
                     CitizenDetails citizenDetails = solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails();
@@ -120,8 +125,9 @@ public class C100RespondentSolicitorService {
                                     .build()
                             ))
                             .contact(Optional.ofNullable(citizenDetails.getContact()).orElse(Contact.builder()
-                                                                                                 .phoneNumber(partyDetails
-                                                                                                          .getPhoneNumber())
+                                                                                                 .phoneNumber(
+                                                                                                     partyDetails
+                                                                                                         .getPhoneNumber())
                                                                                                  .email(partyDetails.getEmail())
                                                                                                  .build()))
                             .dateOfBirth(Optional.ofNullable(citizenDetails.getDateOfBirth()).orElse(partyDetails.getDateOfBirth()))
@@ -129,7 +135,8 @@ public class C100RespondentSolicitorService {
                             .lastName(Optional.ofNullable(citizenDetails.getLastName()).orElse(partyDetails.getLastName()))
                             .placeOfBirth(Optional.ofNullable(citizenDetails.getPlaceOfBirth()).orElse(partyDetails.getPlaceOfBirth()))
                             .previousName(Optional.ofNullable(citizenDetails.getPreviousName()).orElse(partyDetails.getPreviousName()))
-                            .build());
+                            .build()
+                    );
                     log.info("***** Edit ***** {}", caseDataUpdated.get(event.getCaseFieldName()));
                     break;
                 case ATTENDING_THE_COURT:
@@ -265,26 +272,22 @@ public class C100RespondentSolicitorService {
                     .consent(respondentConsentToApplication).build();
                 break;
             case KEEP_DETAILS_PRIVATE:
-                List<ConfidentialityListEnum> confList = caseData.getKeepContactDetailsPrivateOther().getConfidentialityList();
-                if (null != caseData.getKeepContactDetailsPrivateOther()) {
-                    if (YesOrNo.No.equals(caseData.getKeepContactDetailsPrivateOther().getConfidentiality())) {
-                        confList = null;
-                    }
+                List<ConfidentialityListEnum> confList = null;
+                if (null != caseData.getKeepContactDetailsPrivateOther()
+                    && YesOrNo.Yes.equals(caseData.getKeepContactDetailsPrivateOther().getConfidentiality())) {
+                    confList = caseData.getKeepContactDetailsPrivateOther().getConfidentialityList();
                 }
                 log.info("*** confList **** {}", confList);
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .solicitorKeepDetailsPriate(SolicitorKeepDetailsPrivate.builder()
-                                                    .respKeepDetailsPrivate(caseData.getKeepContactDetailsPrivate())
-                                                    .respKeepDetailsPrivateConfidentiality(KeepDetailsPrivate.builder()
-                                                                                               .confidentiality(caseData
-                                                                                        .getKeepContactDetailsPrivateOther()
-                                                                                        .getConfidentiality())
-                                                                                               .confidentialityList(confList)
-                                                                                               .build())
-
-                                                    .build())
-
-                    .build();
+                    .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                                            .otherPeopleKnowYourContactDetails(
+                                                caseData.getKeepContactDetailsPrivate() != null ?
+                                                    caseData.getKeepContactDetailsPrivate().getOtherPeopleKnowYourContactDetails() : null)
+                                            .confidentiality(caseData
+                                                                 .getKeepContactDetailsPrivateOther()
+                                                                 .getConfidentiality())
+                                            .confidentialityList(confList)
+                                            .build()).build();
                 break;
             case CONFIRM_EDIT_CONTACT_DETAILS:
                 CitizenDetails citizenDetails = caseData.getResSolConfirmEditContactDetails();
@@ -312,11 +315,11 @@ public class C100RespondentSolicitorService {
                     .solicitorMiam(SolicitorMiam.builder()
                                        .respSolHaveYouAttendedMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam())
                                        .respSolWillingnessToAttendMiam(Miam.builder()
-                                       .reasonNotAttendingMiam(
-                                           YesOrNo.Yes.equals(caseData.getRespondentSolicitorWillingnessToAttendMiam()
-                                                                  .getWillingToAttendMiam()) ? null
-                                                                  : caseData.getRespondentSolicitorWillingnessToAttendMiam()
-                                               .getReasonNotAttendingMiam())
+                                                                           .reasonNotAttendingMiam(
+                                                                               YesOrNo.Yes.equals(caseData.getRespondentSolicitorWillingnessToAttendMiam()
+                                                                                                      .getWillingToAttendMiam()) ? null
+                                                                                   : caseData.getRespondentSolicitorWillingnessToAttendMiam()
+                                                                                   .getReasonNotAttendingMiam())
                                                                            .build())
                                        .build())
                     .build();
@@ -325,7 +328,7 @@ public class C100RespondentSolicitorService {
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .currentOrPastProceedingsForChildren(caseData.getCurrentOrPastProceedingsForChildren())
                     .respondentExistingProceedings(YesNoDontKnow.yes.equals(caseData.getCurrentOrPastProceedingsForChildren())
-                                                   ? caseData.getRespondentExistingProceedings() : null)
+                                                       ? caseData.getRespondentExistingProceedings() : null)
                     .build();
                 break;
             case ALLEGATION_OF_HARM:
@@ -344,39 +347,45 @@ public class C100RespondentSolicitorService {
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .resSolInternationalElements(ResSolInternationalElements.builder()
                                                      .internationalElementChildInfo(SolicitorInternationalElement.builder()
-                                                     .reasonForChild(caseData.getInternationalElementChild()
-                                                        .getReasonForChild())
-                                                     .reasonForChildDetails(YesOrNo.No.equals(caseData.getInternationalElementChild()
-                                                                                                  .getReasonForChild())
-                                                                                        ? null
-                                                                                : caseData.getInternationalElementChild()
-                                                         .getReasonForChildDetails()).build())
+                                                                                        .reasonForChild(caseData.getInternationalElementChild()
+                                                                                                            .getReasonForChild())
+                                                                                        .reasonForChildDetails(YesOrNo.No.equals(
+                                                                                            caseData.getInternationalElementChild()
+                                                                                                .getReasonForChild())
+                                                                                                                   ? null
+                                                                                                                   : caseData.getInternationalElementChild()
+                                                                                            .getReasonForChildDetails()).build())
                                                      .internationalElementParentInfo(SolicitorInternationalElement.builder()
-                                                             .reasonForParent(caseData.getInternationalElementParent()
-                                                                                 .getReasonForParent())
-                                                             .reasonForParentDetails(YesOrNo.No.equals(caseData.getInternationalElementParent()
-                                                                                                          .getReasonForParent())
-                                                                                        ? null
-                                                                                        : caseData.getInternationalElementParent()
-                                                                 .getReasonForParentDetails()).build())
+                                                                                         .reasonForParent(caseData.getInternationalElementParent()
+                                                                                                              .getReasonForParent())
+                                                                                         .reasonForParentDetails(YesOrNo.No.equals(
+                                                                                             caseData.getInternationalElementParent()
+                                                                                                 .getReasonForParent())
+                                                                                                                     ? null
+                                                                                                                     : caseData.getInternationalElementParent()
+                                                                                             .getReasonForParentDetails()).build())
                                                      .internationalElementJurisdictionInfo(SolicitorInternationalElement.builder()
-                                                           .reasonForJurisdiction(caseData.getInternationalElementJurisdiction()
-                                                                                .getReasonForJurisdiction())
-                                                           .reasonForJurisdictionDetails(YesOrNo.No.equals(caseData
-                                                                                           .getInternationalElementJurisdiction()
-                                                                                           .getReasonForJurisdiction())
-                                                                                       ? null
-                                                                                       : caseData.getInternationalElementJurisdiction()
-                                                               .getReasonForJurisdictionDetails()).build())
+                                                                                               .reasonForJurisdiction(
+                                                                                                   caseData.getInternationalElementJurisdiction()
+                                                                                                       .getReasonForJurisdiction())
+                                                                                               .reasonForJurisdictionDetails(
+                                                                                                   YesOrNo.No.equals(
+                                                                                                       caseData
+                                                                                                           .getInternationalElementJurisdiction()
+                                                                                                           .getReasonForJurisdiction())
+                                                                                                       ? null
+                                                                                                       : caseData.getInternationalElementJurisdiction()
+                                                                                                       .getReasonForJurisdictionDetails()).build())
                                                      .internationalElementRequestInfo(SolicitorInternationalElement.builder()
-                                                          .requestToAuthority(caseData.getInternationalElementRequest()
-                                                                                     .getReasonForJurisdiction())
-                                                          .requestToAuthorityDetails(YesOrNo.No.equals(caseData
-                                                                                           .getInternationalElementRequest()
-                                                                                           .getRequestToAuthority())
-                                                                                            ? null
-                                                                                            : caseData.getInternationalElementRequest()
-                                                              .getRequestToAuthorityDetails()).build())
+                                                                                          .requestToAuthority(caseData.getInternationalElementRequest()
+                                                                                                                  .getReasonForJurisdiction())
+                                                                                          .requestToAuthorityDetails(
+                                                                                              YesOrNo.No.equals(caseData
+                                                                                                                    .getInternationalElementRequest()
+                                                                                                                    .getRequestToAuthority())
+                                                                                                  ? null
+                                                                                                  : caseData.getInternationalElementRequest()
+                                                                                                  .getRequestToAuthorityDetails()).build())
                                                      .build())
                     .build();
                 break;
@@ -386,11 +395,12 @@ public class C100RespondentSolicitorService {
                                               .factorsAffectingAbilityToParticipate(caseData.getAbilityToParticipateInProceedings()
                                                                                         .getFactorsAffectingAbilityToParticipate())
                                               .provideDetailsForFactorsAffectingAbilityToParticipate(YesNoDontKnow.yes
-                                                             .equals(caseData.getAbilityToParticipateInProceedings()
-                                                                         .getFactorsAffectingAbilityToParticipate())
-                                              ? caseData.getAbilityToParticipateInProceedings()
+                                                                                                         .equals(
+                                                                                                             caseData.getAbilityToParticipateInProceedings()
+                                                                                                                 .getFactorsAffectingAbilityToParticipate())
+                                                                                                         ? caseData.getAbilityToParticipateInProceedings()
                                                   .getProvideDetailsForFactorsAffectingAbilityToParticipate()
-                                                  : null)
+                                                                                                         : null)
                                               .build())
                     .build();
                 break;
@@ -414,9 +424,9 @@ public class C100RespondentSolicitorService {
             .disabilityNeeds(YesOrNo.No.equals(attendToCourt.getHaveAnyDisability()) ? null
                                  : attendToCourt.getDisabilityNeeds())
             .respondentSpecialArrangementDetails(YesOrNo.No.equals(attendToCourt.getRespondentSpecialArrangements()) ? null
-                                            : attendToCourt.getRespondentSpecialArrangementDetails())
+                                                     : attendToCourt.getRespondentSpecialArrangementDetails())
             .respondentIntermediaryNeedDetails(YesOrNo.No.equals(attendToCourt.getRespondentIntermediaryNeeds()) ? null
-                                 : attendToCourt.getRespondentIntermediaryNeedDetails())
+                                                   : attendToCourt.getRespondentIntermediaryNeedDetails())
             .build();
     }
 
