@@ -658,7 +658,6 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
-        Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
         when(manageOrderService.populateHearingsDropdown(authorisation, caseData)).thenReturn(caseData);
 
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(authorisation,
