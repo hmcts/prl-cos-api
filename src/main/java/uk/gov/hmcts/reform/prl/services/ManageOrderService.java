@@ -788,7 +788,7 @@ public class ManageOrderService {
                                        .orderDocument(caseData.getUploadOrderDoc())
                                        .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                                        .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
-                                       .childrenList(getSelectedChildInfoFromMangeOrder(caseData))
+                                       .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
                                        .otherDetails(OtherOrderDetails.builder()
                                                          .createdBy(caseData.getJudgeOrMagistratesLastName())
                                                          .orderCreatedDate(dateTime.now()
@@ -840,25 +840,16 @@ public class ManageOrderService {
             .build();
     }
 
-    public String getSelectedChildInfoFromMangeOrder(CaseData caseData) {
-        DynamicMultiSelectList childOption = caseData.getManageOrders().getChildOption();
-        if (childOption != null && childOption.getValue() != null) {
-            return getChildNames(childOption.getValue());
-        } else if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            && childOption != null && childOption.getListItems() != null) {
-            return getChildNames(childOption.getListItems());
-        }
-        return null;
-    }
-
-    private static String getChildNames(List<DynamicMultiselectListElement> dynamicMultiselectListElements) {
+    public String getSelectedChildInfoFromMangeOrder(DynamicMultiSelectList childOption) {
+        String selectedChildNames = null;
         List<String> childList;
-        String selectedChildNames;
-        childList = new ArrayList<>();
-        for (DynamicMultiselectListElement dynamicMultiselectChildElement : dynamicMultiselectListElements) {
-            childList.add(dynamicMultiselectChildElement.getLabel());
+        if (childOption != null && childOption.getValue() != null) {
+            childList = new ArrayList<>();
+            for (DynamicMultiselectListElement dynamicMultiselectChildElement : childOption.getValue()) {
+                childList.add(dynamicMultiselectChildElement.getLabel());
+            }
+            selectedChildNames = String.join(",", childList);
         }
-        selectedChildNames = String.join(",", childList);
         return selectedChildNames;
     }
 
@@ -1064,7 +1055,7 @@ public class ManageOrderService {
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(No)
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
-            .childrenList(getSelectedChildInfoFromMangeOrder(caseData))
+            .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
             .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
                             ? copyPropertiesToSdoDetails(caseData) : null)
@@ -1108,7 +1099,7 @@ public class ManageOrderService {
             .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
             .childOption(getChildOption(caseData))
             .childrenList(caseData.getManageOrders() != null
-                              ? getSelectedChildInfoFromMangeOrder(caseData) : null)
+                              ? getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()) : null)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
