@@ -255,4 +255,7 @@ public class ManageOrders {
     @JsonUnwrapped
     @Builder.Default
     private final List<Element<HearingData>> ordersHearingDetails;
+
+    //PRL-3254 - Added for populating hearing dropdown
+    private DynamicList hearingsType;
 }
