@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
-import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
@@ -277,7 +276,6 @@ public class DraftAnOrderServiceTest {
             .judgeOrMagistratesLastName("judge last")
             .justiceLegalAdviserFullName("Judge full")
             .magistrateLastName(magistrateElementList)
-            .isTheOrderAboutAllChildren(YesNoNotRequiredEnum.yes)
             .wasTheOrderApprovedAtHearing(YesOrNo.No)
             .draftOrderCollection(draftOrderList)
             .build();
@@ -400,7 +398,6 @@ public class DraftAnOrderServiceTest {
             .judgeOrMagistratesLastName("judge last")
             .justiceLegalAdviserFullName("Judge full")
             .magistrateLastName(magistrateElementList)
-            .isTheOrderAboutAllChildren(YesNoNotRequiredEnum.yes)
             .wasTheOrderApprovedAtHearing(YesOrNo.No)
             .draftOrderCollection(draftOrderList)
             .build();
@@ -1283,7 +1280,6 @@ public class DraftAnOrderServiceTest {
             .judgeOrMagistratesLastName("judge last")
             .justiceLegalAdviserFullName("Judge full")
             .magistrateLastName(magistrateElementList)
-            .isTheOrderAboutAllChildren(YesNoNotRequiredEnum.yes)
             .wasTheOrderApprovedAtHearing(YesOrNo.No)
             .build();
 

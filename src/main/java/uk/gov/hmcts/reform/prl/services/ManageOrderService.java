@@ -842,7 +842,9 @@ public class ManageOrderService {
 
     public String getSelectedChildInfoFromMangeOrder(CaseData caseData) {
         DynamicMultiSelectList childOption = caseData.getManageOrders().getChildOption();
-        if (childOption != null && childOption.getValue() != null) {
+        if ((YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+            || YesOrNo.No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren()))
+            && childOption != null) {
             return getChildNames(childOption.getValue());
         } else if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && childOption != null && childOption.getListItems() != null) {
