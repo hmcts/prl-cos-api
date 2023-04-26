@@ -36,7 +36,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_USER_ROLE;
-import static uk.gov.hmcts.reform.prl.utils.TestConstants.*;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.AUTHORISATION_HEADER;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_DOCUMENT_DOWNLOAD_ENDPOINT;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.SERVICE_AUTHORISATION_HEADER;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTH_TOKEN;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTH_TOKEN;
 
 @Slf4j
 @SpringBootTest
@@ -72,22 +76,23 @@ public class CafcassDocumentManagementControllerFunctionalTest {
             .roles(Arrays.asList(CAFCASS_USER_ROLE))
             .build();
 
-        final ResponseEntity<Resource> response = ResponseEntity.status(HttpStatus.OK).contentType(APPLICATION_PDF).build();
+        final ResponseEntity<Resource> response =
+            ResponseEntity.status(HttpStatus.OK).contentType(APPLICATION_PDF).build();
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
         Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
         Mockito.when(authorisationService.getUserInfo()).thenReturn(userInfo);
         Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
         Mockito.when(systemUserService.getSysUserToken()).thenReturn(TEST_AUTH_TOKEN);
         Mockito.when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), any(UUID.class)))
-                .thenReturn(response);
+            .thenReturn(response);
 
         MvcResult mvcResult = mockMvc.perform(get(CAFCASS_DOCUMENT_DOWNLOAD_ENDPOINT, documentId)
-                        .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                        .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
-                        .accept(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_PDF))
-                .andReturn();
+                                                  .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                                                  .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
+                                                  .accept(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(APPLICATION_PDF))
+            .andReturn();
 
     }
 
@@ -105,14 +110,14 @@ public class CafcassDocumentManagementControllerFunctionalTest {
         Mockito.when(systemUserService.getSysUserToken()).thenReturn(TEST_AUTH_TOKEN);
 
         Mockito.when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), any(UUID.class)))
-                .thenReturn(response);
+            .thenReturn(response);
 
         MvcResult mvcResult = mockMvc.perform(get(CAFCASS_DOCUMENT_DOWNLOAD_ENDPOINT, documentId)
-                        .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                        .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
-                        .accept(APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andReturn();
+                                                  .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                                                  .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
+                                                  .accept(APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andReturn();
 
     }
 }
