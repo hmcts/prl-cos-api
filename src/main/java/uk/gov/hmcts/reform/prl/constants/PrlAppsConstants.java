@@ -13,7 +13,7 @@ public class PrlAppsConstants {
 
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
-    
+
     public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
     public static final String STATE = "state";
 
@@ -430,4 +430,13 @@ public class PrlAppsConstants {
     public static final String CUSTOM_DETAILS = "customDetails";
     public static final String[] EMPTY_ARRAY = {};
     public static final String COLON_SEPERATOR = ":";
+
+    //PRL-3504 - pagination for RD staff data
+    public static final String RD_STAFF_TOTAL_RECORDS_HEADER = "total_records";
+    public static final int RD_STAFF_PAGE_SIZE = 50;
+    public static final int RD_STAFF_FIRST_PAGE = 0;
+    public static final int RD_STAFF_SECOND_PAGE = 1;
+    
+    //PRL-3254 - hearing status - Completed
+    public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 }
