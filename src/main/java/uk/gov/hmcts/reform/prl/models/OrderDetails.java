@@ -30,6 +30,7 @@ public class OrderDetails {
     private final String orderType;
     private final String orderTypeId;
     private final YesOrNo isTheOrderAboutChildren;
+    private final YesOrNo isTheOrderAboutAllChildren;
     private final String childrenList;
     private final YesOrNo orderClosesCase;
     private final Document orderDocument;
