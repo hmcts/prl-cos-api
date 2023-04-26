@@ -207,8 +207,6 @@ public class ManageOrders {
     private final YesOrNo ordersNeedToBeServed;
     @JsonProperty("isTheOrderAboutChildren")
     private final YesOrNo isTheOrderAboutChildren;
-    @JsonProperty("isTheOrderAboutAllChildren")
-    private final YesOrNo isTheOrderAboutAllChildren;
     @JsonProperty("loggedInUserType")
     private final String loggedInUserType;
     @JsonProperty("judgeDirectionsToAdminAmendOrder")
