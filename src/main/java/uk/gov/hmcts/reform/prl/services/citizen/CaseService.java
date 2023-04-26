@@ -75,6 +75,7 @@ public class CaseService {
     private final CaseDataMapper caseDataMapper;
 
     private final CcdCoreCaseDataService coreCaseDataService;
+    private static final String INVALID_CLIENT = "Invalid Client";
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
@@ -140,10 +141,10 @@ public class CaseService {
                     }
                 }
             }
+            return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
         } else {
-            throw (new NullPointerException());
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken) {
