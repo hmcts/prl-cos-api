@@ -101,6 +101,12 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class ManageOrderService {
 
+    public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
+
+    public static final String IS_THE_ORDER_ABOUT_ALL_CHILDREN = "isTheOrderAboutAllChildren";
+
+    public static final String CHILD_OPTION = "childOption";
+
     public static final String IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE = "isOnlyC47aOrderSelectedToServe";
     public static final String OTHER_PEOPLE_PRESENT_IN_CASE_FLAG = "otherPeoplePresentInCaseFlag";
     public static final String C_47_A = "C47A";
@@ -1900,5 +1906,28 @@ public class ManageOrderService {
     private List<DynamicListElement> getDynamicListElements(List<String> dropdowns) {
         return dropdowns.stream().map(dropdown -> DynamicListElement.builder().code(dropdown).label(dropdown).build()).collect(
             Collectors.toList());
+    }
+
+    public static void resetChildOptions(CallbackRequest callbackRequest) {
+        log.info("is the order about all children present? ",
+                 callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN));
+        log.info("is the order about all children present value? ",
+                 callbackRequest.getCaseDetails().getData().get(IS_THE_ORDER_ABOUT_CHILDREN));
+        if ((callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN)
+            && callbackRequest.getCaseDetails().getData().get(
+            IS_THE_ORDER_ABOUT_CHILDREN) != null && callbackRequest.getCaseDetails().getData().get(
+            IS_THE_ORDER_ABOUT_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO))
+            || (callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_ALL_CHILDREN)
+            && callbackRequest.getCaseDetails().getData().get(
+            IS_THE_ORDER_ABOUT_ALL_CHILDREN) != null && callbackRequest.getCaseDetails().getData().get(
+            IS_THE_ORDER_ABOUT_ALL_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.YES))
+        ) {
+            log.info("Before  modifying {}", callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
+            callbackRequest.getCaseDetails().getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
+                .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+                .value(List.of(DynamicMultiselectListElement.EMPTY))
+                .build());
+            log.info("after  modifying {}", callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
+        }
     }
 }

@@ -30,7 +30,6 @@ import uk.gov.hmcts.reform.prl.models.SdoDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
@@ -101,8 +100,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class DraftAnOrderService {
 
-    public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
-    public static final String CHILD_OPTION = "childOption";
     private final Time dateTime;
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
@@ -1140,20 +1137,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> prepareDraftOrderCollection(String authorisation, CallbackRequest callbackRequest) {
-        log.info("is the order about all children present? ",
-                 callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN));
-        log.info("is the order about all children present value? ",
-                 callbackRequest.getCaseDetails().getData().get(IS_THE_ORDER_ABOUT_CHILDREN));
-        if (callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN) && callbackRequest.getCaseDetails().getData().get(
-            IS_THE_ORDER_ABOUT_CHILDREN) != null && callbackRequest.getCaseDetails().getData().get(
-            IS_THE_ORDER_ABOUT_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
-            log.info("Before  modifying {}", callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
-            callbackRequest.getCaseDetails().getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
-                .listItems(List.of(DynamicMultiselectListElement.EMPTY))
-                .value(List.of(DynamicMultiselectListElement.EMPTY))
-                .build());
-            log.info("after  modifying {}", callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
-        }
+        manageOrderService.resetChildOptions(callbackRequest);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
