@@ -313,7 +313,7 @@ public class CaseServiceTest {
 
 
     @Test
-    public void testupdateCaseDetailsCitizenUpdateOnCaRespondent() throws JsonProcessingException {
+    public void testupdateCaseDetailsCitizenUpdateOnCaApplicant() throws JsonProcessingException {
 
         User user1 = User.builder().idamId("123").build();
         PartyDetails applicant1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
@@ -336,6 +336,85 @@ public class CaseServiceTest {
                       .idamId("123")
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
+            .build();
+        updateCaseData = UpdateCaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .partyDetails(partyDetails1)
+            .partyType(PartyEnum.applicant)
+            .build();
+
+
+        userDetails = UserDetails.builder().build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(caseRepository.getCase(authToken,"123")).thenReturn(caseDetails);
+        when(caseRepository.updateCase(authToken, "123", caseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123", "citizen-case-submit", updateCaseData);
+
+        assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test
+    public void testupdateCaseDetailsCitizenUpdateOnCaRespondent() throws JsonProcessingException {
+
+        User user1 = User.builder().idamId("123").build();
+        PartyDetails respondent1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
+        PartyDetails respondent2 = PartyDetails.builder().email("test@hmcts.net").firstName("test").build();
+        caseData = CaseData.builder()
+            .applicants(Arrays.asList(element(respondent1), element(respondent2)))
+            .build();
+        caseDataMap = caseData.toMap(objectMapper);
+
+        caseDetails = caseDetails.toBuilder()
+            .data(caseDataMap)
+            .id(123L)
+            .state("SUBMITTED_PAID")
+            .build();
+        PartyDetails partyDetails1 = PartyDetails.builder()
+            .firstName("Test")
+            .lastName("User")
+            .user(User.builder()
+                      .email("test@gmail.com")
+                      .idamId("123")
+                      .solicitorRepresented(YesOrNo.Yes)
+                      .build())
+            .build();
+        updateCaseData = UpdateCaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .partyDetails(partyDetails1)
+            .partyType(PartyEnum.applicant)
+            .build();
+
+
+        userDetails = UserDetails.builder().build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(caseRepository.getCase(authToken,"123")).thenReturn(caseDetails);
+        when(caseRepository.updateCase(authToken, "123", caseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123", "citizen-case-submit", updateCaseData);
+
+        assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testupdateCaseDetailsCitizenUpdateOnCaRespondentForNull() throws JsonProcessingException {
+
+        User user1 = User.builder().idamId("123").build();
+        PartyDetails respondent1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
+        PartyDetails respondent2 = PartyDetails.builder().email("test@hmcts.net").firstName("test").build();
+        caseData = CaseData.builder()
+            .applicants(Arrays.asList(element(respondent1), element(respondent2)))
+            .build();
+        caseDataMap = caseData.toMap(objectMapper);
+
+        caseDetails = caseDetails.toBuilder()
+            .data(caseDataMap)
+            .id(123L)
+            .state("SUBMITTED_PAID")
+            .build();
+        PartyDetails partyDetails1 = PartyDetails.builder()
+            .firstName("Test")
+            .lastName("User")
             .build();
         updateCaseData = UpdateCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
