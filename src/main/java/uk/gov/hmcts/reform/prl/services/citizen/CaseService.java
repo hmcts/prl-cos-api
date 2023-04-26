@@ -110,36 +110,39 @@ public class CaseService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         PartyDetails partyDetails = updateCaseData.getPartyDetails();
         PartyEnum partyType = updateCaseData.getPartyType();
-        if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
-            if (PartyEnum.applicant.equals(partyType)) {
-                List<Element<PartyDetails>> applicants = caseData.getApplicants();
-                applicants.stream()
-                    .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
-                    .findFirst()
-                    .ifPresent(party -> {
-                        applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails));
-                    });
-            } else if (PartyEnum.respondent.equals(partyType)) {
-                List<Element<PartyDetails>> respondents = caseData.getRespondents();
-                respondents.stream()
-                    .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
-                    .findFirst()
-                    .ifPresent(party -> {
-                        respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails));
-                    });
-            }
-        } else {
-            if (PartyEnum.applicant.equals(partyType)) {
-                if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
-                    caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
+        if (null != partyDetails.getUser()) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
+                if (PartyEnum.applicant.equals(partyType)) {
+                    List<Element<PartyDetails>> applicants = caseData.getApplicants();
+                    applicants.stream()
+                        .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
+                        .findFirst()
+                        .ifPresent(party -> {
+                            applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails));
+                        });
+                } else if (PartyEnum.respondent.equals(partyType)) {
+                    List<Element<PartyDetails>> respondents = caseData.getRespondents();
+                    respondents.stream()
+                        .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
+                        .findFirst()
+                        .ifPresent(party -> {
+                            respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails));
+                        });
                 }
             } else {
-                if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
-                    caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
+                if (PartyEnum.applicant.equals(partyType)) {
+                    if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
+                        caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
+                    }
+                } else {
+                    if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
+                        caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
+                    }
                 }
             }
+        } else {
+            throw (new NullPointerException());
         }
-
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
