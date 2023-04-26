@@ -622,6 +622,7 @@ public class DraftAnOrderServiceTest {
 
     @Test
     public void testPopulateCommonDraftOrderFields() {
+        final String authorisation = "Bearer someAuthorisationToken";
         DraftOrder draftOrder = DraftOrder.builder()
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -649,6 +650,7 @@ public class DraftAnOrderServiceTest {
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
             .respondents(List.of(respondents))
+            .manageOrders(ManageOrders.builder().build())
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
@@ -657,6 +659,9 @@ public class DraftAnOrderServiceTest {
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
+        when(manageOrderService.populateHearingsDropdown(authorisation, caseData)).thenReturn(caseData);
+
+        Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(authorisation,
             caseData
         );
 
