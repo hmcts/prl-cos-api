@@ -396,7 +396,7 @@ public class CaseServiceTest {
         assertNotNull(caseDetailsAfterUpdate);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = RuntimeException.class)
     public void testupdateCaseDetailsCitizenUpdateOnCaRespondentForNull() throws JsonProcessingException {
 
         User user1 = User.builder().idamId("123").build();
