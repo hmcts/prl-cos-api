@@ -1868,6 +1868,8 @@ public class ManageOrderService {
             ? caseData.getManageOrders().getHearingsType() : null;
         return caseData.toBuilder()
             .manageOrders(caseData.getManageOrders().toBuilder()
+                              .childOption(DynamicMultiSelectList.builder()
+                                               .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
                               .hearingsType(DynamicList.builder()
                                                .value(null != existingHearingsType ? existingHearingsType.getValue() : DynamicListElement.EMPTY)
                                                .listItems(hearingDropdowns.isEmpty()
