@@ -1443,9 +1443,12 @@ public class ManageOrderService {
         try {
             GeneratedDocumentInfo generatedDocumentInfo;
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
+            log.info("*** generating docs for {}", fieldsMap);
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 List<Element<Child>> children = dynamicMultiSelectListService
                     .getChildrenForDocmosis(caseData);
+                log.info("*** Children list sent to docmosis {}", children);
+
                 if (!children.isEmpty()) {
                     caseData.setChildrenListForDocmosis(children);
                 }
@@ -1453,7 +1456,7 @@ public class ManageOrderService {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
-                log.info("**** Case Data **** {}", caseData.getStandardDirectionOrder());
+                log.info("**** SDO data **** {}", caseData.getStandardDirectionOrder());
                 generatedDocumentInfo = dgsService.generateDocument(
                     authorisation,
                     CaseDetails.builder().caseData(caseData).build(),
@@ -1871,6 +1874,8 @@ public class ManageOrderService {
             ? caseData.getManageOrders().getHearingsType() : null;
         return caseData.toBuilder()
             .manageOrders(caseData.getManageOrders().toBuilder()
+                              .childOption(DynamicMultiSelectList.builder()
+                                               .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
                               .hearingsType(DynamicList.builder()
                                                .value(null != existingHearingsType ? existingHearingsType.getValue() : DynamicListElement.EMPTY)
                                                .listItems(hearingDropdowns.isEmpty()

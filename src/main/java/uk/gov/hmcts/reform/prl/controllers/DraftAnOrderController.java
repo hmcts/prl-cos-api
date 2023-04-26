@@ -106,9 +106,7 @@ public class DraftAnOrderController {
             caseDataUpdated.put("typeOfC21Order", null != manageOrders.getC21OrderOptions()
                 ? manageOrders.getC21OrderOptions().getDisplayedValue() : null);
         }
-        caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
-            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
-
+        log.info("Child options  first logger {}", caseDataUpdated.get("childOption"));
         List<String> errorList = new ArrayList<>();
         if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
             errorList.add("This order is not available to be drafted");
@@ -122,6 +120,7 @@ public class DraftAnOrderController {
                 .build();
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
+            log.info("Child options  second logger {}", caseDataUpdated.get("childOption"));
             caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             return CallbackResponse.builder()
                 .data(caseData).build();
