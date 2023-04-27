@@ -1912,20 +1912,24 @@ public class ManageOrderService {
 
     public void resetChildOptions(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        boolean isTheOrderAboutChildren = caseDataMap.containsKey(IS_THE_ORDER_ABOUT_CHILDREN)
-            && YesOrNo.No.equals(caseDataMap.get(IS_THE_ORDER_ABOUT_CHILDREN));
+        boolean isTheOrderAboutChildrenForDA = caseDataMap.containsKey(IS_THE_ORDER_ABOUT_CHILDREN)
+            && caseDataMap.get(IS_THE_ORDER_ABOUT_CHILDREN) != null
+            && caseDataMap.get(IS_THE_ORDER_ABOUT_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO);
 
-        boolean isTheOrderAboutAllChildren = caseDataMap.containsKey(IS_THE_ORDER_ABOUT_ALL_CHILDREN)
-            && YesOrNo.No.equals(caseDataMap.get(IS_THE_ORDER_ABOUT_ALL_CHILDREN));
+        boolean isTheOrderAboutAllChildrenForCA = caseDataMap.containsKey(IS_THE_ORDER_ABOUT_ALL_CHILDREN)
+            && caseDataMap.get(IS_THE_ORDER_ABOUT_ALL_CHILDREN) != null
+            && caseDataMap.get(IS_THE_ORDER_ABOUT_ALL_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.YES);
 
         List<DynamicMultiselectListElement> listElements = List.of(DynamicMultiselectListElement.EMPTY);
-        log.info("is the order about children present? ", isTheOrderAboutChildren);
-        log.info("is the order about all children present? ", isTheOrderAboutAllChildren);
-        if (isTheOrderAboutAllChildren) {
+        log.info("is the order about children present? ", caseDataMap.get(IS_THE_ORDER_ABOUT_CHILDREN));
+        log.info("is the order about all children present? ", caseDataMap.get(IS_THE_ORDER_ABOUT_CHILDREN));
+
+        if (isTheOrderAboutAllChildrenForCA) {
+            log.info("children", caseDataMap.get(CHILDREN));
             List<Element<Child>> children = objectMapper.convertValue(caseDataMap.get(CHILDREN), List.class);
             dynamicMultiSelectListService.getChildrenMultiSelectListForCA(children, listElements);
         }
-        if (isTheOrderAboutChildren || isTheOrderAboutAllChildren) {
+        if (isTheOrderAboutChildrenForDA || isTheOrderAboutAllChildrenForCA) {
             log.info("Before  modifying {}", callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
             callbackRequest.getCaseDetails().getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
                 .listItems(List.of(DynamicMultiselectListElement.EMPTY))
