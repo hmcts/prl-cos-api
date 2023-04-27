@@ -288,9 +288,7 @@ public class ManageOrdersController {
         manageOrderService.resetChildOptions(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        if (YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren())) {
-            caseData = manageOrderService.populateChildOptions(caseData);
-        }
+        caseData = manageOrderService.resetChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         setIsWithdrawnRequestSent(caseData, caseDataUpdated);
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
@@ -377,6 +375,7 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        caseData = manageOrderService.resetChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
             caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);

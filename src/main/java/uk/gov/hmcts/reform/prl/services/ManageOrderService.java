@@ -1933,15 +1933,17 @@ public class ManageOrderService {
         }
     }
 
-    public CaseData populateChildOptions(CaseData caseData) {
-        caseData = caseData.toBuilder()
-            .manageOrders(caseData.getManageOrders().toBuilder()
-                              .childOption(DynamicMultiSelectList.builder()
-                                               .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
-                                                   caseData))
-                                               .build())
-                              .build())
-            .build();
+    public CaseData resetChildOptionsIfOrderAboutAllChildrenYes(CaseData caseData) {
+        if (YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren())) {
+            caseData = caseData.toBuilder()
+                .manageOrders(caseData.getManageOrders().toBuilder()
+                                  .childOption(DynamicMultiSelectList.builder()
+                                                   .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
+                                                       caseData))
+                                                   .build())
+                                  .build())
+                .build();
+        }
         return caseData;
     }
 }
