@@ -403,40 +403,53 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "f)  the concerns of ((name of applicant)) with regard to ((name of respondent))"
         + System.lineSeparator()
-        + "g)  whether or not the ((child or children))’s ((physical / emotional / educational)) needs are being met by ((the parents OR insert name of guardian))."
+        + "g)  whether or not the ((child or children))’s ((physical / emotional / educational)) needs are being met by "
+        + "((the parents OR insert name of guardian))."
         + System.lineSeparator()
-        + "h)  how the ((child or children)) would be affected by the proposed change of ((insert what is changing e.g. change of living arrangements))."
+        + "h)  how the ((child or children)) would be affected by the proposed change of ((insert what is changing e.g. "
+        + "change of living arrangements))."
         + System.lineSeparator()
-        + "i)  whether or not it appears that the ((child or children)) ((has OR have)) suffered or are at risk of suffering ((any harm OR the harm alleged by)) ((name of person who made allegations of harm))."
+        + "i)  whether or not it appears that the ((child or children)) ((has OR have)) suffered or are at risk of "
+        + "suffering ((any harm OR the harm alleged by)) ((name of person who made allegations of harm))."
         + System.lineSeparator()
-        + "j)  the parenting capacity of ((name of parent)) with regard to the allegations or findings made by (( name of other party))"
+        + "j)  the parenting capacity of ((name of parent)) with regard to the allegations or findings made by "
+        + "(( name of other party))"
         + System.lineSeparator()
         + "k)  whether the local authority should be requested to report under section 37 of the Children Act 1989";
 
     public static final String SECTION7_INTERIM_ORDERS_FACTS = "With regard to the allegations of domestic abuse if proved"
         + System.lineSeparator()
-        + "a)  the impact on the ((child or children)) and on the care given by the ((parent OR guardian)) making the allegation of domestic abuse, if a contact order is made"
+        + "a)  the impact on the ((child or children)) and on the care given by the ((parent OR guardian)) making the "
+        + "allegation of domestic abuse, if a contact order is made"
         + System.lineSeparator()
         + "b)  the risk of harm if a contact order is made - whether physical, emotional or psychological"
         + System.lineSeparator()
-        + "c)  whether contact between the ((child or children)) and the ((mother or father)) can take place safely (physically, emotionally and psychologically) for the child and the parent with whom the child is living"
+        + "c)  whether contact between the ((child or children)) and the ((mother or father)) can take place safely "
+        + "(physically, emotionally and psychologically) for the child and the parent with whom the child is living"
         + System.lineSeparator()
-        + "d)  whether contact should be supervised or supported and, if so, where and by whom and the availability of resources for that purpose"
+        + "d)  whether contact should be supervised or supported and, if so, where and by whom and the availability of "
+        + "resources for that purpose"
         + System.lineSeparator()
         + "e)  if direct contact is not appropriate, whether there should be indirect contact and, if so, in what form";
 
-    public static final String SECTION7_DA_OCCURED = "With regard to the findings of fact made as set out in the schedule to ((this order / the order made on)) ((date that the order was made)):"
+    public static final String SECTION7_DA_OCCURED = "With regard to the findings of fact made as set out in the schedule to "
+        + "((this order / the order made on)) ((date that the order was made)):"
         + System.lineSeparator()
-        + "a)  any harm suffered by the ((child or children)) and the parent with whom the ((child or children)) are living as a consequence of the domestic abuse found"
+        + "a)  any harm suffered by the ((child or children)) and the parent with whom the ((child or children)) are "
+        + "living as a consequence of the domestic abuse found"
         + System.lineSeparator()
-        + "b)  any harm which the ((child or children)) and the parent with whom the ((child or children)) are living is at risk of suffering if a contact order is made"
+        + "b)  any harm which the ((child or children)) and the parent with whom the ((child or children)) are living is"
+        + " at risk of suffering if a contact order is made"
         + System.lineSeparator()
-        + "c)  information about the facilities available locally (including domestic abuse support services) to assist any party or the ((child or children))"
+        + "c)  information about the facilities available locally (including domestic abuse support services) to assist"
+        + " any party or the ((child or children))"
         + System.lineSeparator()
-        + "d) recommendations in respect of arrangements for the ((child or children)) including stepped arrangements with a view to a final order if possible";
+        + "d) recommendations in respect of arrangements for the ((child or children)) including stepped arrangements "
+        + "with a view to a final order if possible";
 
 
-    public static final String CROSS_EXAMINATION_PROHIBITION = "a)  Section 31R The vulnerable party is the victim of a specified domestic abuse offence perpetrated by the other party"
+    public static final String CROSS_EXAMINATION_PROHIBITION = "a)  Section 31R The vulnerable party is the victim of a"
+        + " specified domestic abuse offence perpetrated by the other party"
         + System.lineSeparator()
         + "b)  Section 31S the vulnerable party is protected by an on-notice protective injunction against the other party"
         + System.lineSeparator()

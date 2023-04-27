@@ -24,7 +24,27 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioOtherDirectionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioTransferCourtDirectionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.MiamOtherDirectionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.OtherDirectionPositionStatementEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.*;
+import uk.gov.hmcts.reform.prl.enums.sdo.AllocateOrReserveJudgeEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoApplicantRespondentEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtRequestedEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoNextStepsAllocationEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportSentByEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportsAlsoSentToEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportsSentToEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoScheduleOfAllegationsEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoSection7ImpactAnalysisEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoWitnessStatementsSentToEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
@@ -127,7 +147,7 @@ public class StandardDirectionOrder {
     private final List<SdoSection7ImpactAnalysisEnum> sdoSection7ImpactAnalysisOptions;
     @JsonProperty("sdoSection7FactsEditContent")
     private final String sdoSection7FactsEditContent;
-    @JsonProperty("sdoSection7ChildImpactAnalysis")
+    @JsonProperty("sdoSection7daOccuredEditContent")
     private final String sdoSection7daOccuredEditContent;
 
     @JsonProperty("sdoSection7ChildImpactAnalysis")
