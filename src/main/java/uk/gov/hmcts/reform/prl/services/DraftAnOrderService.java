@@ -172,6 +172,7 @@ public class DraftAnOrderService {
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
+                log.info("draftOrder before converting to final ==>" + draftOrder);
                 updatedCaseData.put(
                     "orderCollection",
                     getFinalOrderCollection(authorisation, caseData, draftOrder, eventId)
