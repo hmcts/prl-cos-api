@@ -51,22 +51,10 @@ public class KeepDetailsPrivateCheckerTest {
                           .builder()
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
+                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .confidentiality(Yes)
+                                                  .confidentialityList(confidentialityListEnums)
                                                   .build())
-                          .solicitorKeepDetailsPriate(SolicitorKeepDetailsPrivate
-                                   .builder()
-                                   .respKeepDetailsPrivateConfidentiality(KeepDetailsPrivate
-                                            .builder()
-                                            .confidentiality(Yes)
-                                            .confidentialityList(confidentialityListEnums)
-                                            .build())
-                                   .respKeepDetailsPrivate(KeepDetailsPrivate
-                                                               .builder()
-                                                               .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
-                                                               .confidentiality(Yes)
-                                                               .confidentialityList(confidentialityListEnums)
-                                                               .build())
-                                                          .build())
-
                           .build())
             .build();
 
