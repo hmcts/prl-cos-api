@@ -3522,13 +3522,6 @@
       "Telephone number"
     ]
   },
-  "keepContactDetailsPrivateOther": {
-    "otherPeopleKnowYourContactDetails": "Yes",
-    "confidentiality": "Yes",
-    "confidentialityList": [
-      "Telephone number"
-    ]
-  },
   "confidentialListDetails": "string",
   "respondentAttendingTheCourt": {
     "respondentWelshNeeds": "Yes",
