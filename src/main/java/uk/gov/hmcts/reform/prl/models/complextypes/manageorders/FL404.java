@@ -93,6 +93,7 @@ public class FL404 {
 
     private DateOrderEndsTimeEnum orderEndDateAndTimeOptions;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private LocalDateTime orderSpecifiedDateTime;
 
 }

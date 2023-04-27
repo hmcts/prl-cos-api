@@ -45,7 +45,10 @@ public class OrderDetails {
     private String selectedHearingType;
 
     private final SdoDetails sdoDetails;
-
+    private final YesOrNo cafcassServedOptions;
+    private final String cafcassEmailId;
+    private final YesOrNo cafcassCymruServedOptions;
+    private final String cafcassCymruEmail;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
