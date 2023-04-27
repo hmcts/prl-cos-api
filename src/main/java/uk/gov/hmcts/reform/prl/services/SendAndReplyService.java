@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -51,6 +52,7 @@ public class SendAndReplyService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
+    private final HearingDataService hearingDataService;
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -235,6 +237,18 @@ public class SendAndReplyService {
         }
     }
 
+    /**
+     * This method will return linked cases dynamic list.
+     * @param authorization Auth token.
+     * @param caseData CaseData object.
+     * @return DynamicList.
+     */
+    public DynamicList getLinkedCasesDynamicList(String authorization, CaseData caseData) {
 
+        return getDynamicList(hearingDataService.getLinkedCasesDynamicList(
+            authorization,
+            caseData
+        ));
+    }
 
 }
