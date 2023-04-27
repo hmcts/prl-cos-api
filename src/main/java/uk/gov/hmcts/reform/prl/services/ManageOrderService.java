@@ -1922,7 +1922,7 @@ public class ManageOrderService {
 
         List<DynamicMultiselectListElement> listElements = List.of(DynamicMultiselectListElement.EMPTY);
         log.info("is the order about children present? ", caseDataMap.get(IS_THE_ORDER_ABOUT_CHILDREN));
-        log.info("is the order about all children present? ", caseDataMap.get(IS_THE_ORDER_ABOUT_CHILDREN));
+        log.info("is the order about all children present? ", caseDataMap.get(IS_THE_ORDER_ABOUT_ALL_CHILDREN));
 
         if (isTheOrderAboutAllChildrenForCA) {
             log.info("children", caseDataMap.get(CHILDREN));
