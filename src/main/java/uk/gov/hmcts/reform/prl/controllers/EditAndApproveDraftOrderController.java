@@ -111,7 +111,6 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
         List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
