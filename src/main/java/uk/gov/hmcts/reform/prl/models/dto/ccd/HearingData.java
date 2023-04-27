@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -17,11 +16,11 @@ import uk.gov.hmcts.reform.prl.enums.HearingSpecificDatesOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -71,8 +70,7 @@ public class HearingData {
     private String instructionsForRemoteHearing;
 
     @JsonProperty("hearingDateTimes")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
-    private List<Element<LocalDateTime>> hearingDateTimes;
+    private List<Element<HearingDateTimeOption>> hearingDateTimes;
 
     @JsonProperty("hearingEstimatedHours")
     private final int hearingEstimatedHours;
