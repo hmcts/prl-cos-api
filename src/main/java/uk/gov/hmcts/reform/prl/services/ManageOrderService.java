@@ -1585,7 +1585,10 @@ public class ManageOrderService {
     private CaseData getFl404bFields(CaseData caseData) {
 
         log.info("Before calling casedata {}", caseData);
-        FL404 orderData = FL404.builder()
+        FL404 fl404Data = (null != caseData.getManageOrders().getFl404CustomFields())
+            ? caseData.getManageOrders().getFl404CustomFields() : FL404.builder().build();
+
+        FL404 orderData = fl404Data.toBuilder()
             .fl404bCaseNumber(String.valueOf(caseData.getId()))
             .fl404bCourtName(caseData.getCourtName())
             .fl404bApplicantName(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
@@ -1615,9 +1618,6 @@ public class ManageOrderService {
                 .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
         }
 
-        if (null != caseData.getManageOrders().getFl404CustomFields()) {
-            orderData = caseData.getManageOrders().getFl404CustomFields();
-        }
         caseData = caseData.toBuilder()
             .manageOrders(ManageOrders.builder()
                               .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
