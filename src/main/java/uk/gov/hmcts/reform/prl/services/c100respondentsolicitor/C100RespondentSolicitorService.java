@@ -92,7 +92,9 @@ public class C100RespondentSolicitorService {
         Object> caseDataUpdated, Element<PartyDetails> solicitorRepresentedRespondent) {
         log.info("finding respondentParty is present ");
         String invokedEvent = callbackRequest.getEventId().substring(0, callbackRequest.getEventId().length() - 1);
+        log.info("invokedEvent " + invokedEvent);
         RespondentSolicitorEvents.getCaseFieldName(invokedEvent).ifPresent(event -> {
+            log.info("event triggered: " + event);
             switch (event) {
                 case CONSENT:
                     caseDataUpdated.put(
@@ -101,17 +103,14 @@ public class C100RespondentSolicitorService {
                     );
                     break;
                 case KEEP_DETAILS_PRIVATE:
-                    String[] keepDetailsPrivateFields = event.getCaseFieldName().split(",");
+                    log.info("KEEP_DETAILS_PRIVATE event triggered");
                     caseDataUpdated.put(
-                        keepDetailsPrivateFields[0],
-                        solicitorRepresentedRespondent.getValue().getResponse()
-                            .getKeepDetailsPrivate()
+                        event.getCaseFieldName(),
+                        solicitorRepresentedRespondent.getValue().getResponse().getKeepDetailsPrivate()
                     );
-                    caseDataUpdated.put(
-                        keepDetailsPrivateFields[1],
-                        solicitorRepresentedRespondent.getValue().getResponse()
-                            .getKeepDetailsPrivate().getConfidentiality()
-                    );
+                    log.info("updated existing details like "
+                                 + solicitorRepresentedRespondent.getValue().getResponse()
+                        .getKeepDetailsPrivate().getOtherPeopleKnowYourContactDetails());
                     break;
                 case CONFIRM_EDIT_CONTACT_DETAILS:
                     CitizenDetails citizenDetails = solicitorRepresentedRespondent.getValue().getResponse().getCitizenDetails();
@@ -242,11 +241,12 @@ public class C100RespondentSolicitorService {
             updatedCaseData,
             CaseData.class
         );
-
+        log.info("KEEP_DETAILS_PRIVATE submission triggered");
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
         Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
-
+        log.info("solicitorRepresentedRespondent found");
         String invokingEvent = callbackRequest.getEventId().substring(0, callbackRequest.getEventId().length() - 1);
+        log.info("invokingEvent is " + invokingEvent);
         RespondentSolicitorEvents.getCaseFieldName(invokingEvent)
             .ifPresent(event -> buildResponseForRespondent(
                 caseData,
@@ -272,10 +272,11 @@ public class C100RespondentSolicitorService {
                     .consent(respondentConsentToApplication).build();
                 break;
             case KEEP_DETAILS_PRIVATE:
+                log.info("event triggered KEEP_DETAILS_PRIVATE");
                 List<ConfidentialityListEnum> confList = null;
-                if (null != caseData.getKeepContactDetailsPrivateOther()
-                    && YesOrNo.Yes.equals(caseData.getKeepContactDetailsPrivateOther().getConfidentiality())) {
-                    confList = caseData.getKeepContactDetailsPrivateOther().getConfidentialityList();
+                if (null != caseData.getKeepContactDetailsPrivate()
+                    && YesOrNo.Yes.equals(caseData.getKeepContactDetailsPrivate().getConfidentiality())) {
+                    confList = caseData.getKeepContactDetailsPrivate().getConfidentialityList();
                 }
                 log.info("*** confList **** {}", confList);
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
@@ -284,10 +285,11 @@ public class C100RespondentSolicitorService {
                                                 caseData.getKeepContactDetailsPrivate() != null
                                                     ? caseData.getKeepContactDetailsPrivate().getOtherPeopleKnowYourContactDetails() : null)
                                             .confidentiality(caseData
-                                                                 .getKeepContactDetailsPrivateOther()
+                                                                 .getKeepContactDetailsPrivate()
                                                                  .getConfidentiality())
                                             .confidentialityList(confList)
                                             .build()).build();
+                log.info("event ended KEEP_DETAILS_PRIVATE");
                 break;
             case CONFIRM_EDIT_CONTACT_DETAILS:
                 CitizenDetails citizenDetails = caseData.getResSolConfirmEditContactDetails();
@@ -482,7 +484,7 @@ public class C100RespondentSolicitorService {
         StringBuilder selectedList = new StringBuilder();
 
         selectedList.append("<ul>");
-        for (ConfidentialityListEnum confidentiality : caseData.getKeepContactDetailsPrivateOther()
+        for (ConfidentialityListEnum confidentiality : caseData.getKeepContactDetailsPrivate()
             .getConfidentialityList()) {
             selectedList.append("<li>");
             selectedList.append(confidentiality.getDisplayedValue());

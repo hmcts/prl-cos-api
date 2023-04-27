@@ -686,7 +686,6 @@ public class CaseData implements MappableObject {
     private final String helpMiamCostsExemptionsPlaceHolder;
 
     private KeepDetailsPrivate keepContactDetailsPrivate;
-    private KeepDetailsPrivate keepContactDetailsPrivateOther;
     private String confidentialListDetails;
 
     private final AttendToCourt respondentAttendingTheCourt;

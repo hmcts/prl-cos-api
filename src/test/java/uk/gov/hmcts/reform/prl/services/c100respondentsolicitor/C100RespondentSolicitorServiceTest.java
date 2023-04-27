@@ -260,10 +260,11 @@ public class C100RespondentSolicitorServiceTest {
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
         caseData = CaseData.builder().respondents(respondentList).id(1)
-            .keepContactDetailsPrivateOther(KeepDetailsPrivate.builder()
-                                                .confidentiality(Yes)
-                                                .confidentialityList(confidentialityListEnums)
-                                                .build())
+            .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
+                                           .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                           .confidentiality(Yes)
+                                           .confidentialityList(confidentialityListEnums)
+                                           .build())
             .respondentConsentToApplication(Consent
                                                 .builder()
                                                 .noConsentReason("test")
@@ -467,10 +468,12 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(documentGenService.generateSingleDocument(authToken,
-                                                       caseData,
-                                                       SOLICITOR_C7_DRAFT_DOCUMENT,
-                                                       false)).thenReturn(document);
+        when(documentGenService.generateSingleDocument(
+            authToken,
+            caseData,
+            SOLICITOR_C7_DRAFT_DOCUMENT,
+            false
+        )).thenReturn(document);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -506,10 +509,12 @@ public class C100RespondentSolicitorServiceTest {
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName("C1A_Allegation_Of_Harm_Draft_Document.pdf")
             .build();
-        when(documentGenService.generateSingleDocument(authToken,
-                                                       caseData,
-                                                       SOLICITOR_C1A_DRAFT_DOCUMENT,
-                                                       false)).thenReturn(document);
+        when(documentGenService.generateSingleDocument(
+            authToken,
+            caseData,
+            SOLICITOR_C1A_DRAFT_DOCUMENT,
+            false
+        )).thenReturn(document);
 
         callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
