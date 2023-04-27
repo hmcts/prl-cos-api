@@ -848,13 +848,16 @@ public class ManageOrderService {
     }
 
     public String getSelectedChildInfoFromMangeOrder(CaseData caseData) {
+        log.info("inside getSelectedChildInfoFromMangeOrder");
         DynamicMultiSelectList childOption = caseData.getManageOrders().getChildOption();
         if ((YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
             || YesOrNo.No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren()))
             && childOption != null) {
+            log.info("getSelectedChildInfoFromMangeOrder from values");
             return getChildNames(childOption.getValue());
         } else if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && childOption != null && childOption.getListItems() != null) {
+            log.info("getSelectedChildInfoFromMangeOrder from listItems");
             return getChildNames(childOption.getListItems());
         }
         return null;
@@ -1935,6 +1938,7 @@ public class ManageOrderService {
 
     public CaseData setChildOptionsIfOrderAboutAllChildrenYes(CaseData caseData) {
         if (YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren())) {
+            log.info("inside setChildOptionsIfOrderAboutAllChildrenYes");
             caseData = caseData.toBuilder()
                 .manageOrders(caseData.getManageOrders().toBuilder()
                                   .childOption(DynamicMultiSelectList.builder()
