@@ -1614,6 +1614,10 @@ public class ManageOrderService {
             orderData = orderData.toBuilder()
                 .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
         }
+
+        if (null != caseData.getManageOrders().getFl404CustomFields()) {
+            orderData = caseData.getManageOrders().getFl404CustomFields();
+        }
         caseData = caseData.toBuilder()
             .manageOrders(ManageOrders.builder()
                               .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
