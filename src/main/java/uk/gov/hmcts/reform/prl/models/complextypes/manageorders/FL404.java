@@ -96,4 +96,6 @@ public class FL404 {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private LocalDateTime orderSpecifiedDateTime;
 
+    private final String formattedOrderSpecificTime;
+
 }
