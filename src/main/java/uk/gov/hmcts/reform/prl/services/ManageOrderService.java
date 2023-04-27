@@ -116,6 +116,8 @@ public class ManageOrderService {
     LocationRefDataService locationRefDataService;
 
     public static final String CAFCASS_SERVED = "cafcassServed";
+    public static final String CAFCASS_EMAIL = "cafcassEmail";
+    public static final String CAFCASS_CYMRU_SERVED = "cafcassCymruServed";
     public static final String SERVE_ON_RESPONDENT = "serveOnRespondent";
     public static final String OTHER_PARTIES_SERVED = "otherPartiesServed";
     public static final String SERVING_RESPONDENTS_OPTIONS = "servingRespondentsOptions";
@@ -1243,21 +1245,22 @@ public class ManageOrderService {
             emailInformation = getEmailInformationCA(caseData);
             postalInformation = getPostalInformationCA(caseData);
         }
-        YesOrNo cafcassServedOptions;
+        YesOrNo cafcassServedOptions = No;
+        YesOrNo cafcassCymruServedOptions = No;
         String cafCassEmail = null;
+        String cafcassCymruEmail = null;
         if (caseData.getManageOrders().getCafcassServedOptions() != null) {
             cafcassServedOptions = caseData.getManageOrders().getCafcassServedOptions();
+            cafCassEmail = caseData.getManageOrders().getCafcassEmailId();
         } else if (caseData.getManageOrders().getCafcassCymruServedOptions() != null) {
-            cafcassServedOptions = caseData.getManageOrders().getCafcassCymruServedOptions();
-            if (No.equals(caseData.getManageOrders().getCafcassCymruServedOptions())) {
-                cafCassEmail = caseData.getManageOrders().getCafcassCymruEmail();
-            }
-        } else {
-            cafcassServedOptions = No;
+            cafcassCymruServedOptions = caseData.getManageOrders().getCafcassCymruServedOptions();
+            cafcassCymruEmail = caseData.getManageOrders().getCafcassCymruEmail();
         }
 
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
+        servedOrderDetails.put(CAFCASS_CYMRU_SERVED, cafcassCymruServedOptions);
+        servedOrderDetails.put(CAFCASS_EMAIL, cafCassEmail);
         servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
@@ -1266,7 +1269,7 @@ public class ManageOrderService {
 
         updateServedOrderDetails(
             servedOrderDetails,
-            cafCassEmail,
+            cafcassCymruEmail,
             orders,
             order,
             postalInformation,
@@ -1355,19 +1358,27 @@ public class ManageOrderService {
         return recipients;
     }
 
-    private static void updateServedOrderDetails(Map<String, Object> servedOrderDetails, String cafCassEmail, List<Element<OrderDetails>> orders,
+    private static void updateServedOrderDetails(Map<String, Object> servedOrderDetails, String cafcassCymruEmail, List<Element<OrderDetails>> orders,
                                                  Element<OrderDetails> order, List<Element<PostalInformation>> postalInformation,
                                                  List<Element<EmailInformation>> emailInformation, List<Element<Document>> additionalDocuments) {
 
         YesOrNo cafcassServed = null;
+        YesOrNo cafcassCymruServed = null;
+        String cafcassEmail = null;
         YesOrNo serveOnRespondent = null;
         YesOrNo otherPartiesServed = null;
         ServingRespondentsEnum servingRespondentsOptions = null;
         String recipients = null;
         String otherParties = null;
 
+        if (servedOrderDetails.containsKey(CAFCASS_EMAIL) && null != servedOrderDetails.get(CAFCASS_EMAIL)) {
+            cafcassEmail = (String) servedOrderDetails.get(CAFCASS_EMAIL);
+        }
         if (servedOrderDetails.containsKey(CAFCASS_SERVED)) {
             cafcassServed = (YesOrNo) servedOrderDetails.get(CAFCASS_SERVED);
+        }
+        if (servedOrderDetails.containsKey(CAFCASS_CYMRU_SERVED)) {
+            cafcassCymruServed = (YesOrNo) servedOrderDetails.get(CAFCASS_CYMRU_SERVED);
         }
         if (servedOrderDetails.containsKey(SERVE_ON_RESPONDENT)) {
             serveOnRespondent = (YesOrNo) servedOrderDetails.get(SERVE_ON_RESPONDENT);
@@ -1396,7 +1407,9 @@ public class ManageOrderService {
             .recipientsOptions(recipients)
             .otherParties(otherParties)
             .cafcassServed(cafcassServed)
-            .cafcassEmail(cafCassEmail)
+            .cafcassEmail(cafcassEmail)
+            .cafcassCymruServed(cafcassCymruServed)
+            .cafcassCymruEmail(cafcassCymruEmail)
             .otherPartiesServed(otherPartiesServed)
             .postalInformation(postalInformation)
             .emailInformation(emailInformation)
