@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -84,6 +83,9 @@ public class SendAndReplyServiceTest {
     DynamicList dynamicList;
     CaseData caseData;
     CaseData caseDataWithAddedMessage;
+
+    @Mock
+    private HearingDataService hearingDataService;
 
     @Before
     public void init() {
@@ -177,7 +179,6 @@ public class SendAndReplyServiceTest {
         assertEquals(sendAndReplyService.getOpenMessagesDynamicList(caseData), dynamicList);
     }
 
-    @Ignore
     @Test
     public void testThatSenderEmailIsPrefilled() {
         MessageMetaData preFillMetaData = MessageMetaData.builder()
