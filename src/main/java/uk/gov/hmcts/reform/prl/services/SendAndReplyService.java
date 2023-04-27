@@ -87,10 +87,10 @@ public class SendAndReplyService {
 
     public Map<String, Object> setSenderAndGenerateMessageList(CaseData caseData, String auth) {
 
-        // TODO need to check where to move below code
+        // TODO Remove this logger
 
         log.info("DynamicList to populate Linked case dropdown setSenderAndGenerateMessageList ------> {}",
-                 getLinkedCasesDynamicList(auth, caseData));
+                 getLinkedCasesDynamicList(auth, String.valueOf(caseData.getId())));
 
         // TODO
         Map<String, Object> data = new HashMap<>();
@@ -247,14 +247,14 @@ public class SendAndReplyService {
     /**
      * This method will return linked cases dynamic list.
      * @param authorization Auth token.
-     * @param caseData CaseData object.
+     * @param caseId CaseData object.
      * @return DynamicList.
      */
-    public DynamicList getLinkedCasesDynamicList(String authorization, CaseData caseData) {
+    public DynamicList getLinkedCasesDynamicList(String authorization, String caseId) {
 
         return getDynamicList(hearingDataService.getLinkedCasesDynamicList(
             authorization,
-            caseData
+            caseId
         ));
     }
 
