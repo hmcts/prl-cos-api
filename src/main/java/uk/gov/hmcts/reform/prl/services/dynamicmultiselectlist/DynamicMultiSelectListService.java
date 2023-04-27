@@ -52,26 +52,22 @@ public class DynamicMultiSelectListService {
     public List<DynamicMultiselectListElement> getChildrenMultiSelectList(CaseData caseData) {
         List<Element<Child>> children = caseData.getChildren();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+        IncrementalInteger i = new IncrementalInteger(1);
         if (children != null) {
-            getChildrenMultiSelectListForCA(children, listItems);
+            children.forEach(child -> {
+                if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
+                    listItems.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
+                                         .label(child.getValue().getFirstName() + " "
+                                                    + child.getValue().getLastName()
+                                                    + " (Child " + i.getAndIncrement() + ")").build());
+                }
+            });
         } else if (caseData.getApplicantChildDetails() != null) {
             caseData.getApplicantChildDetails().forEach(child -> listItems.add(DynamicMultiselectListElement.builder()
                                                                                    .code(child.getId().toString())
                                  .label(child.getValue().getFullName()).build()));
         }
         return listItems;
-    }
-
-    public static void getChildrenMultiSelectListForCA(List<Element<Child>> children, List<DynamicMultiselectListElement> listItems) {
-        IncrementalInteger i = new IncrementalInteger(1);
-        children.forEach(child -> {
-            if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
-                listItems.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
-                                     .label(child.getValue().getFirstName() + " "
-                                                + child.getValue().getLastName()
-                                                + " (Child " + i.getAndIncrement() + ")").build());
-            }
-        });
     }
 
     public Map<String, List<DynamicMultiselectListElement>> getRespondentsMultiSelectList(CaseData caseData) {

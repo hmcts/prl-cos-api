@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -289,12 +288,11 @@ public class ManageOrdersController {
         manageOrderService.resetChildOptions(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
-        if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
-            caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
-        } else {
-            caseDataUpdated.put("isWithdrawRequestSent", "Approved");
+        if (YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren())) {
+            caseData = manageOrderService.populateChildOptions(caseData);
         }
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
+        setIsWithdrawnRequestSent(caseData, caseDataUpdated);
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
@@ -305,10 +303,17 @@ public class ManageOrdersController {
                 caseData
             ));
         }
-        resetChildOptions(caseDetails);
         manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private static void setIsWithdrawnRequestSent(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
+            caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
+        } else {
+            caseDataUpdated.put("isWithdrawRequestSent", "Approved");
+        }
     }
 
     @PostMapping(path = "/show-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -434,25 +439,5 @@ public class ManageOrdersController {
         caseDataUpdated.put("nameOfLaToReviewOrder", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
             .build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-
-    public static void resetChildOptions(CaseDetails caseDetails) {
-        if (caseDetails.getData().containsKey(IS_THE_ORDER_ABOUT_ALL_CHILDREN) && caseDetails.getData().get(
-            IS_THE_ORDER_ABOUT_ALL_CHILDREN) != null && !caseDetails.getData().get(
-            IS_THE_ORDER_ABOUT_ALL_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
-            caseDetails.getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
-                .listItems(List.of(DynamicMultiselectListElement.EMPTY))
-                .value(List.of(DynamicMultiselectListElement.EMPTY))
-                .build());
-        }
-        if (caseDetails.getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN) && caseDetails.getData().get(
-            IS_THE_ORDER_ABOUT_CHILDREN) != null && caseDetails.getData().get(
-            IS_THE_ORDER_ABOUT_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO)) {
-            caseDetails.getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
-                .listItems(List.of(DynamicMultiselectListElement.EMPTY))
-                    .value(List.of(DynamicMultiselectListElement.EMPTY))
-                .build());
-        }
     }
 }
