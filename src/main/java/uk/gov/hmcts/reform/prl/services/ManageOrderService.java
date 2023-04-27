@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -45,9 +46,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -56,6 +61,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -67,11 +74,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HMC_STATUS_COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -442,6 +451,9 @@ public class ManageOrderService {
     @Autowired
     private final UserService userService;
 
+    @Autowired
+    private final HearingService hearingService;
+
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
         if (caseData.getOrderCollection() != null) {
@@ -801,6 +813,8 @@ public class ManageOrderService {
                                        .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
                                                             ? caseData.getDoesOrderClosesCase() : null)
                                        .serveOrderDetails(buildServeOrderDetails(serveOrderData))
+                                       .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
+                                                           ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
                                        .build()));
         }
     }
@@ -1031,6 +1045,7 @@ public class ManageOrderService {
             .isOrderUploadedByJudgeOrAdmin(No)
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
+            .hearingsType(caseData.getManageOrders().getHearingsType())
             .build();
     }
 
@@ -1669,6 +1684,8 @@ public class ManageOrderService {
                            .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                             ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
                            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
+                           .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
+                                                    ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
                            .build());
     }
 
@@ -1747,5 +1764,55 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
+    public CaseData populateHearingsDropdown(String authorization, CaseData caseData) {
+        log.info("Retrieving hearings for caseId: {}", caseData.getId());
+        //fetch hearing details
+        Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(authorization, String.valueOf(caseData.getId())));
+        //get case hearings
+        List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
+        log.info("Total case hearings: {}", caseHearings.size());
+        //filer only completed hearings
+        List<CaseHearing> completedHearings = caseHearings.stream()
+            .filter(caseHearing -> HMC_STATUS_COMPLETED.equalsIgnoreCase(caseHearing.getHmcStatus()))
+            .collect(Collectors.toList());
+        log.info("Total completed hearings: {}", completedHearings.size());
 
+        //get hearings dropdown
+        List<DynamicListElement> hearingDropdowns = completedHearings.stream()
+            .map(caseHearing -> {
+                //get hearingId
+                String hearingId = String.valueOf(caseHearing.getHearingID());
+                //return hearingId concatenated with hearingDate
+                Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
+                return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
+                    if (null != hearingDaySchedule && null != hearingDaySchedule.getHearingStartDateTime()) {
+                        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        String hearingDate = hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter);
+                        return concat(concat(hearingId, " - "), hearingDate);
+                    }
+                    return null;
+                }).filter(Objects::nonNull).collect(Collectors.toList())).orElse(Collections.emptyList());
+            }).map(this::getDynamicListElements)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+
+        //if there are no hearings then dropdown would be empty
+        DynamicList existingHearingsType = (null != caseData.getManageOrders() && null != caseData.getManageOrders().getHearingsType())
+            ? caseData.getManageOrders().getHearingsType() : null;
+        return caseData.toBuilder()
+            .manageOrders(caseData.getManageOrders().toBuilder()
+                              .hearingsType(DynamicList.builder()
+                                               .value(null != existingHearingsType ? existingHearingsType.getValue() : DynamicListElement.EMPTY)
+                                               .listItems(hearingDropdowns.isEmpty()
+                                                              ? Collections.singletonList(DynamicListElement.defaultListItem("No hearings available"))
+                                                              : hearingDropdowns)
+                                               .build()
+                              ).build())
+            .build();
+    }
+
+    private List<DynamicListElement> getDynamicListElements(List<String> dropdowns) {
+        return dropdowns.stream().map(dropdown -> DynamicListElement.builder().code(dropdown).label(dropdown).build()).collect(
+            Collectors.toList());
+    }
 }

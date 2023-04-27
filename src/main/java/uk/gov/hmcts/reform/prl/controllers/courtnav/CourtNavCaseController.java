@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ResponseMessage;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
@@ -47,6 +48,7 @@ public class CourtNavCaseController {
     private final AuthorisationService authorisationService;
     private final FL401ApplicationMapper fl401ApplicationMapper;
     private  final CafcassUploadDocService cafcassUploadDocService;
+    private final SystemUserService systemUserService;
 
     @PostMapping(path = "/case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Third party to call this service to create a case in CCD")
@@ -100,7 +102,7 @@ public class CourtNavCaseController {
 
             if (authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
                 log.info("uploading cafcass document");
-                cafcassUploadDocService.uploadDocument(authorisation, file, typeOfDocument, caseId);
+                cafcassUploadDocService.uploadDocument(systemUserService.getSysUserToken(), file, typeOfDocument, caseId);
             } else {
                 courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
             }
