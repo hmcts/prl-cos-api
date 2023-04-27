@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,26 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioOtherDirectionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioTransferCourtDirectionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.MiamOtherDirectionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.OtherDirectionPositionStatementEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.AllocateOrReserveJudgeEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoApplicantRespondentEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtRequestedEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoNextStepsAllocationEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportSentByEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportsAlsoSentToEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportsSentToEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoScheduleOfAllegationsEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoWitnessStatementsSentToEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.*;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.MiamAttendingPersonName;
@@ -94,16 +76,23 @@ public class SdoDetails {
     private final LocalDate sdoWrittenResponseDeadlineDate;
     private final List<SdoReportsAlsoSentToEnum> sdoHearingReportsAlsoSentTo;
     private final String sdoHearingMaximumPages;
+    private final int sdoHearingHowManyWitnessEvidence;
     private final List<Element<SdoLanguageDialect>> sdoInterpreterDialectRequired;
     private final String sdoUpdateContactDetails;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoCafcassFileAndServe;
+    private final String sdoCafcassNextStepEditContent;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoCafcassCymruFileAndServe;
+    private final String sdoCafcassCymruNextStepEditContent;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoNewPartnersToCafcass;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoNewPartnersToCafcassCymru;
+    private final String sdoSection7EditContent;
+    private final List<SdoSection7ImpactAnalysisEnum> sdoSection7ImpactAnalysisOptions;
+    private final String sdoSection7FactsEditContent;
+    private final String sdoSection7daOccuredEditContent;
     private final SdoReportSentByEnum sdoSection7ChildImpactAnalysis;
     private final String sdoNameOfCouncil;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -190,5 +179,8 @@ public class SdoDetails {
     private final List<SdoDisClosureProceedingCheck> sdoDisClosureProceedingCheck;
     private final List<Element<SdoDioProvideOtherDetails>> sdoDisClosureProceedingDetails;
     private final List<Element<SdoFurtherDirections>> sdoFurtherDirectionDetails;
+
+    private final String sdoCrossExaminationEditContent;
+    private final int sdoDocsEvidenceWitnessEvidence;
 
 }
