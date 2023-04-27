@@ -319,18 +319,19 @@ public class HearingDataService {
         }
     }
 
-    List<DynamicListElement> getLinkedCasesDynamicList(String authorisation, CaseData caseData) {
+    List<DynamicListElement> getLinkedCasesDynamicList(String authorisation, String caseId) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         try {
-            log.info("getLinkedCasesDynamicList case method ", caseData.getId());
+            log.info("getLinkedCasesDynamicList case method ", caseId);
             CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()
-                .caseReference(String.valueOf(caseData.getId())).build();
+                .caseReference(caseId).build();
             Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
 
             if (caseLinkedDataList.isPresent()) {
                 for (CaseLinkedData caseLinkedData : caseLinkedDataList.get()) {
-                    dynamicListElements.add(DynamicListElement.builder().code(caseLinkedData.getCaseReference())
-                                                .label(caseLinkedData.getCaseName()).build());
+                    final String caseReference = caseLinkedData.getCaseReference();
+                    dynamicListElements.add(DynamicListElement.builder().code(caseReference)
+                                                .label(caseReference).build());
                 }
             }
         } catch (Exception e) {
