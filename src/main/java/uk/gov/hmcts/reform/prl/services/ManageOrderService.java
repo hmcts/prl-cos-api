@@ -1191,6 +1191,7 @@ public class ManageOrderService {
                     }
                 });
         }
+        log.info("*** Returning order collection *** {}", orders);
         return orders;
     }
 

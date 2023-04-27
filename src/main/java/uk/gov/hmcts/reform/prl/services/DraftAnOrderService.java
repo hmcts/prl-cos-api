@@ -1062,32 +1062,39 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> judgeOrAdminEditApproveDraftOrderAboutToSubmit(String authorisation, CallbackRequest callbackRequest) {
-        String eventId = callbackRequest.getEventId();
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("*** judgeOrAdminEditApproveDraftOrderAboutToSubmit ***");
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("*** Before checking the event id for editandapprove ***");
+        String eventId = callbackRequest.getEventId();
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
             .equals(caseData.getServeOrderData().getWhatDoWithOrder())
             || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
+            log.info("*** After checking the event id for editandapprove ***");
 
             caseDataUpdated.putAll(removeDraftOrderAndAddToFinalOrder(
                 authorisation,
                 caseData, eventId
             ));
+            log.info("*** checking if we want to serve order ***");
+
             if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
                 CaseData modifiedCaseData = objectMapper.convertValue(
                     caseDataUpdated,
                     CaseData.class
                 );
+                log.info("*** calling serve order ***");
                 List<Element<OrderDetails>> orderCollection = modifiedCaseData.getOrderCollection();
                 caseDataUpdated.put(
                     "orderCollection",
                     manageOrderService.serveOrder(modifiedCaseData, orderCollection)
                 );
+                log.info("*** order collection *** {}", caseDataUpdated.get("orderCollection"));
             }
         } else {
             caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));
