@@ -281,8 +281,8 @@ public class C100RespondentSolicitorService {
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .keepDetailsPrivate(KeepDetailsPrivate.builder()
                                             .otherPeopleKnowYourContactDetails(
-                                                caseData.getKeepContactDetailsPrivate() != null ?
-                                                    caseData.getKeepContactDetailsPrivate().getOtherPeopleKnowYourContactDetails() : null)
+                                                caseData.getKeepContactDetailsPrivate() != null
+                                                    ? caseData.getKeepContactDetailsPrivate().getOtherPeopleKnowYourContactDetails() : null)
                                             .confidentiality(caseData
                                                                  .getKeepContactDetailsPrivateOther()
                                                                  .getConfidentiality())
@@ -314,13 +314,14 @@ public class C100RespondentSolicitorService {
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .solicitorMiam(SolicitorMiam.builder()
                                        .respSolHaveYouAttendedMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam())
-                                       .respSolWillingnessToAttendMiam(Miam.builder()
-                                                                           .reasonNotAttendingMiam(
-                                                                               YesOrNo.Yes.equals(caseData.getRespondentSolicitorWillingnessToAttendMiam()
-                                                                                                      .getWillingToAttendMiam()) ? null
-                                                                                   : caseData.getRespondentSolicitorWillingnessToAttendMiam()
-                                                                                   .getReasonNotAttendingMiam())
-                                                                           .build())
+                                       .respSolWillingnessToAttendMiam(
+                                           Miam.builder()
+                                               .reasonNotAttendingMiam(
+                                                   YesOrNo.Yes.equals(caseData.getRespondentSolicitorWillingnessToAttendMiam()
+                                                                          .getWillingToAttendMiam()) ? null
+                                                       : caseData.getRespondentSolicitorWillingnessToAttendMiam()
+                                                       .getReasonNotAttendingMiam())
+                                               .build())
                                        .build())
                     .build();
                 break;
@@ -346,46 +347,50 @@ public class C100RespondentSolicitorService {
             case INTERNATIONAL_ELEMENT:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .resSolInternationalElements(ResSolInternationalElements.builder()
-                                                     .internationalElementChildInfo(SolicitorInternationalElement.builder()
-                                                                                        .reasonForChild(caseData.getInternationalElementChild()
-                                                                                                            .getReasonForChild())
-                                                                                        .reasonForChildDetails(YesOrNo.No.equals(
-                                                                                            caseData.getInternationalElementChild()
-                                                                                                .getReasonForChild())
-                                                                                                                   ? null
-                                                                                                                   : caseData.getInternationalElementChild()
-                                                                                            .getReasonForChildDetails()).build())
-                                                     .internationalElementParentInfo(SolicitorInternationalElement.builder()
-                                                                                         .reasonForParent(caseData.getInternationalElementParent()
-                                                                                                              .getReasonForParent())
-                                                                                         .reasonForParentDetails(YesOrNo.No.equals(
-                                                                                             caseData.getInternationalElementParent()
-                                                                                                 .getReasonForParent())
-                                                                                                                     ? null
-                                                                                                                     : caseData.getInternationalElementParent()
-                                                                                             .getReasonForParentDetails()).build())
-                                                     .internationalElementJurisdictionInfo(SolicitorInternationalElement.builder()
-                                                                                               .reasonForJurisdiction(
-                                                                                                   caseData.getInternationalElementJurisdiction()
-                                                                                                       .getReasonForJurisdiction())
-                                                                                               .reasonForJurisdictionDetails(
-                                                                                                   YesOrNo.No.equals(
-                                                                                                       caseData
-                                                                                                           .getInternationalElementJurisdiction()
-                                                                                                           .getReasonForJurisdiction())
-                                                                                                       ? null
-                                                                                                       : caseData.getInternationalElementJurisdiction()
-                                                                                                       .getReasonForJurisdictionDetails()).build())
-                                                     .internationalElementRequestInfo(SolicitorInternationalElement.builder()
-                                                                                          .requestToAuthority(caseData.getInternationalElementRequest()
-                                                                                                                  .getReasonForJurisdiction())
-                                                                                          .requestToAuthorityDetails(
-                                                                                              YesOrNo.No.equals(caseData
-                                                                                                                    .getInternationalElementRequest()
-                                                                                                                    .getRequestToAuthority())
-                                                                                                  ? null
-                                                                                                  : caseData.getInternationalElementRequest()
-                                                                                                  .getRequestToAuthorityDetails()).build())
+                                                     .internationalElementChildInfo(
+                                                         SolicitorInternationalElement.builder()
+                                                             .reasonForChild(caseData.getInternationalElementChild()
+                                                                                 .getReasonForChild())
+                                                             .reasonForChildDetails(YesOrNo.No.equals(
+                                                                 caseData.getInternationalElementChild()
+                                                                     .getReasonForChild())
+                                                                                        ? null
+                                                                                        : caseData.getInternationalElementChild()
+                                                                 .getReasonForChildDetails()).build())
+                                                     .internationalElementParentInfo(
+                                                         SolicitorInternationalElement.builder()
+                                                             .reasonForParent(caseData.getInternationalElementParent()
+                                                                                  .getReasonForParent())
+                                                             .reasonForParentDetails(YesOrNo.No.equals(
+                                                                 caseData.getInternationalElementParent()
+                                                                     .getReasonForParent())
+                                                                                         ? null
+                                                                                         : caseData.getInternationalElementParent()
+                                                                 .getReasonForParentDetails()).build())
+                                                     .internationalElementJurisdictionInfo(
+                                                         SolicitorInternationalElement.builder()
+                                                             .reasonForJurisdiction(
+                                                                 caseData.getInternationalElementJurisdiction()
+                                                                     .getReasonForJurisdiction())
+                                                             .reasonForJurisdictionDetails(
+                                                                 YesOrNo.No.equals(
+                                                                     caseData
+                                                                         .getInternationalElementJurisdiction()
+                                                                         .getReasonForJurisdiction())
+                                                                     ? null
+                                                                     : caseData.getInternationalElementJurisdiction()
+                                                                     .getReasonForJurisdictionDetails()).build())
+                                                     .internationalElementRequestInfo(
+                                                         SolicitorInternationalElement.builder()
+                                                             .requestToAuthority(caseData.getInternationalElementRequest()
+                                                                                     .getReasonForJurisdiction())
+                                                             .requestToAuthorityDetails(
+                                                                 YesOrNo.No.equals(caseData
+                                                                                       .getInternationalElementRequest()
+                                                                                       .getRequestToAuthority())
+                                                                     ? null
+                                                                     : caseData.getInternationalElementRequest()
+                                                                     .getRequestToAuthorityDetails()).build())
                                                      .build())
                     .build();
                 break;
@@ -394,13 +399,12 @@ public class C100RespondentSolicitorService {
                     .abilityToParticipate(SolicitorAbilityToParticipateInProceedings.builder()
                                               .factorsAffectingAbilityToParticipate(caseData.getAbilityToParticipateInProceedings()
                                                                                         .getFactorsAffectingAbilityToParticipate())
-                                              .provideDetailsForFactorsAffectingAbilityToParticipate(YesNoDontKnow.yes
-                                                                                                         .equals(
-                                                                                                             caseData.getAbilityToParticipateInProceedings()
-                                                                                                                 .getFactorsAffectingAbilityToParticipate())
-                                                                                                         ? caseData.getAbilityToParticipateInProceedings()
-                                                  .getProvideDetailsForFactorsAffectingAbilityToParticipate()
-                                                                                                         : null)
+                                              .provideDetailsForFactorsAffectingAbilityToParticipate(
+                                                  YesNoDontKnow.yes.equals(
+                                                      caseData.getAbilityToParticipateInProceedings().getFactorsAffectingAbilityToParticipate())
+                                                      ? caseData.getAbilityToParticipateInProceedings()
+                                                      .getProvideDetailsForFactorsAffectingAbilityToParticipate()
+                                                      : null)
                                               .build())
                     .build();
                 break;

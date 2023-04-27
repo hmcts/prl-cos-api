@@ -111,20 +111,12 @@ public class C100RespondentSolicitorServiceTest {
                           .consent(Consent.builder().build())
                           .citizenDetails(CitizenDetails.builder().build())
                           .c7ResponseSubmitted(No)
-                          .solicitorKeepDetailsPriate(SolicitorKeepDetailsPrivate
-                                                          .builder()
-                                                          .respKeepDetailsPrivateConfidentiality(KeepDetailsPrivate
-                                                                                                     .builder()
-                                                                                                     .confidentiality(Yes)
-                                                                                                     .confidentialityList(confidentialityListEnums)
-                                                                                                     .build())
-                                                          .respKeepDetailsPrivate(KeepDetailsPrivate
-                                                                                      .builder()
-                                                                                      .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
-                                                                                      .confidentiality(Yes)
-                                                                                      .confidentialityList(confidentialityListEnums)
-                                                                                      .build())
-                                                          .build())
+                          .keepDetailsPrivate(KeepDetailsPrivate
+                                                  .builder()
+                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .confidentiality(Yes)
+                                                  .confidentialityList(confidentialityListEnums)
+                                                  .build())
                           .solicitorMiam(SolicitorMiam.builder()
                                              .respSolHaveYouAttendedMiam(Miam.builder()
                                                                              .attendedMiam(No)
@@ -138,58 +130,88 @@ public class C100RespondentSolicitorServiceTest {
                                                            .builder()
                                                            .internationalElementParentInfo(SolicitorInternationalElement
                                                                                                .builder()
-                                                                                               .reasonForParentDetails("Test")
-                                                                                               .reasonForJurisdictionDetails("Test")
-                                                                                               .requestToAuthorityDetails("Test")
+                                                                                               .reasonForParentDetails(
+                                                                                                   "Test")
+                                                                                               .reasonForJurisdictionDetails(
+                                                                                                   "Test")
+                                                                                               .requestToAuthorityDetails(
+                                                                                                   "Test")
                                                                                                .build())
                                                            .internationalElementChildInfo(SolicitorInternationalElement
                                                                                               .builder()
                                                                                               .reasonForChild(Yes)
-                                                                                              .reasonForChildDetails("Test")
+                                                                                              .reasonForChildDetails(
+                                                                                                  "Test")
                                                                                               .reasonForParent(Yes)
-                                                                                              .reasonForParentDetails("Test")
+                                                                                              .reasonForParentDetails(
+                                                                                                  "Test")
                                                                                               .reasonForJurisdiction(Yes)
-                                                                                              .reasonForJurisdictionDetails("Test")
+                                                                                              .reasonForJurisdictionDetails(
+                                                                                                  "Test")
                                                                                               .requestToAuthority(Yes)
-                                                                                              .requestToAuthorityDetails("Test")
+                                                                                              .requestToAuthorityDetails(
+                                                                                                  "Test")
                                                                                               .build())
                                                            .build())
                           .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData
                                                                .builder()
                                                                .respChildAbductionInfo(RespondentChildAbduction
                                                                                            .builder()
-                                                                                           .previousThreatsForChildAbduction(Yes)
-                                                                                           .previousThreatsForChildAbductionDetails("Test")
-                                                                                           .reasonForChildAbductionBelief("Test")
+                                                                                           .previousThreatsForChildAbduction(
+                                                                                               Yes)
+                                                                                           .previousThreatsForChildAbductionDetails(
+                                                                                               "Test")
+                                                                                           .reasonForChildAbductionBelief(
+                                                                                               "Test")
                                                                                            .whereIsChild("Test")
-                                                                                           .hasPassportOfficeNotified(Yes)
+                                                                                           .hasPassportOfficeNotified(
+                                                                                               Yes)
                                                                                            .childrenHavePassport(Yes)
-                                                                                           .childrenHaveMoreThanOnePassport(Yes)
-                                                                                           .whoHasChildPassportOther("father")
-                                                                                           .anyOrgInvolvedInPreviousAbduction(Yes)
-                                                                                           .anyOrgInvolvedInPreviousAbductionDetails("Test")
+                                                                                           .childrenHaveMoreThanOnePassport(
+                                                                                               Yes)
+                                                                                           .whoHasChildPassportOther(
+                                                                                               "father")
+                                                                                           .anyOrgInvolvedInPreviousAbduction(
+                                                                                               Yes)
+                                                                                           .anyOrgInvolvedInPreviousAbductionDetails(
+                                                                                               "Test")
                                                                                            .build())
                                                                .respOtherConcernsInfo(RespondentOtherConcerns
                                                                                           .builder()
-                                                                                          .childHavingOtherFormOfContact(Yes)
-                                                                                          .childSpendingSupervisedTime(Yes)
-                                                                                          .ordersRespondentWantFromCourt("Test")
-                                                                                          .childSpendingUnsupervisedTime(Yes)
+                                                                                          .childHavingOtherFormOfContact(
+                                                                                              Yes)
+                                                                                          .childSpendingSupervisedTime(
+                                                                                              Yes)
+                                                                                          .ordersRespondentWantFromCourt(
+                                                                                              "Test")
+                                                                                          .childSpendingUnsupervisedTime(
+                                                                                              Yes)
                                                                                           .build())
                                                                .respAllegationsOfHarmInfo(RespondentAllegationsOfHarm
                                                                                               .builder()
                                                                                               .respondentChildAbuse(Yes)
-                                                                                              .isRespondentChildAbduction(Yes)
-                                                                                              .respondentNonMolestationOrder(Yes)
-                                                                                              .respondentOccupationOrder(Yes)
-                                                                                              .respondentForcedMarriageOrder(Yes)
-                                                                                              .respondentDrugOrAlcoholAbuse(Yes)
-                                                                                              .respondentOtherInjunctiveOrder(Yes)
-                                                                                              .respondentRestrainingOrder(Yes)
-                                                                                              .respondentDomesticAbuse(Yes)
-                                                                                              .respondentDrugOrAlcoholAbuseDetails("Test")
-                                                                                              .respondentOtherSafetyConcerns(Yes)
-                                                                                              .respondentOtherSafetyConcernsDetails("Test")
+                                                                                              .isRespondentChildAbduction(
+                                                                                                  Yes)
+                                                                                              .respondentNonMolestationOrder(
+                                                                                                  Yes)
+                                                                                              .respondentOccupationOrder(
+                                                                                                  Yes)
+                                                                                              .respondentForcedMarriageOrder(
+                                                                                                  Yes)
+                                                                                              .respondentDrugOrAlcoholAbuse(
+                                                                                                  Yes)
+                                                                                              .respondentOtherInjunctiveOrder(
+                                                                                                  Yes)
+                                                                                              .respondentRestrainingOrder(
+                                                                                                  Yes)
+                                                                                              .respondentDomesticAbuse(
+                                                                                                  Yes)
+                                                                                              .respondentDrugOrAlcoholAbuseDetails(
+                                                                                                  "Test")
+                                                                                              .respondentOtherSafetyConcerns(
+                                                                                                  Yes)
+                                                                                              .respondentOtherSafetyConcernsDetails(
+                                                                                                  "Test")
                                                                                               .build())
                                                                .respAohYesOrNo(Yes)
                                                                .build())
@@ -203,15 +225,13 @@ public class C100RespondentSolicitorServiceTest {
             .build();
 
 
-
         List<RespondentWelshNeedsListEnum> welshNeedsListEnum = new ArrayList<>();
         welshNeedsListEnum.add(RespondentWelshNeedsListEnum.speakWelsh);
         List<PartyEnum> party = new ArrayList<>();
         party.add(PartyEnum.respondent);
 
 
-
-        List<CaseUser> caseUserList  = new ArrayList<>();
+        List<CaseUser> caseUserList = new ArrayList<>();
         caseUserList.add(CaseUser.builder()
                              .caseId("12345")
                              .caseRole("[C100RESPONDENTSOLICITOR1]")
@@ -241,9 +261,9 @@ public class C100RespondentSolicitorServiceTest {
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
         caseData = CaseData.builder().respondents(respondentList).id(1)
             .keepContactDetailsPrivateOther(KeepDetailsPrivate.builder()
-                                           .confidentiality(Yes)
-                                           .confidentialityList(confidentialityListEnums)
-                                           .build())
+                                                .confidentiality(Yes)
+                                                .confidentialityList(confidentialityListEnums)
+                                                .build())
             .respondentConsentToApplication(Consent
                                                 .builder()
                                                 .noConsentReason("test")
@@ -285,8 +305,8 @@ public class C100RespondentSolicitorServiceTest {
                                            .requestToAuthorityDetails("Test")
                                            .build())
             .keepContactDetailsPrivate(KeepDetailsPrivate
-                .builder()
-                .build())
+                                           .builder()
+                                           .build())
             .respondentAllegationsOfHarm(RespondentAllegationsOfHarm
                                              .builder()
                                              .respondentChildAbuse(Yes)
@@ -401,7 +421,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
+    @ValueSource(strings = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
         "c100ResSolAttendingTheCourt", "c100ResSolMiam", "c100ResSolCurrentOrPreviousProceedings", "c100ResSolAllegationsOfHarm",
         "c100ResSolInternationalElement", "c100ResSolAbilityToParticipate"})
     void populateAboutToStartCaseDataConsentToApplicationEvent(String event) {
@@ -447,7 +467,10 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(documentGenService.generateSingleDocument(authToken,caseData,SOLICITOR_C7_DRAFT_DOCUMENT,false)).thenReturn(document);
+        when(documentGenService.generateSingleDocument(authToken,
+                                                       caseData,
+                                                       SOLICITOR_C7_DRAFT_DOCUMENT,
+                                                       false)).thenReturn(document);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -483,7 +506,10 @@ public class C100RespondentSolicitorServiceTest {
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName("C1A_Allegation_Of_Harm_Draft_Document.pdf")
             .build();
-        when(documentGenService.generateSingleDocument(authToken,caseData,SOLICITOR_C1A_DRAFT_DOCUMENT,false)).thenReturn(document);
+        when(documentGenService.generateSingleDocument(authToken,
+                                                       caseData,
+                                                       SOLICITOR_C1A_DRAFT_DOCUMENT,
+                                                       false)).thenReturn(document);
 
         callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
