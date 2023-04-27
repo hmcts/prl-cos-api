@@ -859,7 +859,7 @@ public class ManageOrdersControllerTest {
             OrderDetails.builder().build()).build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
-        when(manageOrderService.resetChildOptionsIfOrderAboutAllChildrenYes(caseData))
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1265,7 +1265,7 @@ public class ManageOrdersControllerTest {
             OrderDetails.builder().build()).build());
         when(amendOrderService.updateOrder(caseData, authToken))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
-        when(manageOrderService.resetChildOptionsIfOrderAboutAllChildrenYes(caseData))
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1343,7 +1343,7 @@ public class ManageOrdersControllerTest {
             .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.populateHeader(caseData))
             .thenReturn(stringObjectMap);
-        when(manageOrderService.resetChildOptionsIfOrderAboutAllChildrenYes(caseData))
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1393,7 +1393,7 @@ public class ManageOrdersControllerTest {
             .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.populateHeader(caseData))
             .thenReturn(stringObjectMap);
-        when(manageOrderService.resetChildOptionsIfOrderAboutAllChildrenYes(caseData))
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1443,7 +1443,7 @@ public class ManageOrdersControllerTest {
             .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.populateHeader(caseData))
             .thenReturn(stringObjectMap);
-        when(manageOrderService.resetChildOptionsIfOrderAboutAllChildrenYes(caseData))
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
