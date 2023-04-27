@@ -64,14 +64,6 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                    @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-
-        // TODO need to check where to move below code
-
-        log.info("DynamicList to populate Linked case dropdown handleAboutToStart ------> {}",
-                 sendAndReplyService.getLinkedCasesDynamicList(authorisation, caseData));
-
-        // TODO
-
         caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageList(caseData, authorisation));
 
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
@@ -89,14 +81,6 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-
-        // TODO need to check where to move below code
-
-        log.info("DynamicList to populate Linked case dropdown mid-event  ------> {}",
-                 sendAndReplyService.getLinkedCasesDynamicList(authorisation, caseData));
-
-        // TODO
-
         List<String> errors = new ArrayList<>();
         if (caseData.getChooseSendOrReply().equals(REPLY)) {
             if (!sendAndReplyService.hasMessages(caseData)) {
@@ -122,13 +106,6 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-
-        // TODO need to check where to move below code
-
-        log.info("DynamicList to populate Linked case dropdown about to submit ------> {}",
-                 sendAndReplyService.getLinkedCasesDynamicList(authorisation, caseData));
-
-        // TODO
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             Message newMessage = sendAndReplyService.buildNewSendMessage(caseData);

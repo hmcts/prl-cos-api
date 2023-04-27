@@ -86,6 +86,13 @@ public class SendAndReplyService {
     }
 
     public Map<String, Object> setSenderAndGenerateMessageList(CaseData caseData, String auth) {
+
+        // TODO need to check where to move below code
+
+        log.info("DynamicList to populate Linked case dropdown setSenderAndGenerateMessageList ------> {}",
+                 getLinkedCasesDynamicList(auth, caseData));
+
+        // TODO
         Map<String, Object> data = new HashMap<>();
         MessageMetaData messageMetaData = MessageMetaData.builder()
             .senderEmail(getLoggedInUserEmail(auth))
