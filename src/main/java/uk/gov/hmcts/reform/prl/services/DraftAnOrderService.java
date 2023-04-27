@@ -1147,4 +1147,14 @@ public class DraftAnOrderService {
         manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         return caseDataUpdated;
     }
+
+    public Map<String, Object> resetFields(CallbackRequest callbackRequest) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+        return caseDataUpdated;
+    }
 }
