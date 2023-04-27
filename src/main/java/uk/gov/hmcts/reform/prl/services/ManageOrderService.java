@@ -1585,7 +1585,7 @@ public class ManageOrderService {
     private CaseData getFl404bFields(CaseData caseData) {
 
         log.info("Before calling casedata {}", caseData);
-        FL404 orderData = caseData.getManageOrders().getFl404CustomFields().toBuilder()
+        FL404 orderData = FL404.builder()
             .fl404bCaseNumber(String.valueOf(caseData.getId()))
             .fl404bCourtName(caseData.getCourtName())
             .fl404bApplicantName(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
