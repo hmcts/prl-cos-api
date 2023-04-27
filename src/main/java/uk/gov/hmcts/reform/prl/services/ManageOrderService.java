@@ -80,6 +80,7 @@ import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HMC_STATUS_COMPLETED;
@@ -467,6 +468,7 @@ public class ManageOrderService {
 
     @Autowired
     private final HearingService hearingService;
+
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -1908,24 +1910,26 @@ public class ManageOrderService {
             Collectors.toList());
     }
 
-    public static void resetChildOptions(CallbackRequest callbackRequest) {
-        log.info("is the order about all children present? ",
-                 callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN));
-        log.info("is the order about all children present value? ",
-                 callbackRequest.getCaseDetails().getData().get(IS_THE_ORDER_ABOUT_CHILDREN));
-        if ((callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_CHILDREN)
-            && callbackRequest.getCaseDetails().getData().get(
-            IS_THE_ORDER_ABOUT_CHILDREN) != null && callbackRequest.getCaseDetails().getData().get(
-            IS_THE_ORDER_ABOUT_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO))
-            || (callbackRequest.getCaseDetails().getData().containsKey(IS_THE_ORDER_ABOUT_ALL_CHILDREN)
-            && callbackRequest.getCaseDetails().getData().get(
-            IS_THE_ORDER_ABOUT_ALL_CHILDREN) != null && callbackRequest.getCaseDetails().getData().get(
-            IS_THE_ORDER_ABOUT_ALL_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.YES))
-        ) {
+    public void resetChildOptions(CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        boolean isTheOrderAboutChildren = caseDataMap.containsKey(IS_THE_ORDER_ABOUT_CHILDREN)
+            && YesOrNo.No.equals(caseDataMap.get(IS_THE_ORDER_ABOUT_CHILDREN));
+
+        boolean isTheOrderAboutAllChildren = caseDataMap.containsKey(IS_THE_ORDER_ABOUT_ALL_CHILDREN)
+            && YesOrNo.No.equals(caseDataMap.get(IS_THE_ORDER_ABOUT_ALL_CHILDREN));
+
+        List<DynamicMultiselectListElement> listElements = List.of(DynamicMultiselectListElement.EMPTY);
+        log.info("is the order about children present? ", isTheOrderAboutChildren);
+        log.info("is the order about all children present? ", isTheOrderAboutAllChildren);
+        if (isTheOrderAboutAllChildren) {
+            List<Element<Child>> children = objectMapper.convertValue(caseDataMap.get(CHILDREN), List.class);
+            dynamicMultiSelectListService.getChildrenMultiSelectListForCA(children, listElements);
+        }
+        if (isTheOrderAboutChildren || isTheOrderAboutAllChildren) {
             log.info("Before  modifying {}", callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
             callbackRequest.getCaseDetails().getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
                 .listItems(List.of(DynamicMultiselectListElement.EMPTY))
-                .value(List.of(DynamicMultiselectListElement.EMPTY))
+                .value(listElements)
                 .build());
             log.info("after  modifying {}", callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
         }
