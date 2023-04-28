@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -313,7 +314,7 @@ public class CaseServiceTest {
 
 
     @Test
-    public void testupdateCaseDetailsCitizenUpdateOnCaApplicant() throws JsonProcessingException {
+    public void testUpdateCaseDetailsCitizenUpdateOnCaApplicant() throws JsonProcessingException {
 
         User user1 = User.builder().idamId("123").build();
         PartyDetails applicant1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
@@ -355,7 +356,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testupdateCaseDetailsCitizenUpdateOnCaRespondent() throws JsonProcessingException {
+    public void testUpdateCaseDetailsCitizenUpdateOnCaRespondent() throws JsonProcessingException {
 
         User user1 = User.builder().idamId("123").build();
         PartyDetails respondent1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
@@ -396,8 +397,8 @@ public class CaseServiceTest {
         assertNotNull(caseDetailsAfterUpdate);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testupdateCaseDetailsCitizenUpdateOnCaRespondentForNull() throws JsonProcessingException {
+    @Test
+    public void testUpdateCaseDetailsCitizenUpdateOnCaRespondentForNull() throws JsonProcessingException {
 
         User user1 = User.builder().idamId("123").build();
         PartyDetails respondent1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
@@ -428,15 +429,13 @@ public class CaseServiceTest {
         when(caseRepository.getCase(authToken,"123")).thenReturn(caseDetails);
         when(caseRepository.updateCase(authToken, "123", caseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123", "citizen-case-submit", updateCaseData);
-
-        assertNotNull(caseDetailsAfterUpdate);
+        Assert.assertThrows(RuntimeException.class, () -> caseService.updateCaseDetails(authToken, "123", "citizen-case-submit", updateCaseData));
     }
 
 
 
     @Test
-    public void testupdateCaseDetailsCitizenUpdateOnDaRespondent() throws JsonProcessingException {
+    public void testUpdateCaseDetailsCitizenUpdateOnDaRespondent() throws JsonProcessingException {
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
             .lastName("User")
@@ -488,7 +487,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testupdateCaseDetailsCitizenUpdateOnDaApplicant() throws JsonProcessingException {
+    public void testUpdateCaseDetailsCitizenUpdateOnDaApplicant() throws JsonProcessingException {
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
             .lastName("User")
