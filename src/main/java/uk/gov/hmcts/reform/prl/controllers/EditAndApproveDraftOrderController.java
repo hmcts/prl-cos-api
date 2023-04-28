@@ -241,6 +241,10 @@ public class EditAndApproveDraftOrderController {
     ) {
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId())) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
             final CaseDetails caseDetails = callbackRequest.getCaseDetails();
             log.info("** Calling email service to send emails to recipients on serve order **");
             manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
