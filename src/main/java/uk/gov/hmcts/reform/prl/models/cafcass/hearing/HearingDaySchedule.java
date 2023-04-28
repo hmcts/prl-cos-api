@@ -21,4 +21,6 @@ public class HearingDaySchedule {
 
     private LocalDateTime hearingEndDateTime;
 
+    private String courtTypeId;
+
 }
