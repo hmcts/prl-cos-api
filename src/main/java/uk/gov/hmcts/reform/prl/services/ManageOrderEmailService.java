@@ -351,7 +351,7 @@ public class ManageOrderEmailService {
             .caseName(caseData.getApplicantCaseName())
             .caseUrgency(typeOfHearing)
             .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
-            .familyManNumber(caseData.getFamilymanCaseNumber())
+            .familyManNumber(caseData.getFamilymanCaseNumber() != null ? caseData.getFamilymanCaseNumber() : "")
             .orderLink(citizenDashboardUrl)
             .build();
     }

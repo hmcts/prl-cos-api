@@ -334,8 +334,6 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void buildCafcassEmailNotificationForFL401() throws NotFoundException {
-
-
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
