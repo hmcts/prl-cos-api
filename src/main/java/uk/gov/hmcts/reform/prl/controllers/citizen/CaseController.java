@@ -109,7 +109,7 @@ public class CaseController {
         @PathVariable("caseId") String caseId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
-    ) throws JsonProcessingException {
+    ) {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = null;
             caseDetails = caseService.updateCaseDetails(
