@@ -88,14 +88,16 @@ public class CaseDataService {
                 String userToken = systemUserService.getSysUserToken();
                 final String s2sToken = authTokenGenerator.generate();
                 SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
-                        userToken,
-                        searchString,
-                        s2sToken,
-                        cafCassSearchCaseTypeId);
+                    userToken,
+                    searchString,
+                    s2sToken,
+                    cafCassSearchCaseTypeId
+                );
 
                 cafCassResponse = objectMapper.convertValue(
-                        searchResult,
-                        CafCassResponse.class);
+                    searchResult,
+                    CafCassResponse.class
+                );
 
                 if (cafCassResponse.getCases() != null && !cafCassResponse.getCases().isEmpty()) {
 
@@ -122,7 +124,7 @@ public class CaseDataService {
         List<Should> shoulds = populateStatesForQuery();
 
         LastModified lastModified = LastModified.builder().gte(startDate).lte(endDate).boost(ccdElasticSearchApiBoost)
-                .build();
+            .build();
         Range range = Range.builder().lastModified(lastModified).build();
 
         StateFilter stateFilter = StateFilter.builder().should(shoulds).build();
@@ -156,33 +158,44 @@ public class CaseDataService {
 
     private CafCassResponse getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
         CafCassResponse filteredCafcassResponse = CafCassResponse.builder()
-                .cases(new ArrayList<CafCassCaseDetail>())
-                .build();
+            .cases(new ArrayList<CafCassCaseDetail>())
+            .build();
         Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
         for (CafCassCaseDetail caseDetails : cafCassResponse.getCases()) {
             CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
             if (caseManagementLocation != null) {
                 if (caseManagementLocation.getRegionId() != null
-                        && Integer.parseInt(caseManagementLocation.getRegionId()) < 7) {
-                    caseIdWithRegionIdMap.put(caseDetails.getId().toString(), caseManagementLocation.getRegionId());
+                    && Integer.parseInt(caseManagementLocation.getRegionId()) < 7) {
+                    caseIdWithRegionIdMap.put(caseDetails.getId().toString(), caseManagementLocation.getRegionId()
+                        + "-" + caseManagementLocation.getBaseLocationId());
                     filteredCafcassResponse.getCases().add(caseDetails);
                 } else if (caseManagementLocation.getRegion() != null && Integer.parseInt(caseManagementLocation.getRegion()) < 7) {
-                    caseIdWithRegionIdMap.put(String.valueOf(caseDetails.getId()), caseManagementLocation.getRegion());
+                    caseIdWithRegionIdMap.put(
+                        String.valueOf(caseDetails.getId()),
+                        caseManagementLocation.getRegion() + "-" + caseManagementLocation.getBaseLocation()
+                    );
                     filteredCafcassResponse.getCases().add(caseDetails);
                 }
             }
         }
         log.info("caseIdWithRegionIdMap {}", caseIdWithRegionIdMap);
 
-        List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(authorisation,
-                caseIdWithRegionIdMap);
+        List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(
+            authorisation,
+            caseIdWithRegionIdMap
+        );
 
         if (!listOfHearingDetails.isEmpty()) {
             for (CafCassCaseDetail cafCassCaseDetail : filteredCafcassResponse.getCases()) {
-                for (Hearings hearing : listOfHearingDetails) {
-                    if (hearing != null && hearing.getCaseRef().equals(String.valueOf(cafCassCaseDetail.getId()))) {
-                        cafCassCaseDetail.getCaseData().setHearingData(hearing);
-                    }
+                Hearings filteredHearing =
+                    listOfHearingDetails.stream().filter(hearings -> hearings.getCaseRef().equals(String.valueOf(
+                        cafCassCaseDetail.getId()))).findFirst().orElse(null);
+                if (filteredHearing != null) {
+                    cafCassCaseDetail.getCaseData().setHearingData(filteredHearing);
+                    cafCassCaseDetail.getCaseData().setCourtName(filteredHearing.getCourtName());
+                    cafCassCaseDetail.getCaseData().setCourtTypeId(filteredHearing.getCourtTypeId());
+                    filteredHearing.setCourtName(null);
+                    filteredHearing.setCourtTypeId(null);
                 }
             }
         }
@@ -199,9 +212,10 @@ public class CaseDataService {
 
                 if (refDataCategoryValueMap == null) {
                     refDataCategoryValueMap = refDataService.getRefDataCategoryValueMap(
-                            authorisation,
-                            s2sToken,
-                            hearingData.getHmctsServiceCode());
+                        authorisation,
+                        s2sToken,
+                        hearingData.getHmctsServiceCode()
+                    );
                 }
 
                 for (CaseHearing caseHearing : hearingData.getCaseHearings()) {

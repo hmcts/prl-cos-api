@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCdamService;
 
 import java.util.UUID;
@@ -24,6 +25,8 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.ResponseEntity.status;
 import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATION;
+import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_USER_ROLE;
+
 
 @Slf4j
 @RestController
@@ -34,6 +37,9 @@ public class CafcassDocumentManagementController {
 
     @Autowired
     private AuthorisationService authorisationService;
+
+    @Autowired
+    private SystemUserService systemUserService;
 
     @GetMapping(path = "/documents/{documentId}/binary")
     @Operation(description = "Call CDAM to download document")
@@ -48,9 +54,10 @@ public class CafcassDocumentManagementController {
                                                      @PathVariable UUID documentId) {
         try {
             if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
-                authorisationService.authoriseService(serviceAuthorisation))) {
+                authorisationService.authoriseService(serviceAuthorisation))
+                && authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
                 log.info("processing  request after authorization");
-                return cafcassCdamService.getDocument(authorisation, serviceAuthorisation, documentId);
+                return cafcassCdamService.getDocument(systemUserService.getSysUserToken(), serviceAuthorisation, documentId);
 
             } else {
                 throw new ResponseStatusException(UNAUTHORIZED);
