@@ -546,8 +546,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/**/*',
   '**uk/gov/hmcts/reform/prl/services/tab/alltabs/AllTabServiceImpl.java',
   '**uk/gov/hmcts/reform/prl/services/cafcass/HearingService.java',
-  '**uk/gov/hmcts/reform/prl/services/cafcass/CaseDataService.java',
-  '**uk/gov/hmcts/reform/prl/services/citizen/CaseService.java'
+  '**uk/gov/hmcts/reform/prl/services/cafcass/CaseDataService.java'
 ]
 
 sonarqube {

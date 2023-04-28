@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
@@ -98,6 +99,7 @@ public class CaseServiceTest {
     CaseUtils caseUtils;
 
     private CaseData caseData;
+    private CaseData caseDataWithOutPartyId;
     private CaseDetails caseDetails;
     private UserDetails userDetails;
     private Map<String, Object> caseDataMap;
@@ -122,7 +124,7 @@ public class CaseServiceTest {
             .id(123L)
             .state("SUBMITTED_PAID")
             .build();
-        userDetails = UserDetails.builder().build();
+        userDetails = UserDetails.builder().id("tesUserId").email("testEmail").build();
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
         when(caseRepository.updateCase(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(caseDetails);
@@ -137,6 +139,47 @@ public class CaseServiceTest {
     @Test
     public void testupdateCase() throws JsonProcessingException {
         CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","","linkCase","123");
+        assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test
+    public void testupdateCaseOfApplicantWithOutPartyId() throws JsonProcessingException {
+        User user = User.builder().build();
+        PartyDetails partyDetailsWithUser = PartyDetails.builder().user(user)
+            .firstName("")
+            .lastName("")
+            .build();
+        caseDataWithOutPartyId = CaseData.builder()
+            .applicantsFL401(partyDetailsWithUser)
+            .respondents(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
+                                                                         .partyId(null)
+                                                                         .accessCode("1234").build()).build()))
+            .build();
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataWithOutPartyId);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseDataWithOutPartyId, "", "","","linkCase","1234");
+        assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test
+    public void testupdateCaseOfRespondentWithOutPartyId() throws JsonProcessingException {
+        User user = User.builder().build();
+        PartyDetails partyDetailsWithUser = PartyDetails.builder().user(user)
+            .firstName("")
+            .lastName("")
+            .build();
+        caseDataWithOutPartyId = CaseData.builder()
+            .respondentsFL401(partyDetailsWithUser)
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)
+                                                                         .partyId(null)
+                                                                         .accessCode("1234").build()).build()))
+            .build();
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataWithOutPartyId);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseDataWithOutPartyId, "", "","","linkCase","1234");
         assertNotNull(caseDetailsAfterUpdate);
     }
 
