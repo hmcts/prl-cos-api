@@ -491,6 +491,7 @@ public class DraftAnOrderService {
         caseDataMap.put("isOrderCreatedBySolicitor", selectedOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
         caseDataMap.put("isHearingPageNeeded", isHearingPageNeeded(selectedOrder) ? Yes : No);
+        log.info("******isHearingPageNeeded value ******** {}", caseDataMap.get("isHearingPageNeeded"));
 
         //Set existing hearingsType from draft order
         ManageOrders manageOrders = null != caseData.getManageOrders()
@@ -509,8 +510,12 @@ public class DraftAnOrderService {
     public boolean isHearingPageNeeded(DraftOrder selectedOrder) {
         log.info("******orderTypeId******** {}", selectedOrder.getOrderTypeId());
         log.info("******orderType******** {}", selectedOrder.getOrderType());
+        log.info("******C21 orderType******** {}", selectedOrder.getC21OrderOptions());
         if (null != selectedOrder && !StringUtils.isEmpty(String.valueOf(selectedOrder.getOrderType()))) {
             if (selectedOrder.getOrderType().equals("blankOrderOrDirections")) {
+                log.info("******C21 orderType inside if block******** {}", selectedOrder.getC21OrderOptions());
+                log.info("******C21 sub Type ******** {}", selectedOrder.getC21OrderOptions().equals(C21OrderOptionsEnum.c21other));
+
                 return selectedOrder.getC21OrderOptions().equals(C21OrderOptionsEnum.c21other);
             }
             return Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
