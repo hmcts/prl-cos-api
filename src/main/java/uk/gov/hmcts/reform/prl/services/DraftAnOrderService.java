@@ -805,7 +805,7 @@ public class DraftAnOrderService {
     }
 
     private static void populateSection7ChildImpactAnalysis(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoRightToAskCourt())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSection7EditContent())) {
             caseDataUpdated.put(
                 "sdoSection7EditContent",
                 SECTION7_EDIT_CONTENT
