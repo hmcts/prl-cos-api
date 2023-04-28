@@ -507,6 +507,8 @@ public class DraftAnOrderService {
     }
 
     public boolean isHearingPageNeeded(DraftOrder selectedOrder) {
+        log.info("******orderTypeId******** {}", selectedOrder.getOrderTypeId());
+        log.info("******orderType******** {}", selectedOrder.getOrderType());
         if (null != selectedOrder && !StringUtils.isEmpty(selectedOrder.getOrderTypeId())) {
             if (selectedOrder.getOrderTypeId().equalsIgnoreCase("blankOrderOrDirections")) {
                 return selectedOrder.getC21OrderOptions().equals(C21OrderOptionsEnum.c21other);
