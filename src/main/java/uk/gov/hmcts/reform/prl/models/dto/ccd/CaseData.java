@@ -786,4 +786,6 @@ public class CaseData implements MappableObject {
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
     private NextHearingDetails nextHearingDetails;
 
+    private final YesOrNo isAddCaseNumberAdded;
+
 }
