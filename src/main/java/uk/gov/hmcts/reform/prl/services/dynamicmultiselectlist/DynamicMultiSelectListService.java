@@ -176,12 +176,14 @@ public class DynamicMultiSelectListService {
     public String getStringFromDynamicMultiSelectListFromListItems(DynamicMultiSelectList dynamicMultiSelectList) {
         List<String> strList = new ArrayList<>();
         if (null != dynamicMultiSelectList && null != dynamicMultiSelectList.getListItems()) {
-            dynamicMultiSelectList.getListItems().forEach(value ->
-                                                          strList.add(value.getLabel().split("\\(")[0])
-            );
+            dynamicMultiSelectList.getListItems().forEach(value -> {
+                if (null != value.getLabel()) {
+                    strList.add(value.getLabel().split("\\(")[0]);
+                }
+            });
         }
         if (!strList.isEmpty()) {
-            return String.join(", ",strList);
+            return String.join(", ", strList);
         }
         return "";
     }
