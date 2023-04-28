@@ -135,6 +135,7 @@ public class DraftOrder {
     private YesOrNo hasJudgeProvidedHearingDetails;
 
     private final SdoDetails sdoDetails;
+    private final YesOrNo isOrderCreatedBySolicitor;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {

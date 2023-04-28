@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
@@ -52,6 +53,7 @@ import uk.gov.hmcts.reform.prl.utils.PartiesListGenerator;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -78,6 +80,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_SAFEGUARDIN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_SAFEGUARING_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEEDED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
@@ -260,6 +263,7 @@ public class DraftAnOrderService {
             .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())
                             ? draftOrder.getSdoDetails() : null)
             .selectedHearingType(null != draftOrder.getHearingsType() ? draftOrder.getHearingsType().getValueCode() : null)
+            .isOrderCreatedBySolicitor(draftOrder.getIsOrderCreatedBySolicitor())
             .build();
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
@@ -408,10 +412,7 @@ public class DraftAnOrderService {
             caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
             caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
             caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
-            caseDataMap.put(
-                "isOrderCreatedBySolicitor",
-                (null != selectedOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No
-            );
+            caseDataMap.put("isOrderCreatedBySolicitor", selectedOrder.getIsOrderCreatedBySolicitor());
             caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
         } else {
             log.info("inside populate custom SDO fields");
@@ -487,11 +488,9 @@ public class DraftAnOrderService {
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
         caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
         caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
-        caseDataMap.put(
-            "isOrderCreatedBySolicitor",
-            (null != selectedOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No
-        );
+        caseDataMap.put("isOrderCreatedBySolicitor", selectedOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
+        caseDataMap.put("isHearingPageNeeded", isHearingPageNeeded(selectedOrder) ? Yes : No);
 
         //Set existing hearingsType from draft order
         ManageOrders manageOrders = null != caseData.getManageOrders()
@@ -505,6 +504,17 @@ public class DraftAnOrderService {
         //Set hearings
         caseDataMap.put("hearingsType", caseData.getManageOrders().getHearingsType());
         return caseDataMap;
+    }
+
+    public boolean isHearingPageNeeded(DraftOrder selectedOrder) {
+        if (null != selectedOrder && !StringUtils.isEmpty(selectedOrder.getOrderTypeId())) {
+            if (selectedOrder.getOrderTypeId().equalsIgnoreCase("blankOrderOrDirections")) {
+                return selectedOrder.getC21OrderOptions().equals(C21OrderOptionsEnum.c21other);
+            }
+            return Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS).anyMatch(orderId -> orderId.equalsIgnoreCase(
+                selectedOrder.getOrderTypeId()));
+        }
+        return false;
     }
 
     public DraftOrder getSelectedDraftOrderDetails(CaseData caseData) {
@@ -653,6 +663,7 @@ public class DraftAnOrderService {
             .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())
                             ? manageOrderService.copyPropertiesToSdoDetails(caseData) : null)
             .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
+            .isOrderCreatedBySolicitor(draftOrder.getIsOrderCreatedBySolicitor())
             .hearingsType(caseData.getManageOrders().getHearingsType())
             .build();
     }
@@ -905,7 +916,7 @@ public class DraftAnOrderService {
     }
 
     private static void populateHearingData(Map<String, Object> caseDataUpdated, HearingData hearingData,
-                                                            HearingData existingHearingData, String hearingKey) {
+                                            HearingData existingHearingData, String hearingKey) {
         if (existingHearingData == null
             || existingHearingData.getHearingDateConfirmOptionEnum() == null) {
             caseDataUpdated.put(hearingKey, hearingData);
@@ -1076,10 +1087,7 @@ public class DraftAnOrderService {
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
 
         Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder);
-        caseDataMap.put(
-            "isOrderCreatedBySolicitor",
-            (null != draftOrder.getHasJudgeProvidedHearingDetails()) ? Yes : No
-        );
+        caseDataMap.put("isOrderCreatedBySolicitor", draftOrder.getIsOrderCreatedBySolicitor());
         log.info(
             "is Order created by solicitor in populateCommonDraftOrderFields:::{}:::",
             caseDataMap.get("isOrderCreatedBySolicitor")

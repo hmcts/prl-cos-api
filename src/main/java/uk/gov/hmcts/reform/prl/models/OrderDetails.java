@@ -49,6 +49,7 @@ public class OrderDetails {
     private final String cafcassEmailId;
     private final YesOrNo cafcassCymruServedOptions;
     private final String cafcassCymruEmail;
+    private final YesOrNo isOrderCreatedBySolicitor;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
