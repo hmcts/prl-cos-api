@@ -204,6 +204,16 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
+    public void testGetStringFromDynMultiSelectListFromListItemsForEmptyList() {
+        String str = dynamicMultiSelectListService
+            .getStringFromDynamicMultiSelectListFromListItems(DynamicMultiSelectList
+                                                                  .builder()
+                                                                  .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+                                                                  .build());
+        assertEquals("", str);
+    }
+
+    @Test
     public void testDynamicMultiSelectForDocmosis() {
         List<Element<Child>> str = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseData);

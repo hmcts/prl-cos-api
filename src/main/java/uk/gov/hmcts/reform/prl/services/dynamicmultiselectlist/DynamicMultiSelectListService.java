@@ -176,12 +176,14 @@ public class DynamicMultiSelectListService {
     public String getStringFromDynamicMultiSelectListFromListItems(DynamicMultiSelectList dynamicMultiSelectList) {
         List<String> strList = new ArrayList<>();
         if (null != dynamicMultiSelectList && null != dynamicMultiSelectList.getListItems()) {
-            dynamicMultiSelectList.getListItems().forEach(value ->
-                                                          strList.add(value.getLabel().split("\\(")[0])
-            );
+            dynamicMultiSelectList.getListItems().forEach(value -> {
+                if (null != value.getLabel()) {
+                    strList.add(value.getLabel().split("\\(")[0]);
+                }
+            });
         }
         if (!strList.isEmpty()) {
-            return String.join(", ",strList);
+            return String.join(", ", strList);
         }
         return "";
     }
@@ -205,7 +207,7 @@ public class DynamicMultiSelectListService {
         return childList;
     }
 
-    public List<Element<ApplicantChild>> getApplicantChildDetailstForDocmosis(CaseData caseData) {
+    public List<Element<ApplicantChild>> getApplicantChildDetailsForDocmosis(CaseData caseData) {
         List<Element<ApplicantChild>> applicantChildList = new ArrayList<>();
         log.info("ManageOrders in getChildrenForDocmosis: {}", caseData.getManageOrders());
         if (null != caseData.getManageOrders()
