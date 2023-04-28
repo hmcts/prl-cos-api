@@ -509,12 +509,12 @@ public class DraftAnOrderService {
     public boolean isHearingPageNeeded(DraftOrder selectedOrder) {
         log.info("******orderTypeId******** {}", selectedOrder.getOrderTypeId());
         log.info("******orderType******** {}", selectedOrder.getOrderType());
-        if (null != selectedOrder && !StringUtils.isEmpty(selectedOrder.getOrderTypeId())) {
-            if (selectedOrder.getOrderTypeId().equalsIgnoreCase("blankOrderOrDirections")) {
+        if (null != selectedOrder && !StringUtils.isEmpty(String.valueOf(selectedOrder.getOrderType()))) {
+            if (selectedOrder.getOrderType().equals("blankOrderOrDirections")) {
                 return selectedOrder.getC21OrderOptions().equals(C21OrderOptionsEnum.c21other);
             }
-            return Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS).anyMatch(orderId -> orderId.equalsIgnoreCase(
-                selectedOrder.getOrderTypeId()));
+            return Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
+                .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(selectedOrder.getOrderType())));
         }
         return false;
     }
