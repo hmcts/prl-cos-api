@@ -500,7 +500,7 @@ public class CallbackController {
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("State during the fl401 add case number: {}", caseDataUpdated.get("state"));
-        caseDataUpdated.put("isAddCaseNumberAdded", State.SUBMITTED_PAID.equals(caseDataUpdated.get("state"))
+        caseDataUpdated.put("isAddCaseNumberAdded", State.SUBMITTED_PAID.getValue().equals(caseDataUpdated.get("state"))
                 ? Yes : No);
         log.info("fl401 add case number flag: {}", caseDataUpdated.get("isAddCaseNumberAdded"));
         caseDataUpdated.put("issueDate", LocalDate.now());
