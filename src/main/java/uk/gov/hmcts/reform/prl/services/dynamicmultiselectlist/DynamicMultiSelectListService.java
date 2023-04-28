@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -189,6 +190,7 @@ public class DynamicMultiSelectListService {
         List<Element<Child>> childList = new ArrayList<>();
         log.info("ManageOrders in getChildrenForDocmosis: {}", caseData.getManageOrders());
         if (null != caseData.getManageOrders()
+            && YesOrNo.No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
             && null != caseData.getManageOrders().getChildOption()
             && null != caseData.getManageOrders().getChildOption().getValue()) {
             caseData.getManageOrders().getChildOption().getValue().forEach(value -> {
@@ -203,6 +205,25 @@ public class DynamicMultiSelectListService {
         return childList;
     }
 
+    public List<Element<ApplicantChild>> getApplicantChildDetailstForDocmosis(CaseData caseData) {
+        List<Element<ApplicantChild>> applicantChildList = new ArrayList<>();
+        log.info("ManageOrders in getChildrenForDocmosis: {}", caseData.getManageOrders());
+        if (null != caseData.getManageOrders()
+            && YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+            && null != caseData.getManageOrders().getChildOption()
+            && null != caseData.getManageOrders().getChildOption().getValue()) {
+            caseData.getManageOrders().getChildOption().getValue().forEach(value -> {
+                ApplicantChild applicantChild = getApplicantChildDetails(caseData, value.getCode());
+                if (null != applicantChild) {
+                    applicantChildList.add(element(applicantChild));
+
+                }
+            });
+        }
+        log.info("after retrieving the children List for docmosis: {}", applicantChildList);
+        return applicantChildList;
+    }
+
     private Child getChildDetails(CaseData caseData, String id) {
         Optional<Child> child = Optional.empty();
         log.info("***Case type of application {} ***", CaseUtils.getCaseTypeOfApplication(caseData));
@@ -213,5 +234,19 @@ public class DynamicMultiSelectListService {
         }
         log.info("*** returning child to be added to list {} ***", child);
         return child.orElseGet(() -> null);
+    }
+
+    private ApplicantChild getApplicantChildDetails(CaseData caseData, String id) {
+        Optional<ApplicantChild> applicantChild = Optional.empty();
+        log.info("***Case type of application {} ***", CaseUtils.getCaseTypeOfApplication(caseData));
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && null != caseData.getApplicantChildDetails()) {
+            applicantChild = caseData.getApplicantChildDetails().stream().filter(element -> element.getId().toString().equalsIgnoreCase(
+                    id))
+                .map(Element::getValue)
+                .findFirst();
+        }
+        log.info("*** returning applicantChild to be added to list {} ***", applicantChild);
+        return applicantChild.orElseGet(() -> null);
     }
 }
