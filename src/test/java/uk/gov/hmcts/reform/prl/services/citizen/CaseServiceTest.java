@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,6 +53,7 @@ import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_WITHDRAW;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Slf4j
 public class CaseServiceTest {
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -107,6 +109,7 @@ public class CaseServiceTest {
 
     @Before
     public void setup() {
+        log.info("My changes");
         partyDetails = PartyDetails.builder()
             .firstName("")
             .lastName("")
@@ -144,6 +147,7 @@ public class CaseServiceTest {
 
     @Test
     public void testupdateCaseOfApplicantWithOutPartyId() throws JsonProcessingException {
+        log.info("My changes");
         User user = User.builder().build();
         PartyDetails partyDetailsWithUser = PartyDetails.builder().user(user)
             .firstName("")
@@ -165,6 +169,7 @@ public class CaseServiceTest {
 
     @Test
     public void testupdateCaseOfRespondentWithOutPartyId() throws JsonProcessingException {
+        log.info("My changes");
         User user = User.builder().build();
         PartyDetails partyDetailsWithUser = PartyDetails.builder().user(user)
             .firstName("")
