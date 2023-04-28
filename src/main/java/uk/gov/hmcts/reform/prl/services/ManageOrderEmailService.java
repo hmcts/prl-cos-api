@@ -423,12 +423,6 @@ public class ManageOrderEmailService {
         if (cafcassEmail != null) {
             listOfEmails.add(cafcassEmail);
             log.info("** Send email notification to Cafcass or Cafcass cymru based on selection ** {}", cafcassEmail);
-            emailService.send(
-                cafcassEmail,
-                EmailTemplateNames.CAFCASS_OTHER,
-                buildEmailToCafcassAndOtherParties(caseData),
-                LanguagePreference.english
-            );
         }
         listOfEmails.forEach(email ->
              emailService.send(
