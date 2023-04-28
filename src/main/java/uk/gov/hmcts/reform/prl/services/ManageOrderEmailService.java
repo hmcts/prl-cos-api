@@ -352,16 +352,13 @@ public class ManageOrderEmailService {
             .caseUrgency(typeOfHearing)
             .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
             .familyManNumber(caseData.getFamilymanCaseNumber())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentFileName())
+            .orderLink(citizenDashboardUrl)
             .build();
     }
 
     public void sendEmailWhenOrderIsServed(CaseDetails caseDetails) {
-        sendEmailToApplicantAndRespondent(caseDetails);
         CaseData caseData = emailService.getCaseData(caseDetails);
-
         ManageOrders manageOrders  = caseData.getManageOrders();
-
         String cafcassEmail = null;
         if (YesOrNo.Yes.equals(manageOrders.getCafcassCymruServedOptions())) {
             cafcassEmail = manageOrders.getCafcassCymruEmail();
@@ -377,6 +374,8 @@ public class ManageOrderEmailService {
                                                                                   caseData.getApplicants());
                 Map<String, String> respondentMap = getEmailPartyWithNameFromCode(manageOrders.getRecipientsOptions().getValue(),
                                                                                   caseData.getRespondents());
+                log.info("** applicant map ** {}", applicantsMap);
+                log.info("** respondent map ** {}", respondentMap);
                 for (Map.Entry<String, String> appValues : applicantsMap.entrySet()) {
                     if (!StringUtils.isEmpty(appValues.getKey())) {
                         sendEmailToParty(isFinalOrder, appValues.getKey(),
