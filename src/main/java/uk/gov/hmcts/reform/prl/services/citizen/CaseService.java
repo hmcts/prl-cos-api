@@ -113,39 +113,49 @@ public class CaseService {
         PartyEnum partyType = updateCaseData.getPartyType();
         if (null != partyDetails.getUser()) {
             if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
-                if (PartyEnum.applicant.equals(partyType)) {
-                    List<Element<PartyDetails>> applicants = caseData.getApplicants();
-                    applicants.stream()
-                        .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
-                        .findFirst()
-                        .ifPresent(party -> {
-                            applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails));
-                        });
-                } else if (PartyEnum.respondent.equals(partyType)) {
-                    List<Element<PartyDetails>> respondents = caseData.getRespondents();
-                    respondents.stream()
-                        .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
-                        .findFirst()
-                        .ifPresent(party -> {
-                            respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails));
-                        });
-                }
+                updatingPartyDetailsCa(caseData, partyDetails, partyType);
             } else {
-                if (PartyEnum.applicant.equals(partyType)) {
-                    if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
-                        caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
-                    }
-                } else {
-                    if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
-                        caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
-                    }
-                }
+                caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
             return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+    private static CaseData getFlCaseData(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
+        if (PartyEnum.applicant.equals(partyType)) {
+            if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
+                caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
+            }
+        } else {
+            if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
+                caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
+            }
+        }
+        return caseData;
+    }
+
+    private static void updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
+        if (PartyEnum.applicant.equals(partyType)) {
+            List<Element<PartyDetails>> applicants = caseData.getApplicants();
+            applicants.stream()
+                .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
+                .findFirst()
+                .ifPresent(party -> {
+                    applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails));
+                });
+        } else if (PartyEnum.respondent.equals(partyType)) {
+            List<Element<PartyDetails>> respondents = caseData.getRespondents();
+            respondents.stream()
+                .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
+                .findFirst()
+                .ifPresent(party -> {
+                    respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails));
+                });
+        }
+    }
+
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken) {
 
