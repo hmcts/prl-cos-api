@@ -1490,11 +1490,11 @@ public class ManageOrderService {
                 }
             } else {
                 List<Element<ApplicantChild>> applicantChildren = dynamicMultiSelectListService
-                    .getApplicantChildDetailstForDocmosis(caseData);
+                    .getApplicantChildDetailsForDocmosis(caseData);
                 log.info("*** ApplicantChild list sent to docmosis {}", applicantChildren);
 
                 if (!applicantChildren.isEmpty()) {
-                    caseData.setApplicantChildDetailstForDocmosis(applicantChildren);
+                    caseData.setApplicantChildDetailsForDocmosis(applicantChildren);
                 }
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -1737,7 +1737,7 @@ public class ManageOrderService {
             .build();
 
         log.info("Children list for docmosis in before :: {}", caseData.getChildrenListForDocmosis());
-        log.info("ApplicantChild list for docmosis in before :: {}", caseData.getApplicantChildDetailstForDocmosis());
+        log.info("ApplicantChild list for docmosis in before :: {}", caseData.getApplicantChildDetailsForDocmosis());
 
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<Element<Child>> children = dynamicMultiSelectListService
@@ -1747,15 +1747,15 @@ public class ManageOrderService {
             }
         } else {
             List<Element<ApplicantChild>> applicantChildren = dynamicMultiSelectListService
-                .getApplicantChildDetailstForDocmosis(caseData);
+                .getApplicantChildDetailsForDocmosis(caseData);
             log.info("*** ApplicantChild list sent to docmosis {}", applicantChildren);
 
             if (!applicantChildren.isEmpty()) {
-                caseData.setApplicantChildDetailstForDocmosis(applicantChildren);
+                caseData.setApplicantChildDetailsForDocmosis(applicantChildren);
             }
         }
         log.info("Children list for docmosis in after :: {}", caseData.getChildrenListForDocmosis());
-        log.info("ApplicantChild list for docmosis in after :: {}", caseData.getApplicantChildDetailstForDocmosis());
+        log.info("ApplicantChild list for docmosis in after :: {}", caseData.getApplicantChildDetailsForDocmosis());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         log.info("Children list for tab in :: {}", caseData.getChildrenList());
         if (documentLanguage.isGenEng()) {

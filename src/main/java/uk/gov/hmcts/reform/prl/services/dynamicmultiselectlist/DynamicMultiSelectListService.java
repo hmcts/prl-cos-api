@@ -205,7 +205,7 @@ public class DynamicMultiSelectListService {
         return childList;
     }
 
-    public List<Element<ApplicantChild>> getApplicantChildDetailstForDocmosis(CaseData caseData) {
+    public List<Element<ApplicantChild>> getApplicantChildDetailsForDocmosis(CaseData caseData) {
         List<Element<ApplicantChild>> applicantChildList = new ArrayList<>();
         log.info("ManageOrders in getChildrenForDocmosis: {}", caseData.getManageOrders());
         if (null != caseData.getManageOrders()
