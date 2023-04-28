@@ -512,11 +512,10 @@ public class DraftAnOrderService {
         log.info("******orderType******** {}", selectedOrder.getOrderType());
         log.info("******C21 orderType******** {}", selectedOrder.getC21OrderOptions());
         if (null != selectedOrder && !StringUtils.isEmpty(String.valueOf(selectedOrder.getOrderType()))) {
-            if (selectedOrder.getOrderType().equals("blankOrderOrDirections")) {
+            if (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType())) {
                 log.info("******C21 orderType inside if block******** {}", selectedOrder.getC21OrderOptions());
-                log.info("******C21 sub Type ******** {}", selectedOrder.getC21OrderOptions().equals(C21OrderOptionsEnum.c21other));
-
-                return selectedOrder.getC21OrderOptions().equals(C21OrderOptionsEnum.c21other);
+                log.info("******C21 check ******** {}", selectedOrder.getC21OrderOptions().equals(C21OrderOptionsEnum.c21other));
+                return C21OrderOptionsEnum.c21other.equals(selectedOrder.getC21OrderOptions());
             }
             return Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
                 .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(selectedOrder.getOrderType())));
