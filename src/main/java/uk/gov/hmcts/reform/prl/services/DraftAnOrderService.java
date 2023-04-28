@@ -414,6 +414,7 @@ public class DraftAnOrderService {
             caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
             caseDataMap.put("isOrderCreatedBySolicitor", selectedOrder.getIsOrderCreatedBySolicitor());
             caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
+            caseDataMap.put("isHearingPageNeeded", isHearingPageNeeded(selectedOrder) ? Yes : No);
         } else {
             log.info("inside populate custom SDO fields");
             caseDataMap.putAll(objectMapper.convertValue(selectedOrder.getSdoDetails(), Map.class));
