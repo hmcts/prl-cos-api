@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -1479,6 +1480,14 @@ public class ManageOrderService {
                 if (!children.isEmpty()) {
                     caseData.setChildrenListForDocmosis(children);
                 }
+            } else {
+                List<Element<ApplicantChild>> applicantChildren = dynamicMultiSelectListService
+                    .getApplicantChildDetailstForDocmosis(caseData);
+                log.info("*** ApplicantChild list sent to docmosis {}", applicantChildren);
+
+                if (!applicantChildren.isEmpty()) {
+                    caseData.setApplicantChildDetailstForDocmosis(applicantChildren);
+                }
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
@@ -1720,6 +1729,7 @@ public class ManageOrderService {
             .build();
 
         log.info("Children list for docmosis in before :: {}", caseData.getChildrenListForDocmosis());
+        log.info("ApplicantChild list for docmosis in before :: {}", caseData.getApplicantChildDetailstForDocmosis());
 
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<Element<Child>> children = dynamicMultiSelectListService
@@ -1727,10 +1737,18 @@ public class ManageOrderService {
             if (!children.isEmpty()) {
                 caseData.setChildrenListForDocmosis(children);
             }
-        }
+        } else {
+            List<Element<ApplicantChild>> applicantChildren = dynamicMultiSelectListService
+                .getApplicantChildDetailstForDocmosis(caseData);
+            log.info("*** ApplicantChild list sent to docmosis {}", applicantChildren);
 
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            if (!applicantChildren.isEmpty()) {
+                caseData.setApplicantChildDetailstForDocmosis(applicantChildren);
+            }
+        }
         log.info("Children list for docmosis in after :: {}", caseData.getChildrenListForDocmosis());
+        log.info("ApplicantChild list for docmosis in after :: {}", caseData.getApplicantChildDetailstForDocmosis());
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         log.info("Children list for tab in :: {}", caseData.getChildrenList());
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
