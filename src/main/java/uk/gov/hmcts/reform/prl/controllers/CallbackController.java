@@ -97,6 +97,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
@@ -498,6 +499,10 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("State during the fl401 add case number: {}", caseDataUpdated.get("state"));
+        caseDataUpdated.put("isAddCaseNumberAdded", State.SUBMITTED_PAID.equals(caseDataUpdated.get("state"))
+                ? Yes : No);
+        log.info("fl401 add case number flag: {}", caseDataUpdated.get("isAddCaseNumberAdded"));
         caseDataUpdated.put("issueDate", LocalDate.now());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
