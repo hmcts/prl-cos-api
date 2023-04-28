@@ -105,7 +105,7 @@ public class CaseService {
     }
 
     public CaseDetails updateCaseDetails(String authToken,
-                                         String caseId, String eventId, UpdateCaseData updateCaseData) throws JsonProcessingException {
+                                         String caseId, String eventId, UpdateCaseData updateCaseData) {
 
         CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -142,17 +142,17 @@ public class CaseService {
             applicants.stream()
                 .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
                 .findFirst()
-                .ifPresent(party -> {
-                    applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails));
-                });
+                .ifPresent(party ->
+                    applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
+                );
         } else if (PartyEnum.respondent.equals(partyType)) {
             List<Element<PartyDetails>> respondents = caseData.getRespondents();
             respondents.stream()
                 .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
                 .findFirst()
-                .ifPresent(party -> {
-                    respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails));
-                });
+                .ifPresent(party ->
+                    respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
+                );
         }
     }
 
