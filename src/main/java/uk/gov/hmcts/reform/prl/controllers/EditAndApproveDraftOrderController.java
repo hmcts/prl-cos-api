@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -24,8 +27,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +44,8 @@ public class EditAndApproveDraftOrderController {
     private final ObjectMapper objectMapper;
     private final DraftAnOrderService draftAnOrderService;
     private final ManageOrderService manageOrderService;
-    private final DynamicMultiSelectListService dynamicMultiSelectListService;
     private final HearingDataService hearingDataService;
+    private final ManageOrderEmailService manageOrderEmailService;
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
@@ -223,5 +226,26 @@ public class EditAndApproveDraftOrderController {
                 .errors(errorList)
                 .build();
         }
+    }
+
+    @PostMapping(path = "/judge-or-admin-edit-approve/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Send Email Notification on Case order")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse sendEmailNotificationToRecipientsServeOrder(
+        @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) {
+        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(callbackRequest.getEventId())) {
+            final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            log.info("** Calling email service to send emails to recipients on serve order **");
+            manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+        }
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
