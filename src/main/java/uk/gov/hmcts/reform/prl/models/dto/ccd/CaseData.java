@@ -105,6 +105,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
@@ -785,5 +786,8 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
     private NextHearingDetails nextHearingDetails;
+
+    //PRL-3454 - send and reply message enhancements
+    private SendOrReplyMessage sendOrReplyMessage;
 
 }
