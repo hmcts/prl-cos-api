@@ -293,8 +293,6 @@ public class DraftAnOrderController {
             authorisation,
             callbackRequest
         ));
-        caseDataUpdated.put(
-            "isHearingPageNeeded", YesOrNo.Yes);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
