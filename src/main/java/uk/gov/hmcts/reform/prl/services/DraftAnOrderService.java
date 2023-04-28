@@ -1094,9 +1094,10 @@ public class DraftAnOrderService {
 
         Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder);
         caseDataMap.put("isOrderCreatedBySolicitor", draftOrder.getIsOrderCreatedBySolicitor());
+        caseDataMap.put("isHearingPageNeeded", isHearingPageNeeded(draftOrder) ? Yes : No);
         log.info(
-            "is Order created by solicitor in populateCommonDraftOrderFields:::{}:::",
-            caseDataMap.get("isOrderCreatedBySolicitor")
+            "is getDraftOrderInfo in isOrderCreatedBySolicitor:::{}::::::: isHearingPageNeeded :::::{}",
+            caseDataMap.get("isOrderCreatedBySolicitor"), caseDataMap.get("isHearingPageNeeded")
         );
         return caseDataMap;
     }
