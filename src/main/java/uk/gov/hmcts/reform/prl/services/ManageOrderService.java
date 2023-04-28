@@ -1226,7 +1226,7 @@ public class ManageOrderService {
         );
     }
 
-    private static void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
+    private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
         YesOrNo serveOnRespondentOnly47a = caseData.getManageOrders().getServeToRespondentOptionsOnlyC47a();
         ServingRespondentsEnum servingRespondentsOptions = null;
@@ -1336,27 +1336,19 @@ public class ManageOrderService {
         return otherParties;
     }
 
-    private static String getRecipients(CaseData caseData) {
-        String recipients;
-        List recipientList = new ArrayList<>();
+    private String getRecipients(CaseData caseData) {
+        String recipients = null;
         if (caseData.getManageOrders()
-            .getRecipientsOptions() != null && caseData.getManageOrders()
-            .getRecipientsOptions().getValue() != null) {
-            for (DynamicMultiselectListElement dynamicMultiselectChildElement : caseData.getManageOrders()
-                .getRecipientsOptions().getValue()) {
-                recipientList.add(dynamicMultiselectChildElement.getLabel());
-            }
+            .getRecipientsOptions() != null) {
+            recipients = dynamicMultiSelectListService
+                .getStringFromDynamicMultiSelectList(caseData.getManageOrders().getRecipientsOptions());
 
         } else if (caseData.getManageOrders()
-            .getRecipientsOptionsOnlyC47a() != null && caseData.getManageOrders()
-            .getRecipientsOptionsOnlyC47a().getValue() != null) {
-            for (DynamicMultiselectListElement dynamicMultiselectChildElement : caseData.getManageOrders()
-                .getRecipientsOptionsOnlyC47a().getValue()) {
-                recipientList.add(dynamicMultiselectChildElement.getLabel());
-            }
-
+            .getRecipientsOptionsOnlyC47a() != null) {
+            recipients = dynamicMultiSelectListService
+                .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                         .getRecipientsOptionsOnlyC47a());
         }
-        recipients = String.join(",", recipientList);
         return recipients;
     }
 
