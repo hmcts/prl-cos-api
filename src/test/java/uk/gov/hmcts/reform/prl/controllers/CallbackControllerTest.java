@@ -982,12 +982,21 @@ public class CallbackControllerTest {
     @Test
     public void testAddCaseNumberSubmitted() throws Exception {
 
-        Map<String, Object> caseData = new HashMap<>();
+        CaseData caseData = CaseData.builder()
+            .issueDate(LocalDate.now())
+            .build();
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
-                             .data(caseData).build()).build();
+                             .data(stringObjectMap).build()).build();
+
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .addCaseNumberSubmitted(authToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("issueDate"));
