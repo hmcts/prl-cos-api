@@ -61,8 +61,11 @@ import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CYMRU_NEXT_STEPS_CONTENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_NEXT_STEPS_CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_EX740;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_PROHIBITION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_QUALIFIED_LEGAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_APPLICATION_TO_APPLY_PERMISSION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASE_REVIEW;
@@ -88,6 +91,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_PERMISSION_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_SECOND_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_SETTLEMENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_URGENT_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_DA_OCCURED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_EDIT_CONTENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_INTERIM_ORDERS_FACTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
@@ -771,8 +777,12 @@ public class DraftAnOrderService {
     public void populateStandardDirectionOrderDefaultFields(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
         populateRightToAskCourt(caseData, caseDataUpdated);
         populateHearingAndNextStepsText(caseData, caseDataUpdated);
+        populateCafcassNextSteps(caseData, caseDataUpdated);
+        populateCafcassCymruNextSteps(caseData, caseDataUpdated);
+        populateSection7ChildImpactAnalysis(caseData, caseDataUpdated);
         populateCourtText(caseData, caseDataUpdated);
         populateDocumentAndEvidenceText(caseData, caseDataUpdated);
+        populateCrossExaminationProhibition(caseData, caseDataUpdated);
         populateParentWithCare(caseData, caseDataUpdated);
         List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
         populateCourtDynamicList(courtList, caseDataUpdated, caseData);
@@ -783,6 +793,54 @@ public class DraftAnOrderService {
             caseDataUpdated.put("sdoInstructionsFilingPartiesDynamicList", partiesList);
         }
         populateHearingDetails(authorisation, caseData, caseDataUpdated);
+    }
+
+    private static void populateCrossExaminationProhibition(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoCrossExaminationEditContent())) {
+            caseDataUpdated.put(
+                "sdoCrossExaminationEditContent",
+                CROSS_EXAMINATION_PROHIBITION
+            );
+        }
+    }
+
+    private static void populateSection7ChildImpactAnalysis(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoRightToAskCourt())) {
+            caseDataUpdated.put(
+                "sdoSection7EditContent",
+                SECTION7_EDIT_CONTENT
+            );
+        }
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSection7FactsEditContent())) {
+            caseDataUpdated.put(
+                "sdoSection7FactsEditContent",
+                SECTION7_INTERIM_ORDERS_FACTS
+            );
+        }
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSection7daOccuredEditContent())) {
+            caseDataUpdated.put(
+                "sdoSection7daOccuredEditContent",
+                SECTION7_DA_OCCURED
+            );
+        }
+    }
+
+    private static void populateCafcassNextSteps(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoCafcassNextStepEditContent())) {
+            caseDataUpdated.put(
+                "sdoCafcassNextStepEditContent",
+                CAFCASS_NEXT_STEPS_CONTENT
+            );
+        }
+    }
+
+    private static void populateCafcassCymruNextSteps(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoCafcassCymruNextStepEditContent())) {
+            caseDataUpdated.put(
+                "sdoCafcassCymruNextStepEditContent",
+                CAFCASS_CYMRU_NEXT_STEPS_CONTENT
+            );
+        }
     }
 
     private static void populateRightToAskCourt(CaseData caseData, Map<String, Object> caseDataUpdated) {
@@ -1062,32 +1120,39 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> judgeOrAdminEditApproveDraftOrderAboutToSubmit(String authorisation, CallbackRequest callbackRequest) {
-        String eventId = callbackRequest.getEventId();
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("*** judgeOrAdminEditApproveDraftOrderAboutToSubmit ***");
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("*** Before checking the event id for editandapprove ***");
+        String eventId = callbackRequest.getEventId();
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
             .equals(caseData.getServeOrderData().getWhatDoWithOrder())
             || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
+            log.info("*** After checking the event id for editandapprove ***");
 
             caseDataUpdated.putAll(removeDraftOrderAndAddToFinalOrder(
                 authorisation,
                 caseData, eventId
             ));
+            log.info("*** checking if we want to serve order ***");
+
             if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
                 CaseData modifiedCaseData = objectMapper.convertValue(
                     caseDataUpdated,
                     CaseData.class
                 );
+                log.info("*** calling serve order ***");
                 List<Element<OrderDetails>> orderCollection = modifiedCaseData.getOrderCollection();
                 caseDataUpdated.put(
                     "orderCollection",
                     manageOrderService.serveOrder(modifiedCaseData, orderCollection)
                 );
+                log.info("*** order collection *** {}", caseDataUpdated.get("orderCollection"));
             }
         } else {
             caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));

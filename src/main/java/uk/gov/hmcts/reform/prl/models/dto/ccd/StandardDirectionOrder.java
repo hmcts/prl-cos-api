@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportSentByEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportsAlsoSentToEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportsSentToEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoScheduleOfAllegationsEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoSection7ImpactAnalysisEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWitnessStatementsSentToEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
@@ -122,17 +123,33 @@ public class StandardDirectionOrder {
     private final List<SdoReportsAlsoSentToEnum> sdoHearingReportsAlsoSentTo;
     @JsonProperty("sdoHearingMaximumPages")
     private final String sdoHearingMaximumPages;
+    @JsonProperty("sdoHearingHowManyWitnessEvidence")
+    private final int sdoHearingHowManyWitnessEvidence;
+    @JsonProperty("sdoDocsEvidenceWitnessEvidence")
+    private final int sdoDocsEvidenceWitnessEvidence;
     private final List<Element<SdoLanguageDialect>> sdoInterpreterDialectRequired;
     @JsonProperty("sdoUpdateContactDetails")
     private final String sdoUpdateContactDetails;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoCafcassFileAndServe;
+    private final String sdoCafcassNextStepEditContent;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoCafcassCymruFileAndServe;
+    private final String sdoCafcassCymruNextStepEditContent;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoNewPartnersToCafcass;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoNewPartnersToCafcassCymru;
+
+    @JsonProperty("sdoSection7EditContent")
+    private final String sdoSection7EditContent;
+    @JsonProperty("sdoSection7ImpactAnalysisOptions")
+    private final List<SdoSection7ImpactAnalysisEnum> sdoSection7ImpactAnalysisOptions;
+    @JsonProperty("sdoSection7FactsEditContent")
+    private final String sdoSection7FactsEditContent;
+    @JsonProperty("sdoSection7daOccuredEditContent")
+    private final String sdoSection7daOccuredEditContent;
+
     @JsonProperty("sdoSection7ChildImpactAnalysis")
     private final SdoReportSentByEnum sdoSection7ChildImpactAnalysis;
     @JsonProperty("sdoNameOfCouncil")
@@ -296,5 +313,7 @@ public class StandardDirectionOrder {
     @JsonProperty("sdoDisClosureProceedingDetails")
     private final List<Element<SdoDioProvideOtherDetails>> sdoDisClosureProceedingDetails;
     private final List<Element<SdoFurtherDirections>> sdoFurtherDirectionDetails;
+    @JsonProperty("sdoCrossExaminationEditContent")
+    private final String sdoCrossExaminationEditContent;
 
 }
