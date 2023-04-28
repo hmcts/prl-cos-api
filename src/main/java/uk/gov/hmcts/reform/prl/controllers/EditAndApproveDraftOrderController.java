@@ -36,6 +36,7 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 @RestController
@@ -245,9 +246,11 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            log.info("** Calling email service to send emails to recipients on serve order **");
-            manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+            if (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+                log.info("** Calling email service to send emails to recipients on serve order **");
+                manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+            }
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
