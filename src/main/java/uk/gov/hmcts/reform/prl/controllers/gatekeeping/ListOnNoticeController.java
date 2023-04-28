@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -30,7 +31,6 @@ import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -78,9 +78,10 @@ public class ListOnNoticeController {
         log.info("*** mid event triggered for List ON Notice : {}", caseData.getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String reasonsSelectedForListOnNotice =
-            listOnNoticeService.getReasonsSelected(caseDataUpdated.get(LIST_ON_NOTICE_REASONS_SELECTED),caseData.getId());
-        if (null != reasonsSelectedForListOnNotice && !reasonsSelectedForListOnNotice.equals("")) {
-            caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS,reasonsSelectedForListOnNotice);
+            listOnNoticeService.getReasonsSelected(caseDataUpdated.get(LIST_ON_NOTICE_REASONS_SELECTED),
+                                                   caseData.getId());
+        if (!StringUtils.isEmpty(reasonsSelectedForListOnNotice)) {
+            caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS, reasonsSelectedForListOnNotice);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -90,13 +91,13 @@ public class ListOnNoticeController {
     public AboutToStartOrSubmitCallbackResponse prePopulateListOnNotice(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-        log.info("Inside Prepopulate prePopulate for the case id {}", caseReferenceNumber);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         //populate legal advisor list
-        List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
-        caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
-            .build());
+        caseDataUpdated.put(
+            "legalAdviserList",
+            DynamicList.builder().value(DynamicListElement.EMPTY).listItems(refDataUserService.getLegalAdvisorList())
+                .build()
+        );
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -108,30 +109,31 @@ public class ListOnNoticeController {
     public AboutToStartOrSubmitCallbackResponse listOnNoticeSubmission(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        Long id = callbackRequest.getCaseDetails().getId();
-        log.info("List on Notice Submission flow - case id : {}", id);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String selectedAndAdditonalReasons = (String) caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS);
-        if (null != selectedAndAdditonalReasons && !selectedAndAdditonalReasons.equals("")) {
-            caseDataUpdated.put(CASE_NOTE, selectedAndAdditonalReasons);
-            caseDataUpdated.put(SUBJECT, REASONS_SELECTED_FOR_LIST_ON_NOTICE);
-        }
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        updateCaseNotes(caseData,caseDataUpdated,authorisation,selectedAndAdditonalReasons);
+        if (null != selectedAndAdditonalReasons && !selectedAndAdditonalReasons.equals("")) {
+            caseDataUpdated.put(CASE_NOTE, selectedAndAdditonalReasons);
+            caseDataUpdated.put(SUBJECT, REASONS_SELECTED_FOR_LIST_ON_NOTICE);
+            caseDataUpdated.put(
+                CASE_NOTES,
+                addCaseNoteService.addCaseNoteDetails(
+                    caseData,
+                    userService.getUserDetails(authorisation)
+                )
+            );
+            addCaseNoteService.clearFields(caseDataUpdated);
+        }
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
-                                                                                       caseData.getLegalAdviserList(), refDataUserService);
+                                                                                       caseData.getLegalAdviserList(),
+                                                                                       refDataUserService
+        );
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    private void updateCaseNotes(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation, String selectedAndAdditonalReasons) {
-        if (null != selectedAndAdditonalReasons && !selectedAndAdditonalReasons.equals("")) {
-            caseDataUpdated.put(CASE_NOTES, addCaseNoteService.addCaseNoteDetails(caseData, userService.getUserDetails(authorisation)));
-            addCaseNoteService.clearFields(caseDataUpdated);
-        }
-    }
 }
