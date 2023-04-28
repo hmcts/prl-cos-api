@@ -1907,6 +1907,7 @@ public class ManageOrderService {
         DynamicList existingHearingsType = (null != caseData.getManageOrders() && null != caseData.getManageOrders().getHearingsType())
             ? caseData.getManageOrders().getHearingsType() : null;
         return caseData.toBuilder()
+            .caseTypeOfApplication(CaseUtils.getCaseTypeOfApplication(caseData))
             .manageOrders(caseData.getManageOrders().toBuilder()
                               .childOption(DynamicMultiSelectList.builder()
                                                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
