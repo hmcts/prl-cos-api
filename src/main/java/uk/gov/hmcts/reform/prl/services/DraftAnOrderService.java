@@ -514,7 +514,6 @@ public class DraftAnOrderService {
         if (null != selectedOrder && !StringUtils.isEmpty(String.valueOf(selectedOrder.getOrderType()))) {
             if (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType())) {
                 log.info("******C21 orderType inside if block******** {}", selectedOrder.getC21OrderOptions());
-                log.info("******C21 check ******** {}", selectedOrder.getC21OrderOptions().equals(C21OrderOptionsEnum.c21other));
                 return C21OrderOptionsEnum.c21other.equals(selectedOrder.getC21OrderOptions());
             }
             return Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
