@@ -92,7 +92,7 @@ public class FL404 {
     private final List<Element<DirectionDetails>> addDirections;
 
     private DateOrderEndsTimeEnum orderEndDateAndTimeOptions;
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private LocalDateTime orderSpecifiedDateTime;
 
 }

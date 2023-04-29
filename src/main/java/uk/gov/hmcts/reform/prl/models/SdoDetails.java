@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportSentByEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportsAlsoSentToEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportsSentToEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoScheduleOfAllegationsEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoSection7ImpactAnalysisEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWitnessStatementsSentToEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
@@ -94,16 +95,23 @@ public class SdoDetails {
     private final LocalDate sdoWrittenResponseDeadlineDate;
     private final List<SdoReportsAlsoSentToEnum> sdoHearingReportsAlsoSentTo;
     private final String sdoHearingMaximumPages;
+    private final int sdoHearingHowManyWitnessEvidence;
     private final List<Element<SdoLanguageDialect>> sdoInterpreterDialectRequired;
     private final String sdoUpdateContactDetails;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoCafcassFileAndServe;
+    private final String sdoCafcassNextStepEditContent;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoCafcassCymruFileAndServe;
+    private final String sdoCafcassCymruNextStepEditContent;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoNewPartnersToCafcass;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoNewPartnersToCafcassCymru;
+    private final String sdoSection7EditContent;
+    private final List<SdoSection7ImpactAnalysisEnum> sdoSection7ImpactAnalysisOptions;
+    private final String sdoSection7FactsEditContent;
+    private final String sdoSection7daOccuredEditContent;
     private final SdoReportSentByEnum sdoSection7ChildImpactAnalysis;
     private final String sdoNameOfCouncil;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -190,5 +198,8 @@ public class SdoDetails {
     private final List<SdoDisClosureProceedingCheck> sdoDisClosureProceedingCheck;
     private final List<Element<SdoDioProvideOtherDetails>> sdoDisClosureProceedingDetails;
     private final List<Element<SdoFurtherDirections>> sdoFurtherDirectionDetails;
+
+    private final String sdoCrossExaminationEditContent;
+    private final int sdoDocsEvidenceWitnessEvidence;
 
 }

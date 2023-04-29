@@ -12,8 +12,11 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
@@ -28,8 +31,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 @Service
 @Slf4j
@@ -101,8 +104,6 @@ public class ManageOrderEmailService {
         } else {
             sendEmailForFlCaseType(caseDetails, caseData, isFinalOrder);
         }
-
-
     }
 
 
@@ -333,7 +334,6 @@ public class ManageOrderEmailService {
             buildEmailToCafcassAndOtherParties(caseData),
             LanguagePreference.english
         ));
-
     }
 
     public EmailTemplateVars buildEmailToCafcassAndOtherParties(CaseData caseData) {
@@ -351,10 +351,119 @@ public class ManageOrderEmailService {
             .caseName(caseData.getApplicantCaseName())
             .caseUrgency(typeOfHearing)
             .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
-            .familyManNumber(caseData.getFamilymanCaseNumber())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentFileName())
+            .familyManNumber(caseData.getFamilymanCaseNumber() != null ? caseData.getFamilymanCaseNumber() : "")
+            .orderLink(citizenDashboardUrl)
             .build();
-
     }
 
+    public void sendEmailWhenOrderIsServed(CaseDetails caseDetails) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        ManageOrders manageOrders  = caseData.getManageOrders();
+        String cafcassEmail = null;
+        if (YesOrNo.Yes.equals(manageOrders.getCafcassCymruServedOptions())) {
+            cafcassEmail = manageOrders.getCafcassCymruEmail();
+        }
+        if (YesOrNo.Yes.equals(manageOrders.getCafcassServedOptions())) {
+            cafcassEmail = manageOrders.getCafcassEmailId();
+        }
+        if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
+            String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
+            SelectTypeOfOrderEnum isFinalOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+            if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+                Map<String, String> applicantsMap = getEmailPartyWithNameFromCode(manageOrders.getRecipientsOptions().getValue(),
+                                                                                  caseData.getApplicants());
+                Map<String, String> respondentMap = getEmailPartyWithNameFromCode(manageOrders.getRecipientsOptions().getValue(),
+                                                                                  caseData.getRespondents());
+                log.info("** applicant map ** {}", applicantsMap);
+                log.info("** respondent map ** {}", respondentMap);
+                for (Map.Entry<String, String> appValues : applicantsMap.entrySet()) {
+                    if (!StringUtils.isEmpty(appValues.getKey())) {
+                        sendEmailToParty(isFinalOrder, appValues.getKey(),
+                                         buildApplicantRespondentEmail(caseDetails, appValues.getValue()),
+                                         caseData
+                        );
+                    }
+                }
+
+                for (Map.Entry<String, String> appValues : respondentMap.entrySet()) {
+                    if (!StringUtils.isEmpty(appValues.getKey())) {
+                        sendEmailToParty(isFinalOrder, appValues.getKey(),
+                                         buildApplicantRespondentEmail(caseDetails, appValues.getValue()),
+                                         caseData
+                        );
+                    }
+                }
+            } else {
+                sendEmailForFlCaseType(caseDetails, caseData, isFinalOrder);
+            }
+        }
+
+        List<String> listOfEmails = new ArrayList<>();
+        // Send email notification to other organisations
+        if (manageOrders.getServeOtherPartiesCA() != null) {
+            if (manageOrders.getServeOtherPartiesCA().contains(OtherOrganisationOptions.anotherOrganisation)
+                        && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
+                manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> {
+                    log.info("** Send email notification to other organisations ** {}", value.getEmailAddress());
+                    listOfEmails.add(value.getEmailAddress());
+                });
+            }
+        }
+        //send email notification to other people in the case
+        if (null != manageOrders.getOtherParties()) {
+            manageOrders.getOtherParties().getValue().stream().map(DynamicMultiselectListElement::getCode).forEach(id -> {
+                String otherEmail = getOtherPeopleEmailAddress(id, caseData);
+                if (null != otherEmail) {
+                    log.info("** send email notification to other people in the case ** {}", otherEmail);
+                    listOfEmails.add(otherEmail);
+                }
+            });
+        }
+        //Send email notification to Cafcass or Cafcass cymru based on selection
+        if (cafcassEmail != null) {
+            listOfEmails.add(cafcassEmail);
+            log.info("** Send email notification to Cafcass or Cafcass cymru based on selection ** {}", cafcassEmail);
+        }
+        listOfEmails.forEach(email ->
+             emailService.send(
+                 email,
+                 EmailTemplateNames.CAFCASS_OTHER,
+                 buildEmailToCafcassAndOtherParties(caseData),
+                 LanguagePreference.english
+             )
+        );
+    }
+
+    private String getOtherPeopleEmailAddress(String id, CaseData caseData) {
+        String other = null;
+        if (null != caseData.getOthersToNotify()) {
+            Optional<Element<PartyDetails>> otherPerson = caseData.getOthersToNotify().stream()
+                .filter(element -> element.getId().toString().equalsIgnoreCase(id)).findFirst();
+            if (otherPerson.isPresent() && YesOrNo.Yes.equals(otherPerson.get().getValue().getCanYouProvideEmailAddress())) {
+                other = otherPerson.get().getValue().getEmail();
+            }
+        }
+        return other;
+    }
+
+    private Map<String, String> getEmailPartyWithNameFromCode(List<DynamicMultiselectListElement> value, List<Element<PartyDetails>> partyDetails) {
+        Map<String, String> partyMap = new HashMap<>();
+        value.forEach(element -> {
+            Map<String, String> partyMapTemp;
+            partyMapTemp = getPartyMap(element.getCode(),partyDetails);
+            partyMap.putAll(partyMapTemp);
+        });
+        return partyMap;
+    }
+
+    private Map<String, String> getPartyMap(String code, List<Element<PartyDetails>> parties) {
+        Map<String, String> applicantMap = new HashMap<>();
+        Optional<Element<PartyDetails>> applicant = parties.stream()
+            .filter(element -> element.getId().toString().equalsIgnoreCase(code)).findFirst();
+        if (applicant.isPresent() && YesOrNo.Yes.equals(applicant.get().getValue().getCanYouProvideEmailAddress())) {
+            applicantMap.put(applicant.get().getValue().getEmail(), applicant.get().getValue().getFirstName() + " "
+                + applicant.get().getValue().getLastName());
+        }
+        return applicantMap;
+    }
 }

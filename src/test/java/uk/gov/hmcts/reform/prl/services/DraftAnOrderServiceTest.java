@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
-import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
@@ -220,7 +219,7 @@ public class DraftAnOrderServiceTest {
             .justiceLegalAdviserFullName("Judge full")
             .magistrateLastName(magistrateElementList)
             .recitalsOrPreamble("test preamble")
-            .isTheOrderAboutAllChildren(YesNoNotRequiredEnum.yes)
+            .isTheOrderAboutAllChildren(YesOrNo.Yes)
             .orderDirections("test order")
             .furtherDirectionsIfRequired("test further order")
             .furtherInformationIfRequired("test further information")
@@ -277,7 +276,6 @@ public class DraftAnOrderServiceTest {
             .judgeOrMagistratesLastName("judge last")
             .justiceLegalAdviserFullName("Judge full")
             .magistrateLastName(magistrateElementList)
-            .isTheOrderAboutAllChildren(YesNoNotRequiredEnum.yes)
             .wasTheOrderApprovedAtHearing(YesOrNo.No)
             .draftOrderCollection(draftOrderList)
             .build();
@@ -351,7 +349,7 @@ public class DraftAnOrderServiceTest {
             .justiceLegalAdviserFullName("Judge full")
             .magistrateLastName(magistrateElementList)
             .recitalsOrPreamble("test preamble")
-            .isTheOrderAboutAllChildren(YesNoNotRequiredEnum.yes)
+            .isTheOrderAboutAllChildren(YesOrNo.Yes)
             .orderDirections("test order")
             .furtherDirectionsIfRequired("test further order")
             .furtherInformationIfRequired("test further information")
@@ -400,7 +398,6 @@ public class DraftAnOrderServiceTest {
             .judgeOrMagistratesLastName("judge last")
             .justiceLegalAdviserFullName("Judge full")
             .magistrateLastName(magistrateElementList)
-            .isTheOrderAboutAllChildren(YesNoNotRequiredEnum.yes)
             .wasTheOrderApprovedAtHearing(YesOrNo.No)
             .draftOrderCollection(draftOrderList)
             .build();
@@ -1283,7 +1280,6 @@ public class DraftAnOrderServiceTest {
             .judgeOrMagistratesLastName("judge last")
             .justiceLegalAdviserFullName("Judge full")
             .magistrateLastName(magistrateElementList)
-            .isTheOrderAboutAllChildren(YesNoNotRequiredEnum.yes)
             .wasTheOrderApprovedAtHearing(YesOrNo.No)
             .build();
 
@@ -1407,6 +1403,8 @@ public class DraftAnOrderServiceTest {
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
+            .thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetailsBefore(CaseDetails.builder().data(stringObjectMap).build())
             .eventId("adminEditAndApproveAnOrder")
@@ -1452,6 +1450,8 @@ public class DraftAnOrderServiceTest {
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
+            .thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetailsBefore(CaseDetails.builder().data(stringObjectMap).build())
             .eventId("test")

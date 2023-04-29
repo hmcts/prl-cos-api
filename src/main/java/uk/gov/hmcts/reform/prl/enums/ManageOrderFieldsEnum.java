@@ -17,12 +17,14 @@ public enum ManageOrderFieldsEnum {
     currentOrderCreatedDateTime("currentOrderCreatedDateTime"),
     approvalDate("approvalDate"),
     previewOrderDoc("previewOrderDoc"),
+    previewOrderDocWelsh("previewOrderDocWelsh"),
     wasTheOrderApprovedAtHearing("wasTheOrderApprovedAtHearing"),
     judgeOrMagistratesLastName("judgeOrMagistratesLastName"),
     magistrateLastName("magistrateLastName"),
     justiceLegalAdviserFullName("justiceLegalAdviserFullName"),
     dateOrderMade("dateOrderMade"),
-    hasJudgeProvidedHearingDetails("hasJudgeProvidedHearingDetails");
+    hasJudgeProvidedHearingDetails("hasJudgeProvidedHearingDetails"),
+    amendOrderSelectCheckOptions("amendOrderSelectCheckOptions");
 
     private final String value;
 
