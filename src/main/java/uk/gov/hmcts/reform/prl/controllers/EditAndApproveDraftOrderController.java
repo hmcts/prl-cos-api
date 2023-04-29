@@ -134,6 +134,7 @@ public class EditAndApproveDraftOrderController {
             authorisation,
             callbackRequest
         ));
+        manageOrderService.resetChildOptions(callbackRequest);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
