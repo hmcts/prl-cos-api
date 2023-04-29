@@ -1478,23 +1478,7 @@ public class ManageOrderService {
             GeneratedDocumentInfo generatedDocumentInfo;
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             log.info("*** generating docs for {}", fieldsMap);
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                List<Element<Child>> children = dynamicMultiSelectListService
-                    .getChildrenForDocmosis(caseData);
-                log.info("*** Children list sent to docmosis {}", children);
-
-                if (!children.isEmpty()) {
-                    caseData.setChildrenListForDocmosis(children);
-                }
-            } else {
-                List<Element<ApplicantChild>> applicantChildren = dynamicMultiSelectListService
-                    .getApplicantChildDetailsForDocmosis(caseData);
-                log.info("*** ApplicantChild list sent to docmosis {}", applicantChildren);
-
-                if (!applicantChildren.isEmpty()) {
-                    caseData.setApplicantChildDetailsForDocmosis(applicantChildren);
-                }
-            }
+            populateChildrenListForDocmosis(caseData);
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -1529,6 +1513,26 @@ public class ManageOrderService {
             log.info("Error occured while generating Draft document ==> " + ex.getMessage());
         }
         return caseDataUpdated;
+    }
+
+    public void populateChildrenListForDocmosis(CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            List<Element<Child>> children = dynamicMultiSelectListService
+                .getChildrenForDocmosis(caseData);
+            log.info("*** Children list sent to docmosis {}", children);
+
+            if (!children.isEmpty()) {
+                caseData.setChildrenListForDocmosis(children);
+            }
+        } else {
+            List<Element<ApplicantChild>> applicantChildren = dynamicMultiSelectListService
+                .getApplicantChildDetailsForDocmosis(caseData);
+            log.info("*** ApplicantChild list sent to docmosis {}", applicantChildren);
+
+            if (!applicantChildren.isEmpty()) {
+                caseData.setApplicantChildDetailsForDocmosis(applicantChildren);
+            }
+        }
     }
 
     private CaseData getN117FormData(CaseData caseData) {
@@ -1736,22 +1740,7 @@ public class ManageOrderService {
 
         log.info("Children list for docmosis in before :: {}", caseData.getChildrenListForDocmosis());
         log.info("ApplicantChild list for docmosis in before :: {}", caseData.getApplicantChildDetailsForDocmosis());
-
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            List<Element<Child>> children = dynamicMultiSelectListService
-                .getChildrenForDocmosis(caseData);
-            if (!children.isEmpty()) {
-                caseData.setChildrenListForDocmosis(children);
-            }
-        } else {
-            List<Element<ApplicantChild>> applicantChildren = dynamicMultiSelectListService
-                .getApplicantChildDetailsForDocmosis(caseData);
-            log.info("*** ApplicantChild list sent to docmosis {}", applicantChildren);
-
-            if (!applicantChildren.isEmpty()) {
-                caseData.setApplicantChildDetailsForDocmosis(applicantChildren);
-            }
-        }
+        populateChildrenListForDocmosis(caseData);
         log.info("Children list for docmosis in after :: {}", caseData.getChildrenListForDocmosis());
         log.info("ApplicantChild list for docmosis in after :: {}", caseData.getApplicantChildDetailsForDocmosis());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);

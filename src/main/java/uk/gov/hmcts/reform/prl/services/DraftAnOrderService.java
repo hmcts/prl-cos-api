@@ -271,6 +271,7 @@ public class DraftAnOrderService {
                 .orderDocument(draftOrder.getOrderDocument())
                 .build();
         } else {
+            manageOrderService.populateChildrenListForDocmosis(caseData);
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             log.info("before generating document fieldmap {}", fieldMap);
