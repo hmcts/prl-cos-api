@@ -184,6 +184,7 @@ public class ManageOrders {
     private final DynamicMultiSelectList recipientsOptions;
     private final DynamicMultiSelectList otherParties;
     private final YesOrNo cafcassServedOptions;
+    private final String cafcassEmailId;
     private final YesOrNo cafcassCymruServedOptions;
     private final String cafcassCymruEmail;
     @JsonProperty("serveOtherPartiesCA")
@@ -207,6 +208,8 @@ public class ManageOrders {
     private final YesOrNo ordersNeedToBeServed;
     @JsonProperty("isTheOrderAboutChildren")
     private final YesOrNo isTheOrderAboutChildren;
+    @JsonProperty("isTheOrderAboutAllChildren")
+    private final YesOrNo isTheOrderAboutAllChildren;
     @JsonProperty("loggedInUserType")
     private final String loggedInUserType;
     @JsonProperty("judgeDirectionsToAdminAmendOrder")
@@ -266,11 +269,10 @@ public class ManageOrders {
     @Builder.Default
     private final List<Element<HearingData>> solicitorOrdersHearingDetails;
 
-    private YesOrNo isOrderCreatedBySolicitor;
-
     @JsonProperty("hasJudgeProvidedHearingDetails")
     private YesOrNo hasJudgeProvidedHearingDetails;
 
     //PRL-3254 - Added for populating hearing dropdown
     private DynamicList hearingsType;
+
 }

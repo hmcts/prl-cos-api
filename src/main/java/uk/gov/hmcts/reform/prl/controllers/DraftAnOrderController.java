@@ -36,7 +36,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -69,7 +68,7 @@ public class DraftAnOrderController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse resetFields(
         @RequestBody CallbackRequest callbackRequest) {
-        return AboutToStartOrSubmitCallbackResponse.builder().data(Collections.emptyMap()).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.resetFields(callbackRequest)).build();
     }
 
     @PostMapping(path = "/selected-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -95,6 +94,7 @@ public class DraftAnOrderController {
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
         caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
+        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
 
         log.info("C21 Draft order options in callback:: {}", (null != caseData.getManageOrders())
             ? caseData.getManageOrders().getC21OrderOptions() : null);
