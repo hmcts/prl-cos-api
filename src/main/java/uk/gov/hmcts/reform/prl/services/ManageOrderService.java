@@ -946,6 +946,10 @@ public class ManageOrderService {
 
         Map<String, Object> orderMap = new HashMap<>();
 
+        log.info("caseData.getManageOrdersOptions() {}", caseData.getManageOrdersOptions());
+        log.info("loggedInUserType {}", loggedInUserType);
+        log.info("caseData.getManageOrders() {}", caseData.getManageOrders());
+        log.info("caseData.getServeOrderData(){}", caseData.getServeOrderData());
         if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
             if (uploadAnOrder.equals(caseData.getManageOrdersOptions())
                 && (UserRoles.JUDGE.name().equals(loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
