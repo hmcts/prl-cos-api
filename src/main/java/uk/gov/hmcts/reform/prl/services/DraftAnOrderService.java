@@ -160,6 +160,7 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
+        log.info("set caseTypeOfApplication" + CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataMap.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataMap;
     }
