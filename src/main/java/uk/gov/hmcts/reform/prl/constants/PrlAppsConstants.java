@@ -581,6 +581,15 @@ public class PrlAppsConstants {
     public static final String HEARING_PRIORITY_TYPE_ENUM = "hearingPriorityTypeEnum";
     public static final String CUSTOM_DETAILS = "customDetails";
     public static final String[] EMPTY_ARRAY = {};
+    public static final String LIST_ON_NOTICE_REASONS_SELECTED = "selectedReasonsForListOnNotice";
+
+    public static final String SELECTED_AND_ADDITIONAL_REASONS = "selectedAndAdditionalReasons";
+    public static final String SUBJECT = "subject";
+    public static final String CASE_NOTE = "caseNote";
+
+    public static final String REASONS_SELECTED_FOR_LIST_ON_NOTICE = "List on notice ";
+
+    public static final String CASE_NOTES = "caseNotes";
     public static final String COLON_SEPERATOR = ":";
     public static final String SDO_PERMISSION_HEARING_DETAILS = "sdoPermissionHearingDetails";
     public static final String SDO_SECOND_HEARING_DETAILS = "sdoSecondHearingDetails";
