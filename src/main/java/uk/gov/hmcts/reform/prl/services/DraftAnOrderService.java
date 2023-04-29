@@ -507,6 +507,7 @@ public class DraftAnOrderService {
         caseData = manageOrderService.populateHearingsDropdown(authorization, caseData);
         //Set hearings
         caseDataMap.put("hearingsType", caseData.getManageOrders().getHearingsType());
+        caseDataMap.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataMap;
     }
 
