@@ -17,6 +17,7 @@ public enum ManageOrderFieldsEnum {
     currentOrderCreatedDateTime("currentOrderCreatedDateTime"),
     approvalDate("approvalDate"),
     previewOrderDoc("previewOrderDoc"),
+    previewOrderDocWelsh("previewOrderDocWelsh"),
     wasTheOrderApprovedAtHearing("wasTheOrderApprovedAtHearing"),
     judgeOrMagistratesLastName("judgeOrMagistratesLastName"),
     magistrateLastName("magistrateLastName"),
