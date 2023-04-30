@@ -219,6 +219,7 @@ public class DraftAnOrderService {
                     .build())
             .isTheOrderAboutChildren(draftOrder.getIsTheOrderAboutChildren())
             .childrenList(draftOrder.getChildrenList())
+            .selectedHearingType(null != draftOrder.getHearingsType() ? draftOrder.getHearingsType().getValueCode() : null)
             .build();
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
@@ -363,7 +364,7 @@ public class DraftAnOrderService {
         return caseDataMap;
     }
 
-    public Map<String, Object> populateCommonDraftOrderFields(CaseData caseData) {
+    public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("orderType", selectedOrder.getOrderType());
@@ -385,6 +386,18 @@ public class DraftAnOrderService {
         caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
         caseDataMap.put("reviewRequiredBy", selectedOrder.getOtherDetails().getReviewRequiredBy() != null
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
+
+        //Set existing hearingsType from draft order
+        ManageOrders manageOrders = null != caseData.getManageOrders()
+            ? caseData.getManageOrders().toBuilder().hearingsType(selectedOrder.getHearingsType()).build()
+            : ManageOrders.builder().hearingsType(selectedOrder.getHearingsType()).build();
+        caseData = caseData.toBuilder()
+            .manageOrders(manageOrders)
+            .build();
+        //PRL-3319 - Fetch hearings dropdown
+        caseData = manageOrderService.populateHearingsDropdown(authorization, caseData);
+        //Set hearings
+        caseDataMap.put("hearingsType", caseData.getManageOrders().getHearingsType());
         return caseDataMap;
     }
 
@@ -527,6 +540,7 @@ public class DraftAnOrderService {
             .isOrderUploadedByJudgeOrAdmin(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .approvalDate(draftOrder.getApprovalDate())
             .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData.getManageOrders().getChildOption()))
+            .hearingsType(caseData.getManageOrders().getHearingsType())
             .build();
     }
 
@@ -597,6 +611,10 @@ public class DraftAnOrderService {
                                   .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
                                   .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
                                   .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
+                                  .hearingsType(caseData.getManageOrders().getHearingsType())
+                                  .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
+                                  .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
+                                                      ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .build()).build();
         } else {
             caseData = caseData.toBuilder()
@@ -615,6 +633,10 @@ public class DraftAnOrderService {
                                   .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                                   .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
                                   .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
+                                  .hearingsType(caseData.getManageOrders().getHearingsType())
+                                  .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
+                                  .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
+                                                      ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .build()).build();
         }
         return caseData;

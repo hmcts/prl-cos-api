@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
@@ -48,6 +49,9 @@ public class CourtNavCaseControllerTest {
 
     @Mock
     private CourtNavCaseService courtNavCaseService;
+
+    @Mock
+    private SystemUserService systemUserService;
 
     @Mock
     private FL401ApplicationMapper fl401ApplicationMapper;
