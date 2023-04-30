@@ -785,11 +785,10 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
-
     @JsonUnwrapped
     @Builder.Default
     private final Fl401ListOnNotice fl401ListOnNotice;
 
-
     private NextHearingDetails nextHearingDetails;
+
 }
