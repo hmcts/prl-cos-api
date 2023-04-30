@@ -422,7 +422,7 @@ public class HearingDataServiceTest {
     @Test()
     public void testGetLinkedCases() {
         List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
-        CaseLinkedData caseLinkedData = CaseLinkedData.hearingValuesWith()
+        CaseLinkedData caseLinkedData = CaseLinkedData.caseLinkedDataWith()
             .caseName("CaseName-Test10")
             .caseReference("1677767515750127")
             .build();
