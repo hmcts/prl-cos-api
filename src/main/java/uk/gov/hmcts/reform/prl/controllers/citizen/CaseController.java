@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -96,6 +97,29 @@ public class CaseController {
             );
             log.info("Done with case update with the event id " + eventId);
             log.info("The state now is " + caseDetails.getState());
+            return CaseUtils.getCaseData(caseDetails, objectMapper);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(value = "{caseId}/{eventId}/case-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Updating casedata")
+    public CaseData caseUpdate(
+        @NotNull @Valid @RequestBody UpdateCaseData updateCaseData,
+        @PathVariable("eventId") String eventId,
+        @PathVariable("caseId") String caseId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        if (isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = null;
+            caseDetails = caseService.updateCaseDetails(
+                authorisation,
+                caseId,
+                eventId,
+                updateCaseData
+            );
             return CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

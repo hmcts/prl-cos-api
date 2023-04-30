@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,6 +9,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -28,6 +32,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
+@Slf4j
 public class AllTabServiceImplTest {
 
     @InjectMocks
@@ -43,7 +48,12 @@ public class AllTabServiceImplTest {
     ConfidentialityTabService confidentialityTabService;
 
     @Mock
+    CcdCoreCaseDataService coreCaseDataServiceCcdClient;
+
+    @Mock
     ObjectMapper objectMapper;
+
+    private StartEventResponse startEventResponse;
 
     @Mock
     @Qualifier("caseSummaryTab")
@@ -62,8 +72,10 @@ public class AllTabServiceImplTest {
 
     @Before
     public void setUp() {
+        log.info("My changes");
         when(applicationsTabService.updateTab(CASE_DATA)).thenReturn(applicaionFieldsMap);
         when(caseSummaryTabService.updateTab(CASE_DATA)).thenReturn(summaryTabFields);
+        when(CASE_DATA.getCaseTypeOfApplication()).thenReturn("C100");
         when(CASE_DATA.getDateSubmitted()).thenReturn("2022-02-02");
         when(CASE_DATA.getCourtName()).thenReturn("TEST COURT");
         when(CASE_DATA.getCourtId()).thenReturn("COURT_!");
@@ -87,6 +99,18 @@ public class AllTabServiceImplTest {
         allTabService.updateAllTabsIncludingConfTab(CASE_DATA);
 
         verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
+        verify(applicationsTabService).updateTab(CASE_DATA);
+        verify(caseSummaryTabService).updateTab(CASE_DATA);
+    }
+
+    @Test
+    public void testUpdateAllTabsIncludingConfTabRefactored() {
+        log.info("My changes");
+        startEventResponse = StartEventResponse.builder().build();
+        allTabService.updateAllTabsIncludingConfTabRefactored("auth", "caseId", startEventResponse, EventRequestData
+            .builder()
+            .build(), CASE_DATA);
+
         verify(applicationsTabService).updateTab(CASE_DATA);
         verify(caseSummaryTabService).updateTab(CASE_DATA);
     }
@@ -122,8 +146,32 @@ public class AllTabServiceImplTest {
     }
 
     @Test
-    public void testUpdatePartyDetailsForNoc() {
+    public void testUpdatePartyDetailsForNocC100Applicant() {
+        log.info("My changes");
         allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.C100APPLICANTSOLICITOR1));
+        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
+    }
+
+    @Test
+    public void testUpdatePartyDetailsForNocC100Respondent() {
+        log.info("My changes");
+        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.C100RESPONDENTSOLICITOR1));
+        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
+    }
+
+    @Test
+    public void testUpdatePartyDetailsForNocFL401Applicant() {
+        log.info("My changes");
+        when(CASE_DATA.getCaseTypeOfApplication()).thenReturn("FL401");
+        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.FL401APPLICANTSOLICITOR));
+        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
+    }
+
+    @Test
+    public void testUpdatePartyDetailsForNocFL401Respondent() {
+        log.info("My changes");
+        when(CASE_DATA.getCaseTypeOfApplication()).thenReturn("FL401");
+        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.FL401RESPONDENTSOLICITOR));
         verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
     }
 }
