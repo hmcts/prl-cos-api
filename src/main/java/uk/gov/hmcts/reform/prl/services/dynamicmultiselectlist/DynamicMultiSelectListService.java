@@ -190,7 +190,6 @@ public class DynamicMultiSelectListService {
 
     public List<Element<Child>> getChildrenForDocmosis(CaseData caseData) {
         List<Element<Child>> childList = new ArrayList<>();
-        log.info("ManageOrders in getChildrenForDocmosis: {}", caseData.getManageOrders());
         if (null != caseData.getManageOrders()
             && YesOrNo.No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
             && null != caseData.getManageOrders().getChildOption()
@@ -203,13 +202,11 @@ public class DynamicMultiSelectListService {
                 }
             });
         }
-        log.info("after retrieving the children List for docmosis: {}", childList);
         return childList;
     }
 
     public List<Element<ApplicantChild>> getApplicantChildDetailsForDocmosis(CaseData caseData) {
         List<Element<ApplicantChild>> applicantChildList = new ArrayList<>();
-        log.info("ManageOrders in getChildrenForDocmosis: {}", caseData.getManageOrders());
         if (null != caseData.getManageOrders()
             && YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
             && null != caseData.getManageOrders().getChildOption()
@@ -222,25 +219,21 @@ public class DynamicMultiSelectListService {
                 }
             });
         }
-        log.info("after retrieving the children List for docmosis: {}", applicantChildList);
         return applicantChildList;
     }
 
     private Child getChildDetails(CaseData caseData, String id) {
         Optional<Child> child = Optional.empty();
-        log.info("***Case type of application {} ***", CaseUtils.getCaseTypeOfApplication(caseData));
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             child = caseData.getChildren().stream().filter(element -> element.getId().toString().equalsIgnoreCase(id))
                 .map(Element::getValue)
                 .findFirst();
         }
-        log.info("*** returning child to be added to list {} ***", child);
         return child.orElseGet(() -> null);
     }
 
     private ApplicantChild getApplicantChildDetails(CaseData caseData, String id) {
         Optional<ApplicantChild> applicantChild = Optional.empty();
-        log.info("***Case type of application {} ***", CaseUtils.getCaseTypeOfApplication(caseData));
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && null != caseData.getApplicantChildDetails()) {
             applicantChild = caseData.getApplicantChildDetails().stream().filter(element -> element.getId().toString().equalsIgnoreCase(
@@ -248,7 +241,6 @@ public class DynamicMultiSelectListService {
                 .map(Element::getValue)
                 .findFirst();
         }
-        log.info("*** returning applicantChild to be added to list {} ***", applicantChild);
         return applicantChild.orElseGet(() -> null);
     }
 }

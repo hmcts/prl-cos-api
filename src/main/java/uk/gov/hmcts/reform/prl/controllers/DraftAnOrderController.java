@@ -96,9 +96,6 @@ public class DraftAnOrderController {
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
 
-        log.info("C21 Draft order options in callback:: {}", (null != caseData.getManageOrders())
-            ? caseData.getManageOrders().getC21OrderOptions() : null);
-
         if (null != caseData.getCreateSelectOrderOptions()
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
 
@@ -106,7 +103,6 @@ public class DraftAnOrderController {
             caseDataUpdated.put("typeOfC21Order", null != manageOrders.getC21OrderOptions()
                 ? manageOrders.getC21OrderOptions().getDisplayedValue() : null);
         }
-        log.info("Child options  first logger {}", caseDataUpdated.get("childOption"));
         List<String> errorList = new ArrayList<>();
         if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
             errorList.add("This order is not available to be drafted");
@@ -120,7 +116,6 @@ public class DraftAnOrderController {
                 .build();
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
-            log.info("Child options  second logger {}", caseDataUpdated.get("childOption"));
             caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             return CallbackResponse.builder()
                 .data(caseData).build();
@@ -151,14 +146,11 @@ public class DraftAnOrderController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
 
-        log.info("ChildOption Data in populateFl404Fields {} start ", caseDataUpdated.get("childOption"));
-
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         } else {
-            log.info("Before generate document manageorder {}", caseData.getManageOrders());
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
             caseDataUpdated.putAll(manageOrderService.getCaseData(
                 authorisation,
@@ -179,11 +171,6 @@ public class DraftAnOrderController {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         }
 
-        log.info(
-            "childrenListForDocmosis Data in populateFl404Fields {} end ",
-            caseDataUpdated.get("childrenListForDocmosis")
-        );
-        log.info("CaseDataUpdatedMap in populateFl404Fields {}  ", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
@@ -260,16 +247,12 @@ public class DraftAnOrderController {
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-        log.info("which hearingdetails to pick {}", (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-            .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
-            .equalsIgnoreCase(callbackRequest.getEventId())));
         List<Element<HearingData>> existingOrderHearingDetails = (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId())) ? caseData.getManageOrders()
             .getSolicitorOrdersHearingDetails() : caseData.getManageOrders().getOrdersHearingDetails();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-        log.info("existing hearing details {}", existingOrderHearingDetails);
         if (existingOrderHearingDetails != null) {
             if ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
@@ -300,10 +283,6 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info(
-            "verifying hearing data while submitting************* {} ",
-            callbackRequest.getCaseDetails().getData()
-        );
         return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.prepareDraftOrderCollection(
             authorisation,
             callbackRequest

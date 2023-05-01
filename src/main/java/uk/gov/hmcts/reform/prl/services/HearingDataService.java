@@ -112,7 +112,6 @@ public class HearingDataService {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public HearingDataPrePopulatedDynamicLists populateHearingDynamicLists(String authorisation, String caseReferenceNumber, CaseData caseData) {
-        log.info("populateHearingDynamicLists methd for caseReferenceNum : {}", caseReferenceNumber);
         Map<String, List<DynamicListElement>> hearingChannelsDetails = prePopulateHearingChannel(authorisation);
         return HearingDataPrePopulatedDynamicLists.builder().retrievedHearingTypes(getDynamicList(prePopulateHearingType(authorisation)))
             .retrievedHearingDates(getDynamicList(getHearingStartDate(authorisation, caseData)))
@@ -126,7 +125,6 @@ public class HearingDataService {
 
     public List<DynamicListElement> prePopulateHearingType(String authorisation) {
         try {
-            log.info("Prepopulate HearingType call in HearingDataService");
             CommonDataResponse commonDataResponse = refDataUserService.retrieveCategoryValues(
                 authorisation,
                 HEARINGTYPE,
@@ -168,7 +166,6 @@ public class HearingDataService {
 
     public Map<String, List<DynamicListElement>> prePopulateHearingChannel(String authorisation) {
         try {
-            log.info("Prepopulate HearingChannel call in HearingDataService");
             CommonDataResponse commonDataResponse = refDataUserService.retrieveCategoryValues(
                 authorisation,
                 HEARINGCHANNEL,
@@ -294,7 +291,6 @@ public class HearingDataService {
 
     public List<Element<HearingData>> getHearingData(List<Element<HearingData>> hearingDatas,
                                                      HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,CaseData caseData) {
-        log.info("hearing datas {}", hearingDatas);
         hearingDatas.stream().parallel().forEach(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             hearingRequestDataMapper.mapHearingData(hearingData,hearingDataPrePopulatedDynamicLists,caseData);

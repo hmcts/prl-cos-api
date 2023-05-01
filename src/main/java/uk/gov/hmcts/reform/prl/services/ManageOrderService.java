@@ -851,16 +851,13 @@ public class ManageOrderService {
     }
 
     public String getSelectedChildInfoFromMangeOrder(CaseData caseData) {
-        log.info("inside getSelectedChildInfoFromMangeOrder");
         DynamicMultiSelectList childOption = caseData.getManageOrders().getChildOption();
         if ((YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
             || YesOrNo.No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren()))
             && childOption != null) {
-            log.info("getSelectedChildInfoFromMangeOrder from values");
             return getChildNames(childOption.getValue());
         } else if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && childOption != null && childOption.getListItems() != null) {
-            log.info("getSelectedChildInfoFromMangeOrder from listItems");
             return getChildNames(childOption.getListItems());
         }
         return null;
@@ -946,10 +943,6 @@ public class ManageOrderService {
 
         Map<String, Object> orderMap = new HashMap<>();
 
-        log.info("caseData.getManageOrdersOptions() {}", caseData.getManageOrdersOptions());
-        log.info("loggedInUserType {}", loggedInUserType);
-        log.info("caseData.getManageOrders() {}", caseData.getManageOrders());
-        log.info("caseData.getServeOrderData(){}", caseData.getServeOrderData());
         if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
             if (uploadAnOrder.equals(caseData.getManageOrdersOptions())
                 && (UserRoles.JUDGE.name().equals(loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
@@ -1010,8 +1003,6 @@ public class ManageOrderService {
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType) {
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
-        log.info("Order Hearing details from ordersHearingDetails:: {}:::", null != caseData.getManageOrders()
-            ? caseData.getManageOrders().getOrdersHearingDetails() : null);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .c21OrderOptions(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
                                  ? caseData.getManageOrders().getC21OrderOptions() : null)
@@ -1105,8 +1096,6 @@ public class ManageOrderService {
             try {
                 String standardDirectionOrderObjectJson = objectMapper.writeValueAsString(caseData.getStandardDirectionOrder());
                 sdoDetails = objectMapper.readValue(standardDirectionOrderObjectJson, SdoDetails.class);
-                log.info("caseData.getStandardDirectionOrder() ===> " + standardDirectionOrderObjectJson);
-                log.info("created SdoDetails ===> " + sdoDetails);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -1198,7 +1187,6 @@ public class ManageOrderService {
                     }
                 });
         }
-        log.info("*** Returning order collection *** {}", orders);
         return orders;
     }
 
@@ -1477,12 +1465,10 @@ public class ManageOrderService {
         try {
             GeneratedDocumentInfo generatedDocumentInfo;
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
-            log.info("*** generating docs for {}", fieldsMap);
             populateChildrenListForDocmosis(caseData);
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
-                log.info("**** SDO data **** {}", caseData.getStandardDirectionOrder());
                 generatedDocumentInfo = dgsService.generateDocument(
                     authorisation,
                     CaseDetails.builder().caseData(caseData).build(),
@@ -1519,16 +1505,12 @@ public class ManageOrderService {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<Element<Child>> children = dynamicMultiSelectListService
                 .getChildrenForDocmosis(caseData);
-            log.info("*** Children list sent to docmosis {}", children);
-
-            if (!children.isEmpty()) {
+             if (!children.isEmpty()) {
                 caseData.setChildrenListForDocmosis(children);
             }
         } else {
             List<Element<ApplicantChild>> applicantChildren = dynamicMultiSelectListService
                 .getApplicantChildDetailsForDocmosis(caseData);
-            log.info("*** ApplicantChild list sent to docmosis {}", applicantChildren);
-
             if (!applicantChildren.isEmpty()) {
                 caseData.setApplicantChildDetailsForDocmosis(applicantChildren);
             }
@@ -1596,7 +1578,6 @@ public class ManageOrderService {
 
     private CaseData getFl404bFields(CaseData caseData) {
 
-        log.info("Before calling casedata {}", caseData);
         FL404 orderData = caseData.getManageOrders().getFl404CustomFields();
 
         if (orderData != null) {
@@ -1646,7 +1627,6 @@ public class ManageOrderService {
                               .childOption(getChildOption(caseData))
                               .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
-        log.info("after calling casedata {}", caseData);
         return caseData;
     }
 
@@ -1710,7 +1690,6 @@ public class ManageOrderService {
     private Element<OrderDetails> getOrderDetailsElement(String authorisation, String flagSelectedOrderId,
                                                          String flagSelectedOrder, Map<String, String> fieldMap,
                                                          CaseData caseData) throws Exception {
-        log.info("Child Option inside getOrderDetailsElement::{}", caseData.getManageOrders().getChildOption());
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
 
@@ -1738,13 +1717,8 @@ public class ManageOrderService {
                             ? copyPropertiesToSdoDetails(caseData) : null)
             .build();
 
-        log.info("Children list for docmosis in before :: {}", caseData.getChildrenListForDocmosis());
-        log.info("ApplicantChild list for docmosis in before :: {}", caseData.getApplicantChildDetailsForDocmosis());
         populateChildrenListForDocmosis(caseData);
-        log.info("Children list for docmosis in after :: {}", caseData.getChildrenListForDocmosis());
-        log.info("ApplicantChild list for docmosis in after :: {}", caseData.getApplicantChildDetailsForDocmosis());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info("Children list for tab in :: {}", caseData.getChildrenList());
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
@@ -1849,7 +1823,6 @@ public class ManageOrderService {
 
     public Map<String, Object> populatePreviewOrder(String authorisation, CallbackRequest callbackRequest, CaseData caseData) throws Exception {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("*** sdoHearingsAndNextStepsList *** {}", caseDataUpdated.get("sdoHearingsAndNextStepsList"));
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -1860,7 +1833,6 @@ public class ManageOrderService {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData);
             }
-            log.info("*** Before getCaseData *** {}", caseData.getStandardDirectionOrder());
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getUploadOrderDoc());
@@ -1885,12 +1857,8 @@ public class ManageOrderService {
 
     public CaseData populateHearingsDropdown(String authorization, CaseData caseData) {
         log.info("Retrieving hearings for caseId: {}", caseData.getId());
-        //fetch hearing details
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(authorization, String.valueOf(caseData.getId())));
-        //get case hearings
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
-        log.info("Total case hearings: {}", caseHearings.size());
-        //filer only completed hearings
         List<CaseHearing> completedHearings = caseHearings.stream()
             .filter(caseHearing -> HMC_STATUS_COMPLETED.equalsIgnoreCase(caseHearing.getHmcStatus()))
             .collect(Collectors.toList());
@@ -1941,9 +1909,6 @@ public class ManageOrderService {
     public void resetChildOptions(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         List<DynamicMultiselectListElement> listElements = List.of(DynamicMultiselectListElement.EMPTY);
-        log.info("is the order about children present? " + caseDataMap.get(IS_THE_ORDER_ABOUT_CHILDREN));
-        log.info("is the order about all children present? " + caseDataMap.get(IS_THE_ORDER_ABOUT_ALL_CHILDREN));
-
         boolean isTheOrderAboutChildrenForDA = caseDataMap.containsKey(IS_THE_ORDER_ABOUT_CHILDREN)
             && caseDataMap.get(IS_THE_ORDER_ABOUT_CHILDREN) != null
             && caseDataMap.get(IS_THE_ORDER_ABOUT_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.NO);
@@ -1953,18 +1918,15 @@ public class ManageOrderService {
             && caseDataMap.get(IS_THE_ORDER_ABOUT_ALL_CHILDREN).toString().equalsIgnoreCase(PrlAppsConstants.YES);
 
         if (isTheOrderAboutChildrenForDA || isTheOrderAboutAllChildrenForCA) {
-            log.info("Before  modifying {}", callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
             callbackRequest.getCaseDetails().getData().put(CHILD_OPTION, DynamicMultiSelectList.builder()
                 .listItems(List.of(DynamicMultiselectListElement.EMPTY))
                 .value(listElements)
                 .build());
-            log.info("after  modifying {}", callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
-        }
+            }
     }
 
     public CaseData setChildOptionsIfOrderAboutAllChildrenYes(CaseData caseData) {
         if (YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren())) {
-            log.info("inside setChildOptionsIfOrderAboutAllChildrenYes");
             caseData = caseData.toBuilder()
                 .manageOrders(caseData.getManageOrders().toBuilder()
                                   .childOption(DynamicMultiSelectList.builder()

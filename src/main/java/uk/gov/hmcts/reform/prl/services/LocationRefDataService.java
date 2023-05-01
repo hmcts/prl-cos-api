@@ -120,8 +120,7 @@ public class LocationRefDataService {
             if (code.isPresent()) {
                 key += Arrays.stream(code.get().split(":")).toArray().length > 1
                     ? Arrays.stream(code.get().split(":")).toArray()[1] : "";
-                log.info("** Court venue key: {}, value: {} ", key, value);
-            }
+                }
         }
         return DynamicListElement.builder().code(key).label(value).build();
     }
