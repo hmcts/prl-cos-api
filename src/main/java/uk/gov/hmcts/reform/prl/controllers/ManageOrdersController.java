@@ -110,7 +110,6 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("*** SDO *** {}", caseData.getStandardDirectionOrder());
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
@@ -168,8 +167,6 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("C21 order options in callback:: {}", (null != caseData.getManageOrders())
-            ? caseData.getManageOrders().getC21OrderOptions() : null);
         caseData = caseData.toBuilder()
             .selectedC21Order((null != caseData.getManageOrders()
                                   && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
@@ -197,7 +194,6 @@ public class ManageOrdersController {
             .build();
         if (null != caseData.getCreateSelectOrderOptions()
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-            log.info("C21 Order:: *****{}******", manageOrders.getC21OrderOptions());
             manageOrders = manageOrders.toBuilder()
                                   .typeOfC21Order(null != manageOrders.getC21OrderOptions()
                                                       ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)

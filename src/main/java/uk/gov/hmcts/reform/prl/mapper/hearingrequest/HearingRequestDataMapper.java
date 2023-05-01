@@ -19,8 +19,6 @@ public class HearingRequestDataMapper {
 
     public void mapHearingData(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
         boolean isHearingDynamicListItemsNullifyReq = (null != hearingDataPrePopulatedDynamicLists) ? Boolean.FALSE  : Boolean.TRUE;
-        log.info("hearingDataPrePopulatedDynamicLists --> {}", hearingDataPrePopulatedDynamicLists);
-        log.info("isHearingDynamicListItemsNullifyReq --> {}", isHearingDynamicListItemsNullifyReq);
 
         mapHearingTypesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
         mapConfirmedHearingDatesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
@@ -132,7 +130,6 @@ public class HearingRequestDataMapper {
 
     private void mapApplicantSolicitorListItems(HearingData hearingData, boolean isHearingDynamicListItemsNullifyReq,
                                                 HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
-        log.info("Applicant Solicitor hearing channel ---> {}", hearingData.getApplicantSolicitorHearingChannel());
         if (null != hearingData.getApplicantSolicitorHearingChannel() && null != hearingData.getApplicantSolicitorHearingChannel().getValue()) {
             mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
@@ -147,7 +144,6 @@ public class HearingRequestDataMapper {
     private void mapApplicantHearingChannelListItems(HearingData hearingData, boolean isHearingDynamicListItemsNullifyReq,
                                                      HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
 
-        log.info("applicant hearing channel ---> {}", hearingData.getApplicantHearingChannel());
         if (null != hearingData.getApplicantHearingChannel() && null != hearingData.getApplicantHearingChannel().getValue()) {
             mapDynamicListItems(hearingData.getApplicantHearingChannel(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());

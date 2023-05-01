@@ -121,7 +121,6 @@ public class EditAndApproveDraftOrderController {
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
         if (caseData.getManageOrders().getSolicitorOrdersHearingDetails() != null) {
-            log.info("Inside genearted doc ---->{}",caseData.getManageOrders().getSolicitorOrdersHearingDetails());
             caseDataUpdated.put(
                 ORDER_HEARING_DETAILS,
                 hearingDataService.getHearingData(existingOrderHearingDetails,
@@ -177,7 +176,6 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        log.info("inside judge-or-admin-populate-draft-order-common-fields");
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -248,7 +246,6 @@ public class EditAndApproveDraftOrderController {
             );
             if (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
                 final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-                log.info("** Calling email service to send emails to recipients on serve order **");
                 manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
             }
         }
