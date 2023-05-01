@@ -507,8 +507,7 @@ public class CallbackController {
             .map(CaseEventDetail::getStateId)
             .findFirst();
         log.info("State during the fl401 add case number: {}", previousState);
-        caseDataUpdated.put("isAddCaseNumberAdded", SUBMITTED_PAID.equals(previousState)
-            ? Yes : No);
+        caseDataUpdated.put("isAddCaseNumberAdded", SUBMITTED_PAID.equals(previousState.get()) ? Yes : No);
         log.info("fl401 add case number flag: {}", caseDataUpdated.get("isAddCaseNumberAdded"));
         caseDataUpdated.put("issueDate", LocalDate.now());
         return AboutToStartOrSubmitCallbackResponse.builder()
