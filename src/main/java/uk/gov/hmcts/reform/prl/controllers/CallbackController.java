@@ -76,6 +76,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -503,11 +504,11 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
 
-        Optional<String> previousState = eventsForCase.stream()
+        String previousState = String.valueOf(eventsForCase.stream()
             .map(CaseEventDetail::getStateId)
-            .findFirst();
+            .findFirst());
         log.info("State during the fl401 add case number: {}", previousState);
-        caseDataUpdated.put("isAddCaseNumberAdded", SUBMITTED_PAID.equals(previousState.get()) ? Yes : No);
+        caseDataUpdated.put("isAddCaseNumberAdded", previousState.equalsIgnoreCase(String.valueOf(SUBMITTED_PAID)) ? Yes : No);
         log.info("fl401 add case number flag: {}", caseDataUpdated.get("isAddCaseNumberAdded"));
         caseDataUpdated.put("issueDate", LocalDate.now());
         return AboutToStartOrSubmitCallbackResponse.builder()
