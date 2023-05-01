@@ -1505,7 +1505,7 @@ public class ManageOrderService {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<Element<Child>> children = dynamicMultiSelectListService
                 .getChildrenForDocmosis(caseData);
-             if (!children.isEmpty()) {
+            if (!children.isEmpty()) {
                 caseData.setChildrenListForDocmosis(children);
             }
         } else {
@@ -1922,7 +1922,7 @@ public class ManageOrderService {
                 .listItems(List.of(DynamicMultiselectListElement.EMPTY))
                 .value(listElements)
                 .build());
-            }
+        }
     }
 
     public CaseData setChildOptionsIfOrderAboutAllChildrenYes(CaseData caseData) {
