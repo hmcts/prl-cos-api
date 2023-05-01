@@ -139,4 +139,52 @@ public class HearingData {
 
     @JsonProperty("fillingFormRenderingInfo")
     private String fillingFormRenderingInfo;
+
+    private final DynamicList applicantHearingChannel1;
+    private final DynamicList applicantHearingChannel2;
+    private final DynamicList applicantHearingChannel3;
+    private final DynamicList applicantHearingChannel4;
+    private final DynamicList applicantHearingChannel5;
+
+    private final DynamicList applicantSolicitorHearingChannel1;
+    private final DynamicList applicantSolicitorHearingChannel2;
+    private final DynamicList applicantSolicitorHearingChannel3;
+    private final DynamicList applicantSolicitorHearingChannel4;
+    private final DynamicList applicantSolicitorHearingChannel5;
+
+    private final DynamicList respondentHearingChannel1;
+    private final DynamicList respondentHearingChannel2;
+    private final DynamicList respondentHearingChannel3;
+    private final DynamicList respondentHearingChannel4;
+    private final DynamicList respondentHearingChannel5;
+
+    private final DynamicList respondentSolicitorHearingChannel1;
+    private final DynamicList respondentSolicitorHearingChannel2;
+    private final DynamicList respondentSolicitorHearingChannel3;
+    private final DynamicList respondentSolicitorHearingChannel4;
+    private final DynamicList respondentSolicitorHearingChannel5;
+
+    private final String applicantName1;
+    private final String applicantName2;
+    private final String applicantName3;
+    private final String applicantName4;
+    private final String applicantName5;
+
+    private final String applicantSolicitor1;
+    private final String applicantSolicitor2;
+    private final String applicantSolicitor3;
+    private final String applicantSolicitor4;
+    private final String applicantSolicitor5;
+
+    private final String respondentName1;
+    private final String respondentName2;
+    private final String respondentName3;
+    private final String respondentName4;
+    private final String respondentName5;
+
+    private final String respondentSolicitor1;
+    private final String respondentSolicitor2;
+    private final String respondentSolicitor3;
+    private final String respondentSolicitor4;
+    private final String respondentSolicitor5;
 }
