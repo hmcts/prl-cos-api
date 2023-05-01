@@ -408,14 +408,14 @@ public class ManageOrderEmailService {
             manageOrders.getOtherParties().getValue().stream().map(DynamicMultiselectListElement::getCode).forEach(id -> {
                 String otherEmail = getOtherPeopleEmailAddress(id, caseData);
                 if (null != otherEmail) {
-                     listOfEmails.add(otherEmail);
+                    listOfEmails.add(otherEmail);
                 }
             });
         }
         //Send email notification to Cafcass or Cafcass cymru based on selection
         if (cafcassEmail != null) {
             listOfEmails.add(cafcassEmail);
-            }
+        }
         listOfEmails.forEach(email ->
              emailService.send(
                  email,
