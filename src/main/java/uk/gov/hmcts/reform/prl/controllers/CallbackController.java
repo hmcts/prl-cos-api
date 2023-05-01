@@ -503,11 +503,11 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
 
-        String previousState = String.valueOf(eventsForCase.stream()
+        Optional<String> previousState = eventsForCase.stream()
             .map(CaseEventDetail::getStateId)
-            .findFirst());
-        log.info("State during the fl401 add case number: {}", previousState);
-        caseDataUpdated.put("isAddCaseNumberAdded", previousState.equalsIgnoreCase(String.valueOf(SUBMITTED_PAID)) ? Yes : No);
+            .findFirst();
+        log.info("State during the fl401 add case number in addCaseNumberSubmitted: {}", previousState.get());
+        caseDataUpdated.put("isAddCaseNumberAdded", previousState.get().equalsIgnoreCase(String.valueOf(SUBMITTED_PAID)) ? Yes : No);
         log.info("fl401 add case number flag: {}", caseDataUpdated.get("isAddCaseNumberAdded"));
         caseDataUpdated.put("issueDate", LocalDate.now());
         return AboutToStartOrSubmitCallbackResponse.builder()
