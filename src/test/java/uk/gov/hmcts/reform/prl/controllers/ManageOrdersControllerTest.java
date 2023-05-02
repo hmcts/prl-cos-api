@@ -747,7 +747,7 @@ public class ManageOrdersControllerTest {
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
             .children(listOfChildren)
-            .manageOrders(ManageOrders.builder().ordersNeedToBeServed(YesOrNo.Yes).build())
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(YesOrNo.Yes).build())
             .courtName("testcourt")
             .build();
 
@@ -1046,7 +1046,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
-            .manageOrders(ManageOrders.builder().ordersNeedToBeServed(YesOrNo.Yes).build())
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(YesOrNo.Yes).build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)

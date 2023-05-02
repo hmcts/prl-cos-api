@@ -272,6 +272,9 @@ public class ManageOrders {
     @JsonProperty("hasJudgeProvidedHearingDetails")
     private YesOrNo hasJudgeProvidedHearingDetails;
 
+    @JsonProperty("markedToServeEmailNotification")
+    private YesOrNo markedToServeEmailNotification;
+
     //PRL-3254 - Added for populating hearing dropdown
     private DynamicList hearingsType;
 
