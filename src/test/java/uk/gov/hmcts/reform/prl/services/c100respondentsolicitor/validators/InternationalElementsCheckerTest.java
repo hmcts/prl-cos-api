@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,12 +19,14 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskEr
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Slf4j
 public class InternationalElementsCheckerTest {
 
     @InjectMocks
@@ -84,15 +87,23 @@ public class InternationalElementsCheckerTest {
     }
 
     @Test
-    public void isStarted() {
+    public void isStartedTest() {
         Boolean bool = internationalElementsChecker.isStarted(respondent);
         assertTrue(bool);
     }
 
     @Test
-    public void mandatoryCompleted() {
+    public void mandatoryCompletedTest() {
         Boolean bool = internationalElementsChecker.isFinished(respondent);
         assertTrue(bool);
+    }
+
+    @Test
+    public void mandatoryCompletedWithoutRespdntTest() {
+        log.info("My changes");
+        respondent = null;
+        Boolean bool = internationalElementsChecker.isFinished(respondent);
+        assertFalse(bool);
     }
 
 }
