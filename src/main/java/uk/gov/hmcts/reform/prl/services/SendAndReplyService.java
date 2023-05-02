@@ -6,17 +6,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.repositories.CcdCaseApi;
+import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
@@ -30,8 +38,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicMultiselectList;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -53,6 +66,16 @@ public class SendAndReplyService {
     private String manageCaseUrl;
 
     private final HearingDataService hearingDataService;
+
+    private  final CcdCaseApi ccdCaseApi;
+
+    private final RefDataService refDataService;
+
+    @Value("${sendandreply.category-id}")
+    private String categoryId;
+
+    @Value("${sendandreply.service-code}")
+    private String serviceCode;
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -87,12 +110,9 @@ public class SendAndReplyService {
 
     public Map<String, Object> setSenderAndGenerateMessageList(CaseData caseData, String auth) {
 
-        // TODO Remove this logger
+        // TODO remove this method
+        testmethod(caseData, auth);
 
-        log.info("DynamicList to populate Linked case dropdown setSenderAndGenerateMessageList ------> {}",
-                 getLinkedCasesDynamicList(auth, String.valueOf(caseData.getId())));
-
-        // TODO
         Map<String, Object> data = new HashMap<>();
         MessageMetaData messageMetaData = MessageMetaData.builder()
             .senderEmail(getLoggedInUserEmail(auth))
@@ -256,6 +276,83 @@ public class SendAndReplyService {
             authorization,
             caseId
         ));
+    }
+
+    /**
+     * This method will return Dynamic Multi select list for
+     * applicants, respondents, cafcass and other reciepients.
+     * @param caseData CaseData object.
+     * @return DynamicMultiSelectList.
+     */
+    private DynamicMultiSelectList getExternalRecipientsDynamicMultiselectList(CaseData caseData) {
+        DynamicMultiSelectListService dynamicMultiSelectListService = new DynamicMultiSelectListService();
+        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+        listItems.addAll(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData).get(APPLICANTS));
+        listItems.addAll(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData).get(RESPONDENTS));
+        listItems.add(DynamicMultiselectListElement.builder().code(CAFCASS).label(CAFCASS).build());
+        listItems.add(DynamicMultiselectListElement.builder().code(OTHER).label(OTHER).build());
+        return getDynamicMultiselectList(listItems);
+    }
+
+    /**
+     *  This method will call refdata api and create Dynamic List
+     *  for Judicier tier.
+     * @param authorization Authoriszation token.
+     * @param s2sToken service token.
+     * @param serviceCode Service code e.g. ABA5 for PRL.
+     * @param categoryId e.g. JudgeType.
+     * @return
+     */
+    public DynamicList getJudiciaryTierDynmicList(String authorization, String s2sToken, String serviceCode, String categoryId) {
+
+        Map<String, String> refDataCategoryValueMap = refDataService.getRefDataCategoryValueMap(
+            authorization,
+            s2sToken,
+            serviceCode,
+            categoryId
+        );
+
+        if (refDataCategoryValueMap != null && !refDataCategoryValueMap.isEmpty()) {
+            List<DynamicListElement> judiciaryTierDynmicElementList = new ArrayList<>();
+
+            refDataCategoryValueMap.forEach((k, v) -> judiciaryTierDynmicElementList.add(DynamicListElement.builder().code(
+                k).label(v).build()));
+
+            return getDynamicList(judiciaryTierDynmicElementList);
+        }
+        return DynamicList.builder().build();
+    }
+
+
+    private void testmethod(CaseData caseData, String auth) {
+        // TODO Remove this logger
+
+        log.info("DynamicList to populate Linked case dropdown ------> {}",
+                 getLinkedCasesDynamicList(auth, String.valueOf(caseData.getId())));
+
+
+        try {
+            CaseDetails caseDetails = ccdCaseApi.getCase(auth, String.valueOf(caseData.getId()));
+            caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+            log.info("CaseTYPE of Application --> {}", caseData.getCaseTypeOfApplication());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        log.info("Dynamic List of Applicants and Respondents {}",  getExternalRecipientsDynamicMultiselectList(caseData));
+        // TODO
+
+        // TODO  remove below after testing
+
+        String s2sToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwcmxfY29zX2FwaSIsImV4cCI6MTY4MjcxNTA3OX0.eMEcnzxAPEnE3vPwJlz_kya"
+            + "vNZN2nVRxcZ9pvUg-0HrLw3btTlNrb-10fUwfajT1d5lYxsZ6HnUmCMp0R_zEqw\n";
+
+        // TODO end
+
+        log.info(
+            "getDynamicList(judiciaryTierDynmicElementList) ---> {}",
+            getJudiciaryTierDynmicList(auth, s2sToken, serviceCode, categoryId));
     }
 
 }
