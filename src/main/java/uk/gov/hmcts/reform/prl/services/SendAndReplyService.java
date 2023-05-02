@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.repositories.CcdCaseApi;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -78,6 +80,9 @@ public class SendAndReplyService {
     private String serviceCode;
 
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    private final AuthTokenGenerator authTokenGenerator;
+
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -264,6 +269,22 @@ public class SendAndReplyService {
         for (String field : fields) {
             caseData.remove(field);
         }
+    }
+
+    public void populateDynamicListsForSendAndReply(CaseData caseData, String authorization) {
+
+        String s2sToken = authTokenGenerator.generate();
+        caseData.setSendOrReplyMessage(
+            SendOrReplyMessage.builder()
+                .judicialOrMagistrateTierList(getJudiciaryTierDynmicList(
+                    authorization,
+                    s2sToken,
+                    serviceCode,
+                    categoryId
+                ))
+                .externalPartiesList(getExternalRecipientsDynamicMultiselectList(caseData))
+                .linkedApplicationsList(getLinkedCasesDynamicList(authorization, String.valueOf(caseData.getId())))
+                .build());
     }
 
     /**
