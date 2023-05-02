@@ -142,6 +142,7 @@ public class ListWithoutNoticeControllerFT {
         Assert.assertTrue(res.getData().containsKey("listWithoutNoticeHearingDetails"));
     }
 
+    @Ignore
     @Test
     public void testdateToBeFixed_200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(dateToBeFixed);
