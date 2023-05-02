@@ -271,10 +271,10 @@ public class SendAndReplyService {
         }
     }
 
-    public void populateDynamicListsForSendAndReply(CaseData caseData, String authorization) {
+    public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization) {
 
         String s2sToken = authTokenGenerator.generate();
-        caseData.setSendOrReplyMessage(
+        return caseData.toBuilder().sendOrReplyMessage(
             SendOrReplyMessage.builder()
                 .judicialOrMagistrateTierList(getJudiciaryTierDynmicList(
                     authorization,
@@ -284,7 +284,7 @@ public class SendAndReplyService {
                 ))
                 .externalPartiesList(getExternalRecipientsDynamicMultiselectList(caseData))
                 .linkedApplicationsList(getLinkedCasesDynamicList(authorization, String.valueOf(caseData.getId())))
-                .build());
+                .build()).build();
     }
 
     /**
