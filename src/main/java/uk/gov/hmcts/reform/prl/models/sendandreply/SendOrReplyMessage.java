@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.sendandreply;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
@@ -24,10 +25,19 @@ public class SendOrReplyMessage {
     @JsonProperty("closedMessagesList")
     private final List<Element<Message>> closedMessagesList;
 
+    @JsonUnwrapped
     private DynamicList judicialOrMagistrateTierList;
+
+    @JsonUnwrapped
     private DynamicList linkedApplicationsList;
+
+    @JsonUnwrapped
     private DynamicList futureHearingsList;
+
+    @JsonUnwrapped
     private DynamicList submittedDocumentsList;
+
+    @JsonUnwrapped
     private DynamicMultiSelectList externalPartiesList;
 
 }

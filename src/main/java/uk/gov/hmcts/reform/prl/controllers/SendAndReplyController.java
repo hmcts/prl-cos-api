@@ -189,7 +189,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+        caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
 
         return CallbackResponse.builder().data(caseData).build();
     }
