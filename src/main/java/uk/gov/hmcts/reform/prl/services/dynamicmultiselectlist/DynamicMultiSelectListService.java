@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
@@ -10,9 +11,11 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
 import java.util.ArrayList;
@@ -20,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @Slf4j
@@ -168,25 +173,74 @@ public class DynamicMultiSelectListService {
         return "";
     }
 
-    public List<Child> getChildrenForDocmosis(CaseData caseData) {
-        List<Child> childList = new ArrayList<>();
+    public String getStringFromDynamicMultiSelectListFromListItems(DynamicMultiSelectList dynamicMultiSelectList) {
+        List<String> strList = new ArrayList<>();
+        if (null != dynamicMultiSelectList && null != dynamicMultiSelectList.getListItems()) {
+            dynamicMultiSelectList.getListItems().forEach(value -> {
+                if (null != value.getLabel()) {
+                    strList.add(value.getLabel().split("\\(")[0]);
+                }
+            });
+        }
+        if (!strList.isEmpty()) {
+            return String.join(", ", strList);
+        }
+        return "";
+    }
+
+    public List<Element<Child>> getChildrenForDocmosis(CaseData caseData) {
+        List<Element<Child>> childList = new ArrayList<>();
         if (null != caseData.getManageOrders()
+            && YesOrNo.No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
             && null != caseData.getManageOrders().getChildOption()
             && null != caseData.getManageOrders().getChildOption().getValue()) {
             caseData.getManageOrders().getChildOption().getValue().forEach(value -> {
                 Child child = getChildDetails(caseData, value.getCode());
                 if (null != child) {
-                    childList.add(child);
+                    childList.add(element(child));
+
                 }
             });
         }
         return childList;
     }
 
+    public List<Element<ApplicantChild>> getApplicantChildDetailsForDocmosis(CaseData caseData) {
+        List<Element<ApplicantChild>> applicantChildList = new ArrayList<>();
+        if (null != caseData.getManageOrders()
+            && YesOrNo.Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+            && null != caseData.getManageOrders().getChildOption()
+            && null != caseData.getManageOrders().getChildOption().getValue()) {
+            caseData.getManageOrders().getChildOption().getValue().forEach(value -> {
+                ApplicantChild applicantChild = getApplicantChildDetails(caseData, value.getCode());
+                if (null != applicantChild) {
+                    applicantChildList.add(element(applicantChild));
+
+                }
+            });
+        }
+        return applicantChildList;
+    }
+
     private Child getChildDetails(CaseData caseData, String id) {
-        Optional<Child> child = caseData.getChildren().stream().filter(element -> element.getId().toString().equalsIgnoreCase(id))
-            .map(Element::getValue)
-            .findFirst();
+        Optional<Child> child = Optional.empty();
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            child = caseData.getChildren().stream().filter(element -> element.getId().toString().equalsIgnoreCase(id))
+                .map(Element::getValue)
+                .findFirst();
+        }
         return child.orElseGet(() -> null);
+    }
+
+    private ApplicantChild getApplicantChildDetails(CaseData caseData, String id) {
+        Optional<ApplicantChild> applicantChild = Optional.empty();
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && null != caseData.getApplicantChildDetails()) {
+            applicantChild = caseData.getApplicantChildDetails().stream().filter(element -> element.getId().toString().equalsIgnoreCase(
+                    id))
+                .map(Element::getValue)
+                .findFirst();
+        }
+        return applicantChild.orElseGet(() -> null);
     }
 }

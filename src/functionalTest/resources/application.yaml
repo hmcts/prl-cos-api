@@ -414,6 +414,10 @@ document:
       prl_solicitor_c7_final_filename: C7_Response_Final_Document.pdf
       prl_solicitor_c1a_draft_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-DRAFT.docx
       prl_solicitor_c1a_draft_filename: C1A_Allegation_Of_Harm_Draft_Document.pdf
+      prl_sdo_draft_template: FL-PRL-GOR-ENG-Standard-Directions-Order-Draft.docx
+      prl_sdo_draft_filename: Standard_Directions_Order_draft.pdf
+      prl_sdo_template: FL-PRL-GOR-ENG-Standard-Directions-Order-Final.docx
+      prl_sdo_filename: Standard_Directions_Order_Final.pdf
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf
