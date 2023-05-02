@@ -242,7 +242,6 @@ public class DraftAnOrderControllerTest {
         Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateFl404Fields("test token", callbackRequest).getData());
     }
 
-    @Ignore
     @Test
     public void testGenerateDoc() throws Exception {
         CaseData caseData = CaseData.builder()
@@ -250,6 +249,7 @@ public class DraftAnOrderControllerTest {
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
+            .manageOrders(ManageOrders.builder().build())
             .caseTypeOfApplication("fl401")
             .build();
 
