@@ -747,6 +747,7 @@ public class ManageOrdersControllerTest {
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
             .children(listOfChildren)
+            .manageOrders(ManageOrders.builder().ordersNeedToBeServed(YesOrNo.Yes).build())
             .courtName("testcourt")
             .build();
 
@@ -768,7 +769,7 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
-            .sendEmailToCafcassAndOtherParties(callbackRequest.getCaseDetails());
+            .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -1045,14 +1046,13 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
-            .manageOrders(ManageOrders.builder().build())
+            .manageOrders(ManageOrders.builder().ordersNeedToBeServed(YesOrNo.Yes).build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
             .children(listOfChildren)
             .courtName("testcourt")
-            .manageOrders(manageOrders)
             .previewOrderDoc(Document.builder()
                                  .documentUrl(generatedDocumentInfo.getUrl())
                                  .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -1077,7 +1077,7 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
-            .sendEmailToCafcassAndOtherParties(callbackRequest.getCaseDetails());
+            .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
     }
 
     @Test
