@@ -139,11 +139,13 @@ public class LocationRefDataService {
             authTokenGenerator.generate(),
             SERVICE_ID
         );
-
-        return courtDetails.getCourtVenues().stream().filter(location -> !"Scotland".equals(
-            location.getRegion()))
+        Optional<CourtVenue> courtVenue = (null == courtDetails || null == courtDetails.getCourtVenues())
+            ? Optional.empty()
+            : courtDetails.getCourtVenues().stream().filter(location -> !"Scotland".equals(
+                location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> baseLocationId.equalsIgnoreCase(location.getCourtEpimmsId()))
             .findFirst();
+        return courtVenue;
     }
 }
