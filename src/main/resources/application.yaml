@@ -18,8 +18,8 @@ case:
 
 prl:
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update-demo@mailinator.com}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
   document:
     generate:
       uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
@@ -171,16 +171,16 @@ fees-register:
 
 idam:
   s2s-auth:
-    url: ${AUTH_PROVIDER_SERVICE_CLIENT_BASEURL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
+    url: ${AUTH_PROVIDER_SERVICE_CLIENT_BASEURL:http://rpe-service-auth-provider-demo.service.core-compute-demo.internal}
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:W7supXKMJgcEWKBS}
   api:
-    url: https://idam-api.aat.platform.hmcts.net
+    url: https://idam-api.demo.platform.hmcts.net
   client:
     id: prl-cos-api
-    baseUrl: https://idam-api.aat.platform.hmcts.net
-    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    baseUrl: https://idam-api.demo.platform.hmcts.net
+    redirect_uri: https://manage-case.demo.platform.hmcts.net/oauth2/callback
+    secret: ${IDAM_CLIENT_SECRET:W7supXKMJgcEWKBS}
     clientId: xuiwebapp
     authorize:
       context-path: /oauth2/authorize
@@ -206,7 +206,7 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    url: https://ccd-data-store-api-prl-ccd-definitions-pr-1032.service.core-compute-preview.internal
+    url: http://ccd-data-store-api-demo.service.core-compute-demo.internal/
 
 auth:
   idam:
@@ -228,7 +228,7 @@ send-letter:
   url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
 
 case_document_am:
-  url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
+  url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-demo.service.core-compute-demo.internal}
 
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
@@ -463,7 +463,7 @@ fis_hearing:
 postcodelookup:
   api:
     url: https://api.os.uk/search/places/v1
-    key: ${POST_CODE_LOOKUP_KEY:xxxxxx}
+    key: ${POST_CODE_LOOKUP_KEY:TcDHoU6gWt4GaAd6JU0TSendKdGHhaGT}
 cafcaas:
   search-case-type-id: PRLAPPS
   caseTypeOfApplicationList: C100
@@ -478,6 +478,7 @@ refdata:
   api:
     url: ${REFDATA_API_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
   category-id: HearingType
+
 
 sendandreply:
   service-code: ABA5

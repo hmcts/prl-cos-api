@@ -180,6 +180,8 @@ public class CafCassCaseData {
 
     private String solicitorName;
 
+    private String courtTypeId;
+
     private String courtName;
 
     private List<Element<OtherPersonInTheCase>> otherPeopleInTheCaseTable;

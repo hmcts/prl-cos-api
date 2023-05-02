@@ -190,10 +190,15 @@ public class CaseDataService {
 
         if (!listOfHearingDetails.isEmpty()) {
             for (CafCassCaseDetail cafCassCaseDetail : filteredCafcassResponse.getCases()) {
-                for (Hearings hearing : listOfHearingDetails) {
-                    if (hearing != null && hearing.getCaseRef().equals(String.valueOf(cafCassCaseDetail.getId()))) {
-                        cafCassCaseDetail.getCaseData().setHearingData(hearing);
-                    }
+                Hearings filteredHearing =
+                    listOfHearingDetails.stream().filter(hearings -> hearings.getCaseRef().equals(String.valueOf(
+                        cafCassCaseDetail.getId()))).findFirst().orElse(null);
+                if (filteredHearing != null) {
+                    cafCassCaseDetail.getCaseData().setHearingData(filteredHearing);
+                    cafCassCaseDetail.getCaseData().setCourtName(filteredHearing.getCourtName());
+                    cafCassCaseDetail.getCaseData().setCourtTypeId(filteredHearing.getCourtTypeId());
+                    filteredHearing.setCourtName(null);
+                    filteredHearing.setCourtTypeId(null);
                 }
             }
         }
