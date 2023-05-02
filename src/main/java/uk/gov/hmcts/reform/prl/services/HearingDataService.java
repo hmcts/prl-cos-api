@@ -423,6 +423,7 @@ public class HearingDataService {
         return respondentSolicitorList;
 
     }
+
     List<DynamicListElement> getLinkedCasesDynamicList(String authorisation, String caseId) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         try {
