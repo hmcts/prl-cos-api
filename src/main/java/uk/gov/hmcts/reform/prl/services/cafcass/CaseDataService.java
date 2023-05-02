@@ -178,8 +178,6 @@ public class CaseDataService {
                 }
             }
         }
-        log.info("caseIdWithRegionIdMap {}", caseIdWithRegionIdMap);
-
         List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(
             authorisation,
             caseIdWithRegionIdMap

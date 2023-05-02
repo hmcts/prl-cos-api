@@ -280,6 +280,7 @@ public class ManageOrderServiceTest {
                               .recitalsOrPreamble("test")
                               .isCaseWithdrawn(YesOrNo.Yes)
                               .isTheOrderByConsent(YesOrNo.Yes)
+                              .fl404CustomFields(FL404.builder().build())
                               .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
                               .orderDirections("test")
                               .furtherDirectionsIfRequired("test")
