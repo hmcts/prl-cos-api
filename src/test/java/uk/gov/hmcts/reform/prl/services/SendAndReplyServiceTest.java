@@ -9,15 +9,18 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -92,6 +95,9 @@ public class SendAndReplyServiceTest {
 
     @Mock
     private  RefDataService refDataService;
+
+    @Mock
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     @Before
     public void init() {
@@ -412,8 +418,25 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testGetJudiciaryTierDynmicList() {
-        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenReturn(Collections.emptyMap());
+        Map<String, String> refDataCategoryValueMap = Map.of("51", "High Court Judge", "46", "District Judge Magistrates Court") ;
+
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenReturn(refDataCategoryValueMap);
+
         DynamicList judiciaryTierDynmicList = sendAndReplyService.getJudiciaryTierDynmicList(anyString(),anyString(), anyString(), anyString());
         assertNotNull(judiciaryTierDynmicList);
+    }
+
+    @Test
+    public void testGetExternalRecipientsDynamicMultiselectList() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        Map<String, List<DynamicMultiselectListElement>> listItems = new HashMap<>();
+        listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
+        listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
+        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData)).thenReturn(listItems);
+        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData)).thenReturn(listItems);
+
+        sendAndReplyService.getExternalRecipientsDynamicMultiselectList(caseData);
     }
 }

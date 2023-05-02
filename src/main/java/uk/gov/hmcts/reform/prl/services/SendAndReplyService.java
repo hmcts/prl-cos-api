@@ -77,6 +77,8 @@ public class SendAndReplyService {
     @Value("${sendandreply.service-code}")
     private String serviceCode;
 
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
+
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
         String subject = message.getMessageSubject();
@@ -111,7 +113,7 @@ public class SendAndReplyService {
     public Map<String, Object> setSenderAndGenerateMessageList(CaseData caseData, String auth) {
 
         // TODO remove this method
-        testmethod(caseData, auth);
+//        testmethod(caseData, auth);
 
         Map<String, Object> data = new HashMap<>();
         MessageMetaData messageMetaData = MessageMetaData.builder()
@@ -284,8 +286,7 @@ public class SendAndReplyService {
      * @param caseData CaseData object.
      * @return DynamicMultiSelectList.
      */
-    private DynamicMultiSelectList getExternalRecipientsDynamicMultiselectList(CaseData caseData) {
-        DynamicMultiSelectListService dynamicMultiSelectListService = new DynamicMultiSelectListService();
+    public DynamicMultiSelectList getExternalRecipientsDynamicMultiselectList(CaseData caseData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         listItems.addAll(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData).get(APPLICANTS));
         listItems.addAll(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData).get(RESPONDENTS));
@@ -331,14 +332,10 @@ public class SendAndReplyService {
                  getLinkedCasesDynamicList(auth, String.valueOf(caseData.getId())));
 
 
-        try {
-            CaseDetails caseDetails = ccdCaseApi.getCase(auth, String.valueOf(caseData.getId()));
-            caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseDetails caseDetails = ccdCaseApi.getCase(auth, String.valueOf(caseData.getId()));
+        caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-            log.info("CaseTYPE of Application --> {}", caseData.getCaseTypeOfApplication());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        log.info("CaseTYPE of Application --> {}", caseData.getCaseTypeOfApplication());
 
         log.info("Dynamic List of Applicants and Respondents {}",  getExternalRecipientsDynamicMultiselectList(caseData));
         // TODO
