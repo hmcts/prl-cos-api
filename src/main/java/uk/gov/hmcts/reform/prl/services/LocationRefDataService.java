@@ -35,9 +35,11 @@ public class LocationRefDataService {
 
     public List<DynamicListElement> getCourtLocations(String authToken) {
         try {
-            CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(authToken,
-                                                                                    authTokenGenerator.generate(),
-                                                                                    SERVICE_ID);
+            CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
+                authToken,
+                authTokenGenerator.generate(),
+                SERVICE_ID
+            );
             return onlyEnglandAndWalesLocations(courtDetails);
         } catch (Exception e) {
             log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
@@ -47,9 +49,11 @@ public class LocationRefDataService {
 
     public List<DynamicListElement> getDaCourtLocations(String authToken) {
         try {
-            CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(authToken,
-                                                                                    authTokenGenerator.generate(),
-                                                                                    SERVICE_ID);
+            CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
+                authToken,
+                authTokenGenerator.generate(),
+                SERVICE_ID
+            );
             return daOnlyEnglandAndWalesLocations(courtDetails, "FL401");
         } catch (Exception e) {
             log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
@@ -77,8 +81,10 @@ public class LocationRefDataService {
     }
 
     private DynamicListElement getDaDisplayEntry(CourtVenue location) {
-        String value = concat(concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
-                              location.getPostcode());
+        String value = concat(
+            concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
+            location.getPostcode()
+        );
         String key = location.getCourtEpimmsId() + ":";
         if (daCourtsToFilter.length() > 1) {
             Optional<String> code = Arrays.stream(daCourtsToFilter.split(",")).filter(ele -> Arrays.stream(ele.split(":")).toArray()[0]
@@ -103,7 +109,7 @@ public class LocationRefDataService {
                     return true;
                 }
                 List<String> ids = Arrays.stream(courtList).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
-                        .toString())
+                    .toString())
                     .collect(Collectors.toList());
                 return ids.contains(location.getCourtEpimmsId());
             })
@@ -111,8 +117,10 @@ public class LocationRefDataService {
     }
 
     private DynamicListElement getDisplayEntry(CourtVenue location) {
-        String value = concat(concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
-                              location.getPostcode());
+        String value = concat(
+            concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
+            location.getPostcode()
+        );
         String key = location.getCourtEpimmsId() + ":";
         if (courtsToFilter.length() > 1) {
             Optional<String> code = Arrays.stream(courtsToFilter.split(",")).filter(ele -> Arrays.stream(ele.split(":")).toArray()[0]
@@ -120,22 +128,24 @@ public class LocationRefDataService {
             if (code.isPresent()) {
                 key += Arrays.stream(code.get().split(":")).toArray().length > 1
                     ? Arrays.stream(code.get().split(":")).toArray()[1] : "";
-                log.info("** Court venue key: {}, value: {} ", key, value);
             }
         }
         return DynamicListElement.builder().code(key).label(value).build();
     }
 
     public Optional<CourtVenue> getCourtDetailsFromEpimmsId(String baseLocationId, String authToken) {
-        CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(authToken,
-                                                                                authTokenGenerator.generate(),
-                                                                                SERVICE_ID);
-
-        Optional<CourtVenue> courtVenue = courtDetails.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
+        CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
+            authToken,
+            authTokenGenerator.generate(),
+            SERVICE_ID
+        );
+        Optional<CourtVenue> courtVenue = (null == courtDetails || null == courtDetails.getCourtVenues())
+            ? Optional.empty()
+            : courtDetails.getCourtVenues().stream().filter(location -> !"Scotland".equals(
+                location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> baseLocationId.equalsIgnoreCase(location.getCourtEpimmsId()))
             .findFirst();
-
         return courtVenue;
     }
 }
