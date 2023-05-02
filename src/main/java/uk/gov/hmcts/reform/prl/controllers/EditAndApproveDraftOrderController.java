@@ -133,6 +133,7 @@ public class EditAndApproveDraftOrderController {
             authorisation,
             callbackRequest
         ));
+        manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
         manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
@@ -244,7 +245,7 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            if (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+            if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 final CaseDetails caseDetails = callbackRequest.getCaseDetails();
                 manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
             }
