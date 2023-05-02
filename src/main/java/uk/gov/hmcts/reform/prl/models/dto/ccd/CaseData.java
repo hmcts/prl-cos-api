@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -107,7 +106,6 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -120,27 +118,8 @@ import java.util.Map;
 @SuperBuilder(toBuilder = true)
 public class CaseData extends BaseCaseData implements MappableObject {
 
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
-    private final LocalDateTime createdDate;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
-    private final LocalDateTime lastModifiedDate;
-
-    private final String dateSubmitted;
-
-    private final String caseSubmittedTimeStamp;
-
-    private String courtSeal;
-
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;
-
-    /**
-     * Case Type Of Application.
-     */
-    @JsonProperty("caseTypeOfApplication")
-    private final String caseTypeOfApplication;
 
     /**
      * Case created by.
@@ -150,25 +129,12 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonProperty("isCafcass")
     private YesOrNo isCafcass;
 
-    /**
-     * Case Type Of Application.
-     */
-    private final String selectedCaseTypeID;
-
-    /**
-     * Case name.
-     */
-    @JsonAlias({"applicantCaseName", "applicantOrRespondentCaseName"})
-    private final String applicantCaseName;
-
-
     private String applicantName;
 
     private String respondentName;
 
 
     private String childName;
-
 
     /**
      * Confidential Disclaimer.
