@@ -133,6 +133,7 @@ public class EditAndApproveDraftOrderController {
             authorisation,
             callbackRequest
         ));
+        manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated).build();
     }
@@ -249,7 +250,6 @@ public class EditAndApproveDraftOrderController {
             }
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
