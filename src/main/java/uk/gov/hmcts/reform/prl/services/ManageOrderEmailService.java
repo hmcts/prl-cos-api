@@ -452,9 +452,15 @@ public class ManageOrderEmailService {
         Map<String, String> applicantMap = new HashMap<>();
         Optional<Element<PartyDetails>> applicant = parties.stream()
             .filter(element -> element.getId().toString().equalsIgnoreCase(code)).findFirst();
-        if (applicant.isPresent() && YesOrNo.Yes.equals(applicant.get().getValue().getCanYouProvideEmailAddress())) {
-            applicantMap.put(applicant.get().getValue().getEmail(), applicant.get().getValue().getFirstName() + " "
-                + applicant.get().getValue().getLastName());
+        if (applicant.isPresent()) {
+            if (YesNoDontKnow.yes.equals(applicant.get().getValue().getDoTheyHaveLegalRepresentation())) {
+                applicantMap.put(applicant.get().getValue().getEmail(), applicant.get().getValue().getFirstName() + " "
+                    + applicant.get().getValue().getLastName());
+            } else if (YesOrNo.Yes.equals(applicant.get().getValue().getCanYouProvideEmailAddress())) {
+                applicantMap.put(applicant.get().getValue().getSolicitorEmail(), applicant.get().getValue()
+                    .getRepresentativeFirstName() + " "
+                    + applicant.get().getValue().getRepresentativeLastName());
+            }
         }
         return applicantMap;
     }
