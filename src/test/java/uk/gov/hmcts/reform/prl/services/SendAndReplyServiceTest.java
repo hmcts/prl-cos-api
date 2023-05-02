@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -36,7 +37,9 @@ import java.util.UUID;
 import static java.util.Optional.ofNullable;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -86,6 +89,9 @@ public class SendAndReplyServiceTest {
 
     @Mock
     private HearingDataService hearingDataService;
+
+    @Mock
+    private  RefDataService refDataService;
 
     @Before
     public void init() {
@@ -396,5 +402,18 @@ public class SendAndReplyServiceTest {
             email,
             LanguagePreference.english
         );
+    }
+
+    @Test
+    public void testGetLinkedCasesDynamicList() {
+        DynamicList linkedCasesDynamicList = sendAndReplyService.getLinkedCasesDynamicList(anyString(), anyString());
+        assertNotNull(linkedCasesDynamicList);
+    }
+
+    @Test
+    public void testGetJudiciaryTierDynmicList() {
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenReturn(Collections.emptyMap());
+        DynamicList judiciaryTierDynmicList = sendAndReplyService.getJudiciaryTierDynmicList(anyString(),anyString(), anyString(), anyString());
+        assertNotNull(judiciaryTierDynmicList);
     }
 }

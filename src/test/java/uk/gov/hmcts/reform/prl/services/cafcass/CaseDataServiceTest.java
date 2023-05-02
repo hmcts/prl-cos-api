@@ -117,7 +117,7 @@ public class CaseDataServiceTest {
 
         Map<String, String> refDataMap = new HashMap<>();
         refDataMap.put("ABA5-APL","Appeal");
-        when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString())).thenReturn(refDataMap);
+        when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataMap);
 
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
                                                                           "start", "end"

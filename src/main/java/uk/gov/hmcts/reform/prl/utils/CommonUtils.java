@@ -5,6 +5,8 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -136,6 +138,12 @@ public class CommonUtils {
     public static DynamicList getDynamicList(List<DynamicListElement> listItems) {
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY)
+            .listItems(listItems).build();
+    }
+
+    public static DynamicMultiSelectList getDynamicMultiselectList(List<DynamicMultiselectListElement> listItems) {
+        return DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.EMPTY))
             .listItems(listItems).build();
     }
 }
