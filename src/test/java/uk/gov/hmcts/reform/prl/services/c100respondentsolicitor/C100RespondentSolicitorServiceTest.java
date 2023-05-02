@@ -90,6 +90,10 @@ public class C100RespondentSolicitorServiceTest {
 
     public static final String authToken = "Bearer TestAuthToken";
 
+    Map<String, Object> stringObjectMap;
+
+    CallbackRequest callbackRequest;
+
     @Before
     public void setUp() {
 
@@ -203,14 +207,10 @@ public class C100RespondentSolicitorServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
-
-
         List<RespondentWelshNeedsListEnum> welshNeedsListEnum = new ArrayList<>();
         welshNeedsListEnum.add(RespondentWelshNeedsListEnum.speakWelsh);
         List<PartyEnum> party = new ArrayList<>();
         party.add(PartyEnum.respondent);
-
-
 
         List<CaseUser> caseUserList  = new ArrayList<>();
         caseUserList.add(CaseUser.builder()
@@ -274,6 +274,8 @@ public class C100RespondentSolicitorServiceTest {
                                             .reasonForJurisdictionDetails("Test")
                                             .requestToAuthorityDetails("Test")
                                             .build())
+            .internationalElementJurisdiction(SolicitorInternationalElement.builder().build())
+            .internationalElementRequest(SolicitorInternationalElement.builder().build())
             .internationalElementChild(SolicitorInternationalElement
                                            .builder()
                                            .reasonForChild(Yes)
@@ -324,30 +326,116 @@ public class C100RespondentSolicitorServiceTest {
                                                             .reasonNotAttendingMiam("test")
                                                             .build())
             .build();
-    }
 
-    @Test
-    public void populateAboutToStartCaseDataTest() {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        List<String> errorList = new ArrayList<>();
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
-            .eventId("c100ResSolConsentingToApplicationA")
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
             .build();
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataResSolConsentingToApplicationTest() {
+
+        callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataForResSolKeepDetailsPrivateTest() {
+
+        callbackRequest.setEventId("c100ResSolKeepDetailsPrivateA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
             callbackRequest
         );
 
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataForResSolConfirmOrEditContactDetailsTest() {
+
+        callbackRequest.setEventId("c100ResSolConfirmOrEditContactDetailsA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataForResSolAttendingTheCourtTest() {
+
+        callbackRequest.setEventId("c100ResSolAttendingTheCourtA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataForResSolMiamTest() {
+
+        callbackRequest.setEventId("c100ResSolMiamA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataForResSolCurrentOrPreviousProceedingsTest() {
+
+        callbackRequest.setEventId("c100ResSolCurrentOrPreviousProceedingsA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataForResSolAllegationsOfHarmTest() {
+
+        callbackRequest.setEventId("c100ResSolAllegationsOfHarmA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataForResSolInternationalElementTest() {
+        callbackRequest.setEventId("c100ResSolInternationalElementA");
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataForResSolAbilityToParticipateTest() {
+        callbackRequest.setEventId("c100ResSolAbilityToParticipateA");
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
         assertTrue(response.containsKey("respondents"));
     }
 
@@ -398,8 +486,151 @@ public class C100RespondentSolicitorServiceTest {
         );
 
         assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void submitC7ResponseForActiveRespondentTest() throws Exception {
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+
+        callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
+
+        List<String> errorList = new ArrayList<>();
+        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
+            callbackRequest,authToken,errorList
+        );
+
+        assertTrue(response.containsKey("respondents"));
 
     }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolConsentingToApplicationATest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+
+        callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateATest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolKeepDetailsPrivateA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolConfirmOrEditContactDetailsTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolConfirmOrEditContactDetailsA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolAttendingTheCourtTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolAttendingTheCourtA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForc100ResSolMiamTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolMiamA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolCurrentOrPreviousProceedingsTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolCurrentOrPreviousProceedingsA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolAllegationsOfHarmTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolAllegationsOfHarmA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolInternationalElementTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolInternationalElementA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolAbilityToParticipateTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolAbilityToParticipateA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
 
     @ParameterizedTest
     @ValueSource(strings = { "c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
