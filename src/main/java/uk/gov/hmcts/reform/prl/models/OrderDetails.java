@@ -30,6 +30,7 @@ public class OrderDetails {
     private final String orderType;
     private final String orderTypeId;
     private final YesOrNo isTheOrderAboutChildren;
+    private final YesOrNo isTheOrderAboutAllChildren;
     private final String childrenList;
     private final YesOrNo orderClosesCase;
     private final Document orderDocument;
@@ -43,6 +44,12 @@ public class OrderDetails {
     //PRL-3254 - Added for storing selected hearing dropdown
     private String selectedHearingType;
 
+    private final SdoDetails sdoDetails;
+    private final YesOrNo cafcassServedOptions;
+    private final String cafcassEmailId;
+    private final YesOrNo cafcassCymruServedOptions;
+    private final String cafcassCymruEmail;
+    private final YesOrNo isOrderCreatedBySolicitor;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
