@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 
 import java.time.LocalDateTime;
@@ -32,6 +35,18 @@ public class Message extends MessageMetaData {
     private String replyFrom;
     private String replyTo;
 
+    //PRL-3454 - send & reply message enhancements
+    private InternalExternalMessageEnum internalOrExternalMessage;
+    private InternalMessageWhoToSendToEnum internalMessageWhoToSendTo;
+    private String judicialOrMagistrateTier;
+    private String judgeName;
+    private String selectedCtscEmail;
+    private String ctscEmailAddress;
+    private YesOrNo internalMessageUrgent;
+    private MessageAboutEnum messageAbout;
+    private String selectedLinkedApplications;
+    private String selectedFutureHearings;
+    private String selectedSubmittedDocuments;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
