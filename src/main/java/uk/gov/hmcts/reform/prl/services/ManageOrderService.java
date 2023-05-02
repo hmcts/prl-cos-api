@@ -1939,7 +1939,7 @@ public class ManageOrderService {
         return caseData;
     }
 
-    public static void setMarkedToServeEmailNotification(CaseData caseData, Map<String, Object> caseDataUpdated) {
+    public void setMarkedToServeEmailNotification(CaseData caseData, Map<String, Object> caseDataUpdated) {
         if ((null != caseData.getManageOrders() && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed()))
             || (null != caseData.getServeOrderData() && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
             caseDataUpdated.put("markedToServeEmailNotification", Yes);

@@ -140,12 +140,10 @@ public class LocationRefDataService {
             SERVICE_ID
         );
 
-        Optional<CourtVenue> courtVenue = courtDetails.getCourtVenues().stream().filter(location -> !"Scotland".equals(
+        return courtVenue = courtDetails.getCourtVenues().stream().filter(location -> !"Scotland".equals(
             location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> baseLocationId.equalsIgnoreCase(location.getCourtEpimmsId()))
             .findFirst();
-
-        return courtVenue;
     }
 }
