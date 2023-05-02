@@ -95,6 +95,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VERIFY_CASE_NUMBER_ADDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
@@ -321,7 +322,10 @@ public class CallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
-        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
+        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
+            baseLocationId,
+            authorisation
+        );
         caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
         caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
         if (courtVenue.isPresent()) {
@@ -405,7 +409,9 @@ public class CallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(caseDataUpdated,
-                                                                                                caseData.getLegalAdviserList(), refDataUserService);
+                                                                                                caseData.getLegalAdviserList(),
+                                                                                                refDataUserService
+        );
         caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
 
         caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
@@ -500,14 +506,18 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
+        List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(callbackRequest.getCaseDetails().getId()));
 
         Optional<String> previousState = eventsForCase.stream()
             .map(CaseEventDetail::getStateId)
             .findFirst();
         log.info("State during the fl401 add case number in addCaseNumberSubmitted: {}", previousState.get());
-        caseDataUpdated.put("isAddCaseNumberAdded", previousState.get().equalsIgnoreCase(String.valueOf(SUBMITTED_PAID)) ? Yes : No);
+        if (previousState.isPresent()) {
+            caseDataUpdated.put(
+                VERIFY_CASE_NUMBER_ADDED,
+                SUBMITTED_PAID.getLabel().equalsIgnoreCase(previousState.get()) ? Yes : No
+            );
+        }
         log.info("fl401 add case number flag: {}", caseDataUpdated.get("isAddCaseNumberAdded"));
         caseDataUpdated.put("issueDate", LocalDate.now());
         return AboutToStartOrSubmitCallbackResponse.builder()

@@ -445,7 +445,8 @@ public class PrlAppsConstants {
     public static final int RD_STAFF_PAGE_SIZE = 50;
     public static final int RD_STAFF_FIRST_PAGE = 0;
     public static final int RD_STAFF_SECOND_PAGE = 1;
-    
+
     //PRL-3254 - hearing status - Completed
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
+    public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
 }
