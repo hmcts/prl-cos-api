@@ -101,7 +101,6 @@ public class ListWithoutNoticeControllerFT {
         Assert.assertTrue(res.getData().containsKey("listWithoutNoticeHearingDetails"));
     }
 
-    @Ignore
     @Test
     public void testDateReservedWithListAssit_200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(dateReservedWithListAssit);
@@ -122,7 +121,6 @@ public class ListWithoutNoticeControllerFT {
     }
 
 
-    @Ignore
     @Test
     public void testDateConfirmedByListingTeam_200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(dateConfirmedByListingTeam);
@@ -142,7 +140,6 @@ public class ListWithoutNoticeControllerFT {
         Assert.assertTrue(res.getData().containsKey("listWithoutNoticeHearingDetails"));
     }
 
-    @Ignore
     @Test
     public void testdateToBeFixed_200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(dateToBeFixed);
