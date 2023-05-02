@@ -19,25 +19,19 @@ import java.util.List;
 public class SendOrReplyMessage {
 
     //PRL-3454 - send & reply messages enhancements
+    @JsonUnwrapped(enabled = false)
     @JsonProperty("openMessagesList")
     private final List<Element<Message>> openMessagesList;
 
+    @JsonUnwrapped(enabled = false)
     @JsonProperty("closedMessagesList")
     private final List<Element<Message>> closedMessagesList;
 
-    @JsonUnwrapped
     private DynamicList judicialOrMagistrateTierList;
-
-    @JsonUnwrapped
     private DynamicList linkedApplicationsList;
-
-    @JsonUnwrapped
     private DynamicList futureHearingsList;
-
-    @JsonUnwrapped
     private DynamicList submittedDocumentsList;
-
-    @JsonUnwrapped
     private DynamicMultiSelectList externalPartiesList;
 
 }
+

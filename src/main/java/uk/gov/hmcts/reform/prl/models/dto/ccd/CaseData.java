@@ -788,6 +788,8 @@ public class CaseData implements MappableObject {
     private NextHearingDetails nextHearingDetails;
 
     //PRL-3454 - send and reply message enhancements
+    @JsonUnwrapped
+    @Builder.Default
     private SendOrReplyMessage sendOrReplyMessage;
 
 }
