@@ -418,7 +418,7 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testGetJudiciaryTierDynmicList() {
-        Map<String, String> refDataCategoryValueMap = Map.of("51", "High Court Judge", "46", "District Judge Magistrates Court") ;
+        Map<String, String> refDataCategoryValueMap = Map.of("51", "High Court Judge", "46", "District Judge Magistrates Court");
 
         when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenReturn(refDataCategoryValueMap);
 
