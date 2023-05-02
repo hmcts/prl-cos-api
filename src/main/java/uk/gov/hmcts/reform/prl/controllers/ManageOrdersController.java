@@ -58,6 +58,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
@@ -260,10 +261,20 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        if (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+            final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
+            manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+        }
+        // The following can be removed or utilised based on requirement
+        /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
         manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
-        manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
+        manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
