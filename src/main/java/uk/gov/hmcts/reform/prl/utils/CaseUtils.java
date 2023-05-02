@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -142,5 +143,10 @@ public class CaseUtils {
 
     public static boolean hasLegalRepresentation(PartyDetails partyDetails) {
         return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
+    }
+
+    public static String getFormattedDatAndTime(LocalDateTime dateTime) {
+        DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("EEEE, dd MMM, yyyy 'at' HH:mm a");
+        return  dateTime.format(dateTimeFormat);
     }
 }

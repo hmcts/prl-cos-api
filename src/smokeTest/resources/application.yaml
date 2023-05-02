@@ -417,6 +417,10 @@ document:
       prl_c6a_filename: Notice_Of_Parties_Order_C6a.pdf
       prl_c6a_draft_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Draft.docx
       prl_c6a_draft_filename: Notice_Of_Parties_Order_C6a_draft.pdf
+      prl_sdo_draft_template: FL-PRL-GOR-ENG-Standard-Directions-Order-Draft.docx
+      prl_sdo_draft_filename: Standard_Directions_Order_draft.pdf
+      prl_sdo_template: FL-PRL-GOR-ENG-Standard-Directions-Order-Final.docx
+      prl_sdo_filename: Standard_Directions_Order_Final.pdf
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf
