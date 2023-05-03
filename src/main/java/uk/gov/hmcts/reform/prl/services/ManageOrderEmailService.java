@@ -115,8 +115,6 @@ public class ManageOrderEmailService {
                                  + " " + caseData.getApplicantsFL401().getFirstName()),
                              caseData
             );
-
-
         }
         if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
             sendEmailToParty(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
@@ -340,7 +338,6 @@ public class ManageOrderEmailService {
         if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
             typeOfHearing = URGENT_CASE;
         }
-
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
         return ManageOrderEmail.builder()
@@ -349,7 +346,7 @@ public class ManageOrderEmailService {
             .caseUrgency(typeOfHearing)
             .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
             .familyManNumber(caseData.getFamilymanCaseNumber() != null ? caseData.getFamilymanCaseNumber() : "")
-            .orderLink(citizenDashboardUrl)
+            .orderLink(manageCaseUrl + "/" + caseData.getId() + "#Orders")
             .build();
     }
 
