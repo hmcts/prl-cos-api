@@ -6,8 +6,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -98,6 +104,14 @@ public class SendAndReplyServiceTest {
 
     @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
+    private final String serviceAuthToken = "Bearer testServiceAuth";
+
+    @Mock
+    private CoreCaseDataApi coreCaseDataApi;
 
     @Before
     public void init() {
@@ -438,5 +452,29 @@ public class SendAndReplyServiceTest {
         when(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData)).thenReturn(listItems);
 
         sendAndReplyService.getExternalRecipientsDynamicMultiselectList(caseData);
+    }
+
+    @Test
+    public void testPopulateDynamicListsForSendAndReply() {
+
+        Map<String, List<DynamicMultiselectListElement>> listItems = new HashMap<>();
+        listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
+        listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
+        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData)).thenReturn(listItems);
+        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData)).thenReturn(listItems);
+
+        Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(categoriesAndDocuments);
+        sendAndReplyService.populateDynamicListsForSendAndReply(caseData, serviceAuthToken);
     }
 }
