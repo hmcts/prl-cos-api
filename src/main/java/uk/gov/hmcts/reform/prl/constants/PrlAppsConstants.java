@@ -546,6 +546,10 @@ public class PrlAppsConstants {
     public static final String CASE_DATA_ID = "id";
     public static final String LISTWITHOUTNOTICE_HEARINGDETAILS = "listWithoutNoticeHearingDetails";
     public static final String FL401_LISTONNOTICE_HEARINGDETAILS = "fl401ListOnNoticeHearingDetails";
+    public static final String LINKED_CASES_LIST = "linkedCaCasesList";
+    public static final String LEGAL_ADVISER_LIST = "legalAdviserList";
+    public static final String FL401_CASE_WITHOUT_NOTICE = "isFl401CaseCreatedForWithOutNotice";
+    public static final String FL401_LIST_ON_NOTICE_DOCUMENT = "fl401ListOnNoticeDocument";
 
     public static final String DATE_CONFIRMED_IN_HEARINGS_TAB = "dateConfirmedInHearingsTab";
     public static final String HEARING_DATE_CONFIRM_OPTION_ENUM = "hearingDateConfirmOptionEnum";
