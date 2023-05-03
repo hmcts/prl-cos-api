@@ -129,7 +129,6 @@ public class AmendOrderService {
                                                        String loggedInUserType) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> draftOrderElement = element(getCurrentDraftOrderDetails(caseData,amendedDocument, loggedInUserType));
-        log.info("Draft Order Collection:: {}", draftOrderElement.getValue().getIsOrderUploadedByJudgeOrAdmin());
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(draftOrderElement);
@@ -168,6 +167,8 @@ public class AmendOrderService {
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
+                              .nameOfJudgeForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfJudgeToReviewOrder()))
+                              .nameOfLaForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder()))
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
