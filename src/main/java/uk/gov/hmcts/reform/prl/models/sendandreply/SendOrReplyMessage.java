@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -29,6 +32,10 @@ public class SendOrReplyMessage {
     private DynamicList futureHearingsList;
     private DynamicList submittedDocumentsList;
     private DynamicMultiSelectList externalPartiesList;
+    private InternalMessageWhoToSendToEnum internalMessageWhoToSendTo;
+    private InternalExternalMessageEnum internalOrExternalMessage;
+    private YesOrNo internalMessageUrgent;
+
 
 }
 
