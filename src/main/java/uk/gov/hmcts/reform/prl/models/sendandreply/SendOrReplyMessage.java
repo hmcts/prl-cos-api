@@ -31,3 +31,4 @@ public class SendOrReplyMessage {
     private DynamicMultiSelectList externalPartiesList;
 
 }
+

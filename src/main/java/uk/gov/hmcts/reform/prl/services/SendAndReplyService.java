@@ -6,21 +6,33 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
+import uk.gov.hmcts.reform.prl.repositories.CcdCaseApi;
+import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -30,7 +42,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicMultiselectList;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -51,6 +69,23 @@ public class SendAndReplyService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
+    private final HearingDataService hearingDataService;
+
+    private  final CcdCaseApi ccdCaseApi;
+
+    private final RefDataService refDataService;
+
+    @Value("${sendandreply.category-id}")
+    private String categoryId;
+
+    @Value("${sendandreply.service-code}")
+    private String serviceCode;
+
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    private final AuthTokenGenerator authTokenGenerator;
+
+    private final CoreCaseDataApi coreCaseDataApi;
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -235,6 +270,201 @@ public class SendAndReplyService {
         }
     }
 
+    public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization) {
+
+        final String caseReference = String.valueOf(caseData.getId());
+        String s2sToken = authTokenGenerator.generate();
+        return caseData.toBuilder().sendOrReplyMessage(
+            SendOrReplyMessage.builder()
+                .judicialOrMagistrateTierList(getJudiciaryTierDynmicList(
+                    authorization,
+                    s2sToken,
+                    serviceCode,
+                    categoryId
+                ))
+                .externalPartiesList(getExternalRecipientsDynamicMultiselectList(caseData))
+                .linkedApplicationsList(getLinkedCasesDynamicList(authorization, caseReference))
+                .submittedDocumentsList(getCategoriesAndDocuments(authorization, caseReference))
+                .build()).build();
+    }
+
+    /**
+     * This method will return linked cases dynamic list.
+     * @param authorization Auth token.
+     * @param caseId CaseData object.
+     * @return DynamicList.
+     */
+    public DynamicList getLinkedCasesDynamicList(String authorization, String caseId) {
+
+        return getDynamicList(hearingDataService.getLinkedCasesDynamicList(
+            authorization,
+            caseId
+        ));
+    }
+
+    /**
+     * This method will return Dynamic Multi select list for
+     * applicants, respondents, cafcass and other reciepients.
+     * @param caseData CaseData object.
+     * @return DynamicMultiSelectList.
+     */
+    public DynamicMultiSelectList getExternalRecipientsDynamicMultiselectList(CaseData caseData) {
+        try {
+            List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+            listItems.addAll(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData).get(APPLICANTS));
+            listItems.addAll(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData).get(RESPONDENTS));
+            listItems.add(DynamicMultiselectListElement.builder().code(CAFCASS).label(CAFCASS).build());
+            listItems.add(DynamicMultiselectListElement.builder().code(OTHER).label(OTHER).build());
+            return getDynamicMultiselectList(listItems);
+        } catch (Exception e) {
+            log.error("Error in getExternalRecipientsDynamicMultiselectList method ---> {}", e);
+        }
+        return DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.EMPTY)).build();
+    }
+
+    /**
+     *  This method will call refdata api and create Dynamic List
+     *  for Judicier tier.
+     * @param authorization Authoriszation token.
+     * @param s2sToken service token.
+     * @param serviceCode Service code e.g. ABA5 for PRL.
+     * @param categoryId e.g. JudgeType.
+     * @return
+     */
+    public DynamicList getJudiciaryTierDynmicList(String authorization, String s2sToken, String serviceCode, String categoryId) {
+
+        try {
+            Map<String, String> refDataCategoryValueMap = refDataService.getRefDataCategoryValueMap(
+                authorization,
+                s2sToken,
+                serviceCode,
+                categoryId
+            );
+
+            if (refDataCategoryValueMap != null && !refDataCategoryValueMap.isEmpty()) {
+                List<DynamicListElement> judiciaryTierDynmicElementList = new ArrayList<>();
+
+                refDataCategoryValueMap.forEach((k, v) -> judiciaryTierDynmicElementList.add(DynamicListElement.builder().code(
+                    k).label(v).build()));
+
+                return getDynamicList(judiciaryTierDynmicElementList);
+            }
+        } catch (Exception e) {
+            log.error("Error in getJudiciaryTierDynmicList method ---> {}", e);
+        }
+        return DynamicList.builder()
+            .value(DynamicListElement.EMPTY).build();
+    }
+
+
+    public DynamicList getCategoriesAndDocuments(String authorisation, String caseReference) {
+        try {
+            CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
+                authorisation,
+                authTokenGenerator.generate(),
+                caseReference
+            );
+            return createDynamicList(categoriesAndDocuments);
+        } catch (Exception e) {
+            log.error("Error in getCategoriesAndDocuments method {}", e);
+        }
+        return DynamicList.builder()
+            .value(DynamicListElement.EMPTY).build();
+    }
+
+    private DynamicList createDynamicList(CategoriesAndDocuments categoriesAndDocuments) {
+
+        List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
+            .sorted(Comparator.comparing(Category::getCategoryName))
+            .collect(Collectors.toList());
+
+        List<DynamicListElement> dynamicListElementList = new ArrayList<>();
+        String parentString = null;
+        dynamicListElementList = createDynamicListFromSubCategories(parentCategories, dynamicListElementList,
+                                                                    parentString, null
+        );
+        System.out.println("Done");
+        List<DynamicListElement> finalDynamicListElementList = dynamicListElementList;
+        categoriesAndDocuments.getUncategorisedDocuments().stream().forEach(document -> {
+            finalDynamicListElementList.add(
+                DynamicListElement.builder().code(fetchdocumentidfromurl(document.getDocumentURL()))
+                    .label(document.getDocumentFilename()).build()
+            );
+        });
+        return DynamicList.builder().value(DynamicListElement.EMPTY)
+            .listItems(finalDynamicListElementList).build();
+    }
+
+    private List<DynamicListElement> createDynamicListFromSubCategories(List<Category> categoryList,
+                                                                        List<DynamicListElement> dynamicListElementList,
+                                                                        final String parentLabelString,
+                                                                        final String parentCodeString) {
+        categoryList.stream().forEach(category -> {
+            if (parentLabelString == null) {
+                if (category.getDocuments() != null) {
+                    category.getDocuments().stream().forEach(document -> {
+                        dynamicListElementList.add(
+                            DynamicListElement.builder().code(category.getCategoryId() + "___"
+                                                                  + fetchdocumentidfromurl(document.getDocumentURL()))
+                                .label(category.getCategoryName() + " --- " + document.getDocumentFilename()).build()
+                        );
+                    });
+                }
+                if (category.getSubCategories() != null) {
+                    createDynamicListFromSubCategories(
+                        category.getSubCategories(),
+                        dynamicListElementList,
+                        category.getCategoryName(),
+                        category.getCategoryId()
+                    );
+                }
+            } else {
+                if (category.getDocuments() != null) {
+                    category.getDocuments().stream().forEach(document -> {
+                        dynamicListElementList.add(
+                            DynamicListElement.builder()
+                                .code(parentCodeString + " -> " + category.getCategoryId() + "___"
+                                          + fetchdocumentidfromurl(document.getDocumentURL()))
+                                .label(parentLabelString + " -> " + category.getCategoryName() + " --- "
+                                           + document.getDocumentFilename()).build()
+                        );
+                    });
+                }
+                if (category.getSubCategories() != null) {
+                    createDynamicListFromSubCategories(category.getSubCategories(), dynamicListElementList,
+                                                       parentLabelString + " -> " + category.getCategoryName(),
+                                                       parentCodeString + " -> " + category.getCategoryId()
+                    );
+                }
+            }
+
+
+        });
+        return dynamicListElementList;
+    }
+
+    private String fetchdocumentidfromurl(String documentUrl) {
+
+        return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
+
+    }
+
+
+    private List<DynamicListElement> getDisplayEntry(Category category) {
+        List<String> key = null;
+        String value = null;
+        List<DynamicListElement> dynamicListElementList = new ArrayList<>();
+        List<String> keys = new ArrayList<>();
+        category.getDocuments().stream().forEach(document -> {
+            keys.add(category.getCategoryId() + "_" + document.getDocumentURL());
+            dynamicListElementList.add(
+                DynamicListElement.builder().code(category.getCategoryId() + "_" + document.getDocumentURL())
+                    .label(category.getCategoryName() + "-" + document.getDocumentFilename()).build()
+            );
+        });
+        return dynamicListElementList;
+    }
 
 
 }

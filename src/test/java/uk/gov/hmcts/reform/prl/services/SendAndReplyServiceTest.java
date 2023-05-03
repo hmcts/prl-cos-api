@@ -6,17 +6,27 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -36,7 +46,9 @@ import java.util.UUID;
 import static java.util.Optional.ofNullable;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -83,6 +95,23 @@ public class SendAndReplyServiceTest {
     DynamicList dynamicList;
     CaseData caseData;
     CaseData caseDataWithAddedMessage;
+
+    @Mock
+    private HearingDataService hearingDataService;
+
+    @Mock
+    private  RefDataService refDataService;
+
+    @Mock
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
+    private final String serviceAuthToken = "Bearer testServiceAuth";
+
+    @Mock
+    private CoreCaseDataApi coreCaseDataApi;
 
     @Before
     public void init() {
@@ -393,5 +422,59 @@ public class SendAndReplyServiceTest {
             email,
             LanguagePreference.english
         );
+    }
+
+    @Test
+    public void testGetLinkedCasesDynamicList() {
+        DynamicList linkedCasesDynamicList = sendAndReplyService.getLinkedCasesDynamicList(anyString(), anyString());
+        assertNotNull(linkedCasesDynamicList);
+    }
+
+    @Test
+    public void testGetJudiciaryTierDynmicList() {
+        Map<String, String> refDataCategoryValueMap = Map.of("51", "High Court Judge", "46", "District Judge Magistrates Court");
+
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenReturn(refDataCategoryValueMap);
+
+        DynamicList judiciaryTierDynmicList = sendAndReplyService.getJudiciaryTierDynmicList(anyString(),anyString(), anyString(), anyString());
+        assertNotNull(judiciaryTierDynmicList);
+    }
+
+    @Test
+    public void testGetExternalRecipientsDynamicMultiselectList() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        Map<String, List<DynamicMultiselectListElement>> listItems = new HashMap<>();
+        listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
+        listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
+        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData)).thenReturn(listItems);
+        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData)).thenReturn(listItems);
+
+        sendAndReplyService.getExternalRecipientsDynamicMultiselectList(caseData);
+    }
+
+    @Test
+    public void testPopulateDynamicListsForSendAndReply() {
+
+        Map<String, List<DynamicMultiselectListElement>> listItems = new HashMap<>();
+        listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
+        listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
+        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData)).thenReturn(listItems);
+        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData)).thenReturn(listItems);
+
+        Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(categoriesAndDocuments);
+        sendAndReplyService.populateDynamicListsForSendAndReply(caseData, serviceAuthToken);
     }
 }
