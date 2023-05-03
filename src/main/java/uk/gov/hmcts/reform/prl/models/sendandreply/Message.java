@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
 import java.time.LocalDateTime;
 
@@ -39,7 +40,7 @@ public class Message extends MessageMetaData {
     private InternalExternalMessageEnum internalOrExternalMessage;
     private InternalMessageWhoToSendToEnum internalMessageWhoToSendTo;
     private String judicialOrMagistrateTier;
-    private String judgeName;
+    private JudicialUser sendReplyJudgeName;
     private String selectedCtscEmail;
     private String ctscEmailAddress;
     private YesOrNo internalMessageUrgent;
