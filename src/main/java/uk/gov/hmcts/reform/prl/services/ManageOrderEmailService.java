@@ -357,9 +357,11 @@ public class ManageOrderEmailService {
             String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
             SelectTypeOfOrderEnum isFinalOrder = CaseUtils.getSelectTypeOfOrder(caseData);
             if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+                log.info("** checking to send emails to applicants");
                 sendEmailToPartyOrSolicitor(manageOrders.getRecipientsOptions().getValue(),
                                                                                   caseData.getApplicants(),
                                               isFinalOrder, caseDetails, caseData);
+                log.info("** checking to send emails to respondents");
                 sendEmailToPartyOrSolicitor(manageOrders.getRecipientsOptions().getValue(),
                                                                                   caseData.getRespondents(),
                                               isFinalOrder, caseDetails, caseData);
@@ -429,6 +431,7 @@ public class ManageOrderEmailService {
         Map<String, String> partyMap = new HashMap<>();
         value.forEach(element -> {
             Map<String, String> partyMapTemp;
+            log.info("** fetching email for selection ** {}, --{}--", element.getLabel(), element.getCode());
             partyMapTemp = getPartyMap(element.getCode(),partyDetails);
             partyMap.putAll(partyMapTemp);
         });
