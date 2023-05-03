@@ -32,6 +32,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -433,11 +434,9 @@ public class HearingDataService {
             Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
 
             if (caseLinkedDataList.isPresent()) {
-                for (CaseLinkedData caseLinkedData : caseLinkedDataList.get()) {
-                    final String caseReference = caseLinkedData.getCaseReference();
-                    dynamicListElements.add(DynamicListElement.builder().code(caseReference)
-                                                .label(caseReference).build());
-                }
+                return caseLinkedDataList.get().stream()
+                    .map(cData -> DynamicListElement.builder()
+                        .code(cData.getCaseReference()).label(cData.getCaseReference()).build()).collect(Collectors.toList());
             }
         } catch (Exception e) {
             log.error("Exception occured in getLinkedCasesDynamicList {}", e.getMessage());
