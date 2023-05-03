@@ -91,6 +91,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
@@ -512,14 +513,12 @@ public class CallbackController {
             .map(CaseEventDetail::getStateId)
             .findFirst();
         log.info("State during the fl401 add case number in addCaseNumberSubmitted: {}", previousState.get());
-        if (previousState.isPresent()) {
-            caseDataUpdated.put(
-                VERIFY_CASE_NUMBER_ADDED,
-                SUBMITTED_PAID.getLabel().equalsIgnoreCase(previousState.get()) ? Yes : No
-            );
-        }
+        previousState.ifPresent(s -> caseDataUpdated.put(
+            VERIFY_CASE_NUMBER_ADDED,
+            SUBMITTED_PAID.getLabel().equalsIgnoreCase(s) ? Yes : No
+        ));
         log.info("fl401 add case number flag: {}", caseDataUpdated.get("isAddCaseNumberAdded"));
-        caseDataUpdated.put("issueDate", LocalDate.now());
+        caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
