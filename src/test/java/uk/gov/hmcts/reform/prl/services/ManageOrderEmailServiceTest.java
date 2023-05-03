@@ -1064,7 +1064,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServedShouldNotInvoke() {
+    public void testSendEmailWhenOrderServedShouldInvoke() {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -1081,15 +1081,48 @@ public class ManageOrderEmailServiceTest {
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
-            .applicants(List.of(Element.<PartyDetails>builder().value(applicant).build()))
-            .respondents(List.of(Element.<PartyDetails>builder().value(applicant).build()))
+            .applicants(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(YesOrNo.No)
+                              .recipientsOptions(dynamicMultiSelectList)
                               .cafcassEmailId("test").build())
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         manageOrderEmailService.sendEmailWhenOrderIsServed(CaseDetails.builder().build());
 
-        Mockito.verify(emailService,Mockito.times(1)).getCaseData(Mockito.any());
+        Mockito.verify(emailService,Mockito.times(5)).getCaseData(Mockito.any());
+    }
+
+    @Test
+    public void testSendEmailWhenOrderServedFl401() {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        applicant = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("")
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("Fl401")
+            .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
+            .issueDate(LocalDate.now())
+            .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(YesOrNo.No)
+                              .recipientsOptions(dynamicMultiSelectList)
+                              .cafcassEmailId("test").build())
+            .build();
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(CaseDetails.builder().build());
+        Mockito.verify(emailService,Mockito.times(5)).getCaseData(Mockito.any());
     }
 }
