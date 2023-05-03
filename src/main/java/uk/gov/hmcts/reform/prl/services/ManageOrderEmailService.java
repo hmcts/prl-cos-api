@@ -433,8 +433,10 @@ public class ManageOrderEmailService {
             Map<String, String> partyMapTemp;
             log.info("** fetching email for selection ** {}, --{}--", element.getLabel(), element.getCode());
             partyMapTemp = getPartyMap(element.getCode(),partyDetails);
+            log.info("*** party map temp {} ***", partyMapTemp);
             partyMap.putAll(partyMapTemp);
         });
+        log.info("*** party map {} ***", partyMap);
         for (Map.Entry<String, String> appValues : partyMap.entrySet()) {
             if (!StringUtils.isEmpty(appValues.getKey())) {
                 sendEmailToParty(isFinalOrder, appValues.getKey(),
