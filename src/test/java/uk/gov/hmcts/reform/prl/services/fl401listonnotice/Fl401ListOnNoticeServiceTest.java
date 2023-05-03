@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.fl401listonnotice;
+package uk.gov.hmcts.reform.prl.services.fl401listonnotice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
@@ -26,7 +25,10 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.Fl401ListOnNotice;
-import uk.gov.hmcts.reform.prl.services.fl401listonnotice.Fl401ListOnNoticeService;
+import uk.gov.hmcts.reform.prl.services.HearingDataService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.ArrayList;
@@ -35,24 +37,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class Fl401ListOnNoticeControllerTest {
+public class Fl401ListOnNoticeServiceTest {
 
     @InjectMocks
-    Fl401ListOnNoticeController fl401ListOnNoticeController;
+    Fl401ListOnNoticeService fl401ListOnNoticeService;
 
     @Mock
     private ObjectMapper objectMapper;
 
     @Mock
-    Fl401ListOnNoticeService fl401ListOnNoticeService;
+    private HearingDataService hearingDataService;
 
     public static final String authToken = "Bearer TestAuthToken";
+
+    @Mock
+    RefDataUserService refDataUserService;
+
+    @Mock
+    AllocatedJudgeService allocatedJudgeService;
+
+    @Mock
+    private DocumentGenService documentGenService;
 
     private CaseData caseData;
     private CallbackRequest callbackRequest;
@@ -111,22 +123,13 @@ public class Fl401ListOnNoticeControllerTest {
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(hearingDataService.prePopulateHearingType(authToken)).thenReturn(List.of(DynamicListElement.builder().build()));
+        when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
 
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(stringObjectMap)
-            .build();
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-
-        when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(authToken,caseData))
-            .thenReturn(stringObjectMap);
-        AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
-            .prePopulateHearingPageDataForFl401ListOnNotice(authToken, callbackRequest);
-        assertNotNull(response);
-
+        Map<String, Object> responseDataMap = fl401ListOnNoticeService
+            .prePopulateHearingPageDataForFl401ListOnNotice(authToken, caseData);
+        assertTrue(responseDataMap.containsKey("fl401ListOnNoticeHearingDetails"));
+        assertTrue(responseDataMap.containsKey("legalAdviserList"));
     }
 
     @Test
@@ -189,33 +192,25 @@ public class Fl401ListOnNoticeControllerTest {
                                                       .orderWithoutGivingNotice(YesOrNo.Yes)
                                                       .build())
             .fl401ListOnNotice(Fl401ListOnNotice.builder()
-                                    .fl401ListOnNoticeDocument(Document.builder()
-                                                                   .documentUrl(generatedDocumentInfo.getUrl())
-                                                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                                   .documentHash(generatedDocumentInfo.getHashToken())
-                                                                   .documentFileName("fl404BFilename.pdf")
-                                                                   .build())
+                                   .fl401ListOnNoticeDocument(Document.builder()
+                                                                  .documentUrl(generatedDocumentInfo.getUrl())
+                                                                  .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                                  .documentHash(generatedDocumentInfo.getHashToken())
+                                                                  .documentFileName("fl404BFilename.pdf")
+                                                                  .build())
                                    .fl401ListOnNoticeHearingDetails(listOnNoticeHearingDetails)
-                                    .build())
+                                   .build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(hearingDataService.prePopulateHearingType(authToken)).thenReturn(List.of(DynamicListElement.builder()
+                                                                                          .build()));
+        when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
 
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(stringObjectMap)
-            .build();
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-        when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(authToken,caseData))
-            .thenReturn(stringObjectMap);
-        AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
-            .prePopulateHearingPageDataForFl401ListOnNotice(authToken,callbackRequest);
-        assertNotNull(response);
+        Map<String, Object> responseDataMap = fl401ListOnNoticeService
+            .prePopulateHearingPageDataForFl401ListOnNotice(authToken, caseData);
+        assertTrue(responseDataMap.containsKey("fl401ListOnNoticeHearingDetails"));
     }
-
 
     @Test
     public void shouldGenerateFL404bDocForListOnNotice() throws Exception {
@@ -248,19 +243,14 @@ public class Fl401ListOnNoticeControllerTest {
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName("Fl404B_Document.pdf")
             .build();
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(stringObjectMap)
-            .build();
+        when(documentGenService.generateSingleDocument(authToken,caseData,DA_LIST_ON_NOTICE_FL404B_DOCUMENT,false)).thenReturn(document);
+        when(hearingDataService.prePopulateHearingType(authToken)).thenReturn(List.of(DynamicListElement.builder()
+                                                                                          .build()));
+        when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
 
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-        when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(authToken,caseData))
-            .thenReturn(stringObjectMap);
-        AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
-            .generateFl404bDocument(authToken,callbackRequest);
-        assertNotNull(response);
+        Map<String, Object> responseDataMap = fl401ListOnNoticeService
+            .generateFl404bDocument(authToken, caseData);
+        assertTrue(responseDataMap.containsKey("fl401ListOnNoticeDocument"));
     }
 
     @Test
@@ -331,16 +321,6 @@ public class Fl401ListOnNoticeControllerTest {
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(stringObjectMap)
-            .build();
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
             .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
@@ -351,10 +331,16 @@ public class Fl401ListOnNoticeControllerTest {
         );
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(authToken,caseData))
-            .thenReturn(stringObjectMap);
-        AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
-            .fl401ListOnNoticeSubmission(authToken,callbackRequest);
-        assertNotNull(response);
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService)).thenReturn(
+            allocatedJudge);
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+        when(hearingDataService.prePopulateHearingType(authToken)).thenReturn(List.of(DynamicListElement.builder()
+                                                                                          .build()));
+        when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
+
+        Map<String, Object> responseDataMap = fl401ListOnNoticeService
+            .fl401ListOnNoticeSubmission(authToken, caseData);
+        assertTrue(responseDataMap.containsKey("fl401ListOnNoticeHearingDetails"));
+
     }
 }
