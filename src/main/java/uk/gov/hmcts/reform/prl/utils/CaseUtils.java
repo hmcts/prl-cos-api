@@ -2,7 +2,10 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -15,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,9 +32,16 @@ import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
 @Slf4j
 public class CaseUtils {
-
     private CaseUtils() {
 
+    }
+
+    public static CaseData getCaseDataFromStartUpdateEventResponse(StartEventResponse startEventResponse, ObjectMapper objectMapper) {
+        CaseDetails caseDetails = startEventResponse.getCaseDetails();
+        if (caseDetails == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return getCaseData(caseDetails, objectMapper);
     }
 
     public static CaseData getCaseData(CaseDetails caseDetails, ObjectMapper objectMapper) {
@@ -132,5 +143,10 @@ public class CaseUtils {
 
     public static boolean hasLegalRepresentation(PartyDetails partyDetails) {
         return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
+    }
+
+    public static String getFormattedDatAndTime(LocalDateTime dateTime) {
+        DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("EEEE, dd MMM, yyyy 'at' HH:mm a");
+        return  dateTime.format(dateTimeFormat);
     }
 }

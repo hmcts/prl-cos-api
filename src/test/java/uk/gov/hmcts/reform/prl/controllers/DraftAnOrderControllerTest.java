@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
@@ -32,9 +33,12 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DirectionOnIssue;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
+import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,8 +70,16 @@ public class DraftAnOrderControllerTest {
     @Mock
     private UserDetails userDetails;
 
+    @Mock
+    private HearingDataService hearingDataService;
+
     @InjectMocks
     private DraftAnOrderController draftAnOrderController;
+
+    @Mock
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    public static final String authToken = "Bearer TestAuthToken";
 
     @Before
     public void setUp() {
@@ -88,14 +100,17 @@ public class DraftAnOrderControllerTest {
     @Test
     public void testPopulateHeader() {
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .selectedOrder(CreateSelectOrderOptionsEnum.blankOrderOrDirections.getDisplayedValue())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.populateHearingsDropdown(authToken, caseData)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -103,19 +118,11 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
 
-        Assert.assertEquals(stringObjectMap.get("applicantCaseName"),
-                            draftAnOrderController.populateHeader(callbackRequest).getData().get("applicantCaseName"));
-        Assert.assertEquals(stringObjectMap.get("familymanCaseNumber"),
-                            draftAnOrderController.populateHeader(callbackRequest).getData().get("familymanCaseNumber"));
+        CaseData updatedCaseData = draftAnOrderController.populateHeader(authToken, callbackRequest).getData();
 
-        if (draftAnOrderController.populateHeader(callbackRequest)
-            .getData().get("createSelectOrderOptions") != null) {
-            Assert.assertEquals(stringObjectMap.get("createSelectOrderOptions"),
-                                draftAnOrderController.populateHeader(callbackRequest).getData().get("createSelectOrderOptions"));
-        } else {
-            Assert.assertEquals("",
-                                draftAnOrderController.populateHeader(callbackRequest).getData().get("createSelectOrderOptions"));
-        }
+        Assert.assertEquals(caseData.getApplicantCaseName(), updatedCaseData.getApplicantCaseName());
+        Assert.assertEquals(caseData.getFamilymanCaseNumber(), updatedCaseData.getFamilymanCaseNumber());
+        Assert.assertEquals(caseData.getCreateSelectOrderOptions(), updatedCaseData.getCreateSelectOrderOptions());
 
     }
 
@@ -126,6 +133,7 @@ public class DraftAnOrderControllerTest {
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.directionOnIssue)
+            .selectedOrder(CreateSelectOrderOptionsEnum.blankOrderOrDirections.getDisplayedValue())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -138,8 +146,8 @@ public class DraftAnOrderControllerTest {
             .build();
 
         Assert.assertEquals(
-            "Solicitors cannot draft a Direction On Issue order",
-            draftAnOrderController.populateHeader(callbackRequest).getErrors().get(0)
+            "This order is not available to be drafted",
+            draftAnOrderController.populateHeader(authToken, callbackRequest).getErrors().get(0)
         );
     }
 
@@ -162,8 +170,8 @@ public class DraftAnOrderControllerTest {
             .build();
 
         Assert.assertEquals(
-            "Solicitors cannot draft a Standard Directions order",
-            draftAnOrderController.populateHeader(callbackRequest).getErrors().get(0)
+            "This order is not available to be drafted",
+            draftAnOrderController.populateHeader(authToken, callbackRequest).getErrors().get(0)
         );
     }
 
@@ -171,6 +179,7 @@ public class DraftAnOrderControllerTest {
     public void testPopulateFl404Fields() throws Exception {
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
@@ -202,6 +211,7 @@ public class DraftAnOrderControllerTest {
     public void testPopulateFl404FieldsBlankOrder() throws Exception {
 
         CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
@@ -238,6 +248,7 @@ public class DraftAnOrderControllerTest {
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
+            .manageOrders(ManageOrders.builder().build())
             .caseTypeOfApplication("fl401")
             .build();
 
@@ -294,6 +305,7 @@ public class DraftAnOrderControllerTest {
             .sdoCourtList(List.of(SdoCourtEnum.crossExaminationEx740))
             .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
             .sdoOtherList(List.of(SdoOtherEnum.parentWithCare))
+            .sdoFurtherList(List.of(SdoFurtherInstructionsEnum.newDirection))
             .build();
         CaseData caseData = CaseData.builder()
             .id(123L)
@@ -328,6 +340,7 @@ public class DraftAnOrderControllerTest {
             .sdoCourtList(new ArrayList<>())
             .sdoDocumentationAndEvidenceList(new ArrayList<>())
             .sdoOtherList(new ArrayList<>())
+            .sdoFurtherList(new ArrayList<>())
             .build();
 
         CaseData caseData = CaseData.builder()

@@ -34,7 +34,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrdersOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.CaseLinksElement;
@@ -583,7 +582,10 @@ public class CaseData implements MappableObject {
     private final ManageOrders manageOrders;
 
     @JsonProperty("childrenListForDocmosis")
-    private List<Child> childrenListForDocmosis;
+    private List<Element<Child>> childrenListForDocmosis;
+
+    @JsonProperty("applicantChildDetailsForDocmosis")
+    private List<Element<ApplicantChild>> applicantChildDetailsForDocmosis;
 
     @JsonUnwrapped
     @Builder.Default
@@ -750,7 +752,6 @@ public class CaseData implements MappableObject {
 
     private String judgeDirectionsToAdmin;
     private YesOrNo doYouWantToEditTheOrder;
-    private YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     private String courtAdminNotes;
 
 
@@ -785,11 +786,10 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
-
     @JsonUnwrapped
     @Builder.Default
     private final Fl401ListOnNotice fl401ListOnNotice;
 
-
     private NextHearingDetails nextHearingDetails;
+
 }

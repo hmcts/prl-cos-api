@@ -112,7 +112,6 @@ public class HearingDataService {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public HearingDataPrePopulatedDynamicLists populateHearingDynamicLists(String authorisation, String caseReferenceNumber, CaseData caseData) {
-        log.info("populateHearingDynamicLists methd for caseReferenceNum : {}", caseReferenceNumber);
         Map<String, List<DynamicListElement>> hearingChannelsDetails = prePopulateHearingChannel(authorisation);
         return HearingDataPrePopulatedDynamicLists.builder().retrievedHearingTypes(getDynamicList(prePopulateHearingType(authorisation)))
             .retrievedHearingDates(getDynamicList(getHearingStartDate(authorisation, caseData)))
@@ -126,7 +125,6 @@ public class HearingDataService {
 
     public List<DynamicListElement> prePopulateHearingType(String authorisation) {
         try {
-            log.info("Prepopulate HearingType call in HearingDataService");
             CommonDataResponse commonDataResponse = refDataUserService.retrieveCategoryValues(
                 authorisation,
                 HEARINGTYPE,
@@ -154,7 +152,7 @@ public class HearingDataService {
 
             }
         } catch (Exception e) {
-            log.error("List of Hearing Start Date Values look up failed - " + e.getMessage(), e);
+            log.error("List of Hearing Start Date Values look up failed - {} {} ", e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -168,7 +166,6 @@ public class HearingDataService {
 
     public Map<String, List<DynamicListElement>> prePopulateHearingChannel(String authorisation) {
         try {
-            log.info("Prepopulate HearingChannel call in HearingDataService");
             CommonDataResponse commonDataResponse = refDataUserService.retrieveCategoryValues(
                 authorisation,
                 HEARINGCHANNEL,
@@ -298,8 +295,11 @@ public class HearingDataService {
             HearingData hearingData = hearingDataElement.getValue();
             hearingRequestDataMapper.mapHearingData(hearingData,hearingDataPrePopulatedDynamicLists,caseData);
             Optional<JudicialUser> judgeDetailsSelected = ofNullable(hearingData.getHearingJudgeNameAndEmail());
-            if (judgeDetailsSelected.isPresent() && !judgeDetailsSelected.get().getPersonalCode().isEmpty()) {
+            log.info("judgeDetailsSelected ---> {}", judgeDetailsSelected);
+            if (judgeDetailsSelected.isPresent() && judgeDetailsSelected.get().getPersonalCode() != null
+                && !judgeDetailsSelected.get().getPersonalCode().isEmpty()) {
                 Optional<List<JudicialUsersApiResponse>> judgeApiResponse = ofNullable(getJudgeDetails(hearingData.getHearingJudgeNameAndEmail()));
+                log.info("JudgeAPI response {}", judgeApiResponse);
                 if (!judgeApiResponse.get().isEmpty()) {
                     hearingData.setHearingJudgeLastName(judgeApiResponse.get().stream().findFirst().get().getSurname());
                     hearingData.setHearingJudgeEmailAddress(judgeApiResponse.get().stream().findFirst().get().getEmailId());
