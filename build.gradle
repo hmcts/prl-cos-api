@@ -539,8 +539,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/utils/*',
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/validators/RespondentEventsChecker.java',
-  '**uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController.java',
-  '**uk/gov/hmcts/reform/prl/services/dynamicmultiselectlist/DynamicMultiSelectListService.java'
+  '**uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController.java'
 ]
 
 sonarqube {
