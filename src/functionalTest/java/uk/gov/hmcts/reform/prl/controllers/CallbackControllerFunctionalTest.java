@@ -14,6 +14,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
+import java.time.LocalDate;
+
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
@@ -154,6 +156,7 @@ public class CallbackControllerFunctionalTest {
             .contentType("application/json")
             .post("/fl401-add-case-number")
             .then()
+            .body("issueDate", equalTo(LocalDate.now().toString()))
             .assertThat().statusCode(200);
     }
 
