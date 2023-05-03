@@ -395,13 +395,11 @@ public class ManageOrderEmailService {
 
         List<String> listOfEmails = new ArrayList<>();
         // Send email notification to other organisations
-        if (manageOrders.getServeOtherPartiesCA() != null) {
-            if (manageOrders.getServeOtherPartiesCA().contains(OtherOrganisationOptions.anotherOrganisation)
+        if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
+            .contains(OtherOrganisationOptions.anotherOrganisation)
                         && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
-                manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> {
-                    listOfEmails.add(value.getEmailAddress());
-                });
-            }
+            manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfEmails
+                .add(value.getEmailAddress()));
         }
         //send email notification to other people in the case
         if (null != manageOrders.getOtherParties()) {

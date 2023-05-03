@@ -1073,11 +1073,19 @@ public class ManageOrderEmailServiceTest {
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(dynamicMultiselectListElement))
             .build();
+        applicant = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("")
+            .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
+            .applicants(List.of(Element.<PartyDetails>builder().value(applicant).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().value(applicant).build()))
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                              .cafcassEmailAddress(List.of(element("test"))).build())
+                              .cafcassEmailId("test").build())
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         manageOrderEmailService.sendEmailWhenOrderIsServed(CaseDetails.builder().build());
