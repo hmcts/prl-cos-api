@@ -13,11 +13,12 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -32,16 +33,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 
@@ -70,6 +75,7 @@ public class CaseService {
     private final CaseDataMapper caseDataMapper;
 
     private final CcdCoreCaseDataService coreCaseDataService;
+    private static final String INVALID_CLIENT = "Invalid Client";
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
@@ -91,16 +97,69 @@ public class CaseService {
 
             CaseData updatedCaseData = caseDataMapper
                 .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
-                                          .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
+                                          .courtName(C100_DEFAULT_COURT_NAME)
                                           .build());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
-    public List<CaseData> retrieveCases(String authToken, String s2sToken) {
-        Map<String, String> searchCriteria = new HashMap<>();
+    public CaseDetails updateCaseDetails(String authToken,
+                                         String caseId, String eventId, UpdateCaseData updateCaseData) {
 
+        CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        PartyDetails partyDetails = updateCaseData.getPartyDetails();
+        PartyEnum partyType = updateCaseData.getPartyType();
+        if (null != partyDetails.getUser()) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
+                updatingPartyDetailsCa(caseData, partyDetails, partyType);
+            } else {
+                caseData = getFlCaseData(caseData, partyDetails, partyType);
+            }
+            return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private static CaseData getFlCaseData(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
+        if (PartyEnum.applicant.equals(partyType)) {
+            if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
+                caseData = caseData.toBuilder().applicantsFL401(partyDetails).build();
+            }
+        } else {
+            if (partyDetails.getUser().getIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
+                caseData = caseData.toBuilder().respondentsFL401(partyDetails).build();
+            }
+        }
+        return caseData;
+    }
+
+    private static void updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
+        if (PartyEnum.applicant.equals(partyType)) {
+            List<Element<PartyDetails>> applicants = caseData.getApplicants();
+            applicants.stream()
+                .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
+                .findFirst()
+                .ifPresent(party ->
+                    applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
+                );
+        } else if (PartyEnum.respondent.equals(partyType)) {
+            List<Element<PartyDetails>> respondents = caseData.getRespondents();
+            respondents.stream()
+                .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
+                .findFirst()
+                .ifPresent(party ->
+                    respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
+                );
+        }
+    }
+
+
+    public List<CaseData> retrieveCases(String authToken, String s2sToken) {
+
+        Map<String, String> searchCriteria = new HashMap<>();
         searchCriteria.put("sortDirection", "desc");
         searchCriteria.put("page", "1");
 
