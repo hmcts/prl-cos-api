@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,7 +158,7 @@ public class CallbackControllerFunctionalTest {
             .contentType("application/json")
             .post("/fl401-add-case-number")
             .then()
-            .body("issueDate", equalTo(LocalDate.now().toString()))
+            .body("data.issueDate", equalTo(LocalDate.now().toString()))
             .assertThat().statusCode(200);
     }
 
