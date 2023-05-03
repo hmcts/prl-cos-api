@@ -18,10 +18,12 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
@@ -177,5 +179,18 @@ public class SendAndReplyController extends AbstractCallbackController {
         //if a message is being closed then no notification email is sent
         return AboutToStartOrSubmitCallbackResponse.builder()
             .build();
+    }
+
+
+    @PostMapping("/send-or-reply-to-messages/mid-event")
+    public CallbackResponse sendOrReplyToMessagesMidEvent(@RequestHeader("Authorization")
+                                                               @Parameter(hidden = true) String authorisation,
+                                                          @RequestBody CallbackRequest callbackRequest) {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+
+        return CallbackResponse.builder().data(caseData).build();
     }
 }

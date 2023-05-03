@@ -424,5 +424,24 @@ public class HearingDataService {
 
     }
 
-}
+    List<DynamicListElement> getLinkedCasesDynamicList(String authorisation, String caseId) {
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        try {
+            log.info("getLinkedCasesDynamicList case method ", caseId);
+            CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()
+                .caseReference(caseId).build();
+            Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
 
+            if (caseLinkedDataList.isPresent()) {
+                for (CaseLinkedData caseLinkedData : caseLinkedDataList.get()) {
+                    final String caseReference = caseLinkedData.getCaseReference();
+                    dynamicListElements.add(DynamicListElement.builder().code(caseReference)
+                                                .label(caseReference).build());
+                }
+            }
+        } catch (Exception e) {
+            log.error("Exception occured in getLinkedCasesDynamicList {}", e.getMessage());
+        }
+        return dynamicListElements;
+    }
+}
