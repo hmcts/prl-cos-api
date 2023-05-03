@@ -11,11 +11,11 @@ import lombok.RequiredArgsConstructor;
 public enum HearingPriorityTypeEnum {
 
     @JsonProperty("StandardPriority")
-    StandardPriority("StandardPriority"),
+    StandardPriority("StandardPriority","Standard priority"),
     @JsonProperty("UrgentPriority")
-    UrgentPriority("UrgentPriority");
+    UrgentPriority("UrgentPriority","Urgent priority");
 
-
+    private final String id;
     private final String displayedValue;
 
     @JsonValue

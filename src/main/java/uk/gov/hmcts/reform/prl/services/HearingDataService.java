@@ -6,11 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
@@ -110,7 +112,6 @@ public class HearingDataService {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public HearingDataPrePopulatedDynamicLists populateHearingDynamicLists(String authorisation, String caseReferenceNumber, CaseData caseData) {
-        log.info("populateHearingDynamicLists methd for caseReferenceNum : {}", caseReferenceNumber);
         Map<String, List<DynamicListElement>> hearingChannelsDetails = prePopulateHearingChannel(authorisation);
         return HearingDataPrePopulatedDynamicLists.builder().retrievedHearingTypes(getDynamicList(prePopulateHearingType(authorisation)))
             .retrievedHearingDates(getDynamicList(getHearingStartDate(authorisation, caseData)))
@@ -124,7 +125,6 @@ public class HearingDataService {
 
     public List<DynamicListElement> prePopulateHearingType(String authorisation) {
         try {
-            log.info("Prepopulate HearingType call in HearingDataService");
             CommonDataResponse commonDataResponse = refDataUserService.retrieveCategoryValues(
                 authorisation,
                 HEARINGTYPE,
@@ -152,7 +152,7 @@ public class HearingDataService {
 
             }
         } catch (Exception e) {
-            log.error("List of Hearing Start Date Values look up failed - " + e.getMessage(), e);
+            log.error("List of Hearing Start Date Values look up failed - {} {} ", e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -166,7 +166,6 @@ public class HearingDataService {
 
     public Map<String, List<DynamicListElement>> prePopulateHearingChannel(String authorisation) {
         try {
-            log.info("Prepopulate HearingChannel call in HearingDataService");
             CommonDataResponse commonDataResponse = refDataUserService.retrieveCategoryValues(
                 authorisation,
                 HEARINGCHANNEL,
@@ -215,6 +214,14 @@ public class HearingDataService {
 
 
     public HearingData generateHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,CaseData caseData) {
+        List<String> applicantNames  = getApplicantNameList(caseData);
+        List<String> respondentNames = getRespondentNameList(caseData);
+        List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData);
+        List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData);
+        int numberOfApplicant = applicantNames.size();
+        int numberOfRespondents = respondentNames.size();
+        int numberOfApplicantSolicitors = applicantSolicitorNames.size();
+        int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
         return HearingData.builder()
             .hearingTypes(hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes())
             .confirmedHearingDates(hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates())
@@ -239,6 +246,46 @@ public class HearingDataService {
             .respondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "")
             .respondentSolicitor("")
             .fillingFormRenderingInfo(CommonUtils.renderCollapsible())
+            .applicantName1(0 < numberOfApplicant ? applicantNames.get(0) : "INVALID_DATA")
+            .applicantName2(1 < numberOfApplicant ? applicantNames.get(1) : "INVALID_DATA")
+            .applicantName3(2 < numberOfApplicant ? applicantNames.get(2) : "INVALID_DATA")
+            .applicantName4(3 < numberOfApplicant ? applicantNames.get(3) : "INVALID_DATA")
+            .applicantName5(4 < numberOfApplicant ? applicantNames.get(4) : "INVALID_DATA")
+            .applicantSolicitor1(0 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(0) : "INVALID_DATA")
+            .applicantSolicitor2(1 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(1) : "INVALID_DATA")
+            .applicantSolicitor3(2 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(2) : "INVALID_DATA")
+            .applicantSolicitor4(3 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(3) : "INVALID_DATA")
+            .applicantSolicitor5(4 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(4) : "INVALID_DATA")
+            .respondentName1(0 < numberOfRespondents ? respondentNames.get(0) : "INVALID_DATA")
+            .respondentName2(1 < numberOfRespondents ? respondentNames.get(1) : "INVALID_DATA")
+            .respondentName3(2 < numberOfRespondents ? respondentNames.get(2) : "INVALID_DATA")
+            .respondentName4(3 < numberOfRespondents ? respondentNames.get(3) : "INVALID_DATA")
+            .respondentName5(4 < numberOfRespondents ? respondentNames.get(4) : "INVALID_DATA")
+            .respondentSolicitor1(0 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(0) : "INVALID_DATA")
+            .respondentSolicitor2(1 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(1) : "INVALID_DATA")
+            .respondentSolicitor3(2 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(2) : "INVALID_DATA")
+            .respondentSolicitor4(3 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(3) : "INVALID_DATA")
+            .respondentSolicitor5(4 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(4) : "INVALID_DATA")
+            .applicantHearingChannel1(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantHearingChannel2(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantHearingChannel3(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantHearingChannel4(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantHearingChannel5(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantSolicitorHearingChannel1(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantSolicitorHearingChannel2(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantSolicitorHearingChannel3(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantSolicitorHearingChannel4(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .applicantSolicitorHearingChannel5(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .respondentHearingChannel1(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .respondentHearingChannel2(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .respondentHearingChannel3(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .respondentHearingChannel4(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .respondentHearingChannel5(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .respondentSolicitorHearingChannel1(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .respondentSolicitorHearingChannel2(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .respondentSolicitorHearingChannel3(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .respondentSolicitorHearingChannel4(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .respondentSolicitorHearingChannel5(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             .build();
     }
 
@@ -248,8 +295,11 @@ public class HearingDataService {
             HearingData hearingData = hearingDataElement.getValue();
             hearingRequestDataMapper.mapHearingData(hearingData,hearingDataPrePopulatedDynamicLists,caseData);
             Optional<JudicialUser> judgeDetailsSelected = ofNullable(hearingData.getHearingJudgeNameAndEmail());
-            if (judgeDetailsSelected.isPresent() && !judgeDetailsSelected.get().getPersonalCode().isEmpty()) {
+            log.info("judgeDetailsSelected ---> {}", judgeDetailsSelected);
+            if (judgeDetailsSelected.isPresent() && judgeDetailsSelected.get().getPersonalCode() != null
+                && !judgeDetailsSelected.get().getPersonalCode().isEmpty()) {
                 Optional<List<JudicialUsersApiResponse>> judgeApiResponse = ofNullable(getJudgeDetails(hearingData.getHearingJudgeNameAndEmail()));
+                log.info("JudgeAPI response {}", judgeApiResponse);
                 if (!judgeApiResponse.get().isEmpty()) {
                     hearingData.setHearingJudgeLastName(judgeApiResponse.get().stream().findFirst().get().getSurname());
                     hearingData.setHearingJudgeEmailAddress(judgeApiResponse.get().stream().findFirst().get().getEmailId());
@@ -319,4 +369,60 @@ public class HearingDataService {
         }
     }
 
+    private List<String> getApplicantNameList(CaseData caseData) {
+        List<String> applicantList = new ArrayList<>();
+
+        if (caseData.getApplicants() != null) {
+            applicantList = caseData.getApplicants().stream()
+                .map(Element::getValue)
+                .map(PartyDetails::getLabelForDynamicList)
+                .collect(Collectors.toList());
+        }
+
+        return applicantList;
+
+    }
+
+    private List<String> getRespondentNameList(CaseData caseData) {
+        List<String> respondentList  =  new ArrayList<>();
+
+        if (caseData.getRespondents() != null) {
+            respondentList = caseData.getRespondents().stream()
+                .map(Element::getValue)
+                .map(PartyDetails::getLabelForDynamicList)
+                .collect(Collectors.toList());
+        }
+        return respondentList;
+
+    }
+
+    private List<String> getApplicantSolicitorNameList(CaseData caseData) {
+        List<String> applicantSolicitorList = new ArrayList<>();
+
+        if (caseData.getApplicants() != null) {
+            applicantSolicitorList = caseData.getApplicants().stream()
+                .map(Element::getValue)
+                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+                .collect(Collectors.toList());
+        }
+        return applicantSolicitorList;
+
+    }
+
+    private List<String> getRespondentSolicitorNameList(CaseData caseData) {
+        List<String> respondentSolicitorList = new ArrayList<>();
+
+        if (caseData.getRespondents() != null) {
+            caseData.getRespondents().stream()
+                .map(Element::getValue)
+                .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
+                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+                .collect(Collectors.toList());
+        }
+
+        return respondentSolicitorList;
+
+    }
+
 }
+

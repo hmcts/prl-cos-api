@@ -25,6 +25,8 @@
     <cve>CVE-2023-24998</cve>
     <cve>CVE-2023-28708</cve>
     <cve>CVE-2023-20861</cve>
+    <cve>CVE-2023-20863</cve>
+    <cve>CVE-2023-20860</cve>
   </suppress>
   <suppress>
     <notes>Temporary Suppression</notes>
@@ -32,6 +34,7 @@
     <cve>CVE-2021-4235</cve>
     <cve>CVE-2022-3064</cve>
     <cve>CVE-2022-45143</cve>
+    <cve>CVE-2023-20860</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
@@ -92,5 +95,15 @@
     <notes><![CDATA[
       spring-aop-5.3.20.jar ]]></notes>
     <cve>CVE-2023-20860</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      spring-boot-2.7.0.jar ]]></notes>
+    <cve>CVE-2023-20873</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      spring-security-web-5.7.1.jar ]]></notes>
+    <cve>CVE-2023-20862</cve>
   </suppress>
 </suppressions>
