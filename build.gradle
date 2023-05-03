@@ -543,8 +543,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/HearingDataService.java',
   '**uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController.java',
   '**uk/gov/hmcts/reform/prl/services/cafcass/HearingService.java',
-  '**uk/gov/hmcts/reform/prl/services/cafcass/CaseDataService.java',
-  '**uk/gov/hmcts/reform/prl/services/cafcass/Fl401ListOnNoticeController.java'
+  '**uk/gov/hmcts/reform/prl/services/cafcass/CaseDataService.java'
 ]
 
 sonarqube {
