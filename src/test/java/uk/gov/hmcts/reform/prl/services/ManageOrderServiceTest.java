@@ -2707,8 +2707,11 @@ public class ManageOrderServiceTest {
                               .isTheOrderAboutChildren(YesOrNo.Yes)
                               .isTheOrderAboutAllChildren(YesOrNo.Yes)
                               .childOption(DynamicMultiSelectList.builder()
-                                               .value(List.of(DynamicMultiselectListElement.builder().label("John (Child 1)").build())).build()
-                              )                              .build())
+                                               .value(List.of(DynamicMultiselectListElement.builder()
+                                                                  .label("John (Child 1)").build()))
+                                               .build()
+                              )
+                              .build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
