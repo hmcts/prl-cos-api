@@ -489,7 +489,7 @@ public class SendAndReplyService {
                                          ? sendOrReplyMessage.getExternalPartiesList().getValueCode() : null)
 
             // TODO need to check with Yogendra
-//            .messageHistory(buildMessageHistory(metaData.getSenderEmail(), caseData.getMessageContent()))
+            //            .messageHistory(buildMessageHistory(metaData.getSenderEmail(), caseData.getMessageContent()))
             .latestMessage(caseData.getMessageContent())
             .updatedTime(dateTime.now())
             .build();
