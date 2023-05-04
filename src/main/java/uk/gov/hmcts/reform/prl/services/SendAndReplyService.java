@@ -521,6 +521,7 @@ public class SendAndReplyService {
             messages = caseData.getSendOrReplyMessage().getOpenMessagesList();
         }
         messages.add(messageElement);
+        messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
         return messages;
     }
 }
