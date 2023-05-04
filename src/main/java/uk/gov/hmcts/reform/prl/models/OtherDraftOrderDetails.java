@@ -24,5 +24,6 @@ public class OtherDraftOrderDetails {
     private final AmendOrderCheckEnum reviewRequiredBy;
     private final String nameOfJudgeForReview;
     private final String nameOfLaForReview;
-
+    private final String nameOfJudgeForReviewOrder;
+    private final String nameOfLaForReviewOrder;
 }

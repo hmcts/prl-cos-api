@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Slf4j
 public class AbilityToParticipateCheckerTest {
 
     @InjectMocks
@@ -40,12 +42,13 @@ public class AbilityToParticipateCheckerTest {
     public void setUp() {
         User user = User.builder().email("respondent@example.net")
             .idamId("1234-5678").solicitorRepresented(Yes).build();
-
+        log.info("My changes");
         respondent = PartyDetails.builder()
             .user(user)
             .response(Response.builder().abilityToParticipate(
                 SolicitorAbilityToParticipateInProceedings.builder()
                     .factorsAffectingAbilityToParticipate(YesNoDontKnow.yes)
+                    .provideDetailsForFactorsAffectingAbilityToParticipate("test")
                     .build())
                           .build())
             .build();
@@ -65,9 +68,28 @@ public class AbilityToParticipateCheckerTest {
     }
 
     @Test
-    public void hasMandatoryCompletedTest() {
-        boolean anyNonEmpty = abilityToParticipateChecker.isFinished(respondent);
+    public void isStartedNotTest() {
+        log.info("My changes");
+        respondent = null;
+        boolean anyNonEmpty = abilityToParticipateChecker.isStarted(respondent);
 
         assertFalse(anyNonEmpty);
     }
+
+    @Test
+    public void hasMandatoryCompletedTest() {
+        log.info("My changes");
+        boolean anyNonEmpty = abilityToParticipateChecker.isFinished(respondent);
+
+        assertTrue(anyNonEmpty);
+    }
+
+    @Test
+    public void hasMandatoryCompletedWithoutRespondentTest() {
+        log.info("My changes");
+        respondent = null;
+        boolean anyNonEmpty = abilityToParticipateChecker.isFinished(respondent);
+        assertFalse(anyNonEmpty);
+    }
+
 }

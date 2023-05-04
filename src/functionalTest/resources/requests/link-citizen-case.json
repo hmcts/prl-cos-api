@@ -3150,7 +3150,9 @@
     }
   ],
   "sdoCafcassFileAndServe": "2023-01-23",
+  "sdoCafcassNextStepEditContent": "string",
   "sdoCafcassCymruFileAndServe": "2023-01-23",
+  "sdoCafcassCymruNextStepEditContent": "string",
   "sdoNewPartnersToCafcass": "2023-01-23",
   "sdoCafcassCymruReportSentByDate": "2023-01-23",
   "sdoLocalAuthorityReportSubmitByDate": "2023-01-23",
@@ -3261,6 +3263,7 @@
     "Cafcass Cymru"
   ],
   "sdoHearingMaximumPages": "string",
+  "sdoHearingHowManyWitnessEvidence": 1,
   "sdoUpdateContactDetails": "string",
   "sdoSection7ChildImpactAnalysis": "Cafcass",
   "sdoNameOfCouncil": "string",

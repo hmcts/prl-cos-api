@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import groovy.util.logging.Slf4j;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -36,15 +36,21 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_CONFIRMED_IN_HEARINGS_TAB;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_DATE_CONFIRM_OPTION_ENUM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_N;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -395,11 +401,26 @@ public class HearingDataServiceTest {
             .representativeFirstName("Ram")
             .representativeLastName("Mer")
             .build();
+        log.info("My changes");
+        PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
             .applicantName("test")
             .solicitorName("Test")
             .respondentName("Test")
+            .applicants(applicantList)
+            .respondents(respondentList)
             .applicantsFL401(applicant)
             .caseTypeOfApplication("FL401")
             .build();
@@ -445,6 +466,23 @@ public class HearingDataServiceTest {
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
         assertEquals("1677767515750127",expectedResponse.get(0).getCode());
         assertEquals("CaseName-Test10",expectedResponse.get(0).getLabel());
+    }
+
+    @Test()
+    public void testNullifyUnncessaryFieldsPopulated() {
+        log.info("My changes");
+        Map<String, Object> hearingDateConfirmOptionEnumMap = new LinkedHashMap<>();
+        Map<String, Object> objectMap = new LinkedHashMap<>();
+        hearingDateConfirmOptionEnumMap.put(HEARING_DATE_CONFIRM_OPTION_ENUM,DATE_CONFIRMED_IN_HEARINGS_TAB);
+        List<Object> listWithoutNoticeHeardetailsObj = new ArrayList<>();
+        objectMap.put("value",hearingDateConfirmOptionEnumMap);
+        objectMap.put(LISTWITHOUTNOTICE_HEARINGDETAILS,objectMap);
+        listWithoutNoticeHeardetailsObj.add(objectMap);
+
+        hearingDataService.nullifyUnncessaryFieldsPopulated(listWithoutNoticeHeardetailsObj);
+
+        assertEquals(null, ((LinkedHashMap)((LinkedHashMap)listWithoutNoticeHeardetailsObj.get(0)).get("value")).get(CUSTOM_DETAILS));
+
     }
 }
 
