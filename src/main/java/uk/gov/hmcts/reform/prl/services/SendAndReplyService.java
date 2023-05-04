@@ -277,7 +277,7 @@ public class SendAndReplyService {
         String s2sToken = authTokenGenerator.generate();
         return caseData.toBuilder().sendOrReplyMessage(
             SendOrReplyMessage.builder()
-                .judicialOrMagistrateTierList(getJudiciaryTierDynmicList(
+                .judicialOrMagistrateTierList(getJudiciaryTierDynamicList(
                     authorization,
                     s2sToken,
                     serviceCode,
@@ -310,7 +310,7 @@ public class SendAndReplyService {
 
     /**
      * This method will return Dynamic Multi select list for
-     * applicants, respondents, cafcass and other reciepients.
+     * applicants, respondents, cafcass and other recipients.
      * @param caseData CaseData object.
      * @return DynamicMultiSelectList.
      */
@@ -323,7 +323,7 @@ public class SendAndReplyService {
             listItems.add(DynamicMultiselectListElement.builder().code(OTHER).label(OTHER).build());
             return getDynamicMultiselectList(listItems);
         } catch (Exception e) {
-            log.error("Error in getExternalRecipientsDynamicMultiselectList method ---> {}", e);
+            log.error("Error in getExternalRecipientsDynamicMultiselectList method", e);
         }
         return DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.EMPTY)).build();
@@ -338,7 +338,7 @@ public class SendAndReplyService {
      * @param categoryId e.g. JudgeType.
      * @return
      */
-    public DynamicList getJudiciaryTierDynmicList(String authorization, String s2sToken, String serviceCode, String categoryId) {
+    public DynamicList getJudiciaryTierDynamicList(String authorization, String s2sToken, String serviceCode, String categoryId) {
 
         try {
             Map<String, String> refDataCategoryValueMap = refDataService.getRefDataCategoryValueMap(
@@ -349,15 +349,15 @@ public class SendAndReplyService {
             );
 
             if (refDataCategoryValueMap != null && !refDataCategoryValueMap.isEmpty()) {
-                List<DynamicListElement> judiciaryTierDynmicElementList = new ArrayList<>();
+                List<DynamicListElement> judiciaryTierDynamicElementList = new ArrayList<>();
 
-                refDataCategoryValueMap.forEach((k, v) -> judiciaryTierDynmicElementList.add(DynamicListElement.builder().code(
+                refDataCategoryValueMap.forEach((k, v) -> judiciaryTierDynamicElementList.add(DynamicListElement.builder().code(
                     k).label(v).build()));
 
-                return getDynamicList(judiciaryTierDynmicElementList);
+                return getDynamicList(judiciaryTierDynamicElementList);
             }
         } catch (Exception e) {
-            log.error("Error in getJudiciaryTierDynmicList method ---> {}", e);
+            log.error("Error in getJudiciaryTierDynamicList method", e);
         }
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY).build();
@@ -373,7 +373,7 @@ public class SendAndReplyService {
             );
             return createDynamicList(categoriesAndDocuments);
         } catch (Exception e) {
-            log.error("Error in getCategoriesAndDocuments method {}", e);
+            log.error("Error in getCategoriesAndDocuments method", e);
         }
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY).build();
@@ -386,36 +386,29 @@ public class SendAndReplyService {
             .collect(Collectors.toList());
 
         List<DynamicListElement> dynamicListElementList = new ArrayList<>();
-        String parentString = null;
-        dynamicListElementList = createDynamicListFromSubCategories(parentCategories, dynamicListElementList,
-                                                                    parentString, null
-        );
-        System.out.println("Done");
-        List<DynamicListElement> finalDynamicListElementList = dynamicListElementList;
-        categoriesAndDocuments.getUncategorisedDocuments().stream().forEach(document -> {
-            finalDynamicListElementList.add(
-                DynamicListElement.builder().code(fetchdocumentidfromurl(document.getDocumentURL()))
-                    .label(document.getDocumentFilename()).build()
-            );
-        });
+        createDynamicListFromSubCategories(parentCategories, dynamicListElementList, null, null);
+
+        categoriesAndDocuments.getUncategorisedDocuments().forEach(document -> dynamicListElementList.add(
+            DynamicListElement.builder().code(fetchDocumentIdFromUrl(document.getDocumentURL()))
+                .label(document.getDocumentFilename()).build()
+        ));
+
         return DynamicList.builder().value(DynamicListElement.EMPTY)
-            .listItems(finalDynamicListElementList).build();
+            .listItems(dynamicListElementList).build();
     }
 
-    private List<DynamicListElement> createDynamicListFromSubCategories(List<Category> categoryList,
-                                                                        List<DynamicListElement> dynamicListElementList,
-                                                                        final String parentLabelString,
-                                                                        final String parentCodeString) {
-        categoryList.stream().forEach(category -> {
+    private void createDynamicListFromSubCategories(List<Category> categoryList,
+                                                    List<DynamicListElement> dynamicListElementList,
+                                                    final String parentLabelString,
+                                                    final String parentCodeString) {
+        categoryList.forEach(category -> {
             if (parentLabelString == null) {
                 if (category.getDocuments() != null) {
-                    category.getDocuments().stream().forEach(document -> {
-                        dynamicListElementList.add(
-                            DynamicListElement.builder().code(category.getCategoryId() + "___"
-                                                                  + fetchdocumentidfromurl(document.getDocumentURL()))
-                                .label(category.getCategoryName() + " --- " + document.getDocumentFilename()).build()
-                        );
-                    });
+                    category.getDocuments().forEach(document -> dynamicListElementList.add(
+                        DynamicListElement.builder().code(category.getCategoryId() + "___"
+                                                              + fetchDocumentIdFromUrl(document.getDocumentURL()))
+                            .label(category.getCategoryName() + " --- " + document.getDocumentFilename()).build()
+                    ));
                 }
                 if (category.getSubCategories() != null) {
                     createDynamicListFromSubCategories(
@@ -427,15 +420,13 @@ public class SendAndReplyService {
                 }
             } else {
                 if (category.getDocuments() != null) {
-                    category.getDocuments().stream().forEach(document -> {
-                        dynamicListElementList.add(
-                            DynamicListElement.builder()
-                                .code(parentCodeString + " -> " + category.getCategoryId() + "___"
-                                          + fetchdocumentidfromurl(document.getDocumentURL()))
-                                .label(parentLabelString + " -> " + category.getCategoryName() + " --- "
-                                           + document.getDocumentFilename()).build()
-                        );
-                    });
+                    category.getDocuments().forEach(document -> dynamicListElementList.add(
+                        DynamicListElement.builder()
+                            .code(parentCodeString + " -> " + category.getCategoryId() + "___"
+                                      + fetchDocumentIdFromUrl(document.getDocumentURL()))
+                            .label(parentLabelString + " -> " + category.getCategoryName() + " --- "
+                                       + document.getDocumentFilename()).build()
+                    ));
                 }
                 if (category.getSubCategories() != null) {
                     createDynamicListFromSubCategories(category.getSubCategories(), dynamicListElementList,
@@ -447,31 +438,13 @@ public class SendAndReplyService {
 
 
         });
-        return dynamicListElementList;
     }
 
-    private String fetchdocumentidfromurl(String documentUrl) {
+    private String fetchDocumentIdFromUrl(String documentUrl) {
 
         return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
 
     }
-
-
-    private List<DynamicListElement> getDisplayEntry(Category category) {
-        List<String> key = null;
-        String value = null;
-        List<DynamicListElement> dynamicListElementList = new ArrayList<>();
-        List<String> keys = new ArrayList<>();
-        category.getDocuments().stream().forEach(document -> {
-            keys.add(category.getCategoryId() + "_" + document.getDocumentURL());
-            dynamicListElementList.add(
-                DynamicListElement.builder().code(category.getCategoryId() + "_" + document.getDocumentURL())
-                    .label(category.getCategoryName() + "-" + document.getDocumentFilename()).build()
-            );
-        });
-        return dynamicListElementList;
-    }
-
 
     public Message buildSendMessage(CaseData caseData) {
         MessageMetaData metaData = caseData.getMessageMetaData();
@@ -514,5 +487,4 @@ public class SendAndReplyService {
             .updatedTime(dateTime.now())
             .build();
     }
-
 }

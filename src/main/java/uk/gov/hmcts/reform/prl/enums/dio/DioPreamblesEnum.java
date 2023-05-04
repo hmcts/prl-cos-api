@@ -15,7 +15,7 @@ public enum DioPreamblesEnum {
     rightToAskCourt("rightToAskCourt", "Right to ask court to reconsider this order"),
 
     @JsonProperty("partyRaisedDomesticAbuse")
-    partyRaisedDomesticAbuse("partyRaisedDomesticAbuse", "Party/parties raised domestic abuse issues");
+    partyRaisedDomesticAbuse("partyRaisedDomesticAbuse", "Party or parties raising domestic abuse issues");
 
     private final String id;
     private final String displayedValue;
