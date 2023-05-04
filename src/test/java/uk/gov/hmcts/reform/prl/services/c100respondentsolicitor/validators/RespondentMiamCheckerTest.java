@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
@@ -45,16 +44,11 @@ public class RespondentMiamCheckerTest {
         User user = User.builder().email("respondent@example.net")
             .idamId("1234-5678").solicitorRepresented(Yes).build();
         Response miamResponse = Response.builder()
-            .solicitorMiam(SolicitorMiam.builder()
-                               .respSolHaveYouAttendedMiam(Miam.builder()
-                                                               .attendedMiam(No)
-                                                               .build())
-                               .respSolWillingnessToAttendMiam(Miam.builder()
-                                                                   .willingToAttendMiam(No)
-                                                                   .reasonNotAttendingMiam("test")
-                                                                   .build())
-                               .build())
-            .build();
+            .miam(Miam.builder()
+                      .attendedMiam(No)
+                      .willingToAttendMiam(No)
+                      .reasonNotAttendingMiam("test")
+                      .build()).build();
 
         respondents = PartyDetails.builder()
             .user(user)
@@ -101,13 +95,12 @@ public class RespondentMiamCheckerTest {
     @Test
     public void hasMandatoryCompletedTestWithAttendedMiamYes() {
 
-        Response miamResponse = Response.builder()
-            .solicitorMiam(SolicitorMiam.builder()
-                               .respSolHaveYouAttendedMiam(Miam.builder()
-                                                               .attendedMiam(Yes)
-                                                               .build())
-
-                               .build())
+        Response miamResponse = Response
+            .builder()
+            .miam(Miam
+                      .builder()
+                      .attendedMiam(Yes)
+                      .build())
             .build();
 
         PartyDetails respondents = PartyDetails.builder()

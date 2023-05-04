@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
@@ -28,14 +28,14 @@ public class RespondentMiamChecker implements RespondentEventChecker {
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
 
-        return response.filter(value -> ofNullable(value.getSolicitorMiam())
+        return response.filter(value -> ofNullable(value.getMiam())
             .filter(miam -> anyNonEmpty(
-                miam.getRespSolHaveYouAttendedMiam().getAttendedMiam(),
-                miam.getRespSolHaveYouAttendedMiam().getReasonNotAttendingMiam(),
-                miam.getRespSolHaveYouAttendedMiam().getWillingToAttendMiam(),
-                miam.getRespSolWillingnessToAttendMiam().getAttendedMiam(),
-                miam.getRespSolWillingnessToAttendMiam().getReasonNotAttendingMiam(),
-                miam.getRespSolWillingnessToAttendMiam().getWillingToAttendMiam()
+                miam.getAttendedMiam(),
+                miam.getReasonNotAttendingMiam(),
+                miam.getWillingToAttendMiam(),
+                miam.getAttendedMiam(),
+                miam.getReasonNotAttendingMiam(),
+                miam.getWillingToAttendMiam()
             )).isPresent()).isPresent();
     }
 
@@ -44,8 +44,8 @@ public class RespondentMiamChecker implements RespondentEventChecker {
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {
-            Optional<SolicitorMiam> miam
-                = Optional.ofNullable(response.get().getSolicitorMiam());
+            Optional<Miam> miam
+                = Optional.ofNullable(response.get().getMiam());
             if (miam.isPresent() && checkMiamManadatoryCompleted(miam)) {
                 respondentTaskErrorService.removeError(MIAM_ERROR);
                 return true;
@@ -59,17 +59,17 @@ public class RespondentMiamChecker implements RespondentEventChecker {
         return false;
     }
 
-    private boolean checkMiamManadatoryCompleted(Optional<SolicitorMiam> miam) {
+    private boolean checkMiamManadatoryCompleted(Optional<Miam> miam) {
         List<Optional<?>> fields = new ArrayList<>();
         log.info("entering miam checker if loop...");
         if (miam.isPresent()) {
-            fields.add(ofNullable(miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam()));
-            YesOrNo attendMiam = miam.get().getRespSolHaveYouAttendedMiam().getAttendedMiam();
+            fields.add(ofNullable(miam.get().getAttendedMiam()));
+            YesOrNo attendMiam = miam.get().getAttendedMiam();
             if (YesOrNo.No.equals(attendMiam)) {
-                fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam()));
-                YesOrNo willingToAttendMiam = miam.get().getRespSolWillingnessToAttendMiam().getWillingToAttendMiam();
+                fields.add(ofNullable(miam.get().getWillingToAttendMiam()));
+                YesOrNo willingToAttendMiam = miam.get().getWillingToAttendMiam();
                 if (YesOrNo.No.equals(willingToAttendMiam)) {
-                    fields.add(ofNullable(miam.get().getRespSolWillingnessToAttendMiam().getReasonNotAttendingMiam()));
+                    fields.add(ofNullable(miam.get().getReasonNotAttendingMiam()));
                 }
             }
         }

@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInter
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
@@ -149,11 +148,11 @@ public class C100RespondentSolicitorService {
                     log.info("MIAM fields, :::{}", (Object) miamFields);
                     caseDataUpdated.put(
                         miamFields[0],
-                        solicitorRepresentedRespondent.getValue().getResponse().getSolicitorMiam().getRespSolHaveYouAttendedMiam()
+                        solicitorRepresentedRespondent.getValue().getResponse().getMiam().getAttendedMiam()
                     );
                     caseDataUpdated.put(
                         miamFields[1],
-                        solicitorRepresentedRespondent.getValue().getResponse().getSolicitorMiam().getRespSolWillingnessToAttendMiam()
+                        solicitorRepresentedRespondent.getValue().getResponse().getMiam().getWillingToAttendMiam()
                     );
                     caseDataUpdated.put(miamFields[2], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
                     caseDataUpdated.put(
@@ -314,18 +313,14 @@ public class C100RespondentSolicitorService {
                 break;
             case MIAM:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .solicitorMiam(SolicitorMiam.builder()
-                                       .respSolHaveYouAttendedMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam())
-                                       .respSolWillingnessToAttendMiam(
-                                           Miam.builder()
-                                               .reasonNotAttendingMiam(
-                                                   YesOrNo.Yes.equals(caseData.getRespondentSolicitorWillingnessToAttendMiam()
-                                                                          .getWillingToAttendMiam()) ? null
-                                                       : caseData.getRespondentSolicitorWillingnessToAttendMiam()
-                                                       .getReasonNotAttendingMiam())
-                                               .build())
-                                       .build())
-                    .build();
+                    .miam(Miam.builder()
+                              .attendedMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam())
+                              .willingToAttendMiam(caseData.getRespondentSolicitorWillingnessToAttendMiam().getWillingToAttendMiam())
+                              .reasonNotAttendingMiam(
+                                  Yes.equals(caseData.getRespondentSolicitorWillingnessToAttendMiam()
+                                                  .getWillingToAttendMiam()) ? null : caseData
+                                                          .getRespondentSolicitorWillingnessToAttendMiam()
+                                                          .getReasonNotAttendingMiam()).build()).build();
                 break;
             case CURRENT_OR_PREVIOUS_PROCEEDINGS:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
