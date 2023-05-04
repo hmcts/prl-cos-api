@@ -452,7 +452,9 @@ public class ManageOrderEmailService {
         Optional<Element<PartyDetails>> applicant = parties.stream()
             .filter(element -> element.getId().toString().equalsIgnoreCase(code)).findFirst();
         if (applicant.isPresent()) {
+            log.info("*** party *** {}", applicant.get());
             if (YesNoDontKnow.yes.equals(applicant.get().getValue().getDoTheyHaveLegalRepresentation())) {
+                log.info("*** legal rep present ***");
                 applicantMap.put(applicant.get().getValue().getSolicitorEmail(), applicant.get().getValue()
                     .getRepresentativeFirstName() + " "
                     + applicant.get().getValue().getRepresentativeLastName());
