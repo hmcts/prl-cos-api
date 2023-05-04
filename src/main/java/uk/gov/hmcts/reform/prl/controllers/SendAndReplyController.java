@@ -209,7 +209,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
             log.info("New message object created ----> {}", newMessage);
 
-            List<Element<Message>> listOfMessages = sendAndReplyService.addNewMessage(caseData, newMessage);
+            List<Element<Message>> listOfMessages = sendAndReplyService.addNewOpenMessage(caseData, newMessage);
 
             log.info("listOfMessages created ----> {}", listOfMessages);
 
