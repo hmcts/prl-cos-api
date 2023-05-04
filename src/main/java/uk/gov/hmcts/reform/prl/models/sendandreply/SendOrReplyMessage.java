@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.sendandreply;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
@@ -20,6 +21,7 @@ import java.util.List;
 @SuperBuilder(toBuilder = true)
 @ToString(callSuper = true)
 @AllArgsConstructor
+@Builder(toBuilder = true)
 public class SendOrReplyMessage {
 
     //PRL-3454 - send & reply messages enhancements

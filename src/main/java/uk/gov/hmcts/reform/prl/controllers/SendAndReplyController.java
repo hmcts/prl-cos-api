@@ -195,7 +195,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     }
 
     @PostMapping("/send-or-reply-to-messages/about-to-submit")
-    public CallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
+    public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
                                                           @Parameter(hidden = true) String authorisation,
                                                           @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -212,16 +212,16 @@ public class SendAndReplyController extends AbstractCallbackController {
             List<Element<Message>> listOfMessages = sendAndReplyService.addNewMessage(caseData, newMessage);
 
             log.info("listOfMessages created ----> {}", listOfMessages);
-            final CaseData build =
-                caseData.toBuilder().openMessages(listOfMessages).build();
 
-            log.info("case data after adding new message created ----> {}", build);
-
+            caseData = caseData.toBuilder().sendOrReplyMessage(caseData.getSendOrReplyMessage().toBuilder().openMessagesList(listOfMessages).build()).build();
 
         }
 
-        log.info("updated case data  ----> {}", caseData);
+        caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
-        return CallbackResponse.builder().data(caseData).build();
+        log.info("updated case data  ----> {}", caseDataMap);
+
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 }
