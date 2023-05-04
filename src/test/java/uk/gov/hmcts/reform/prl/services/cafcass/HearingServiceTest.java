@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -136,16 +136,11 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void testGetHearingsForAllCases(){
+    public void testGetHearingsForAllCases() {
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        CaseData caseData = CaseData.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseManagementLocation(CaseManagementLocation.builder()
-                                        .regionId("1").baseLocationId("100").build())
-            .build();
-        List<Hearings> hearingListForAllCases = new ArrayList<>();
+
+        final List<Hearings> hearingListForAllCases = new ArrayList<>();
         List<CaseHearing> caseHearings = new ArrayList();
 
         CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
@@ -163,6 +158,12 @@ public class HearingServiceTest {
         hearings.setCaseHearings(caseHearings);
 
         hearingListForAllCases.add(hearings);
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .regionId("1").baseLocationId("100").build())
+            .build();
 
         Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
         caseIdWithRegionIdMap.put(String.valueOf(caseData.getId()), caseData.getCaseManagementLocation().getRegionId()
@@ -170,23 +171,23 @@ public class HearingServiceTest {
 
         ReflectionTestUtils.setField(hearingService, "hearingStatusList", List.of("LISTED"));
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
-        when(hearingApiClient.getHearingDetailsForAllCaseIds(authToken, authTokenGenerator.generate(), caseIdWithRegionIdMap)).thenReturn(hearingListForAllCases);
+        when(hearingApiClient.getHearingDetailsForAllCaseIds(authToken, authTokenGenerator.generate(),
+                                                             caseIdWithRegionIdMap)).thenReturn(hearingListForAllCases);
         hearingService.getHearingsForAllCases(authToken,caseIdWithRegionIdMap);
 
     }
 
     @Test
-    public void testgetHearingsThrowsException() throws Exception{
+    public void testgetHearingsThrowsException() throws Exception {
 
         try {
             Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
 
             hearingService.getHearingsForAllCases(authToken, caseIdWithRegionIdMap);
-        }catch (Exception e) {
+        } catch (Exception e) {
             assertEquals("Error while getHearingsForAllCases", e.getMessage());
             verify(log).error("Error while getHearingsForAllCases", Exception.class);
-            }
-
+        }
 
     }
 
