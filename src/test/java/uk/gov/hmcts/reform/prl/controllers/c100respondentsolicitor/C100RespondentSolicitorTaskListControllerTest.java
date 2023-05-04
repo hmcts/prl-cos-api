@@ -108,7 +108,7 @@ public class C100RespondentSolicitorTaskListControllerTest {
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
-            .keepContactDetailsPrivateOther(KeepDetailsPrivate.builder()
+            .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
                                                 .confidentiality(Yes)
                                                 .confidentialityList(confidentialityListEnums)
                                                 .build())
