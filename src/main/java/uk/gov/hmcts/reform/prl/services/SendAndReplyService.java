@@ -17,8 +17,11 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.ExternalPartyDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -50,6 +53,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicMultiselectList;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -87,6 +91,8 @@ public class SendAndReplyService {
     private final AuthTokenGenerator authTokenGenerator;
 
     private final CoreCaseDataApi coreCaseDataApi;
+
+    private final RefDataUserService refDataUserService;
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -458,9 +464,8 @@ public class SendAndReplyService {
             .internalMessageUrgent(sendOrReplyMessage.getInternalMessageUrgent())
             .internalMessageWhoToSendTo(sendOrReplyMessage.getInternalMessageWhoToSendTo().name())
             .messageAbout(sendOrReplyMessage.getMessageAbout().name())
-            //            .sendReplyJudgeName(caseData.getSendOrReplyMessage().getSendReplyJudgeName())
+            .judgeName(getJudgeName(sendOrReplyMessage.getSendReplyJudgeName()))
             .messageSubject(sendOrReplyMessage.getMessageSubject())
-
             .recipientEmailAddresses(sendOrReplyMessage.getRecipientEmailAddresses())
             .selectedCtscEmail(sendOrReplyMessage.getExternalPartiesList() != null
                                    ? sendOrReplyMessage.getExternalPartiesList().getValueCode() : null)
@@ -480,11 +485,42 @@ public class SendAndReplyService {
                                                ? sendOrReplyMessage.getSubmittedDocumentsList().getValueCode() : null)
             .selectedSubmittedDocumentValue(sendOrReplyMessage.getSubmittedDocumentsList() != null
                                                 ? sendOrReplyMessage.getSubmittedDocumentsList().getValueLabel() : null)
-            //            .selectedExternalParties(sendOrReplyMessage.getExternalPartiesList().getValueCode())
+            .selectedExternalParties(sendOrReplyMessage.getExternalPartiesList() != null
+                                         ? sendOrReplyMessage.getExternalPartiesList().getValueCode() : null)
 
-            //            .messageHistory(buildMessageHistory(metaData.getSenderEmail(), caseData.getMessageContent()))
+            // TODO need to check with Yogendra
+//            .messageHistory(buildMessageHistory(metaData.getSenderEmail(), caseData.getMessageContent()))
             .latestMessage(caseData.getMessageContent())
             .updatedTime(dateTime.now())
             .build();
+    }
+
+    public List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser judicialUser) {
+
+        String[] judgePersonalCode = getPersonalCode(judicialUser);
+        return refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
+                                                                .personalCode(judgePersonalCode).build());
+
+    }
+
+    private String getJudgeName(JudicialUser judicialUser) {
+        if(judicialUser != null && judicialUser.getPersonalCode() != null) {
+            final Optional<List<JudicialUsersApiResponse>> judicialUsersApiResponseList = ofNullable(getJudgeDetails(
+                judicialUser));
+            if (judicialUsersApiResponseList.isPresent()) {
+                return judicialUsersApiResponseList.get().stream().findFirst().get().getFullName();
+            }
+        }
+        return null;
+    }
+
+    public List<Element<Message>> addNewOpenMessage(CaseData caseData, Message newMessage) {
+        List<Element<Message>> messages = new ArrayList<>();
+        Element<Message> messageElement = element(newMessage);
+        if (!caseData.getSendOrReplyMessage().getOpenMessagesList().isEmpty()) {
+            messages = caseData.getSendOrReplyMessage().getOpenMessagesList();
+        }
+        messages.add(messageElement);
+        return messages;
     }
 }
