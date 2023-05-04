@@ -549,9 +549,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/cafcass/CaseDataService.java',
   '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/ManageOrderEmailService.java',
-  '**uk/gov/hmcts/reform/prl/services/dynamicmultiselectlist/DynamicMultiSelectListService.java',
-  'src/main/java/uk/gov/hmcts/reform/prl/controllers/SendAndReplyController.java',
-  'src/main/java/uk/gov/hmcts/reform/prl/services/SendAndReplyService.java'
+  '**uk/gov/hmcts/reform/prl/services/dynamicmultiselectlist/DynamicMultiSelectListService.java'
 ]
 
 sonarqube {
