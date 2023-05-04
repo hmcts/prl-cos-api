@@ -37,17 +37,21 @@ public class Message extends MessageMetaData {
     private String replyTo;
 
     //PRL-3454 - send & reply message enhancements
-    private InternalExternalMessageEnum internalOrExternalMessage;
-    private InternalMessageWhoToSendToEnum internalMessageWhoToSendTo;
-    private String judicialOrMagistrateTier;
-    private JudicialUser sendReplyJudgeName;
+    private String internalOrExternalMessage;
+    private String internalMessageWhoToSendTo;
+    private String messageAbout;
+    private String judicialOrMagistrateTierCode;
+    private String judicialOrMagistrateTierValue;
+    private String sendReplyJudgeName;
     private String selectedCtscEmail;
-    private String ctscEmailAddress;
+    private String recipientEmailAddresses;
     private YesOrNo internalMessageUrgent;
-    private MessageAboutEnum messageAbout;
-    private String selectedLinkedApplications;
-    private String selectedFutureHearings;
-    private String selectedSubmittedDocuments;
+    private String selectedLinkedApplicationCode;
+    private String selectedLinkedApplicationValue;
+    private String selectedFutureHearingCode;
+    private String selectedFutureHearingValue;
+    private String selectedSubmittedDocumentCode;
+    private String selectedSubmittedDocumentValue;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
