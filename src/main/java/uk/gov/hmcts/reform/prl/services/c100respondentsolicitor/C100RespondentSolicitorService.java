@@ -379,8 +379,9 @@ public class C100RespondentSolicitorService {
                                                                      .getReasonForJurisdictionDetails()).build())
                                                      .internationalElementRequestInfo(
                                                          SolicitorInternationalElement.builder()
-                                                             .requestToAuthority(caseData.getInternationalElementRequest()
-                                                                                     .getReasonForJurisdiction())
+                                                             .requestToAuthority(
+                                                                 caseData.getInternationalElementRequest()
+                                                                     .getRequestToAuthority())
                                                              .requestToAuthorityDetails(
                                                                  YesOrNo.No.equals(caseData
                                                                                        .getInternationalElementRequest()
