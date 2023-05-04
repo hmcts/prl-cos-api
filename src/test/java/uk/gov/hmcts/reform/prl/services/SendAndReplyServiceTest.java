@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
@@ -47,6 +48,7 @@ import static java.util.Optional.ofNullable;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -436,7 +438,7 @@ public class SendAndReplyServiceTest {
 
         when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenReturn(refDataCategoryValueMap);
 
-        DynamicList judiciaryTierDynmicList = sendAndReplyService.getJudiciaryTierDynmicList(anyString(),anyString(), anyString(), anyString());
+        DynamicList judiciaryTierDynmicList = sendAndReplyService.getJudiciaryTierDynamicList(anyString(),anyString(), anyString(), anyString());
         assertNotNull(judiciaryTierDynmicList);
     }
 
@@ -451,8 +453,26 @@ public class SendAndReplyServiceTest {
         when(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData)).thenReturn(listItems);
         when(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData)).thenReturn(listItems);
 
-        sendAndReplyService.getExternalRecipientsDynamicMultiselectList(caseData);
+        DynamicMultiSelectList externalParties = sendAndReplyService.getExternalRecipientsDynamicMultiselectList(caseData);
+
+        assertNotNull(externalParties);
     }
+
+    @Test
+    public void testGetExternalRecipientsDynamicMultiselectListException() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        Map<String, List<DynamicMultiselectListElement>> listItems = new HashMap<>();
+        listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
+        listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
+        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData)).thenThrow(new RuntimeException());
+
+        DynamicMultiSelectList externalParties = sendAndReplyService.getExternalRecipientsDynamicMultiselectList(caseData);
+
+        assertNull(externalParties.getListItems());
+    }
+
 
     @Test
     public void testPopulateDynamicListsForSendAndReply() {
@@ -475,6 +495,73 @@ public class SendAndReplyServiceTest {
             Mockito.any(),
             Mockito.any()
         )).thenReturn(categoriesAndDocuments);
-        sendAndReplyService.populateDynamicListsForSendAndReply(caseData, serviceAuthToken);
+
+        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, serviceAuthToken);
+
+        assertNotNull(updatedCaseData);
+        assertNotNull(updatedCaseData.getSendOrReplyMessage());
     }
+
+    @Test
+    public void testPopulateDynamicListsForSendAndReplyWithSubCategories() {
+
+        Map<String, List<DynamicMultiselectListElement>> listItems = new HashMap<>();
+        listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
+        listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
+        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData)).thenReturn(listItems);
+        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData)).thenReturn(listItems);
+
+        Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+
+        Category subCategory1 = new Category("subCategory1Id", "subCategory1Name", 1, List.of(document), null);
+        Category subCategory2 = new Category("subCategory2Id", "subCategory2Name", 1, List.of(document), List.of(subCategory1));
+
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), List.of(subCategory2));
+
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(categoriesAndDocuments);
+
+        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, serviceAuthToken);
+
+        assertNotNull(updatedCaseData);
+        assertNotNull(updatedCaseData.getSendOrReplyMessage());
+    }
+
+    @Test
+    public void testGetCategoriesAndDocumentsException() {
+
+        Map<String, List<DynamicMultiselectListElement>> listItems = new HashMap<>();
+        listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
+        listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
+
+        Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+
+        when(authTokenGenerator.generate())
+            .thenThrow(new RuntimeException());
+
+        DynamicList dynamicList1 = sendAndReplyService.getCategoriesAndDocuments("test", "test");
+
+        assertNull(dynamicList1.getListItems());
+    }
+
+    @Test
+    public void testGetJudiciaryTierDynmicListException() {
+
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenThrow(new RuntimeException());
+
+        DynamicList judiciaryTierDynmicList = sendAndReplyService.getJudiciaryTierDynamicList(anyString(),anyString(), anyString(), anyString());
+        assertNull(judiciaryTierDynmicList.getListItems());
+    }
+
+
+
+
 }
