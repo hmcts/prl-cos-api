@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInter
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
 
 import java.util.List;
 
@@ -44,10 +43,6 @@ public class Response {
     private final String safeToCallOption;
     private final SafetyConcerns safetyConcerns;
     private final ReasonableAdjustmentsSupport supportYouNeed;
-
-    @JsonUnwrapped
-    @Builder.Default
-    private final SolicitorMiam solicitorMiam;
 
     private final YesNoDontKnow currentOrPastProceedingsForChildren;
     private final List<Element<RespondentProceedingDetails>> respondentExistingProceedings;

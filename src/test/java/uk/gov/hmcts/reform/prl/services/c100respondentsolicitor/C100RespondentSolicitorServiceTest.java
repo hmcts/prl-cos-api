@@ -40,7 +40,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentI
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -122,15 +121,9 @@ public class C100RespondentSolicitorServiceTest {
                                                   .confidentiality(Yes)
                                                   .confidentialityList(confidentialityListEnums)
                                                   .build())
-                          .solicitorMiam(SolicitorMiam.builder()
-                                             .respSolHaveYouAttendedMiam(Miam.builder()
-                                                                             .attendedMiam(No)
-                                                                             .build())
-                                             .respSolWillingnessToAttendMiam(Miam.builder()
-                                                                                 .willingToAttendMiam(No)
-                                                                                 .reasonNotAttendingMiam("test")
-                                                                                 .build())
-                                             .build())
+                          .miam(Miam.builder().attendedMiam(No)
+                                    .willingToAttendMiam(No)
+                                    .reasonNotAttendingMiam("test").build())
                           .resSolInternationalElements(ResSolInternationalElements
                                                            .builder()
                                                            .internationalElementParentInfo(SolicitorInternationalElement
