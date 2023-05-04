@@ -82,9 +82,6 @@ public class KeepDetailsPrivateCheckerTest {
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
                                                   .build())
-                          .solicitorKeepDetailsPriate(SolicitorKeepDetailsPrivate
-                                                          .builder()
-                                                          .build())
                           .build())
             .build();
 
