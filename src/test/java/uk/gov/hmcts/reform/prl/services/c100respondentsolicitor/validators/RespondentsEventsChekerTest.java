@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ALLEGATION_OF_HARM;
@@ -50,6 +51,13 @@ public class RespondentsEventsChekerTest {
 
     @Mock
     RespondentAllegationsOfHarmChecker respondentAllegationsOfHarmChecker;
+
+    @Mock
+    ViewDraftResponseChecker viewDraftResponseChecker;
+
+
+    @Mock
+    ResponseSubmitChecker responseSubmitChecker;
 
 
     @InjectMocks
@@ -113,6 +121,21 @@ public class RespondentsEventsChekerTest {
     public void checkContactDetailsEventStatus() {
         assertTrue(respondentEventsChecker.getEventStatus().containsKey(CONFIRM_EDIT_CONTACT_DETAILS));
         assertTrue(respondentEventsChecker.getEventStatus().containsValue(respondentContactDetailsChecker));
+    }
+
+    @Test
+    public void testCheckerFields() {
+        assertNotNull(respondentEventsChecker.getConsentToApplicationChecker());
+        assertNotNull(respondentEventsChecker.getKeepDetailsPrivateChecker());
+        assertNotNull(respondentEventsChecker.getRespondentMiamChecker());
+        assertNotNull(respondentEventsChecker.getAttendToCourtChecker());
+        assertNotNull(respondentEventsChecker.getAbilityToParticipateChecker());
+        assertNotNull(respondentEventsChecker.getInternationalElementsChecker());
+        assertNotNull(respondentEventsChecker.getViewDraftResponseChecker());
+        assertNotNull(respondentEventsChecker.getCurrentOrPastProceedingsChecker());
+        assertNotNull(respondentEventsChecker.getRespondentContactDetailsChecker());
+        assertNotNull(respondentEventsChecker.getRespondentAllegationsOfHarmChecker());
+        assertNotNull(respondentEventsChecker.getResponseSubmitChecker());
     }
 }
 
