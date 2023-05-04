@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
@@ -14,12 +12,11 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.ExternalPartyDocument;
 
 import java.util.List;
 
 @Data
-@SuperBuilder(toBuilder = true)
-@ToString(callSuper = true)
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class SendOrReplyMessage {
@@ -46,5 +43,6 @@ public class SendOrReplyMessage {
     private String messageSubject;
     private JudicialUser sendReplyJudgeName;
 
+    private final List<Element<ExternalPartyDocument>> externalPartyDocuments;
 }
 
