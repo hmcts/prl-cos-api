@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
@@ -56,6 +58,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
@@ -69,6 +73,7 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -77,6 +82,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
@@ -122,6 +128,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum.judge;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -142,7 +149,13 @@ public class CallbackControllerTest {
     private UserService userService;
 
     @Mock
+    RefDataUserService refDataUserService;
+
+    @Mock
     CourtSealFinderService courtSealFinderService;
+
+    @Mock
+    GatekeepingDetailsService gatekeepingDetailsService;
 
     @Mock
     private WorkflowResult workflowResult;
@@ -1695,15 +1708,65 @@ public class CallbackControllerTest {
         CaseData caseData = CaseData.builder().id(123L).applicantCaseName("testName").applicantOrganisationPolicy(
             applicantOrganisationPolicy).caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
+            .builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails
+                             .builder()
                              .id(1L)
-                             .data(caseDetails).build()).build();
+                             .data(caseDetails).build())
+            .build();
         when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .aboutToSubmitCaseCreation(authToken, callbackRequest);
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("caseNameHmctsInternal"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantOrRespondentCaseName"));
+    }
+
+    @Test
+    public void testSendToGateKeeperEvent() {
+        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
+            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .allocatedJudge(allocatedJudge)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(123L)
+            .data(stringObjectMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        Map<String, Object> tabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+        JudicialUser judicialUser = JudicialUser.builder()
+            .personalCode("Test")
+            .idamId("Test")
+            .build();
+        GatekeepingDetails gatekeepingDetails = GatekeepingDetails.builder()
+            .isJudgeOrLegalAdviserGatekeeping(judge)
+            .isSpecificGateKeeperNeeded(Yes)
+            .judgeName(judicialUser)
+            .build();
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
+
+        when(gatekeepingDetailsService.getGatekeepingDetails(caseDataUpdated, caseData.getLegalAdviserList(),refDataUserService))
+            .thenReturn(gatekeepingDetails);
+        assertNotNull(callbackController.sendToGatekeeper("auth",callbackRequest));
     }
 }

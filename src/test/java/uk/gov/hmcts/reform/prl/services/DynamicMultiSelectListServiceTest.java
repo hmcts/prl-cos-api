@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
@@ -68,6 +69,7 @@ public class DynamicMultiSelectListServiceTest {
             .children(children)
             .applicants(partyDetails)
             .manageOrders(ManageOrders.builder()
+                              .isTheOrderAboutAllChildren(YesOrNo.No)
                               .childOption(DynamicMultiSelectList.builder()
                                                .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID)
                                                                   .label("")
@@ -191,6 +193,16 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
+    public void testGetEmptyStringFromDynMulSelectList() {
+        String str = dynamicMultiSelectListService
+            .getStringFromDynamicMultiSelectList(DynamicMultiSelectList
+                                                     .builder()
+                                                     .value(java.util.Collections.EMPTY_LIST)
+                                                     .build());
+        assertEquals("", str);
+    }
+
+    @Test
     public void testGetStringFromDynMultiSelectListFromListItems() {
         DynamicMultiselectListElement listElement = DynamicMultiselectListElement.builder()
             .label("Child (Child 1)")
@@ -215,8 +227,49 @@ public class DynamicMultiSelectListServiceTest {
 
     @Test
     public void testDynamicMultiSelectForDocmosis() {
+
         List<Element<Child>> str = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseData);
         assertNotNull(str);
+    }
+
+    @Test
+    public void testGetChildrenForDocmosisC100() {
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                                                    .value(Child.builder().build()).build());
+        caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .children(children)
+            .manageOrders(ManageOrders.builder()
+                              .isTheOrderAboutAllChildren(YesOrNo.No)
+                              .childOption(DynamicMultiSelectList.builder()
+                                               .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID)
+                                                                  .label("")
+                                                                  .build()))
+                                               .build()).build())
+            .build();
+        List<Element<Child>> childList = dynamicMultiSelectListService
+            .getChildrenForDocmosis(caseData);
+        assertNotNull(childList);
+    }
+
+    @Test
+    public void testGetApplicantChildDetailsForDocmosis() {
+        caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .applicantChildDetails(List.of(Element.<ApplicantChild>builder().id(UUID.fromString(TEST_UUID))
+                                               .value(ApplicantChild.builder().fullName("test").build())
+                                               .build()))
+            .manageOrders(ManageOrders.builder()
+                              .isTheOrderAboutChildren(YesOrNo.Yes)
+                              .childOption(DynamicMultiSelectList.builder()
+                                               .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID)
+                                                                  .label("")
+                                                                  .build()))
+                                               .build()).build())
+            .build();
+        List<Element<ApplicantChild>> applchildList = dynamicMultiSelectListService
+            .getApplicantChildDetailsForDocmosis(caseData);
+        assertNotNull(applchildList);
     }
 }
