@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,9 +22,11 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Slf4j
 public class ResponseSubmitCheckerTest {
 
     @InjectMocks
@@ -40,6 +43,9 @@ public class ResponseSubmitCheckerTest {
 
     @Mock
     AbilityToParticipateChecker abilityToParticipateChecker;
+
+    @Mock
+    RespondentMiamChecker respondentMiamChecker;
 
     @Mock
     AttendToCourtChecker attendToCourtChecker;
@@ -115,5 +121,38 @@ public class ResponseSubmitCheckerTest {
         Boolean bool = responseSubmitChecker.isFinished(emptyRespondent);
 
         assertFalse(bool);
+    }
+
+    @Test
+    public void hasMandatoryCompletedTrue() {
+        log.info("My changes");
+
+        when(respondentEventsChecker.getConsentToApplicationChecker()).thenReturn(consentToApplicationChecker);
+        when(consentToApplicationChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getKeepDetailsPrivateChecker()).thenReturn(keepDetailsPrivateChecker);
+        when(keepDetailsPrivateChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getRespondentMiamChecker()).thenReturn(respondentMiamChecker);
+        when(respondentMiamChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getAbilityToParticipateChecker()).thenReturn(abilityToParticipateChecker);
+        when(abilityToParticipateChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getAttendToCourtChecker()).thenReturn(attendToCourtChecker);
+        when(attendToCourtChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getCurrentOrPastProceedingsChecker()).thenReturn(currentOrPastProceedingsChecker);
+        when(currentOrPastProceedingsChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getRespondentAllegationsOfHarmChecker()).thenReturn(respondentAllegationsOfHarmChecker);
+        when(respondentAllegationsOfHarmChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
+        when(respondentContactDetailsChecker.isFinished(respondent)).thenReturn(true);
+
+        Boolean bool = responseSubmitChecker.isFinished(respondent);
+
+        assertTrue(bool);
     }
 }

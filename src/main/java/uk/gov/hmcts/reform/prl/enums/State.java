@@ -26,6 +26,7 @@ public enum State {
     ALL_FINAL_ORDERS_ISSUED("ALL_FINAL_ORDERS_ISSUED", "Closed"),
     PREPARE_FOR_HEARING_CONDUCT_HEARING("PREPARE_FOR_HEARING_CONDUCT_HEARING","Hearing"),
     DELETED("DELETED", "Deleted"),
+    REQUESTED_FOR_DELETION("REQUESTED_FOR_DELETION", "Requested for deletion"),
     DECISION_OUTCOME("DECISION_OUTCOME","Hearing Outcome");
     private final String value;
     private final String label;

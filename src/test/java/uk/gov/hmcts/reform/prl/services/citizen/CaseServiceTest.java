@@ -129,15 +129,7 @@ public class CaseServiceTest {
                                                                          .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
                                                                          .accessCode("123").build()).build()))
             .build();
-        PartyDetails partyDetails1 = PartyDetails.builder()
-            .firstName("Test")
-            .lastName("User")
-            .user(User.builder()
-                      .email("test@gmail.com")
-                      .idamId("123")
-                      .solicitorRepresented(YesOrNo.Yes)
-                      .build())
-            .build();
+
         caseDataMap = new HashMap<>();
         caseDetails = CaseDetails.builder()
             .data(caseDataMap)
@@ -147,7 +139,15 @@ public class CaseServiceTest {
         userDetails = UserDetails.builder().id("tesUserId").email("testEmail").build();
         updateCaseData = UpdateCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
-            .partyDetails(partyDetails1)
+            .partyDetails(PartyDetails.builder()
+                              .firstName("Test")
+                              .lastName("User")
+                              .user(User.builder()
+                                        .email("test@gmail.com")
+                                        .idamId("123")
+                                        .solicitorRepresented(YesOrNo.Yes)
+                                        .build())
+                              .build())
             .partyType(PartyEnum.applicant)
             .build();
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);

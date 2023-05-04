@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,11 +21,13 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskEr
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Slf4j
 public class CurrentOrPastProceedingsCheckerTest {
 
     @InjectMocks
@@ -78,8 +81,31 @@ public class CurrentOrPastProceedingsCheckerTest {
     }
 
     @Test
+    public void isStartedNotTest() {
+        log.info("My changes");
+        respondent = null;
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isStarted(respondent);
+
+        assertFalse(anyNonEmpty);
+    }
+
+
+    @Test
     public void hasMandatoryCompletedTest() {
         boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent);
         Assert.assertTrue(anyNonEmpty);
     }
+
+    @Test
+    public void hasMandatoryCompletedWithoutRespdntExisProceedingAndPastProceedingTest() {
+        log.info("My changes");
+        respondent = PartyDetails.builder()
+            .response(Response
+                          .builder()
+                          .build())
+            .build();
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent);
+        Assert.assertFalse(anyNonEmpty);
+    }
+
 }
