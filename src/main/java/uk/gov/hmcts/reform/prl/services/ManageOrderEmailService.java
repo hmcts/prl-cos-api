@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -397,7 +398,7 @@ public class ManageOrderEmailService {
             log.info("(manageOrders.getServeOtherPartiesDA()() {}", manageOrders.getServeOtherPartiesDA());
             sendEmailForFlCaseType(caseDetails, caseData, isFinalOrder);
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
-                .contains(OtherOrganisationOptions.anotherOrganisation)
+                .contains(ServeOtherPartiesOptions.other)
                 && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsDA())) {
                 manageOrders.getEmailInformationDA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
                     .add(value.getEmailAddress()));
