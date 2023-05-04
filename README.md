@@ -5,7 +5,7 @@
 ## Notes
 
 Update with master until Gatekeeping and manage order changes.
-TODO:Changes for Docmosis
+TODO:Changes for Gatekeeping
 
 Since Spring Boot 2.1 bean overriding is disabled. If you want to enable it you will need to set `spring.main.allow-bean-definition-overriding` to `true`.
 
