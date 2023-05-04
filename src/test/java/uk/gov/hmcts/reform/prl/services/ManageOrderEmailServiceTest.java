@@ -874,6 +874,9 @@ public class ManageOrderEmailServiceTest {
                                  .firstName("test1").build())
             .respondents(listOfRespondents)
             .respondentsFL401(PartyDetails.builder()
+                                  .solicitorEmail("")
+                                  .representativeLastName("")
+                                  .representativeFirstName("")
                                   .lastName("test")
                                   .firstName("test1").build())
             .children(listOfChildren)
@@ -1109,7 +1112,7 @@ public class ManageOrderEmailServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeLastName("")
             .representativeFirstName("")
-            .solicitorEmail("")
+            .solicitorEmail("test@gmail.com")
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("Fl401")

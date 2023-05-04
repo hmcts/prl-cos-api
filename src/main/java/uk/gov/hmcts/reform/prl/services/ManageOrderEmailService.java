@@ -108,7 +108,14 @@ public class ManageOrderEmailService {
 
 
     private void sendEmailForFlCaseType(CaseDetails caseDetails, CaseData caseData, SelectTypeOfOrderEnum isFinalOrder) {
-        if (!StringUtils.isEmpty(caseData.getApplicantsFL401().getEmail())) {
+        if (StringUtils.isNotEmpty(caseData.getApplicantsFL401().getSolicitorEmail())) {
+            sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getSolicitorEmail(),
+                             buildApplicantRespondentEmail(
+                                 caseDetails, caseData.getApplicantsFL401().getRepresentativeFirstName()
+                                     + " " + caseData.getApplicantsFL401().getRepresentativeLastName()),
+                             caseData
+            );
+        } else if (StringUtils.isNotEmpty(caseData.getApplicantsFL401().getEmail())) {
             sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getEmail(),
                              buildApplicantRespondentEmail(
                                  caseDetails, caseData.getApplicantsFL401().getFirstName()
@@ -116,7 +123,14 @@ public class ManageOrderEmailService {
                              caseData
             );
         }
-        if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
+        if (StringUtils.isNotEmpty(caseData.getRespondentsFL401().getSolicitorEmail())) {
+            sendEmailToParty(isFinalOrder, caseData.getRespondentsFL401().getSolicitorEmail(),
+                             buildApplicantRespondentEmail(
+                                 caseDetails, caseData.getRespondentsFL401().getRepresentativeFirstName()
+                                     + " " + caseData.getRespondentsFL401().getRepresentativeLastName()),
+                             caseData
+            );
+        } else if (StringUtils.isNotEmpty(caseData.getRespondentsFL401().getEmail())) {
             sendEmailToParty(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
                              buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
                                  + " " + caseData.getRespondentsFL401().getFirstName()),
@@ -452,7 +466,6 @@ public class ManageOrderEmailService {
         Optional<Element<PartyDetails>> applicant = parties.stream()
             .filter(element -> element.getId().toString().equalsIgnoreCase(code)).findFirst();
         if (applicant.isPresent()) {
-            log.info("*** party *** {}", applicant.get());
             if (null != applicant.get().getValue().getSolicitorEmail()) {
                 log.info("*** legal rep present ***");
                 applicantMap.put(applicant.get().getValue().getSolicitorEmail(), applicant.get().getValue()
