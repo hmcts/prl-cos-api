@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
@@ -436,7 +437,7 @@ public class SendAndReplyServiceTest {
 
         when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenReturn(refDataCategoryValueMap);
 
-        DynamicList judiciaryTierDynmicList = sendAndReplyService.getJudiciaryTierDynmicList(anyString(),anyString(), anyString(), anyString());
+        DynamicList judiciaryTierDynmicList = sendAndReplyService.getJudiciaryTierDynamicList(anyString(),anyString(), anyString(), anyString());
         assertNotNull(judiciaryTierDynmicList);
     }
 
@@ -451,7 +452,9 @@ public class SendAndReplyServiceTest {
         when(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData)).thenReturn(listItems);
         when(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData)).thenReturn(listItems);
 
-        sendAndReplyService.getExternalRecipientsDynamicMultiselectList(caseData);
+        DynamicMultiSelectList externalParties = sendAndReplyService.getExternalRecipientsDynamicMultiselectList(caseData);
+
+        assertNotNull(externalParties);
     }
 
     @Test
@@ -475,6 +478,10 @@ public class SendAndReplyServiceTest {
             Mockito.any(),
             Mockito.any()
         )).thenReturn(categoriesAndDocuments);
-        sendAndReplyService.populateDynamicListsForSendAndReply(caseData, serviceAuthToken);
+
+        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, serviceAuthToken);
+
+        assertNotNull(updatedCaseData);
+        assertNotNull(updatedCaseData.getSendOrReplyMessage());
     }
 }
