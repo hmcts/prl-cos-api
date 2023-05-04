@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.ExternalPartyDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
@@ -271,8 +272,8 @@ public class SendAndReplyService {
     }
 
     public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization) {
-
         final String caseReference = String.valueOf(caseData.getId());
+        DynamicList documentCategoryList = getCategoriesAndDocuments(authorization, caseReference);
         String s2sToken = authTokenGenerator.generate();
         return caseData.toBuilder().sendOrReplyMessage(
             SendOrReplyMessage.builder()
@@ -284,8 +285,15 @@ public class SendAndReplyService {
                 ))
                 .externalPartiesList(getExternalRecipientsDynamicMultiselectList(caseData))
                 .linkedApplicationsList(getLinkedCasesDynamicList(authorization, caseReference))
-                .submittedDocumentsList(getCategoriesAndDocuments(authorization, caseReference))
+                .submittedDocumentsList(documentCategoryList)
+                .externalPartyDocuments(List.of(getExternalPartyDocument(documentCategoryList),
+                                                getExternalPartyDocument(documentCategoryList),
+                                                getExternalPartyDocument(documentCategoryList)))
                 .build()).build();
+    }
+
+    private Element<ExternalPartyDocument> getExternalPartyDocument(DynamicList documentCategoryList) {
+        return element(ExternalPartyDocument.builder().documentCategoryList(documentCategoryList).build());
     }
 
     /**
