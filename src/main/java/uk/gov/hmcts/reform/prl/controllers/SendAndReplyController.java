@@ -213,7 +213,8 @@ public class SendAndReplyController extends AbstractCallbackController {
 
             log.info("listOfMessages created ----> {}", listOfMessages);
 
-            caseData = caseData.toBuilder().sendOrReplyMessage(caseData.getSendOrReplyMessage().toBuilder().openMessagesList(listOfMessages).build()).build();
+            caseData = caseData.toBuilder().sendOrReplyMessage(caseData.getSendOrReplyMessage().toBuilder().openMessagesList(listOfMessages).build())
+                .build();
 
         }
 
