@@ -286,9 +286,7 @@ public class SendAndReplyService {
                 .externalPartiesList(getExternalRecipientsDynamicMultiselectList(caseData))
                 .linkedApplicationsList(getLinkedCasesDynamicList(authorization, caseReference))
                 .submittedDocumentsList(documentCategoryList)
-                .externalPartyDocuments(List.of(getExternalPartyDocument(documentCategoryList),
-                                                getExternalPartyDocument(documentCategoryList),
-                                                getExternalPartyDocument(documentCategoryList)))
+                .externalPartyDocuments(List.of(getExternalPartyDocument(documentCategoryList)))
                 .build()).build();
     }
 
