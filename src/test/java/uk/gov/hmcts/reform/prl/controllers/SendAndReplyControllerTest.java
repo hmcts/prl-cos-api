@@ -193,11 +193,11 @@ public class SendAndReplyControllerTest {
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(REPLY)
             .messageReply(message)
+            .caseTypeOfApplication(null)
             .replyMessageDynamicList(DynamicList.builder().build())
             .closedMessages(Collections.singletonList(element(message)))
             .build();
         UUID selectedValue = UUID.randomUUID();
-
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(elementUtils.getDynamicListSelectedValue(caseData.getReplyMessageDynamicList(), objectMapper))
             .thenReturn(selectedValue);
@@ -205,6 +205,25 @@ public class SendAndReplyControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
         verify(sendAndReplyService).closeMessage(selectedValue, caseData);
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesMidEvent() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.No).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(REPLY)
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .closedMessages(Collections.singletonList(element(message)))
+            .build();
+        UUID selectedValue = UUID.randomUUID();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest);
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth);
     }
 
     @Test
