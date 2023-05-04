@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
 import java.util.List;
 
@@ -41,6 +42,7 @@ public class SendOrReplyMessage {
     private YesOrNo internalMessageUrgent;
     private String recipientEmailAddresses;
     private String messageSubject;
+    private JudicialUser sendReplyJudgeName;
 
 }
 

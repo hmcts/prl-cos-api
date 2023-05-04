@@ -38,7 +38,7 @@ public class Message extends MessageMetaData {
     private String messageAbout;
     private String judicialOrMagistrateTierCode;
     private String judicialOrMagistrateTierValue;
-    private String sendReplyJudgeName;
+    private String judgeName;
     private String selectedCtscEmail;
     private String recipientEmailAddresses;
     private YesOrNo internalMessageUrgent;
@@ -48,6 +48,7 @@ public class Message extends MessageMetaData {
     private String selectedFutureHearingValue;
     private String selectedSubmittedDocumentCode;
     private String selectedSubmittedDocumentValue;
+    private String selectedExternalParties;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
