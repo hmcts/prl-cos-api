@@ -8,11 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
-import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
 import java.time.LocalDateTime;
 
