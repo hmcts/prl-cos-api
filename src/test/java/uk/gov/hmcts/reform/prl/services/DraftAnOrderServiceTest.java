@@ -37,11 +37,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
-import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.DraftOrder;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
+import uk.gov.hmcts.reform.prl.models.*;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -79,6 +75,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_RIGHT_TO_ASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
@@ -106,6 +104,7 @@ public class DraftAnOrderServiceTest {
     @Mock
     private Time dateTime;
 
+
     @Mock
     private ObjectMapper objectMapper;
 
@@ -124,6 +123,9 @@ public class DraftAnOrderServiceTest {
     @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
 
+    @Mock
+    SdoDetails updatedSdoDetails;
+
     private DynamicList dynamicList;
     private DynamicMultiSelectList dynamicMultiSelectList;
     private List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
@@ -135,6 +137,7 @@ public class DraftAnOrderServiceTest {
     private final String serviceAuthToken = "serviceTestAuthtoken";
 
     private CaseData caseData;
+    private StandardDirectionOrder standardDirectionOrder;
     private List<Element<Child>> listOfChildren;
     private List<Element<MagistrateLastName>> magistrateElementList;
     private List<Element<DraftOrder>> draftOrderList;
@@ -229,13 +232,43 @@ public class DraftAnOrderServiceTest {
             .childOption(DynamicMultiSelectList.builder()
                              .value(List.of(DynamicMultiselectListElement.builder().label("John (Child 1)").build())).build()
             )
+            .sdoDetails(SdoDetails.builder().sdoDocsEvidenceWitnessEvidence(1).build())
             .build();
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder()
-            .id(UUID.randomUUID())
+            .id(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
             .value(draftOrder)
             .build();
         draftOrderList = Collections.singletonList(draftOrderElement);
+
+        standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(SdoCourtEnum.crossExaminationEx740))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(List.of(SdoOtherEnum.parentWithCare))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.miamAttendance))
+            .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoFurtherList(List.of(SdoFurtherInstructionsEnum.newDirection))
+            .sdoRightToAskCourt("")
+            .sdoParentWithCare("")
+            .sdoNextStepsAfterSecondGK("")
+            .sdoHearingNotNeeded("")
+            .sdoParticipationDirections("")
+            .sdoJoiningInstructionsForRH("")
+            .sdoUpdateContactDetails("")
+            .sdoPermissionHearingDirections("")
+            .sdoCrossExaminationEx741("")
+            .sdoCafcassNextStepEditContent("")
+            .sdoCafcassCymruNextStepEditContent("")
+            .sdoSection7EditContent("")
+            .sdoSection7FactsEditContent("")
+            .sdoSection7daOccuredEditContent("")
+            .sdoCrossExaminationEx740("")
+            .sdoCrossExaminationQualifiedLegal("")
+            .sdoSpecifiedDocuments("")
+            .sdoSpipAttendance("")
+            .build();
 
         caseData = CaseData.builder()
             .id(12345L)
@@ -278,6 +311,7 @@ public class DraftAnOrderServiceTest {
             .magistrateLastName(magistrateElementList)
             .wasTheOrderApprovedAtHearing(YesOrNo.No)
             .draftOrderCollection(draftOrderList)
+            .standardDirectionOrder(standardDirectionOrder)
             .build();
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
@@ -1621,5 +1655,27 @@ public class DraftAnOrderServiceTest {
             .id(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
             .value(element)
             .build();
+    }
+
+    @Test
+    public void testPopulateStandardDirectionOrder() throws Exception{
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("standardDirectionOrder",standardDirectionOrder);
+
+       String standardDirectionOrderObjectJson = objectMapper.writeValueAsString(caseData.getStandardDirectionOrder());
+
+        when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(),objectMapper))
+            .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
+        when(objectMapper.writeValueAsString(SdoDetails.class)).thenReturn(standardDirectionOrderObjectJson);
+        when(objectMapper.readValue(standardDirectionOrderObjectJson, StandardDirectionOrder.class)).thenReturn(standardDirectionOrder);
+        when(objectMapper.convertValue(standardDirectionOrder, Map.class)).thenReturn(caseDataUpdated);
+
+        when(locationRefDataService.getCourtLocations("test-token")).thenReturn(new ArrayList<>());
+        when(partiesListGenerator.buildPartiesList(
+            caseData,
+            new ArrayList<>()
+        )).thenReturn(DynamicList.builder().build());
+
+        draftAnOrderService.populateStandardDirectionOrder(authToken, caseData);
     }
 }
