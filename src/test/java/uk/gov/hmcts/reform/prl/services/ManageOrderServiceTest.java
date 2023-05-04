@@ -865,7 +865,6 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
-            .dateOrderMade(LocalDate.now())
             .orderRecipients(recipientList)
             .applicants(partyDetails)
             .respondents(partyDetails)
@@ -2639,4 +2638,139 @@ public class ManageOrderServiceTest {
         assertEquals(3, caseData.getManageOrders().getHearingsType().getListItems().size());
     }
 
+    @Test
+    public void testResetChildOption() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(PartyDetails.builder().firstName("firstname")
+                                 .lastName("lastname")
+                                 .representativeFirstName("firstname")
+                                 .representativeLastName("lastname")
+                                 .build())
+            .respondentsFL401(PartyDetails.builder().firstName("firstname")
+                                  .lastName("lastname")
+                                  .representativeFirstName("firstname")
+                                  .representativeLastName("lastname")
+                                  .build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(new ArrayList<>())
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.interim)
+            .manageOrders(manageOrders.toBuilder()
+                              .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                              .isTheOrderAboutChildren(YesOrNo.No)
+                              .isTheOrderAboutAllChildren(YesOrNo.No)
+                              .build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .build();
+
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        manageOrderService.resetChildOptions(callbackRequest);
+        assertNotNull(caseData.getManageOrders().getIsTheOrderAboutChildren());
+        assertNotNull(caseData.getManageOrders().getIsTheOrderAboutAllChildren());
+    }
+
+    @Test
+    public void testToSetChildOption() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(PartyDetails.builder().firstName("firstname")
+                                 .lastName("lastname")
+                                 .representativeFirstName("firstname")
+                                 .representativeLastName("lastname")
+                                 .build())
+            .respondentsFL401(PartyDetails.builder().firstName("firstname")
+                                  .lastName("lastname")
+                                  .representativeFirstName("firstname")
+                                  .representativeLastName("lastname")
+                                  .build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(new ArrayList<>())
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.interim)
+            .manageOrders(manageOrders.toBuilder()
+                              .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                              .isTheOrderAboutChildren(YesOrNo.Yes)
+                              .isTheOrderAboutAllChildren(YesOrNo.Yes)
+                              .childOption(DynamicMultiSelectList.builder()
+                                               .value(List.of(DynamicMultiselectListElement.builder().label("John (Child 1)").build())).build()
+                              )                              .build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .build();
+
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
+        assertNotNull(caseData.getManageOrders().getIsTheOrderAboutChildren());
+        assertNotNull(caseData.getManageOrders().getIsTheOrderAboutAllChildren());
+    }
+
+    @Test
+    public void testSetMarkedToServeEmailNotification() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(PartyDetails.builder().firstName("firstname")
+                                 .lastName("lastname")
+                                 .representativeFirstName("firstname")
+                                 .representativeLastName("lastname")
+                                 .build())
+            .respondentsFL401(PartyDetails.builder().firstName("firstname")
+                                  .lastName("lastname")
+                                  .representativeFirstName("firstname")
+                                  .representativeLastName("lastname")
+                                  .build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(new ArrayList<>())
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.interim)
+            .manageOrders(manageOrders.toBuilder()
+                              .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                              .isTheOrderAboutChildren(YesOrNo.Yes)
+                              .isTheOrderAboutAllChildren(YesOrNo.Yes)
+                              .childOption(DynamicMultiSelectList.builder()
+                                               .value(List.of(DynamicMultiselectListElement.builder().label("John (Child 1)").build())).build()
+                              )
+                              .ordersNeedToBeServed(YesOrNo.Yes)
+                              .build())
+            .serveOrderData(ServeOrderData.builder()
+                                .doYouWantToServeOrder(YesOrNo.Yes)
+                                .build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .build();
+
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+
+        manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataMap);
+        assertNotNull(caseData.getManageOrders().getIsTheOrderAboutChildren());
+        assertNotNull(caseData.getManageOrders().getIsTheOrderAboutAllChildren());
+    }
 }
