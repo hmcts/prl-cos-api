@@ -14,15 +14,19 @@ import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -39,10 +43,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions.anotherOrganisation;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -74,22 +81,14 @@ public class ManageOrderEmailServiceTest {
     @Mock
     private CourtFinderApi courtFinderApi;
 
-
     @Mock
     private Court court;
-
     @Mock
     private ServiceArea serviceArea;
 
-
-
-
     CaseData caseData;
-
     PartyDetails applicant;
-
     PartyDetails respondent;
-
 
     @Before
     public void setUp() {
@@ -276,7 +275,7 @@ public class ManageOrderEmailServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -389,7 +388,7 @@ public class ManageOrderEmailServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -510,7 +509,7 @@ public class ManageOrderEmailServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1009,6 +1008,117 @@ public class ManageOrderEmailServiceTest {
         Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
                                                            Mockito.any(),
                                                            Mockito.any(),Mockito.any());
+    }
+
+    @Test
+    public void testToSendEmailWhenOrderIsServed() {
+        applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .email("applicant@tests.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("respondent@tests.com")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = element(applicant);
+        final List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(UUID.randomUUID()).value(respondent).build();
+        final List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        final List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        PartyDetails others = PartyDetails.builder()
+            .firstName("otherFirst")
+            .lastName("otherLast")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("others@tests.com")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@other.com")
+            .build();
+
+        Element<PartyDetails> wrappedOthers = element(others);
+        final List<Element<PartyDetails>> listOfOthers = Collections.singletonList(wrappedOthers);
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicMultiselectListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement);
+        final DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .listItems(dynamicListElementsList)
+            .value(dynamicListElementsList)
+            .build();
+        final List<OtherOrganisationOptions> serveOtherPartiesList = new ArrayList<>();
+        serveOtherPartiesList.add(anotherOrganisation);
+        EmailInformation emailInformation = EmailInformation.builder()
+            .emailAddress("caEmail@serve.com")
+            .emailName("Test serve")
+            .build();
+        Element<EmailInformation> wrappedEmailInfo = element(emailInformation);
+        final List<Element<EmailInformation>> emailInformationList = Collections.singletonList(wrappedEmailInfo);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .respondents(listOfRespondents)
+            .children(listOfChildren)
+            .isCaseUrgent(YesOrNo.Yes)
+            .courtName("testcourt")
+            .othersToNotify(listOfOthers)
+            .manageOrders(ManageOrders.builder()
+                              .cafcassCymruServedOptions(YesOrNo.Yes)
+                              .cafcassCymruEmail("testcafcass@gmail.com")
+                              .recipientsOptions(dynamicMultiSelectList)
+                              .otherParties(dynamicMultiSelectList)
+                              .serveToRespondentOptions(YesOrNo.No)
+                              .serveOtherPartiesCA(serveOtherPartiesList)
+                              .deliveryByOptionsCA(DeliveryByEnum.email)
+                              .emailInformationCA(emailInformationList)
+                              .build())
+            .issueDate(LocalDate.now())
+            .build();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", "test@test.com");
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        EmailTemplateVars email = ManageOrderEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .applicantName(applicantNames)
+            .courtName(court.getCourtName())
+            .caseLink("/dummyURL")
+            .build();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+        assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 
 }
