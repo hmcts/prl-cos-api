@@ -467,4 +467,46 @@ public class SendAndReplyService {
     }
 
 
+    public Message buildSendMessage(CaseData caseData) {
+        MessageMetaData metaData = caseData.getMessageMetaData();
+
+        final SendOrReplyMessage sendOrReplyMessage = caseData.getSendOrReplyMessage();
+
+        return Message.builder()
+            .status(OPEN)
+            .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
+            .internalOrExternalMessage(sendOrReplyMessage.getInternalOrExternalMessage().name())
+            .internalMessageUrgent(sendOrReplyMessage.getInternalMessageUrgent())
+            .internalMessageWhoToSendTo(sendOrReplyMessage.getInternalMessageWhoToSendTo().name())
+            .messageAbout(sendOrReplyMessage.getMessageAbout().name())
+            //            .sendReplyJudgeName(caseData.getSendOrReplyMessage().getSendReplyJudgeName())
+            .messageSubject(sendOrReplyMessage.getMessageSubject())
+
+            .recipientEmailAddresses(sendOrReplyMessage.getRecipientEmailAddresses())
+            .selectedCtscEmail(sendOrReplyMessage.getExternalPartiesList() != null
+                                   ? sendOrReplyMessage.getExternalPartiesList().getValueCode() : null)
+            .judicialOrMagistrateTierCode(sendOrReplyMessage.getJudicialOrMagistrateTierList() != null
+                                              ? sendOrReplyMessage.getJudicialOrMagistrateTierList().getValueCode() : null)
+            .judicialOrMagistrateTierValue(sendOrReplyMessage.getJudicialOrMagistrateTierList() != null
+                                               ? sendOrReplyMessage.getJudicialOrMagistrateTierList().getValueLabel() : null)
+            .selectedLinkedApplicationCode(sendOrReplyMessage.getLinkedApplicationsList() != null
+                                               ? sendOrReplyMessage.getLinkedApplicationsList().getValueCode() : null)
+            .selectedLinkedApplicationValue(sendOrReplyMessage.getLinkedApplicationsList() != null
+                                                ? sendOrReplyMessage.getLinkedApplicationsList().getValueLabel() : null)
+            .selectedFutureHearingCode(sendOrReplyMessage.getFutureHearingsList() != null
+                                           ? sendOrReplyMessage.getFutureHearingsList().getValueCode() : null)
+            .selectedFutureHearingValue(sendOrReplyMessage.getFutureHearingsList() != null
+                                            ? sendOrReplyMessage.getFutureHearingsList().getValueLabel() : null)
+            .selectedSubmittedDocumentCode(sendOrReplyMessage.getSubmittedDocumentsList() != null
+                                               ? sendOrReplyMessage.getSubmittedDocumentsList().getValueCode() : null)
+            .selectedSubmittedDocumentValue(sendOrReplyMessage.getSubmittedDocumentsList() != null
+                                                ? sendOrReplyMessage.getSubmittedDocumentsList().getValueLabel() : null)
+            //            .selectedExternalParties(sendOrReplyMessage.getExternalPartiesList().getValueCode())
+
+            //            .messageHistory(buildMessageHistory(metaData.getSenderEmail(), caseData.getMessageContent()))
+            .latestMessage(caseData.getMessageContent())
+            .updatedTime(dateTime.now())
+            .build();
+    }
+
 }

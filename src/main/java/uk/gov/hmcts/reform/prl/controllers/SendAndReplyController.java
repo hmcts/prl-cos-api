@@ -109,8 +109,6 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = getCaseData(caseDetails);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
-        log.info("Case Data in about to submit ----> {}", caseDataMap);
-
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             Message newMessage = sendAndReplyService.buildNewSendMessage(caseData);
             List<Element<Message>> listOfMessages = sendAndReplyService.addNewMessage(caseData, newMessage);
@@ -192,6 +190,29 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+
+        return CallbackResponse.builder().data(caseData).build();
+    }
+
+    @PostMapping("/send-or-reply-to-messages/about-to-submit")
+    public CallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
+                                                          @Parameter(hidden = true) String authorisation,
+                                                          @RequestBody CallbackRequest callbackRequest) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+
+        log.info("Case Data New about to submit ----> {}", caseDataMap);
+
+        if (caseData.getChooseSendOrReply().equals(SEND)) {
+            Message newMessage = sendAndReplyService.buildSendMessage(caseData);
+
+            log.info("New message object created ----> {}", newMessage);
+
+            List<Element<Message>> listOfMessages = sendAndReplyService.addNewMessage(caseData, newMessage);
+            caseDataMap.putAll(sendAndReplyService.returnMapOfOpenMessages(listOfMessages));
+
+        }
 
         return CallbackResponse.builder().data(caseData).build();
     }
