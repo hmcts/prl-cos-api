@@ -362,8 +362,6 @@ public class ManageOrderEmailService {
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("** CA case email notifications***");
-                log.info("(manageOrders.getServeToRespondentOptions() {}", manageOrders.getServeToRespondentOptions());
-                log.info("(manageOrders.getServeOtherPartiesCA()() {}", manageOrders.getServeOtherPartiesCA());
                 sendEmailToPartyOrSolicitor(manageOrders.getRecipientsOptions().getValue(),
                                             caseData.getApplicants(),
                                             isFinalOrder, caseDetails, caseData
@@ -394,8 +392,6 @@ public class ManageOrderEmailService {
                 listOfOtherAndCafcassEmails.add(getCafcassEmail(manageOrders));
             }
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
-            log.info("** DA case emails notifcations***");
-            log.info("(manageOrders.getServeOtherPartiesDA()() {}", manageOrders.getServeOtherPartiesDA());
             sendEmailForFlCaseType(caseDetails, caseData, isFinalOrder);
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
                 .contains(ServeOtherPartiesOptions.other)
@@ -446,12 +442,9 @@ public class ManageOrderEmailService {
         Map<String, String> partyMap = new HashMap<>();
         value.forEach(element -> {
             Map<String, String> partyMapTemp;
-            log.info("** fetching email for selection ** {}, --{}--", element.getLabel(), element.getCode());
             partyMapTemp = getPartyMap(element.getCode(), partyDetails);
-            log.info("*** party map temp {} ***", partyMapTemp);
             partyMap.putAll(partyMapTemp);
         });
-        log.info("*** party map {} ***", partyMap);
         for (Map.Entry<String, String> appValues : partyMap.entrySet()) {
             if (!StringUtils.isEmpty(appValues.getKey())) {
                 sendEmailToParty(isFinalOrder, appValues.getKey(),
@@ -467,9 +460,7 @@ public class ManageOrderEmailService {
         Optional<Element<PartyDetails>> applicant = parties.stream()
             .filter(element -> element.getId().toString().equalsIgnoreCase(code)).findFirst();
         if (applicant.isPresent()) {
-            log.info("*** party *** {}", applicant.get());
             if (null != applicant.get().getValue().getSolicitorEmail()) {
-                log.info("*** legal rep present ***");
                 applicantMap.put(applicant.get().getValue().getSolicitorEmail(), applicant.get().getValue()
                     .getRepresentativeFirstName() + " "
                     + applicant.get().getValue().getRepresentativeLastName());
