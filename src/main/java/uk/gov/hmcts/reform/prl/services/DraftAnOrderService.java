@@ -484,7 +484,6 @@ public class DraftAnOrderService {
         caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
         caseDataMap.put("isHearingPageNeeded", isHearingPageNeeded(selectedOrder) ? Yes : No);
         caseDataMap.put("doYouWantToEditTheOrder", caseData.getDoYouWantToEditTheOrder());
-        caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
 
         //Set existing hearingsType from draft order
         ManageOrders manageOrders = null != caseData.getManageOrders()
@@ -652,7 +651,9 @@ public class DraftAnOrderService {
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .approvalDate(draftOrder.getApprovalDate())
-            .manageOrderHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
+            .manageOrderHearingDetails(YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
+                                           ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                : caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData))
             .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())
                             ? manageOrderService.copyPropertiesToSdoDetails(caseData) : null)
