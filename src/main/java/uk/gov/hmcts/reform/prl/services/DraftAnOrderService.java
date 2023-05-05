@@ -483,6 +483,7 @@ public class DraftAnOrderService {
         caseDataMap.put("isOrderCreatedBySolicitor", selectedOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
         caseDataMap.put("isHearingPageNeeded", isHearingPageNeeded(selectedOrder) ? Yes : No);
+        caseDataMap.put("doYouWantToEditTheOrder", caseData.getDoYouWantToEditTheOrder());
 
         //Set existing hearingsType from draft order
         ManageOrders manageOrders = null != caseData.getManageOrders()
