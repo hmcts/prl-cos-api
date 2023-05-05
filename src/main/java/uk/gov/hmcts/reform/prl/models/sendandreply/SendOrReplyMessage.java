@@ -44,5 +44,8 @@ public class SendOrReplyMessage {
     private JudicialUser sendReplyJudgeName;
 
     private final List<Element<ExternalPartyDocument>> externalPartyDocuments;
+
+    private DynamicList messageReplyDynamicList;
+    private YesOrNo respondToMessage;
 }
 
