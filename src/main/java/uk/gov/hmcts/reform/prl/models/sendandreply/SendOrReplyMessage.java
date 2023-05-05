@@ -43,6 +43,7 @@ public class SendOrReplyMessage {
     private String messageSubject;
     private JudicialUser sendReplyJudgeName;
 
+    @JsonProperty("externalPartyDocuments")
     private final List<Element<ExternalPartyDocument>> externalPartyDocuments;
 }
 
