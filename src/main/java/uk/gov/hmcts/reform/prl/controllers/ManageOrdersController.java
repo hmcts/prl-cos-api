@@ -322,6 +322,9 @@ public class ManageOrdersController {
                     .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
             }
         }
+        log.info("***performingUser***{}", performingUser);
+        log.info("***performingAction***{}", performingAction);
+        log.info("***judgeLaReviewRequired***{}", judgeLaReviewRequired);
         caseDataUpdated.put("performingUser", performingUser);
         caseDataUpdated.put("performingAction", performingAction);
         caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
