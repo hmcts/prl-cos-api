@@ -166,6 +166,7 @@ public class ApplicationsTabService implements TabService {
                 applicationTab.put("allegationsOfHarmRevisedChildAbductionTable", getRevisedChildAbductionTable(caseData));
                 applicationTab.put("allegationsOfHarmRevisedOtherConcernsTable", getAllegationsOfHarmRevisedOtherConcerns(caseData));
                 applicationTab.put("allegationsOfHarmRevisedChildContactTable", getAllegationsOfHarmRevisedChildContact(caseData));
+                applicationTab.put(CHILD_AND_CAFCASS_OFFICER_DETAILS, prePopulateRevisedChildAndCafcassOfficerDetails(caseData));
 
                 log.info("application tab data v2");
             } else {
@@ -1271,6 +1272,25 @@ public class ApplicationsTabService implements TabService {
                     .cafcassOfficerEmailAddress(childElement.getValue().getCafcassOfficerEmailAddress())
                     .cafcassOfficerPhoneNo(childElement.getValue().getCafcassOfficerPhoneNo())
                     .build();
+                childAndCafcassOfficers.add(element(childAndCafcassOfficer));
+            });
+        }
+        return childAndCafcassOfficers;
+    }
+
+    public List<Element<ChildAndCafcassOfficer>> prePopulateRevisedChildAndCafcassOfficerDetails(CaseData caseData) {
+        List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = new ArrayList<>();
+        if (caseData.getNewChildDetails() != null) {
+            caseData.getNewChildDetails().stream().forEach(childElement -> {
+                ChildAndCafcassOfficer childAndCafcassOfficer = ChildAndCafcassOfficer.builder()
+                        .childId(childElement.getId().toString())
+                        .childName(CHILD_NAME + childElement.getValue().getFirstName() + " " + childElement.getValue().getLastName())
+                        .cafcassOfficerName(childElement.getValue().getCafcassOfficerName())
+                        .cafcassOfficerPosition(childElement.getValue().getCafcassOfficerPosition())
+                        .cafcassOfficerOtherPosition(childElement.getValue().getCafcassOfficerOtherPosition())
+                        .cafcassOfficerEmailAddress(childElement.getValue().getCafcassOfficerEmailAddress())
+                        .cafcassOfficerPhoneNo(childElement.getValue().getCafcassOfficerPhoneNo())
+                        .build();
                 childAndCafcassOfficers.add(element(childAndCafcassOfficer));
             });
         }
