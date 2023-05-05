@@ -535,7 +535,7 @@ public class SendAndReplyService {
             .build();
         data.put("messageObject", messageMetaData);
 
-        if (hasMessages(caseData)) {
+        if (isNotEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
             data.put("messageReplyDynamicList", getOpenMessagesReplyList(caseData));
         }
         return data;
