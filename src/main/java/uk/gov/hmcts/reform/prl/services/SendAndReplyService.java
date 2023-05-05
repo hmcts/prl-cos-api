@@ -462,10 +462,13 @@ public class SendAndReplyService {
         return Message.builder()
             .status(OPEN)
             .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
-            .internalOrExternalMessage(sendOrReplyMessage.getInternalOrExternalMessage().name())
+            .internalOrExternalMessage(sendOrReplyMessage.getInternalOrExternalMessage() != null
+                                           ? sendOrReplyMessage.getInternalOrExternalMessage().name() : null)
             .internalMessageUrgent(sendOrReplyMessage.getInternalMessageUrgent())
-            .internalMessageWhoToSendTo(sendOrReplyMessage.getInternalMessageWhoToSendTo().name())
-            .messageAbout(sendOrReplyMessage.getMessageAbout().name())
+            .internalMessageWhoToSendTo(sendOrReplyMessage.getInternalMessageWhoToSendTo() != null
+                                            ? sendOrReplyMessage.getInternalMessageWhoToSendTo().name() : null)
+            .messageAbout(sendOrReplyMessage.getMessageAbout() != null
+                          ? sendOrReplyMessage.getMessageAbout().name() : null)
             .judgeName(getJudgeName(sendOrReplyMessage.getSendReplyJudgeName()))
             .messageSubject(sendOrReplyMessage.getMessageSubject())
             .recipientEmailAddresses(sendOrReplyMessage.getRecipientEmailAddresses())
