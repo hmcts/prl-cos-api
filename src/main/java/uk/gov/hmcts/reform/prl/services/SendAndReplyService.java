@@ -46,6 +46,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER;
@@ -519,7 +520,7 @@ public class SendAndReplyService {
     public List<Element<Message>> addNewOpenMessage(CaseData caseData, Message newMessage) {
         List<Element<Message>> messages = new ArrayList<>();
         Element<Message> messageElement = element(newMessage);
-        if (!caseData.getSendOrReplyMessage().getOpenMessagesList().isEmpty()) {
+        if (isNotEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
             messages = caseData.getSendOrReplyMessage().getOpenMessagesList();
         }
         messages.add(messageElement);
