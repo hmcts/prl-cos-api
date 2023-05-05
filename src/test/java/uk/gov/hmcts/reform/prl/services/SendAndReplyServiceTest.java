@@ -496,7 +496,7 @@ public class SendAndReplyServiceTest {
             Mockito.any()
         )).thenReturn(categoriesAndDocuments);
 
-        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, serviceAuthToken);
+        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
 
         assertNotNull(updatedCaseData);
         assertNotNull(updatedCaseData.getSendOrReplyMessage());
@@ -528,7 +528,12 @@ public class SendAndReplyServiceTest {
             Mockito.any()
         )).thenReturn(categoriesAndDocuments);
 
-        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, serviceAuthToken);
+        userDetails = UserDetails.builder()
+            .email("sender@email.com")
+            .build();
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
+
+        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
 
         assertNotNull(updatedCaseData);
         assertNotNull(updatedCaseData.getSendOrReplyMessage());

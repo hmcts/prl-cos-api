@@ -215,11 +215,11 @@ public class SendAndReplyController extends AbstractCallbackController {
 
             caseDataMap.putAll(Map.of("openMessagesList", listOfMessages));
 
+            sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
+
         }
 
-        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
         log.info("updated case data after adding open message in the list  ----> {}", caseDataMap);
-
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
