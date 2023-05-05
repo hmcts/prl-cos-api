@@ -41,11 +41,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER;
@@ -459,6 +461,8 @@ public class SendAndReplyService {
 
         final SendOrReplyMessage sendOrReplyMessage = caseData.getSendOrReplyMessage();
 
+        log.info("select sendOrReplyMessage.getExternalPartiesList() ---> {}", sendOrReplyMessage.getExternalPartiesList());
+
         return Message.builder()
             .status(OPEN)
             .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
@@ -490,11 +494,8 @@ public class SendAndReplyService {
                                                ? sendOrReplyMessage.getSubmittedDocumentsList().getValueCode() : null)
             .selectedSubmittedDocumentValue(sendOrReplyMessage.getSubmittedDocumentsList() != null
                                                 ? sendOrReplyMessage.getSubmittedDocumentsList().getValueLabel() : null)
-            .selectedExternalParties(sendOrReplyMessage.getExternalPartiesList() != null
-                                         ? sendOrReplyMessage.getExternalPartiesList().getValueCode() : null)
-
-            // TODO need to check with Yogendra
-            //            .messageHistory(buildMessageHistory(metaData.getSenderEmail(), caseData.getMessageContent()))
+            .selectedExternalParties(getSelectedExternalParties(sendOrReplyMessage.getExternalPartiesList()))
+            .externalPartyDocuments(sendOrReplyMessage.getExternalPartyDocuments())
             .latestMessage(caseData.getMessageContent())
             .updatedTime(dateTime.now())
             .build();
@@ -522,11 +523,29 @@ public class SendAndReplyService {
     public List<Element<Message>> addNewOpenMessage(CaseData caseData, Message newMessage) {
         List<Element<Message>> messages = new ArrayList<>();
         Element<Message> messageElement = element(newMessage);
-        if (!caseData.getSendOrReplyMessage().getOpenMessagesList().isEmpty()) {
+        if (isNotEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
             messages = caseData.getSendOrReplyMessage().getOpenMessagesList();
         }
         messages.add(messageElement);
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
         return messages;
     }
+
+    private String getSelectedExternalParties(DynamicMultiSelectList externalPartiesList) {
+        String externalParties = "";
+        if (Objects.nonNull(externalPartiesList)) {
+            List<DynamicMultiselectListElement> selectedElement = externalPartiesList.getValue();
+
+            log.info("selectedElement value for external parties ----------> {}", selectedElement);
+            if (isNotEmpty(selectedElement)) {
+                List<String> labelList = selectedElement.stream().map(DynamicMultiselectListElement::getLabel)
+                    .collect(Collectors.toList());
+                externalParties = String.join(",",labelList);
+            }
+        }
+
+        log.info("externalParties string -------> {}", externalParties);
+        return externalParties;
+    }
+
 }
