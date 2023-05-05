@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
@@ -533,7 +534,10 @@ public class CallbackController {
                 .filter(element -> element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
                 .collect(Collectors.toList());
             caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
-
+            List<Element<Document>> test = furtherEvidences.stream().map(furtherEvidenceElement -> Element.<Document>builder()
+                .value(furtherEvidenceElement.getValue().getDocumentFurtherEvidence()).build())
+                .collect(Collectors.toList());
+            caseDataUpdated.put("legal_Prof_Quarentine_Docs_List", test);
             List<Element<FurtherEvidence>> furtherEvidencesNotConfidential = furtherEvidencesList.stream()
                 .filter(element -> !element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
                 .collect(Collectors.toList());
@@ -562,7 +566,6 @@ public class CallbackController {
                 .filter(element -> !element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
                 .collect(Collectors.toList());
             caseDataUpdated.put("otherDocNotConf", otherDocumentsForTabDisplayNotConfidential);
-
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

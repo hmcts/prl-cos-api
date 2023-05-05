@@ -787,9 +787,9 @@ public class CaseData implements MappableObject {
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
     private NextHearingDetails nextHearingDetails;
 
-    @JsonProperty("legal_Prof_Quarentine_Docs_List")
-    private final List<Element<Document>> legal_Prof_Quarentine_Docs_List;
-    @JsonProperty("citizenUpload_Quarentine_Docs_List")
-    private final List<Element<Document>> citizenUpload_Quarentine_Docs_List;
+    @JsonProperty("legalProfQuarentineDocsList")
+    private final List<Element<Document>> legalProfQuarentineDocsList;
+    @JsonProperty("citizenUploadQuarentineDocsList")
+    private final List<Element<Document>> citizenUploadQuarentineDocsList;
 
 }
