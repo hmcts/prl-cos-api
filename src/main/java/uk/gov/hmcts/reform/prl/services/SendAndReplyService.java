@@ -462,6 +462,7 @@ public class SendAndReplyService {
         final SendOrReplyMessage sendOrReplyMessage = caseData.getSendOrReplyMessage();
 
         log.info("select sendOrReplyMessage.getExternalPartiesList() ---> {}", sendOrReplyMessage.getExternalPartiesList());
+        log.info("select sendOrReplyMessage.getExternalPartyDocuments() ---> {}", sendOrReplyMessage.getExternalPartyDocuments());
 
         return Message.builder()
             .status(OPEN)
@@ -495,7 +496,6 @@ public class SendAndReplyService {
             .selectedSubmittedDocumentValue(sendOrReplyMessage.getSubmittedDocumentsList() != null
                                                 ? sendOrReplyMessage.getSubmittedDocumentsList().getValueLabel() : null)
             .selectedExternalParties(getSelectedExternalParties(sendOrReplyMessage.getExternalPartiesList()))
-            .externalPartyDocuments(sendOrReplyMessage.getExternalPartyDocuments())
             .latestMessage(caseData.getMessageContent())
             .updatedTime(dateTime.now())
             .build();
