@@ -75,6 +75,21 @@ public class SendAndReplyController extends AbstractCallbackController {
             .build();
     }
 
+    @PostMapping("/send-or-reply-to-messages/about-to-start")
+    public AboutToStartOrSubmitCallbackResponse handleSendOrMessageAboutToStart(@RequestHeader("Authorization")
+                                                                                    @Parameter(hidden = true) String authorisation,
+                                                                                @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
+
+        caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataMap)
+            .build();
+    }
+
     @PostMapping("/mid-event")
     public AboutToStartOrSubmitCallbackResponse handleMidEvent(@RequestHeader("Authorization")
                                                                    @Parameter(hidden = true) String authorisation,

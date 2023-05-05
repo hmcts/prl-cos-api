@@ -526,4 +526,27 @@ public class SendAndReplyService {
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
         return messages;
     }
+
+    public Map<String,Object> setSenderAndGenerateMessageReplyList(CaseData caseData, String authorisation) {
+        Map<String, Object> data = new HashMap<>();
+        MessageMetaData messageMetaData = MessageMetaData.builder()
+            .senderEmail(getLoggedInUserEmail(authorisation))
+            .build();
+        data.put("messageObject", messageMetaData);
+
+        if (hasMessages(caseData)) {
+            data.put("messageReplyDynamicList", getOpenMessagesReplyList(caseData));
+        }
+        return data;
+    }
+
+    public DynamicList getOpenMessagesReplyList(CaseData caseData) {
+        List<Element<Message>> openMessages = caseData.getSendOrReplyMessage().getOpenMessagesList();
+
+        return ElementUtils.asDynamicList(
+            openMessages,
+            null,
+            Message::getLabelForDynamicList
+        );
+    }
 }
