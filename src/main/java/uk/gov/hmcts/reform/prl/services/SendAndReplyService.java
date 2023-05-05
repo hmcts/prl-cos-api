@@ -281,6 +281,7 @@ public class SendAndReplyService {
         final String caseReference = String.valueOf(caseData.getId());
         DynamicList documentCategoryList = getCategoriesAndDocuments(authorization, caseReference);
         String s2sToken = authTokenGenerator.generate();
+        final String loggedInUserEmail = getLoggedInUserEmail(authorization);
         return caseData.toBuilder().sendOrReplyMessage(
             SendOrReplyMessage.builder()
                 .judicialOrMagistrateTierList(getJudiciaryTierDynamicList(
@@ -293,6 +294,7 @@ public class SendAndReplyService {
                 .linkedApplicationsList(getLinkedCasesDynamicList(authorization, caseReference))
                 .submittedDocumentsList(documentCategoryList)
                 .externalPartyDocuments(List.of(getExternalPartyDocument(documentCategoryList)))
+                .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder().label(loggedInUserEmail).code(loggedInUserEmail).build())))
                 .build()).build();
     }
 
@@ -467,8 +469,8 @@ public class SendAndReplyService {
             .judgeName(getJudgeName(sendOrReplyMessage.getSendReplyJudgeName()))
             .messageSubject(sendOrReplyMessage.getMessageSubject())
             .recipientEmailAddresses(sendOrReplyMessage.getRecipientEmailAddresses())
-            .selectedCtscEmail(sendOrReplyMessage.getExternalPartiesList() != null
-                                   ? sendOrReplyMessage.getExternalPartiesList().getValueCode() : null)
+            .selectedCtscEmail(sendOrReplyMessage.getCtscEmailList() != null
+                                   ? sendOrReplyMessage.getCtscEmailList().getValueCode() : null)
             .judicialOrMagistrateTierCode(sendOrReplyMessage.getJudicialOrMagistrateTierList() != null
                                               ? sendOrReplyMessage.getJudicialOrMagistrateTierList().getValueCode() : null)
             .judicialOrMagistrateTierValue(sendOrReplyMessage.getJudicialOrMagistrateTierList() != null
