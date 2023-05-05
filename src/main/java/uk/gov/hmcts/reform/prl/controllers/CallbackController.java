@@ -534,10 +534,13 @@ public class CallbackController {
                 .filter(element -> element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
                 .collect(Collectors.toList());
             caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
+            log.info("*** further evidences ***", furtherEvidences);
             List<Element<Document>> test = furtherEvidences.stream().map(furtherEvidenceElement -> Element.<Document>builder()
-                .value(furtherEvidenceElement.getValue().getDocumentFurtherEvidence()).build())
+                .value(furtherEvidenceElement.getValue().getDocumentFurtherEvidence()).id(furtherEvidenceElement.getId()).build())
                 .collect(Collectors.toList());
-            caseDataUpdated.put("legal_Prof_Quarentine_Docs_List", test);
+            log.info("*** test evidences ***", test);
+
+            caseDataUpdated.put("legalProfQuarentineDocsList", test);
             List<Element<FurtherEvidence>> furtherEvidencesNotConfidential = furtherEvidencesList.stream()
                 .filter(element -> !element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
                 .collect(Collectors.toList());
