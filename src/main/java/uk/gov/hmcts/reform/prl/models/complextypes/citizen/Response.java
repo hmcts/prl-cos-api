@@ -33,8 +33,6 @@ public class Response {
     private final KeepDetailsPrivate keepDetailsPrivate;
     private final CitizenDetails citizenDetails;
     // TODO: Add support you need during your case here
-    @JsonUnwrapped
-    @Builder.Default
     private final Miam miam;
     //Applicable only for C100 citizen respondent
     private final CurrentOrPreviousProceedings currentOrPreviousProceedings;
