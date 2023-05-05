@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
@@ -170,7 +172,7 @@ public class ManageOrdersController {
         );
         caseData = caseData.toBuilder()
             .selectedC21Order((null != caseData.getManageOrders()
-                                  && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
+                && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
                                   ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ")
             .build();
         if (callbackRequest
@@ -196,9 +198,9 @@ public class ManageOrdersController {
         if (null != caseData.getCreateSelectOrderOptions()
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
             manageOrders = manageOrders.toBuilder()
-                                  .typeOfC21Order(null != manageOrders.getC21OrderOptions()
-                                                      ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
-                                  .build();
+                .typeOfC21Order(null != manageOrders.getC21OrderOptions()
+                                    ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
+                .build();
         }
 
         caseData = caseData.toBuilder()
@@ -289,6 +291,9 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
+        String performingUser = null;
+        String performingAction = null;
+        String judgeLaReviewRequired = null;
         manageOrderService.resetChildOptions(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -308,6 +313,18 @@ public class ManageOrdersController {
         manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
         manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
+        //Added below fields for WA purpose
+        if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
+            performingUser = manageOrderService.getLoggedInUserType(authorisation);
+            performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
+            if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {
+                judgeLaReviewRequired = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck
+                    .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
+            }
+        }
+        caseDataUpdated.put("performingUser", performingUser);
+        caseDataUpdated.put("performingAction", performingAction);
+        caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -440,8 +457,11 @@ public class ManageOrdersController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
-        caseDataUpdated.put("nameOfLaToReviewOrder", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
-            .build());
+        caseDataUpdated.put(
+            "nameOfLaToReviewOrder",
+            DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
+                .build()
+        );
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
