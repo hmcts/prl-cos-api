@@ -87,8 +87,6 @@ public class ManageOrderEmailServiceTest {
     @Mock
     private ServiceArea serviceArea;
 
-    private UUID uuid;
-
     private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
 
     CaseData caseData;
@@ -97,7 +95,7 @@ public class ManageOrderEmailServiceTest {
 
     PartyDetails respondent;
 
-    private final UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    private UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
 
     @Before
