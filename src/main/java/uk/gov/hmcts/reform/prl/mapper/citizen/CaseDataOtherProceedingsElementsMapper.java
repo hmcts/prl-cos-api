@@ -174,7 +174,7 @@ public class CaseDataOtherProceedingsElementsMapper {
 
     private static List<Order> getChildSupervisionOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getSupervisionOrders()) ? orderDetails.getSupervisionOrders()
-                .stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum.superviosionOrder).build())
+                .stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum.supervisionOrder).build())
                 .collect(Collectors.toList()) : Collections.emptyList();
     }
 

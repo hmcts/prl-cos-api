@@ -56,6 +56,7 @@ public class CitizenCoreCaseDataService {
     ) {
         try {
             UserDetails userDetails = idamClient.getUserDetails(anonymousUserToken);
+
             EventRequestData eventRequestData = eventRequest(caseEvent, userDetails.getId());
 
             StartEventResponse startEventResponse = startUpdate(
@@ -64,8 +65,10 @@ public class CitizenCoreCaseDataService {
                 caseId,
                 true
             );
+            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+            Iterables.removeIf(caseDataMap.values(), Objects::isNull);
 
-            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
+            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataMap);
             return submitUpdate(
                 anonymousUserToken,
                 eventRequestData,

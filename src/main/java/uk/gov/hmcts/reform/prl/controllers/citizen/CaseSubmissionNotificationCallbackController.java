@@ -25,7 +25,7 @@ import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
 @SecurityRequirement(name = "Bearer Authentication")
 public class CaseSubmissionNotificationCallbackController extends AbstractCallbackController {
 
-    private CitizenEmailService citizenEmailService;
+    private final CitizenEmailService citizenEmailService;
 
     @PostMapping("/notified")
     public void handleNotification(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,

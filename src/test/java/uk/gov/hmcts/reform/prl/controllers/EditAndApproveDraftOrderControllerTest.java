@@ -12,6 +12,7 @@ import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -313,7 +314,12 @@ public class EditAndApproveDraftOrderControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData.getDraftOrderCollection(), C100_CASE_TYPE)).thenReturn(caseDataMap);
-        when(manageOrderService.getCaseData("test", caseData)).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderInfo("test", caseData)).thenReturn(caseDataMap);
+        when(draftAnOrderService
+                 .getSelectedDraftOrderDetails(caseData))
+            .thenReturn(DraftOrder.builder().orderType(
+                CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
+
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateJudgeOrAdminDraftOrderCustomFields("test",callbackRequest);
         Assert.assertNotNull(response);

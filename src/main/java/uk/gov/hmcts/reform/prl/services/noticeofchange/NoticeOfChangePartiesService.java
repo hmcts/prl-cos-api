@@ -35,28 +35,31 @@ public class NoticeOfChangePartiesService {
         Map<String, Object> data = new HashMap<>();
 
         List<Element<PartyDetails>> elements = representing.getTarget().apply(caseData);
-        int numElements = elements != null ? elements.size() : 0;
+        int numElements = null != elements ? elements.size() : 0;
 
         List<SolicitorRole> solicitorRoles = SolicitorRole.values(representing);
         for (int i = 0; i < solicitorRoles.size(); i++) {
             SolicitorRole solicitorRole = solicitorRoles.get(i);
 
-            Optional<Element<PartyDetails>> solicitorContainer = i < numElements
-                ? Optional.of(elements.get(i))
-                : Optional.empty();
+            if (null != elements) {
+                Optional<Element<PartyDetails>> solicitorContainer = i < numElements
+                    ? Optional.of(elements.get(i))
+                    : Optional.empty();
 
-            OrganisationPolicy organisationPolicy = policyConverter.generate(
-                solicitorRole, solicitorContainer
-            );
+                OrganisationPolicy organisationPolicy = policyConverter.generate(
+                    solicitorRole, solicitorContainer
+                );
 
-            data.put(String.format(representing.getPolicyFieldTemplate(), i), organisationPolicy);
+                data.put(String.format(representing.getPolicyFieldTemplate(), i), organisationPolicy);
 
-            Optional<NoticeOfChangeParties> possibleAnswer = populateAnswer(
-                strategy, solicitorContainer
-            );
+                Optional<NoticeOfChangeParties> possibleAnswer = populateAnswer(
+                    strategy, solicitorContainer
+                );
 
-            if (possibleAnswer.isPresent()) {
-                data.put(String.format(representing.getNocAnswersTemplate(), i), possibleAnswer.get());
+                if (possibleAnswer.isPresent()) {
+                    data.put(String.format(representing.getNocAnswersTemplate(), i), possibleAnswer.get());
+                }
+
             }
         }
 
@@ -68,7 +71,7 @@ public class NoticeOfChangePartiesService {
         if (BLANK == strategy) {
             return Optional.of(NoticeOfChangeParties.builder().build());
         }
-        return element.map(e -> partiesConverter.generateForSubmission(e));
+        return element.map(partiesConverter::generateForSubmission);
     }
 
     public enum NoticeOfChangeAnswersPopulationStrategy {

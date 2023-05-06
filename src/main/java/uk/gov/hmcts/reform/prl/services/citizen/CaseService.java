@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -79,7 +78,6 @@ public class CaseService {
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
-        log.info("Case data map sending to update ccd : {}", caseData.toMap(CcdObjectMapper.getObjectMapper()));
 
         if (LINK_CASE.equalsIgnoreCase(eventId) && null != accessCode) {
             linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
@@ -88,19 +86,20 @@ public class CaseService {
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)) {
             UserDetails userDetails = idamClient.getUserDetails(authToken);
             UserInfo userInfo = UserInfo
-                    .builder()
-                    .idamId(userDetails.getId())
-                    .firstName(userDetails.getForename())
-                    .lastName(userDetails.getSurname().orElse(null))
-                    .emailAddress(userDetails.getEmail())
-                    .build();
+                .builder()
+                .idamId(userDetails.getId())
+                .firstName(userDetails.getForename())
+                .lastName(userDetails.getSurname().orElse(null))
+                .emailAddress(userDetails.getEmail())
+                .build();
 
             Court closestChildArrangementsCourt = buildCourt(caseData);
 
-            CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData.toBuilder()
-                    .userInfo(wrapElements(userInfo))
-                    .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
-                    .build());
+            CaseData updatedCaseData = caseDataMapper
+                .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
+                                          .courtName((closestChildArrangementsCourt != null)
+                                                         ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
+                                          .build());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
@@ -125,7 +124,7 @@ public class CaseService {
     }
 
     private List<CaseData> searchCasesLinkedToUser(String authToken, String s2sToken,
-                                                      Map<String, String> searchCriteria) {
+                                                   Map<String, String> searchCriteria) {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
         List<CaseDetails> caseDetails = new ArrayList<>();
@@ -162,7 +161,7 @@ public class CaseService {
             coreCaseDataApi.getCase(anonymousUserToken, s2sToken, caseId).getData(),
             CaseData.class
         );
-
+        log.info("caseId {}", caseId);
         if ("Valid".equalsIgnoreCase(findAccessCodeStatus(accessCode, caseData))) {
             UUID partyId = null;
             YesOrNo isApplicant = YesOrNo.Yes;
@@ -175,6 +174,7 @@ public class CaseService {
                     invite.getValue().setInvitedUserId(userId);
                 }
             }
+
             processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant);
 
             caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData);

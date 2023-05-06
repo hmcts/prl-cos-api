@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -41,6 +42,9 @@ public class C100RespondentSolicitorController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ResponseSubmitChecker responseSubmitChecker;
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Respondent Solicitor")
@@ -143,5 +147,48 @@ public class C100RespondentSolicitorController {
         caseDataUpdated.putAll(documentGenService.generateC7DraftDocuments(authorisation, caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/about-to-start-response-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback for Respondent Solicitor - validate response events before submit")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse validateActiveRespondentResponseBeforeStart(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+
+        List<String> errorList = new ArrayList<>();
+        log.info("validateTheResponseBeforeSubmit: Callback for Respondent Solicitor - validate response");
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(respondentSolicitorService.validateActiveRespondentResponse(
+                callbackRequest,
+                errorList))
+            .errors(errorList)
+            .build();
+    }
+
+    @PostMapping(path = "/submit-c7-response", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback for Respondent Solicitor - update c7 response after submission")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse updateC7ResponseSubmit(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+
+        List<String> errorList = new ArrayList<>();
+        log.info("validateTheResponseBeforeSubmit: Callback for Respondent Solicitor - validate response");
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(respondentSolicitorService.submitC7ResponseForActiveRespondent(
+                callbackRequest,
+                authorisation,
+                errorList))
+            .errors(errorList)
+            .build();
     }
 }

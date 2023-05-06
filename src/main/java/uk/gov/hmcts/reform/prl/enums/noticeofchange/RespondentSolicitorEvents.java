@@ -11,7 +11,8 @@ import java.util.Optional;
 public enum RespondentSolicitorEvents {
     START_RESPONSE("c100ResSolStartingResponse", "Respond to the application", "c100ResSolStartingResponse"),
     CONSENT("c100ResSolConsentingToApplication", "Do you give your consent?", "respondentConsentToApplication"),
-    KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "Keep your details private", "keepContactDetailsPrivate"),
+    KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "Keep your details private", "keepContactDetailsPrivate,"
+        + "keepContactDetailsPrivateOther"),
     CONFIRM_EDIT_CONTACT_DETAILS(
         "c100ResSolConfirmOrEditContactDetails",
         "Edit your contact details",
@@ -21,14 +22,18 @@ public enum RespondentSolicitorEvents {
     MIAM(
         "c100ResSolMiam",
         "MIAM",
-        "respondentSolicitorWillingnessToAttendMiam,whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder"
+        "respondentSolicitorHaveYouAttendedMiam,respondentSolicitorWillingnessToAttendMiam,"
+            + "whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder"
     ),
     CURRENT_OR_PREVIOUS_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "Current or past proceedings",
                                     "currentOrPastProceedingsForChildren,respondentExistingProceedings"
     ),
-    ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "Allegations of harm", ""),
-    INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", ""),
-    ABILITY_TO_PARTICIPATE("c100ResSolAbilityToParticipate", "Ability to participate", ""),
+    ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "Allegations of harm", "respondentAohYesNo,"
+        + "respondentAllegationsOfHarm,respondentDomesticAbuseBehaviour,respondentChildAbuseBehaviour,"
+        + "respondentChildAbduction,respondentOtherConcerns"),
+    INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", "internationalElementChild,"
+        + "internationalElementParent,internationalElementJurisdiction,internationalElementRequest"),
+    ABILITY_TO_PARTICIPATE("c100ResSolAbilityToParticipate", "Ability to participate", "abilityToParticipateInProceedings"),
     VIEW_DRAFT_RESPONSE("c100ResSolViewResponseDraftDocument", "View a draft of your response", ""),
     SUBMIT("c100ResSolSubmit", "Submit", "");
 

@@ -10,9 +10,9 @@ Since Spring Boot 2.1 bean overriding is disabled. If you want to enable it you 
 
 JUnit 5 is now enabled by default in the project. Please refrain from using JUnit4 and use the next generation
 
-## Building and deploying the application
+### Building and deploying the application
 
-### Building the application
+#### Building the application
 
 The project uses [Gradle](https://gradle.org) as a build tool. It already contains
 `./gradlew` wrapper script, so there's no need to install gradle.
@@ -92,4 +92,3 @@ There is no need to remove postgres and java or similar core images.
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-

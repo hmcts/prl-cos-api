@@ -14,7 +14,7 @@ plugins {
   id 'info.solidsoft.pitest' version '1.7.4'
   id 'io.spring.dependency-management' version '1.0.11.RELEASE'
   id 'jacoco'
-  id 'org.owasp.dependencycheck' version '6.2.2'
+  id 'org.owasp.dependencycheck' version '8.0.2'
   id 'org.sonarqube' version '3.3'
   id 'org.springframework.boot' version '2.7.0'
   id 'au.com.dius.pact' version '4.2.6'
@@ -537,16 +537,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/enums/**/*',
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/*',
-  '**uk/gov/hmcts/reform/prl/Application.*',
-  '**uk/gov/hmcts/reform/prl/controllers/c100respondentsolicitor/C100RespondentSolicitorController.java',
-  '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/C100RespondentSolicitorService.java',
-  '**/uk/gov/hmcts/reform/prl/services/RespondentSolicitorTaskListRenderer.java',
-  '**/uk/gov/hmcts/reform/prl/utils/noticeofchange/RespondentPolicyConverter.java',
-  '**/uk/gov/hmcts/reform/prl/services/noticeofchange/NoticeOfChangePartiesService.java',
-  '**/uk/gov/hmcts/reform/prl/utils/noticeofchange/NoticeOfChangePartiesConverter.java',
-  '**/uk/gov/hmcts/reform/prl/services/caseaccess/CcdDataStoreService.java',
-  '**/uk/gov/hmcts/reform/prl/services/document/DocumentGenService.java',
-  '**/uk/gov/hmcts/reform/prl/services/UpdatePartyDetailsService.java'
+  '**uk/gov/hmcts/reform/prl/Application.*'
 ]
 
 sonarqube {

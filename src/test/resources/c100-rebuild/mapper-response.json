@@ -366,7 +366,7 @@
         "dateStarted":null,
         "dateEnded":null,
         "typeOfOrder":[
-          "superviosionOrder"
+          "supervisionOrder"
         ],
         "otherTypeOfOrder":null,
         "nameOfJudge":null,
@@ -391,7 +391,7 @@
         "dateStarted":null,
         "dateEnded":null,
         "typeOfOrder":[
-          "superviosionOrder"
+          "supervisionOrder"
         ],
         "otherTypeOfOrder":null,
         "nameOfJudge":null,
@@ -416,7 +416,7 @@
         "dateStarted":null,
         "dateEnded":null,
         "typeOfOrder":[
-          "superviosionOrder"
+          "supervisionOrder"
         ],
         "otherTypeOfOrder":null,
         "nameOfJudge":null,

@@ -106,7 +106,7 @@ public class FL401SubmitApplicationController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Application Submitted."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public CallbackResponse fl401SubmitApplicationValidation(@RequestHeader("Authorization") @Parameter(hidden = true)
+    public AboutToStartOrSubmitCallbackResponse fl401SubmitApplicationValidation(@RequestHeader("Authorization") @Parameter(hidden = true)
                                                                      String authorisation,
                                                              @RequestBody CallbackRequest callbackRequest) {
 
@@ -118,13 +118,13 @@ public class FL401SubmitApplicationController {
             errorList.add(
                 "Statement of truth and submit is not allowed for this case unless you finish all the mandatory events");
         }
-        caseData = caseData.toBuilder()
-            .submitCountyCourtSelection(DynamicList.builder()
-                                            .listItems(locationRefDataService.getCourtLocations(authorisation))
-                                            .build())
-            .build();
-        return CallbackResponse.builder()
-            .data(caseData)
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
+            .listItems(locationRefDataService.getCourtLocations(authorisation))
+            .build());
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
             .errors(errorList)
             .build();
     }
@@ -154,13 +154,16 @@ public class FL401SubmitApplicationController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(COURT_NAME_FIELD, courtName);
         String postcode = Arrays.stream(venueDetails).toArray()[3].toString();
-        String courtSlug = courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts().get(0).getCourtSlug();
-        Court court = courtFinderApi.getCourtDetails(courtSlug);
-        caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
-        Optional<CourtEmailAddress> optionalCourtEmail = courtFinderService.getEmailAddress(court);
         String courtEmail = null;
-        if (optionalCourtEmail.isPresent()) {
-            courtEmail = optionalCourtEmail.get().getAddress();
+        if (null != courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode)
+            && null != courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts()) {
+            String courtSlug = courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode).getCourts().get(0).getCourtSlug();
+            Court court = courtFinderApi.getCourtDetails(courtSlug);
+            caseDataUpdated.put(COURT_ID_FIELD, baseLocationId);
+            Optional<CourtEmailAddress> optionalCourtEmail = courtFinderService.getEmailAddress(court);
+            if (optionalCourtEmail.isPresent()) {
+                courtEmail = optionalCourtEmail.get().getAddress();
+            }
         }
         caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
         String regionName = Arrays.stream(venueDetails).toArray()[4].toString();
@@ -195,7 +198,6 @@ public class FL401SubmitApplicationController {
         caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
 
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
-
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();

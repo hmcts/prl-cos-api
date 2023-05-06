@@ -90,7 +90,7 @@ public class PrlAppsConstants {
     public static final String SUBMITTED_STATE = State.SUBMITTED_PAID.getValue();
     public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
     public static final String ISSUED_STATE = State.CASE_ISSUE.getValue();
-    public static final String GATEKEEPING_STATE = State.GATEKEEPING.getValue();
+    public static final String GATEKEEPING_STATE = State.GATE_KEEPING.getValue();
 
     public static final String C8_HINT = "C8";
     public static final String C1A_HINT = "C1A";
@@ -192,12 +192,12 @@ public class PrlAppsConstants {
         + "court, instruct their representatives before, during, and after the hearing "
         + "or attend the hearing without significant distress should file an application "
         + "notice and include the following information as far as practicable:"
-        + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "a. why the party or witness would benefit from assistance;"
-        + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "b. the measure or measures that would be likely to maximise as fas as practicable the "
         + "quality of their evidence or participation and why;"
-        + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "c.written confirmations from any relevant witness of his/her views.";
     public static final String JOINING_INSTRUCTIONS = "Joining instructions";
     public static final String UPDATE_CONTACT_DETAILS = "The parties must, if their contact details have changed or missing from "
@@ -205,7 +205,7 @@ public class PrlAppsConstants {
         + "number at [CafcassCymruCAT@gov.wales/ privatelawapplications@cafcass.gov.uk]"
         + "The email must include telephone contact details and email address so that they "
         + "may be contacted for safeguarding purposes."
-        + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "Alternatively if any party is managing their case using the online dashboard, "
         + "they can update their contact details on the and donot have to also contact "
         + "Cafcass or Cafcass Cymru.";
@@ -214,9 +214,9 @@ public class PrlAppsConstants {
         + "cross examination is conducted in person, or if the conduct of cross-examination "
         + "in person would cause significant distress to a party and it would not be "
         + "contrary of justice to make the direction."
-        + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "It is ordered that:"
-        + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "a. The applicant and respondent(delete as appropriate) must notify the court by "
         + "4pm on[date] whether they intend to appoint their own qualified legal representative."
         + System.lineSeparator()
@@ -229,21 +229,21 @@ public class PrlAppsConstants {
         + "witness(es) to be cross-examined by a qualified legal representative(s) and concluded "
         + "that it is neccessary to appoint such a qualified legal representative(s) to conduct "
         + "the cross examination."
-        + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "1. The court is to appoint a qualified leagal representaive on behalf of [name/s] "
         + "for the hearing listed on [date] at [time] at [name of court].";
     public static final String SPECIFIED_DOCUMENTS = "No document other than a document specified in an order or filled in accordance "
         + "with the Rules or any Practice Direction shall be filled without the court's permission.";
     public static final String SPIP_ATTENDANCE = "Both parents must attend the following programme at dates and at times to be confirmed "
         + "by the activity provider."
-        + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "a. The required activity is a Separated Parenting Information programme"
-        + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "b. The Court shall spend this order to Cafcass/Cafcass Cymeru with parties contact details"
-        + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "c. The activity provider must notify the Court whether the course was at the conclusion of the activity directed";
     public static final String PARENT_WITHCARE = "The application is transferred to the Family Court at [place]"
-        + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "The reason for transfer is another court is in the the area where the child usually lives / there "
         + "are on-going proceedings in another court / free-text box reason";
 
@@ -303,6 +303,8 @@ public class PrlAppsConstants {
         + "require proceedings to be transferred to their local Family Court to accommodate childcare responsibilities.\n"
         + System.lineSeparator()
         + "Any application for transfer should be made to the Court in writing within 5 working days of receipt of these directions.";
+    public static final String DIO_APPLICATION_TO_APPLY_PERMISSION = " Any party intending at the FHDRA to apply for permission"
+         + " to instruct an expert must first comply fully with the requirements of Practice Direction 25C of the Family Procedure Rules.";
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";

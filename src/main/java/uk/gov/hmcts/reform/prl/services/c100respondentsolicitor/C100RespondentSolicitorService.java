@@ -16,9 +16,13 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorKeepDetailsPrivate;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorMiam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -30,6 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents.SUBMIT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -43,10 +48,13 @@ public class C100RespondentSolicitorService {
     private final CcdDataStoreService ccdDataStoreService;
 
     @Autowired
-    private RespondentSolicitorMiamService miamService;
+    private final RespondentSolicitorMiamService miamService;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private final ResponseSubmitChecker responseSubmitChecker;
+
+    @Autowired
+    private final ObjectMapper objectMapper;
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
         log.info("Inside prePopulateAboutToStartCaseData");
@@ -55,9 +63,19 @@ public class C100RespondentSolicitorService {
             caseDataUpdated,
             CaseData.class
         );
-        findActiveRespondent(caseData, authorisation)
-            .ifPresentOrElse(x -> retrieveExistingResponseForSolicitor(callbackRequest, caseDataUpdated, x), ()
-                -> errorList.add("You must select a respondent to represent through 'Respond to application' event"));
+        Optional<Element<PartyDetails>> getActiveRespondent = findActiveRespondent(caseData, authorisation);
+
+        getActiveRespondent.ifPresentOrElse(x -> retrieveExistingResponseForSolicitor(
+            callbackRequest,
+            caseDataUpdated,
+            x), () -> errorList.add(
+            "You must select a respondent to represent through 'Respond to application' event"));
+
+        String activeRespondentName = getActiveRespondent.isPresent()
+            ? (getActiveRespondent.get().getValue().getFirstName() + " "
+            + getActiveRespondent.get().getValue().getLastName()) : null;
+
+        caseDataUpdated.put("respondentNameForResponse", activeRespondentName);
         return caseDataUpdated;
     }
 
@@ -70,36 +88,34 @@ public class C100RespondentSolicitorService {
                         event.getCaseFieldName(),
                         x.getValue().getResponse().getConsent()
                     );
-                    log.info("finding respondentConsentToApplication = " + x.getValue().getResponse().getConsent());
                     break;
                 case KEEP_DETAILS_PRIVATE:
-                    caseDataUpdated.put(
-                        event.getCaseFieldName(),
-                        x.getValue().getResponse().getKeepDetailsPrivate()
-                    );
-                    log.info("finding respondentKeepDetailsPrivate = " + x.getValue().getResponse().getKeepDetailsPrivate());
+                    String[] keepDetailsPrivateFields = event.getCaseFieldName().split(",");
+                    caseDataUpdated.put(keepDetailsPrivateFields[0], x.getValue().getResponse()
+                        .getSolicitorKeepDetailsPriate().getRespKeepDetailsPrivate());
+                    caseDataUpdated.put(keepDetailsPrivateFields[1], x.getValue().getResponse()
+                        .getSolicitorKeepDetailsPriate().getRespKeepDetailsPrivateConfidentiality());
                     break;
                 case CONFIRM_EDIT_CONTACT_DETAILS:
                     caseDataUpdated.put(
                         event.getCaseFieldName(),
                         x.getValue().getResponse().getCitizenDetails()
                     );
-                    log.info("finding respondentConfirmYourDetails = " + x.getValue().getResponse().getCitizenDetails());
                     break;
                 case ATTENDING_THE_COURT:
                     caseDataUpdated.put(
                         event.getCaseFieldName(),
                         x.getValue().getResponse().getAttendToCourt()
                     );
-                    log.info("finding respondentAttendingTheCourt = " + x.getValue().getResponse().getAttendToCourt());
                     break;
                 case MIAM:
                     String[] miamFields = event.getCaseFieldName().split(",");
                     log.info("MIAM fields, :::{}", (Object) miamFields);
-                    caseDataUpdated.put(miamFields[0], x.getValue().getResponse().getMiam());
-                    caseDataUpdated.put(miamFields[1], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
+                    caseDataUpdated.put(miamFields[0], x.getValue().getResponse().getSolicitorMiam().getRespSolHaveYouAttendedMiam());
+                    caseDataUpdated.put(miamFields[1], x.getValue().getResponse().getSolicitorMiam().getRespSolWillingnessToAttendMiam());
+                    caseDataUpdated.put(miamFields[2], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
                     caseDataUpdated.put(
-                        miamFields[2],
+                        miamFields[3],
                         miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder()
                     );
                     break;
@@ -115,8 +131,58 @@ public class C100RespondentSolicitorService {
                     );
                     break;
                 case ALLEGATION_OF_HARM:
+                    String[] allegationsOfHarmFields = event.getCaseFieldName().split(",");
+                    caseDataUpdated.put(
+                        allegationsOfHarmFields[0],
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo()
+                    );
+                    caseDataUpdated.put(
+                        allegationsOfHarmFields[1],
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAllegationsOfHarmInfo()
+                    );
+                    caseDataUpdated.put(
+                        allegationsOfHarmFields[2],
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespDomesticAbuseInfo()
+                    );
+                    caseDataUpdated.put(
+                        allegationsOfHarmFields[3],
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespChildAbuseInfo()
+                    );
+                    caseDataUpdated.put(
+                        allegationsOfHarmFields[4],
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespChildAbductionInfo()
+                    );
+                    caseDataUpdated.put(
+                        allegationsOfHarmFields[5],
+                        x.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespOtherConcernsInfo()
+                    );
+                    break;
                 case INTERNATIONAL_ELEMENT:
+                    String[] internationalElementFields = event.getCaseFieldName().split(",");
+                    caseDataUpdated.put(
+                        internationalElementFields[0],
+                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementChildInfo()
+                    );
+                    caseDataUpdated.put(
+                        internationalElementFields[1],
+                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementParentInfo()
+                    );
+                    caseDataUpdated.put(
+                        internationalElementFields[2],
+                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementJurisdictionInfo()
+                    );
+                    caseDataUpdated.put(
+                        internationalElementFields[3],
+                        x.getValue().getResponse().getResSolInternationalElements().getInternationalElementRequestInfo()
+                    );
+                    break;
                 case ABILITY_TO_PARTICIPATE:
+                    String[] abilityToParticipateFields = event.getCaseFieldName().split(",");
+                    caseDataUpdated.put(
+                        abilityToParticipateFields[0],
+                        x.getValue().getResponse().getAbilityToParticipate()
+                    );
+                    break;
                 case VIEW_DRAFT_RESPONSE:
                 case SUBMIT:
                 default:
@@ -133,7 +199,6 @@ public class C100RespondentSolicitorService {
             CaseData.class
         );
 
-        log.info("populateAboutToSubmitCaseData:: caseData" + caseData);
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
 
         findActiveRespondent(caseData, authorisation).ifPresentOrElse(
@@ -167,14 +232,12 @@ public class C100RespondentSolicitorService {
                                  .build()).build();
                 break;
             case KEEP_DETAILS_PRIVATE:
-                KeepDetailsPrivate respondentKeepDetailsPrivate = caseData.getKeepContactDetailsPrivate();
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .keepDetailsPrivate(buildResponseForRespondent.getKeepDetailsPrivate().toBuilder()
-                                            .confidentiality(respondentKeepDetailsPrivate.getConfidentiality())
-                                            .confidentialityList(respondentKeepDetailsPrivate.getConfidentialityList())
-                                            .otherPeopleKnowYourContactDetails(
-                                                respondentKeepDetailsPrivate.getOtherPeopleKnowYourContactDetails())
-                                            .build())
+                    .solicitorKeepDetailsPriate(SolicitorKeepDetailsPrivate.builder()
+                                                    .respKeepDetailsPrivate(caseData.getKeepContactDetailsPrivate())
+                                                    .respKeepDetailsPrivateConfidentiality(caseData.getKeepContactDetailsPrivateOther())
+                                                    .build())
+
                     .build();
                 break;
             case CONFIRM_EDIT_CONTACT_DETAILS:
@@ -199,7 +262,10 @@ public class C100RespondentSolicitorService {
                 break;
             case MIAM:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .miam(caseData.getRespondentSolicitorMiam())
+                    .solicitorMiam(SolicitorMiam.builder()
+                                       .respSolHaveYouAttendedMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam())
+                                       .respSolWillingnessToAttendMiam(caseData.getRespondentSolicitorWillingnessToAttendMiam())
+                              .build())
                     .build();
                 break;
             case CURRENT_OR_PREVIOUS_PROCEEDINGS:
@@ -209,17 +275,41 @@ public class C100RespondentSolicitorService {
                     .build();
                 break;
             case ALLEGATION_OF_HARM:
+                buildResponseForRespondent = buildResponseForRespondent.toBuilder()
+                    .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData.builder()
+                                                         .respAohYesOrNo(caseData.getRespondentAohYesNo())
+                                                         .respAllegationsOfHarmInfo(caseData.getRespondentAllegationsOfHarm())
+                                                         .respDomesticAbuseInfo(caseData.getRespondentDomesticAbuseBehaviour())
+                                                         .respChildAbuseInfo(caseData.getRespondentChildAbuseBehaviour())
+                                                         .respChildAbductionInfo(caseData.getRespondentChildAbduction())
+                                                         .respOtherConcernsInfo(caseData.getRespondentOtherConcerns())
+                                                         .build())
+                    .build();
+                break;
             case INTERNATIONAL_ELEMENT:
+                buildResponseForRespondent = buildResponseForRespondent.toBuilder()
+                    .resSolInternationalElements(ResSolInternationalElements.builder()
+                                                     .internationalElementChildInfo(caseData.getInternationalElementChild())
+                                                     .internationalElementParentInfo(caseData.getInternationalElementParent())
+                                                     .internationalElementJurisdictionInfo(caseData.getInternationalElementJurisdiction())
+                                                     .internationalElementRequestInfo(caseData.getInternationalElementRequest())
+                                                     .build())
+                    .build();
+                break;
             case ABILITY_TO_PARTICIPATE:
+                buildResponseForRespondent = buildResponseForRespondent.toBuilder()
+                    .abilityToParticipate(caseData.getAbilityToParticipateInProceedings())
+                    .build();
+                break;
             case VIEW_DRAFT_RESPONSE:
             case SUBMIT:
+
             default:
                 break;
         }
         PartyDetails amended = party.getValue().toBuilder()
             .response(buildResponseForRespondent).build();
         respondents.set(respondents.indexOf(party), element(party.getId(), amended));
-        log.info("updateRespondents:: party found. before update " + party);
     }
 
     private Optional<Element<PartyDetails>> findActiveRespondent(CaseData caseData, String authorisation) {
@@ -232,7 +322,6 @@ public class C100RespondentSolicitorService {
                 .stream()
                 .filter(x -> YesOrNo.Yes.equals(x.getValue().getResponse().getActiveRespondent()))
                 .findFirst();
-            log.info("finding activeRespondent " + activeRespondent);
         }
         return activeRespondent;
     }
@@ -254,22 +343,27 @@ public class C100RespondentSolicitorService {
     private List<Element<PartyDetails>> getSolicitorRepresentedRespondents(CaseData caseData, FindUserCaseRolesResponse findUserCaseRolesResponse) {
         List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
         for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-            log.info("caseUser is = " + caseUser);
             SolicitorRole.from(caseUser.getCaseRole()).ifPresent(
-                x -> solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex())));
+                x -> {
+                    Element<PartyDetails> respondent;
+                    respondent = caseData.getRespondents().get(x.getIndex());
+                    if (respondent.getValue().getResponse() != null
+                        && !(YesOrNo.Yes.equals(respondent.getValue().getResponse().getC7ResponseSubmitted()))) {
+                        solicitorRepresentedParties.add(respondent);
+                    } else if (respondent.getValue().getResponse() == null) {
+                        solicitorRepresentedParties.add(respondent);
+                    }
+                });
         }
-        log.info("finding solicitorRepresentedParties Party " + solicitorRepresentedParties);
         return solicitorRepresentedParties;
     }
 
     private FindUserCaseRolesResponse findUserCaseRoles(CaseData caseData, String authorisation) {
         log.info("findUserCaseRoles : caseId is:: " + caseData.getId());
-        FindUserCaseRolesResponse findUserCaseRolesResponse = ccdDataStoreService.findUserCaseRoles(
+        return ccdDataStoreService.findUserCaseRoles(
             String.valueOf(caseData.getId()),
             authorisation
         );
-        log.info("findUserCaseRolesResponse = " + findUserCaseRolesResponse);
-        return findUserCaseRolesResponse;
     }
 
     public Map<String, Object> populateSolicitorRespondentList(CallbackRequest callbackRequest, String authorisation) {
@@ -278,7 +372,6 @@ public class C100RespondentSolicitorService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("populateSolicitorRespondentList service: caseData is:: " + caseData);
         headerMap.put(CHOOSE_RESPONDENT_DYNAMIC_LIST, ElementUtils.asDynamicList(
             findSolicitorRepresentedRespondents(caseData, authorisation),
             null,
@@ -293,7 +386,6 @@ public class C100RespondentSolicitorService {
             updatedCaseData,
             CaseData.class
         );
-        log.info("updateRespondents:: caseData" + caseData);
 
         UUID selectedRespondentId = caseData.getChooseRespondentDynamicList().getValueCodeAsUuid();
         log.info("updateRespondents:: selectedRespondentId" + selectedRespondentId);
@@ -303,13 +395,15 @@ public class C100RespondentSolicitorService {
             .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
             .findFirst()
             .ifPresent(party -> {
-                log.info("updateRespondents:: party found. before update " + party);
                 PartyDetails amended = party.getValue().toBuilder()
                     .response(party.getValue().getResponse().toBuilder().activeRespondent(YesOrNo.Yes).build())
                     .build();
-
+                if (callbackRequest.getEventId().equalsIgnoreCase(SUBMIT.getEventId())) {
+                    amended = party.getValue().toBuilder()
+                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(YesOrNo.Yes).build())
+                        .build();
+                }
                 respondents.set(respondents.indexOf(party), element(party.getId(), amended));
-                log.info("updateRespondents:: party found. after update " + party);
             });
 
         findSolicitorRepresentedRespondents(caseData, authorisation)
@@ -318,13 +412,11 @@ public class C100RespondentSolicitorService {
                     .filter(party -> Objects.equals(party.getId(), solicitorRepresentedParty.getId())
                         && !Objects.equals(party.getId(), selectedRespondentId))
                     .forEach(party -> {
-                        log.info("updateRespondents:: party found which needs to be set to false. before update " + party);
                         PartyDetails amended = party.getValue().toBuilder()
                             .response(party.getValue().getResponse().toBuilder().activeRespondent(YesOrNo.No).build())
                             .build();
 
                         respondents.set(respondents.indexOf(party), element(party.getId(), amended));
-                        log.info("updateRespondents:: party found which needs to be set to false. after update " + party);
                     })
             );
         updatedCaseData.put(RESPONDENTS, respondents);
@@ -350,5 +442,61 @@ public class C100RespondentSolicitorService {
         Map<String, Object> keepDetailsPrivateList = new HashMap<>();
         keepDetailsPrivateList.put("confidentialListDetails", selectedList);
         return keepDetailsPrivateList;
+    }
+
+    public Map<String, Object> validateActiveRespondentResponse(CallbackRequest callbackRequest, List<String> errorList) {
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = objectMapper.convertValue(
+            caseDataUpdated,
+            CaseData.class
+        );
+        log.info("Event name:::{}", callbackRequest.getEventId());
+        boolean mandatoryFinished = false;
+
+        mandatoryFinished = responseSubmitChecker.hasMandatoryCompleted(caseData);
+        if (!mandatoryFinished) {
+            errorList.add(
+                "Response submission is not allowed for this case unless you finish all the mandatory information");
+        }
+        //Todo final C7 Document generation
+        return caseDataUpdated;
+    }
+
+    public Map<String, Object> submitC7ResponseForActiveRespondent(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = objectMapper.convertValue(
+            updatedCaseData,
+            CaseData.class
+        );
+
+        UUID selectedRespondentId = caseData.getChooseRespondentDynamicList().getValueCodeAsUuid();
+        log.info("updateRespondents:: selectedRespondentId" + selectedRespondentId);
+        List<Element<PartyDetails>> respondents = caseData.getRespondents();
+
+        respondents.stream()
+            .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
+            .findFirst()
+            .ifPresent(party -> {
+                PartyDetails amended = party.getValue().toBuilder()
+                        .response(party.getValue().getResponse().toBuilder().c7ResponseSubmitted(YesOrNo.Yes).build())
+                        .build();
+
+                respondents.set(respondents.indexOf(party), element(party.getId(), amended));
+            });
+
+        respondents.stream()
+            .filter(party -> Objects.equals(party.getId(), selectedRespondentId))
+            .findFirst()
+            .ifPresent(party -> {
+                PartyDetails amended = party.getValue().toBuilder()
+                    .response(party.getValue().getResponse().toBuilder().activeRespondent(YesOrNo.No).build())
+                    .build();
+
+                respondents.set(respondents.indexOf(party), element(party.getId(), amended));
+            });
+
+        updatedCaseData.put(RESPONDENTS, respondents);
+        return updatedCaseData;
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 
@@ -30,8 +31,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 public class DraftOrdersControllerFunctionalTest {
-
-    private final String userToken = "Bearer testToken";
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -120,7 +119,11 @@ public class DraftOrdersControllerFunctionalTest {
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .build();
         Map<String, Object> caseDataMap = new HashMap<>();
-        when(manageOrderService.getCaseData("test", caseData)).thenReturn(caseDataMap);
+        when(manageOrderService.getCaseData(
+            "test",
+            caseData,
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections
+        )).thenReturn(caseDataMap);
 
         mockMvc.perform(post("/generate-doc")
                             .contentType(MediaType.APPLICATION_JSON)

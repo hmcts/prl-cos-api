@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.caseinvite;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +26,8 @@ public class CaseInvite {
     private String accessCode;
     private String invitedUserId;
     private String hasLinked;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate expiryDate;
     private YesOrNo isApplicant;
 

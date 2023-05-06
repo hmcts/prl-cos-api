@@ -23,5 +23,4 @@ public class AttendToCourt {
     private final String respondentSpecialArrangementDetails;
     private final YesOrNo respondentIntermediaryNeeds;
     private final String respondentIntermediaryNeedDetails;
-
 }

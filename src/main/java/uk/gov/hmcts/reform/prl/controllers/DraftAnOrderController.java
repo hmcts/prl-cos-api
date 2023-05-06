@@ -90,6 +90,7 @@ public class DraftAnOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
 
@@ -101,7 +102,7 @@ public class DraftAnOrderController {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         } else {
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
-            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
+            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
         if (caseData != null) {
             caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
@@ -184,7 +185,14 @@ public class DraftAnOrderController {
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
         }
-        caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
+        log.info("Event Id  {} ", callbackRequest.getEventId());
+        if ("editAndApproveAnOrder".equalsIgnoreCase(callbackRequest.getEventId())
+            || "adminEditAndApproveAnOrder".equalsIgnoreCase(callbackRequest.getEventId())) {
+            caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
+        } else {
+            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
+        }
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -196,7 +204,6 @@ public class DraftAnOrderController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(draftAnOrderService.generateDraftOrderCollection(caseData));
-        log.info("*** before returning {} ***", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

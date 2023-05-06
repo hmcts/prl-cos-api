@@ -18,9 +18,15 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioRemoteHearingEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioUrgentHearingRefusedCheckListEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioWithoutNoticeFirstHearingCheckListEnum;
+import uk.gov.hmcts.reform.prl.enums.dio.DioWithoutNoticeHearingRefusedCheckListEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoLanguageDialect;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -81,6 +87,14 @@ public class DirectionOnIssue {
     private final List<DioUrgentHearingRefusedCheckListEnum> dioUrgentHearingRefusedCheckList;
     @JsonProperty("dioHearingUrgencyRefusedDetails")
     private final String dioHearingUrgencyRefusedDetails;
+    @JsonProperty("dioWithoutNoticeFirstHearingCheckList")
+    private final List<DioWithoutNoticeFirstHearingCheckListEnum> dioWithoutNoticeFirstHearingCheckList;
+    @JsonProperty("dioWithoutNoticeFirstHearingDetails")
+    private final String dioWithoutNoticeFirstHearingDetails;
+    @JsonProperty("dioWithoutNoticeHearingRefusedCheckList")
+    private final List<DioWithoutNoticeHearingRefusedCheckListEnum> dioWithoutNoticeHearingRefusedCheckList;
+    @JsonProperty("dioWithoutNoticeHearingRefusedDetails")
+    private final String dioWithoutNoticeHearingRefusedDetails;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private final LocalDateTime dioFhdraStartDateTime;
     private final DynamicList dioFhdraCourtDynamicList;
@@ -93,14 +107,38 @@ public class DirectionOnIssue {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dioPositionStatementDeadlineDate;
 
+    @JsonProperty("dioPositionStatementWritten")
+    private final SdoWrittenStatementEnum dioPositionStatementWritten;
     @JsonProperty("dioMiamAttendingPerson")
     private final String dioMiamAttendingPerson;
 
-    @JsonProperty("dioWithoutNoticeFirstHearingCheckList")
-    private final List<DioWithoutNoticeFirstHearingCheckListEnum> dioWithoutNoticeFirstHearingCheckList;
-    @JsonProperty("dioWithoutNoticeFirstHearingDetails")
-    private final String dioWithoutNoticeFirstHearingDetails;
+    @JsonProperty("dioPersonWhoRequiresInterpreter")
+    private final String dioPersonWhoRequiresInterpreter;
+    @JsonProperty("dioInterpreterDialectRequired")
+    private final List<Element<SdoLanguageDialect>> dioInterpreterDialectRequired;
+    @JsonProperty("dioUpdateContactDetails")
+    private final String dioUpdateContactDetails;
 
+    @JsonProperty("dioCafcassSafeguardingIssue")
+    private final String dioCafcassSafeguardingIssue;
+    @JsonProperty("dioCafcassCymruSafeguardingIssue")
+    private final String dioCafcassCymruSafeguardingIssue;
+
+    @JsonProperty("dioTransferApplicationCourtDynamicList")
+    private final DynamicList dioTransferApplicationCourtDynamicList;
+    @JsonProperty("dioTransferApplicationReason")
+    private final List<SdoTransferApplicationReasonEnum> dioTransferApplicationReason;
+    @JsonProperty("dioTransferApplicationSpecificReason")
+    private final String dioTransferApplicationSpecificReason;
+    @JsonProperty("dioLocalAuthorityName")
+    private final String dioLocalAuthorityName;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate dioLocalAuthorityReportSubmitByDate;
+    @JsonProperty("dioDisclosureOfPapersCaseNumbers")
+    private final List<Element<SdoDisclosureOfPapersCaseNumber>> dioDisclosureOfPapersCaseNumbers;
     @JsonProperty("dioParentWithCare")
     private final String dioParentWithCare;
+    @JsonProperty("dioApplicationToApplyPermission")
+    private final List<Element<DioApplicationToApplyPermission>> dioApplicationToApplyPermission;
+
 }
