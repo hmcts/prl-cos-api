@@ -83,7 +83,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofh
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.ChildAbductionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.DomesticAbuseVictim;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -91,6 +93,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -102,6 +105,7 @@ import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicationsTabServiceTest {
@@ -203,70 +207,76 @@ public class ApplicationsTabServiceTest {
             .applicationPermissionRequired(PermissionRequiredEnum.yes)
             .applicationPermissionRequiredReason("Some xyz reason")
             // hearing urgency
-            .isCaseUrgent(YesOrNo.Yes)
+            .isCaseUrgent(Yes)
             .caseUrgencyTimeAndReason("Test String")
-            .doYouRequireAHearingWithReducedNotice(YesOrNo.No)
+            .doYouRequireAHearingWithReducedNotice(No)
             //allegations of harm overview
             .allegationOfHarm(AllegationOfHarm.builder()
-                                  .allegationsOfHarmYesNo(YesOrNo.Yes)
-                                  .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
-                                  .allegationsOfHarmChildAbductionYesNo(YesOrNo.Yes).build())
+                                  .allegationsOfHarmYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbductionYesNo(Yes).build())
             //miam
-            .applicantAttendedMiam(YesOrNo.Yes)
-            .claimingExemptionMiam(YesOrNo.No)
-            .familyMediatorMiam(YesOrNo.Yes)
-            .miamExemptionsChecklist(Collections.singletonList(MiamExemptionsChecklistEnum.domesticViolence))
-            .miamDomesticViolenceChecklist(Collections.singletonList(
-                MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_4))
-            .miamUrgencyReasonChecklist(Collections.singletonList(MiamUrgencyReasonChecklistEnum
-                                                                      .miamUrgencyReasonChecklistEnum_Value_1))
-            .miamChildProtectionConcernList(Collections.singletonList(MiamChildProtectionConcernChecklistEnum
-                                                                          .MIAMChildProtectionConcernChecklistEnum_value_1))
-            .miamPreviousAttendanceChecklist(MiamPreviousAttendanceChecklistEnum.miamPreviousAttendanceChecklistEnum_Value_1)
-            .miamOtherGroundsChecklist(MiamOtherGroundsChecklistEnum.miamOtherGroundsChecklistEnum_Value_2)
+            .miamDetails(MiamDetails.builder()
+                             .applicantAttendedMiam(Yes)
+                             .claimingExemptionMiam(No)
+                             .familyMediatorMiam(Yes)
+                             .miamExemptionsChecklist(Collections.singletonList(MiamExemptionsChecklistEnum.domesticViolence))
+                             .miamDomesticViolenceChecklist(Collections.singletonList(
+                                 MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_4))
+                             .miamUrgencyReasonChecklist(Collections.singletonList(MiamUrgencyReasonChecklistEnum
+                                                                                       .miamUrgencyReasonChecklistEnum_Value_1))
+                             .miamChildProtectionConcernList(Collections.singletonList(MiamChildProtectionConcernChecklistEnum
+                                                                                           .MIAMChildProtectionConcernChecklistEnum_value_1))
+                             .miamPreviousAttendanceChecklist(MiamPreviousAttendanceChecklistEnum.miamPreviousAttendanceChecklistEnum_Value_1)
+                             .miamOtherGroundsChecklist(MiamOtherGroundsChecklistEnum.miamOtherGroundsChecklistEnum_Value_2)
+                             .build())
+
             //other proceedings
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .existingProceedings(Collections.singletonList(proceedingDetailsElement))
             //international element
-            .habitualResidentInOtherState(YesOrNo.Yes)
+            .habitualResidentInOtherState(Yes)
             .habitualResidentInOtherStateGiveReason("Example reason")
-            .requestToForeignAuthority(YesOrNo.No)
+            .requestToForeignAuthority(No)
             //attending the hearing
-            .isWelshNeeded(YesOrNo.Yes)
-            .isDisabilityPresent(YesOrNo.No)
-            .adjustmentsRequired("Adjustments String")
+            .attendHearing(AttendHearing.builder()
+                               .isWelshNeeded(Yes)
+                               .isDisabilityPresent(No)
+                               .adjustmentsRequired("Adjustments String")
+                               .build())
+
             //litigation capacity
             .litigationCapacityFactors("Test")
-            .litigationCapacityOtherFactors(YesOrNo.Yes)
+            .litigationCapacityOtherFactors(Yes)
             //allegations of harm
             .allegationOfHarm(AllegationOfHarm.builder()
-                                  .ordersNonMolestation(YesOrNo.Yes)
-                                  .ordersNonMolestationCurrent(YesOrNo.Yes)
+                                  .ordersNonMolestation(Yes)
+                                  .ordersNonMolestationCurrent(Yes)
                                   .ordersNonMolestationDateIssued(LocalDate.of(1990, 8, 1))
                                   .ordersNonMolestationEndDate(LocalDate.of(1991, 8, 1))
                                   .ordersNonMolestationCourtName("Court name")
-                                  .ordersOccupation(YesOrNo.Yes)
-                                  .ordersOccupationCurrent(YesOrNo.Yes)
+                                  .ordersOccupation(Yes)
+                                  .ordersOccupationCurrent(Yes)
                                   .ordersOccupationDateIssued(LocalDate.of(1990, 8, 1))
                                   .ordersOccupationEndDate(LocalDate.of(1991, 8, 1))
                                   .ordersOccupationCourtName("Court name")
-                                  .ordersForcedMarriageProtection(YesOrNo.Yes)
-                                  .ordersForcedMarriageProtectionCurrent(YesOrNo.Yes)
+                                  .ordersForcedMarriageProtection(Yes)
+                                  .ordersForcedMarriageProtectionCurrent(Yes)
                                   .ordersForcedMarriageProtectionDateIssued(LocalDate.of(1990, 8, 1))
                                   .ordersForcedMarriageProtectionEndDate(LocalDate.of(1991, 8, 1))
                                   .ordersForcedMarriageProtectionCourtName("Court name")
-                                  .ordersRestraining(YesOrNo.Yes)
-                                  .ordersRestrainingCurrent(YesOrNo.Yes)
+                                  .ordersRestraining(Yes)
+                                  .ordersRestrainingCurrent(Yes)
                                   .ordersRestrainingDateIssued(LocalDate.of(1990, 8, 1))
                                   .ordersRestrainingEndDate(LocalDate.of(1991, 8, 1))
                                   .ordersRestrainingCourtName("Court name")
-                                  .ordersOtherInjunctive(YesOrNo.Yes)
-                                  .ordersOtherInjunctiveCurrent(YesOrNo.Yes)
+                                  .ordersOtherInjunctive(Yes)
+                                  .ordersOtherInjunctiveCurrent(Yes)
                                   .ordersOtherInjunctiveDateIssued(LocalDate.of(1990, 8, 1))
                                   .ordersOtherInjunctiveEndDate(LocalDate.of(1991, 8, 1))
                                   .ordersOtherInjunctiveCourtName("Court name")
-                                  .ordersUndertakingInPlace(YesOrNo.Yes)
-                                  .ordersUndertakingInPlaceCurrent(YesOrNo.Yes)
+                                  .ordersUndertakingInPlace(Yes)
+                                  .ordersUndertakingInPlaceCurrent(Yes)
                                   .ordersUndertakingInPlaceDateIssued(LocalDate.of(1990, 8, 1))
                                   .ordersUndertakingInPlaceEndDate(LocalDate.of(1991, 8, 1))
                                   .ordersUndertakingInPlaceCourtName("Court name")
@@ -275,16 +285,16 @@ public class ApplicationsTabServiceTest {
                                   .psychologicalAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
                                   .sexualAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
                                   .financialAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
-                                  .previousAbductionThreats(YesOrNo.Yes)
+                                  .previousAbductionThreats(Yes)
                                   .previousAbductionThreatsDetails("Details")
-                                  .abductionPreviousPoliceInvolvement(YesOrNo.No)
-                                  .allegationsOfHarmOtherConcerns(YesOrNo.Yes)
+                                  .abductionPreviousPoliceInvolvement(No)
+                                  .allegationsOfHarmOtherConcerns(Yes)
                                   .allegationsOfHarmOtherConcernsDetails("Test String")
-                                  .agreeChildUnsupervisedTime(YesOrNo.No).build())
+                                  .agreeChildUnsupervisedTime(No).build())
 
             //welsh language requirements
-            .welshLanguageRequirement(YesOrNo.Yes)
-            .languageRequirementApplicationNeedWelsh(YesOrNo.No)
+            .welshLanguageRequirement(Yes)
+            .languageRequirementApplicationNeedWelsh(No)
             //child details
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test string")
@@ -293,7 +303,9 @@ public class ApplicationsTabServiceTest {
             .solicitorName("Test Solicitor")
             .build();
 
-        emptyCaseData = CaseData.builder().build();
+        emptyCaseData = CaseData.builder()
+            .miamDetails(MiamDetails.builder()
+                             .build()).build();
     }
 
     @Test
@@ -461,6 +473,7 @@ public class ApplicationsTabServiceTest {
             .dateOfBirth(LocalDate.of(1989, 11, 30))
             .applicantsRelationshipToChild(RelationshipsEnum.father.getDisplayedValue())
             .orderAppliedFor("Child Arrangements Order, Prohibited Steps Order")
+            .cafcassOfficerAdded(No)
             .personWhoLivesWithChild(List.of(
                 Element
                     .<OtherPersonWhoLivesWithChildDetails>builder().value(confidentilPerson1).build(),
@@ -1177,6 +1190,47 @@ public class ApplicationsTabServiceTest {
         assertEquals(expected, result);
     }
 
+    @Test
+    public void tesGetHomeDetailsWithNoChild() {
+
+        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
+            .keepChildrenInfoConfidential(YesOrNo.Yes)
+            .childFullName("child")
+            .childsAge("12")
+            .isRespondentResponsibleForChild(YesOrNo.Yes)
+            .build();
+
+        Home home = Home.builder()
+            .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
+            .doesApplicantHaveHomeRights(No)
+            .doAnyChildrenLiveAtAddress(No)
+            .isPropertyRented(No)
+            .isThereMortgageOnProperty(No)
+            .isPropertyAdapted(No)
+            .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
+            .familyHome(List.of(FamilyHomeEnum.payForRepairs))
+            .livingSituation(List.of(LivingSituationEnum.awayFromHome))
+            .mortgages(Mortgage.builder().address(Address.builder().addressLine1("123").build()).mortgageLenderName("wer")
+                           .mortgageNumber("1234").mortgageNamedAfter(Collections.singletonList(MortgageNamedAfterEnum.applicant)).build())
+            .landlords(Landlord.builder().landlordName("test")
+                           .mortgageNamedAfterList(Collections.singletonList(MortgageNamedAfterEnum.applicant)).address(
+                    Address.builder().addressLine1("123").build()).build())
+            .build();
+        CaseData caseData = CaseData.builder().home(home).build();
+
+        Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
+                                                "Test data",
+                                                "applicantWantToStopFromRespondentDoingToChild",
+                                                "Being violent or threatening towards their child or children",
+                                                "isPhoneNumberConfidential","This information is to be kept confidential",
+                                                "isEmailAddressConfidential",
+                                                "This information is to be kept confidential",
+                                                "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
+        Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
+        assertEquals(expected, result);
+    }
+
 
     @Test
     public void tesGetHomeDetailsWithLandordAsNull() {
@@ -1375,7 +1429,33 @@ public class ApplicationsTabServiceTest {
     }
 
 
+    @Test
+    public void testUpdateTabWithChildren() {
+        List<Element<Child>> children = new ArrayList<>();
+        Child child = Child.builder()
+            .firstName("test")
+            .lastName("test")
+            .build();
 
+        Element<Child> childElement = element(UUID.fromString("1accfb1e-2574-4084-b97e-1cd53fd14815"), child);
+        children.add(childElement);
+
+        caseDataWithParties = caseDataWithParties.toBuilder()
+            .children(children)
+            .build();
+
+        when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class))
+            .thenReturn(OtherPersonInTheCase.builder().build());
+        when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOrders.class))
+            .thenReturn(allegationsOfHarmOrders);
+        when(objectMapper.convertValue(caseDataWithParties, ChildAbductionDetails.class))
+            .thenReturn(
+                ChildAbductionDetails.builder().build());
+        when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOtherConcerns.class))
+            .thenReturn(AllegationsOfHarmOtherConcerns.builder().build());
+
+        assertNotNull(applicationsTabService.updateTab(caseDataWithParties));
+    }
 
 
 

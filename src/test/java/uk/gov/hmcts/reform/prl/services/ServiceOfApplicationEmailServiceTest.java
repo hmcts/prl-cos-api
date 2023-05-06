@@ -9,12 +9,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Mockito.times;
@@ -57,17 +62,55 @@ public class ServiceOfApplicationEmailServiceTest {
                                             .representativeFirstName("FirstName")
                                             .build())))
             .respondents(List.of(element(PartyDetails.builder()
-                                            .solicitorEmail("test@gmail.com")
-                                            .representativeLastName("LastName")
-                                            .representativeFirstName("FirstName")
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                            .build())))
+                                             .build())))
+
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         serviceOfApplicationEmailService.sendEmailC100(caseDetails);
         verify(emailService,times(2)).send(Mockito.anyString(),
+                                           Mockito.any(),
+                                           Mockito.any(),Mockito.any());
+    }
+
+    @Test
+    public void testC100EmailNotificationForMultipleApplicants() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder()
+                                            .solicitorEmail("test@gmail.com")
+                                            .representativeLastName("LastName")
+                                            .representativeFirstName("FirstName")
+                                            .build()),
+                                element(PartyDetails.builder()
+                                            .solicitorEmail("test@gmail.com")
+                                            .representativeLastName("LastName1")
+                                            .representativeFirstName("FirstName1")
+                                            .build())))
+            .respondents(List.of(element(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build()),
+                                 element(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName1")
+                                             .representativeFirstName("FirstName1")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build())))
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+        serviceOfApplicationEmailService.sendEmailC100(caseDetails);
+        verify(emailService,times(3)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(),Mockito.any());
     }
@@ -113,6 +156,33 @@ public class ServiceOfApplicationEmailServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
         serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
+        verify(emailService,times(1)).send(Mockito.anyString(),
+                                           Mockito.any(),
+                                           Mockito.any(),Mockito.any());
+    }
+
+    @Test
+    public void testSendEmailToC100Applicants() throws Exception {
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("first")
+            .lastName("last")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("app@gmail.com")
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .applicants(applicantList)
+            .build();
+
+        serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
+
         verify(emailService,times(1)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(),Mockito.any());

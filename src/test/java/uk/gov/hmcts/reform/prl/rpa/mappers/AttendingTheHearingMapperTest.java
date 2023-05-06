@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
@@ -49,11 +50,16 @@ public class AttendingTheHearingMapperTest {
         Element<WelshNeed> welshNeedElement = Element.<WelshNeed>builder().value(welshNeed).build();
         welshNeeds = Collections.singletonList(welshNeedElement);
 
-        CaseData caseData = CaseData.builder().isWelshNeeded(YesOrNo.Yes)
-            .welshNeeds(welshNeeds).isIntermediaryNeeded(YesOrNo.Yes).interpreterNeeds(interpreterNeeds)
-            .isDisabilityPresent(YesOrNo.No).adjustmentsRequired("Adjustments Required details")
-            .isSpecialArrangementsRequired(YesOrNo.No).specialArrangementsRequired("Special Arrangements Required")
-            .isIntermediaryNeeded(YesOrNo.Yes).build();
+        CaseData caseData = CaseData.builder().attendHearing(
+            AttendHearing.builder()
+                .isWelshNeeded(YesOrNo.Yes)
+                .welshNeeds(welshNeeds).isIntermediaryNeeded(YesOrNo.Yes).interpreterNeeds(interpreterNeeds)
+                .isDisabilityPresent(YesOrNo.No).adjustmentsRequired("Adjustments Required details")
+                .isSpecialArrangementsRequired(YesOrNo.No).specialArrangementsRequired("Special Arrangements Required")
+                .isIntermediaryNeeded(YesOrNo.Yes)
+                .build()
+            )
+            .build();
         assertNotNull(attendingTheHearingMapper.map(caseData));
 
     }
@@ -64,11 +70,14 @@ public class AttendingTheHearingMapperTest {
         partyType.add(PartyEnum.applicant);
         partyType.add(PartyEnum.respondent);
         interpreterNeeds = null;
-        CaseData caseData = CaseData.builder().isWelshNeeded(YesOrNo.Yes)
-            .welshNeeds(null).isIntermediaryNeeded(YesOrNo.Yes).interpreterNeeds(interpreterNeeds)
-            .isDisabilityPresent(YesOrNo.No).adjustmentsRequired("Adjustments Required details")
-            .isSpecialArrangementsRequired(YesOrNo.No).specialArrangementsRequired("Special Arrangements Required")
-            .build();
+        CaseData caseData = CaseData.builder().attendHearing(
+            AttendHearing.builder()
+                .isWelshNeeded(YesOrNo.Yes)
+                .welshNeeds(null).isIntermediaryNeeded(YesOrNo.Yes).interpreterNeeds(interpreterNeeds)
+                .isDisabilityPresent(YesOrNo.No).adjustmentsRequired("Adjustments Required details")
+                .isSpecialArrangementsRequired(YesOrNo.No).specialArrangementsRequired("Special Arrangements Required")
+                .build()
+        ).build();
         assertNotNull(attendingTheHearingMapper.map(caseData));
 
     }
@@ -85,10 +94,14 @@ public class AttendingTheHearingMapperTest {
         Element<WelshNeed> welshNeedElement = Element.<WelshNeed>builder().value(welshNeed).build();
         welshNeeds = Collections.singletonList(welshNeedElement);
 
-        CaseData caseData = CaseData.builder().isWelshNeeded(YesOrNo.Yes)
-            .welshNeeds(welshNeeds).isIntermediaryNeeded(YesOrNo.Yes)
-            .isDisabilityPresent(YesOrNo.No).adjustmentsRequired("Adjustments Required details")
-            .isSpecialArrangementsRequired(YesOrNo.No).specialArrangementsRequired("Special Arrangements Required")
+        CaseData caseData = CaseData.builder().attendHearing(AttendHearing.builder()
+                                                                 .isWelshNeeded(YesOrNo.Yes)
+                                                                 .welshNeeds(welshNeeds).isIntermediaryNeeded(YesOrNo.Yes)
+                                                                 .isDisabilityPresent(YesOrNo.No).adjustmentsRequired("Adjustments Required details")
+                                                                 .isSpecialArrangementsRequired(YesOrNo.No)
+                                                                 .specialArrangementsRequired("Special Arrangements Required")
+                                                                 .build()
+            )
             .build();
         assertNotNull(attendingTheHearingMapper.map(caseData));
 
@@ -113,10 +126,13 @@ public class AttendingTheHearingMapperTest {
         Element<WelshNeed> welshNeedElement = Element.<WelshNeed>builder().value(welshNeed).build();
         welshNeeds = Collections.singletonList(welshNeedElement);
 
-        CaseData caseData = CaseData.builder().isWelshNeeded(YesOrNo.Yes)
-            .welshNeeds(welshNeeds).isIntermediaryNeeded(YesOrNo.Yes)
-            .isDisabilityPresent(YesOrNo.No).adjustmentsRequired("Adjustments Required details")
-            .isSpecialArrangementsRequired(YesOrNo.No).specialArrangementsRequired("Special Arrangements Required")
+        CaseData caseData = CaseData.builder().attendHearing(AttendHearing.builder()
+                                                                 .welshNeeds(welshNeeds).isIntermediaryNeeded(YesOrNo.Yes)
+                                                                 .isWelshNeeded(YesOrNo.Yes)
+                                                                 .isDisabilityPresent(YesOrNo.No).adjustmentsRequired("Adjustments Required details")
+                                                                 .isSpecialArrangementsRequired(YesOrNo.No)
+                                                                 .specialArrangementsRequired("Special Arrangements Required")
+                                                                 .build())
             .build();
         assertNotNull(attendingTheHearingMapper.map(caseData));
 

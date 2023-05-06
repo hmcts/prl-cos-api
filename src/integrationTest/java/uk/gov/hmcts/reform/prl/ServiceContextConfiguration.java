@@ -65,6 +65,20 @@ public class ServiceContextConfiguration {
                 }
 
             }
+            if (template.request().httpMethod() == Request.HttpMethod.GET) {
+                Map<String, Collection<String>> headers = template.request().headers();
+                if (headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+                    Collection<String> listOfContentType = headers.get(HttpHeaders.CONTENT_TYPE);
+                    if (!listOfContentType.contains("x-www-form-urlencoded")) {
+                        template.header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+                    } else {
+                        template.header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+                    }
+                } else {
+                    template.header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+                }
+
+            }
         };
     }
 

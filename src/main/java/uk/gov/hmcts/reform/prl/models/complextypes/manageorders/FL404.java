@@ -1,11 +1,15 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.manageorders;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DateOrderEndsTimeEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder(toBuilder = true)
@@ -82,5 +86,13 @@ public class FL404 {
     private final String fl404bOccupationTime2;
     private final String fl404bDateOfNextHearing;
     private final String fl404bTimeOfNextHearing;
+
+    //Draft order changes
+    @JsonProperty("addDirections")
+    private final List<Element<DirectionDetails>> addDirections;
+
+    private DateOrderEndsTimeEnum orderEndDateAndTimeOptions;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private LocalDateTime orderSpecifiedDateTime;
 
 }

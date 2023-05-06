@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.prl.models.Address;
 
 import java.time.LocalDate;
 
-
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor

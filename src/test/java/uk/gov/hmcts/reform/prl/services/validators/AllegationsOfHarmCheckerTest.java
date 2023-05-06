@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -487,24 +488,35 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenAllCaseDataPresentValidateFieldsReturnTrue() {
 
-        Behaviours behaviour = Behaviours.builder()
-            .abuseNatureDescription("Test")
+        Behaviours behaviour1 = Behaviours.builder()
+            .abuseNatureDescription("Test1")
             .behavioursStartDateAndLength("5 days")
-            .behavioursNature("Testing")
+            .behavioursNature("Testing1")
             .behavioursApplicantSoughtHelp(Yes)
-            .behavioursApplicantHelpSoughtWho("Who from")
-            .behavioursApplicantHelpAction("Action")
+            .behavioursApplicantHelpSoughtWho("Who from1")
+            .behavioursApplicantHelpAction("Action1")
             .build();
+        Behaviours behaviour2 = Behaviours.builder()
+                .abuseNatureDescription("Test2")
+                .behavioursStartDateAndLength("5 days")
+                .behavioursNature("Testing2")
+                .behavioursApplicantSoughtHelp(Yes)
+                .behavioursApplicantHelpSoughtWho("Who from2")
+                .behavioursApplicantHelpAction("Action2")
+                .build();
 
-        Element<Behaviours> wrappedBehaviour = Element.<Behaviours>builder()
-            .value(behaviour)
+        Element<Behaviours> wrappedBehaviour1 = Element.<Behaviours>builder()
+            .value(behaviour1)
             .build();
+        Element<Behaviours> wrappedBehaviour2 = Element.<Behaviours>builder()
+                .value(behaviour2)
+                .build();
 
         CaseData caseData = CaseData.builder()
             .allegationOfHarm(AllegationOfHarm.builder()
                                   .allegationsOfHarmYesNo(Yes)
                                   .allegationsOfHarmDomesticAbuseYesNo(Yes)
-                                  .behaviours(Collections.singletonList(wrappedBehaviour))
+                                  .behaviours(List.of(wrappedBehaviour1,wrappedBehaviour2))
                                   .physicalAbuseVictim(Collections.singletonList(applicants))
                                   .ordersNonMolestation(No)
                                   .ordersOccupation(No)
@@ -522,6 +534,58 @@ public class AllegationsOfHarmCheckerTest {
             .build();
 
         assertTrue(allegationsOfHarmChecker.validateFields(caseData));
+
+    }
+
+    @Test
+    public void whenAllCaseDataPresentValidateFieldsReturnFalse() {
+
+        Behaviours behaviour1 = Behaviours.builder()
+                .abuseNatureDescription("Test1")
+                .behavioursStartDateAndLength("5 days")
+                .behavioursNature("")
+                .behavioursApplicantSoughtHelp(Yes)
+                .behavioursApplicantHelpSoughtWho("Who from1")
+                .behavioursApplicantHelpAction("Action1")
+                .build();
+        Behaviours behaviour2 = Behaviours.builder()
+                .abuseNatureDescription("Test2")
+                .behavioursStartDateAndLength("5 days")
+                .behavioursNature("Testing2")
+                .behavioursApplicantSoughtHelp(Yes)
+                .behavioursApplicantHelpSoughtWho("Who from2")
+                .behavioursApplicantHelpAction("Action2")
+                .build();
+
+        Element<Behaviours> wrappedBehaviour1 = Element.<Behaviours>builder()
+                .value(behaviour1)
+                .build();
+        Element<Behaviours> wrappedBehaviour2 = Element.<Behaviours>builder()
+                .value(behaviour2)
+                .build();
+
+        CaseData caseData = CaseData.builder()
+                .allegationOfHarm(AllegationOfHarm.builder()
+                        .allegationsOfHarmYesNo(Yes)
+                        .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                        .behaviours(List.of(wrappedBehaviour1,wrappedBehaviour2))
+                        .physicalAbuseVictim(Collections.singletonList(applicants))
+                        .ordersNonMolestation(No)
+                        .ordersOccupation(No)
+                        .ordersForcedMarriageProtection(No)
+                        .ordersRestraining(No)
+                        .ordersOtherInjunctive(No)
+                        .ordersUndertakingInPlace(No)
+                        .allegationsOfHarmChildAbductionYesNo(No)
+                        .allegationsOfHarmOtherConcernsYesNo(No)
+                        .allegationsOfHarmOtherConcernsCourtActions("testing")
+                        .allegationsOfHarmOtherConcerns(No)
+                        .agreeChildUnsupervisedTime(No)
+                        .agreeChildSupervisedTime(No)
+                        .agreeChildOtherContact(No).build())
+                .build();
+
+        assertFalse(allegationsOfHarmChecker.validateFields(caseData));
 
     }
 }

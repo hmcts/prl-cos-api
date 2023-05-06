@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Builder(toBuilder = true)
 public class CafCassCaseData {
     @Setter(AccessLevel.NONE)
@@ -180,6 +180,8 @@ public class CafCassCaseData {
 
     private String solicitorName;
 
+    private String courtTypeId;
+
     private String courtName;
 
     private List<Element<OtherPersonInTheCase>> otherPeopleInTheCaseTable;
@@ -217,4 +219,8 @@ public class CafCassCaseData {
 
     @Setter(AccessLevel.NONE)
     private List<Element<CaseOrder>> orderCollection;
+
+    @Setter(AccessLevel.NONE)
+    private CaseManagementLocation caseManagementLocation;
+
 }

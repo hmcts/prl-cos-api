@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -59,7 +60,7 @@ public class ServiceOfApplicationPostService {
                     );
                     sentDocs.addAll(docs);
                 } catch (Exception e) {
-                    log.info("The bulk print service has failed: " + e);
+                    log.info("The bulk print service has failed: {}", e.getMessage());
                 }
             });
         return sentDocs;
@@ -105,12 +106,11 @@ public class ServiceOfApplicationPostService {
     }
 
     private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
-        CaseData respondentCaseData = CaseData
+        return CaseData
             .builder()
             .id(caseData.getId())
             .respondents(List.of(element(partyDetails)))
             .build();
-        return respondentCaseData;
     }
 
     private List<GeneratedDocumentInfo> getUploadedDocumentsServiceOfApplication(CaseData caseData) {
@@ -150,7 +150,8 @@ public class ServiceOfApplicationPostService {
 
     private List<GeneratedDocumentInfo> getSelectedOrders(CaseData caseData) {
         List<String> orderNames = caseData.getServiceOfApplicationScreen1()
-            .retrieveSelectedOrders();
+            .getValue().stream().map(DynamicMultiselectListElement::getLabel)
+            .collect(Collectors.toList());
 
         return caseData.getOrderCollection().stream()
             .map(Element::getValue)
@@ -177,7 +178,7 @@ public class ServiceOfApplicationPostService {
             log.info("ID in the queue from bulk print service : {}",bulkPrintId);
             sentDocs.addAll(docs);
         } catch (Exception e) {
-            log.info("The bulk print service has failed: " + e);
+            log.info("The bulk print service has failed: {}", e);
         }
         return sentDocs;
     }

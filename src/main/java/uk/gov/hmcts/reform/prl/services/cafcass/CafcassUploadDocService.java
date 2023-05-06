@@ -35,8 +35,13 @@ import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.getCas
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafcassUploadDocService {
 
-    public static final String[] ALLOWED_FILE_TYPES = {"pdf"};
-    public static final String[] ALLOWED_TYPE_OF_DOCS = {"FL401", "C8", "WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET"};
+    public static final String[] ALLOWED_FILE_TYPES = {"pdf", "docx"};
+    public static final String[] ALLOWED_TYPE_OF_DOCS = {"16_4_Report", "CIR_Part1", "CIR_Part2", "CIR_Review", "CMO_report",
+        "Contact_Centre_Recordings", "Correspondence", "Direct_work", "Enforcement_report", "Enquiry_from_Foreign_Court", "FAO_Report",
+        "FAO_Workplan", "High_Court_Team_Template", "Letter_from_Child", "Other_Non_Section_7_Report", "Parental_Order_Report", "Position_Statement",
+        "Positive_Parenting_Programme_Report", "Re_W_Report", "S_11H_Monitoring", "S_16A_Risk_Assessment", "Safeguarding_Letter",
+        "Safeguarding_Letter_Returner", "Safeguarding_Letter_Shorter_Template", "Safeguarding_Letter_Update",
+        "Second_Gatekeeping_Safeguarding_Letter", "Section7_Addendum_Report", "Section7_Report_Child_Impact_Analysis", "Suitability_report"};
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
@@ -53,7 +58,6 @@ public class CafcassUploadDocService {
             }
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-            checkIfNumberOfAttachmentExceeds(caseData);
 
             // upload document
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
@@ -111,15 +115,6 @@ public class CafcassUploadDocService {
         );
 
         log.info("Document has been saved in CCD {}", document.getOriginalFilename());
-    }
-
-    private void checkIfNumberOfAttachmentExceeds(CaseData caseData) {
-        if (caseData.getNumberOfAttachments() != null && caseData.getCafcassUploadedDocs() != null
-            && Integer.valueOf(caseData.getNumberOfAttachments())
-            <= caseData.getCafcassUploadedDocs().size()) {
-            log.error("Number of attachments size is reached {}", caseData.getNumberOfAttachments());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
     }
 
     public CaseDetails checkIfCasePresent(String caseId, String authorisation) {

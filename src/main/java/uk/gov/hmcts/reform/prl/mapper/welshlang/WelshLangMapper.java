@@ -161,9 +161,9 @@ public class WelshLangMapper {
         /**
          *  Type of Application - What order(s) are you applying for?.
          */
-        welshMap.put(OrderTypeEnum.childArrangementsOrder.getDisplayedValue(), "Gorchymyn Trefniadau Plant");
-        welshMap.put(OrderTypeEnum.prohibitedStepsOrder.getDisplayedValue(), "Gorchymyn Camau Gwaharddedig");
-        welshMap.put(OrderTypeEnum.specificIssueOrder.getDisplayedValue(), "Gorchymyn Materion Penodol");
+        welshMap.put(OrderTypeEnum.childArrangementsOrder.getDisplayedValue(), "Trefniadau Plant");
+        welshMap.put(OrderTypeEnum.prohibitedStepsOrder.getDisplayedValue(), "Camau Gwaharddedig");
+        welshMap.put(OrderTypeEnum.specificIssueOrder.getDisplayedValue(), "Materion Penodol");
 
         /**
          *  Type of Application - Type of child arrangements order.
@@ -573,7 +573,7 @@ public class WelshLangMapper {
         welshMap.put(ProceedingsEnum.ongoing.getDisplayedValue(), "achosion sy’n mynd ymlaen ar hyn o bryd");
         welshMap.put(ProceedingsEnum.previous.getDisplayedValue(), "achosion blaenorol");
         welshMap.put(TypeOfOrderEnum.emergencyProtectionOrder.getDisplayedValue(), "Gorchymyn Diogelu Brys");
-        welshMap.put(TypeOfOrderEnum.superviosionOrder.getDisplayedValue(), "Gorchymyn Goruchwylio");
+        welshMap.put(TypeOfOrderEnum.supervisionOrder.getDisplayedValue(), "Gorchymyn Goruchwylio");
         welshMap.put(TypeOfOrderEnum.careOrder.getDisplayedValue(), "Gorchymyn Gofal");
         welshMap.put(TypeOfOrderEnum.childAbduction.getDisplayedValue(), "Herwgydio plentyn");
         welshMap.put(TypeOfOrderEnum.familyLaw1996Part4.getDisplayedValue(), "Deddf Cyfraith Teulu 1996 Rhan 4");
@@ -667,6 +667,13 @@ public class WelshLangMapper {
          */
         welshMap.put(FL401OrderTypeEnum.nonMolestationOrder.getDisplayedValue(), "Gorchymyn rhag molestu");
         welshMap.put(FL401OrderTypeEnum.occupationOrder.getDisplayedValue(), "Gorchymyn anheddu");
+
+        /**
+         *  Type of Application - What order(s) are you applying for?.
+         */
+        welshMap.put(OrderTypeEnum.childArrangementsOrder.getDisplayedValue(), "Trefniadau Plant");
+        welshMap.put(OrderTypeEnum.prohibitedStepsOrder.getDisplayedValue(), "Camau Gwaharddedig");
+        welshMap.put(OrderTypeEnum.specificIssueOrder.getDisplayedValue(), "Materion Penodol");
 
         /**
          * Without notice order. reasonForOrderWithoutGivingNotice.

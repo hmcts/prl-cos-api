@@ -1,21 +1,31 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -42,6 +52,7 @@ import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,6 +63,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_ID;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -99,7 +111,7 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "200", description = "Document generated"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
-    public ResponseEntity generateCitizenStatementDocument(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
+    public ResponseEntity<Object> generateCitizenStatementDocument(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
                                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
         fileIndex = 0;
@@ -139,12 +151,12 @@ public class CaseDocumentController {
 
     }
 
-    private ResponseEntity getUploadedDocumentsList(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
+    private ResponseEntity<Object> getUploadedDocumentsList(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
                                                     @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                     @RequestHeader("serviceAuthorization") String s2sToken,
                                                     String caseId,
                                                     CaseData tempCaseData,
-                                                    UploadedDocuments uploadedDocuments) {
+                                                    UploadedDocuments uploadedDocuments) throws JsonProcessingException {
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         if (uploadedDocuments != null) {
             if (tempCaseData.getCitizenUploadedDocumentList() != null
@@ -163,7 +175,8 @@ public class CaseDocumentController {
                 authorisation,
                 s2sToken,
                 caseId,
-                CITIZEN_UPLOADED_DOCUMENT
+                CITIZEN_UPLOADED_DOCUMENT,
+                null
             );
 
             final String partyId = generateAndUploadDocumentRequest.getValues().get(PARTY_ID);
@@ -194,7 +207,9 @@ public class CaseDocumentController {
     private void findAndSendEmail(String partyId, CaseData tempCaseData, PartyDetails partyDetails) {
         if (partyDetails.getUser() != null && !partyId.equalsIgnoreCase(partyDetails.getUser().getIdamId())) {
             String email = partyDetails.getEmail();
-            sendEmailToCitizen(tempCaseData, partyDetails.getFirstName(), email);
+            if (!StringUtils.isEmpty(email)) {
+                sendEmailToCitizen(tempCaseData, partyDetails.getFirstName(), email);
+            }
         }
     }
 
@@ -224,7 +239,7 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "401", description = "Provided Authroization token is missing or invalid"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    public ResponseEntity uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+    public ResponseEntity<Object> uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                          @RequestHeader("serviceAuthorization") String s2sToken,
                                                          @ModelAttribute UploadedDocumentRequest uploadedDocumentRequest) {
 
@@ -234,8 +249,7 @@ public class CaseDocumentController {
 
         UploadedDocuments uploadedDocuments = uploadService.uploadCitizenDocument(
             authorisation,
-            uploadedDocumentRequest,
-            caseId
+            uploadedDocumentRequest
         );
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         if (uploadedDocuments != null) {
@@ -324,9 +338,73 @@ public class CaseDocumentController {
             authorisation,
             s2sToken,
             caseId,
-            CITIZEN_UPLOADED_DOCUMENT
+            CITIZEN_UPLOADED_DOCUMENT,
+            null
         );
         return "SUCCESS";
+    }
+
+    @PostMapping(path = "/upload-citizen-document", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces =
+        APPLICATION_JSON)
+    @Operation(description = "Call CDAM to upload document")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad Request while uploading the document"),
+        @ApiResponse(responseCode = "401", description = "Provided Authroization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public ResponseEntity<Object> uploadCitizenDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                   @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+                                                   @RequestParam("file") MultipartFile file) throws IOException {
+
+        if (!isAuthorized(authorisation, serviceAuthorization)) {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+        return ResponseEntity.ok(documentGenService.uploadDocument(authorisation, file));
+    }
+
+    @DeleteMapping("/{documentId}/delete")
+    @Operation(description = "Delete a document from client document api")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Deleted document successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad Request while deleting the document"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "404", description = "Document not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")})
+    public ResponseEntity<Object> deleteDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                            @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+                                            @PathVariable("documentId") String documentId) {
+        if (!isAuthorized(authorisation, serviceAuthorization)) {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+        return ResponseEntity.ok(documentGenService.deleteDocument(authorisation, documentId));
+    }
+
+    private boolean isAuthorized(String authorisation, String serviceAuthorization) {
+        return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+            authorisationService.authoriseService(serviceAuthorization));
+    }
+
+    @GetMapping("/{documentId}/download")
+    @Operation(description = "Download a Citizen document from client document api")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Downloaded document successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad Request while deleting the document"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "404", description = "Document not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")})
+    public ResponseEntity<byte[]> downloadDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                   @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+                                   @PathVariable("documentId") String documentId) throws IOException {
+        if (!isAuthorized(authorisation, serviceAuthorization)) {
+            throw (new RuntimeException("Invalid Client"));
+        }
+        Resource body = documentGenService.downloadDocument(authorisation, documentId).getBody();
+        if (body != null) {
+            return ResponseEntity.ok(IOUtils.toByteArray(body.getInputStream()));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
 

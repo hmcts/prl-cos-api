@@ -26,13 +26,13 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
@@ -62,9 +62,9 @@ public class SendAndReplyController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(@RequestHeader("Authorization")
                                                                        @Parameter(hidden = true) String authorisation,
                                                                    @RequestBody CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = getCaseData(caseDetails);
-        Map<String, Object> caseDataMap = new HashMap<>(sendAndReplyService.setSenderAndGenerateMessageList(caseData, authorisation));
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageList(caseData, authorisation));
 
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
@@ -80,8 +80,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
-        Map<String, Object> caseDataMap = new HashMap<>();
-
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         List<String> errors = new ArrayList<>();
         if (caseData.getChooseSendOrReply().equals(REPLY)) {
             if (!sendAndReplyService.hasMessages(caseData)) {
@@ -151,6 +150,10 @@ public class SendAndReplyController extends AbstractCallbackController {
             caseData.getClosedMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
         }
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
+
+        if (caseDataMap.containsKey(CASE_TYPE_OF_APPLICATION) && caseDataMap.get(CASE_TYPE_OF_APPLICATION) == null) {
+            caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getSelectedCaseTypeID());
+        }
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();
@@ -160,9 +163,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestHeader("Authorization")
                                                                     @Parameter(hidden = true) String authorisation,
                                                                 @RequestBody CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = getCaseData(caseDetails);
-
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         List<Element<Message>> messages = caseData.getOpenMessages();
         if (ofNullable(caseData.getClosedMessages()).isPresent()) {
             messages.addAll(caseData.getClosedMessages());
@@ -173,7 +174,6 @@ public class SendAndReplyController extends AbstractCallbackController {
         if (mostRecentMessage.getStatus().equals(MessageStatus.OPEN)) {
             sendAndReplyService.sendNotificationEmail(caseData, mostRecentMessage);
         }
-
         //if a message is being closed then no notification email is sent
         return AboutToStartOrSubmitCallbackResponse.builder()
             .build();

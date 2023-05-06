@@ -56,7 +56,7 @@ public class CafCassControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(caseDataService.getCaseData("authorisation", "serviceAuthorisation", "startDate", "endDate"))
+        when(caseDataService.getCaseData("authorisation", "startDate", "endDate"))
             .thenReturn(expectedCafCassResponse);
         ResponseEntity responseEntity = cafCassController.searcCasesByDates(
             "authorisation",
@@ -64,13 +64,14 @@ public class CafCassControllerTest {
             "startDate",
             "endDate"
         );
+
         CafCassResponse realCafCassResponse = (CafCassResponse) responseEntity.getBody();
         assertEquals(
             objectMapper.writeValueAsString(expectedCafCassResponse),
             objectMapper.writeValueAsString(realCafCassResponse)
         );
-        assertEquals(realCafCassResponse.getTotal(), 2);
-        assertEquals(realCafCassResponse.getCases().size(), 2);
+        assertEquals(realCafCassResponse.getTotal(), 4);
+        assertEquals(realCafCassResponse.getCases().size(), 4);
     }
 
     @Test
@@ -93,7 +94,7 @@ public class CafCassControllerTest {
     public void testFeignExceptionBadRequest() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(caseDataService.getCaseData(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, "startDate",
+        when(caseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
                                          "endDate"
         )).thenThrow(feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
         final ResponseEntity response = cafCassController.searcCasesByDates(
@@ -109,7 +110,7 @@ public class CafCassControllerTest {
     public void testFeignExceptionUnAuthorised() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(caseDataService.getCaseData(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, "startDate",
+        when(caseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
                                          "endDate"
         )).thenThrow(feignException(UNAUTHORIZED.value(), "Unauthorised"));
         final ResponseEntity response = cafCassController.searcCasesByDates(
@@ -125,7 +126,7 @@ public class CafCassControllerTest {
     public void testExceptionInternalServerError() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(caseDataService.getCaseData(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, "startDate",
+        when(caseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
                                          "endDate"
         )).thenThrow(new RuntimeException());
         final ResponseEntity response = cafCassController.searcCasesByDates(

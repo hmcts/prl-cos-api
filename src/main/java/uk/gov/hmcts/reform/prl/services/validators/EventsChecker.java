@@ -154,6 +154,7 @@ public class EventsChecker {
         eventStatus.put(FL401_OTHER_PROCEEDINGS, fl401OtherProceedingsChecker);
         eventStatus.put(FL401_SOT_AND_SUBMIT, fl401StatementOfTruthAndSubmitChecker);
         eventStatus.put(FL401_RESUBMIT, fl401ResubmitChecker);
+
     }
 
     public boolean isFinished(Event event, CaseData caseData) {

@@ -1,0 +1,95 @@
+{
+  "provider": {
+    "name": "case-document-am-client-api"
+  },
+  "consumer": {
+    "name": "prl_cos"
+  },
+  "interactions": [
+    {
+      "description": "a request to delete a document from cdam api with valid authorization",
+      "request": {
+        "method": "DELETE",
+        "path": "/cases/documents/4f854707-91bf-4fa0-98ec-893ae0025cae",
+        "headers": {
+          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
+          "ServiceAuthorization": "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+        },
+        "query": {
+          "permanent": [
+            "true"
+          ]
+        },
+        "matchingRules": {
+          "query": {
+            "permanent": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "true"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200
+      },
+      "providerStates": [
+        {
+          "name": "A request to delete a document from cdam api"
+        }
+      ]
+    },
+    {
+      "description": "a request to upload a document on cdam api with valid authorization",
+      "request": {
+        "method": "POST",
+        "path": "/cases/documents",
+        "headers": {
+          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
+          "ServiceAuthorization": "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "documents": [
+            {
+              "_links": null,
+              "classification": "RESTRICTED",
+              "createdBy": null,
+              "createdOn": null,
+              "hashToken": null,
+              "lastModifiedBy": null,
+              "metadata": null,
+              "mimeType": null,
+              "modifiedOn": null,
+              "originalDocumentName": "Test.pdf",
+              "size": 0,
+              "ttl": null
+            }
+          ]
+        }
+      },
+      "providerStates": [
+        {
+          "name": "A request to upload a document on cdam api"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.1.11"
+    }
+  }
+}

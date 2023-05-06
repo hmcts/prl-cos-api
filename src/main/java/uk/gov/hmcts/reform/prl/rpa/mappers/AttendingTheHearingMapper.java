@@ -24,18 +24,18 @@ public class AttendingTheHearingMapper {
     public JsonObject map(CaseData caseData) {
 
         return new NullAwareJsonObjectBuilder()
-            .add("isWelshNeeded", CommonUtils.getYesOrNoValue(caseData.getIsWelshNeeded()))
-            .add("welshNeeds", mapWelshNeeds(caseData.getWelshNeeds()))
-            .add("isInterpreterNeeded", CommonUtils.getYesOrNoValue(caseData.getIsInterpreterNeeded()))
-            .add("interpreterNeeds", mapInterpreterNeeds(caseData.getInterpreterNeeds()))
-            .add("isDisabilityPresent", CommonUtils.getYesOrNoValue(caseData.getIsDisabilityPresent()))
-            .add("adjustmentsRequired", caseData.getAdjustmentsRequired())
+            .add("isWelshNeeded", CommonUtils.getYesOrNoValue(caseData.getAttendHearing().getIsWelshNeeded()))
+            .add("welshNeeds", mapWelshNeeds(caseData.getAttendHearing().getWelshNeeds()))
+            .add("isInterpreterNeeded", CommonUtils.getYesOrNoValue(caseData.getAttendHearing().getIsInterpreterNeeded()))
+            .add("interpreterNeeds", mapInterpreterNeeds(caseData.getAttendHearing().getInterpreterNeeds()))
+            .add("isDisabilityPresent", CommonUtils.getYesOrNoValue(caseData.getAttendHearing().getIsDisabilityPresent()))
+            .add("adjustmentsRequired", caseData.getAttendHearing().getAdjustmentsRequired())
             .add(
                 "isSpecialArrangementsRequired",
-                CommonUtils.getYesOrNoValue(caseData.getIsSpecialArrangementsRequired())
+                CommonUtils.getYesOrNoValue(caseData.getAttendHearing().getIsSpecialArrangementsRequired())
             )
-            .add("specialArrangementsRequired", caseData.getSpecialArrangementsRequired())
-            .add("isIntermediaryNeeded", CommonUtils.getYesOrNoValue(caseData.getIsIntermediaryNeeded()))
+            .add("specialArrangementsRequired", caseData.getAttendHearing().getSpecialArrangementsRequired())
+            .add("isIntermediaryNeeded", CommonUtils.getYesOrNoValue(caseData.getAttendHearing().getIsIntermediaryNeeded()))
             .build();
     }
 

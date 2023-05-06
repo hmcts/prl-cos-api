@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CaseAccessApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.UserId;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -34,20 +35,19 @@ public class CcdCaseApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CcdCaseApi.class);
 
-    public void linkCitizenToCase(String authorisation, String anonymousUserToken, String caseId, CaseData caseData) {
-        linkToCase(authorisation, anonymousUserToken, caseId, caseData);
+    public void linkCitizenToCase(String authorisation, String anonymousUserToken, String caseId,
+                                  CaseData caseData, StartEventResponse startEventResponse) {
+        linkToCase(authorisation, anonymousUserToken, caseId, caseData, startEventResponse);
     }
 
-    private void linkToCase(String authorisation, String anonymousUserToken, String caseId, CaseData caseData) {
+    private void linkToCase(String authorisation, String anonymousUserToken, String caseId,
+                            CaseData caseData, StartEventResponse startEventResponse) {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
-        LOGGER.info("<--linkToCase-> Linking the case " + caseId);
+        LOGGER.info("linkToCase  Linking the case {} ", caseId);
         LOGGER.debug("Granting access to case {} for citizen {}", caseId, userDetails.getId());
         this.grantAccessToCase(userDetails.getId(), anonymousUserToken, caseId);
-
-        // LOGGER.debug("Revoking access to case {} ", caseId);
-        // this.revokeAccessToCase(userDetails, anonymousUserToken, caseId);
-        this.linkCitizen(anonymousUserToken, userDetails, caseId, caseData);
-        LOGGER.info("case is now linked " + caseId);
+        this.linkCitizen(anonymousUserToken, caseId, caseData, startEventResponse);
+        LOGGER.info("case is now linked {}", caseId);
     }
 
     private void grantAccessToCase(String citizenId, String anonymousUserToken, String caseId) {
@@ -62,31 +62,41 @@ public class CcdCaseApi {
         );
     }
 
-    private void revokeAccessToCase(UserDetails userDetails, String anonymousUserToken, String caseId) {
-        LOGGER.debug("Revoking access to case {}", caseId);
-        caseAccessApi.revokeAccessToCase(
-            anonymousUserToken,
-            authTokenGenerator.generate(),
-            idamClient.getUserDetails(anonymousUserToken).getId(),
-            PrlAppsConstants.JURISDICTION,
-            PrlAppsConstants.CASE_TYPE,
-            caseId,
-            userDetails.getId()
-        );
-    }
-
     private CaseDetails linkCitizen(
         String anonymousUserToken,
-        UserDetails citizenUser,
         String caseId,
-        CaseData caseData
-    ) {
-        LOGGER.info("<----updateCitizenIdAndEmail---->", caseId);
+        CaseData caseData,
+        StartEventResponse startEventResponse) {
+        LOGGER.info("updateCitizenIdAndEmail {}", caseId);
         return citizenCoreCaseDataService.linkDefendant(
             anonymousUserToken,
             Long.valueOf(caseId),
             caseData,
-            CaseEvent.LINK_CITIZEN
+            CaseEvent.LINK_CITIZEN,
+            startEventResponse
+        );
+    }
+
+    public CaseDetails updateCase(String authorisation, String caseId, CaseData caseData, CaseEvent caseEvent) {
+        return citizenCoreCaseDataService.updateCase(
+            authorisation,
+            Long.valueOf(caseId),
+            caseData,
+            caseEvent
+        );
+    }
+
+    public CaseDetails createCase(String authorisation, CaseData caseData) {
+        return citizenCoreCaseDataService.createCase(
+            authorisation,
+            caseData
+        );
+    }
+
+    public CaseDetails getCase(String authorisation, String caseId) {
+        return citizenCoreCaseDataService.getCase(
+            authorisation,
+            caseId
         );
     }
 }

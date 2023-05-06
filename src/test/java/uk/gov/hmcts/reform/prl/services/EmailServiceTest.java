@@ -11,6 +11,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -113,12 +114,14 @@ public class EmailServiceTest {
     public void shouldGetCaseData() {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
+            .state(State.CASE_ISSUED.getValue())
             .build();
         CaseData caseData = CaseDetailsProvider.full().getCaseData();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CaseData caseData1 = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
             .id(caseDetails.getId())
+            .state(State.valueOf(caseDetails.getState()))
             .build();
         assertEquals(emailService.getCaseData(caseDetails), caseData1);
     }

@@ -4,7 +4,7 @@
     {
       "id": 1661164783455399,
       "jurisdiction": "PRIVATELAW",
-      "state": "CASE_ISSUE",
+      "state": "DECISION_OUTCOME",
       "caseTypeOfApplication": "C100",
       "case_type_id": "PRLAPPS",
       "created_date": "2022-08-22T10:39:43.49",
@@ -139,7 +139,7 @@
     {
       "id": 1661447479032162,
       "jurisdiction": "PRIVATELAW",
-      "state": "CASE_ISSUE",
+      "state": "DECISION_OUTCOME",
       "caseTypeOfApplication": "C100",
       "case_type_id": "PRLAPPS",
       "created_date": "2022-08-25T17:11:19.007",
@@ -265,6 +265,35 @@
             }
           }
         ],
+        "hearingData": {
+          "hmctsServiceCode": "ABA5",
+          "caseRef": "1661447479032162",
+          "caseRef": "1661447479032162",
+          "caseHearings": [
+            {
+              "hearingID": 2000004862,
+              "hearingType": "ABA5-FHR",
+              "hearingTypeValue": "First Hearing",
+              "hearingDaySchedule": [
+                {
+                  "hearingVenueName": null,
+                  "hearingStartDateTime": "2023-04-13T09:00:00",
+                  "hearingEndDateTime": "2023-04-13T15:00:00"
+                },
+                {
+                  "hearingVenueName": null,
+                  "hearingStartDateTime": "2023-04-12T09:00:00",
+                  "hearingEndDateTime": "2023-04-12T15:00:00"
+                },
+                {
+                  "hearingVenueName": null,
+                  "hearingStartDateTime": "2023-04-11T09:00:00",
+                  "hearingEndDateTime": "2023-04-11T15:00:00"
+                }
+              ]
+            }
+          ]
+        },
         "submitAndPayDownloadApplicationLink": {
           "document_filename": "Draft_C100_application.pdf",
           "document_id": "b5eaa277-7e48-491b-82aa-0fc048cc46b8"

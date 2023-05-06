@@ -47,6 +47,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ApplicantsDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ChildAtAddress;
@@ -117,18 +118,7 @@ public class FL401ApplicationMapper {
                 .reasonForOrderWithoutGivingNotice(getReasonForWithOutOrderNotice(courtNavCaseData))
                 .futherDetails(courtNavCaseData.getFl401().getSituation().getOrdersAppliedWithoutNoticeReasonDetails())
                 .build()))
-            .bailDetails(RespondentBailConditionDetails.builder()
-                             .isRespondentAlreadyInBailCondition(courtNavCaseData
-                                                                     .getFl401()
-                                                                     .getSituation().isBailConditionsOnRespondent()
-                                                                     ? YesNoDontKnow.yes : YesNoDontKnow.no)
-                             .bailConditionEndDate(courtNavCaseData.getFl401().getSituation().isBailConditionsOnRespondent()
-                                                       ? LocalDate.parse(courtNavCaseData
-                                                                             .getFl401()
-                                                                             .getSituation()
-                                                                             .getBailConditionsEndDate()
-                                                                             .mergeDate()) : null)
-                             .build())
+            .bailDetails(getRespondentBailConditionDetails(courtNavCaseData))
             .anyOtherDtailsForWithoutNoticeOrder(OtherDetailsOfWithoutNoticeOrder.builder()
                                                      .otherDetails(courtNavCaseData.getFl401().getSituation().getAdditionalDetailsForCourt())
                                                      .build())
@@ -173,10 +163,7 @@ public class FL401ApplicationMapper {
                                                                                                           .mergeDate()))
                                                     .relationshipDateComplexEndDate(getRelationShipEndDate(courtNavCaseData))
                                                     .build())
-                .applicantRelationshipDate(LocalDate.parse(courtNavCaseData
-                                                               .getFl401()
-                                                               .getRelationshipWithRespondent()
-                                                               .getCeremonyDate().mergeDate()))
+                .applicantRelationshipDate(getRelationShipCeremonyDate(courtNavCaseData))
                 .build()) : null)
             .respondentRelationOptions((courtNavCaseData
                 .getFl401()
@@ -205,26 +192,22 @@ public class FL401ApplicationMapper {
                                   .nameOfFirm(courtNavCaseData.getFl401().getStatementOfTruth().getRepresentativeFirmName())
                                   .signOnBehalf(courtNavCaseData.getFl401().getStatementOfTruth().getRepresentativePositionHeld())
                                   .build())
-            .isInterpreterNeeded(Boolean.TRUE.equals(courtNavCaseData.getFl401().getGoingToCourt().getIsInterpreterRequired())
-                                     ? YesOrNo.Yes : YesOrNo.No)
-            .interpreterNeeds(interpreterLanguageDetails(courtNavCaseData))
-            .isDisabilityPresent(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds() ? YesOrNo.Yes : YesOrNo.No)
-            .adjustmentsRequired(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds()
-                                     ? courtNavCaseData.getFl401().getGoingToCourt().getDisabilityNeedsDetails() : null)
-            .isSpecialArrangementsRequired(null != courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures()
-                                               ? YesOrNo.Yes : YesOrNo.No)
-            .specialArrangementsRequired(null != courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures()
-                                             ? (courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures()
-                .stream()
-                .map(SpecialMeasuresEnum::getDisplayedValue)
-                .collect(Collectors.joining(","))) : null)
-            .fl401OtherProceedingDetails(FL401OtherProceedingDetails.builder()
-                                             .hasPrevOrOngoingOtherProceeding(courtNavCaseData.getFl401().getFamily().isAnyOngoingCourtProceedings()
-                                                                                  ? YesNoDontKnow.yes : YesNoDontKnow.no)
-                                             .fl401OtherProceedings(courtNavCaseData.getFl401().getFamily().isAnyOngoingCourtProceedings()
-                                                                        ? getOngoingProceedings(courtNavCaseData.getFl401()
-                                                                                                    .getFamily().getOngoingCourtProceedings()) : null)
-                                             .build())
+            .attendHearing(AttendHearing.builder()
+                               .isInterpreterNeeded(Boolean.TRUE.equals(courtNavCaseData.getFl401().getGoingToCourt().getIsInterpreterRequired())
+                                                        ? YesOrNo.Yes : YesOrNo.No)
+                               .interpreterNeeds(interpreterLanguageDetails(courtNavCaseData))
+                               .isDisabilityPresent(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds() ? YesOrNo.Yes : YesOrNo.No)
+                               .adjustmentsRequired(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds()
+                                                        ? courtNavCaseData.getFl401().getGoingToCourt().getDisabilityNeedsDetails() : null)
+                               .isSpecialArrangementsRequired(null != courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures()
+                                                                  ? YesOrNo.Yes : YesOrNo.No)
+                               .specialArrangementsRequired(null != courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures()
+                                                                ? (courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures()
+                                   .stream()
+                                   .map(SpecialMeasuresEnum::getDisplayedValue)
+                                   .collect(Collectors.joining(","))) : null)
+                               .build())
+            .fl401OtherProceedingDetails(getFl401OtherProceedingDetails(courtNavCaseData))
             .build();
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
 
@@ -245,6 +228,31 @@ public class FL401ApplicationMapper {
 
     }
 
+    private RespondentBailConditionDetails getRespondentBailConditionDetails(CourtNavFl401 courtNavCaseData) {
+        return RespondentBailConditionDetails.builder()
+            .isRespondentAlreadyInBailCondition(courtNavCaseData
+                                                    .getFl401()
+                                                    .getSituation().isBailConditionsOnRespondent()
+                                                    ? YesNoDontKnow.yes : YesNoDontKnow.no)
+            .bailConditionEndDate(courtNavCaseData.getFl401().getSituation().isBailConditionsOnRespondent()
+                                      ? LocalDate.parse(courtNavCaseData
+                                                            .getFl401()
+                                                            .getSituation()
+                                                            .getBailConditionsEndDate()
+                                                            .mergeDate()) : null)
+            .build();
+    }
+
+    private FL401OtherProceedingDetails getFl401OtherProceedingDetails(CourtNavFl401 courtNavCaseData) {
+        return FL401OtherProceedingDetails.builder()
+            .hasPrevOrOngoingOtherProceeding(courtNavCaseData.getFl401().getFamily().isAnyOngoingCourtProceedings()
+                                                 ? YesNoDontKnow.yes : YesNoDontKnow.no)
+            .fl401OtherProceedings(courtNavCaseData.getFl401().getFamily().isAnyOngoingCourtProceedings()
+                                       ? getOngoingProceedings(courtNavCaseData.getFl401()
+                                                                   .getFamily().getOngoingCourtProceedings()) : null)
+            .build();
+    }
+
     private List<ApplicantStopFromRespondentDoingToChildEnum> getChildrenBehaviourList(CourtNavFl401 courtNavCaseData) {
 
         return (null !=  courtNavCaseData.getFl401()
@@ -258,6 +266,20 @@ public class FL401ApplicationMapper {
             .getRespondentBehaviour().getStopBehaviourTowardsApplicant())
             ? getBehaviourTowardsApplicant(courtNavCaseData) : null;
     }
+
+
+    private LocalDate getRelationShipCeremonyDate(CourtNavFl401 courtNavCaseData) {
+        LocalDate cermonyDate = null;
+
+        if (null != courtNavCaseData.getFl401().getRelationshipWithRespondent().getCeremonyDate()) {
+            cermonyDate = LocalDate.parse(courtNavCaseData
+                                              .getFl401()
+                                              .getRelationshipWithRespondent()
+                                              .getCeremonyDate().mergeDate());
+        }
+        return cermonyDate;
+    }
+
 
     private LocalDate getRelationShipEndDate(CourtNavFl401 courtNavCaseData) {
         LocalDate endDate = null;

@@ -1,0 +1,17 @@
+{
+  "miam_otherProceedings":"No",
+  "miam_consent":"s",
+  "miam_attendance":"No",
+  "miam_haveDocSigned":"Yes",
+  "miam_mediatorDocument":"No",
+  "miam_validReason":"Yes",
+  "miam_nonAttendanceReasons":[
+    "none"
+  ],
+  "miam_certificate":{
+    "id":"test",
+    "url":"test",
+    "filename":"test",
+    "binaryUrl":"test"
+  }
+}

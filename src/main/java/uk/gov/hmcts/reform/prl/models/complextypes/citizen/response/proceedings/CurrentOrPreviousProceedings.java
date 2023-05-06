@@ -1,10 +1,11 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.util.List;
 
@@ -12,7 +13,8 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class CurrentOrPreviousProceedings {
-    private final YesNoDontKnow haveChildrenBeenInvolvedInCourtCase;
+    private final YesOrNo haveChildrenBeenInvolvedInCourtCase;
     private final YesOrNo courtOrderMadeForProtection;
-    private List<Proceedings> proceedingsList;
+    @JsonProperty("proceedingsList")
+    private List<Element<Proceedings>> proceedingsList;
 }

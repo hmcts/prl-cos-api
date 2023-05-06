@@ -1,22 +1,26 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
+import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +47,8 @@ public class FeeAndPayServiceRequestControllerTest {
 
     @Mock
     private PaymentServiceResponse paymentServiceResponse;
+    @Mock
+    private SolicitorEmailService solicitorEmailService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -59,24 +65,6 @@ public class FeeAndPayServiceRequestControllerTest {
     }
 
     @Test
-    public void testPaymentServiceRequestDetails() throws Exception {
-
-        FeeType feeType = null;
-
-        CallbackRequest callbackRequest = CallbackRequest.builder().build();
-
-        when(paymentRequestService.createServiceRequest(callbackRequest,authToken)).thenReturn(paymentServiceResponse);
-
-        when(feesService.fetchFeeDetails(feeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
-
-        feeAndPayServiceRequestController.createPaymentServiceRequest(authToken, callbackRequest);
-
-        verify(paymentRequestService).createServiceRequest(callbackRequest,authToken);
-        verifyNoMoreInteractions(paymentRequestService);
-
-    }
-
-    @Test
     public void testFeeServiceFeeCodeDetails() throws Exception {
 
         FeeType feeType = null;
@@ -87,9 +75,19 @@ public class FeeAndPayServiceRequestControllerTest {
 
         when(feesService.fetchFeeDetails(feeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        feeAndPayServiceRequestController.createPaymentServiceRequest(authToken, callbackRequest);
-
         verifyNoMoreInteractions(feesService);
 
     }
+
+    @Test
+    public void testCcdSubmitted() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().caseId("123")
+                             .state("PENDING").caseData(CaseData.builder()
+                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .build()).build()).build();
+        ResponseEntity response = feeAndPayServiceRequestController.ccdSubmitted(authToken, callbackRequest);
+        Assert.assertNotNull(response);
+    }
+
 }

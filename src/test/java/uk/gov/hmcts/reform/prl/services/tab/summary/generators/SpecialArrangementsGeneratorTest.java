@@ -4,6 +4,7 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.SpecialArrangements;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.SpecialArrangementsGenerator;
 
@@ -16,7 +17,9 @@ public class SpecialArrangementsGeneratorTest {
     @Test
     public void testIfSpecialArrangementHasMarkedAsYes() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
-                                                         .isSpecialArrangementsRequired(YesOrNo.Yes)
+                                                         .attendHearing(AttendHearing.builder()
+                                                                            .isSpecialArrangementsRequired(YesOrNo.Yes)
+                                                                            .build())
                                                              .build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()
@@ -31,7 +34,9 @@ public class SpecialArrangementsGeneratorTest {
     @Test
     public void testIfSpecialArrangementHasMarkedAsNo() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
-                                                         .isSpecialArrangementsRequired(YesOrNo.No)
+                                                         .attendHearing(AttendHearing.builder()
+                                                                            .isSpecialArrangementsRequired(YesOrNo.No)
+                                                                            .build())
                                                          .build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()

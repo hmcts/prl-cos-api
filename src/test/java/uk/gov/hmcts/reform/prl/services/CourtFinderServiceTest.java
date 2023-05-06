@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -44,6 +45,9 @@ public class CourtFinderServiceTest {
     @Mock
     CourtFinderApi courtFinderApi;
 
+    @Mock
+    private CaseData caseDataMock;
+
     private Court londonCourt;
     private Court westLondonCourt;
     private Court newcastleCourt;
@@ -53,6 +57,8 @@ public class CourtFinderServiceTest {
     private PartyDetails applicant2;
     private PartyDetails respondent;
     private PartyDetails inValidRespondent;
+
+    private PartyDetails respondentNoPostcode;
 
     @Before
     public void init() {
@@ -216,6 +222,86 @@ public class CourtFinderServiceTest {
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(westLondonCourt));
     }
 
+
+    @Test
+    public void givenValidCaseData_whenChildLivesWithRespondentWithNoPostcode() throws NotFoundException {
+        Child child = Child.builder()
+            .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
+            .build();
+        Address respondentAddressWithoutPostCode = Address.builder()
+            .addressLine1(null)
+            .postTown(null)
+            .country(null)
+            .postCode(null)
+            .build();
+        respondentNoPostcode = PartyDetails.builder()
+            .address(respondentAddressWithoutPostCode)
+            .build();
+        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();;
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondentNoPostcode).build();
+        CaseData caseData = CaseData.builder()
+            .children(Collections.singletonList(wrappedChild))
+            .applicants(Collections.singletonList(wrappedApplicant))
+            .respondents(Collections.singletonList(wrappedRespondent))
+            .build();
+        when(courtFinderApi.findClosestChildArrangementsCourtByPostcode(null))
+            .thenReturn(ServiceArea.builder()
+                            .courts(Collections.singletonList(newcastleCourt))
+                            .build());
+        assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(newcastleCourt));
+    }
+
+    @Test
+    public void givenValidCaseData_whenChildLivesWithAnotherPersonNoPostcode() throws NotFoundException {
+        OtherPersonWhoLivesWithChild person = OtherPersonWhoLivesWithChild.builder()
+            .address(Address.builder()
+                         .postCode(null)
+                         .build())
+            .build();
+        Element<OtherPersonWhoLivesWithChild> wrappedPerson = Element.<OtherPersonWhoLivesWithChild>builder()
+            .value(person).build();
+        Child child = Child.builder()
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .personWhoLivesWithChild(Collections.singletonList(wrappedPerson))
+            .build();
+        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .children(Collections.singletonList(wrappedChild))
+            .applicants(Collections.singletonList(wrappedApplicant))
+            .respondents(Collections.singletonList(wrappedRespondent))
+            .build();
+
+        assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(newcastleCourt));
+    }
+
+    @Test
+    public void givenValidCaseData_whenChildLivesWithRespondent_thenReturnNull() throws NotFoundException {
+        C100RebuildData c100RebuildData = C100RebuildData.builder().c100RebuildChildPostCode("TW20 2PL").build();
+        Child child = Child.builder()
+            .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
+            .build();
+        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();;
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        CaseData caseData = CaseData.builder()
+            .children(Collections.singletonList(wrappedChild))
+            .applicants(Collections.singletonList(wrappedApplicant))
+            .respondents(Collections.singletonList(wrappedRespondent))
+            .c100RebuildData(c100RebuildData)
+            .build();
+        assertNull(courtFinderService.getNearestFamilyCourt(caseData));
+    }
+
+    @Test
+    public void givenValidCaseData_whenChildLivesWithRespondent_thenReturnNull_logsException() throws NotFoundException {
+        assertNull(courtFinderService.getNearestFamilyCourt(caseDataMock));
+    }
+
     @Test
     public void givenInvalidPostCode_NoServiceAreaReturned() throws NotFoundException {
 
@@ -262,7 +348,7 @@ public class CourtFinderServiceTest {
             .childLiveWith(Collections.singletonList(anotherPerson))
             .personWhoLivesWithChild(Collections.singletonList(wrappedPerson))
             .build();
-        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();;
+        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
 
@@ -534,6 +620,22 @@ public class CourtFinderServiceTest {
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
         Assert.assertTrue(emailAddress.isPresent());
+    }
+
+    @Test
+    public void givenDescriptionAndExplanationMatchedReturnCourtEmailAddressNull() {
+
+        CourtEmailAddress courtEmailAddressWithBothFields = CourtEmailAddress.builder()
+            .address("brighton.breathingspace@justice.gov.uk")
+            .description("Family public law (children in care)")
+            .explanation("Paper process including C100 applications")
+            .build();
+
+        horshamCourt.setCourtEmailAddresses(Collections.singletonList(courtEmailAddressWithBothFields));
+
+        Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(null);
+
+        Assert.assertFalse(emailAddress.isPresent());
     }
 
 }

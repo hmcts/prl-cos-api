@@ -14,10 +14,10 @@ import java.util.Arrays;
 public enum CreateSelectOrderOptionsEnum {
     @JsonProperty("standardDirectionsOrder")
     standardDirectionsOrder("standardDirectionsOrder", "Standard directions order","1"),
+    @JsonProperty("directionOnIssue")
+    directionOnIssue("directionOnIssue", "Direction on issue","2"),
     @JsonProperty("blankOrderOrDirections")
-    blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)","2"),
-    @JsonProperty("blankOrderOrDirectionsWithdraw")
-    blankOrderOrDirectionsWithdraw("blankOrderOrDirectionsWithdraw", "Blank order or directions (C21) - to withdraw application","3"),
+    blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)","3"),
     @JsonProperty("childArrangementsSpecificProhibitedOrder")
     childArrangementsSpecificProhibitedOrder(
         "childArrangementsSpecificProhibitedOrder",

@@ -1,0 +1,55 @@
+{
+  "resp_Respondents":[
+    {
+      "id":"5c38efb6-4d8a-400f-b678-4a1a0ec1167c",
+      "firstName":"respFN1",
+      "lastName":"respLN1",
+      "personalDetails":{
+        "dateOfBirth":{
+          "year":"2000",
+          "month":"10",
+          "day":"20"
+        },
+        "isDateOfBirthUnknown":"",
+        "approxDateOfBirth":{
+          "day":"",
+          "month":"",
+          "year":""
+        },
+        "gender":"Male",
+        "otherGenderDetails":"",
+        "hasNameChanged":"dontKnow",
+        "previousFullName":"",
+        "respondentPlaceOfBirth":"",
+        "respondentPlaceOfBirthUnknown":"Yes"
+      },
+      "address":{
+        "AddressLine1":"resp1 adrs line 1",
+        "AddressLine2":"resp1 adrs line 2",
+        "PostTown":"resp1Town",
+        "PostCode":"CV3 2ND",
+        "addressHistory":"dontKnow",
+        "provideDetailsOfPreviousAddresses":""
+      },
+      "relationshipDetails":{
+        "relationshipToChildren":[
+          {
+            "childId":"b3b7208a-443e-432c-9824-0d7ca768f7b9",
+            "relationshipType":"Guardian",
+            "otherRelationshipTypeDetails":""
+          },
+          {
+            "childId":"d2513831-e99f-4f38-af32-be46b9802a19",
+            "relationshipType":"Guardian",
+            "otherRelationshipTypeDetails":""
+          }
+        ]
+      },
+      "contactDetails":{
+        "emailAddress":"resp1@gmail.com",
+        "telephoneNumber":"",
+        "donKnowTelephoneNumber":"Yes"
+      }
+    }
+  ]
+}

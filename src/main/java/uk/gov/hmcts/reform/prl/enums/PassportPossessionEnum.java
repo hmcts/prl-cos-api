@@ -9,10 +9,11 @@ import lombok.RequiredArgsConstructor;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum PassportPossessionEnum {
 
-    mother("Mother"),
-    father("Father"),
-    otherPerson("Other");
+    mother("mother", "Mother"),
+    father("father", "Father"),
+    otherPerson("otherPerson", "Other");
 
+    private final String id;
     private final String displayedValue;
 
     @JsonValue

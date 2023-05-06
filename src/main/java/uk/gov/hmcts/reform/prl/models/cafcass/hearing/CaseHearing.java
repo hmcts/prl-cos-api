@@ -1,12 +1,13 @@
 package uk.gov.hmcts.reform.prl.models.cafcass.hearing;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -14,30 +15,23 @@ import java.util.List;
 @Builder(builderMethodName = "caseHearingWith")
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CaseHearing {
 
     private Long hearingID;
 
-    private LocalDateTime hearingRequestDateTime;
-
     private String hearingType;
 
+    private String hearingTypeValue;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String hmcStatus;
-
-    private LocalDateTime lastResponseReceivedDateTime;
-
-    private Integer requestVersion;
-
-    private String hearingListingStatus;
-
-    private String listAssistCaseStatus;
 
     private List<HearingDaySchedule> hearingDaySchedule;
 
-    private String hearingGroupRequestId;
-
-    private Boolean hearingIsLinkedFlag;
-
-    //    private List<String> hearingChannels;
+    @JsonProperty("hearingStatus")
+    public String getHearingStatus() {
+        return hmcStatus;
+    }
 
 }

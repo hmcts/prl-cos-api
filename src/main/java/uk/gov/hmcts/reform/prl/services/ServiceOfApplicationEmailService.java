@@ -11,11 +11,13 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.ApplicantSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.LocalAuthorityEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
 
@@ -24,7 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Service
 @Slf4j
@@ -37,6 +41,9 @@ public class ServiceOfApplicationEmailService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
+    @Value("${citizen.url}")
+    private String citizenUrl;
+
     public void sendEmailC100(CaseDetails caseDetails) throws Exception {
         log.info("Sending the serve Parties emails for C100 Application for caseId {}", caseDetails.getId());
 
@@ -47,7 +54,8 @@ public class ServiceOfApplicationEmailService {
             .map(Element::getValue)
             .collect(Collectors.toMap(
                 PartyDetails::getSolicitorEmail,
-                i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName()
+                i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
+                (x, y) -> x
             ));
 
         for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
@@ -56,7 +64,7 @@ public class ServiceOfApplicationEmailService {
                 appSols.getKey(),
                 EmailTemplateNames.APPLICANT_SOLICITOR_CA,
                 buildApplicantSolicitorEmail(caseDetails, appSols.getValue()),
-                LanguagePreference.english
+                LanguagePreference.getPreferenceLanguage(caseData)
             );
         }
         List<Map<String,List<String>>> respondentSolicitors = caseData
@@ -87,10 +95,10 @@ public class ServiceOfApplicationEmailService {
         sendEmailToLocalAuthority(caseDetails, caseData);
     }
 
-    private void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) throws Exception {
+    private void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) {
         if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
-            for (Element element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
-                String email = element.getValue().toString();
+            for (Element<String> element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
+                String email = element.getValue();
                 emailService.send(
                     email,
                     EmailTemplateNames.LOCAL_AUTHORITY,
@@ -170,7 +178,7 @@ public class ServiceOfApplicationEmailService {
             .build();
     }
 
-    private EmailTemplateVars buildLocalAuthorityEmail(CaseDetails caseDetails) throws Exception {
+    private EmailTemplateVars buildLocalAuthorityEmail(CaseDetails caseDetails) {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         return LocalAuthorityEmail.builder()
@@ -179,5 +187,39 @@ public class ServiceOfApplicationEmailService {
             .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .issueDate(caseData.getIssueDate())
             .build();
+    }
+
+    public void sendEmailToC100Applicants(CaseData caseData) {
+
+        Map<String, String> applicantEmails = caseData.getApplicants().stream()
+            .map(Element::getValue)
+            .filter(applicant -> !CaseUtils.hasLegalRepresentation(applicant)
+                && Yes.equals(applicant.getCanYouProvideEmailAddress()))
+            .collect(Collectors.toMap(
+                PartyDetails::getEmail,
+                party -> party.getFirstName() + " " + party.getLastName(),
+                (x, y) -> x
+            ));
+
+        if (!applicantEmails.isEmpty()) {
+            applicantEmails.forEach(
+                (key, value) ->
+                    emailService.send(
+                        key,
+                        EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION,
+                        buildApplicantEmailVars(caseData, value),
+                        LanguagePreference.getPreferenceLanguage(caseData)
+            ));
+        }
+    }
+
+    private EmailTemplateVars buildApplicantEmailVars(CaseData caseData, String applicantName) {
+        return CitizenCaseSubmissionEmail.builder()
+            .caseNumber(String.valueOf(caseData.getId()))
+            .applicantName(applicantName)
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(citizenUrl + CITIZEN_DASHBOARD)
+            .build();
+
     }
 }

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -8,8 +9,10 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.RespondentSolicitorTaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
@@ -22,7 +25,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
-
+@Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseEventHandler {
@@ -30,6 +33,7 @@ public class CaseEventHandler {
     private final CoreCaseDataService coreCaseDataService;
     private final TaskListService taskListService;
     private final TaskListRenderer taskListRenderer;
+    private final RespondentSolicitorTaskListRenderer respondentSolicitorTaskListRenderer;
     private final TaskErrorService taskErrorService;
 
     @EventListener
@@ -37,14 +41,21 @@ public class CaseEventHandler {
         final CaseData caseData = event.getCaseData();
 
         final String taskList = getUpdatedTaskList(caseData);
+        final String respondentTaskList = getRespondentTaskList();
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
             caseData.getId(),
             "internal-update-task-list",
-            Map.of("taskList", taskList,"id",String.valueOf(caseData.getId()))
-
+            Map.of(
+                "taskList",
+                taskList,
+                "respondentTaskList",
+                respondentTaskList,
+                "id",
+                String.valueOf(caseData.getId())
+            )
         );
     }
 
@@ -65,6 +76,15 @@ public class CaseEventHandler {
 
         return taskListRenderer
             .render(tasks, eventErrors, caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE), caseData);
+
+    }
+
+    public String getRespondentTaskList() {
+        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks();
+        log.info("tasks found: " + tasks.size());
+
+        return respondentSolicitorTaskListRenderer
+            .render(tasks);
 
     }
 }
