@@ -12,8 +12,12 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
@@ -28,8 +32,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 @Service
 @Slf4j
@@ -78,9 +82,9 @@ public class ManageOrderEmailService {
         String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             Map<String, String> applicantsMap = getEmailPartyWithName(caseData
-                                                                         .getApplicants());
+                                                                          .getApplicants());
             Map<String, String> respondentMap = getEmailPartyWithName(caseData
-                                                                         .getRespondents());
+                                                                          .getRespondents());
             for (Map.Entry<String, String> appValues : applicantsMap.entrySet()) {
                 if (!StringUtils.isEmpty(appValues.getKey())) {
                     sendEmailToParty(isFinalOrder, appValues.getKey(),
@@ -101,21 +105,17 @@ public class ManageOrderEmailService {
         } else {
             sendEmailForFlCaseType(caseDetails, caseData, isFinalOrder);
         }
-
-
     }
 
 
     private void sendEmailForFlCaseType(CaseDetails caseDetails, CaseData caseData, SelectTypeOfOrderEnum isFinalOrder) {
-        if (!StringUtils.isEmpty(caseData.getApplicantsFL401().getEmail())) {
-            sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getEmail(),
+        if (!StringUtils.isEmpty(caseData.getApplicantsFL401().getSolicitorEmail())) {
+            sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getSolicitorEmail(),
                              buildApplicantRespondentEmail(
-                                 caseDetails, caseData.getApplicantsFL401().getFirstName()
-                                 + " " + caseData.getApplicantsFL401().getFirstName()),
+                                 caseDetails, caseData.getApplicantsFL401().getRepresentativeFirstName()
+                                     + " " + caseData.getApplicantsFL401().getRepresentativeLastName()),
                              caseData
             );
-
-
         }
         if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
             sendEmailToParty(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
@@ -128,7 +128,6 @@ public class ManageOrderEmailService {
 
     public void sendFinalOrderIssuedNotification(CaseDetails caseDetails) {
         CaseData caseData = emailService.getCaseData(caseDetails);
-        log.info("sendFinalOrderIssuedNotification:: Case state " + caseData.getState());
         if (State.ALL_FINAL_ORDERS_ISSUED.equals(caseData.getState())) {
             sendNotificationToRespondentSolicitor(caseDetails);
             sendNotificationToRespondent(caseDetails);
@@ -136,7 +135,6 @@ public class ManageOrderEmailService {
     }
 
     private void sendNotificationToRespondent(CaseDetails caseDetails) {
-        log.info("inside sendNotificationToRespondent");
         CaseData caseData = emailService.getCaseData(caseDetails);
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             for (Element<PartyDetails> respondent : caseData.getRespondents()) {
@@ -175,7 +173,6 @@ public class ManageOrderEmailService {
 
 
     private void sendNotificationToRespondentSolicitor(CaseDetails caseDetails) {
-        log.info("inside sendNotificationToRespondentSolicitor ");
         CaseData caseData = emailService.getCaseData(caseDetails);
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             for (Map<String, List<String>> resSols : getRespondentSolicitor(caseDetails)) {
@@ -202,7 +199,7 @@ public class ManageOrderEmailService {
             emailAddress,
             (isFinalOrder == SelectTypeOfOrderEnum.finl) ? EmailTemplateNames.CA_DA_FINAL_ORDER_EMAIL
                 : EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
-             email,
+            email,
             LanguagePreference.getPreferenceLanguage(caseData)
         );
     }
@@ -217,7 +214,7 @@ public class ManageOrderEmailService {
             ));
     }
 
-    private EmailTemplateVars buildApplicantRespondentEmail(CaseDetails caseDetails,String name) {
+    private EmailTemplateVars buildApplicantRespondentEmail(CaseDetails caseDetails, String name) {
         CaseData caseData = emailService.getCaseData(caseDetails);
 
         return ManageOrderEmail.builder()
@@ -231,7 +228,7 @@ public class ManageOrderEmailService {
 
     private EmailTemplateVars buildRespondentEmail(CaseDetails caseDetails, PartyDetails partyDetails) {
         CaseData caseData = emailService.getCaseData(caseDetails);
-        return  ManageOrderEmail.builder()
+        return ManageOrderEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
             .applicantName(String.format("%s %s", partyDetails.getFirstName(), partyDetails.getLastName()))
@@ -287,8 +284,10 @@ public class ManageOrderEmailService {
             .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
             .map(i -> {
                 Map<String, List<String>> temp = new HashMap<>();
-                temp.put(i.getSolicitorEmail(),List.of(i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
-                                                       i.getFirstName() + " " + i.getLastName()));
+                temp.put(i.getSolicitorEmail(), List.of(
+                    i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
+                    i.getFirstName() + " " + i.getLastName()
+                ));
                 return temp;
             })
             .collect(Collectors.toList());
@@ -298,7 +297,7 @@ public class ManageOrderEmailService {
         return partyDetails
             .stream()
             .map(Element::getValue)
-                .filter(a -> a.getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
+            .filter(a -> a.getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
             .map(PartyDetails::getEmail)
             .collect(Collectors.toList());
     }
@@ -308,7 +307,7 @@ public class ManageOrderEmailService {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
 
-        ManageOrders manageOrders  = caseData.getManageOrders();
+        ManageOrders manageOrders = caseData.getManageOrders();
 
         List<String> cafcassEmails = new ArrayList<>();
         List<String> otherEmails = new ArrayList<>();
@@ -327,13 +326,12 @@ public class ManageOrderEmailService {
 
         cafcassEmails.addAll(otherEmails);
 
-        cafcassEmails.forEach(email ->   emailService.send(
+        cafcassEmails.forEach(email -> emailService.send(
             email,
             EmailTemplateNames.CAFCASS_OTHER,
             buildEmailToCafcassAndOtherParties(caseData),
             LanguagePreference.english
         ));
-
     }
 
     public EmailTemplateVars buildEmailToCafcassAndOtherParties(CaseData caseData) {
@@ -343,7 +341,6 @@ public class ManageOrderEmailService {
         if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
             typeOfHearing = URGENT_CASE;
         }
-
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
         return ManageOrderEmail.builder()
@@ -351,10 +348,127 @@ public class ManageOrderEmailService {
             .caseName(caseData.getApplicantCaseName())
             .caseUrgency(typeOfHearing)
             .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
-            .familyManNumber(caseData.getFamilymanCaseNumber())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentFileName())
+            .familyManNumber(caseData.getFamilymanCaseNumber() != null ? caseData.getFamilymanCaseNumber() : "")
+            .orderLink(manageCaseUrl + "/" + caseData.getId() + "#Orders")
             .build();
-
     }
 
+    public void sendEmailWhenOrderIsServed(CaseDetails caseDetails) {
+        List<String> listOfOtherAndCafcassEmails = new ArrayList<>();
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        ManageOrders manageOrders = caseData.getManageOrders();
+        String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
+        SelectTypeOfOrderEnum isFinalOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+            if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
+                log.info("** CA case email notifications***");
+                sendEmailToPartyOrSolicitor(manageOrders.getRecipientsOptions().getValue(),
+                                            caseData.getApplicants(),
+                                            isFinalOrder, caseDetails, caseData
+                );
+                sendEmailToPartyOrSolicitor(manageOrders.getRecipientsOptions().getValue(),
+                                            caseData.getRespondents(),
+                                            isFinalOrder, caseDetails, caseData
+                );
+            }
+            if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
+                .contains(OtherOrganisationOptions.anotherOrganisation)
+                && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
+                manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
+                    .add(value.getEmailAddress()));
+            }
+            //send email notification to other people in the case
+            if (null != manageOrders.getOtherParties()) {
+                manageOrders.getOtherParties().getValue().stream().map(DynamicMultiselectListElement::getCode).forEach(
+                    id -> {
+                        String otherEmail = getOtherPeopleEmailAddress(id, caseData);
+                        if (null != otherEmail) {
+                            listOfOtherAndCafcassEmails.add(otherEmail);
+                        }
+                    });
+            }
+            //Send email notification to Cafcass or Cafcass cymru based on selection
+            if (getCafcassEmail(manageOrders) != null) {
+                listOfOtherAndCafcassEmails.add(getCafcassEmail(manageOrders));
+            }
+        } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
+            sendEmailForFlCaseType(caseDetails, caseData, isFinalOrder);
+            if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
+                .contains(ServeOtherPartiesOptions.other)
+                && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsDA())) {
+                manageOrders.getEmailInformationDA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
+                    .add(value.getEmailAddress()));
+            }
+        }
+
+        // Send email notification to other organisations
+        listOfOtherAndCafcassEmails.forEach(email ->
+                                                emailService.send(
+                                                    email,
+                                                    EmailTemplateNames.CAFCASS_OTHER,
+                                                    buildEmailToCafcassAndOtherParties(caseData),
+                                                    LanguagePreference.english
+                                                )
+        );
+    }
+
+    private String getCafcassEmail(ManageOrders manageOrders) {
+        String cafcassEmail = null;
+        if (YesOrNo.Yes.equals(manageOrders.getCafcassCymruServedOptions())) {
+            cafcassEmail = manageOrders.getCafcassCymruEmail();
+        }
+        if (YesOrNo.Yes.equals(manageOrders.getCafcassServedOptions())) {
+            cafcassEmail = manageOrders.getCafcassEmailId();
+        }
+        return cafcassEmail;
+    }
+
+    private String getOtherPeopleEmailAddress(String id, CaseData caseData) {
+        String other = null;
+        if (null != caseData.getOthersToNotify()) {
+            Optional<Element<PartyDetails>> otherPerson = caseData.getOthersToNotify().stream()
+                .filter(element -> element.getId().toString().equalsIgnoreCase(id)).findFirst();
+            if (otherPerson.isPresent() && YesOrNo.Yes.equals(otherPerson.get().getValue().getCanYouProvideEmailAddress())) {
+                other = otherPerson.get().getValue().getEmail();
+            }
+        }
+        return other;
+    }
+
+    private void sendEmailToPartyOrSolicitor(List<DynamicMultiselectListElement> value,
+                                             List<Element<PartyDetails>> partyDetails,
+                                             SelectTypeOfOrderEnum isFinalOrder,
+                                             CaseDetails caseDetails, CaseData caseData) {
+        Map<String, String> partyMap = new HashMap<>();
+        value.forEach(element -> {
+            Map<String, String> partyMapTemp;
+            partyMapTemp = getPartyMap(element.getCode(), partyDetails);
+            partyMap.putAll(partyMapTemp);
+        });
+        for (Map.Entry<String, String> appValues : partyMap.entrySet()) {
+            if (!StringUtils.isEmpty(appValues.getKey())) {
+                sendEmailToParty(isFinalOrder, appValues.getKey(),
+                                 buildApplicantRespondentEmail(caseDetails, appValues.getValue()),
+                                 caseData
+                );
+            }
+        }
+    }
+
+    private Map<String, String> getPartyMap(String code, List<Element<PartyDetails>> parties) {
+        Map<String, String> applicantMap = new HashMap<>();
+        Optional<Element<PartyDetails>> applicant = parties.stream()
+            .filter(element -> element.getId().toString().equalsIgnoreCase(code)).findFirst();
+        if (applicant.isPresent()) {
+            if (null != applicant.get().getValue().getSolicitorEmail()) {
+                applicantMap.put(applicant.get().getValue().getSolicitorEmail(), applicant.get().getValue()
+                    .getRepresentativeFirstName() + " "
+                    + applicant.get().getValue().getRepresentativeLastName());
+            } else if (YesOrNo.Yes.equals(applicant.get().getValue().getCanYouProvideEmailAddress())) {
+                applicantMap.put(applicant.get().getValue().getEmail(), applicant.get().getValue().getFirstName() + " "
+                    + applicant.get().getValue().getLastName());
+            }
+        }
+        return applicantMap;
+    }
 }
