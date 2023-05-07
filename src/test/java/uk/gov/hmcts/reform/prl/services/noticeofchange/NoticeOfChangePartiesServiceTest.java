@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.noticeofchange;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,7 +51,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Slf4j
 public class NoticeOfChangePartiesServiceTest {
     @InjectMocks
     NoticeOfChangePartiesService noticeOfChangePartiesService;
@@ -96,7 +94,6 @@ public class NoticeOfChangePartiesServiceTest {
 
     @Before
     public void setUp() {
-        log.info("My changes");
         partyDetails = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .gender(Gender.male)
@@ -165,7 +162,6 @@ public class NoticeOfChangePartiesServiceTest {
 
     @Test
     public void testGenerateForDa() {
-        log.info("My changes");
         when(policyConverter.caGenerate(role, optionalParty))
             .thenReturn(organisationPolicy);
         when(policyConverter.daGenerate(roleForDa, daParty))
@@ -203,7 +199,6 @@ public class NoticeOfChangePartiesServiceTest {
 
     @Test
     public void testNocRequestSubmittedForC100RespondentSolicitor() {
-        log.info("My changes");
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[C100RESPONDENTSOLICITOR1]")
             .label("Respondent solicitor A")
@@ -248,7 +243,6 @@ public class NoticeOfChangePartiesServiceTest {
 
     @Test
     public void testNocRequestSubmittedForC100ApplicantSolicitor() {
-        log.info("My changes");
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[C100APPLICANTSOLICITOR1]")
             .label("Applicant solicitor A")
@@ -293,7 +287,6 @@ public class NoticeOfChangePartiesServiceTest {
 
     @Test
     public void testNocRequestSubmittedForFL401RespondentSolicitor() {
-        log.info("My changes");
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[FL401RESPONDENTSOLICITOR]")
             .label("Respondent solicitor A")
@@ -335,7 +328,6 @@ public class NoticeOfChangePartiesServiceTest {
 
     @Test
     public void testNocRequestSubmittedForFL401ApplicantSolicitor() {
-        log.info("My changes");
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[FL401APPLICANTSOLICITOR]")
             .label("Applicant solicitor A")
