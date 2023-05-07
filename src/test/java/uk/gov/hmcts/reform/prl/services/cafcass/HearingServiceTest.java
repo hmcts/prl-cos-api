@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +28,6 @@ import java.util.Map;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Slf4j
 public class HearingServiceTest {
 
     @Mock
@@ -54,7 +52,6 @@ public class HearingServiceTest {
 
     @Before
     public void setup() {
-        log.info("My changes");
         final List<CaseHearing> caseHearings = new ArrayList();
 
         final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
@@ -106,7 +103,6 @@ public class HearingServiceTest {
     @Test
     @DisplayName("test case for HearingService.")
     public void getHearingsTestException() {
-        log.info("My changes");
         when(authTokenGenerator.generate()).thenThrow(new RuntimeException());
 
         Hearings response =
@@ -174,7 +170,6 @@ public class HearingServiceTest {
     @Test
     @DisplayName("test case to all hearings of all cases.")
     public void getHearingsForAllCases() {
-        log.info("My changes");
         ReflectionTestUtils.setField(hearingService, "hearingStatusList", List.of("LISTED"));
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(hearingApiClient.getHearingDetailsForAllCaseIds(authToken, authTokenGenerator.generate(),caseIdWithRegionIdMap))
@@ -187,7 +182,6 @@ public class HearingServiceTest {
     @Test
     @DisplayName("test case to all hearings of all cases exception")
     public void getHearingsForAllCasesTestException() {
-        log.info("My changes");
         when(authTokenGenerator.generate()).thenThrow(new RuntimeException());
 
         List<Hearings> response =

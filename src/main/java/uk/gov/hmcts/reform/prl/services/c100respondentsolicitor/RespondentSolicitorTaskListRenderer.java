@@ -64,9 +64,7 @@ public class RespondentSolicitorTaskListRenderer {
                 .forEach(section -> lines.addAll(renderSection(section, respondent)));
 
             lines.add(DIV);
-            log.info("task list now: " + String.join("\n\n", lines));
             lines.addAll(renderResSolTasksErrors(tasksErrors, respondent));
-            log.info("task list after: " + String.join("\n\n", lines));
         } else {
             String caseDocumentsUrl = manageCaseUrl + URL_STRING + caseId + "#Case%20documents";
             lines.add(
@@ -183,10 +181,8 @@ public class RespondentSolicitorTaskListRenderer {
 
     private List<String> renderResSolTasksErrors(List<RespondentEventValidationErrors> taskErrors, String respondent) {
         if (isEmpty(taskErrors)) {
-            log.info("taskErrors is empty ");
             return emptyList();
         }
-        log.info("taskErrors found: " + taskErrors.size());
         final List<String> errors = taskErrors.stream()
             .flatMap(task -> task.getErrors()
                 .stream()
@@ -196,7 +192,6 @@ public class RespondentSolicitorTaskListRenderer {
                     taskListRenderElements.renderRespondentSolicitorLink(task.getEvent(), respondent)
                 )))
             .collect(toList());
-        log.info("errors found: " + errors.size());
         return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
     }
 }

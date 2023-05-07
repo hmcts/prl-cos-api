@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.hearings;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +29,6 @@ import java.util.Map;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-@Slf4j
 public class HearingServiceTest {
 
     @Mock
@@ -54,7 +52,6 @@ public class HearingServiceTest {
 
     @Before
     public void setup() {
-        log.info("My changes");
         final List<CaseHearing> caseHearings = new ArrayList();
 
         final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
@@ -104,7 +101,6 @@ public class HearingServiceTest {
     @Test
     @DisplayName("test case for HearingService getHearings exception.")
     public void getHearingsTestException() {
-        log.info("My changes");
         when(hearingService.getHearings(authToken,caseReferenceNumber)).thenThrow(new RuntimeException());
         Hearings response =
             hearingService.getHearings(authToken, caseReferenceNumber);
@@ -126,7 +122,6 @@ public class HearingServiceTest {
     @Test
     @DisplayName("test case for HearingService getNextHearingDate exception .")
     public void getNextHearingDateTestException() {
-        log.info("My changes");
         when(hearingService.getNextHearingDate(authToken,caseReferenceNumber)).thenThrow(new RuntimeException());
         NextHearingDetails response =
             hearingService.getNextHearingDate(authToken, caseReferenceNumber);
@@ -137,7 +132,6 @@ public class HearingServiceTest {
     @Test
     @DisplayName("test case for HearingService getNextHearingDate success.")
     public void getCaseLinkedDataTestSuccess() {
-        log.info("My changes");
         CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith().build();
         List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
         caseLinkedDataList.add(CaseLinkedData.caseLinkedDataWith().caseReference("123").build());
@@ -151,7 +145,6 @@ public class HearingServiceTest {
     @Test
     @DisplayName("test case for HearingService getNextHearingDate success.")
     public void getCaseLinkedDataTestException() {
-        log.info("My changes");
         CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith().build();
         List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
         caseLinkedDataList.add(CaseLinkedData.caseLinkedDataWith().caseReference("123").build());

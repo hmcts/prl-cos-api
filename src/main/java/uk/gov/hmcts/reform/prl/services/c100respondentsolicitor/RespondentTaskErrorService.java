@@ -24,18 +24,12 @@ public class RespondentTaskErrorService {
         RespondentEventErrorsEnum.class);
 
     public List<RespondentEventValidationErrors> getEventErrors() {
-        log.info("finding errors");
         List<RespondentEventValidationErrors> eventErrorList = new ArrayList<>();
-        log.info("eventErrors size :: " + eventErrors.size());
         for (Map.Entry<RespondentEventErrorsEnum, RespondentEventValidationErrors> entry : eventErrors.entrySet()) {
-            log.info("entry key :: " + entry.getKey());
-            log.info("entry value :: " + entry.getValue());
             eventErrorList.add(entry.getValue());
         }
-        log.info("eventErrorList size :: " + eventErrorList.size());
         eventErrorList.sort(Comparator.comparingInt(x -> RespondentSolicitorEvents.getEventOrder()
             .indexOf(x.getEvent())));
-        log.info("eventErrorList size after :: " + eventErrorList.size());
         return eventErrorList;
     }
 
