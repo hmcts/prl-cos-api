@@ -69,7 +69,6 @@ public class C100RespondentSolicitorService {
     private final ResponseSubmitChecker responseSubmitChecker;
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
-        log.info("Inside prePopulateAboutToStartCaseData");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(
@@ -91,7 +90,6 @@ public class C100RespondentSolicitorService {
 
     private void retrieveExistingResponseForSolicitor(CallbackRequest callbackRequest, Map<String,
         Object> caseDataUpdated, Element<PartyDetails> solicitorRepresentedRespondent) {
-        log.info("finding respondentParty is present ");
         String invokedEvent = callbackRequest.getEventId().substring(0, callbackRequest.getEventId().length() - 1);
         RespondentSolicitorEvents.getCaseFieldName(invokedEvent).ifPresent(event -> {
             switch (event) {
@@ -138,7 +136,6 @@ public class C100RespondentSolicitorService {
                             .previousName(Optional.ofNullable(citizenDetails.getPreviousName()).orElse(partyDetails.getPreviousName()))
                             .build()
                     );
-                    log.info("***** Edit ***** {}", caseDataUpdated.get(event.getCaseFieldName()));
                     break;
                 case ATTENDING_THE_COURT:
                     caseDataUpdated.put(
@@ -148,7 +145,6 @@ public class C100RespondentSolicitorService {
                     break;
                 case MIAM:
                     String[] miamFields = event.getCaseFieldName().split(",");
-                    log.info("MIAM fields, :::{}", (Object) miamFields);
                     caseDataUpdated.put(
                         miamFields[0],
                         solicitorRepresentedRespondent.getValue().getResponse().getSolicitorMiam().getRespSolHaveYouAttendedMiam()
@@ -237,7 +233,6 @@ public class C100RespondentSolicitorService {
     }
 
     public Map<String, Object> populateAboutToSubmitCaseData(CallbackRequest callbackRequest) {
-        log.info("Inside populateAboutToSubmitCaseData");
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             updatedCaseData,
@@ -434,38 +429,16 @@ public class C100RespondentSolicitorService {
         }
 
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-            .
-
-                solicitorKeepDetailsPriate(SolicitorKeepDetailsPrivate.builder()
-                                               .
-
-                                                   respKeepDetailsPrivate(caseData.getKeepContactDetailsPrivate())
-                                               .
-
-                                                   respKeepDetailsPrivateConfidentiality(KeepDetailsPrivate.builder()
-                                                                                             .
-
-                                                                                                 confidentiality(
-                                                                                                     caseData
-                                                                                                         .getKeepContactDetailsPrivateOther()
-                                                                                                         .
-
-                                                                                                             getConfidentiality())
-                                                                                             .
-
-                                                                                                 confidentialityList(
-                                                                                                     confList)
-                                                                                             .
-
-                                                                                                 build())
-
-                                               .
-
-                                                   build())
-
-            .
-
-                build();
+            .solicitorKeepDetailsPriate(SolicitorKeepDetailsPrivate.builder()
+                                            .respKeepDetailsPrivate(caseData.getKeepContactDetailsPrivate())
+                                            .respKeepDetailsPrivateConfidentiality(KeepDetailsPrivate.builder()
+                                                                                       .confidentiality(caseData
+                                                                                                            .getKeepContactDetailsPrivateOther()
+                                                                                                            .getConfidentiality())
+                                                                                       .confidentialityList(confList)
+                                                                                       .build())
+                                            .build())
+            .build();
         return buildResponseForRespondent;
     }
 
@@ -493,7 +466,6 @@ public class C100RespondentSolicitorService {
         if (YesOrNo.No.equals(consent.getPermissionFromCourt())) {
             courtOrderDetails = null;
         }
-        log.info("***no con rea*** {}", noConsentReason);
         return consent.toBuilder()
             .noConsentReason(noConsentReason)
             .courtOrderDetails(courtOrderDetails)
@@ -508,7 +480,6 @@ public class C100RespondentSolicitorService {
             throw new RespondentSolicitorException(TECH_ERROR);
         } else {
             String invokingSolicitor = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
-            log.info("****** invokingSolicitor is " + invokingSolicitor);
 
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingSolicitor);
 
@@ -554,7 +525,6 @@ public class C100RespondentSolicitorService {
             CaseData.class
         );
         String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
-        log.info("Event name:::{}", callbackRequest.getEventId());
         boolean mandatoryFinished = false;
         if (!caseData.getRespondents().isEmpty()) {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingRespondent);
