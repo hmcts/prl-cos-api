@@ -126,9 +126,7 @@ public class NoticeOfChangePartiesService {
                 Optional<NoticeOfChangeParties> possibleAnswer = populateDaAnswer(
                     strategy, daElements
                 );
-                if (possibleAnswer.isPresent()) {
-                    data.put(representing.getNocAnswersTemplate(), possibleAnswer.get());
-                }
+                data.put(representing.getNocAnswersTemplate(), possibleAnswer.get());
             }
         }
 
