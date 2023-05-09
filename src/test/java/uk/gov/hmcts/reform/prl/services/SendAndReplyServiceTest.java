@@ -17,15 +17,21 @@ import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.ExternalPartyDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -93,6 +99,8 @@ public class SendAndReplyServiceTest {
     Element<Message> message2Element;
     List<Element<Message>> messages;
     List<Element<Message>> messagesWithOneAdded;
+
+    List<Element<ExternalPartyDocument>> externalPartyDocsList;
     MessageMetaData metaData;
     DynamicList dynamicList;
     CaseData caseData;
@@ -185,6 +193,14 @@ public class SendAndReplyServiceTest {
             .build();
 
         messagesWithOneAdded = Arrays.asList(element(message1), element(message2), element(message3));
+
+        ExternalPartyDocument externalPartyDocument1 = ExternalPartyDocument.builder()
+            .documentCategoryList(DynamicList.builder().value(DynamicListElement.builder().code("123").label("label").build())
+                                      .build())
+            .build();
+
+        externalPartyDocsList = Arrays.asList(element(externalPartyDocument1));
+
         caseDataWithAddedMessage = CaseData.builder()
             .openMessages(messagesWithOneAdded)
             .messageMetaData(metaData)
@@ -566,7 +582,52 @@ public class SendAndReplyServiceTest {
         assertNull(judiciaryTierDynmicList.getListItems());
     }
 
+    @Test
+    public void testBuildSendMessage() {
+        DynamicList dynamicList1 = DynamicList.builder().build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .externalPartiesList(DynamicMultiSelectList.builder().build())
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .ctscEmailList(dynamicList1)
+                    .judicialOrMagistrateTierList(dynamicList1)
+                    .linkedApplicationsList(dynamicList1)
+                    .futureHearingsList(dynamicList1)
+                    .submittedDocumentsList(dynamicList1).externalPartyDocuments(externalPartyDocsList)
+                    .build())
+            .build();
+        Message message = sendAndReplyService.buildSendMessage(caseData);
 
+        assertNotNull(message);
+    }
 
+    @Test
+    public void testAddNewOpenMessage() {
+        DynamicList dynamicList1 = DynamicList.builder().build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .externalPartiesList(DynamicMultiSelectList.builder().build())
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .ctscEmailList(dynamicList1)
+                    .judicialOrMagistrateTierList(dynamicList1)
+                    .linkedApplicationsList(dynamicList1)
+                    .futureHearingsList(dynamicList1)
+                    .submittedDocumentsList(dynamicList1)
+                    .openMessagesList(messagesWithOneAdded)
+                    .build())
+            .build();
+
+        List<Element<Message>> message = sendAndReplyService.addNewOpenMessage(caseData,message1);
+
+        assertNotNull(message);
+    }
 
 }
