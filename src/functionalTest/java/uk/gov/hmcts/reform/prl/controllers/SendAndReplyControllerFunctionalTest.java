@@ -96,4 +96,17 @@ public class SendAndReplyControllerFunctionalTest {
 
     }
 
+    @Test
+    public void givenBodyWithSendData_whenMidEventCallback_thenPopulateDynamicList() throws Exception {
+        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
+        request
+            .header("Authorization", "Bearer 1234")
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/send-and-reply-to-messages/send-or-reply-to-messages/mid-event")
+            .then()
+            .assertThat().statusCode(200);
+    }
+
 }
