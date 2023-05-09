@@ -281,7 +281,7 @@ public class C100RespondentSolicitorServiceTest {
                                              .respondentIntermediaryNeedDetails("Test")
                                              .build())
             .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
-            .abilityToParticipate(AbilityToParticipate.builder()
+            .abilityToParticipateInProceedings(AbilityToParticipate.builder()
                                                    .factorsAffectingAbilityToParticipate(YesNoDontKnow.yes)
                                                    .build())
             .internationalElementParent(SolicitorInternationalElement

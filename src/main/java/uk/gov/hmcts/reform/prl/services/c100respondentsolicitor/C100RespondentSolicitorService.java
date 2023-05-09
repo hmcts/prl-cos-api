@@ -395,12 +395,12 @@ public class C100RespondentSolicitorService {
             case ABILITY_TO_PARTICIPATE:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .abilityToParticipate(AbilityToParticipate.builder()
-                                              .factorsAffectingAbilityToParticipate(caseData.getAbilityToParticipate()
+                                              .factorsAffectingAbilityToParticipate(caseData.getAbilityToParticipateInProceedings()
                                                                                         .getFactorsAffectingAbilityToParticipate())
                                               .provideDetailsForFactorsAffectingAbilityToParticipate(
                                                   YesNoDontKnow.yes.equals(
-                                                      caseData.getAbilityToParticipate().getFactorsAffectingAbilityToParticipate())
-                                                      ? caseData.getAbilityToParticipate()
+                                                      caseData.getAbilityToParticipateInProceedings().getFactorsAffectingAbilityToParticipate())
+                                                      ? caseData.getAbilityToParticipateInProceedings()
                                                       .getProvideDetailsForFactorsAffectingAbilityToParticipate()
                                                       : null)
                                               .build())
