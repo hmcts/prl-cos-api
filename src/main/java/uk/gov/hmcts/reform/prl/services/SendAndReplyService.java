@@ -37,7 +37,6 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -521,7 +520,7 @@ public class SendAndReplyService {
             );
             return selectedExternalPartyDocuments;
         }
-        return Collections.EMPTY_LIST;
+        return null;
     }
 
     public List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser judicialUser) {
