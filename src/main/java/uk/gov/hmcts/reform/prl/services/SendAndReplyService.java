@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.ExternalPartyDocument;
+import uk.gov.hmcts.reform.prl.models.complextypes.sendandreply.SelectedExternalPartyDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -496,9 +498,29 @@ public class SendAndReplyService {
             .selectedSubmittedDocumentValue(sendOrReplyMessage.getSubmittedDocumentsList() != null
                                                 ? sendOrReplyMessage.getSubmittedDocumentsList().getValueLabel() : null)
             .selectedExternalParties(getSelectedExternalParties(sendOrReplyMessage.getExternalPartiesList()))
+            .selectedExternalPartyDocuments(getExternalPartyDocuments(sendOrReplyMessage))
             .latestMessage(caseData.getMessageContent())
             .updatedTime(dateTime.now())
             .build();
+    }
+
+    private List<SelectedExternalPartyDocuments> getExternalPartyDocuments(SendOrReplyMessage sendOrReplyMessage) {
+
+        if (sendOrReplyMessage != null && isNotEmpty(sendOrReplyMessage.getExternalPartyDocuments())) {
+
+            List<SelectedExternalPartyDocuments> selectedExternalPartyDocuments = new ArrayList<>();
+
+            sendOrReplyMessage.getExternalPartyDocuments().forEach(
+                externalPartyDocumentElement -> {
+                    final DynamicListElement documentCategoryDynamicList = externalPartyDocumentElement.getValue()
+                        .getDocumentCategoryList().getValue();
+                    SelectedExternalPartyDocuments.builder().selectedDocumentCode(documentCategoryDynamicList.getCode())
+                        .selectedDocumentValue(documentCategoryDynamicList.getLabel());
+                }
+            );
+            return selectedExternalPartyDocuments;
+        }
+        return Collections.EMPTY_LIST;
     }
 
     public List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser judicialUser) {
