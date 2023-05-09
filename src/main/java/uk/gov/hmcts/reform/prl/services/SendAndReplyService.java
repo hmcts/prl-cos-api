@@ -514,8 +514,9 @@ public class SendAndReplyService {
                 externalPartyDocumentElement -> {
                     final DynamicListElement documentCategoryDynamicList = externalPartyDocumentElement.getValue()
                         .getDocumentCategoryList().getValue();
-                    SelectedExternalPartyDocument.builder().selectedDocumentCode(documentCategoryDynamicList.getCode())
-                        .selectedDocumentValue(documentCategoryDynamicList.getLabel());
+                    selectedExternalPartyDocuments.add(SelectedExternalPartyDocument.builder()
+                                                           .selectedDocumentCode(documentCategoryDynamicList.getCode())
+                                                           .selectedDocumentValue(documentCategoryDynamicList.getLabel()).build());
                 }
             );
             return selectedExternalPartyDocuments;
