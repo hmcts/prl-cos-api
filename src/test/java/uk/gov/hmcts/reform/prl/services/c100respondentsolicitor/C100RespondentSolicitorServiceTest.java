@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
@@ -38,7 +39,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentA
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -281,7 +281,7 @@ public class C100RespondentSolicitorServiceTest {
                                              .respondentIntermediaryNeedDetails("Test")
                                              .build())
             .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
-            .abilityToParticipateInProceedings(SolicitorAbilityToParticipateInProceedings.builder()
+            .abilityToParticipate(AbilityToParticipate.builder()
                                                    .factorsAffectingAbilityToParticipate(YesNoDontKnow.yes)
                                                    .build())
             .internationalElementParent(SolicitorInternationalElement
