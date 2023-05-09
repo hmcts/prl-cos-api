@@ -513,13 +513,18 @@ public class SendAndReplyService {
                 externalPartyDocumentElement -> {
                     final DynamicListElement documentCategoryDynamicList = externalPartyDocumentElement.getValue()
                         .getDocumentCategoryList().getValue();
+
+                    log.info("documentCategoryDynamicList in getExternalPartyDocuments -----> {}", documentCategoryDynamicList);
                     selectedExternalPartyDocuments.add(SelectedExternalPartyDocument.builder()
                                                            .selectedDocumentCode(documentCategoryDynamicList.getCode())
                                                            .selectedDocumentValue(documentCategoryDynamicList.getLabel()).build());
+                    log.info("selectedExternalPartyDocuments -------------> {}", selectedExternalPartyDocuments);
                 }
             );
+            log.info("");
             return selectedExternalPartyDocuments;
         }
+        log.info("selectedExternalPartyDocuments is null-------------> ");
         return null;
     }
 
