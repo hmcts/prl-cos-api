@@ -683,7 +683,6 @@ public class CaseData implements MappableObject {
     private Consent respondentConsentToApplication;
 
     private final Miam respondentSolicitorHaveYouAttendedMiam;
-    private final Miam respondentSolicitorWillingnessToAttendMiam;
     private final String whatIsMiamPlaceHolder;
     private final String helpMiamCostsExemptionsPlaceHolder;
 

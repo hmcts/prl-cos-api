@@ -336,11 +336,9 @@ public class C100RespondentSolicitorServiceTest {
                                                  .build())
             .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
                                                         .attendedMiam(No)
+                                                        .willingToAttendMiam(No)
+                                                        .reasonNotAttendingMiam("test")
                                                         .build())
-            .respondentSolicitorWillingnessToAttendMiam(Miam.builder()
-                                                            .willingToAttendMiam(No)
-                                                            .reasonNotAttendingMiam("test")
-                                                            .build())
             .build();
 
         stringObjectMap = caseData.toMap(new ObjectMapper());
