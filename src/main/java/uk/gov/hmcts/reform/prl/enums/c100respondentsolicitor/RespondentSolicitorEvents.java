@@ -21,7 +21,8 @@ public enum RespondentSolicitorEvents {
     MIAM(
         "c100ResSolMiam",
         "MIAM",
-        "respondentSolicitorHaveYouAttendedMiam, whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder"
+        "respondentSolicitorHaveYouAttendedMiam"
+            + "whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder"
     ),
     CURRENT_OR_PREVIOUS_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "Current or past proceedings",
                                     "currentOrPastProceedingsForChildren,respondentExistingProceedings"
