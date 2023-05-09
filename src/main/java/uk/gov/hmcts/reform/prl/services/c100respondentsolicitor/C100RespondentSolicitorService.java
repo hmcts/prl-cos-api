@@ -19,13 +19,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -394,13 +394,13 @@ public class C100RespondentSolicitorService {
                 break;
             case ABILITY_TO_PARTICIPATE:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .abilityToParticipate(SolicitorAbilityToParticipateInProceedings.builder()
-                                              .factorsAffectingAbilityToParticipate(caseData.getAbilityToParticipateInProceedings()
+                    .abilityToParticipate(AbilityToParticipate.builder()
+                                              .factorsAffectingAbilityToParticipate(caseData.getAbilityToParticipate()
                                                                                         .getFactorsAffectingAbilityToParticipate())
                                               .provideDetailsForFactorsAffectingAbilityToParticipate(
                                                   YesNoDontKnow.yes.equals(
-                                                      caseData.getAbilityToParticipateInProceedings().getFactorsAffectingAbilityToParticipate())
-                                                      ? caseData.getAbilityToParticipateInProceedings()
+                                                      caseData.getAbilityToParticipate().getFactorsAffectingAbilityToParticipate())
+                                                      ? caseData.getAbilityToParticipate()
                                                       .getProvideDetailsForFactorsAffectingAbilityToParticipate()
                                                       : null)
                                               .build())

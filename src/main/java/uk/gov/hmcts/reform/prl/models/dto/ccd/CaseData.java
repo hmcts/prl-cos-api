@@ -82,6 +82,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCaf
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
@@ -93,7 +94,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentA
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -737,7 +737,7 @@ public class CaseData implements MappableObject {
     /**
      * Respondent solicitor's Ability to participate proceedings.
      */
-    private final SolicitorAbilityToParticipateInProceedings abilityToParticipateInProceedings;
+    private final AbilityToParticipate abilityToParticipate;
 
     // C100 Rebuild
     @JsonUnwrapped

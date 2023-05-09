@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
@@ -46,7 +46,7 @@ public class AbilityToParticipateCheckerTest {
         respondent = PartyDetails.builder()
             .user(user)
             .response(Response.builder().abilityToParticipate(
-                SolicitorAbilityToParticipateInProceedings.builder()
+                    AbilityToParticipate.builder()
                     .factorsAffectingAbilityToParticipate(YesNoDontKnow.yes)
                     .provideDetailsForFactorsAffectingAbilityToParticipate("test")
                     .build())
