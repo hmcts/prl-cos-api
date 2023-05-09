@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.ExternalPartyDocument;
-import uk.gov.hmcts.reform.prl.models.complextypes.sendandreply.SelectedExternalPartyDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.sendandreply.SelectedExternalPartyDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
@@ -504,17 +504,17 @@ public class SendAndReplyService {
             .build();
     }
 
-    private List<SelectedExternalPartyDocuments> getExternalPartyDocuments(SendOrReplyMessage sendOrReplyMessage) {
+    private List<SelectedExternalPartyDocument> getExternalPartyDocuments(SendOrReplyMessage sendOrReplyMessage) {
 
         if (sendOrReplyMessage != null && isNotEmpty(sendOrReplyMessage.getExternalPartyDocuments())) {
 
-            List<SelectedExternalPartyDocuments> selectedExternalPartyDocuments = new ArrayList<>();
+            List<SelectedExternalPartyDocument> selectedExternalPartyDocuments = new ArrayList<>();
 
             sendOrReplyMessage.getExternalPartyDocuments().forEach(
                 externalPartyDocumentElement -> {
                     final DynamicListElement documentCategoryDynamicList = externalPartyDocumentElement.getValue()
                         .getDocumentCategoryList().getValue();
-                    SelectedExternalPartyDocuments.builder().selectedDocumentCode(documentCategoryDynamicList.getCode())
+                    SelectedExternalPartyDocument.builder().selectedDocumentCode(documentCategoryDynamicList.getCode())
                         .selectedDocumentValue(documentCategoryDynamicList.getLabel());
                 }
             );

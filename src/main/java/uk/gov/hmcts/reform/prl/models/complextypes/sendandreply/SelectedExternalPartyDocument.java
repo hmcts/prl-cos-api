@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder(toBuilder = true)
-public class SelectedExternalPartyDocuments {
+public class SelectedExternalPartyDocument {
 
     private String selectedDocumentCode;
 
