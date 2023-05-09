@@ -1625,6 +1625,7 @@ public class ManageOrderService {
                               .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
                               .fl404CustomFields(orderData)
                               .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                              .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                               .childOption(getChildOption(caseData))
                               .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
