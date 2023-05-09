@@ -336,12 +336,12 @@ public class ManageOrdersController {
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
             caseData.setAppointedGuardianName(namesList);
-            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-                caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingDataService
-                    .getHearingData(existingOrderHearingDetails,
-                                    hearingDataPrePopulatedDynamicLists, caseData
-                    ));
-            }
+
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingDataService
+                .getHearingData(existingOrderHearingDetails,
+                                hearingDataPrePopulatedDynamicLists, caseData
+                ));
+
             caseDataUpdated.putAll(manageOrderService.getCaseData(
                 authorisation,
                 caseData,
