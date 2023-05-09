@@ -343,7 +343,8 @@ public class ManageOrdersController {
                 );
             caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
             caseData.getManageOrders().toBuilder().ordersHearingDetails(hearingData);
-
+            log.info("Case data for draft before order hearing data ==>  {}", hearingData);
+            log.info("Case data for draft before order generation ==>  {}", caseData.getManageOrders().getOrdersHearingDetails());
             caseDataUpdated.putAll(manageOrderService.getCaseData(
                 authorisation,
                 caseData,
