@@ -209,6 +209,8 @@ public class SendAndReplyControllerTest {
 
     @Test
     public void testSendOrReplyToMessagesMidEvent() {
+
+
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.No).build();
         CaseData caseData = CaseData.builder().id(12345L)
