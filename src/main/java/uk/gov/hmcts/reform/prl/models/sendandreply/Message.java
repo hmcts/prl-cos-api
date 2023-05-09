@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.sendandreply;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -9,8 +10,10 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
+import uk.gov.hmcts.reform.prl.models.complextypes.sendandreply.SelectedExternalPartyDocuments;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static java.util.Optional.ofNullable;
 
@@ -49,6 +52,9 @@ public class Message extends MessageMetaData {
     private String selectedSubmittedDocumentCode;
     private String selectedSubmittedDocumentValue;
     private String selectedExternalParties;
+
+    @JsonProperty("selectedExternalPartyDocuments")
+    private List<SelectedExternalPartyDocuments> selectedExternalPartyDocuments;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
