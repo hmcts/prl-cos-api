@@ -737,7 +737,7 @@ public class CaseData implements MappableObject {
     /**
      * Respondent solicitor's Ability to participate proceedings.
      */
-    private final AbilityToParticipate abilityToParticipate;
+    private final AbilityToParticipate abilityToParticipateInProceedings;
 
     // C100 Rebuild
     @JsonUnwrapped
