@@ -31,15 +31,14 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -124,33 +123,17 @@ public class C100RespondentSolicitorServiceTest {
                           .miam(Miam.builder().attendedMiam(No)
                                     .willingToAttendMiam(No)
                                     .reasonNotAttendingMiam("test").build())
-                          .resSolInternationalElements(ResSolInternationalElements
-                                                           .builder()
-                                                           .internationalElementParentInfo(SolicitorInternationalElement
-                                                                                               .builder()
-                                                                                               .reasonForParentDetails(
-                                                                                                   "Test")
-                                                                                               .reasonForJurisdictionDetails(
-                                                                                                   "Test")
-                                                                                               .requestToAuthorityDetails(
-                                                                                                   "Test")
-                                                                                               .build())
-                                                           .internationalElementChildInfo(SolicitorInternationalElement
-                                                                                              .builder()
-                                                                                              .reasonForChild(Yes)
-                                                                                              .reasonForChildDetails(
-                                                                                                  "Test")
-                                                                                              .reasonForParent(Yes)
-                                                                                              .reasonForParentDetails(
-                                                                                                  "Test")
-                                                                                              .reasonForJurisdiction(Yes)
-                                                                                              .reasonForJurisdictionDetails(
-                                                                                                  "Test")
-                                                                                              .requestToAuthority(Yes)
-                                                                                              .requestToAuthorityDetails(
-                                                                                                  "Test")
-                                                                                              .build())
-                                                           .build())
+                          .citizenInternationalElements(CitizenInternationalElements
+                                                            .builder()
+                                                            .childrenLiveOutsideOfEnWl(Yes)
+                                                            .childrenLiveOutsideOfEnWlDetails("Test")
+                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
+                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
+                                                            .anotherPersonOrderOutsideEnWl(Yes)
+                                                            .anotherPersonOrderOutsideEnWlDetails("test")
+                                                            .anotherCountryAskedInformation(Yes)
+                                                            .anotherCountryAskedInformationDetaails("test")
+                                                            .build())
                           .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData
                                                                .builder()
                                                                .respChildAbductionInfo(RespondentChildAbduction
@@ -284,24 +267,15 @@ public class C100RespondentSolicitorServiceTest {
             .abilityToParticipateInProceedings(AbilityToParticipate.builder()
                                                    .factorsAffectingAbilityToParticipate(YesNoDontKnow.yes)
                                                    .build())
-            .internationalElementParent(SolicitorInternationalElement
-                                            .builder()
-                                            .reasonForParentDetails("Test")
-                                            .reasonForJurisdictionDetails("Test")
-                                            .requestToAuthorityDetails("Test")
-                                            .build())
-            .internationalElementJurisdiction(SolicitorInternationalElement.builder().build())
-            .internationalElementRequest(SolicitorInternationalElement.builder().build())
-            .internationalElementChild(SolicitorInternationalElement
-                                           .builder()
-                                           .reasonForChild(Yes)
-                                           .reasonForChildDetails("Test")
-                                           .reasonForParent(Yes)
-                                           .reasonForParentDetails("Test")
-                                           .reasonForJurisdiction(Yes)
-                                           .reasonForJurisdictionDetails("Test")
-                                           .requestToAuthority(Yes)
-                                           .requestToAuthorityDetails("Test")
+            .internationalElementChild(CitizenInternationalElements.builder()
+                                           .childrenLiveOutsideOfEnWl(Yes)
+                                           .childrenLiveOutsideOfEnWlDetails("Test")
+                                           .parentsAnyOneLiveOutsideEnWl(Yes)
+                                           .parentsAnyOneLiveOutsideEnWlDetails("Test")
+                                           .anotherPersonOrderOutsideEnWl(Yes)
+                                           .anotherPersonOrderOutsideEnWlDetails("Test")
+                                           .anotherCountryAskedInformation(Yes)
+                                           .anotherCountryAskedInformationDetaails("Test")
                                            .build())
             .keepContactDetailsPrivate(KeepDetailsPrivate
                                            .builder()

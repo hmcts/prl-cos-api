@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.safetyconcerns.SafetyConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 
@@ -54,10 +53,6 @@ public class Response {
     @JsonUnwrapped
     @Builder.Default
     private final RespondentAllegationsOfHarmData respondentAllegationsOfHarmData;
-
-    @JsonUnwrapped
-    @Builder.Default
-    private final ResSolInternationalElements resSolInternationalElements;
 
     private final YesOrNo c7ResponseSubmitted;
     private final YesOrNo c1AResponseSubmitted;
