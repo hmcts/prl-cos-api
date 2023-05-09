@@ -528,13 +528,13 @@ public class CallbackController {
         List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
         List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
         List<Element<QuarentineLegalDoc>> quarentineDocs = null;
+        log.info("*** Category *** {}", caseData.getDocumentCategory());
         if (furtherEvidencesList != null) {
             log.info("*** further evidences *** {}", furtherEvidencesList);
             quarentineDocs = furtherEvidencesList.stream().map(element -> Element.<QuarentineLegalDoc>builder()
                 .value(QuarentineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
                            .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
                            .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxFurtherEvidence())
-                           .category(caseData.getDocumentCategory().getDisplayedValue())
                            .build())
                     .id(element.getId()).build())
                 .collect(Collectors.toList());
@@ -546,7 +546,6 @@ public class CallbackController {
                                .documentName(element.getValue().getDocumentName())
                                .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxCorrespondence())
                                .notes(element.getValue().getNotes())
-                               .category(caseData.getDocumentCategory().getDisplayedValue())
                                .build())
                     .id(element.getId()).build())
                 .collect(Collectors.toList());
@@ -557,7 +556,6 @@ public class CallbackController {
                                .documentType(element.getValue().getDocumentTypeOther().toString())
                                .notes(element.getValue().getNotes())
                                .documentName(element.getValue().getDocumentName())
-                               .category(caseData.getDocumentCategory().getDisplayedValue())
                                .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxOtherDocuments())
                                .build())
                     .id(element.getId()).build())
