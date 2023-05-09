@@ -526,7 +526,6 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Element<FurtherEvidence>> furtherEvidencesList = caseData.getFurtherEvidences();
         List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
-        List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
         List<Element<QuarentineLegalDoc>> quarentineDocs = null;
         log.info("*** Category *** {}", caseData.getDocumentCategory());
         if (furtherEvidencesList != null) {
@@ -550,6 +549,7 @@ public class CallbackController {
                     .id(element.getId()).build())
                 .collect(Collectors.toList());
         }
+        List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
         if (otherDocumentsList != null) {
             quarentineDocs = otherDocumentsList.stream().map(element -> Element.<QuarentineLegalDoc>builder()
                     .value(QuarentineLegalDoc.builder().document(element.getValue().getDocumentOther())
