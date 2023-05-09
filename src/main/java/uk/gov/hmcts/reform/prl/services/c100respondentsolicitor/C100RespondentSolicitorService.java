@@ -148,7 +148,7 @@ public class C100RespondentSolicitorService {
                     log.info("MIAM fields, :::{}", (Object) miamFields);
                     caseDataUpdated.put(
                         miamFields[0],
-                        solicitorRepresentedRespondent.getValue().getResponse().getMiam().getAttendedMiam()
+                        solicitorRepresentedRespondent.getValue().getResponse().getMiam()
                     );
                     caseDataUpdated.put(miamFields[1], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
                     caseDataUpdated.put(
