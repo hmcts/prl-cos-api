@@ -116,18 +116,14 @@ public class ManageOrdersController {
         List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-        List<Element<HearingData>> hearingData = hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                                                   hearingDataPrePopulatedDynamicLists,
-                                                                                   caseData
-        );
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
             caseDataUpdated.put(
                 ORDER_HEARING_DETAILS,
-                hearingData
+                hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                  hearingDataPrePopulatedDynamicLists, caseData
+                )
             );
         }
-        log.info("Hearing data {}", hearingData);
-        caseData.getManageOrders().toBuilder().ordersHearingDetails(hearingData);
         caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
             authorisation,
             callbackRequest,
