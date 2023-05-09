@@ -10,7 +10,7 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
-import uk.gov.hmcts.reform.prl.models.complextypes.sendandreply.SelectedExternalPartyDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.sendandreply.SelectedExternalPartyDocument;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -54,7 +54,7 @@ public class Message extends MessageMetaData {
     private String selectedExternalParties;
 
     @JsonProperty("selectedExternalPartyDocuments")
-    private List<SelectedExternalPartyDocuments> selectedExternalPartyDocuments;
+    private List<SelectedExternalPartyDocument> selectedExternalPartyDocuments;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
