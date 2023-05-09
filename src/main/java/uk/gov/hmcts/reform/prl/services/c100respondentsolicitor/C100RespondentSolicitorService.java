@@ -315,11 +315,11 @@ public class C100RespondentSolicitorService {
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
                     .miam(Miam.builder()
                               .attendedMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam())
-                              .willingToAttendMiam(caseData.getRespondentSolicitorWillingnessToAttendMiam().getWillingToAttendMiam())
+                              .willingToAttendMiam(caseData.getRespondentSolicitorHaveYouAttendedMiam().getWillingToAttendMiam())
                               .reasonNotAttendingMiam(
-                                  Yes.equals(caseData.getRespondentSolicitorWillingnessToAttendMiam()
+                                  Yes.equals(caseData.getRespondentSolicitorHaveYouAttendedMiam()
                                                   .getWillingToAttendMiam()) ? null : caseData
-                                                          .getRespondentSolicitorWillingnessToAttendMiam()
+                                                          .getRespondentSolicitorHaveYouAttendedMiam()
                                                           .getReasonNotAttendingMiam()).build()).build();
                 break;
             case CURRENT_OR_PREVIOUS_PROCEEDINGS:
