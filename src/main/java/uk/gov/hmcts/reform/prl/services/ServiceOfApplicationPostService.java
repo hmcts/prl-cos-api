@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
@@ -78,14 +79,20 @@ public class ServiceOfApplicationPostService {
                 .equalsIgnoreCase(partyDetails.getIsCurrentAddressKnown().getDisplayedValue()))
             .forEach(partyDetails -> {
                 List<GeneratedDocumentInfo> docs = null;
+                List<Element<BulkPrintDetails>> printedDocCollectionList;
                 docs = getUploadedDocumentsServiceOfApplication(caseData);
                 try {
                     docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
                 } catch (Exception e) {
                     log.info("*** Error while generating privacy notice to be served ***");
                 }
-                CaseData caseDataReturned = sendBulkPrint(caseData, authorisation, docs);
-                sentDocs.addAll(caseData.getGeneratedDocs());
+                if (caseData.getBulkPrintDetails() != null) {
+                    printedDocCollectionList = caseData.getBulkPrintDetails();
+                } else {
+                    printedDocCollectionList = new ArrayList<>();
+                }
+                printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, docs)));
+                caseData.setBulkPrintDetails(printedDocCollectionList);
             }
             ));
         return sentDocs;
@@ -166,8 +173,9 @@ public class ServiceOfApplicationPostService {
                                                                       documentName, welshCase(caseData)));
     }
 
-    private CaseData sendBulkPrint(CaseData caseData,String authorisation, List<GeneratedDocumentInfo> docs) {
+    private Element<BulkPrintDetails> sendBulkPrint(CaseData caseData,String authorisation, List<GeneratedDocumentInfo> docs) {
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
+        String bulkPrintedId = "";
         try {
             log.info("*** Initiating request to Bulk print service ***");
             UUID bulkPrintId = bulkPrintService.send(
@@ -177,12 +185,14 @@ public class ServiceOfApplicationPostService {
                 docs
             );
             log.info("ID in the queue from bulk print service : {}",bulkPrintId);
+            bulkPrintedId = String.valueOf(bulkPrintId);
+
             sentDocs.addAll(docs);
-            caseData.setGeneratedDocs(sentDocs);
-            caseData.setBulkPrintId(bulkPrintId);
+
         } catch (Exception e) {
             log.info("The bulk print service has failed: {}", e);
         }
-        return caseData;
+        return element(BulkPrintDetails.builder().bulkPrintId(bulkPrintedId).printedDocs(sentDocs).build());
     }
+
 }

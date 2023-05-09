@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -81,13 +80,10 @@ public class ServiceOfApplicationService {
     }
 
     public CaseData sendPost(CaseDetails caseDetails, String authorization) throws Exception {
-        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info(" Sending post to the parties involved ");
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            sentDocs = serviceOfApplicationPostService.sendDocs(caseData,authorization);
-            caseData.setGeneratedDocs(sentDocs);
-
+            serviceOfApplicationPostService.sendDocs(caseData,authorization);
         }
         return caseData;
     }

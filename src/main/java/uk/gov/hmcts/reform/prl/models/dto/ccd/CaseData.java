@@ -96,7 +96,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAb
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
@@ -114,7 +114,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -788,7 +787,6 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
     private NextHearingDetails nextHearingDetails;
-    private List<GeneratedDocumentInfo> generatedDocs;
-    private UUID bulkPrintId;
+    private List<Element<BulkPrintDetails>> bulkPrintDetails;
 
 }
