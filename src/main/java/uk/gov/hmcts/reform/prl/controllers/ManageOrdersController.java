@@ -337,10 +337,12 @@ public class ManageOrdersController {
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
             caseData.setAppointedGuardianName(namesList);
 
-            caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingDataService
+            List<Element<HearingData>> hearingData = hearingDataService
                 .getHearingData(existingOrderHearingDetails,
                                 hearingDataPrePopulatedDynamicLists, caseData
-                ));
+                );
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
+            caseData.getManageOrders().toBuilder().ordersHearingDetails(hearingData);
 
             caseDataUpdated.putAll(manageOrderService.getCaseData(
                 authorisation,
