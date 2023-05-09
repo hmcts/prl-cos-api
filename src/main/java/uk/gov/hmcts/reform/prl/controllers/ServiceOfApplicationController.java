@@ -114,4 +114,22 @@ public class ServiceOfApplicationController {
         updatedCaseData.putAll(allTabsFields);
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
+
+    @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Serve Parties Email and Post Notification")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleSubmitted(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
+        serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
+        Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        updatedCaseData.put("caseInvites", caseData.getCaseInvites());
+        Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
+        updatedCaseData.putAll(allTabsFields);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
+    }
 }

@@ -84,7 +84,8 @@ public class ServiceOfApplicationPostService {
                 } catch (Exception e) {
                     log.info("*** Error while generating privacy notice to be served ***");
                 }
-                sentDocs.addAll(sendBulkPrint(String.valueOf(caseData.getId()), authorisation, docs));
+                CaseData caseDataReturned = sendBulkPrint(caseData, authorisation, docs);
+                sentDocs.addAll(caseData.getGeneratedDocs());
             }
             ));
         return sentDocs;
@@ -165,21 +166,23 @@ public class ServiceOfApplicationPostService {
                                                                       documentName, welshCase(caseData)));
     }
 
-    private List<GeneratedDocumentInfo> sendBulkPrint(String id,String authorisation, List<GeneratedDocumentInfo> docs) {
+    private CaseData sendBulkPrint(CaseData caseData,String authorisation, List<GeneratedDocumentInfo> docs) {
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         try {
             log.info("*** Initiating request to Bulk print service ***");
             UUID bulkPrintId = bulkPrintService.send(
-                id,
+                String.valueOf(caseData.getId()),
                 authorisation,
                 LETTER_TYPE,
                 docs
             );
             log.info("ID in the queue from bulk print service : {}",bulkPrintId);
             sentDocs.addAll(docs);
+            caseData.setGeneratedDocs(sentDocs);
+            caseData.setBulkPrintId(bulkPrintId);
         } catch (Exception e) {
             log.info("The bulk print service has failed: {}", e);
         }
-        return sentDocs;
+        return caseData;
     }
 }
