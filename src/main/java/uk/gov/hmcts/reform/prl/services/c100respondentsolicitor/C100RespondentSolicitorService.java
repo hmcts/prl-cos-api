@@ -150,13 +150,9 @@ public class C100RespondentSolicitorService {
                         miamFields[0],
                         solicitorRepresentedRespondent.getValue().getResponse().getMiam().getAttendedMiam()
                     );
+                    caseDataUpdated.put(miamFields[1], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
                     caseDataUpdated.put(
-                        miamFields[1],
-                        solicitorRepresentedRespondent.getValue().getResponse().getMiam().getWillingToAttendMiam()
-                    );
-                    caseDataUpdated.put(miamFields[2], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
-                    caseDataUpdated.put(
-                        miamFields[3],
+                        miamFields[2],
                         miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder()
                     );
                     break;
