@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.ExternalPartyDocument;
+import uk.gov.hmcts.reform.prl.models.complextypes.sendandreply.SelectedExternalPartyDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
@@ -36,11 +37,13 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -461,13 +464,19 @@ public class SendAndReplyService {
 
         final SendOrReplyMessage sendOrReplyMessage = caseData.getSendOrReplyMessage();
 
+        log.info("select sendOrReplyMessage.getExternalPartiesList() ---> {}", sendOrReplyMessage.getExternalPartiesList());
+        log.info("select sendOrReplyMessage.getExternalPartyDocuments() ---> {}", sendOrReplyMessage.getExternalPartyDocuments());
+
         return Message.builder()
             .status(OPEN)
             .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
-            .internalOrExternalMessage(sendOrReplyMessage.getInternalOrExternalMessage().name())
+            .internalOrExternalMessage(sendOrReplyMessage.getInternalOrExternalMessage() != null
+                                           ? sendOrReplyMessage.getInternalOrExternalMessage().name() : null)
             .internalMessageUrgent(sendOrReplyMessage.getInternalMessageUrgent())
-            .internalMessageWhoToSendTo(sendOrReplyMessage.getInternalMessageWhoToSendTo().name())
-            .messageAbout(sendOrReplyMessage.getMessageAbout().name())
+            .internalMessageWhoToSendTo(sendOrReplyMessage.getInternalMessageWhoToSendTo() != null
+                                            ? sendOrReplyMessage.getInternalMessageWhoToSendTo().name() : null)
+            .messageAbout(sendOrReplyMessage.getMessageAbout() != null
+                          ? sendOrReplyMessage.getMessageAbout().name() : null)
             .judgeName(getJudgeName(sendOrReplyMessage.getSendReplyJudgeName()))
             .messageSubject(sendOrReplyMessage.getMessageSubject())
             .recipientEmailAddresses(sendOrReplyMessage.getRecipientEmailAddresses())
@@ -489,14 +498,30 @@ public class SendAndReplyService {
                                                ? sendOrReplyMessage.getSubmittedDocumentsList().getValueCode() : null)
             .selectedSubmittedDocumentValue(sendOrReplyMessage.getSubmittedDocumentsList() != null
                                                 ? sendOrReplyMessage.getSubmittedDocumentsList().getValueLabel() : null)
-            .selectedExternalParties(sendOrReplyMessage.getExternalPartiesList() != null
-                                         ? sendOrReplyMessage.getExternalPartiesList().getValueCode() : null)
-
-            // TODO need to check with Yogendra
-            //            .messageHistory(buildMessageHistory(metaData.getSenderEmail(), caseData.getMessageContent()))
+            .selectedExternalParties(getSelectedExternalParties(sendOrReplyMessage.getExternalPartiesList()))
+            .selectedExternalPartyDocuments(getExternalPartyDocuments(sendOrReplyMessage))
             .latestMessage(caseData.getMessageContent())
             .updatedTime(dateTime.now())
             .build();
+    }
+
+    private List<SelectedExternalPartyDocuments> getExternalPartyDocuments(SendOrReplyMessage sendOrReplyMessage) {
+
+        if (sendOrReplyMessage != null && isNotEmpty(sendOrReplyMessage.getExternalPartyDocuments())) {
+
+            List<SelectedExternalPartyDocuments> selectedExternalPartyDocuments = new ArrayList<>();
+
+            sendOrReplyMessage.getExternalPartyDocuments().forEach(
+                externalPartyDocumentElement -> {
+                    final DynamicListElement documentCategoryDynamicList = externalPartyDocumentElement.getValue()
+                        .getDocumentCategoryList().getValue();
+                    SelectedExternalPartyDocuments.builder().selectedDocumentCode(documentCategoryDynamicList.getCode())
+                        .selectedDocumentValue(documentCategoryDynamicList.getLabel());
+                }
+            );
+            return selectedExternalPartyDocuments;
+        }
+        return Collections.EMPTY_LIST;
     }
 
     public List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser judicialUser) {
@@ -528,6 +553,7 @@ public class SendAndReplyService {
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
         return messages;
     }
+
 
     public Map<String,Object> setSenderAndGenerateMessageReplyList(CaseData caseData, String authorisation) {
         Map<String, Object> data = new HashMap<>();
@@ -571,4 +597,22 @@ public class SendAndReplyService {
             .sendOrReplyMessage(
                 caseData.getSendOrReplyMessage().toBuilder().replyMessage(previousMessage.get()).build()).build();
     }
+
+    private String getSelectedExternalParties(DynamicMultiSelectList externalPartiesList) {
+        String externalParties = "";
+        if (Objects.nonNull(externalPartiesList)) {
+            List<DynamicMultiselectListElement> selectedElement = externalPartiesList.getValue();
+
+            log.info("selectedElement value for external parties ----------> {}", selectedElement);
+            if (isNotEmpty(selectedElement)) {
+                List<String> labelList = selectedElement.stream().map(DynamicMultiselectListElement::getLabel)
+                    .collect(Collectors.toList());
+                externalParties = String.join(",",labelList);
+            }
+        }
+
+        log.info("externalParties string -------> {}", externalParties);
+        return externalParties;
+    }
+
 }
