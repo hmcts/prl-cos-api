@@ -85,6 +85,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
@@ -94,7 +95,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentA
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
@@ -694,10 +694,7 @@ public class CaseData implements MappableObject {
     /**
      * Respondent solicitor's international element.
      */
-    private final SolicitorInternationalElement internationalElementChild;
-    private final SolicitorInternationalElement internationalElementParent;
-    private final SolicitorInternationalElement internationalElementJurisdiction;
-    private final SolicitorInternationalElement internationalElementRequest;
+    private final CitizenInternationalElements internationalElementChild;
 
     /**
      * Respondent solicitor's allegations of harm.

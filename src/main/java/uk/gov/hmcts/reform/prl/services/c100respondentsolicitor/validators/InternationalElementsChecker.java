@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
@@ -27,11 +27,11 @@ public class InternationalElementsChecker implements RespondentEventChecker {
     @Override
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
-        return response.filter(value -> ofNullable(value.getResSolInternationalElements())
-            .filter(resSolInternationalElements -> anyNonEmpty(
-                resSolInternationalElements.getInternationalElementChildInfo().getReasonForChild(),
-                resSolInternationalElements.getInternationalElementJurisdictionInfo().getReasonForJurisdiction(),
-                resSolInternationalElements.getInternationalElementParentInfo().getReasonForParent()
+        return response.filter(value -> ofNullable(value.getCitizenInternationalElements())
+            .filter(citizenInternationalElements -> anyNonEmpty(
+                citizenInternationalElements.getChildrenLiveOutsideOfEnWlDetails(),
+                citizenInternationalElements.getAnotherCountryAskedInformation(),
+                citizenInternationalElements.getParentsAnyOneLiveOutsideEnWl()
             )).isPresent()).isPresent();
     }
 
@@ -40,8 +40,8 @@ public class InternationalElementsChecker implements RespondentEventChecker {
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {
-            Optional<ResSolInternationalElements> solicitorInternationalElement
-                = Optional.ofNullable(response.get().getResSolInternationalElements());
+            Optional<CitizenInternationalElements> solicitorInternationalElement
+                = Optional.ofNullable(response.get().getCitizenInternationalElements());
             if (solicitorInternationalElement.isPresent() && checkInternationalElementMandatoryCompleted(
                 solicitorInternationalElement.get())) {
                 respondentTaskErrorService.removeError(INTERNATIONAL_ELEMENT_ERROR);
@@ -56,32 +56,31 @@ public class InternationalElementsChecker implements RespondentEventChecker {
         return false;
     }
 
-    private boolean checkInternationalElementMandatoryCompleted(ResSolInternationalElements internationalElements) {
+    private boolean checkInternationalElementMandatoryCompleted(CitizenInternationalElements internationalElements) {
         List<Optional<?>> fields = new ArrayList<>();
-        Optional<YesOrNo> reasonForChild = ofNullable(internationalElements.getInternationalElementChildInfo().getReasonForChild());
+        Optional<YesOrNo> reasonForChild = ofNullable(internationalElements.getChildrenLiveOutsideOfEnWl());
         fields.add(reasonForChild);
         if (reasonForChild.isPresent() && YesOrNo.Yes.equals(reasonForChild.get())) {
-            fields.add(ofNullable(internationalElements.getInternationalElementChildInfo().getReasonForChildDetails()));
+            fields.add(ofNullable(internationalElements.getChildrenLiveOutsideOfEnWlDetails()));
         }
 
-        Optional<YesOrNo> reasonForParent = ofNullable(internationalElements.getInternationalElementParentInfo().getReasonForParent());
+        Optional<YesOrNo> reasonForParent = ofNullable(internationalElements.getParentsAnyOneLiveOutsideEnWl());
         fields.add(reasonForParent);
         if (reasonForParent.isPresent() && YesOrNo.Yes.equals(reasonForParent.get())) {
-            fields.add(ofNullable(internationalElements.getInternationalElementParentInfo().getReasonForParentDetails()));
+            fields.add(ofNullable(internationalElements.getParentsAnyOneLiveOutsideEnWlDetails()));
         }
 
         Optional<YesOrNo> reasonForJurisdiction = ofNullable(internationalElements
-                                                                 .getInternationalElementJurisdictionInfo().getReasonForJurisdiction());
+                                                                 .getAnotherPersonOrderOutsideEnWl());
         fields.add(reasonForJurisdiction);
         if (reasonForJurisdiction.isPresent() && YesOrNo.Yes.equals(reasonForJurisdiction.get())) {
-            fields.add(ofNullable(internationalElements.getInternationalElementJurisdictionInfo().getReasonForJurisdictionDetails()));
+            fields.add(ofNullable(internationalElements.getAnotherPersonOrderOutsideEnWlDetails()));
         }
 
-        Optional<YesOrNo> requestToAuthority = ofNullable(internationalElements.getInternationalElementRequestInfo()
-                                                              .getRequestToAuthority());
+        Optional<YesOrNo> requestToAuthority = ofNullable(internationalElements.getAnotherCountryAskedInformation());
         fields.add(requestToAuthority);
         if (requestToAuthority.isPresent() && YesOrNo.Yes.equals(requestToAuthority.get())) {
-            fields.add(ofNullable(internationalElements.getInternationalElementRequestInfo().getRequestToAuthorityDetails()));
+            fields.add(ofNullable(internationalElements.getAnotherCountryAskedInformationDetaails()));
         }
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));

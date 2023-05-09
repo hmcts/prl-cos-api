@@ -11,8 +11,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
@@ -22,7 +21,6 @@ import java.util.List;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -46,36 +44,18 @@ public class InternationalElementsCheckerTest {
             .builder()
             .response(Response
                           .builder()
-                          .resSolInternationalElements(ResSolInternationalElements
-                                                           .builder()
-                                                           .internationalElementParentInfo(SolicitorInternationalElement
-                                                                                               .builder()
-                                                                                               .reasonForParent(Yes)
-                                                                                               .reasonForParentDetails("Test")
-                                                                                               .reasonForJurisdictionDetails("Test")
-                                                                                               .requestToAuthorityDetails("Test")
-                                                                                               .build())
-                                                           .internationalElementChildInfo(SolicitorInternationalElement
-                                                                                              .builder()
-                                                                                              .reasonForChild(Yes)
-                                                                                              .reasonForChildDetails("Test")
-                                                                                              .reasonForParent(Yes)
-                                                                                              .reasonForParentDetails("Test")
-                                                                                              .reasonForJurisdiction(Yes)
-                                                                                              .reasonForJurisdictionDetails("Test")
-                                                                                              .requestToAuthority(Yes)
-                                                                                              .requestToAuthorityDetails("Test")
-                                                                                              .build())
-                                                           .internationalElementRequestInfo(SolicitorInternationalElement
-                                                                                                .builder()
-                                                                                                .requestToAuthority(No)
-                                                                                                .build())
-                                                           .internationalElementJurisdictionInfo(SolicitorInternationalElement
-                                                                                                .builder()
-                                                                                                     .reasonForJurisdiction(No)
-                                                                                                     .build())
-                                                           .build())
-                          .build())
+                          .citizenInternationalElements(CitizenInternationalElements
+                                                            .builder()
+                                                            .childrenLiveOutsideOfEnWl(Yes)
+                                                            .childrenLiveOutsideOfEnWlDetails("Test")
+                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
+                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
+                                                            .anotherPersonOrderOutsideEnWl(Yes)
+                                                            .anotherPersonOrderOutsideEnWlDetails("Test")
+                                                            .anotherCountryAskedInformation(Yes)
+                                                            .anotherCountryAskedInformationDetaails("Test")
+                                                            .build())
+            .build())
             .build();
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();

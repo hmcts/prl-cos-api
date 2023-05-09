@@ -22,11 +22,10 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResSolInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
@@ -198,20 +197,19 @@ public class C100RespondentSolicitorService {
                     String[] internationalElementFields = event.getCaseFieldName().split(",");
                     caseDataUpdated.put(
                         internationalElementFields[0],
-                        solicitorRepresentedRespondent.getValue().getResponse().getResSolInternationalElements().getInternationalElementChildInfo()
+                        solicitorRepresentedRespondent.getValue().getResponse().getCitizenInternationalElements()
                     );
                     caseDataUpdated.put(
                         internationalElementFields[1],
-                        solicitorRepresentedRespondent.getValue().getResponse().getResSolInternationalElements().getInternationalElementParentInfo()
+                        solicitorRepresentedRespondent.getValue().getResponse().getCitizenInternationalElements()
                     );
                     caseDataUpdated.put(
                         internationalElementFields[2],
-                        solicitorRepresentedRespondent.getValue().getResponse()
-                            .getResSolInternationalElements().getInternationalElementJurisdictionInfo()
+                        solicitorRepresentedRespondent.getValue().getResponse().getCitizenInternationalElements()
                     );
                     caseDataUpdated.put(
                         internationalElementFields[3],
-                        solicitorRepresentedRespondent.getValue().getResponse().getResSolInternationalElements().getInternationalElementRequestInfo()
+                        solicitorRepresentedRespondent.getValue().getResponse().getCitizenInternationalElements()
                     );
                     break;
                 case ABILITY_TO_PARTICIPATE:
@@ -339,53 +337,55 @@ public class C100RespondentSolicitorService {
                 break;
             case INTERNATIONAL_ELEMENT:
                 buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .resSolInternationalElements(ResSolInternationalElements.builder()
-                                                     .internationalElementChildInfo(
-                                                         SolicitorInternationalElement.builder()
-                                                             .reasonForChild(caseData.getInternationalElementChild()
-                                                                                 .getReasonForChild())
-                                                             .reasonForChildDetails(YesOrNo.No.equals(
-                                                                 caseData.getInternationalElementChild()
-                                                                     .getReasonForChild())
-                                                                                        ? null
-                                                                                        : caseData.getInternationalElementChild()
-                                                                 .getReasonForChildDetails()).build())
-                                                     .internationalElementParentInfo(
-                                                         SolicitorInternationalElement.builder()
-                                                             .reasonForParent(caseData.getInternationalElementParent()
-                                                                                  .getReasonForParent())
-                                                             .reasonForParentDetails(YesOrNo.No.equals(
-                                                                 caseData.getInternationalElementParent()
-                                                                     .getReasonForParent())
-                                                                                         ? null
-                                                                                         : caseData.getInternationalElementParent()
-                                                                 .getReasonForParentDetails()).build())
-                                                     .internationalElementJurisdictionInfo(
-                                                         SolicitorInternationalElement.builder()
-                                                             .reasonForJurisdiction(
-                                                                 caseData.getInternationalElementJurisdiction()
-                                                                     .getReasonForJurisdiction())
-                                                             .reasonForJurisdictionDetails(
-                                                                 YesOrNo.No.equals(
-                                                                     caseData
-                                                                         .getInternationalElementJurisdiction()
-                                                                         .getReasonForJurisdiction())
-                                                                     ? null
-                                                                     : caseData.getInternationalElementJurisdiction()
-                                                                     .getReasonForJurisdictionDetails()).build())
-                                                     .internationalElementRequestInfo(
-                                                         SolicitorInternationalElement.builder()
-                                                             .requestToAuthority(
-                                                                 caseData.getInternationalElementRequest()
-                                                                     .getRequestToAuthority())
-                                                             .requestToAuthorityDetails(
-                                                                 YesOrNo.No.equals(caseData
-                                                                                       .getInternationalElementRequest()
-                                                                                       .getRequestToAuthority())
-                                                                     ? null
-                                                                     : caseData.getInternationalElementRequest()
-                                                                     .getRequestToAuthorityDetails()).build())
-                                                     .build())
+                    .citizenInternationalElements(CitizenInternationalElements
+                                                      .builder()
+                                                      .childrenLiveOutsideOfEnWl(caseData
+                                                                                     .getInternationalElementChild()
+                                                                                     .getChildrenLiveOutsideOfEnWl())
+                                                      .childrenLiveOutsideOfEnWlDetails(YesOrNo
+                                                                                            .No
+                                                                                            .equals(caseData
+                                                                                                        .getInternationalElementChild()
+                                                                                                        .getChildrenLiveOutsideOfEnWl()
+                                                                                            ) ? null : caseData
+                                                          .getInternationalElementChild()
+                                                          .getChildrenLiveOutsideOfEnWlDetails())
+                                                      .parentsAnyOneLiveOutsideEnWl(caseData
+                                                                                        .getInternationalElementChild()
+                                                                                        .getParentsAnyOneLiveOutsideEnWl())
+                                                      .parentsAnyOneLiveOutsideEnWlDetails(YesOrNo
+                                                                                               .No
+                                                                                               .equals(caseData
+                                                                                                           .getInternationalElementChild()
+                                                                                                           .getParentsAnyOneLiveOutsideEnWl()
+                                                                                               ) ? null : caseData
+                                                                                               .getInternationalElementChild()
+                                                                                               .getParentsAnyOneLiveOutsideEnWlDetails()
+                                                          )
+                                                      .anotherPersonOrderOutsideEnWl(caseData
+                                                                                         .getInternationalElementChild()
+                                                                                         .getAnotherPersonOrderOutsideEnWl())
+                                                      .anotherPersonOrderOutsideEnWlDetails(YesOrNo
+                                                                                                .No
+                                                                                                .equals(caseData
+                                                                                                            .getInternationalElementChild()
+                                                                                                            .getAnotherPersonOrderOutsideEnWl()
+                                                                                                ) ? null : caseData
+                                                                                                .getInternationalElementChild()
+                                                                                                .getAnotherPersonOrderOutsideEnWlDetails()
+                                                          )
+                                                      .anotherCountryAskedInformation(caseData
+                                                                                          .getInternationalElementChild()
+                                                                                          .getAnotherCountryAskedInformation())
+                                                      .anotherCountryAskedInformationDetaails(YesOrNo
+                                                                                                  .No
+                                                                                                  .equals(caseData
+                                                                                                              .getInternationalElementChild()
+                                                                                                              .getAnotherCountryAskedInformation()
+                                                                                                  ) ? null : caseData
+                                                          .getInternationalElementChild()
+                                                          .getAnotherCountryAskedInformationDetaails())
+                                                      .build())
                     .build();
                 break;
             case ABILITY_TO_PARTICIPATE:
