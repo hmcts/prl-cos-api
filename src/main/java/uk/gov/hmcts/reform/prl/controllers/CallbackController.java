@@ -97,7 +97,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
-import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
@@ -524,52 +523,37 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Element<FurtherEvidence>> furtherEvidencesList = caseData.getFurtherEvidences();
         List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
         List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
+        List<Element<Document>> quarentineDocs = null;
         if (furtherEvidencesList != null) {
-            List<Element<FurtherEvidence>> furtherEvidences = furtherEvidencesList.stream()
-                .filter(element -> element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
-                .collect(Collectors.toList());
-            caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
-            log.info("*** further evidences ***", furtherEvidences);
-            List<Element<Document>> test = furtherEvidences.stream().map(furtherEvidenceElement -> Element.<Document>builder()
+            log.info("*** further evidences *** {}", furtherEvidencesList);
+            quarentineDocs = furtherEvidencesList.stream().map(furtherEvidenceElement -> Element.<Document>builder()
                 .value(furtherEvidenceElement.getValue().getDocumentFurtherEvidence()).id(furtherEvidenceElement.getId()).build())
                 .collect(Collectors.toList());
-            log.info("*** test evidences ***", test);
-
-            caseDataUpdated.put("legalProfQuarentineDocsList", test);
-            List<Element<FurtherEvidence>> furtherEvidencesNotConfidential = furtherEvidencesList.stream()
-                .filter(element -> !element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
-                .collect(Collectors.toList());
-            caseDataUpdated.put("mainAppNotConf", furtherEvidencesNotConfidential);
+            log.info("*** test evidences *** {}", quarentineDocs);
         }
         if (correspondenceList != null) {
-            List<Element<Correspondence>> correspondence = correspondenceList.stream()
-                .filter(element -> element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup))
+            quarentineDocs = correspondenceList.stream().map(element -> Element.<Document>builder()
+                    .value(element.getValue().getDocumentCorrespondence()).id(element.getId()).build())
                 .collect(Collectors.toList());
-            caseDataUpdated.put("correspondenceForTabDisplay", correspondence);
-
-            List<Element<Correspondence>> correspondenceForTabDisplayNotConfidential = correspondenceList.stream()
-                .filter(element -> !element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup))
-                .collect(Collectors.toList());
-
-            caseDataUpdated.put("corrNotConf", correspondenceForTabDisplayNotConfidential);
         }
         if (otherDocumentsList != null) {
-
-            List<Element<OtherDocuments>> otherDocuments = otherDocumentsList.stream()
-                .filter(element -> element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
+            quarentineDocs = otherDocumentsList.stream().map(element -> Element.<Document>builder()
+                    .value(element.getValue().getDocumentOther()).id(element.getId()).build())
                 .collect(Collectors.toList());
-            caseDataUpdated.put("otherDocumentsForTabDisplay", otherDocuments);
-
-            List<Element<OtherDocuments>> otherDocumentsForTabDisplayNotConfidential = otherDocumentsList.stream()
-                .filter(element -> !element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
-                .collect(Collectors.toList());
-            caseDataUpdated.put("otherDocNotConf", otherDocumentsForTabDisplayNotConfidential);
         }
+        if (quarentineDocs != null) {
+            if (null != caseData.getLegalProfQuarentineDocsList()) {
+                caseData.getLegalProfQuarentineDocsList().addAll(quarentineDocs);
+            } else {
+                caseData.setLegalProfQuarentineDocsList(quarentineDocs);
+            }
+        }
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("legalProfQuarentineDocsList", caseData.getLegalProfQuarentineDocsList());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -599,10 +583,7 @@ public class CallbackController {
         } catch (Exception e) {
             log.error("Error while fetching User or Org details for the logged in user ", e);
         }
-
         return caseDataUpdated;
-
     }
-
 }
 
