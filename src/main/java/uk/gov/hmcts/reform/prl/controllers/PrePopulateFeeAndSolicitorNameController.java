@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.launchdarkly.shaded.com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -127,7 +128,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
                 .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                 .build();
-
+            log.info("before court data  :{} ",new Gson().toJson(caseData));
             caseData = buildGeneratedDocumentCaseData(authorisation, callbackRequest, caseData, caseDataForOrgDetails);
         }
 
