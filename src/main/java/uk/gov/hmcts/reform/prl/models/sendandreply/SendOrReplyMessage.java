@@ -46,6 +46,7 @@ public class SendOrReplyMessage {
     private final List<Element<ExternalPartyDocument>> externalPartyDocuments;
 
     private DynamicList messageReplyDynamicList;
+    private Message replyMessage;
     private YesOrNo respondToMessage;
 }
 

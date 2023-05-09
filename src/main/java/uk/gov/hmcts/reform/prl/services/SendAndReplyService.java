@@ -56,6 +56,7 @@ import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicMultiselectList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 @Service
@@ -549,5 +550,25 @@ public class SendAndReplyService {
             null,
             Message::getLabelForDynamicList
         );
+    }
+
+    public CaseData populateMessageReplyFields(CaseData caseData, String auth) {
+        UUID messageId = elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
+
+        Optional<Message> previousMessage = nullSafeCollection(
+            caseData.getSendOrReplyMessage().getOpenMessagesList()).stream()
+            .filter(element -> element.getId().equals(messageId))
+            .map(Element::getValue)
+            .findFirst();
+
+        if (previousMessage.isEmpty()) {
+            log.info("No message found with that ID");
+            return caseData;
+        }
+
+        return caseData.toBuilder()
+            .sendOrReplyMessage(
+                caseData.getSendOrReplyMessage().toBuilder().replyMessage(previousMessage.get()).build()).build();
     }
 }

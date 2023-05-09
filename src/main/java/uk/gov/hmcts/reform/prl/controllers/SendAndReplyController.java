@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -204,9 +205,18 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+        List<String> errors = new ArrayList<>();
+        if (REPLY.equals(caseData.getChooseSendOrReply())) {
+            if (CollectionUtils.isEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
+                errors.add("There are no messages to respond to.");
+            } else {
+                caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
+            }
+        } else {
+            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+        }
 
-        return CallbackResponse.builder().data(caseData).build();
+        return CallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
     @PostMapping("/send-or-reply-to-messages/about-to-submit")
