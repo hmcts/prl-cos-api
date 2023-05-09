@@ -137,7 +137,7 @@ public class ServiceOfApplicationControllerTest {
 
         when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
         when(serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails())).thenReturn(cd);
-        serviceOfApplicationController.handleAboutToSubmit("test auth",callbackRequest);
+        serviceOfApplicationController.handleSubmitted("test auth",callbackRequest);
         verify(serviceOfApplicationService).sendEmail(callbackRequest.getCaseDetails());
 
     }
