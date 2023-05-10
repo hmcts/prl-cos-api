@@ -186,7 +186,7 @@ public class HearingDataService {
 
     }
 
-    protected List<DynamicListElement> getLinkedCases(String authorisation, CaseData caseData) {
+    public List<DynamicListElement> getLinkedCases(String authorisation, CaseData caseData) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         try {
             log.info("Linked case method ", caseData.getId());
@@ -318,7 +318,7 @@ public class HearingDataService {
 
     }
 
-    private DynamicList getDynamicList(List<DynamicListElement> listItems) {
+    public DynamicList getDynamicList(List<DynamicListElement> listItems) {
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY)
             .listItems(listItems).build();

@@ -545,6 +545,11 @@ public class PrlAppsConstants {
 
     public static final String CASE_DATA_ID = "id";
     public static final String LISTWITHOUTNOTICE_HEARINGDETAILS = "listWithoutNoticeHearingDetails";
+    public static final String FL401_LISTONNOTICE_HEARINGDETAILS = "fl401ListOnNoticeHearingDetails";
+    public static final String LINKED_CASES_LIST = "linkedCaCasesList";
+    public static final String LEGAL_ADVISER_LIST = "legalAdviserList";
+    public static final String FL401_CASE_WITHOUT_NOTICE = "isFl401CaseCreatedForWithOutNotice";
+    public static final String FL401_LIST_ON_NOTICE_DOCUMENT = "fl401ListOnNoticeDocument";
 
     public static final String DATE_CONFIRMED_IN_HEARINGS_TAB = "dateConfirmedInHearingsTab";
     public static final String HEARING_DATE_CONFIRM_OPTION_ENUM = "hearingDateConfirmOptionEnum";
@@ -591,6 +596,7 @@ public class PrlAppsConstants {
 
     public static final String CASE_NOTES = "caseNotes";
     public static final String COLON_SEPERATOR = ":";
+    public static final String DA_LIST_ON_NOTICE_FL404B_DOCUMENT = "DA_LIST_ON_NOTICE_FL404B_DOCUMENT";
     public static final String SDO_PERMISSION_HEARING_DETAILS = "sdoPermissionHearingDetails";
     public static final String SDO_SECOND_HEARING_DETAILS = "sdoSecondHearingDetails";
     public static final String SDO_URGENT_HEARING_DETAILS = "sdoUrgentHearingDetails";
