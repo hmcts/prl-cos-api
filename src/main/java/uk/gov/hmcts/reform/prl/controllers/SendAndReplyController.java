@@ -136,7 +136,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
             List<Element<Message>> messages;
             if (caseData.getMessageReply().getIsReplying().equals(YesOrNo.No)) {
-                messages = sendAndReplyService.closeMessage(selectedValue, caseData.getOpenMessages());
+                messages = sendAndReplyService.closeMessage(selectedValue, caseData);
                 List<Element<Message>> closedMessages = messages.stream()
                     .filter(m -> m.getValue().getStatus().equals(MessageStatus.CLOSED))
                     .collect(Collectors.toList());
@@ -210,7 +210,7 @@ public class SendAndReplyController extends AbstractCallbackController {
             if (CollectionUtils.isEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
                 errors.add("There are no messages to respond to.");
             } else {
-                caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
+                caseData = sendAndReplyService.populateMessageReplyFields(caseData);
             }
         } else {
             caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
@@ -245,7 +245,9 @@ public class SendAndReplyController extends AbstractCallbackController {
         } else {
             //Reply message
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
-                caseDataMap.put("closedMessagesList", sendAndReplyService.closeMessage(caseData));
+                caseData = sendAndReplyService.closeMessage(caseData);
+                caseDataMap.put("closedMessagesList", caseData.getSendOrReplyMessage().getClosedMessagesList());
+                caseDataMap.put("openMessagesList", caseData.getSendOrReplyMessage().getOpenMessagesList());
             }
         }
 

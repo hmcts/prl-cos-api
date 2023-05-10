@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -162,34 +163,45 @@ public class SendAndReplyService {
         return messages;
     }
 
-    public List<Element<Message>> closeMessage(UUID messageId, List<Element<Message>> openMessages) {
-        nullSafeCollection(openMessages).stream()
+    public List<Element<Message>> closeMessage(UUID messageId, CaseData caseData) {
+        List<Element<Message>> messages = caseData.getOpenMessages();
+        messages.stream()
             .filter(m -> m.getId().equals(messageId))
             .map(Element::getValue)
             .forEach(message -> {
                 message.setStatus(MessageStatus.CLOSED);
                 message.setUpdatedTime(dateTime.now());
             });
-        return openMessages;
+        return messages;
     }
 
-    public List<Element<Message>> closeMessage(CaseData caseData) {
+    public CaseData closeMessage(CaseData caseData) {
         UUID messageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
 
-        List<Element<Message>> closedMessages = this.closeMessage(messageId, caseData.getSendOrReplyMessage().getOpenMessagesList());
+        List<Element<Message>> openMessages = caseData.getSendOrReplyMessage().getOpenMessagesList();
+        List<Element<Message>> closedMessages = caseData.getSendOrReplyMessage().getClosedMessagesList();
 
-        if (isNotEmpty(caseData.getSendOrReplyMessage().getClosedMessagesList())) {
-            closedMessages.addAll(caseData.getSendOrReplyMessage().getClosedMessagesList());
-        }
+        //find & remove from open messages list
+        Optional<Element<Message>> closedMessage = openMessages.stream()
+                .filter(m -> m.getId().equals(messageId))
+                .findFirst()
+                .map(element -> {
+                    openMessages.remove(element);
+                    element.getValue().setStatus(MessageStatus.CLOSED);
+                    element.getValue().setUpdatedTime(dateTime.now());
+                    return element;
+                });
 
-        caseData = caseData.toBuilder()
+        //add to closed messages list
+        closedMessage.ifPresent(element -> nullSafeCollection(closedMessages).add(element));
+
+        return caseData.toBuilder()
             .sendOrReplyMessage(caseData.getSendOrReplyMessage().toBuilder()
                                     .closedMessagesList(closedMessages)
+                                    .openMessagesList(openMessages)
                                     .build())
             .build();
-
-        return caseData.getSendOrReplyMessage().getClosedMessagesList();
     }
 
 
@@ -477,7 +489,6 @@ public class SendAndReplyService {
     }
 
     public Message buildSendMessage(CaseData caseData) {
-        MessageMetaData metaData = caseData.getMessageMetaData();
 
         final SendOrReplyMessage sendOrReplyMessage = caseData.getSendOrReplyMessage();
 
@@ -539,7 +550,7 @@ public class SendAndReplyService {
             );
             return selectedExternalPartyDocuments;
         }
-        return null;
+        return Collections.emptyList();
     }
 
     public List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser judicialUser) {
@@ -554,6 +565,7 @@ public class SendAndReplyService {
         if (judicialUser != null && judicialUser.getPersonalCode() != null) {
             final Optional<List<JudicialUsersApiResponse>> judicialUsersApiResponseList = ofNullable(getJudgeDetails(
                 judicialUser));
+
             if (judicialUsersApiResponseList.isPresent()) {
                 return judicialUsersApiResponseList.get().stream().findFirst().get().getFullName();
             }
@@ -596,7 +608,7 @@ public class SendAndReplyService {
         );
     }
 
-    public CaseData populateMessageReplyFields(CaseData caseData, String auth) {
+    public CaseData populateMessageReplyFields(CaseData caseData) {
         UUID messageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
 
