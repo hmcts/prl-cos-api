@@ -135,7 +135,7 @@ public class ServiceOfApplicationPostService {
             generatedDocumentInfo = dgsService.generateCoverLetterDocument(
                 auth,
                 printInputParams,
-                documentGenService.getFileName(caseData, DOCUMENT_COVER_SHEET_HINT, false),
+                documentGenService.getTemplate(caseData, DOCUMENT_COVER_SHEET_HINT, false),
                 String.valueOf(caseData.getId())
             );
         }
