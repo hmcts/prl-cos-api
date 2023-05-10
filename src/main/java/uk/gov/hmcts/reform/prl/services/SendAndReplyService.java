@@ -281,7 +281,7 @@ public class SendAndReplyService {
 
     public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization) {
         String caseReference = String.valueOf(caseData.getId());
-        caseReference = "1683706766996114";
+        caseReference = "1681293182640016";
         DynamicList documentCategoryList = getCategoriesAndDocuments(authorization, caseReference);
         String s2sToken = authTokenGenerator.generate();
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
