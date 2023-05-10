@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,8 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 @Slf4j
 public class NoticeOfChangePartiesService {
+    public static final String NO_REPRESENTATION_FOUND_ERROR = "You do not represent anyone in this case.";
+    public static final String SOL_STOP_REP_CHOOSE_PARTIES = "solStopRepChooseParties";
     public final NoticeOfChangePartiesConverter partiesConverter;
     public final RespondentPolicyConverter policyConverter;
     private final AuthTokenGenerator tokenGenerator;
@@ -153,33 +156,6 @@ public class NoticeOfChangePartiesService {
         return partiesConverter.generateDaForSubmission(partyDetails) == null
             ? Optional.of(NoticeOfChangeParties.builder().build())
             : Optional.of(partiesConverter.generateDaForSubmission(partyDetails));
-    }
-
-    public Map<String, Object> populateAboutToStartStopRepresentation(String authorisation,
-                                                                      CallbackRequest callbackRequest,
-                                                                      List<String> errorList) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        DynamicMultiSelectList solicitorRepresentedParties
-            = dynamicMultiSelectListService.getSolicitorRepresentedParties(
-            authorisation,
-            getCaseData(callbackRequest.getCaseDetails(), objectMapper)
-        );
-        log.info("solicitorRepresentedParties retrieved:: " + solicitorRepresentedParties.getListItems());
-        if (solicitorRepresentedParties.getListItems().isEmpty()) {
-            log.info("Inside error block ");
-            errorList.add(
-                "You do not represent anyone in this case.");
-        } else {
-            log.info("Thanks a lot. we are done here");
-            caseDataUpdated.put(
-                "solStopRepChooseParties",
-                dynamicMultiSelectListService.getSolicitorRepresentedParties(
-                    authorisation,
-                    getCaseData(callbackRequest.getCaseDetails(), objectMapper)
-                )
-            );
-        }
-        return caseDataUpdated;
     }
 
     public enum NoticeOfChangeAnswersPopulationStrategy {
@@ -383,5 +359,59 @@ public class NoticeOfChangePartiesService {
                 data.put(solicitorRole.getRepresenting().getPolicyFieldTemplate(), organisationPolicy);
             }
         }
+    }
+
+    public Map<String, Object> populateAboutToStartStopRepresentation(String authorisation,
+                                                                      CallbackRequest callbackRequest,
+                                                                      List<String> errorList) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        DynamicMultiSelectList solicitorRepresentedParties
+            = dynamicMultiSelectListService.getSolicitorRepresentedParties(
+            authorisation, getCaseData(callbackRequest.getCaseDetails(), objectMapper));
+
+        if (solicitorRepresentedParties.getListItems().isEmpty()) {
+            errorList.add(NO_REPRESENTATION_FOUND_ERROR);
+        } else {
+            caseDataUpdated.put(SOL_STOP_REP_CHOOSE_PARTIES, solicitorRepresentedParties);
+        }
+        return caseDataUpdated;
+    }
+
+    public Map<String, Object> aboutToSubmitStopRepresenting(String authorisation, CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Optional<PartyDetails>> selectedPartyDetailsList = new ArrayList<>();
+
+        caseData.getSolStopRepChooseParties().getValue().forEach(value -> {
+            if (null != caseData.getRespondents()) {
+                log.info("Respodnent selected");
+                selectedPartyDetailsList.add(caseData.getRespondents()
+                                                 .stream()
+                                                 .filter(element -> element.getId().toString().equalsIgnoreCase(value.getCode()))
+                                                 .map(Element::getValue)
+                                                 .findFirst()
+                );
+            }
+            if (null != caseData.getApplicants()) {
+                log.info("applicant selected");
+                selectedPartyDetailsList.add(caseData.getApplicants()
+                                                 .stream()
+                                                 .filter(element -> element.getId().toString().equalsIgnoreCase(value.getCode()))
+                                                 .map(Element::getValue)
+                                                 .findFirst()
+                );
+            }
+            if (null != caseData.getRespondentsFL401()
+                && value.getCode().equalsIgnoreCase(String.valueOf(caseData.getRespondentsFL401().getPartyId()))) {
+                selectedPartyDetailsList.add(Optional.ofNullable(caseData.getRespondentsFL401()));
+            }
+            if (null != caseData.getApplicantsFL401()
+                && value.getCode().equalsIgnoreCase(String.valueOf(caseData.getApplicantsFL401().getPartyId()))) {
+                selectedPartyDetailsList.add(Optional.ofNullable(caseData.getApplicantsFL401()));
+            }
+        });
+
+        log.info("Party details found - rest wip:: ", selectedPartyDetailsList);
+        return caseDataUpdated;
     }
 }

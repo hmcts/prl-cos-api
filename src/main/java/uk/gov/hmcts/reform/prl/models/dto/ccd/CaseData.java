@@ -799,4 +799,6 @@ public class CaseData implements MappableObject {
     private NextHearingDetails nextHearingDetails;
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
+
+    private DynamicMultiSelectList solStopRepChooseParties;
 }
