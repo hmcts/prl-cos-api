@@ -245,7 +245,7 @@ public class SendAndReplyServiceTest {
             .filter(m -> m.getValue().getStatus().equals(OPEN))
             .count();
         countOpen -= 1; // we expect one less message to be open.
-        List<Element<Message>> serviceUpdated = sendAndReplyService.closeMessage(messageToClose, caseData.getOpenMessages());
+        List<Element<Message>> serviceUpdated = sendAndReplyService.closeMessage(messageToClose, caseData);
         long actualCount = serviceUpdated.stream()
             .filter(m -> m.getValue().getStatus().equals(OPEN))
             .count();
