@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -61,6 +63,7 @@ public class NoticeOfChangePartiesService {
     private final EventService eventPublisher;
     @Qualifier("allTabsService")
     private final AllTabServiceImpl tabService;
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing) {
         return generate(caseData, representing, POPULATE);
@@ -150,6 +153,30 @@ public class NoticeOfChangePartiesService {
         return partiesConverter.generateDaForSubmission(partyDetails) == null
             ? Optional.of(NoticeOfChangeParties.builder().build())
             : Optional.of(partiesConverter.generateDaForSubmission(partyDetails));
+    }
+
+    public Map<String, Object> populateAboutToStartStopRepresentation(String authorisation,
+                                                                      CallbackRequest callbackRequest,
+                                                                      List<String> errorList) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        DynamicMultiSelectList solicitorRepresentedParties
+            = dynamicMultiSelectListService.getSolicitorRepresentedParties(
+            authorisation,
+            getCaseData(callbackRequest.getCaseDetails(), objectMapper)
+        );
+        if (!solicitorRepresentedParties.getListItems().isEmpty()) {
+            errorList.add(
+                "You do not represent anyone in this case.");
+        } else {
+            caseDataUpdated.put(
+                "solStopRepChooseParties",
+                dynamicMultiSelectListService.getSolicitorRepresentedParties(
+                    authorisation,
+                    getCaseData(callbackRequest.getCaseDetails(), objectMapper)
+                )
+            );
+        }
+        return caseDataUpdated;
     }
 
     public enum NoticeOfChangeAnswersPopulationStrategy {
@@ -335,7 +362,8 @@ public class NoticeOfChangePartiesService {
         return null;
     }
 
-    private void generateRequiredOrgPoliciesForNoc(SolicitorRole.Representing representing, Map<String, Object> data) {
+    private void generateRequiredOrgPoliciesForNoc(SolicitorRole.Representing
+                                                       representing, Map<String, Object> data) {
         List<SolicitorRole> nonSolicitorRoles = SolicitorRole.notMatchingRoles(representing);
         for (int i = 0; i < nonSolicitorRoles.size(); i++) {
             SolicitorRole solicitorRole = nonSolicitorRoles.get(i);
