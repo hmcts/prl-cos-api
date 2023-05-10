@@ -462,9 +462,6 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testPopulateDynamicListsForSendAndReply() {
-
-
-
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
 
         LocalDateTime hearingStartDate = LocalDateTime.now().plusDays(5).withNano(1);
