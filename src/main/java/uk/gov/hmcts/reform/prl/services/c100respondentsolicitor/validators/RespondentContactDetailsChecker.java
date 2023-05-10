@@ -72,10 +72,12 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
             if (address.isPresent() && !verifyAddressCompleted(address.get())) {
                 return false;
             }
-            fields.add(ofNullable(citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years()));
-            if (YesOrNo.No
-                .equals(citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years())) {
-                fields.add(ofNullable(citizenDetails.get().getAddressHistory().getPreviousAddressHistory()));
+            if (null != citizenDetails.get().getAddressHistory()) {
+                fields.add(ofNullable(citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years()));
+                if (YesOrNo.No
+                    .equals(citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years())) {
+                    fields.add(ofNullable(citizenDetails.get().getAddressHistory().getPreviousAddressHistory()));
+                }
             }
             fields.add(ofNullable(citizenDetails.get().getContact().getPhoneNumber()));
             fields.add(ofNullable(citizenDetails.get().getContact().getEmail()));
