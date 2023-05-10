@@ -253,7 +253,6 @@ public class DynamicMultiSelectListService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (userDetails != null && userDetails.getEmail() != null) {
-            log.info("listItems size is:: " + listItems.size());
             if (null != caseData.getRespondents()) {
                 caseData.getRespondents().forEach(respondent -> {
                     listItems.addAll(getPartiesAsDynamicMultiSelectList(
@@ -262,8 +261,6 @@ public class DynamicMultiSelectListService {
                         respondent.getId()
                     ));
                 });
-                log.info("listItems size is:: " + listItems.size());
-                log.info("listItems are:: " + listItems);
             }
             if (null != caseData.getApplicants()) {
                 caseData.getApplicants().forEach(applicant -> {
@@ -273,22 +270,14 @@ public class DynamicMultiSelectListService {
                         applicant.getId()
                     ));
                 });
-                log.info("listItems size is:: " + listItems.size());
-                log.info("listItems are:: " + listItems);
             }
             if (null != caseData.getRespondentsFL401()) {
                 listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, caseData.getRespondentsFL401(), null));
-                log.info("listItems size is:: " + listItems.size());
-                log.info("listItems are:: " + listItems);
             }
             if (null != caseData.getApplicantsFL401()) {
                 listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, caseData.getApplicantsFL401(), null));
-                log.info("listItems size is:: " + listItems.size());
-                log.info("listItems are:: " + listItems);
             }
         }
-        log.info("listItems size is:: " + listItems.size());
-        log.info("listItems are:: " + listItems);
         return DynamicMultiSelectList.builder().listItems(listItems).build();
     }
 
@@ -296,11 +285,6 @@ public class DynamicMultiSelectListService {
                                                                                    PartyDetails partyDetails,
                                                                                    UUID partyId) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-        log.info("verifying party:: " + partyDetails.getLabelForDynamicList());
-        log.info("verifying solicitor:: " + partyDetails.getSolicitorEmail());
-        log.info("party solicitor represented:: " + partyDetails.getUser().getSolicitorRepresented());
-        log.info("logged in user email:: " + userDetails.getEmail());
-        log.info("partyId is:: " + partyId);
 
         if (partyDetails.getUser() != null
             && YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())
