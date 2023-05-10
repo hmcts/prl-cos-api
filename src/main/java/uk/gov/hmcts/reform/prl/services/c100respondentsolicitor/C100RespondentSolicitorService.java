@@ -330,49 +330,45 @@ public class C100RespondentSolicitorService {
                                                       .childrenLiveOutsideOfEnWl(caseData
                                                                                      .getInternationalElementChild()
                                                                                      .getChildrenLiveOutsideOfEnWl())
-                                                      .childrenLiveOutsideOfEnWlDetails(YesOrNo
-                                                                                            .No
+                                                      .childrenLiveOutsideOfEnWlDetails(Yes
                                                                                             .equals(caseData
                                                                                                         .getInternationalElementChild()
                                                                                                         .getChildrenLiveOutsideOfEnWl()
-                                                                                            ) ? null : caseData
+                                                                                            ) ? caseData
                                                           .getInternationalElementChild()
-                                                          .getChildrenLiveOutsideOfEnWlDetails())
+                                                          .getChildrenLiveOutsideOfEnWlDetails() : null)
                                                       .parentsAnyOneLiveOutsideEnWl(caseData
                                                                                         .getInternationalElementChild()
                                                                                         .getParentsAnyOneLiveOutsideEnWl())
-                                                      .parentsAnyOneLiveOutsideEnWlDetails(YesOrNo
-                                                                                               .No
+                                                      .parentsAnyOneLiveOutsideEnWlDetails(Yes
                                                                                                .equals(caseData
                                                                                                            .getInternationalElementChild()
                                                                                                            .getParentsAnyOneLiveOutsideEnWl()
-                                                                                               ) ? null : caseData
+                                                                                               ) ? caseData
                                                                                                .getInternationalElementChild()
-                                                                                               .getParentsAnyOneLiveOutsideEnWlDetails()
+                                                                                               .getParentsAnyOneLiveOutsideEnWlDetails() : null
                                                           )
                                                       .anotherPersonOrderOutsideEnWl(caseData
                                                                                          .getInternationalElementChild()
                                                                                          .getAnotherPersonOrderOutsideEnWl())
-                                                      .anotherPersonOrderOutsideEnWlDetails(YesOrNo
-                                                                                                .No
+                                                      .anotherPersonOrderOutsideEnWlDetails(Yes
                                                                                                 .equals(caseData
                                                                                                             .getInternationalElementChild()
                                                                                                             .getAnotherPersonOrderOutsideEnWl()
-                                                                                                ) ? null : caseData
+                                                                                                ) ? caseData
                                                                                                 .getInternationalElementChild()
-                                                                                                .getAnotherPersonOrderOutsideEnWlDetails()
+                                                                                                .getAnotherPersonOrderOutsideEnWlDetails() : null
                                                           )
                                                       .anotherCountryAskedInformation(caseData
                                                                                           .getInternationalElementChild()
                                                                                           .getAnotherCountryAskedInformation())
-                                                      .anotherCountryAskedInformationDetaails(YesOrNo
-                                                                                                  .No
+                                                      .anotherCountryAskedInformationDetaails(Yes
                                                                                                   .equals(caseData
                                                                                                               .getInternationalElementChild()
                                                                                                               .getAnotherCountryAskedInformation()
-                                                                                                  ) ? null : caseData
+                                                                                                  ) ? caseData
                                                           .getInternationalElementChild()
-                                                          .getAnotherCountryAskedInformationDetaails())
+                                                          .getAnotherCountryAskedInformationDetaails() : null)
                                                       .build())
                     .build();
                 break;
