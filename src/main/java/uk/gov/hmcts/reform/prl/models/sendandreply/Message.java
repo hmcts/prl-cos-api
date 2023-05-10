@@ -48,7 +48,6 @@ public class Message extends MessageMetaData {
     private String selectedFutureHearingValue;
     private String selectedSubmittedDocumentCode;
     private String selectedSubmittedDocumentValue;
-    private String selectedExternalParties;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
