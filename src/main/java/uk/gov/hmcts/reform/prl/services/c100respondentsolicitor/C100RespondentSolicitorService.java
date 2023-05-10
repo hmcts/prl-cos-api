@@ -199,18 +199,6 @@ public class C100RespondentSolicitorService {
                         internationalElementFields[0],
                         solicitorRepresentedRespondent.getValue().getResponse().getCitizenInternationalElements()
                     );
-                    caseDataUpdated.put(
-                        internationalElementFields[1],
-                        solicitorRepresentedRespondent.getValue().getResponse().getCitizenInternationalElements()
-                    );
-                    caseDataUpdated.put(
-                        internationalElementFields[2],
-                        solicitorRepresentedRespondent.getValue().getResponse().getCitizenInternationalElements()
-                    );
-                    caseDataUpdated.put(
-                        internationalElementFields[3],
-                        solicitorRepresentedRespondent.getValue().getResponse().getCitizenInternationalElements()
-                    );
                     break;
                 case ABILITY_TO_PARTICIPATE:
                     String[] abilityToParticipateFields = event.getCaseFieldName().split(",");
