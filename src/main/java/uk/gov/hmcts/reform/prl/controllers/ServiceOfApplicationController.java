@@ -97,7 +97,7 @@ public class ServiceOfApplicationController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-   /* @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    /* @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Serve Parties Email Notification")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
