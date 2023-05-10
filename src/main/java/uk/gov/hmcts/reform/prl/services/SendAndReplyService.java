@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.common.CodeAndLabel;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
-import uk.gov.hmcts.reform.prl.models.complextypes.ExternalPartyDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -30,7 +29,6 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -87,8 +85,6 @@ public class SendAndReplyService {
 
     @Value("${refdata.category-id}")
     private String hearingTypeCategoryId;
-
-    private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     private final AuthTokenGenerator authTokenGenerator;
 
@@ -299,10 +295,6 @@ public class SendAndReplyService {
                 .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder().label(loggedInUserEmail).code(loggedInUserEmail).build())))
                 .futureHearingsList(getFutureHearingDynamicList(authorization, s2sToken, caseReference))
                 .build()).build();
-    }
-
-    private Element<ExternalPartyDocument> getExternalPartyDocument(DynamicList documentCategoryList) {
-        return element(ExternalPartyDocument.builder().documentCategoryList(documentCategoryList).build());
     }
 
     private DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
