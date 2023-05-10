@@ -129,6 +129,7 @@
       } ],
       "applicantSolicitorEmailAddress" : "prl_caseworker_solicitor@mailinator.com",
       "solicitorName" : "Demo Solicitor privatelaw",
+      "courtEpimsId" : "12",
       "ordersNonMolestationDocument" : {
         "document_filename" : "dummy.pdf",
         "document_id" : "9964bc7a-13b6-4fc1-99f7-34d9eeaa63a4"
@@ -251,6 +252,7 @@
       } ],
       "applicantSolicitorEmailAddress" : "prl_caseworker_solicitor@mailinator.com",
       "solicitorName" : "Demo Solicitor privatelaw",
+      "courtEpimsId" : "12",
       "courtName" : "Central Family Court",
       "hearingData" : {
         "caseRef" : "1673970714366224",
@@ -488,6 +490,7 @@
       } ],
       "applicantSolicitorEmailAddress" : "testways2payuser4@mailnesia.com",
       "solicitorName" : "firstName lastName",
+      "courtEpimsId" : "12",
       "courtName" : "East London Family Court",
       "ordersNonMolestationDocument" : {
         "document_filename" : "dummy.pdf",
@@ -651,6 +654,7 @@
       } ],
       "applicantSolicitorEmailAddress" : "testways2payuser4@mailnesia.com",
       "solicitorName" : "firstName lastName",
+      "courtEpimsId" : "12",
       "courtName" : "East London Family Court",
       "ordersNonMolestationDocument" : {
         "document_filename" : "dummy.pdf",

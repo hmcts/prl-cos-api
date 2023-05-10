@@ -39,5 +39,9 @@ public class SendOrReplyMessage {
     private String recipientEmailAddresses;
     private String messageSubject;
     private JudicialUser sendReplyJudgeName;
+
+    private DynamicList messageReplyDynamicList;
+    private Message replyMessage;
+    private YesOrNo respondToMessage;
 }
 
