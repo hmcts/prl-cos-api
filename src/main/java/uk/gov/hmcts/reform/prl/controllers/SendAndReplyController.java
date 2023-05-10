@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -67,6 +68,21 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageList(caseData, authorisation));
+
+        caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataMap)
+            .build();
+    }
+
+    @PostMapping("/send-or-reply-to-messages/about-to-start")
+    public AboutToStartOrSubmitCallbackResponse handleSendOrMessageAboutToStart(@RequestHeader("Authorization")
+                                                                                    @Parameter(hidden = true) String authorisation,
+                                                                                @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
 
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
@@ -189,9 +205,18 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+        List<String> errors = new ArrayList<>();
+        if (REPLY.equals(caseData.getChooseSendOrReply())) {
+            if (CollectionUtils.isEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
+                errors.add("There are no messages to respond to.");
+            } else {
+                caseData = sendAndReplyService.populateMessageReplyFields(caseData);
+            }
+        } else {
+            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+        }
 
-        return CallbackResponse.builder().data(caseData).build();
+        return CallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
     @PostMapping("/send-or-reply-to-messages/about-to-submit")
@@ -213,10 +238,17 @@ public class SendAndReplyController extends AbstractCallbackController {
 
             log.info("listOfMessages created ----> {}", listOfMessages);
 
-            caseDataMap.putAll(Map.of("openMessagesList", listOfMessages));
+            caseDataMap.put("openMessagesList", listOfMessages);
 
             sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
 
+        } else {
+            //Reply message
+            if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
+                caseData = sendAndReplyService.closeMessage(caseData);
+                caseDataMap.put("closedMessagesList", caseData.getSendOrReplyMessage().getClosedMessagesList());
+                caseDataMap.put("openMessagesList", caseData.getSendOrReplyMessage().getOpenMessagesList());
+            }
         }
 
         log.info("updated case data after adding open message in the list  ----> {}", caseDataMap);
