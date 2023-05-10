@@ -374,13 +374,12 @@ public class SendAndReplyService {
 
     private Map<String, String> getHearingTypeRefDataMap(String authorization, String s2sToken, String serviceCode) {
 
-        Map<String, String> refDataCategoryValueMap = refDataCategoryValueMap = refDataService.getRefDataCategoryValueMap(
+        return refDataService.getRefDataCategoryValueMap(
             authorization,
             s2sToken,
             serviceCode,
             hearingTypeCategoryId
         );
-        return refDataCategoryValueMap;
     }
 
     /**
@@ -569,7 +568,10 @@ public class SendAndReplyService {
                 judicialUser));
 
             if (judicialUsersApiResponseList.isPresent()) {
-                return judicialUsersApiResponseList.get().stream().findFirst().get().getFullName();
+                Optional<JudicialUsersApiResponse> judicialUsersApiResponse = judicialUsersApiResponseList.get().stream().findFirst();
+                if (judicialUsersApiResponse.isPresent()) {
+                    return judicialUsersApiResponse.get().getFullName();
+                }
             }
         }
         return null;
