@@ -344,7 +344,7 @@ public class C100RespondentSolicitorServiceTest {
     @ValueSource(strings = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA",
         "c100ResSolAttendingTheCourtA", "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA", "c100ResSolAllegationsOfHarmA",
         "c100ResSolInternationalElementA", "c100ResSolAbilityToParticipateA"})
-    public void testPopulateAboutToStartCaseData(String arg) {
+    void testPopulateAboutToStartCaseData(String arg) {
 
         callbackRequest.setEventId(arg);
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
@@ -425,7 +425,7 @@ public class C100RespondentSolicitorServiceTest {
     @ValueSource(strings = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA",
         "c100ResSolAttendingTheCourtA", "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA", "c100ResSolAllegationsOfHarmA",
         "c100ResSolInternationalElementA", "c100ResSolAbilityToParticipateA"})
-    public void testPopulateAboutToSubmitCaseData(String arg) throws Exception {
+    void testPopulateAboutToSubmitCaseData(String arg) throws Exception {
 
         when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
 
