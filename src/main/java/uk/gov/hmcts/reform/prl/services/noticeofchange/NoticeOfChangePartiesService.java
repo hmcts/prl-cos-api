@@ -164,10 +164,13 @@ public class NoticeOfChangePartiesService {
             authorisation,
             getCaseData(callbackRequest.getCaseDetails(), objectMapper)
         );
+        log.info("solicitorRepresentedParties retrieved:: " + solicitorRepresentedParties.getListItems());
         if (!solicitorRepresentedParties.getListItems().isEmpty()) {
+            log.info("Inside error block ");
             errorList.add(
                 "You do not represent anyone in this case.");
         } else {
+            log.info("Thanks a lot. we are done here");
             caseDataUpdated.put(
                 "solStopRepChooseParties",
                 dynamicMultiSelectListService.getSolicitorRepresentedParties(
