@@ -171,12 +171,14 @@ public class CaseDataService {
                     && Integer.parseInt(caseManagementLocation.getRegionId()) < 7) {
                     caseIdWithRegionIdMap.put(caseDetails.getId().toString(), caseManagementLocation.getRegionId()
                         + "-" + caseManagementLocation.getBaseLocationId());
+                    caseDetails.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocationId());
                     filteredCafcassResponse.getCases().add(caseDetails);
                 } else if (caseManagementLocation.getRegion() != null && Integer.parseInt(caseManagementLocation.getRegion()) < 7) {
                     caseIdWithRegionIdMap.put(
                         String.valueOf(caseDetails.getId()),
                         caseManagementLocation.getRegion() + "-" + caseManagementLocation.getBaseLocation()
                     );
+                    caseDetails.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocation());
                     filteredCafcassResponse.getCases().add(caseDetails);
                 }
             }
@@ -197,6 +199,16 @@ public class CaseDataService {
                     cafCassCaseDetail.getCaseData().setCourtTypeId(filteredHearing.getCourtTypeId());
                     filteredHearing.setCourtName(null);
                     filteredHearing.setCourtTypeId(null);
+                    filteredHearing.getCaseHearings().stream().forEach(
+                        caseHearing -> {
+                            caseHearing.getHearingDaySchedule().stream().forEach(
+                                hearingDaySchedule -> {
+                                    hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
+                                    hearingDaySchedule.setHearingVenueId(null);
+                                }
+                            );
+                        }
+                    );
                 }
             }
         }
