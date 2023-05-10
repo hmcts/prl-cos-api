@@ -252,26 +252,21 @@ public class DynamicMultiSelectListService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (userDetails != null && userDetails.getEmail() != null) {
-            List<Element<PartyDetails>> respondents = caseData.getRespondents();
-            List<Element<PartyDetails>> applicants = caseData.getApplicants();
-            PartyDetails fl401Respondent = caseData.getRespondentsFL401();
-            PartyDetails fl401Applicant = caseData.getApplicantsFL401();
-
-            if (null != respondents) {
-                respondents.forEach(respondent -> {
+            if (null != caseData.getRespondents()) {
+                caseData.getRespondents().forEach(respondent -> {
                     listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, respondent.getValue()));
                 });
             }
-            if (null != applicants) {
-                applicants.forEach(applicant -> {
+            if (null != caseData.getApplicants()) {
+                caseData.getApplicants().forEach(applicant -> {
                     listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, applicant.getValue()));
                 });
             }
-            if (null != fl401Respondent) {
-                listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, fl401Respondent));
+            if (null != caseData.getRespondentsFL401()) {
+                listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, caseData.getRespondentsFL401()));
             }
-            if (null != fl401Applicant) {
-                listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, fl401Applicant));
+            if (null != caseData.getApplicantsFL401()) {
+                listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, caseData.getApplicantsFL401()));
             }
         }
         return DynamicMultiSelectList.builder().listItems(listItems).build();
