@@ -3562,36 +3562,6 @@
     "requestToAuthority": "Yes",
     "requestToAuthorityDetails": "string"
   },
-  "internationalElementParent": {
-    "reasonForChild": "Yes",
-    "reasonForChildDetails": "string",
-    "reasonForParent": "Yes",
-    "reasonForParentDetails": "string",
-    "reasonForJurisdiction": "Yes",
-    "reasonForJurisdictionDetails": "string",
-    "requestToAuthority": "Yes",
-    "requestToAuthorityDetails": "string"
-  },
-  "internationalElementJurisdiction": {
-    "reasonForChild": "Yes",
-    "reasonForChildDetails": "string",
-    "reasonForParent": "Yes",
-    "reasonForParentDetails": "string",
-    "reasonForJurisdiction": "Yes",
-    "reasonForJurisdictionDetails": "string",
-    "requestToAuthority": "Yes",
-    "requestToAuthorityDetails": "string"
-  },
-  "internationalElementRequest": {
-    "reasonForChild": "Yes",
-    "reasonForChildDetails": "string",
-    "reasonForParent": "Yes",
-    "reasonForParentDetails": "string",
-    "reasonForJurisdiction": "Yes",
-    "reasonForJurisdictionDetails": "string",
-    "requestToAuthority": "Yes",
-    "requestToAuthorityDetails": "string"
-  },
   "respondentAllegationsOfHarm": {
     "respondentDomesticAbuse": "Yes",
     "respondentChildAbuse": "Yes",
