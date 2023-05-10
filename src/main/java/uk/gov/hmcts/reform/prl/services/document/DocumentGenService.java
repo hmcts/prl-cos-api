@@ -626,7 +626,7 @@ public class DocumentGenService {
         return generatedDocumentInfo;
     }
 
-    private String getFileName(CaseData caseData, String docGenFor, boolean isWelsh) {
+    public String getFileName(CaseData caseData, String docGenFor, boolean isWelsh) {
         String caseTypeOfApp = caseData.getCaseTypeOfApplication();
         String fileName = "";
 

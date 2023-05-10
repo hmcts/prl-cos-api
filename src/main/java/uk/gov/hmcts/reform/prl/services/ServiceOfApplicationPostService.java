@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -13,10 +14,13 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,6 +43,12 @@ public class ServiceOfApplicationPostService {
 
     @Autowired
     private DocumentGenService documentGenService;
+
+    @Autowired
+    private DocumentLanguageService documentLanguageService;
+
+    @Autowired
+    private DgsService dgsService;
 
     private static final String LETTER_TYPE = "RespondentServiceOfApplication";
 
@@ -111,6 +121,31 @@ public class ServiceOfApplicationPostService {
         docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C7_DRAFT_HINT));
         docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C8_BLANK_HINT));
         return docs;
+    }
+
+    public Document getCoverLetter(String auth, Address address, CaseData caseData) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        Map<String, Object> printInputParams = new HashMap<>();
+        printInputParams.put("name", caseData.getApplicantCaseName());
+        printInputParams.put("id", caseData.getId());
+        printInputParams.put("address", Address.builder().addressLine1("abc").addressLine3("ddd").county("county").postCode("postcode").postTown("posttown").build());
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (documentLanguage.isGenEng()) {
+            generatedDocumentInfo = dgsService.generateCoverLetterDocument(
+                auth,
+                printInputParams,
+                documentGenService.getFileName(caseData,DOCUMENT_COVER_SHEET_HINT,false),
+                String.valueOf(caseData.getId())
+            );
+        }
+        if(null != generatedDocumentInfo){
+            return Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName("cover_letter.pdf").build();
+        }
+        return null;
     }
 
     private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
