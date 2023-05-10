@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -255,25 +256,33 @@ public class DynamicMultiSelectListService {
             log.info("listItems size is:: " + listItems.size());
             if (null != caseData.getRespondents()) {
                 caseData.getRespondents().forEach(respondent -> {
-                    listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, respondent.getValue()));
+                    listItems.addAll(getPartiesAsDynamicMultiSelectList(
+                        userDetails,
+                        respondent.getValue(),
+                        respondent.getId()
+                    ));
                 });
                 log.info("listItems size is:: " + listItems.size());
                 log.info("listItems are:: " + listItems);
             }
             if (null != caseData.getApplicants()) {
                 caseData.getApplicants().forEach(applicant -> {
-                    listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, applicant.getValue()));
+                    listItems.addAll(getPartiesAsDynamicMultiSelectList(
+                        userDetails,
+                        applicant.getValue(),
+                        applicant.getId()
+                    ));
                 });
                 log.info("listItems size is:: " + listItems.size());
                 log.info("listItems are:: " + listItems);
             }
             if (null != caseData.getRespondentsFL401()) {
-                listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, caseData.getRespondentsFL401()));
+                listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, caseData.getRespondentsFL401(), null));
                 log.info("listItems size is:: " + listItems.size());
                 log.info("listItems are:: " + listItems);
             }
             if (null != caseData.getApplicantsFL401()) {
-                listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, caseData.getApplicantsFL401()));
+                listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, caseData.getApplicantsFL401(), null));
                 log.info("listItems size is:: " + listItems.size());
                 log.info("listItems are:: " + listItems);
             }
@@ -284,21 +293,31 @@ public class DynamicMultiSelectListService {
     }
 
     private List<DynamicMultiselectListElement> getPartiesAsDynamicMultiSelectList(UserDetails userDetails,
-                                                                                   PartyDetails partyDetails) {
+                                                                                   PartyDetails partyDetails,
+                                                                                   UUID partyId) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         log.info("verifying party:: " + partyDetails.getLabelForDynamicList());
         log.info("verifying solicitor:: " + partyDetails.getSolicitorEmail());
         log.info("party solicitor represented:: " + partyDetails.getUser().getSolicitorRepresented());
         log.info("logged in user email:: " + userDetails.getEmail());
+        log.info("partyId is:: " + partyId);
 
         if (partyDetails.getUser() != null
             && YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())
             && userDetails.getEmail().equals(partyDetails.getSolicitorEmail())) {
-            listItems.add(DynamicMultiselectListElement
-                              .builder()
-                              .code(String.valueOf(partyDetails.getPartyId()))
-                              .label(partyDetails.getLabelForDynamicList())
-                              .build());
+            if (partyId != null) {
+                listItems.add(DynamicMultiselectListElement
+                                  .builder()
+                                  .code(String.valueOf(partyDetails.getPartyId()))
+                                  .label(partyDetails.getLabelForDynamicList())
+                                  .build());
+            } else {
+                listItems.add(DynamicMultiselectListElement
+                                  .builder()
+                                  .code(String.valueOf(partyId))
+                                  .label(partyDetails.getLabelForDynamicList())
+                                  .build());
+            }
         }
         return listItems;
     }
