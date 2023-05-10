@@ -88,22 +88,22 @@ public class ServiceOfApplicationPostService {
             .filter(partyDetails -> YesOrNo.Yes.getDisplayedValue()
                 .equalsIgnoreCase(partyDetails.getIsCurrentAddressKnown().getDisplayedValue()))
             .forEach(partyDetails -> {
-                         List<GeneratedDocumentInfo> docs = null;
-                         List<Element<BulkPrintDetails>> printedDocCollectionList;
-                         docs = getUploadedDocumentsServiceOfApplication(caseData);
-                         try {
-                             docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
-                         } catch (Exception e) {
-                             log.info("*** Error while generating privacy notice to be served ***");
-                         }
-                         if (caseData.getBulkPrintDetails() != null) {
-                             printedDocCollectionList = caseData.getBulkPrintDetails();
-                         } else {
-                             printedDocCollectionList = new ArrayList<>();
-                         }
-                         printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, docs)));
-                         caseData.setBulkPrintDetails(printedDocCollectionList);
-                     }
+                List<GeneratedDocumentInfo> docs = null;
+                List<Element<BulkPrintDetails>> printedDocCollectionList;
+                docs = getUploadedDocumentsServiceOfApplication(caseData);
+                try {
+                    docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
+                } catch (Exception e) {
+                    log.info("*** Error while generating privacy notice to be served ***");
+                }
+                if (caseData.getBulkPrintDetails() != null) {
+                    printedDocCollectionList = caseData.getBulkPrintDetails();
+                } else {
+                    printedDocCollectionList = new ArrayList<>();
+                }
+                printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, docs)));
+                caseData.setBulkPrintDetails(printedDocCollectionList);
+            }
             ));
         return sentDocs;
     }
