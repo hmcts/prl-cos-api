@@ -300,7 +300,7 @@ public class StandardDirectionOrder {
     private final List<Element<SdoDioProvideOtherDetails>> sdoLetterFromGpDetails;
     @JsonProperty("sdoLsApplicantName")
     private final List<Element<SdoNameOfApplicant>> sdoLsApplicantName;
-    @JsonProperty("sdoLSRespondentName")
+    @JsonProperty("sdoLsRespondentName")
     private final List<Element<SdoNameOfRespondent>> sdoLsRespondentName;
     @JsonProperty("sdoLetterFromSchoolCheck")
     private final List<SdoLetterFromSchoolCheck> sdoLetterFromSchoolCheck;
