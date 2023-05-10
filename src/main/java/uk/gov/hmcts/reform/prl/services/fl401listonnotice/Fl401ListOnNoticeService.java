@@ -102,7 +102,7 @@ public class Fl401ListOnNoticeService {
         return caseDataUpdated;
     }
 
-    public Map<String, Object> fl401ListOnNoticeSubmission(String authorisation, CaseData caseData) {
+    public Map<String, Object> fl401ListOnNoticeSubmission(CaseData caseData) {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Object listOnNoticeHearingDetailsObj = (null != caseData.getFl401ListOnNotice())

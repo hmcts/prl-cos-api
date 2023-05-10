@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -37,13 +36,13 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
     @Operation(description = "Callback to populate Hearing page details")
     public AboutToStartOrSubmitCallbackResponse prePopulateHearingPageDataForFl401ListOnNotice(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
+        @RequestBody CallbackRequest callbackRequest) {
 
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(fl401ListOnNoticeService
-                      .prePopulateHearingPageDataForFl401ListOnNotice(authorisation,caseData))
+                      .prePopulateHearingPageDataForFl401ListOnNotice(authorisation, caseData))
             .build();
     }
 
@@ -61,7 +60,7 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
             CaseData.class
         );
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(fl401ListOnNoticeService.generateFl404bDocument(authorisation,caseData))
+            .data(fl401ListOnNoticeService.generateFl404bDocument(authorisation, caseData))
             .build();
     }
 
@@ -79,6 +78,6 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
             CaseData.class
         );
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(authorisation,caseData)).build();
+            .data(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(caseData)).build();
     }
 }
