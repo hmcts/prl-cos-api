@@ -36,8 +36,8 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
                 contact.getPlaceOfBirth(),
                 contact.getAddress(),
                 contact.getAddressHistory(),
-                contact.getContact().getEmail(),
-                contact.getContact().getPhoneNumber()
+                ofNullable(contact.getContact().getEmail()),
+                ofNullable(contact.getContact().getPhoneNumber())
             )).isPresent()).isPresent();
     }
 
