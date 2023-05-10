@@ -674,4 +674,80 @@ public class SendAndReplyServiceTest {
         assertNotNull(message);
     }
 
+    @Test
+    public void testSetSenderAndGenerateMessageReplyList() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .openMessagesList(messagesWithOneAdded)
+                    .build())
+            .build();
+
+        Map<String,Object> data = sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData,auth);
+        assertNotNull(data.get("messageObject"));
+
+    }
+
+    @Test
+    public void testPopulateMessageReplyFieldst() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .openMessagesList(messagesWithOneAdded)
+                    .messageReplyDynamicList(dynamicList)
+                    .build())
+            .build();
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(messagesWithOneAdded.get(0).getId());
+        CaseData data = sendAndReplyService.populateMessageReplyFields(caseData);
+        assertEquals("This is message 1 body",data.getSendOrReplyMessage().getReplyMessage().getMessageContent());
+
+    }
+
+    @Test
+    public void testPopulateMessageReplyFieldsWithNoPrevMsg() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .messageReplyDynamicList(dynamicList)
+                    .build())
+            .build();
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(messagesWithOneAdded.get(0).getId());
+        CaseData data = sendAndReplyService.populateMessageReplyFields(caseData);
+        assertNotNull(data);
+
+    }
+
+    @Test
+    public void testCloseMessage() {
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(messagesWithOneAdded.get(0).getId());
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .messageReplyDynamicList(dynamicList)
+                    .openMessagesList(messagesWithOneAdded)
+                    .closedMessagesList(messages)
+                    .build())
+            .build();
+        CaseData caseData1 = sendAndReplyService.closeMessage(caseData);
+        assertNotNull(caseData1);
+    }
+
+
+
 }
