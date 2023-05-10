@@ -165,7 +165,7 @@ public class NoticeOfChangePartiesService {
             getCaseData(callbackRequest.getCaseDetails(), objectMapper)
         );
         log.info("solicitorRepresentedParties retrieved:: " + solicitorRepresentedParties.getListItems());
-        if (!solicitorRepresentedParties.getListItems().isEmpty()) {
+        if (solicitorRepresentedParties.getListItems().isEmpty()) {
             log.info("Inside error block ");
             errorList.add(
                 "You do not represent anyone in this case.");
