@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.ExternalPartyDocument;
-import uk.gov.hmcts.reform.prl.models.complextypes.sendandreply.SelectedExternalPartyDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
@@ -281,7 +280,8 @@ public class SendAndReplyService {
     }
 
     public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization) {
-        final String caseReference = String.valueOf(caseData.getId());
+        String caseReference = String.valueOf(caseData.getId());
+        caseReference = "1683706766996114";
         DynamicList documentCategoryList = getCategoriesAndDocuments(authorization, caseReference);
         String s2sToken = authTokenGenerator.generate();
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
@@ -497,35 +497,9 @@ public class SendAndReplyService {
             .selectedSubmittedDocumentValue(sendOrReplyMessage.getSubmittedDocumentsList() != null
                                                 ? sendOrReplyMessage.getSubmittedDocumentsList().getValueLabel() : null)
             .selectedExternalParties(getSelectedExternalParties(sendOrReplyMessage.getExternalPartiesList()))
-            .selectedExternalPartyDocuments(getExternalPartyDocuments(sendOrReplyMessage))
             .latestMessage(caseData.getMessageContent())
             .updatedTime(dateTime.now())
             .build();
-    }
-
-    private List<SelectedExternalPartyDocument> getExternalPartyDocuments(SendOrReplyMessage sendOrReplyMessage) {
-
-        if (sendOrReplyMessage != null && isNotEmpty(sendOrReplyMessage.getExternalPartyDocuments())) {
-
-            List<SelectedExternalPartyDocument> selectedExternalPartyDocuments = new ArrayList<>();
-
-            sendOrReplyMessage.getExternalPartyDocuments().forEach(
-                externalPartyDocumentElement -> {
-                    final DynamicListElement documentCategoryDynamicList = externalPartyDocumentElement.getValue()
-                        .getDocumentCategoryList().getValue();
-
-                    log.info("documentCategoryDynamicList in getExternalPartyDocuments -----> {}", documentCategoryDynamicList);
-                    selectedExternalPartyDocuments.add(SelectedExternalPartyDocument.builder()
-                                                           .selectedDocumentCode(documentCategoryDynamicList.getCode())
-                                                           .selectedDocumentValue(documentCategoryDynamicList.getLabel()).build());
-                    log.info("selectedExternalPartyDocuments -------------> {}", selectedExternalPartyDocuments);
-                }
-            );
-            log.info("");
-            return selectedExternalPartyDocuments;
-        }
-        log.info("selectedExternalPartyDocuments is null-------------> ");
-        return null;
     }
 
     public List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser judicialUser) {
