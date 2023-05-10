@@ -579,7 +579,7 @@ public class SendAndReplyService {
         List<Element<Message>> messages = new ArrayList<>();
         Element<Message> messageElement = element(newMessage);
         if (isNotEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
-            messages = caseData.getSendOrReplyMessage().getOpenMessagesList();
+            messages.addAll(caseData.getSendOrReplyMessage().getOpenMessagesList());
         }
         messages.add(messageElement);
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
