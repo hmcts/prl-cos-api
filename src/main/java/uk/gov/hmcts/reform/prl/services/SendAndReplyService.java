@@ -54,6 +54,7 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 @Service
@@ -168,6 +169,35 @@ public class SendAndReplyService {
                 message.setUpdatedTime(dateTime.now());
             });
         return messages;
+    }
+
+    public CaseData closeMessage(CaseData caseData) {
+        UUID messageId = elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
+
+        List<Element<Message>> openMessages = caseData.getSendOrReplyMessage().getOpenMessagesList();
+        List<Element<Message>> closedMessages = caseData.getSendOrReplyMessage().getClosedMessagesList();
+
+        //find & remove from open messages list
+        Optional<Element<Message>> closedMessage = openMessages.stream()
+                .filter(m -> m.getId().equals(messageId))
+                .findFirst()
+                .map(element -> {
+                    openMessages.remove(element);
+                    element.getValue().setStatus(MessageStatus.CLOSED);
+                    element.getValue().setUpdatedTime(dateTime.now());
+                    return element;
+                });
+
+        //add to closed messages list
+        closedMessage.ifPresent(element -> nullSafeCollection(closedMessages).add(element));
+
+        return caseData.toBuilder()
+            .sendOrReplyMessage(caseData.getSendOrReplyMessage().toBuilder()
+                                    .closedMessagesList(closedMessages)
+                                    .openMessagesList(openMessages)
+                                    .build())
+            .build();
     }
 
 
@@ -524,6 +554,7 @@ public class SendAndReplyService {
             .build();
     }
 
+
     public List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser judicialUser) {
 
         String[] judgePersonalCode = getPersonalCode(judicialUser);
@@ -536,6 +567,7 @@ public class SendAndReplyService {
         if (judicialUser != null && judicialUser.getPersonalCode() != null) {
             final Optional<List<JudicialUsersApiResponse>> judicialUsersApiResponseList = ofNullable(getJudgeDetails(
                 judicialUser));
+
             if (judicialUsersApiResponseList.isPresent()) {
                 return judicialUsersApiResponseList.get().stream().findFirst().get().getFullName();
             }
@@ -552,6 +584,50 @@ public class SendAndReplyService {
         messages.add(messageElement);
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
         return messages;
+    }
+
+
+    public Map<String,Object> setSenderAndGenerateMessageReplyList(CaseData caseData, String authorisation) {
+        Map<String, Object> data = new HashMap<>();
+        MessageMetaData messageMetaData = MessageMetaData.builder()
+            .senderEmail(getLoggedInUserEmail(authorisation))
+            .build();
+        data.put("messageObject", messageMetaData);
+
+        if (isNotEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
+            data.put("messageReplyDynamicList", getOpenMessagesReplyList(caseData));
+        }
+        return data;
+    }
+
+    public DynamicList getOpenMessagesReplyList(CaseData caseData) {
+        List<Element<Message>> openMessages = caseData.getSendOrReplyMessage().getOpenMessagesList();
+
+        return ElementUtils.asDynamicList(
+            openMessages,
+            null,
+            Message::getLabelForDynamicList
+        );
+    }
+
+    public CaseData populateMessageReplyFields(CaseData caseData) {
+        UUID messageId = elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
+
+        Optional<Message> previousMessage = nullSafeCollection(
+            caseData.getSendOrReplyMessage().getOpenMessagesList()).stream()
+            .filter(element -> element.getId().equals(messageId))
+            .map(Element::getValue)
+            .findFirst();
+
+        if (previousMessage.isEmpty()) {
+            log.info("No message found with that ID");
+            return caseData;
+        }
+
+        return caseData.toBuilder()
+            .sendOrReplyMessage(
+                caseData.getSendOrReplyMessage().toBuilder().replyMessage(previousMessage.get()).build()).build();
     }
 
 }
