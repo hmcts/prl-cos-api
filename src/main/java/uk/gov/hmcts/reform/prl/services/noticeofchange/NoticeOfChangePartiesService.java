@@ -385,6 +385,7 @@ public class NoticeOfChangePartiesService {
         log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsList);
         caseData.getSolStopRepChooseParties().getValue().forEach(value -> {
             log.info("list code is ::" + value.getCode());
+            log.info("list code label is ::" + value.getLabel());
             if (null != caseData.getRespondents()) {
                 log.info("C100 Respondent selected");
                 selectedPartyDetailsList.add(caseData.getRespondents()
