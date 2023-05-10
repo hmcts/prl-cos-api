@@ -131,5 +131,4 @@ public class ListOnNoticeController {
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
 }
