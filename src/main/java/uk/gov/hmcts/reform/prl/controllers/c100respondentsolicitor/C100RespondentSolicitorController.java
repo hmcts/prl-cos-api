@@ -67,7 +67,7 @@ public class C100RespondentSolicitorController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         log.info("handleAboutToSubmit: Callback for about-to-submit");
         List<String> errorList = new ArrayList<>();
-        log.info("callBackRequest {}", callbackRequest.getCaseDetails().getData().toString());
+        log.info("swanky placeholder name {}", callbackRequest.getCaseDetails().getData().toString());
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(respondentSolicitorService.populateAboutToSubmitCaseData(
