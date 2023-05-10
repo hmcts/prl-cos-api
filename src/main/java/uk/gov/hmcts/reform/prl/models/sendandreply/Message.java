@@ -8,11 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
-import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
 import java.time.LocalDateTime;
 
@@ -37,17 +33,21 @@ public class Message extends MessageMetaData {
     private String replyTo;
 
     //PRL-3454 - send & reply message enhancements
-    private InternalExternalMessageEnum internalOrExternalMessage;
-    private InternalMessageWhoToSendToEnum internalMessageWhoToSendTo;
-    private String judicialOrMagistrateTier;
-    private JudicialUser sendReplyJudgeName;
+    private String internalOrExternalMessage;
+    private String internalMessageWhoToSendTo;
+    private String messageAbout;
+    private String judicialOrMagistrateTierCode;
+    private String judicialOrMagistrateTierValue;
+    private String judgeName;
     private String selectedCtscEmail;
-    private String ctscEmailAddress;
+    private String recipientEmailAddresses;
     private YesOrNo internalMessageUrgent;
-    private MessageAboutEnum messageAbout;
-    private String selectedLinkedApplications;
-    private String selectedFutureHearings;
-    private String selectedSubmittedDocuments;
+    private String selectedLinkedApplicationCode;
+    private String selectedLinkedApplicationValue;
+    private String selectedFutureHearingCode;
+    private String selectedFutureHearingValue;
+    private String selectedSubmittedDocumentCode;
+    private String selectedSubmittedDocumentValue;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
