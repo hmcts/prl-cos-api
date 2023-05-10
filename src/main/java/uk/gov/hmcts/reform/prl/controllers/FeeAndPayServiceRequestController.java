@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.launchdarkly.shaded.com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -47,7 +48,14 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        log.info("fee and pay before {} ",new Gson().toJson(callbackRequest));
         solicitorEmailService.sendAwaitingPaymentEmail(callbackRequest.getCaseDetails());
+
+        log.info("fee and pay after {} ",new Gson().toJson(ok(SubmittedCallbackResponse.builder().confirmationHeader(
+                CONFIRMATION_HEADER).confirmationBody(
+                CONFIRMATION_BODY_PREFIX + callbackRequest.getCaseDetails().getCaseId()
+                        + CONFIRMATION_BODY_SUFFIX
+        ).build())));
         return ok(SubmittedCallbackResponse.builder().confirmationHeader(
             CONFIRMATION_HEADER).confirmationBody(
             CONFIRMATION_BODY_PREFIX + callbackRequest.getCaseDetails().getCaseId()

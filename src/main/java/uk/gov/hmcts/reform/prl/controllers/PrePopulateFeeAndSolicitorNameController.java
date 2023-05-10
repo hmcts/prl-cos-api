@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.launchdarkly.shaded.com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -99,7 +100,7 @@ public class PrePopulateFeeAndSolicitorNameController {
         CaseData caseData = null;
         boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
                                                                                      .getCaseDetails().getCaseData());
-
+        log.info("getSolicitorAndFeeDetails :{} ",new Gson().toJson(callbackRequest));
         if (!mandatoryEventStatus) {
             errorList.add(
                 "Submit and pay is not allowed for this case unless you finish all the mandatory events");
@@ -121,6 +122,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .getNearestFamilyCourt(callbackRequest.getCaseDetails()
                                            .getCaseData());
             UserDetails userDetails = userService.getUserDetails(authorisation);
+            log.info("before court data :{} ",new Gson().toJson(caseData));
             caseData = CaseData.builder()
                 .solicitorName(userDetails.getFullName())
                 .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
@@ -129,10 +131,14 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
                 .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                 .build();
-
+            log.info("after court data :{} ",new Gson().toJson(caseData));
             caseData = buildGeneratedDocumentCaseData(authorisation, callbackRequest, caseData, caseDataForOrgDetails);
         }
-
+        log.info("full court data :{} ",new Gson().toJson(caseData));
+        log.info("full court data with case details :{} ",new Gson().toJson(CallbackResponse.builder()
+                .data(caseData)
+                .errors(errorList)
+                .build()));
         return CallbackResponse.builder()
             .data(caseData)
             .errors(errorList)

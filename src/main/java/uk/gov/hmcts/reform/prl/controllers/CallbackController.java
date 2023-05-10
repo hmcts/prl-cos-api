@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.launchdarkly.shaded.com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -238,6 +239,8 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
+        log.info("generate docs before {} ",new Gson().toJson(callbackRequest));
+
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
@@ -265,11 +268,13 @@ public class CallbackController {
                 State.SUBMITTED_NOT_PAID)
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
             .build();
-
+        log.info("generate docs after at 271 {} ",new Gson().toJson(caseData));
         Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData);
         // updating Summary tab to update case status
         caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         caseDataUpdated.putAll(map);
+        log.info("generate docs after at 275 case Data {} ",new Gson().toJson(caseData));
+        log.info("generate docs after at 275 case updated {} ",new Gson().toJson(caseDataUpdated));
 
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             // updating Summary tab to update case status
@@ -291,6 +296,7 @@ public class CallbackController {
             "paymentServiceRequestReferenceNumber",
             paymentServiceResponse.getServiceRequestReference()
         );
+        log.info("generate docs after {} ",new Gson().toJson(caseDataUpdated));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
