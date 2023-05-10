@@ -25,8 +25,10 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.ExternalPartyDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -114,6 +116,9 @@ public class SendAndReplyServiceTest {
 
     @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    @Mock
+    private RefDataUserService refDataUserService;
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -584,12 +589,18 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testBuildSendMessage() {
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.EMPTY;
+        List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
+        dynamicMultiselectListElementList.add(dynamicMultiselectListElement);
         DynamicList dynamicList1 = DynamicList.builder().build();
+
+        JudicialUser judicialUser = JudicialUser.builder().personalCode("123").build();
+
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    .externalPartiesList(DynamicMultiSelectList.builder().build())
+                    .externalPartiesList(DynamicMultiSelectList.builder().value(dynamicMultiselectListElementList).build())
                     .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
                     .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
                     .messageAbout(MessageAboutEnum.APPLICATION)
@@ -598,8 +609,40 @@ public class SendAndReplyServiceTest {
                     .linkedApplicationsList(dynamicList1)
                     .futureHearingsList(dynamicList1)
                     .submittedDocumentsList(dynamicList1).externalPartyDocuments(externalPartyDocsList)
+                    .sendReplyJudgeName(judicialUser)
                     .build())
             .build();
+
+        List<JudicialUsersApiResponse> judicialUsersApiResponseList = Arrays.asList(JudicialUsersApiResponse.builder().build());
+
+        when(sendAndReplyService.getJudgeDetails(judicialUser)).thenReturn(judicialUsersApiResponseList);
+        Message message = sendAndReplyService.buildSendMessage(caseData);
+
+        assertNotNull(message);
+    }
+
+    @Test
+    public void testBuildSendMessageWithoutJudgeNameAndExternalPartyDocs() {
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.EMPTY;
+        List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
+        dynamicMultiselectListElementList.add(dynamicMultiselectListElement);
+        DynamicList dynamicList1 = DynamicList.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .ctscEmailList(dynamicList1)
+                    .judicialOrMagistrateTierList(dynamicList1)
+                    .linkedApplicationsList(dynamicList1)
+                    .futureHearingsList(dynamicList1)
+                    .sendReplyJudgeName(null)
+                    .build())
+            .build();
+
         Message message = sendAndReplyService.buildSendMessage(caseData);
 
         assertNotNull(message);
