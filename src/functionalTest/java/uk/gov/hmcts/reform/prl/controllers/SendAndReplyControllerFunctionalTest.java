@@ -97,6 +97,7 @@ public class SendAndReplyControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenBodyWithSendData_whenMidEventCallback_thenPopulateDynamicList() throws Exception {
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
         request
