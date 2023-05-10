@@ -62,24 +62,8 @@ public class InternationalElementsChecker implements RespondentEventChecker {
         fields.add(reasonForChild);
         if (reasonForChild.isPresent() && YesOrNo.Yes.equals(reasonForChild.get())) {
             fields.add(ofNullable(internationalElements.getChildrenLiveOutsideOfEnWlDetails()));
-        }
-
-        Optional<YesOrNo> reasonForParent = ofNullable(internationalElements.getParentsAnyOneLiveOutsideEnWl());
-        fields.add(reasonForParent);
-        if (reasonForParent.isPresent() && YesOrNo.Yes.equals(reasonForParent.get())) {
             fields.add(ofNullable(internationalElements.getParentsAnyOneLiveOutsideEnWlDetails()));
-        }
-
-        Optional<YesOrNo> reasonForJurisdiction = ofNullable(internationalElements
-                                                                 .getAnotherPersonOrderOutsideEnWl());
-        fields.add(reasonForJurisdiction);
-        if (reasonForJurisdiction.isPresent() && YesOrNo.Yes.equals(reasonForJurisdiction.get())) {
             fields.add(ofNullable(internationalElements.getAnotherPersonOrderOutsideEnWlDetails()));
-        }
-
-        Optional<YesOrNo> requestToAuthority = ofNullable(internationalElements.getAnotherCountryAskedInformation());
-        fields.add(requestToAuthority);
-        if (requestToAuthority.isPresent() && YesOrNo.Yes.equals(requestToAuthority.get())) {
             fields.add(ofNullable(internationalElements.getAnotherCountryAskedInformationDetaails()));
         }
         return fields.stream().noneMatch(Optional::isEmpty)
