@@ -10,9 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
-import uk.gov.hmcts.reform.prl.models.complextypes.ExternalPartyDocument;
 
 import java.util.List;
 
@@ -33,7 +31,6 @@ public class SendOrReplyMessage {
     private DynamicList futureHearingsList;
     private DynamicList submittedDocumentsList;
     private DynamicList ctscEmailList;
-    private DynamicMultiSelectList externalPartiesList;
 
     private InternalExternalMessageEnum internalOrExternalMessage;
     private InternalMessageWhoToSendToEnum internalMessageWhoToSendTo;
@@ -42,9 +39,6 @@ public class SendOrReplyMessage {
     private String recipientEmailAddresses;
     private String messageSubject;
     private JudicialUser sendReplyJudgeName;
-
-    @JsonProperty("externalPartyDocuments")
-    private final List<Element<ExternalPartyDocument>> externalPartyDocuments;
 
     private DynamicList messageReplyDynamicList;
     private Message replyMessage;
