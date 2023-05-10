@@ -748,6 +748,4 @@ public class SendAndReplyServiceTest {
         assertNotNull(caseData1);
     }
 
-
-
 }
