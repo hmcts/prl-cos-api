@@ -381,33 +381,45 @@ public class NoticeOfChangePartiesService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Optional<PartyDetails>> selectedPartyDetailsList = new ArrayList<>();
-
+        log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsList.size());
+        log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsList);
         caseData.getSolStopRepChooseParties().getValue().forEach(value -> {
+            log.info("list code is ::" + value.getCode());
             if (null != caseData.getRespondents()) {
-                log.info("Respodnent selected");
+                log.info("C100 Respondent selected");
                 selectedPartyDetailsList.add(caseData.getRespondents()
                                                  .stream()
                                                  .filter(element -> element.getId().toString().equalsIgnoreCase(value.getCode()))
                                                  .map(Element::getValue)
                                                  .findFirst()
                 );
+                log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsList.size());
+                log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsList);
             }
             if (null != caseData.getApplicants()) {
-                log.info("applicant selected");
+                log.info("C100 applicant selected");
                 selectedPartyDetailsList.add(caseData.getApplicants()
                                                  .stream()
                                                  .filter(element -> element.getId().toString().equalsIgnoreCase(value.getCode()))
                                                  .map(Element::getValue)
                                                  .findFirst()
                 );
+                log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsList.size());
+                log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsList);
             }
             if (null != caseData.getRespondentsFL401()
                 && value.getCode().equalsIgnoreCase(String.valueOf(caseData.getRespondentsFL401().getPartyId()))) {
+                log.info("FL401 Respondent selected");
                 selectedPartyDetailsList.add(Optional.ofNullable(caseData.getRespondentsFL401()));
+                log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsList.size());
+                log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsList);
             }
             if (null != caseData.getApplicantsFL401()
                 && value.getCode().equalsIgnoreCase(String.valueOf(caseData.getApplicantsFL401().getPartyId()))) {
+                log.info("FL401 Applicant selected");
                 selectedPartyDetailsList.add(Optional.ofNullable(caseData.getApplicantsFL401()));
+                log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsList.size());
+                log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsList);
             }
         });
 
