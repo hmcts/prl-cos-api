@@ -75,6 +75,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -526,32 +527,32 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Element<FurtherEvidence>> furtherEvidencesList = caseData.getFurtherEvidences();
         List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
-        List<Element<QuarentineLegalDoc>> quarentineDocs = null;
+        List<Element<QuarentineLegalDoc>> quarentineDocs = new ArrayList<>();
         log.info("*** Category *** {}", caseData.getDocumentCategory());
         if (furtherEvidencesList != null) {
             log.info("*** further evidences *** {}", furtherEvidencesList);
-            quarentineDocs = furtherEvidencesList.stream().map(element -> Element.<QuarentineLegalDoc>builder()
+            quarentineDocs.addAll(furtherEvidencesList.stream().map(element -> Element.<QuarentineLegalDoc>builder()
                 .value(QuarentineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
                            .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
                            .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxFurtherEvidence())
                            .build())
                     .id(element.getId()).build())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
             log.info("*** test evidences *** {}", quarentineDocs);
         }
         if (correspondenceList != null) {
-            quarentineDocs = correspondenceList.stream().map(element -> Element.<QuarentineLegalDoc>builder()
+            quarentineDocs.addAll(correspondenceList.stream().map(element -> Element.<QuarentineLegalDoc>builder()
                     .value(QuarentineLegalDoc.builder().document(element.getValue().getDocumentCorrespondence())
                                .documentName(element.getValue().getDocumentName())
                                .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxCorrespondence())
                                .notes(element.getValue().getNotes())
                                .build())
                     .id(element.getId()).build())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
         }
         List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
         if (otherDocumentsList != null) {
-            quarentineDocs = otherDocumentsList.stream().map(element -> Element.<QuarentineLegalDoc>builder()
+            quarentineDocs.addAll(otherDocumentsList.stream().map(element -> Element.<QuarentineLegalDoc>builder()
                     .value(QuarentineLegalDoc.builder().document(element.getValue().getDocumentOther())
                                .documentType(element.getValue().getDocumentTypeOther().toString())
                                .notes(element.getValue().getNotes())
@@ -559,15 +560,9 @@ public class CallbackController {
                                .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxOtherDocuments())
                                .build())
                     .id(element.getId()).build())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
         }
-        if (quarentineDocs != null) {
-            if (null != caseData.getLegalProfQuarentineDocsList()) {
-                caseData.getLegalProfQuarentineDocsList().addAll(quarentineDocs);
-            } else {
-                caseData.setLegalProfQuarentineDocsList(quarentineDocs);
-            }
-        }
+        caseData.setLegalProfQuarentineDocsList(quarentineDocs);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("legalProfQuarentineDocsList", caseData.getLegalProfQuarentineDocsList());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
