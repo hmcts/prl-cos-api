@@ -80,11 +80,11 @@ public class CaseControllerFunctionalTest {
 
     @Ignore
     @Test
-        public void createCaseInCcd() throws Exception {
+    public void createCaseInCcd() throws Exception {
         String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
         request
-                .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
-                .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+                .header("Authorization", "authToken")
+                .header("ServiceAuthorization", "s2sAuthToken")
                 .body(requestBody)
                 .when()
                 .contentType("application/json")
