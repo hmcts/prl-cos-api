@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
@@ -36,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -127,6 +127,9 @@ public class SendAndReplyServiceTest {
 
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
+
+    @Mock
+    private HearingService hearingService;
 
     @Before
     public void init() {
@@ -464,45 +467,7 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
-    public void testGetExternalRecipientsDynamicMultiselectList() {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .build();
-        Map<String, List<DynamicMultiselectListElement>> listItems = new HashMap<>();
-        listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
-        listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
-        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData)).thenReturn(listItems);
-        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData)).thenReturn(listItems);
-
-        DynamicMultiSelectList externalParties = sendAndReplyService.getExternalRecipientsDynamicMultiselectList(caseData);
-
-        assertNotNull(externalParties);
-    }
-
-    @Test
-    public void testGetExternalRecipientsDynamicMultiselectListException() {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .build();
-        Map<String, List<DynamicMultiselectListElement>> listItems = new HashMap<>();
-        listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
-        listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
-        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData)).thenThrow(new RuntimeException());
-
-        DynamicMultiSelectList externalParties = sendAndReplyService.getExternalRecipientsDynamicMultiselectList(caseData);
-
-        assertNull(externalParties.getListItems());
-    }
-
-
-    @Test
     public void testPopulateDynamicListsForSendAndReply() {
-
-        Map<String, List<DynamicMultiselectListElement>> listItems = new HashMap<>();
-        listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
-        listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
-        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData)).thenReturn(listItems);
-        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData)).thenReturn(listItems);
 
         Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
         Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
@@ -525,12 +490,6 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testPopulateDynamicListsForSendAndReplyWithSubCategories() {
-
-        Map<String, List<DynamicMultiselectListElement>> listItems = new HashMap<>();
-        listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
-        listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
-        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData)).thenReturn(listItems);
-        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData)).thenReturn(listItems);
 
         Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
 
@@ -562,10 +521,6 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testGetCategoriesAndDocumentsException() {
-
-        Map<String, List<DynamicMultiselectListElement>> listItems = new HashMap<>();
-        listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
-        listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
 
         Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
         Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
