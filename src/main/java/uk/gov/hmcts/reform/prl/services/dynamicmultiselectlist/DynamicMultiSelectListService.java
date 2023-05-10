@@ -308,13 +308,13 @@ public class DynamicMultiSelectListService {
             if (partyId != null) {
                 listItems.add(DynamicMultiselectListElement
                                   .builder()
-                                  .code(String.valueOf(partyDetails.getPartyId()))
+                                  .code(String.valueOf(partyId))
                                   .label(partyDetails.getLabelForDynamicList())
                                   .build());
             } else {
                 listItems.add(DynamicMultiselectListElement
                                   .builder()
-                                  .code(String.valueOf(partyId))
+                                  .code(String.valueOf(partyDetails.getPartyId()))
                                   .label(partyDetails.getLabelForDynamicList())
                                   .build());
             }
