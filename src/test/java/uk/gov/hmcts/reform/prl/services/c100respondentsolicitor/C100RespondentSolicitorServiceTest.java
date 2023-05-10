@@ -342,8 +342,8 @@ public class C100RespondentSolicitorServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA",
-    "c100ResSolAttendingTheCourtA", "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA", "c100ResSolAllegationsOfHarmA",
-    "c100ResSolInternationalElementA", "c100ResSolAbilityToParticipateA"})
+        "c100ResSolAttendingTheCourtA", "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA", "c100ResSolAllegationsOfHarmA",
+        "c100ResSolInternationalElementA", "c100ResSolAbilityToParticipateA"})
     public void testPopulateAboutToStartCaseData(String arg) {
 
         callbackRequest.setEventId(arg);
