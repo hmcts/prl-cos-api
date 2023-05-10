@@ -9,20 +9,32 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -91,6 +103,7 @@ public class SendAndReplyServiceTest {
     Element<Message> message2Element;
     List<Element<Message>> messages;
     List<Element<Message>> messagesWithOneAdded;
+
     MessageMetaData metaData;
     DynamicList dynamicList;
     CaseData caseData;
@@ -104,6 +117,9 @@ public class SendAndReplyServiceTest {
 
     @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    @Mock
+    private RefDataUserService refDataUserService;
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -186,6 +202,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         messagesWithOneAdded = Arrays.asList(element(message1), element(message2), element(message3));
+
         caseDataWithAddedMessage = CaseData.builder()
             .openMessages(messagesWithOneAdded)
             .messageMetaData(metaData)
@@ -446,18 +463,75 @@ public class SendAndReplyServiceTest {
     @Test
     public void testPopulateDynamicListsForSendAndReply() {
 
+
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+
+        LocalDateTime hearingStartDate = LocalDateTime.now().plusDays(5).withNano(1);
+        HearingDaySchedule hearingDaySchedule =
+            HearingDaySchedule.hearingDayScheduleWith()
+                .hearingVenueId("231596")
+                .hearingJudgeId("4925644")
+                .hearingStartDateTime(hearingStartDate)
+                .build();
+        List<HearingDaySchedule> hearingDayScheduleList = new ArrayList<>();
+        hearingDayScheduleList.add(hearingDaySchedule);
+
+        CaseHearing caseHearingWithListedStatus =
+            CaseHearing.caseHearingWith().hearingID(123L)
+                .hmcStatus("LISTED")
+                .hearingType("hearingType1")
+                .hearingDaySchedule(hearingDayScheduleList)
+                .build();
+        CaseHearing caseHearingWithCancelled =
+            CaseHearing.caseHearingWith().hearingID(345L)
+                .hmcStatus("LISTED")
+                .hearingType("hearingType2")
+                .hearingDaySchedule(hearingDayScheduleList)
+                .build();
+
+        CaseHearing caseHearingWithoutHearingDaySche =
+            CaseHearing.caseHearingWith().hearingID(678L)
+                .hmcStatus("CANCELLED")
+                .hearingType("hearingType3")
+                .hearingDaySchedule(null)
+                .build();
+
+        List<CaseHearing> caseHearingList = new ArrayList<>();
+        caseHearingList.add(caseHearingWithListedStatus);
+        caseHearingList.add(caseHearingWithCancelled);
+        caseHearingList.add(caseHearingWithoutHearingDaySche);
+
+        Hearings futureHearings =
+            Hearings.hearingsWith()
+                .caseRef("123")
+                .hmctsServiceCode("ABA5")
+                .caseHearings(caseHearingList)
+                .build();
+
         Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
         Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
 
         CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
-
-        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-
         when(coreCaseDataApi.getCategoriesAndDocuments(
             Mockito.any(),
             Mockito.any(),
             Mockito.any()
         )).thenReturn(categoriesAndDocuments);
+        when(hearingService.getFutureHearings(anyString(),anyString())).thenReturn(futureHearings);
+
+        Map<String, String> refDataCategoryValueMap = new HashMap<>();
+
+        refDataCategoryValueMap.put("hearingType1","val1");
+        refDataCategoryValueMap.put("hearingType2","val2");
+        refDataCategoryValueMap.put("hearingType3","val3");
+
+        ReflectionTestUtils.setField(
+            sendAndReplyService, "serviceCode", "serviceCode");
+        ReflectionTestUtils.setField(
+            sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+
+        when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataCategoryValueMap);
 
         CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
 
@@ -519,7 +593,88 @@ public class SendAndReplyServiceTest {
         assertNull(judiciaryTierDynmicList.getListItems());
     }
 
+    @Test
+    public void testBuildSendMessage() {
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.EMPTY;
+        List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
+        dynamicMultiselectListElementList.add(dynamicMultiselectListElement);
+        DynamicList dynamicList1 = DynamicList.builder().build();
 
+        JudicialUser judicialUser = JudicialUser.builder().personalCode("123").build();
 
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .ctscEmailList(dynamicList1)
+                    .judicialOrMagistrateTierList(dynamicList1)
+                    .linkedApplicationsList(dynamicList1)
+                    .futureHearingsList(dynamicList1)
+                    .sendReplyJudgeName(judicialUser)
+                    .build())
+            .build();
+
+        List<JudicialUsersApiResponse> judicialUsersApiResponseList = Arrays.asList(JudicialUsersApiResponse.builder().build());
+
+        when(sendAndReplyService.getJudgeDetails(judicialUser)).thenReturn(judicialUsersApiResponseList);
+        Message message = sendAndReplyService.buildSendMessage(caseData);
+
+        assertNotNull(message);
+    }
+
+    @Test
+    public void testBuildSendMessageWithoutJudgeNameAndExternalPartyDocs() {
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.EMPTY;
+        List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
+        dynamicMultiselectListElementList.add(dynamicMultiselectListElement);
+        DynamicList dynamicList1 = DynamicList.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .ctscEmailList(dynamicList1)
+                    .judicialOrMagistrateTierList(dynamicList1)
+                    .linkedApplicationsList(dynamicList1)
+                    .futureHearingsList(dynamicList1)
+                    .sendReplyJudgeName(null)
+                    .build())
+            .build();
+
+        Message message = sendAndReplyService.buildSendMessage(caseData);
+
+        assertNotNull(message);
+    }
+
+    @Test
+    public void testAddNewOpenMessage() {
+        DynamicList dynamicList1 = DynamicList.builder().build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    //.externalPartiesList(DynamicMultiSelectList.builder().build())
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .ctscEmailList(dynamicList1)
+                    .judicialOrMagistrateTierList(dynamicList1)
+                    .linkedApplicationsList(dynamicList1)
+                    .futureHearingsList(dynamicList1)
+                    .submittedDocumentsList(dynamicList1)
+                    .openMessagesList(messagesWithOneAdded)
+                    .build())
+            .build();
+
+        List<Element<Message>> message = sendAndReplyService.addNewOpenMessage(caseData,message1);
+
+        assertNotNull(message);
+    }
 
 }
