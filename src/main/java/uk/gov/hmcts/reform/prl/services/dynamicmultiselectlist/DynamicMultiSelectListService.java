@@ -252,29 +252,45 @@ public class DynamicMultiSelectListService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (userDetails != null && userDetails.getEmail() != null) {
+            log.info("listItems size is:: " + listItems.size());
             if (null != caseData.getRespondents()) {
                 caseData.getRespondents().forEach(respondent -> {
                     listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, respondent.getValue()));
                 });
+                log.info("listItems size is:: " + listItems.size());
+                log.info("listItems are:: " + listItems);
             }
             if (null != caseData.getApplicants()) {
                 caseData.getApplicants().forEach(applicant -> {
                     listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, applicant.getValue()));
                 });
+                log.info("listItems size is:: " + listItems.size());
+                log.info("listItems are:: " + listItems);
             }
             if (null != caseData.getRespondentsFL401()) {
                 listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, caseData.getRespondentsFL401()));
+                log.info("listItems size is:: " + listItems.size());
+                log.info("listItems are:: " + listItems);
             }
             if (null != caseData.getApplicantsFL401()) {
                 listItems.addAll(getPartiesAsDynamicMultiSelectList(userDetails, caseData.getApplicantsFL401()));
+                log.info("listItems size is:: " + listItems.size());
+                log.info("listItems are:: " + listItems);
             }
         }
+        log.info("listItems size is:: " + listItems.size());
+        log.info("listItems are:: " + listItems);
         return DynamicMultiSelectList.builder().listItems(listItems).build();
     }
 
     private List<DynamicMultiselectListElement> getPartiesAsDynamicMultiSelectList(UserDetails userDetails,
                                                                                    PartyDetails partyDetails) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+        log.info("verifying party:: " + partyDetails.getLabelForDynamicList());
+        log.info("verifying solicitor:: " + partyDetails.getSolicitorEmail());
+        log.info("party solicitor represented:: " + partyDetails.getUser().getSolicitorRepresented());
+        log.info("logged in user email:: " + userDetails.getEmail());
+
         if (partyDetails.getUser() != null
             && YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())
             && userDetails.getEmail().equals(partyDetails.getSolicitorEmail())) {
