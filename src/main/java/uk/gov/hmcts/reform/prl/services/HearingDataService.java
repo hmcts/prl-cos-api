@@ -440,6 +440,7 @@ public class HearingDataService {
         } catch (Exception e) {
             log.error("Exception occured in getLinkedCasesDynamicList {}", e.getMessage());
         }
+        log.info("Dynamic case linking ----> {}", dynamicListElements);
         return dynamicListElements;
     }
 }

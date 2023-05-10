@@ -13,14 +13,13 @@ import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.CodeAndLabel;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
-import uk.gov.hmcts.reform.prl.models.complextypes.ExternalPartyDocument;
-import uk.gov.hmcts.reform.prl.models.complextypes.sendandreply.SelectedExternalPartyDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
@@ -29,14 +28,14 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
-import uk.gov.hmcts.reform.prl.repositories.CcdCaseApi;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -50,13 +49,9 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
+import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
-import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicMultiselectList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -81,8 +76,6 @@ public class SendAndReplyService {
 
     private final HearingDataService hearingDataService;
 
-    private  final CcdCaseApi ccdCaseApi;
-
     private final RefDataService refDataService;
 
     @Value("${sendandreply.category-id}")
@@ -91,13 +84,16 @@ public class SendAndReplyService {
     @Value("${sendandreply.service-code}")
     private String serviceCode;
 
-    private final DynamicMultiSelectListService dynamicMultiSelectListService;
+    @Value("${refdata.category-id}")
+    private String hearingTypeCategoryId;
 
     private final AuthTokenGenerator authTokenGenerator;
 
     private final CoreCaseDataApi coreCaseDataApi;
 
     private final RefDataUserService refDataUserService;
+
+    private final HearingService hearingService;
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -312,7 +308,7 @@ public class SendAndReplyService {
     }
 
     public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization) {
-        final String caseReference = String.valueOf(caseData.getId());
+        String caseReference = String.valueOf(caseData.getId());
         DynamicList documentCategoryList = getCategoriesAndDocuments(authorization, caseReference);
         String s2sToken = authTokenGenerator.generate();
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
@@ -324,16 +320,67 @@ public class SendAndReplyService {
                     serviceCode,
                     categoryId
                 ))
-                .externalPartiesList(getExternalRecipientsDynamicMultiselectList(caseData))
                 .linkedApplicationsList(getLinkedCasesDynamicList(authorization, caseReference))
                 .submittedDocumentsList(documentCategoryList)
-                .externalPartyDocuments(List.of(getExternalPartyDocument(documentCategoryList)))
                 .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder().label(loggedInUserEmail).code(loggedInUserEmail).build())))
+                .futureHearingsList(getFutureHearingDynamicList(authorization, s2sToken, caseReference))
                 .build()).build();
     }
 
-    private Element<ExternalPartyDocument> getExternalPartyDocument(DynamicList documentCategoryList) {
-        return element(ExternalPartyDocument.builder().documentCategoryList(documentCategoryList).build());
+    private DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
+        Hearings futureHearings = hearingService.getFutureHearings(authorization, caseId);
+
+        // label - hearingtypevalue - date
+        // code - hearing id - hearingtype
+
+        if (futureHearings != null && futureHearings.getCaseHearings() != null && !futureHearings.getCaseHearings().isEmpty()) {
+
+            Map<String, String> refDataCategoryValueMap = getHearingTypeRefDataMap(authorization, s2sToken, serviceCode);
+
+            List<DynamicListElement> hearingDropdowns = futureHearings.getCaseHearings().stream()
+                .map(caseHearing -> {
+                    //get hearingId
+                    String hearingId = String.valueOf(caseHearing.getHearingID());
+                    final String hearingType = caseHearing.getHearingType();
+                    String hearingTypeValue = refDataCategoryValueMap.get(hearingType);
+                    //return hearingId concatenated with hearingDate
+                    Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
+                    return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
+                        if (null != hearingDaySchedule && null != hearingDaySchedule.getHearingStartDateTime()) {
+                            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                            String hearingDate = hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter);
+                            return CodeAndLabel.builder().label(concat(hearingTypeValue, " - ").concat(hearingDate))
+                                .code(concat(hearingId, " - ").concat(hearingType)).build();
+                        }
+                        return null;
+                    }).filter(Objects::nonNull).collect(Collectors.toList())).orElse(Collections.emptyList());
+                }).map(this::getDynamicListElements)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+
+            log.info("getDynamicList(hearingDropdowns) -----> {}", getDynamicList(hearingDropdowns));
+
+            return getDynamicList(hearingDropdowns);
+        }
+
+        return DynamicList.builder()
+            .value(DynamicListElement.EMPTY).build();
+    }
+
+    private List<DynamicListElement> getDynamicListElements(List<CodeAndLabel> dropdowns) {
+        return dropdowns.stream().map(dropdown -> DynamicListElement.builder().code(dropdown.getCode()).label(dropdown.getLabel()).build()).collect(
+            Collectors.toList());
+    }
+
+    private Map<String, String> getHearingTypeRefDataMap(String authorization, String s2sToken, String serviceCode) {
+
+        Map<String, String> refDataCategoryValueMap = refDataCategoryValueMap = refDataService.getRefDataCategoryValueMap(
+            authorization,
+            s2sToken,
+            serviceCode,
+            hearingTypeCategoryId
+        );
+        return refDataCategoryValueMap;
     }
 
     /**
@@ -348,27 +395,6 @@ public class SendAndReplyService {
             authorization,
             caseId
         ));
-    }
-
-    /**
-     * This method will return Dynamic Multi select list for
-     * applicants, respondents, cafcass and other recipients.
-     * @param caseData CaseData object.
-     * @return DynamicMultiSelectList.
-     */
-    public DynamicMultiSelectList getExternalRecipientsDynamicMultiselectList(CaseData caseData) {
-        try {
-            List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-            listItems.addAll(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData).get(APPLICANTS));
-            listItems.addAll(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData).get(RESPONDENTS));
-            listItems.add(DynamicMultiselectListElement.builder().code(CAFCASS).label(CAFCASS).build());
-            listItems.add(DynamicMultiselectListElement.builder().code(OTHER).label(OTHER).build());
-            return getDynamicMultiselectList(listItems);
-        } catch (Exception e) {
-            log.error("Error in getExternalRecipientsDynamicMultiselectList method", e);
-        }
-        return DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.EMPTY)).build();
     }
 
     /**
@@ -492,9 +518,6 @@ public class SendAndReplyService {
 
         final SendOrReplyMessage sendOrReplyMessage = caseData.getSendOrReplyMessage();
 
-        log.info("select sendOrReplyMessage.getExternalPartiesList() ---> {}", sendOrReplyMessage.getExternalPartiesList());
-        log.info("select sendOrReplyMessage.getExternalPartyDocuments() ---> {}", sendOrReplyMessage.getExternalPartyDocuments());
-
         return Message.builder()
             .status(OPEN)
             .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
@@ -526,32 +549,11 @@ public class SendAndReplyService {
                                                ? sendOrReplyMessage.getSubmittedDocumentsList().getValueCode() : null)
             .selectedSubmittedDocumentValue(sendOrReplyMessage.getSubmittedDocumentsList() != null
                                                 ? sendOrReplyMessage.getSubmittedDocumentsList().getValueLabel() : null)
-            .selectedExternalParties(getSelectedExternalParties(sendOrReplyMessage.getExternalPartiesList()))
-            .selectedExternalPartyDocuments(getExternalPartyDocuments(sendOrReplyMessage))
             .latestMessage(caseData.getMessageContent())
             .updatedTime(dateTime.now())
             .build();
     }
 
-    private List<SelectedExternalPartyDocument> getExternalPartyDocuments(SendOrReplyMessage sendOrReplyMessage) {
-
-        if (sendOrReplyMessage != null && isNotEmpty(sendOrReplyMessage.getExternalPartyDocuments())) {
-
-            List<SelectedExternalPartyDocument> selectedExternalPartyDocuments = new ArrayList<>();
-
-            sendOrReplyMessage.getExternalPartyDocuments().forEach(
-                externalPartyDocumentElement -> {
-                    final DynamicListElement documentCategoryDynamicList = externalPartyDocumentElement.getValue()
-                        .getDocumentCategoryList().getValue();
-                    selectedExternalPartyDocuments.add(SelectedExternalPartyDocument.builder()
-                                                           .selectedDocumentCode(documentCategoryDynamicList.getCode())
-                                                           .selectedDocumentValue(documentCategoryDynamicList.getLabel()).build());
-                }
-            );
-            return selectedExternalPartyDocuments;
-        }
-        return Collections.emptyList();
-    }
 
     public List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser judicialUser) {
 
@@ -626,23 +628,6 @@ public class SendAndReplyService {
         return caseData.toBuilder()
             .sendOrReplyMessage(
                 caseData.getSendOrReplyMessage().toBuilder().replyMessage(previousMessage.get()).build()).build();
-    }
-
-    private String getSelectedExternalParties(DynamicMultiSelectList externalPartiesList) {
-        String externalParties = "";
-        if (Objects.nonNull(externalPartiesList)) {
-            List<DynamicMultiselectListElement> selectedElement = externalPartiesList.getValue();
-
-            log.info("selectedElement value for external parties ----------> {}", selectedElement);
-            if (isNotEmpty(selectedElement)) {
-                List<String> labelList = selectedElement.stream().map(DynamicMultiselectListElement::getLabel)
-                    .collect(Collectors.toList());
-                externalParties = String.join(",",labelList);
-            }
-        }
-
-        log.info("externalParties string -------> {}", externalParties);
-        return externalParties;
     }
 
 }
