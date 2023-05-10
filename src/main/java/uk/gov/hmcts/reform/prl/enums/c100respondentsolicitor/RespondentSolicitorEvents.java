@@ -30,8 +30,7 @@ public enum RespondentSolicitorEvents {
     ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "Allegations of harm", "respondentAohYesNo,"
         + "respondentAllegationsOfHarm,respondentDomesticAbuseBehaviour,respondentChildAbuseBehaviour,"
         + "respondentChildAbduction,respondentOtherConcerns"),
-    INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", "internationalElementChild,"
-        + "internationalElementParent,internationalElementJurisdiction,internationalElementRequest"),
+    INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", "internationalElementChild"),
     ABILITY_TO_PARTICIPATE(
         "c100ResSolAbilityToParticipate",
         "Ability to participate",
