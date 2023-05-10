@@ -162,16 +162,34 @@ public class SendAndReplyService {
         return messages;
     }
 
-    public List<Element<Message>> closeMessage(UUID messageId, CaseData caseData) {
-        List<Element<Message>> messages = caseData.getOpenMessages();
-        messages.stream()
+    public List<Element<Message>> closeMessage(UUID messageId, List<Element<Message>> openMessages) {
+        nullSafeCollection(openMessages).stream()
             .filter(m -> m.getId().equals(messageId))
             .map(Element::getValue)
             .forEach(message -> {
                 message.setStatus(MessageStatus.CLOSED);
                 message.setUpdatedTime(dateTime.now());
             });
-        return messages;
+        return openMessages;
+    }
+
+    public List<Element<Message>> closeMessage(CaseData caseData) {
+        UUID messageId = elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
+
+        List<Element<Message>> closedMessages = this.closeMessage(messageId, caseData.getSendOrReplyMessage().getOpenMessagesList());
+
+        if (isNotEmpty(caseData.getSendOrReplyMessage().getClosedMessagesList())) {
+            closedMessages.addAll(caseData.getSendOrReplyMessage().getClosedMessagesList());
+        }
+
+        caseData = caseData.toBuilder()
+            .sendOrReplyMessage(caseData.getSendOrReplyMessage().toBuilder()
+                                    .closedMessagesList(closedMessages)
+                                    .build())
+            .build();
+
+        return caseData.getSendOrReplyMessage().getClosedMessagesList();
     }
 
 

@@ -178,12 +178,12 @@ public class SendAndReplyControllerTest {
         when(elementUtils.getDynamicListSelectedValue(caseDataWithMessage.getReplyMessageDynamicList(), objectMapper))
             .thenReturn(selectedValue);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataWithMessage);
-        when(sendAndReplyService.closeMessage(selectedValue, caseDataWithMessage))
+        when(sendAndReplyService.closeMessage(selectedValue, caseDataWithMessage.getOpenMessages()))
             .thenReturn(Collections.singletonList(element(message)));
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).closeMessage(selectedValue, caseDataWithMessage);
+        verify(sendAndReplyService).closeMessage(selectedValue, caseDataWithMessage.getOpenMessages());
     }
 
     @Test
@@ -204,7 +204,7 @@ public class SendAndReplyControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).closeMessage(selectedValue, caseData);
+        verify(sendAndReplyService).closeMessage(selectedValue, caseData.getOpenMessages());
     }
 
     @Test

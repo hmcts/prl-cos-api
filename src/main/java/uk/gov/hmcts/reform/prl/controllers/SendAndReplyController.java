@@ -136,7 +136,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
             List<Element<Message>> messages;
             if (caseData.getMessageReply().getIsReplying().equals(YesOrNo.No)) {
-                messages = sendAndReplyService.closeMessage(selectedValue, caseData);
+                messages = sendAndReplyService.closeMessage(selectedValue, caseData.getOpenMessages());
                 List<Element<Message>> closedMessages = messages.stream()
                     .filter(m -> m.getValue().getStatus().equals(MessageStatus.CLOSED))
                     .collect(Collectors.toList());
@@ -238,10 +238,15 @@ public class SendAndReplyController extends AbstractCallbackController {
 
             log.info("listOfMessages created ----> {}", listOfMessages);
 
-            caseDataMap.putAll(Map.of("openMessagesList", listOfMessages));
+            caseDataMap.put("openMessagesList", listOfMessages);
 
             sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
 
+        } else {
+            //Reply message
+            if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
+                caseDataMap.put("closedMessagesList", sendAndReplyService.closeMessage(caseData));
+            }
         }
 
         log.info("updated case data after adding open message in the list  ----> {}", caseDataMap);
