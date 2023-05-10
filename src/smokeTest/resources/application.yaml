@@ -115,7 +115,7 @@ uk:
             CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
             CA_DA_RESPONDENT_SOLICITOR_NOC: 68f0d268-8062-4199-8695-2661081a836a
             CA_AWAITING_PAYMENT: 3cf67615-8b67-4814-9e61-1ce786b986a1
-            RETURN_APPLICATION_CONSENT_ORDER: 96e26a9a-ca28-4b63-bd59-38e8ad14e373            
+            RETURN_APPLICATION_CONSENT_ORDER: 96e26a9a-ca28-4b63-bd59-38e8ad14e373
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             CA_AWAITING_PAYMENT: 312019d9-54f4-4c9a-a8b0-2dc7e4008a9e
@@ -419,6 +419,9 @@ document:
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf
+    fl401listonnotice:
+      prl_fl404b_for_da_list_on_notice_template: PRL-GOR-ENG-FL401-LIST-ON-NOTICE-FL404B.docx
+      prl_fl404b_for_da_list_on_notice_filename: fl401-list-on-notice-fl404b.pdf
 
 southampton:
   court:
