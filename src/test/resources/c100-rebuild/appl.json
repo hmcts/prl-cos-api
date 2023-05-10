@@ -47,7 +47,8 @@
         "canProvideTelephoneNumber":"Yes",
         "telephoneNumber":"07438408341",
         "canNotProvideTelephoneNumberReason":"",
-        "canLeaveVoiceMail":"Yes"
+        "canLeaveVoiceMail":"Yes",
+        "applicantContactPreferences":"digital"
       },
       "applicantAddressPostcode":"CV3 2ND",
       "applicantAddress1":"app1 adrs line 1",
@@ -61,7 +62,7 @@
       "id":"4204ca6a-dd6f-49e2-9c34-41fe153f0aaf",
       "applicantFirstName":"applicantFN2",
       "applicantLastName":"applicantLN2",
-      "detailsKnown":"No",
+      "detailsKnown":"I dont know",
       "startAlternative":"No",
       "start":"",
       "contactDetailsPrivate":[
@@ -102,7 +103,8 @@
         "canProvideTelephoneNumber":"No",
         "telephoneNumber":"",
         "canNotProvideTelephoneNumberReason":"app2 can't provide telephone",
-        "canLeaveVoiceMail":"No"
+        "canLeaveVoiceMail":"No",
+        "applicantContactPreferences":"post"
       },
       "applicantAddressPostcode":"CV34BA",
       "applicantAddress1":"app2 adrs line 1",

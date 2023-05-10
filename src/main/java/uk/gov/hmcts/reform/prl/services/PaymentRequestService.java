@@ -58,24 +58,7 @@ public class PaymentRequestService {
             CaseData.class
         );
         FeeResponse feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
-        return paymentApi
-            .createPaymentServiceRequest(authorisation, authTokenGenerator.generate(),
-                                         PaymentServiceRequest.builder()
-             .callBackUrl(callBackUrl)
-             .casePaymentRequest(CasePaymentRequestDto.builder()
-                                     .action(PAYMENT_ACTION)
-                                     .responsibleParty(caseData.getApplicantCaseName()).build())
-             .caseReference(String.valueOf(caseData.getId()))
-             .ccdCaseNumber(String.valueOf(caseData.getId()))
-             .fees(new FeeDto[]{
-                 FeeDto.builder()
-                     .calculatedAmount(feeResponse.getAmount())
-                     .code(feeResponse.getCode())
-                     .version(feeResponse.getVersion())
-                     .volume(1).build()
-             })
-             .build()
-        );
+        return getPaymentServiceResponse(authorisation, caseData, feeResponse);
     }
 
     public PaymentResponse createServicePayment(String serviceRequestReference, String authorization,
@@ -115,7 +98,7 @@ public class PaymentRequestService {
         log.info("Case Data retrieved for caseId : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
-        String paymentReferenceNumber = caseData.getC100RebuildData().getPaymentReferenceNumber();
+        String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
 
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
@@ -204,5 +187,37 @@ public class PaymentRequestService {
                                            .applicantCaseName(createPaymentRequest.getApplicantCaseName())
                                            .build()).build())
             .build();
+    }
+
+    public PaymentServiceResponse createServiceRequestFromCcdCallack(
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest, String authorisation) throws Exception {
+
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        FeeResponse feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+        return getPaymentServiceResponse(authorisation, caseData, feeResponse);
+    }
+
+    public PaymentServiceResponse getPaymentServiceResponse(String authorisation, CaseData caseData, FeeResponse feeResponse) {
+        return paymentApi
+            .createPaymentServiceRequest(authorisation, authTokenGenerator.generate(),
+                                         PaymentServiceRequest.builder()
+                                             .callBackUrl(callBackUrl)
+                                             .casePaymentRequest(CasePaymentRequestDto.builder()
+                                                                     .action(PAYMENT_ACTION)
+                                                                     .responsibleParty(caseData.getApplicantCaseName()).build())
+                                             .caseReference(String.valueOf(caseData.getId()))
+                                             .ccdCaseNumber(String.valueOf(caseData.getId()))
+                                             .fees(new FeeDto[]{
+                                                 FeeDto.builder()
+                                                     .calculatedAmount(feeResponse.getAmount())
+                                                     .code(feeResponse.getCode())
+                                                     .version(feeResponse.getVersion())
+                                                     .volume(1).build()
+                                             })
+                                             .build()
+            );
     }
 }

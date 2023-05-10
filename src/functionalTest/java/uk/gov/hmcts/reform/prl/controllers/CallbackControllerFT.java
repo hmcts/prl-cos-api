@@ -17,7 +17,9 @@ import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -26,15 +28,18 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.List;
@@ -88,7 +93,8 @@ public class CallbackControllerFT {
 
     @MockBean
     private LocationRefDataService locationRefDataService;
-
+    @MockBean
+    private GatekeepingDetailsService gatekeepingDetailsService;
     private static final String MIAM_VALIDATION_REQUEST_ERROR = "requests/call-back-controller-miam-request-error.json";
     private static final String MIAM_VALIDATION_REQUEST_NO_ERROR = "requests/call-back-controller-miam-request-no-error.json";
     private static final String C100_GENERATE_DRAFT_DOC = "requests/call-back-controller-generate-save-doc.json";
@@ -99,6 +105,8 @@ public class CallbackControllerFT {
     private static final String C100_RESEND_RPA = "requests/call-back-controller-resend-rpa.json";
     private static final String FL401_ABOUT_TO_SUBMIT_CREATION = "requests/call-back-controller-about-to-submit-case-creation.json";
     private static final String FL401_CASE_DATA = "requests/call-back-controller-fl401-case-data.json";
+    private static final String C100_SEND_TO_GATEKEEPERJUDGE = "requests/call-back-controller-send-to-gatekeeperForJudge.json";
+
 
     @Before
     public void setUp() {
@@ -167,7 +175,7 @@ public class CallbackControllerFT {
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
-            .state(State.CASE_ISSUE)
+            .state(State.CASE_ISSUED)
             .applicantsConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
             .build();
@@ -222,7 +230,7 @@ public class CallbackControllerFT {
 
         when(allTabService.getAllTabsFields(any(CaseData.class))).thenReturn(caseDataMap);
 
-        MvcResult res = mockMvc.perform(post("/case-withdrawn-email-notification")
+        MvcResult res = mockMvc.perform(post("/case-withdrawn-about-to-submit")
                                           .contentType(MediaType.APPLICATION_JSON)
                                           .header("Authorization", "auth")
                                           .content(requestBody)
@@ -335,5 +343,36 @@ public class CallbackControllerFT {
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("data.localCourtAdmin").doesNotHaveJsonPath()).andReturn();
+    }
+
+    @Test
+    public void testGatekeepingDetailsWhenLegalAdvisorOptionSelected_200ResponseAndNoErrors() throws Exception {
+        String requestBody = ResourceLoader.loadJson(C100_SEND_TO_GATEKEEPER);
+
+        when(gatekeepingDetailsService.getGatekeepingDetails(Mockito.any(Map.class), Mockito.any(DynamicList.class), Mockito.any(
+            RefDataUserService.class))).thenReturn(
+            GatekeepingDetails.builder().isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.legalAdviser).build());
+
+        mockMvc.perform(post("/send-to-gatekeeper")
+                            .header("Authorization", "auth")
+                            .contentType(MediaType.APPLICATION_JSON).content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.gatekeepingDetails.isJudgeOrLegalAdviserGatekeeping").value("legalAdviser")).andReturn();
+    }
+
+    @Test
+    public void testGatekeepingDetailsWhenJudgeOptionSelected_200ResponseAndNoErrors() throws Exception {
+        String requestBody = ResourceLoader.loadJson(C100_SEND_TO_GATEKEEPERJUDGE);
+        when(gatekeepingDetailsService.getGatekeepingDetails(Mockito.any(Map.class), Mockito.any(DynamicList.class), Mockito.any(
+            RefDataUserService.class))).thenReturn(
+            GatekeepingDetails.builder().isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge).build());
+
+        mockMvc.perform(post("/send-to-gatekeeper")
+                            .header("Authorization", "auth")
+                            .contentType(MediaType.APPLICATION_JSON).content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.gatekeepingDetails.isJudgeOrLegalAdviserGatekeeping").value("judge")).andReturn();
     }
 }

@@ -31,4 +31,8 @@ public class ApplicantDto {
     private String applicantAddressCounty;
     private YesOrNo applicantAddressHistory;
     private String applicantProvideDetailsOfPreviousAddresses;
+
+    private String detailsKnown;
+    private String start;
+    private String startAlternative;
 }

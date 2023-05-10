@@ -4,7 +4,8 @@
 
 ## Notes
 
-Update with master until 3.0
+Update with master until Gatekeeping and manage order changes.
+TODO:Changes for Gatekeeping
 
 Since Spring Boot 2.1 bean overriding is disabled. If you want to enable it you will need to set `spring.main.allow-bean-definition-overriding` to `true`.
 
@@ -89,6 +90,13 @@ docker image rm <image-id>
 
 There is no need to remove postgres and java or similar core images.
 
+#### Troubleshooting
+
+### Managing Preview environment PODs
+Make sure you have added the label 'keep-helm' while creating the PR. Otherwise, add the label and re-trigger the build.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
+

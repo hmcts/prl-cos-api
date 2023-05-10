@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -22,10 +23,11 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUE;
+import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationServiceTest {
@@ -113,7 +115,7 @@ public class ServiceOfApplicationServiceTest {
         CaseDetails caseDetails = CaseDetails
             .builder()
             .id(123L)
-            .state(CASE_ISSUE.getValue())
+            .state(CASE_ISSUED.getValue())
             .data(casedata)
             .build();
         CaseData caseData1 = serviceOfApplicationService.sendPost(caseDetails,"test auth");
@@ -135,7 +137,7 @@ public class ServiceOfApplicationServiceTest {
         CaseDetails caseDetails = CaseDetails
             .builder()
             .id(123L)
-            .state(CASE_ISSUE.getValue())
+            .state(CASE_ISSUED.getValue())
             .data(casedata)
             .build();
         CaseData caseData1 = serviceOfApplicationService.sendPost(caseDetails,"test auth");
@@ -158,7 +160,7 @@ public class ServiceOfApplicationServiceTest {
         CaseDetails caseDetails = CaseDetails
             .builder()
             .id(123L)
-            .state(CASE_ISSUE.getValue())
+            .state(CASE_ISSUED.getValue())
             .data(casedata)
             .build();
         CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
@@ -181,10 +183,34 @@ public class ServiceOfApplicationServiceTest {
         CaseDetails caseDetails = CaseDetails
             .builder()
             .id(123L)
-            .state(CASE_ISSUE.getValue())
+            .state(CASE_ISSUED.getValue())
             .data(casedata)
             .build();
         CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
         verify(serviceOfApplicationEmailService).sendEmailFL401(Mockito.any(CaseDetails.class));
+    }
+
+    @Test
+    public void skipSolicitorEmailForCaseCreatedByCitizen() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTyoeOfApplication","C100");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+        when(caseInviteManager.generatePinAndSendNotificationEmail(Mockito.any(CaseData.class))).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails
+            .builder()
+            .id(123L)
+            .state(CASE_ISSUED.getValue())
+            .data(casedata)
+            .build();
+        CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
+        verify(serviceOfApplicationEmailService, never()).sendEmailC100(Mockito.any(CaseDetails.class));
     }
 }

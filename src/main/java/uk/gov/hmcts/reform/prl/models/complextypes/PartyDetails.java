@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnu
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 
 @Data
@@ -82,6 +84,8 @@ public class PartyDetails {
     // it will hold either applicant flag or respondent flag
     private Flags partyLevelFlag;
 
+    private ContactPreferences contactPreferences;
+
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
             || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
@@ -107,4 +111,10 @@ public class PartyDetails {
             this.lastName
         );
     }
+
+    private UUID partyId;
+
+    private UUID solicitorOrgUuid;
+
+    private UUID solicitorPartyId;
 }

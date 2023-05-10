@@ -16,16 +16,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -43,6 +45,9 @@ public class ServiceOfApplicationController {
     @Autowired
     AllTabServiceImpl allTabService;
 
+    @Autowired
+    DynamicMultiSelectListService dynamicMultiSelectListService;
+
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for add case number submit event")
@@ -54,13 +59,40 @@ public class ServiceOfApplicationController {
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
+        caseDataUpdated.put(
+            "serviceOfApplicationScreen1",
+            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, null)
+        );
 
-        if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
-            List<String> createdOrders = caseData.getOrderCollection().stream()
-                .map(Element::getValue).map(OrderDetails::getOrderType)
-                .collect(Collectors.toList());
-            caseDataUpdated = serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders,caseDataUpdated);
-        }
+        Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
+            .getApplicantsMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> applicantList = applicantDetails.get("applicants");
+        List<DynamicMultiselectListElement> applicantSolicitorList = applicantDetails.get("applicantSolicitors");
+        Map<String, List<DynamicMultiselectListElement>> respondentDetails = dynamicMultiSelectListService
+            .getRespondentsMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> respondentList = respondentDetails.get("respondents");
+        List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
+        List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData);
+
+        ConfirmRecipients confirmRecipients = ConfirmRecipients.builder()
+            .applicantsList(DynamicMultiSelectList.builder()
+                                .listItems(applicantList)
+                                .build())
+            .applicantSolicitorList(DynamicMultiSelectList.builder()
+                                        .listItems(applicantSolicitorList)
+                                        .build())
+            .respondentsList(DynamicMultiSelectList.builder()
+                                 .listItems(respondentList)
+                                 .build())
+            .respondentSolicitorList(DynamicMultiSelectList.builder()
+                                         .listItems(respondentSolicitorList)
+                                         .build())
+            .otherPeopleList(DynamicMultiSelectList.builder()
+                                 .listItems(otherPeopleList)
+                                 .build())
+            .build();
+        caseDataUpdated.put("confirmRecipients",confirmRecipients);
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

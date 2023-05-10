@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChildDetails;
 
@@ -28,5 +29,10 @@ public class ChildDetails {
     private final String childLiveWith;
     private List<Element<OtherPersonWhoLivesWithChildDetails>> personWhoLivesWithChild;
     private final String parentalResponsibilityDetails;
+
+    private final YesOrNo cafcassOfficerAdded;
+    private final String cafcassOfficerName;
+    private final String cafcassOfficerEmailAddress;
+    private final String cafcassOfficerPhoneNo;
 
 }

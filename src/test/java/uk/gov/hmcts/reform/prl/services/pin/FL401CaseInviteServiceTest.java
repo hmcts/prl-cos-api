@@ -100,7 +100,7 @@ public class FL401CaseInviteServiceTest {
     @Test
     public void givenRespondentsWithNoRepresentation_whenCaseInvitesGenerated_thenSentToAllRespondentsAndStoredInCaseData() {
         CaseData actualCaseData = fl401CaseInviteService
-            .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAndEmailsNoRepresentation);
+            .generateAndSendCaseInvite(caseDataWithRespondentsAndEmailsNoRepresentation);
 
         assertEquals(1, actualCaseData.getCaseInvites().size());
         assertEquals("respondentOne@email.com", actualCaseData.getCaseInvites().get(0).getValue()
@@ -110,7 +110,7 @@ public class FL401CaseInviteServiceTest {
     @Test
     public void givenRespondentWithRepresentation_whenCaseInvitesGenerated_thenSentToOnlyThoseWithoutRepresentation() {
         CaseData actualCaseData = fl401CaseInviteService
-            .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAndEmailsOnePartyNoRepresentation);
+            .generateAndSendCaseInvite(caseDataWithRespondentsAndEmailsOnePartyNoRepresentation);
 
         //two respondents but only one should have a case invite generated
         assertEquals(1, actualCaseData.getCaseInvites().size());
@@ -121,21 +121,21 @@ public class FL401CaseInviteServiceTest {
     @Test
     public void givenMultipleRespondentsWithNoEmail_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
         CaseData actualCaseData = fl401CaseInviteService
-            .generateAndSendRespondentCaseInvite(getCaseDataWithRespondentsNoEmails);
+            .generateAndSendCaseInvite(getCaseDataWithRespondentsNoEmails);
         assertTrue(actualCaseData.getCaseInvites().isEmpty());
     }
 
     @Test
     public void givenMultipleRespondentsWithEmailAndRepresentation_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
         CaseData actualCaseData = fl401CaseInviteService
-            .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAllWithRepresentation);
+            .generateAndSendCaseInvite(caseDataWithRespondentsAllWithRepresentation);
         assertTrue(actualCaseData.getCaseInvites().isEmpty());
     }
 
     @Test
     public void givenNoRespondents_whenCaseInvitesGenerated_thenNoInvitesGenerated() {
         CaseData actualCaseData = fl401CaseInviteService
-            .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAllWithRepresentation);
+            .generateAndSendCaseInvite(caseDataWithRespondentsAllWithRepresentation);
         assertTrue(actualCaseData.getCaseInvites().isEmpty());
     }
 
@@ -153,7 +153,7 @@ public class FL401CaseInviteServiceTest {
             .applicantsFL401(applicant)
             .build();
         CaseData actualCaseData = fl401CaseInviteService
-            .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAllWithRepresentation);
+            .generateAndSendCaseInvite(caseDataWithRespondentsAllWithRepresentation);
         assertEquals(1, actualCaseData.getCaseInvites().size());
         assertEquals("testfl401@applicant.com", actualCaseData.getCaseInvites().get(0).getValue()
             .getCaseInviteEmail());

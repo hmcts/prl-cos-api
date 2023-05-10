@@ -60,15 +60,9 @@
     "Country": "string",
     "PostCode": "string"
   },
-  "isChildrenKnownToAuthority": "Yes",
-  "childAndLocalAuthority": "string",
-  "isChildrenUnderChildProtection": "Yes",
   "isChildrenWithSameParents": "Yes",
   "parentsAndTheirChildren": "string",
   "parentalResponsibilities": "string",
-  "whoChildrenLiveWith": "Applicant(s)",
-  "childAddressAndAdultsLivingWith": "string",
-  "isExistingProceedings": "Yes",
   "childrenInProceeding": "string",
   "otherChildren": [
     {
@@ -2288,8 +2282,8 @@
     ]
   },
   "caseManagementLocation": {
-    "regionId": "string",
-    "baseLocationId": "string",
+    "region": "string",
+    "baseLocation": "string",
     "regionName": "string",
     "baseLocationName": "string"
   },
@@ -2710,10 +2704,12 @@
     "PostCode": "string"
   },
   "serveOrderDynamicList": {
-    "value": {
+    "value": [
+      {
       "code": "string",
       "label": "string"
-    },
+      }
+    ],
     "list_items": [
       {
         "code": "string",
@@ -2749,6 +2745,7 @@
   "recitalsOrPreamble": "string",
   "orderDirections": "string",
   "furtherDirectionsIfRequired": "string",
+  "furtherInformationIfRequired": "string",
   "courtDeclares2": [
     "Is entitled to occupy the address as their home"
   ],
@@ -3156,7 +3153,9 @@
     }
   ],
   "sdoCafcassFileAndServe": "2023-01-23",
+  "sdoCafcassNextStepEditContent": "string",
   "sdoCafcassCymruFileAndServe": "2023-01-23",
+  "sdoCafcassCymruNextStepEditContent": "string",
   "sdoNewPartnersToCafcass": "2023-01-23",
   "sdoCafcassCymruReportSentByDate": "2023-01-23",
   "sdoLocalAuthorityReportSubmitByDate": "2023-01-23",
@@ -3267,6 +3266,7 @@
     "Cafcass Cymru"
   ],
   "sdoHearingMaximumPages": "string",
+  "sdoHearingHowManyWitnessEvidence": 1,
   "sdoUpdateContactDetails": "string",
   "sdoSection7ChildImpactAnalysis": "Cafcass",
   "sdoNameOfCouncil": "string",
@@ -4083,6 +4083,7 @@
         ],
         "orderDirections": "string",
         "furtherDirectionsIfRequired": "string",
+        "furtherInformationIfRequired": "string",
         "childArrangementsOrdersToIssue": [
           "Child Arrangements Order"
         ],

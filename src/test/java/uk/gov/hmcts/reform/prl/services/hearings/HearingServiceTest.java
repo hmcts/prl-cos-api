@@ -5,12 +5,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 
@@ -28,11 +28,11 @@ public class HearingServiceTest {
     private String caseReferenceNumber;
 
     @Mock
-    HearingApiClient hearingApiClient;
+    private HearingApiClient hearingApiClient;
 
     Hearings hearings = null;
 
-    @InjectMocks
+    @Mock
     private HearingService hearingService;
 
     @Before
@@ -52,7 +52,7 @@ public class HearingServiceTest {
     }
 
     @Test
-    @DisplayName("test case for HearingService.")
+    @DisplayName("test case for HearingService getHearings success.")
     public void getHearingsTestSuccess() {
 
         Hearings response =
@@ -62,12 +62,31 @@ public class HearingServiceTest {
     }
 
     @Test
-    @DisplayName("test case for HearingService.")
+    @DisplayName("test case for HearingService getHearings exception.")
     public void getHearingsTestException() {
-        hearingApiClient = null;
 
         Hearings response =
             hearingService.getHearings(authToken, caseReferenceNumber);
+
+        Assert.assertEquals(null, response);
+    }
+
+    @Test
+    @DisplayName("test case for HearingService getNextHearingDate success.")
+    public void getNextHearingDateTestSuccess() {
+
+        NextHearingDetails response =
+            hearingService.getNextHearingDate(authToken, caseReferenceNumber);
+
+        Assert.assertEquals(null, response);
+    }
+
+    @Test
+    @DisplayName("test case for HearingService getNextHearingDate exception .")
+    public void getNextHearingDateTestException() {
+
+        NextHearingDetails response =
+            hearingService.getNextHearingDate(authToken, caseReferenceNumber);
 
         Assert.assertEquals(null, response);
     }
