@@ -334,9 +334,9 @@ public class C100RespondentSolicitorService {
                                                                                             .equals(caseData
                                                                                                         .getInternationalElementChild()
                                                                                                         .getChildrenLiveOutsideOfEnWl()
-                                                                                            ) ? null : caseData
+                                                                                            ) ? caseData
                                                           .getInternationalElementChild()
-                                                          .getChildrenLiveOutsideOfEnWlDetails())
+                                                          .getChildrenLiveOutsideOfEnWlDetails() : null)
                                                       .parentsAnyOneLiveOutsideEnWl(caseData
                                                                                         .getInternationalElementChild()
                                                                                         .getParentsAnyOneLiveOutsideEnWl())
@@ -344,9 +344,9 @@ public class C100RespondentSolicitorService {
                                                                                                .equals(caseData
                                                                                                            .getInternationalElementChild()
                                                                                                            .getParentsAnyOneLiveOutsideEnWl()
-                                                                                               ) ? null : caseData
+                                                                                               ) ? caseData
                                                                                                .getInternationalElementChild()
-                                                                                               .getParentsAnyOneLiveOutsideEnWlDetails()
+                                                                                               .getParentsAnyOneLiveOutsideEnWlDetails() : null
                                                           )
                                                       .anotherPersonOrderOutsideEnWl(caseData
                                                                                          .getInternationalElementChild()
@@ -355,9 +355,9 @@ public class C100RespondentSolicitorService {
                                                                                                 .equals(caseData
                                                                                                             .getInternationalElementChild()
                                                                                                             .getAnotherPersonOrderOutsideEnWl()
-                                                                                                ) ? null : caseData
+                                                                                                ) ? caseData
                                                                                                 .getInternationalElementChild()
-                                                                                                .getAnotherPersonOrderOutsideEnWlDetails()
+                                                                                                .getAnotherPersonOrderOutsideEnWlDetails() : null
                                                           )
                                                       .anotherCountryAskedInformation(caseData
                                                                                           .getInternationalElementChild()
@@ -366,9 +366,9 @@ public class C100RespondentSolicitorService {
                                                                                                   .equals(caseData
                                                                                                               .getInternationalElementChild()
                                                                                                               .getAnotherCountryAskedInformation()
-                                                                                                  ) ? null : caseData
+                                                                                                  ) ? caseData
                                                           .getInternationalElementChild()
-                                                          .getAnotherCountryAskedInformationDetaails())
+                                                          .getAnotherCountryAskedInformationDetaails() : null)
                                                       .build())
                     .build();
                 break;
