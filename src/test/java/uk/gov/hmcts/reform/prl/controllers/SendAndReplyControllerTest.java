@@ -212,7 +212,7 @@ public class SendAndReplyControllerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.No).build();
         CaseData caseData = CaseData.builder().id(12345L)
-            .chooseSendOrReply(REPLY)
+            .chooseSendOrReply(SEND)
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
             .closedMessages(Collections.singletonList(element(message)))
