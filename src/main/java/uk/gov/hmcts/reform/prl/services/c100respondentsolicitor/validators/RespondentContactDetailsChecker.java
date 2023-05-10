@@ -79,8 +79,10 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
                     fields.add(ofNullable(citizenDetails.get().getAddressHistory().getPreviousAddressHistory()));
                 }
             }
-            fields.add(ofNullable(citizenDetails.get().getContact().getPhoneNumber()));
-            fields.add(ofNullable(citizenDetails.get().getContact().getEmail()));
+            if (null != citizenDetails.get().getContact()) {
+                fields.add(ofNullable(citizenDetails.get().getContact().getPhoneNumber()));
+                fields.add(ofNullable(citizenDetails.get().getContact().getEmail()));
+            }
         }
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
