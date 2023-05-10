@@ -113,7 +113,8 @@ public class DgsService {
     }
 
 
-    public GeneratedDocumentInfo generateCoverLetterDocument(String authorisation, Map<String, Object> requestPayload, String templateName, String caseId) throws Exception {
+    public GeneratedDocumentInfo generateCoverLetterDocument(String authorisation, Map<String, Object> requestPayload,
+                                                             String templateName, String caseId) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =

@@ -88,38 +88,38 @@ public class ServiceOfApplicationPostService {
             .filter(partyDetails -> YesOrNo.Yes.getDisplayedValue()
                 .equalsIgnoreCase(partyDetails.getIsCurrentAddressKnown().getDisplayedValue()))
             .forEach(partyDetails -> {
-                List<GeneratedDocumentInfo> docs = null;
-                List<Element<BulkPrintDetails>> printedDocCollectionList;
-                docs = getUploadedDocumentsServiceOfApplication(caseData);
-                try {
-                    docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
-                } catch (Exception e) {
-                    log.info("*** Error while generating privacy notice to be served ***");
-                }
-                if (caseData.getBulkPrintDetails() != null) {
-                    printedDocCollectionList = caseData.getBulkPrintDetails();
-                } else {
-                    printedDocCollectionList = new ArrayList<>();
-                }
-                printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, docs)));
-                caseData.setBulkPrintDetails(printedDocCollectionList);
-            }
+                         List<GeneratedDocumentInfo> docs = null;
+                         List<Element<BulkPrintDetails>> printedDocCollectionList;
+                         docs = getUploadedDocumentsServiceOfApplication(caseData);
+                         try {
+                             docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
+                         } catch (Exception e) {
+                             log.info("*** Error while generating privacy notice to be served ***");
+                         }
+                         if (caseData.getBulkPrintDetails() != null) {
+                             printedDocCollectionList = caseData.getBulkPrintDetails();
+                         } else {
+                             printedDocCollectionList = new ArrayList<>();
+                         }
+                         printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, docs)));
+                         caseData.setBulkPrintDetails(printedDocCollectionList);
+                     }
             ));
         return sentDocs;
     }
 
     private List<GeneratedDocumentInfo> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
         List<GeneratedDocumentInfo> docs = new ArrayList<>();
-        docs.add(generateDocument(auth, getRespondentCaseData(partyDetails,caseData),DOCUMENT_COVER_SHEET_HINT));
+        docs.add(generateDocument(auth, getRespondentCaseData(partyDetails, caseData), DOCUMENT_COVER_SHEET_HINT));
         docs.add(getFinalDocument(caseData));
         getC1aDocument(caseData).ifPresent(docs::add);
         docs.addAll(getSelectedOrders(caseData));
         docs.addAll(getUploadedDocumentsServiceOfApplication(caseData));
         CaseData blankCaseData = CaseData.builder().build();
-        docs.add(generateDocument(auth, blankCaseData,DOCUMENT_PRIVACY_NOTICE_HINT));
-        docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C1A_BLANK_HINT));
-        docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C7_DRAFT_HINT));
-        docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C8_BLANK_HINT));
+        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
+        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C1A_BLANK_HINT));
+        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C7_DRAFT_HINT));
+        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C8_BLANK_HINT));
         return docs;
     }
 
@@ -128,17 +128,18 @@ public class ServiceOfApplicationPostService {
         Map<String, Object> printInputParams = new HashMap<>();
         printInputParams.put("name", caseData.getApplicantCaseName());
         printInputParams.put("id", caseData.getId());
-        printInputParams.put("address", Address.builder().addressLine1("abc").addressLine3("ddd").county("county").postCode("postcode").postTown("posttown").build());
+        printInputParams.put("address", Address.builder().addressLine1("abc").addressLine3("ddd")
+            .county("county").postCode("postcode").postTown("posttown").build());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             generatedDocumentInfo = dgsService.generateCoverLetterDocument(
                 auth,
                 printInputParams,
-                documentGenService.getFileName(caseData,DOCUMENT_COVER_SHEET_HINT,false),
+                documentGenService.getFileName(caseData, DOCUMENT_COVER_SHEET_HINT, false),
                 String.valueOf(caseData.getId())
             );
         }
-        if(null != generatedDocumentInfo){
+        if (null != generatedDocumentInfo) {
             return Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -205,10 +206,11 @@ public class ServiceOfApplicationPostService {
 
     private GeneratedDocumentInfo generateDocument(String authorisation, CaseData caseData, String documentName) throws Exception {
         return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation, caseData,
-                                                                      documentName, welshCase(caseData)));
+                                                                                 documentName, welshCase(caseData)
+        ));
     }
 
-    private Element<BulkPrintDetails> sendBulkPrint(CaseData caseData,String authorisation, List<GeneratedDocumentInfo> docs) {
+    private Element<BulkPrintDetails> sendBulkPrint(CaseData caseData, String authorisation, List<GeneratedDocumentInfo> docs) {
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         String bulkPrintedId = "";
         try {
@@ -219,7 +221,7 @@ public class ServiceOfApplicationPostService {
                 LETTER_TYPE,
                 docs
             );
-            log.info("ID in the queue from bulk print service : {}",bulkPrintId);
+            log.info("ID in the queue from bulk print service : {}", bulkPrintId);
             bulkPrintedId = String.valueOf(bulkPrintId);
 
             sentDocs.addAll(docs);
