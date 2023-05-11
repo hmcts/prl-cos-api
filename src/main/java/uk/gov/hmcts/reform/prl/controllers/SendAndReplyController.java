@@ -240,8 +240,6 @@ public class SendAndReplyController extends AbstractCallbackController {
 
             caseDataMap.put("openMessagesList", listOfMessages);
 
-            sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
-
         } else {
             //Reply message
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
@@ -250,6 +248,8 @@ public class SendAndReplyController extends AbstractCallbackController {
                 caseDataMap.put("openMessagesList", caseData.getSendOrReplyMessage().getOpenMessagesList());
             }
         }
+        //clear temp fields
+        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
 
         log.info("updated case data after adding open message in the list  ----> {}", caseDataMap);
 
