@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -528,13 +529,14 @@ public class CallbackController {
         List<Element<FurtherEvidence>> furtherEvidencesList = caseData.getFurtherEvidences();
         List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
         List<Element<QuarentineLegalDoc>> quarentineDocs = new ArrayList<>();
-        log.info("*** Category *** {}", caseData.getDocumentCategory());
+        log.info("*** Category *** {}", caseData.getDocumentCategoryChecklist());
         if (furtherEvidencesList != null) {
             log.info("*** further evidences *** {}", furtherEvidencesList);
             quarentineDocs.addAll(furtherEvidencesList.stream().map(element -> Element.<QuarentineLegalDoc>builder()
                 .value(QuarentineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
                            .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
                            .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxFurtherEvidence())
+                           .category(DocumentCategoryEnum.MAINAPPLICATION.getDisplayedValue())
                            .build())
                     .id(element.getId()).build())
                 .collect(Collectors.toList()));
@@ -546,6 +548,7 @@ public class CallbackController {
                                .documentName(element.getValue().getDocumentName())
                                .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxCorrespondence())
                                .notes(element.getValue().getNotes())
+                               .category(DocumentCategoryEnum.CORRESPONDENCE.getDisplayedValue())
                                .build())
                     .id(element.getId()).build())
                 .collect(Collectors.toList()));
@@ -557,6 +560,7 @@ public class CallbackController {
                                .documentType(element.getValue().getDocumentTypeOther().toString())
                                .notes(element.getValue().getNotes())
                                .documentName(element.getValue().getDocumentName())
+                               .category(DocumentCategoryEnum.OTHER.getDisplayedValue())
                                .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxOtherDocuments())
                                .build())
                     .id(element.getId()).build())

@@ -1055,7 +1055,7 @@ public class CallbackControllerTest {
                              .id(1L)
                              .data(caseData).build()).build();
         CaseData caseData1 = CaseData.builder()
-            .documentCategory(DocumentCategoryEnum.CORRESPONDENCE)
+            .documentCategoryChecklist(DocumentCategoryEnum.CORRESPONDENCE)
             .furtherEvidences(List.of(Element.<FurtherEvidence>builder()
                                           .value(FurtherEvidence.builder()
                                                      .typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.consentOrder)
