@@ -344,7 +344,7 @@ public class SendAndReplyService {
                     //get hearingId
                     String hearingId = String.valueOf(caseHearing.getHearingID());
                     final String hearingType = caseHearing.getHearingType();
-                    String hearingTypeValue = refDataCategoryValueMap != null ? refDataCategoryValueMap.get(hearingType) : EMPTY_STRING;
+                    String hearingTypeValue = !refDataCategoryValueMap.isEmpty() ? refDataCategoryValueMap.get(hearingType) : EMPTY_STRING;
                     //return hearingId concatenated with hearingDate
                     Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
                     return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
@@ -376,12 +376,17 @@ public class SendAndReplyService {
 
     private Map<String, String> getRefDataMap(String authorization, String s2sToken, String serviceCode, String hearingTypeCategoryId) {
 
-        return refDataService.getRefDataCategoryValueMap(
-            authorization,
-            s2sToken,
-            serviceCode,
-            hearingTypeCategoryId
-        );
+        try {
+            return refDataService.getRefDataCategoryValueMap(
+                authorization,
+                s2sToken,
+                serviceCode,
+                hearingTypeCategoryId
+            );
+        } catch (Exception e) {
+            log.error("Error while calling Ref data api in getRefDataMap method --->  ", e);
+        }
+        return Collections.EMPTY_MAP;
     }
 
     /**
