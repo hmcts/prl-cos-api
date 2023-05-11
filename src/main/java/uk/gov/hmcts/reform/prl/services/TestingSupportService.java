@@ -139,10 +139,10 @@ public class TestingSupportService {
 
             requestBody = ResourceLoader.loadJson(VALID_Respondent_TaskList_INPUT_JSON);
             Response dummyResponse = objectMapper.readValue(requestBody, Response.class);
-            PartyDetails partyDetails = PartyDetails.builder().response(dummyResponse).build();
+            PartyDetails partyDetails = solicitorRepresentedRespondent.getValue().toBuilder().response(dummyResponse).build();
             respondents.set(respondents.indexOf(solicitorRepresentedRespondent), element(solicitorRepresentedRespondent
                                                                                              .getId(), partyDetails));
-            caseDataUpdated.put("respondents", respondents);;
+            caseDataUpdated.put("respondents", respondents);
             return caseDataUpdated;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
