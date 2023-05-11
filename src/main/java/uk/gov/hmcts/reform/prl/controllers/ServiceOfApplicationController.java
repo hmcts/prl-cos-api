@@ -113,9 +113,9 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        updatedCaseData.put("coverLetter", serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData));
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);
+        updatedCaseData.put("coverLetter", serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
 

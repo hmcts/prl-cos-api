@@ -125,7 +125,10 @@ public class ServiceOfApplicationPostService {
     public Document getCoverLetter(String auth, Address address, CaseData caseData) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        log.info("documentLanguage.isGenEng() {}", documentLanguage.isGenEng());
+        log.info("documentGenService.getTemplate {}", documentGenService.getTemplate(caseData, DOCUMENT_COVER_SHEET_HINT, false));
         if (documentLanguage.isGenEng()) {
+            log.info("inside");
             generatedDocumentInfo = dgsService.generateDocument(
                 auth,
                 CaseDetails.builder().caseData(caseData.toBuilder()
@@ -136,6 +139,7 @@ public class ServiceOfApplicationPostService {
                 documentGenService.getTemplate(caseData, DOCUMENT_COVER_SHEET_HINT, false)
                 );
         }
+        log.info("generatedDocumentInfo {}", generatedDocumentInfo);
         if (null != generatedDocumentInfo) {
             return Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
