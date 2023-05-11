@@ -447,7 +447,7 @@ public class CallbackController {
     ) {
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest))
+            .data(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest, authorisation))
             .build();
     }
 
