@@ -428,7 +428,7 @@ public class C100RespondentSolicitorService {
             .build();
     }
 
-    private Element<PartyDetails> findSolicitorRepresentedRespondents(CallbackRequest callbackRequest) {
+    public Element<PartyDetails> findSolicitorRepresentedRespondents(CallbackRequest callbackRequest) {
         Element<PartyDetails> solicitorRepresentedRespondent = null;
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
