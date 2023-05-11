@@ -137,7 +137,7 @@ public class ServiceOfApplicationPostService {
         return null;
     }
 
-    private GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth) throws Exception {
+    public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         log.info("documentLanguage.isGenEng() {}", documentLanguage.isGenEng());
@@ -219,7 +219,7 @@ public class ServiceOfApplicationPostService {
         ));
     }
 
-    private Element<BulkPrintDetails> sendBulkPrint(CaseData caseData, String authorisation, List<GeneratedDocumentInfo> docs) {
+    public Element<BulkPrintDetails> sendBulkPrint(CaseData caseData, String authorisation, List<GeneratedDocumentInfo> docs) {
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         String bulkPrintedId = "";
         try {

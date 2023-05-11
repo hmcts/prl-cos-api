@@ -116,6 +116,9 @@ public class ServiceOfApplicationController {
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);
         log.info("inside about to submit");
+        serviceOfApplicationPostService
+            .sendBulkPrint(caseData, authorisation,
+                           List.of(serviceOfApplicationPostService.getCoverLetterGeneratedDocInfo(caseData, authorisation)));
         updatedCaseData.put("coverLetter", serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
@@ -126,14 +129,10 @@ public class ServiceOfApplicationController {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleSubmitted(
+    public void handleSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
+        serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
         serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
-        Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info("inside submitted");
-        updatedCaseData.put("coverLetter1", serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData));
-        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
 }
