@@ -92,6 +92,7 @@ public class ServiceOfApplicationPostService {
                 docs = getUploadedDocumentsServiceOfApplication(caseData);
                 try {
                     docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
+                    docs.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
                 } catch (Exception e) {
                     log.info("*** Error while generating privacy notice to be served ***");
                 }
@@ -124,6 +125,20 @@ public class ServiceOfApplicationPostService {
 
     public Document getCoverLetter(String auth, Address address, CaseData caseData) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
+        generatedDocumentInfo = getCoverLetterGeneratedDocInfo(caseData, auth);
+        log.info("generatedDocumentInfo {}", generatedDocumentInfo);
+        if (null != generatedDocumentInfo) {
+            return Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName("cover_letter.pdf").build();
+        }
+        return null;
+    }
+
+    private GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = null;
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         log.info("documentLanguage.isGenEng() {}", documentLanguage.isGenEng());
         log.info("documentGenService.getTemplate {}", documentGenService.getTemplate(caseData, DOCUMENT_COVER_SHEET_HINT, false));
@@ -137,17 +152,10 @@ public class ServiceOfApplicationPostService {
                                                                          .county("county").postCode("postcode")
                                                                          .postTown("posttown").build()).build()).build(),
                 documentGenService.getTemplate(caseData, DOCUMENT_COVER_SHEET_HINT, false)
-                );
+            );
         }
-        log.info("generatedDocumentInfo {}", generatedDocumentInfo);
-        if (null != generatedDocumentInfo) {
-            return Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName("cover_letter.pdf").build();
-        }
-        return null;
+        log.info("generatedDocumentInfo***** {}", generatedDocumentInfo);
+        return generatedDocumentInfo;
     }
 
     private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
@@ -216,6 +224,7 @@ public class ServiceOfApplicationPostService {
         String bulkPrintedId = "";
         try {
             log.info("*** Initiating request to Bulk print service ***");
+            log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
             UUID bulkPrintId = bulkPrintService.send(
                 String.valueOf(caseData.getId()),
                 authorisation,
