@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static java.util.Optional.ofNullable;
 
@@ -48,6 +49,8 @@ public class Message extends MessageMetaData {
     private String selectedFutureHearingValue;
     private String selectedSubmittedDocumentCode;
     private String selectedSubmittedDocumentValue;
+
+    private List<Message> replyHistory;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
