@@ -139,7 +139,8 @@ public class TestingSupportService {
 
             requestBody = ResourceLoader.loadJson(VALID_Respondent_TaskList_INPUT_JSON);
             Response dummyResponse = objectMapper.readValue(requestBody, Response.class);
-            PartyDetails partyDetails = solicitorRepresentedRespondent.getValue().toBuilder().response(dummyResponse).build();
+            PartyDetails partyDetails = solicitorRepresentedRespondent.getValue();
+            partyDetails.setResponse(dummyResponse);
             respondents.set(respondents.indexOf(solicitorRepresentedRespondent), element(solicitorRepresentedRespondent
                                                                                              .getId(), partyDetails));
             caseDataUpdated.put("respondents", respondents);
