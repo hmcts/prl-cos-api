@@ -127,9 +127,8 @@ public class TestingSupportService {
     }
 
     public Map<String, Object> initiateTaskListCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-
         if (isAuthorized(authorisation)) {
+            Map<String, Object> caseDataUpdated = new HashMap<>();
             String requestBody;;
 
             CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -139,10 +138,12 @@ public class TestingSupportService {
 
             requestBody = ResourceLoader.loadJson(VALID_Respondent_TaskList_INPUT_JSON);
             Response dummyResponse = objectMapper.readValue(requestBody, Response.class);
-            PartyDetails partyDetails = solicitorRepresentedRespondent.getValue();
-            partyDetails.setResponse(dummyResponse);
+            Response response = dummyResponse.toBuilder().build();
+
+            PartyDetails amended = solicitorRepresentedRespondent.getValue()
+                .toBuilder().response(response).build();
             respondents.set(respondents.indexOf(solicitorRepresentedRespondent), element(solicitorRepresentedRespondent
-                                                                                             .getId(), partyDetails));
+                                                                                             .getId(), amended));
             caseDataUpdated.put("respondents", respondents);
             return caseDataUpdated;
         } else {
