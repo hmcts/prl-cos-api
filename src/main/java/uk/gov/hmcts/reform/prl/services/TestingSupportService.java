@@ -131,16 +131,13 @@ public class TestingSupportService {
 
     public Map<String, Object> initiateRespondentResponseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
         if (isAuthorized(authorisation)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            String requestBody;
-            ;
 
             CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<Element<PartyDetails>> respondents = initialCaseData.getRespondents();
             Element<PartyDetails> solicitorRepresentedRespondent = c100RespondentSolicitorService
                 .findSolicitorRepresentedRespondents(callbackRequest);
 
-            requestBody = ResourceLoader.loadJson(VALID_Respondent_TaskList_INPUT_JSON);
+            String requestBody = ResourceLoader.loadJson(VALID_Respondent_TaskList_INPUT_JSON);
             Response dummyResponse = objectMapper.readValue(requestBody, Response.class);
 
             String invokingSolicitor = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
@@ -168,6 +165,7 @@ public class TestingSupportService {
                 .toBuilder().response(dummyResponse).build();
             respondents.set(respondents.indexOf(solicitorRepresentedRespondent), element(solicitorRepresentedRespondent
                                                                                              .getId(), amended));
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put(C100_RESPONDENTS, respondents);
 
             return caseDataUpdated;
