@@ -115,6 +115,7 @@ public class ServiceOfApplicationController {
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);
+        log.info("inside about to submit");
         updatedCaseData.put("coverLetter", serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
@@ -131,6 +132,7 @@ public class ServiceOfApplicationController {
         CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
         serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        log.info("inside submitted");
         updatedCaseData.put("coverLetter1", serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
