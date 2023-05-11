@@ -378,7 +378,6 @@ public class NoticeOfChangePartiesService {
     }
 
     public Map<String, Object> aboutToSubmitStopRepresenting(String authorisation, CallbackRequest callbackRequest) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Optional<PartyDetails>> selectedPartyDetailsList = new ArrayList<>();
         log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsList.size());
@@ -425,6 +424,7 @@ public class NoticeOfChangePartiesService {
         });
 
         log.info("Party details found - rest wip:: ", selectedPartyDetailsList);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         return caseDataUpdated;
     }
 }
