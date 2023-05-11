@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.noticeofchange;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +17,6 @@ import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Slf4j
 public class NoticeOfChangeContentProviderTest {
     @InjectMocks
     NoticeOfChangeContentProvider noticeOfChangeContentProvider;
@@ -27,7 +25,6 @@ public class NoticeOfChangeContentProviderTest {
 
     @Before
     public void setUp() {
-        log.info("My changes");
         caseData = CaseData.builder()
             .id(123455)
             .caseTypeOfApplication("fl401")
@@ -49,7 +46,6 @@ public class NoticeOfChangeContentProviderTest {
 
     @Test
     public void testBuildNoticeOfChangeEmail() {
-        log.info("My changes");
         EmailTemplateVars emailTemplateVars = noticeOfChangeContentProvider.buildNocEmailSolicitor(caseData, "Solicitor Name");
         assertEquals("123455",emailTemplateVars.getCaseReference());
     }

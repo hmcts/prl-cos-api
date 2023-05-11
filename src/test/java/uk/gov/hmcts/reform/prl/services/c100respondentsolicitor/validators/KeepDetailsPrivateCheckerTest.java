@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +26,6 @@ import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Slf4j
 public class KeepDetailsPrivateCheckerTest {
 
     @InjectMocks
@@ -75,7 +73,6 @@ public class KeepDetailsPrivateCheckerTest {
 
     @Test
     public void isStartedWithoutRespKeepDetailsPrivateTest() {
-        log.info("My changes");
         respondent = PartyDetails.builder()
             .response(Response
                           .builder()
@@ -97,7 +94,6 @@ public class KeepDetailsPrivateCheckerTest {
 
     @Test
     public void hasMandatoryCompletedWithoutRespondentTest() {
-        log.info("My changes");
         respondent = null;
         boolean anyNonEmpty = keepDetailsPrivateChecker.isFinished(respondent);
         Assert.assertFalse(anyNonEmpty);

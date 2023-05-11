@@ -45,7 +45,6 @@ public class NoticeOfChangeEventHandlerTest {
 
     @Test
     public void shouldNotifyLegalRepresentative() {
-        log.info("My changes");
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("af1").lastName("al1")
             .canYouProvideEmailAddress(YesOrNo.Yes)

@@ -401,7 +401,6 @@ public class HearingDataServiceTest {
             .representativeFirstName("Ram")
             .representativeLastName("Mer")
             .build();
-        log.info("My changes");
         PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .email("abc@xyz.com")
@@ -470,7 +469,6 @@ public class HearingDataServiceTest {
 
     @Test()
     public void testNullifyUnncessaryFieldsPopulated() {
-        log.info("My changes");
         Map<String, Object> hearingDateConfirmOptionEnumMap = new LinkedHashMap<>();
         Map<String, Object> objectMap = new LinkedHashMap<>();
         hearingDateConfirmOptionEnumMap.put(HEARING_DATE_CONFIRM_OPTION_ENUM,DATE_CONFIRMED_IN_HEARINGS_TAB);

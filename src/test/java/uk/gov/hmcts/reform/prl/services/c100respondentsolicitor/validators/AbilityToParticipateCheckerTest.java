@@ -42,7 +42,6 @@ public class AbilityToParticipateCheckerTest {
     public void setUp() {
         User user = User.builder().email("respondent@example.net")
             .idamId("1234-5678").solicitorRepresented(Yes).build();
-        log.info("My changes");
         respondent = PartyDetails.builder()
             .user(user)
             .response(Response.builder().abilityToParticipate(
@@ -69,7 +68,6 @@ public class AbilityToParticipateCheckerTest {
 
     @Test
     public void isStartedNotTest() {
-        log.info("My changes");
         respondent = null;
         boolean anyNonEmpty = abilityToParticipateChecker.isStarted(respondent);
 
@@ -78,7 +76,6 @@ public class AbilityToParticipateCheckerTest {
 
     @Test
     public void hasMandatoryCompletedTest() {
-        log.info("My changes");
         boolean anyNonEmpty = abilityToParticipateChecker.isFinished(respondent);
 
         assertTrue(anyNonEmpty);
@@ -86,7 +83,6 @@ public class AbilityToParticipateCheckerTest {
 
     @Test
     public void hasMandatoryCompletedWithoutRespondentTest() {
-        log.info("My changes");
         respondent = null;
         boolean anyNonEmpty = abilityToParticipateChecker.isFinished(respondent);
         assertFalse(anyNonEmpty);

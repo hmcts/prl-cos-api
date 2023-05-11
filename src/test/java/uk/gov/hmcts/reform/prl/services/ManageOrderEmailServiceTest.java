@@ -80,7 +80,6 @@ public class ManageOrderEmailServiceTest {
     @Mock
     private CourtFinderApi courtFinderApi;
 
-
     @Mock
     private Court court;
 
@@ -96,7 +95,6 @@ public class ManageOrderEmailServiceTest {
     PartyDetails respondent;
 
     private UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-
 
     @Before
     public void setUp() {

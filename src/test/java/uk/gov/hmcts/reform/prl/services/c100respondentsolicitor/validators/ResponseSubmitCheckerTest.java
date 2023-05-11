@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +25,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Slf4j
 public class ResponseSubmitCheckerTest {
 
     @InjectMocks
@@ -125,7 +123,6 @@ public class ResponseSubmitCheckerTest {
 
     @Test
     public void hasMandatoryCompletedTrue() {
-        log.info("My changes");
 
         when(respondentEventsChecker.getConsentToApplicationChecker()).thenReturn(consentToApplicationChecker);
         when(consentToApplicationChecker.isFinished(respondent)).thenReturn(true);

@@ -121,7 +121,6 @@ public class TaskListServiceTest {
 
     @Test
     public void getTasksShouldReturnListOfRespondentSolicitorTasks() {
-        log.info("My changes");
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .gender(Gender.male)
@@ -394,7 +393,6 @@ public class TaskListServiceTest {
 
     @Test
     public void testGetRespondentsEvents() {
-        log.info("My changes");
         List<RespondentSolicitorEvents> actualRespEvents = taskListService.getRespondentsEvents();
 
         List<RespondentSolicitorEvents> expectedRespEvents = List.of(
