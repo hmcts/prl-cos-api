@@ -96,11 +96,11 @@ public class ReviewDocumentsController {
             if (quarentineLegalDocElement.isPresent()) {
                 QuarentineLegalDoc doc = quarentineLegalDocElement.get().getValue();
                 String doctobereviewed = String
-                    .join(format("<label class='govuk-label' for='more-detail'> Submitted by<li>%s</li></label>", "Solicitor"),
+                    .join(format("<label class='govuk-label' for='more-detail'> Submitted by<li>%s</li></label>", "Legal professional"),
                           format("<label class='govuk-label' for='more-detail'>Document category <li>%s</li></label>",
-                                 caseData.getDocumentCategory()),
+                                 doc.getCategory()),
                           format("<label class='govuk-label' for='more-detail'> Details/comments<li>%s</li></label>",
-                         caseData.getGiveDetails()));
+                         doc.getNotes()));
                 caseDataUpdated.put("docToBeReviewed", doctobereviewed);
             }
         }
