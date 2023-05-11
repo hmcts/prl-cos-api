@@ -109,11 +109,14 @@ public class UpdatePartyDetailsService {
     }
 
     private void updateLegalRepresentation(CallbackRequest callbackRequest, String authorisation, CaseDetails caseDetails, CaseData caseData) {
+        log.info("callbackRequest.getCaseDetailsBefore() ==> " + callbackRequest.getCaseDetailsBefore());
         CaseData oldCaseData = objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class);
+        log.info("oldCaseData ==> " + oldCaseData);
         if ("amendRespondentsDetails".equalsIgnoreCase(callbackRequest.getEventId())) {
             caseData.getRespondents().stream().forEach(partyDetailsElement -> {
                 if (YesNoDontKnow.no.equals(partyDetailsElement.getValue().getDoTheyHaveLegalRepresentation())) {
                     int respondentIndex = caseData.getRespondents().indexOf(partyDetailsElement);
+                    log.info("respondentIndex ==> " + respondentIndex);
                     PartyDetails oldRespondent = oldCaseData.getRespondents().get(respondentIndex).getValue();
                     UserDetails userDetails = userService.getUserDetails(authorisation);
                     DynamicListElement roleItem = DynamicListElement.builder()
