@@ -21,7 +21,6 @@
     <cve>CVE-2020-15522</cve>
     <cve>CVE-2022-31692</cve>
     <cve>CVE-2022-31690</cve>
-    <cve>CVE-2022-25647</cve>
     <cve>CVE-2022-45688</cve>
     <cve>CVE-2023-24998</cve>
     <cve>CVE-2023-28708</cve>
@@ -43,12 +42,6 @@
     <cve>CVE-2016-1000027</cve>
     <cve>CVE-2021-37533</cve>
     <cve>CVE-2023-20860</cve>
-    <cve>CVE-2023-20863</cve>
-  </suppress>
-  <suppress>
-    <notes><![CDATA[ spring_boot:2.7.0 ]]></notes>
-    <cve>CVE-2023-20873</cve>
-    <cve>CVE-2023-20862</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[

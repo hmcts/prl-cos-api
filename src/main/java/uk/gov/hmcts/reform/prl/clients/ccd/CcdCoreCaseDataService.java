@@ -60,7 +60,6 @@ public class CcdCoreCaseDataService {
         boolean isRepresented
     ) {
         if (isRepresented) {
-            log.info("calling for caseworker");
             return coreCaseDataApi.submitEventForCaseWorker(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -72,7 +71,6 @@ public class CcdCoreCaseDataService {
                 caseDataContent
             );
         } else {
-            log.info("calling for citizen");
             return coreCaseDataApi.submitEventForCitizen(
                 authorisation,
                 authTokenGenerator.generate(),

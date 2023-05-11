@@ -80,7 +80,6 @@ public class InternationalElementsCheckerTest {
 
     @Test
     public void mandatoryCompletedWithoutRespdntTest() {
-        log.info("My changes");
         respondent = null;
         Boolean bool = internationalElementsChecker.isFinished(respondent);
         assertFalse(bool);

@@ -82,7 +82,6 @@ public class CurrentOrPastProceedingsCheckerTest {
 
     @Test
     public void isStartedNotTest() {
-        log.info("My changes");
         respondent = null;
         boolean anyNonEmpty = currentOrPastProceedingsChecker.isStarted(respondent);
 
@@ -98,7 +97,6 @@ public class CurrentOrPastProceedingsCheckerTest {
 
     @Test
     public void hasMandatoryCompletedWithoutRespdntExisProceedingAndPastProceedingTest() {
-        log.info("My changes");
         respondent = PartyDetails.builder()
             .response(Response
                           .builder()
