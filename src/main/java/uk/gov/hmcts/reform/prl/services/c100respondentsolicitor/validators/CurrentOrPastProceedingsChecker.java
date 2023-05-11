@@ -44,7 +44,8 @@ public class CurrentOrPastProceedingsChecker implements RespondentEventChecker {
 
             Optional<YesNoDontKnow> currentOrPastProceedingsForChildren = ofNullable(response.get().getCurrentOrPastProceedingsForChildren());
 
-            if (YesNoDontKnow.yes.equals(currentOrPastProceedingsForChildren)) {
+            if (currentOrPastProceedingsForChildren.isPresent()
+                && YesNoDontKnow.yes.equals(currentOrPastProceedingsForChildren.get())) {
                 fields.add(ofNullable(response.get().getRespondentExistingProceedings()));
             }
         }
