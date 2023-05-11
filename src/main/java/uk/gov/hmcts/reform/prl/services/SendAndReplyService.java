@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -94,6 +95,11 @@ public class SendAndReplyService {
     private final RefDataUserService refDataUserService;
 
     private final HearingService hearingService;
+
+    private static final String TABLE_ROW_BEGIN = "<tr>";
+    private static final String TABLE_ROW_END = "</tr>";
+    private static final String TABLE_ROW_DATA_BEGIN = "<td>";
+    private static final String TABLE_ROW_DATA_END = "</td>";
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -627,9 +633,42 @@ public class SendAndReplyService {
             return caseData;
         }
 
+        //populate message table
+        String messageReply = renderMessageTable(previousMessage.get());
+
         return caseData.toBuilder()
             .sendOrReplyMessage(
-                caseData.getSendOrReplyMessage().toBuilder().replyMessage(previousMessage.get()).build()).build();
+                caseData.getSendOrReplyMessage().toBuilder()
+                    .replyMessage(previousMessage.get())
+                    .messageReplyTable(messageReply).build())
+            .build();
+    }
+
+    private String renderMessageTable(Message message) {
+        final List<String> lines = new LinkedList<>();
+
+        lines.add("<table>");
+        lines.add(TABLE_ROW_BEGIN);
+        lines.add(TABLE_ROW_DATA_BEGIN);
+        lines.add("Date of the message");
+        lines.add(TABLE_ROW_DATA_END);
+        lines.add(TABLE_ROW_DATA_BEGIN);
+        lines.add(message.getDateSent());
+        lines.add(TABLE_ROW_DATA_END);
+        lines.add(TABLE_ROW_END);
+
+        lines.add(TABLE_ROW_BEGIN);
+        lines.add(TABLE_ROW_DATA_BEGIN);
+        lines.add("Urgent");
+        lines.add(TABLE_ROW_DATA_END);
+        lines.add(TABLE_ROW_DATA_BEGIN);
+        lines.add(message.getInternalMessageUrgent().getDisplayedValue());
+        lines.add(TABLE_ROW_DATA_END);
+        lines.add(TABLE_ROW_END);
+
+        lines.add("</table>");
+
+        return String.join("\n\n", lines);
     }
 
 }

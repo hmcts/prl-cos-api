@@ -43,5 +43,6 @@ public class SendOrReplyMessage {
     private DynamicList messageReplyDynamicList;
     private Message replyMessage;
     private YesOrNo respondToMessage;
+    private String messageReplyTable;
 }
 
