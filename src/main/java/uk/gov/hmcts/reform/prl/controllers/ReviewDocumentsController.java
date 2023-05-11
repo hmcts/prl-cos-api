@@ -72,7 +72,7 @@ public class ReviewDocumentsController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).errors(errors).build();
     }
 
-    @PostMapping(path = "/amend-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/review-documents/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to amend order mid-event")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse populateOrderToAmendDownloadLink(
