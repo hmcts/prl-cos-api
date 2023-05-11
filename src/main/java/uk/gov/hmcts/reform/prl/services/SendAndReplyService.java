@@ -649,7 +649,9 @@ public class SendAndReplyService {
     private String renderMessageTable(Message message) {
         final List<String> lines = new LinkedList<>();
 
+        lines.add("<div class='width-50'>");
         lines.add("<table>");
+
         lines.add(TABLE_ROW_BEGIN);
         lines.add(TABLE_ROW_DATA_BEGIN);
         lines.add("Date of the message");
@@ -669,6 +671,7 @@ public class SendAndReplyService {
         lines.add(TABLE_ROW_END);
 
         lines.add("</table>");
+        lines.add("</div>");
 
         return String.join("\n\n", lines);
     }
