@@ -556,6 +556,8 @@ public class SendAndReplyService {
                                                 ? sendOrReplyMessage.getSubmittedDocumentsList().getValueLabel() : null)
             .latestMessage(caseData.getMessageContent())
             .updatedTime(dateTime.now())
+            .messageContent(caseData.getMessageContent())
+            .replyHistory(Collections.emptyList())
             .build();
     }
 

@@ -9,6 +9,7 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
+import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,7 +51,7 @@ public class Message extends MessageMetaData {
     private String selectedSubmittedDocumentCode;
     private String selectedSubmittedDocumentValue;
 
-    private List<Message> replyHistory;
+    private List<Element<MessageHistory>> replyHistory;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
