@@ -33,6 +33,7 @@ public class DgsService {
         log.info("caseDetails.coverpage address {}", caseDetails.getCaseData() != null ? caseDetails.getCaseData().getCoverPageAddress() : "empty");
         Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put(CASE_DETAILS_STRING, AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
+        log.info("tempCaseDetails {}", tempCaseDetails);
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
