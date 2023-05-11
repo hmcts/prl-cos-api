@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -79,6 +80,8 @@ public class TestingSupportService {
 
     private static final String VALID_C100_DRAFT_INPUT_JSON = "C100_Dummy_Draft_CaseDetails.json";
 
+    private static final String VALID_Respondent_TaskList_INPUT_JSON = "Dummy_Respondent_Tasklist_Data.json";
+
     private static final String VALID_FL401_DRAFT_INPUT_JSON = "FL401_Dummy_Draft_CaseDetails.json";
 
     private static final String VALID_C100_GATEKEEPING_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails.json";
@@ -110,6 +113,18 @@ public class TestingSupportService {
                 adminCreateApplication,
                 dummyCaseDetails
             );
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    public Map<String, Object> initiateTaskListCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
+        if (isAuthorized(authorisation)) {
+            String requestBody;
+            requestBody = ResourceLoader.loadJson(VALID_Respondent_TaskList_INPUT_JSON);
+            Response dummyResponse = objectMapper.readValue(requestBody, Response.class);
+            Map<String, Object> response = (Map<String, Object>) dummyResponse;
+            return response;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
