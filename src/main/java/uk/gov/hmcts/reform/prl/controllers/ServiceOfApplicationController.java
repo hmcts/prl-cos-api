@@ -119,6 +119,7 @@ public class ServiceOfApplicationController {
         serviceOfApplicationPostService
             .sendBulkPrint(caseData, authorisation,
                            List.of(serviceOfApplicationPostService.getCoverLetterGeneratedDocInfo(caseData, authorisation)));
+        log.info("Bulk print");
         updatedCaseData.put("coverLetter", serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
