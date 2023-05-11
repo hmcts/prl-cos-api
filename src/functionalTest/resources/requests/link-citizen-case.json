@@ -3525,13 +3525,6 @@
       "Telephone number"
     ]
   },
-  "keepContactDetailsPrivateOther": {
-    "otherPeopleKnowYourContactDetails": "Yes",
-    "confidentiality": "Yes",
-    "confidentialityList": [
-      "Telephone number"
-    ]
-  },
   "confidentialListDetails": "string",
   "respondentAttendingTheCourt": {
     "respondentWelshNeeds": "Yes",
@@ -3560,36 +3553,6 @@
     "respondentIntermediaryNeedDetails": "string"
   },
   "internationalElementChild": {
-    "reasonForChild": "Yes",
-    "reasonForChildDetails": "string",
-    "reasonForParent": "Yes",
-    "reasonForParentDetails": "string",
-    "reasonForJurisdiction": "Yes",
-    "reasonForJurisdictionDetails": "string",
-    "requestToAuthority": "Yes",
-    "requestToAuthorityDetails": "string"
-  },
-  "internationalElementParent": {
-    "reasonForChild": "Yes",
-    "reasonForChildDetails": "string",
-    "reasonForParent": "Yes",
-    "reasonForParentDetails": "string",
-    "reasonForJurisdiction": "Yes",
-    "reasonForJurisdictionDetails": "string",
-    "requestToAuthority": "Yes",
-    "requestToAuthorityDetails": "string"
-  },
-  "internationalElementJurisdiction": {
-    "reasonForChild": "Yes",
-    "reasonForChildDetails": "string",
-    "reasonForParent": "Yes",
-    "reasonForParentDetails": "string",
-    "reasonForJurisdiction": "Yes",
-    "reasonForJurisdictionDetails": "string",
-    "requestToAuthority": "Yes",
-    "requestToAuthorityDetails": "string"
-  },
-  "internationalElementRequest": {
     "reasonForChild": "Yes",
     "reasonForChildDetails": "string",
     "reasonForParent": "Yes",
