@@ -36,8 +36,8 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
                 contact.getPlaceOfBirth(),
                 contact.getAddress(),
                 contact.getAddressHistory(),
-                contact.getContact().getEmail(),
-                contact.getContact().getPhoneNumber()
+                ofNullable(contact.getContact().getEmail()),
+                ofNullable(contact.getContact().getPhoneNumber())
             )).isPresent()).isPresent();
     }
 
@@ -72,13 +72,17 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
             if (address.isPresent() && !verifyAddressCompleted(address.get())) {
                 return false;
             }
-            fields.add(ofNullable(citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years()));
-            if (YesOrNo.No
-                .equals(citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years())) {
-                fields.add(ofNullable(citizenDetails.get().getAddressHistory().getPreviousAddressHistory()));
+            if (null != citizenDetails.get().getAddressHistory()) {
+                fields.add(ofNullable(citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years()));
+                if (YesOrNo.No
+                    .equals(citizenDetails.get().getAddressHistory().getIsAtAddressLessThan5Years())) {
+                    fields.add(ofNullable(citizenDetails.get().getAddressHistory().getPreviousAddressHistory()));
+                }
             }
-            fields.add(ofNullable(citizenDetails.get().getContact().getPhoneNumber()));
-            fields.add(ofNullable(citizenDetails.get().getContact().getEmail()));
+            if (null != citizenDetails.get().getContact()) {
+                fields.add(ofNullable(citizenDetails.get().getContact().getPhoneNumber()));
+                fields.add(ofNullable(citizenDetails.get().getContact().getEmail()));
+            }
         }
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
