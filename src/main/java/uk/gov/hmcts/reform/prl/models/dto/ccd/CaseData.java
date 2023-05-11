@@ -801,6 +801,6 @@ public class CaseData implements MappableObject {
     /**
      * Review documents.
      */
-    private DynamicList reviewDocsDynamicList;
-
+    @JsonUnwrapped
+    private ReviewDocuments reviewDocuments;
 }
