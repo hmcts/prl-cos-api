@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class AbilityToParticipateChecker implements RespondentEventChecker {
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {
-            Optional<SolicitorAbilityToParticipateInProceedings> abilityToParticipate = Optional.ofNullable(
+            Optional<AbilityToParticipate> abilityToParticipate = Optional.ofNullable(
                 response.get()
                     .getAbilityToParticipate());
             if (!abilityToParticipate.isEmpty() && checkAbilityToParticipateMandatoryCompleted(abilityToParticipate)) {
@@ -58,7 +58,7 @@ public class AbilityToParticipateChecker implements RespondentEventChecker {
         return false;
     }
 
-    private boolean checkAbilityToParticipateMandatoryCompleted(Optional<SolicitorAbilityToParticipateInProceedings> abilityToParticipate) {
+    private boolean checkAbilityToParticipateMandatoryCompleted(Optional<AbilityToParticipate> abilityToParticipate) {
 
         List<Optional<?>> fields = new ArrayList<>();
         if (abilityToParticipate.isPresent()) {
