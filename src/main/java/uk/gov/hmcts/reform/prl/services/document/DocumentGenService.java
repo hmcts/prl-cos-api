@@ -865,6 +865,7 @@ public class DocumentGenService {
                                            String hint,
                                            boolean isWelsh) throws Exception {
         log.info(" *** Document generation initiated for {} *** ", hint);
+        log.info(" *** *** ");
         return getDocument(authorisation, caseData, hint, isWelsh);
     }
 
