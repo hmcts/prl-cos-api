@@ -61,7 +61,7 @@ public class TestingSupportController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.initiateTaskListCreation(
+        return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.initiateRespondentResponseCreation(
             authorisation,
             callbackRequest
         )).build();
