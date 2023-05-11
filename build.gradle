@@ -428,7 +428,7 @@ dependencies {
   contractTestCompile group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
 
   compile 'org.junit.vintage:junit-vintage-engine:5.8.2'
-  testRuntimeOnly "org.junit.platform:junit-platform-commons:1.8.2"
+  testRuntimeOnly "org.junit.platform:junit-platform-commons:1.9.3"
 
 
   contractTestCompile("org.junit.jupiter:junit-jupiter-api:5.8.2")
