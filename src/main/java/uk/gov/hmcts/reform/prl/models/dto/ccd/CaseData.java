@@ -788,5 +788,7 @@ public class CaseData implements MappableObject {
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
     private NextHearingDetails nextHearingDetails;
     private List<Element<BulkPrintDetails>> bulkPrintDetails;
+    @JsonProperty("coverPageAddress")
+    private Address coverPageAddress;
 
 }
