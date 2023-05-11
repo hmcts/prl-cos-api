@@ -110,7 +110,7 @@ public class UpdatePartyDetailsService {
 
     private void updateLegalRepresentation(CallbackRequest callbackRequest, String authorisation, CaseDetails caseDetails, CaseData caseData) {
         log.info("callbackRequest.getCaseDetailsBefore() ==> " + callbackRequest.getCaseDetailsBefore());
-        CaseData oldCaseData = objectMapper.convertValue(callbackRequest.getCaseDetailsBefore(), CaseData.class);
+        CaseData oldCaseData = objectMapper.convertValue(callbackRequest.getCaseDetailsBefore().getData(), CaseData.class);
         log.info("oldCaseData ==> " + oldCaseData);
         if ("amendRespondentsDetails".equalsIgnoreCase(callbackRequest.getEventId())) {
             caseData.getRespondents().stream().forEach(partyDetailsElement -> {
