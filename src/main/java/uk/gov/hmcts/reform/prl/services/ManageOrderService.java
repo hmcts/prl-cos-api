@@ -1274,6 +1274,20 @@ public class ManageOrderService {
         );
     }
 
+    private void updateChildrenWitCaseCloseStatus(CallbackRequest callbackRequest) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        for (DynamicMultiselectListElement element : caseData.getManageOrders().getChildOption().getListItems()) {
+            for (Element<Child> childElement:caseData.getChildren()) {
+                if (element.getCode().equals(childElement.getId())) {
+                    childElement.getValue().toBuilder().isFinalOrderIssued(Yes).build();
+                }
+            }
+        }
+    }
+
     private static ServingRespondentsEnum getServingRespondentsOptions(CaseData caseData) {
         ServingRespondentsEnum servingRespondentsOptions = null;
         if (caseData.getManageOrders()
@@ -1922,6 +1936,13 @@ public class ManageOrderService {
                 .listItems(List.of(DynamicMultiselectListElement.EMPTY))
                 .value(listElements)
                 .build());
+        }
+        //TODO need to add check  for closing case for children
+
+        if (SelectTypeOfOrderEnum.finl.equals(caseDataMap.containsKey("typeOfOrder")
+                                                  ? caseDataMap.get("typeOfOrder") : "")
+                && !isTheOrderAboutAllChildrenForCA) {
+            updateChildrenWitCaseCloseStatus(callbackRequest);
         }
     }
 
