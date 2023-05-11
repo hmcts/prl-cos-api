@@ -61,7 +61,7 @@ public class NoticeOfChangeController extends AbstractCallbackController {
     }
 
     @PostMapping(path = "/aboutToStartStopRepresentation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "About to Start solicitor stop representation")
+    @Operation(description = "About to start solicitor stop representation")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
@@ -78,5 +78,20 @@ public class NoticeOfChangeController extends AbstractCallbackController {
                 callbackRequest,
                 errorList
             )).errors(errorList).build();
+    }
+
+    @PostMapping(path = "/aboutToSubmitStopRepresentation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "About to submit solicitor stop representation")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse aboutToSubmitStopRepresentation(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(noticeOfChangePartiesService.aboutToSubmitStopRepresenting(authorisation, callbackRequest)).build();
     }
 }
