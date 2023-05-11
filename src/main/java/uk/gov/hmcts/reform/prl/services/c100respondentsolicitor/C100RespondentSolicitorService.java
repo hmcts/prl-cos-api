@@ -211,12 +211,9 @@ public class C100RespondentSolicitorService {
             updatedCaseData,
             CaseData.class
         );
-        log.info("KEEP_DETAILS_PRIVATE submission triggered");
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
         Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
-        log.info("solicitorRepresentedRespondent found");
         String invokingEvent = callbackRequest.getEventId().substring(0, callbackRequest.getEventId().length() - 1);
-        log.info("invokingEvent is " + invokingEvent);
         RespondentSolicitorEvents.getCaseFieldName(invokingEvent)
             .ifPresent(event -> buildResponseForRespondent(
                 caseData,

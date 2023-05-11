@@ -12,11 +12,13 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -129,17 +131,38 @@ public class TestingSupportService {
 
     public Map<String, Object> initiateRespondentResponseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
         if (isAuthorized(authorisation)) {
-            CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            Map<String, Object> caseDataUpdated = caseDetails.getData();
-            String requestBody;;
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            String requestBody;
+            ;
 
-            CaseData initialCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<Element<PartyDetails>> respondents = initialCaseData.getRespondents();
             Element<PartyDetails> solicitorRepresentedRespondent = c100RespondentSolicitorService
                 .findSolicitorRepresentedRespondents(callbackRequest);
 
             requestBody = ResourceLoader.loadJson(VALID_Respondent_TaskList_INPUT_JSON);
             Response dummyResponse = objectMapper.readValue(requestBody, Response.class);
+
+            String invokingSolicitor = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
+            if (SolicitorRole.C100RESPONDENTSOLICITOR2.getEventId().equalsIgnoreCase(invokingSolicitor)) {
+                CitizenDetails party = dummyResponse.getCitizenDetails();
+                dummyResponse = dummyResponse
+                    .toBuilder()
+                    .citizenDetails(party.toBuilder()
+                                        .firstName("Elise")
+                                        .lastName("Lynn")
+                                        .build())
+                    .build();
+            } else if (SolicitorRole.C100RESPONDENTSOLICITOR3.getEventId().equalsIgnoreCase(invokingSolicitor)) {
+                CitizenDetails party = dummyResponse.getCitizenDetails();
+                dummyResponse = dummyResponse
+                    .toBuilder()
+                    .citizenDetails(party.toBuilder()
+                                        .firstName("David")
+                                        .lastName("Carman")
+                                        .build())
+                    .build();
+            }
 
             PartyDetails amended = solicitorRepresentedRespondent.getValue()
                 .toBuilder().response(dummyResponse).build();
@@ -153,7 +176,7 @@ public class TestingSupportService {
         }
     }
 
-    public void respondentTasklistRequestSubmitted(CallbackRequest callbackRequest) {
+    public void respondentTaskListRequestSubmitted(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
     }
