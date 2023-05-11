@@ -39,20 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_OF_SUBMISSION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL_401_STMT_OF_TRUTH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -126,25 +113,25 @@ public class TestingSupportService {
         }
     }
 
-    public Map<String, Object> initiateTaskListCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
+    public Map<String, Object> initiateRespondentResponseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
         if (isAuthorized(authorisation)) {
-            Map<String, Object> caseDataUpdated = new HashMap<>();
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            Map<String, Object> caseDataUpdated = caseDetails.getData();
             String requestBody;;
 
-            CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            CaseData initialCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             List<Element<PartyDetails>> respondents = initialCaseData.getRespondents();
             Element<PartyDetails> solicitorRepresentedRespondent = c100RespondentSolicitorService
                 .findSolicitorRepresentedRespondents(callbackRequest);
 
             requestBody = ResourceLoader.loadJson(VALID_Respondent_TaskList_INPUT_JSON);
             Response dummyResponse = objectMapper.readValue(requestBody, Response.class);
-            Response response = dummyResponse.toBuilder().build();
 
             PartyDetails amended = solicitorRepresentedRespondent.getValue()
-                .toBuilder().response(response).build();
+                .toBuilder().response(dummyResponse).build();
             respondents.set(respondents.indexOf(solicitorRepresentedRespondent), element(solicitorRepresentedRespondent
                                                                                              .getId(), amended));
-            caseDataUpdated.put("respondents", respondents);
+            caseDataUpdated.put(C100_RESPONDENTS, respondents);
             return caseDataUpdated;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
