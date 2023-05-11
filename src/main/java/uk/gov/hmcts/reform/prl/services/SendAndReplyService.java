@@ -50,6 +50,8 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
@@ -335,14 +337,14 @@ public class SendAndReplyService {
 
         if (futureHearings != null && futureHearings.getCaseHearings() != null && !futureHearings.getCaseHearings().isEmpty()) {
 
-            Map<String, String> refDataCategoryValueMap = getHearingTypeRefDataMap(authorization, s2sToken, serviceCode);
+            Map<String, String> refDataCategoryValueMap = getRefDataMap(authorization, s2sToken, serviceCode, hearingTypeCategoryId);
 
             List<DynamicListElement> hearingDropdowns = futureHearings.getCaseHearings().stream()
                 .map(caseHearing -> {
                     //get hearingId
                     String hearingId = String.valueOf(caseHearing.getHearingID());
                     final String hearingType = caseHearing.getHearingType();
-                    String hearingTypeValue = refDataCategoryValueMap.get(hearingType);
+                    String hearingTypeValue = refDataCategoryValueMap != null ? refDataCategoryValueMap.get(hearingType) : EMPTY_STRING;
                     //return hearingId concatenated with hearingDate
                     Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
                     return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
@@ -372,7 +374,7 @@ public class SendAndReplyService {
             Collectors.toList());
     }
 
-    private Map<String, String> getHearingTypeRefDataMap(String authorization, String s2sToken, String serviceCode) {
+    private Map<String, String> getRefDataMap(String authorization, String s2sToken, String serviceCode, String hearingTypeCategoryId) {
 
         return refDataService.getRefDataCategoryValueMap(
             authorization,
@@ -408,12 +410,7 @@ public class SendAndReplyService {
     public DynamicList getJudiciaryTierDynamicList(String authorization, String s2sToken, String serviceCode, String categoryId) {
 
         try {
-            Map<String, String> refDataCategoryValueMap = refDataService.getRefDataCategoryValueMap(
-                authorization,
-                s2sToken,
-                serviceCode,
-                categoryId
-            );
+            Map<String, String> refDataCategoryValueMap = getRefDataMap(authorization, s2sToken, serviceCode, categoryId);
 
             if (refDataCategoryValueMap != null && !refDataCategoryValueMap.isEmpty()) {
                 List<DynamicListElement> judiciaryTierDynamicElementList = new ArrayList<>();
@@ -630,6 +627,36 @@ public class SendAndReplyService {
         return caseData.toBuilder()
             .sendOrReplyMessage(
                 caseData.getSendOrReplyMessage().toBuilder().replyMessage(previousMessage.get()).build()).build();
+    }
+
+    /**
+     *  This method will send notification, when internal
+     *  other message is sent.
+     * @param caseData CaseData
+     * @param message Message
+     */
+    public void sendNotificationEmailOther(CaseData caseData, Message message) {
+
+        final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
+
+        if (recipientEmailAddresses.length > 0) {
+            final EmailTemplateVars emailTemplateVars = buildNotificationEmailOther(caseData);
+            for (String recipientEmailAddress : recipientEmailAddresses) {
+                emailService.send(
+                    recipientEmailAddress,
+                    EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,
+                    emailTemplateVars,
+                    LanguagePreference.english);
+            }
+        }
+    }
+
+    private EmailTemplateVars buildNotificationEmailOther(CaseData caseData) {
+
+        return  SendAndReplyNotificationEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .build();
     }
 
 }
