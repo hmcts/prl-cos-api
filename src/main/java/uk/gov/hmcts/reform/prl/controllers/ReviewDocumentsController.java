@@ -95,12 +95,12 @@ public class ReviewDocumentsController {
                 .filter(element -> element.getId().equals(uuid)).findFirst();
             if (quarentineLegalDocElement.isPresent()) {
                 QuarentineLegalDoc doc = quarentineLegalDocElement.get().getValue();
-                String doctobereviewed = String.join(format("<label class='govuk-label' for='more-detail'> Submitted by<li>%s</li></label>"
-                                                         , "Solicitor")
-                , format("<label class='govuk-label' for='more-detail'>Document category <li>%s</li></label>"
-                        , caseData.getDocumentCategory())
-                , format("<label class='govuk-label' for='more-detail'> Details/comments<li>%s</li></label>"
-                        , caseData.getGiveDetails()));
+                String doctobereviewed = String
+                    .join(format("<label class='govuk-label' for='more-detail'> Submitted by<li>%s</li></label>", "Solicitor"),
+                          format("<label class='govuk-label' for='more-detail'>Document category <li>%s</li></label>",
+                                 caseData.getDocumentCategory()),
+                          format("<label class='govuk-label' for='more-detail'> Details/comments<li>%s</li></label>",
+                         caseData.getGiveDetails()));
                 caseDataUpdated.put("docToBeReviewed", doctobereviewed);
             }
         }
