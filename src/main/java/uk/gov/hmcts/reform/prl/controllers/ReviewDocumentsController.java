@@ -18,18 +18,24 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarentineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.TaskListRenderElements;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.HttpHeaders;
 
+import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
@@ -42,6 +48,8 @@ public class ReviewDocumentsController {
 
     @Autowired
     private ManageOrderService manageOrderService;
+
+    private final TaskListRenderElements taskListRenderElements;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
@@ -63,7 +71,7 @@ public class ReviewDocumentsController {
         if (null != caseData.getLegalProfQuarentineDocsList()) {
             List<DynamicListElement> dynamicListElements = caseData.getLegalProfQuarentineDocsList().stream()
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                    .label(element.getValue().getDocumentName())
+                    .label(element.getValue().getDocument().getDocumentFileName())
                     .build()).collect(Collectors.toList());
             caseDataUpdated.put("reviewDocsDynamicList", DynamicList.builder().listItems(dynamicListElements).build());
         } else {
@@ -80,9 +88,22 @@ public class ReviewDocumentsController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
-
+        if (null != caseData.getReviewDocuments().getReviewDocsDynamicList() && null != caseData.getReviewDocuments()
+            .getReviewDocsDynamicList().getValue()) {
+            UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
+            Optional<Element<QuarentineLegalDoc>> quarentineLegalDocElement = caseData.getLegalProfQuarentineDocsList().stream()
+                .filter(element -> element.getId().equals(uuid)).findFirst();
+            if (quarentineLegalDocElement.isPresent()) {
+                QuarentineLegalDoc doc = quarentineLegalDocElement.get().getValue();
+                String doctobereviewed = String.join(format("<label class='govuk-label' for='more-detail'> Submitted by<li>%s</li></label>"
+                                                         , "Solicitor")
+                , format("<label class='govuk-label' for='more-detail'>Document category <li>%s</li></label>"
+                        , caseData.getDocumentCategory())
+                , format("<label class='govuk-label' for='more-detail'> Details/comments<li>%s</li></label>"
+                        , caseData.getGiveDetails()));
+                caseDataUpdated.put("docToBeReviewed", doctobereviewed);
+            }
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
