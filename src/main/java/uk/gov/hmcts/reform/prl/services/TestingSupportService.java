@@ -146,13 +146,16 @@ public class TestingSupportService {
             respondents.set(respondents.indexOf(solicitorRepresentedRespondent), element(solicitorRepresentedRespondent
                                                                                              .getId(), amended));
             caseDataUpdated.put(C100_RESPONDENTS, respondents);
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            eventPublisher.publishEvent(new CaseDataChanged(caseData));
 
             return caseDataUpdated;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    public void respondentTasklistRequestSubmitted(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        eventPublisher.publishEvent(new CaseDataChanged(caseData));
     }
 
     private Map<String, Object> updateCaseDetails(String authorisation, CaseDetails initialCaseDetails,

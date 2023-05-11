@@ -67,6 +67,18 @@ public class TestingSupportController {
         )).build();
     }
 
+    @PostMapping(path = "/submittedRespondentTaskList", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Submitted request for Respondent Tasklist refresg")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public void submittedRespondentTaskList(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        testingSupportService.respondentTasklistRequestSubmitted(callbackRequest);
+    }
+
     @PostMapping(path = "/submitted-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Initiate the case creation for testing support")
     @ApiResponses(value = {
