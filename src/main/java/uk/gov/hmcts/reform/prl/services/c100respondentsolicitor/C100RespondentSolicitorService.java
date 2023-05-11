@@ -83,7 +83,6 @@ public class C100RespondentSolicitorService {
 
             caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
         }
-        log.info("swanky placeholder name {}", caseDataUpdated.toString());
         return caseDataUpdated;
     }
 
@@ -238,6 +237,7 @@ public class C100RespondentSolicitorService {
             ));
 
         updatedCaseData.put(RESPONDENTS, respondents);
+        log.info("swanky placeholder name {}", updatedCaseData);
         return updatedCaseData;
     }
 
