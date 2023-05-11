@@ -431,11 +431,11 @@ dependencies {
   testRuntimeOnly "org.junit.platform:junit-platform-commons:1.8.2"
 
 
-  contractTestCompile("org.junit.jupiter:junit-jupiter-api:5.8.2")
+  contractTestCompile("org.junit.jupiter:junit-jupiter-api:5.9.3")
   contractTestRuntime("org.junit.jupiter:junit-jupiter-engine:5.8.2")
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.2"
   testCompileOnly 'org.apiguardian:apiguardian-api:1.0.0'
-  contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.7.2')
+  contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.9.3')
 
   contractTestCompile sourceSets.main.runtimeClasspath
   contractTestCompile sourceSets.test.runtimeClasspath
