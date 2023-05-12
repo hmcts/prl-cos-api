@@ -780,7 +780,8 @@ public class ManageOrderService {
         } else {
             flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         }
-        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
+        if (caseData.getCreateSelectOrderOptions() != null
+            && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             List<Element<OrderDetails>> orderCollection = new ArrayList<>();
             orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
