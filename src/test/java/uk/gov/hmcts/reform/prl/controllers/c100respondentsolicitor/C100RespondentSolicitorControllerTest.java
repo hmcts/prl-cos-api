@@ -115,14 +115,14 @@ public class C100RespondentSolicitorControllerTest {
                                     .documentHash(generatedDocumentInfo.getHashToken())
                                     .documentFileName("c7DraftFilename.pdf")
                                     .build())
-            .keepContactDetailsPrivateOther(KeepDetailsPrivate.builder()
-                                                .confidentiality(Yes)
-                                                .confidentialityList(confidentialityListEnums)
-                                                .build())
+            .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
+                                           .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                           .confidentiality(Yes)
+                                           .confidentialityList(confidentialityListEnums)
+                                           .build())
             .applicants(applicantList)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .chooseRespondentDynamicList(chooseRespondent)
             .respondents(respondentList)
             .build();
     }
@@ -142,7 +142,7 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
-        when(respondentSolicitorService.populateAboutToStartCaseData(callbackRequest, authToken, errorList)).thenReturn(stringObjectMap);
+        when(respondentSolicitorService.populateAboutToStartCaseData(callbackRequest)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleAboutToStart(
             authToken,
@@ -167,55 +167,9 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
-        when(respondentSolicitorService.populateAboutToSubmitCaseData(callbackRequest, authToken, errorList)).thenReturn(stringObjectMap);
+        when(respondentSolicitorService.populateAboutToSubmitCaseData(callbackRequest)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleAboutToSubmit(
-            authToken,
-            callbackRequest
-        );
-
-        assertTrue(response.getData().containsKey("state"));
-    }
-
-    @Test
-    public void testPopulateSolicitorRespondentList() throws Exception {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        when(respondentSolicitorService.populateSolicitorRespondentList(callbackRequest, authToken)).thenReturn(stringObjectMap);
-
-        AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.populateSolicitorRespondentList(
-            authToken,
-            callbackRequest
-        );
-
-        assertTrue(response.getData().containsKey("state"));;
-    }
-
-    @Test
-    public void testHandleActiveRespondentSelection() throws Exception {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        when(respondentSolicitorService.updateActiveRespondentSelectionBySolicitor(callbackRequest, authToken)).thenReturn(stringObjectMap);
-
-        AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleActiveRespondentSelection(
             authToken,
             callbackRequest
         );
@@ -237,7 +191,8 @@ public class C100RespondentSolicitorControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest)).thenReturn(stringObjectMap);
+        when(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest)).thenReturn(
+            stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController
             .generateConfidentialityDynamicSelectionDisplay(callbackRequest);
@@ -263,6 +218,21 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("C1A_Allegation_Of_Harm_Draft_Document.pdf")
+            .build();
+        caseDataUpdated.put("draftC7ResponseDoc", document);
+        when(respondentSolicitorService.generateDraftDocumentsForRespondent(callbackRequest, authToken)).thenReturn(
+            caseDataUpdated);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.generateC7ResponseDraftDocument(
             authToken,
             callbackRequest
@@ -286,7 +256,11 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
-        when(respondentSolicitorService.validateActiveRespondentResponse(callbackRequest, errorList)).thenReturn(stringObjectMap);
+        when(respondentSolicitorService.validateActiveRespondentResponse(
+            callbackRequest,
+            errorList,
+            authToken
+        )).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.validateActiveRespondentResponseBeforeStart(
             authToken,
@@ -311,7 +285,11 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
-        when(respondentSolicitorService.submitC7ResponseForActiveRespondent(callbackRequest, authToken, errorList)).thenReturn(stringObjectMap);
+        when(respondentSolicitorService.submitC7ResponseForActiveRespondent(
+            callbackRequest,
+            authToken,
+            errorList
+        )).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.updateC7ResponseSubmit(
             authToken,
