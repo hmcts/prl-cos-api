@@ -91,10 +91,13 @@ public class ReviewDocumentsController {
         if (null != caseData.getReviewDocuments().getReviewDocsDynamicList() && null != caseData.getReviewDocuments()
             .getReviewDocsDynamicList().getValue()) {
             UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
+            log.info("** uuid ** {}", uuid);
             Optional<Element<QuarentineLegalDoc>> quarentineLegalDocElement = caseData.getLegalProfQuarentineDocsList().stream()
                 .filter(element -> element.getId().equals(uuid)).findFirst();
             if (quarentineLegalDocElement.isPresent()) {
                 QuarentineLegalDoc doc = quarentineLegalDocElement.get().getValue();
+                log.info("** QuarentineLegalDoc ** {}", doc);
+
                 String doctobereviewed = String
                     .join(format("<label class='govuk-label' for='more-detail'> Submitted by<li>%s</li></label>", "Legal professional"),
                           format("<label class='govuk-label' for='more-detail'>Document category <li>%s</li></label>",
@@ -103,6 +106,7 @@ public class ReviewDocumentsController {
                          doc.getNotes()));
                 caseDataUpdated.put("docToBeReviewed", doctobereviewed);
                 caseDataUpdated.put("reviewDoc", doc.getDocument());
+                log.info("** review doc ** {}", doc.getDocument());
             }
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
