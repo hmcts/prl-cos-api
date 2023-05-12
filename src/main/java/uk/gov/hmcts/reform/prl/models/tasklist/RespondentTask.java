@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.prl.models.tasklist;
 
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 
 import java.util.Optional;
 
@@ -11,6 +11,7 @@ import java.util.Optional;
 public class RespondentTask {
 
     private final RespondentSolicitorEvents event;
+    private final TaskState state;
     private String hint;
 
     public RespondentTask withHint(String hint) {
@@ -22,9 +23,10 @@ public class RespondentTask {
         return Optional.ofNullable(hint);
     }
 
-    public static RespondentTask task(RespondentSolicitorEvents event) {
+    public static RespondentTask task(RespondentSolicitorEvents event, TaskState state) {
         return RespondentTask.builder()
             .event(event)
+            .state(state)
             .build();
     }
 }

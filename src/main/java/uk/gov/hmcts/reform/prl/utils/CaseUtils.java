@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
@@ -25,10 +26,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 public class CaseUtils {
@@ -145,6 +151,65 @@ public class CaseUtils {
         return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
     }
 
+    public static Map<String, String> getApplicantsToNotify(CaseData caseData, UUID excludeId) {
+        return nullSafeCollection(caseData.getApplicants()).stream()
+            .filter(applicantElement -> !applicantElement.getId().equals(excludeId))
+            .map(Element::getValue)
+            .filter(applicant -> !CaseUtils.hasLegalRepresentation(applicant)
+                && Yes.equals(applicant.getCanYouProvideEmailAddress()))
+            .collect(Collectors.toMap(
+                PartyDetails::getEmail,
+                party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
+                (x, y) -> x
+            ));
+    }
+
+    public static Map<String, String> getRespondentsToNotify(CaseData caseData, UUID excludeId) {
+        return nullSafeCollection(caseData.getRespondents()).stream()
+            .filter(respondentElement -> !respondentElement.getId().equals(excludeId))
+            .map(Element::getValue)
+            .filter(respondent -> !CaseUtils.hasLegalRepresentation(respondent)
+                && Yes.equals(respondent.getCanYouProvideEmailAddress()))
+            .collect(Collectors.toMap(
+                PartyDetails::getEmail,
+                party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
+                (x, y) -> x
+            ));
+    }
+
+    public static Map<String, String> getOthersToNotify(CaseData caseData) {
+        return nullSafeCollection(caseData.getOthersToNotify()).stream()
+            .map(Element::getValue)
+            .filter(other -> Yes.equals(other.getCanYouProvideEmailAddress()))
+            .collect(Collectors.toMap(
+                PartyDetails::getEmail,
+                party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
+                (x, y) -> x
+            ));
+    }
+
+    public static Map<String, String> getApplicantSolicitorsToNotify(CaseData caseData) {
+        return nullSafeCollection(caseData.getApplicants()).stream()
+            .map(Element::getValue)
+            .filter(CaseUtils::hasLegalRepresentation)
+            .collect(Collectors.toMap(
+                PartyDetails::getSolicitorEmail,
+                applicant -> applicant.getRepresentativeFirstName() + EMPTY_SPACE_STRING + applicant.getRepresentativeLastName(),
+                (x, y) -> x
+            ));
+    }
+
+    public static Map<String, String> getRespondentSolicitorsToNotify(CaseData caseData) {
+        return nullSafeCollection(caseData.getRespondents()).stream()
+            .map(Element::getValue)
+            .filter(CaseUtils::hasLegalRepresentation)
+            .collect(Collectors.toMap(
+                PartyDetails::getSolicitorEmail,
+                respondent -> respondent.getRepresentativeFirstName() + EMPTY_SPACE_STRING + respondent.getRepresentativeLastName(),
+                (x, y) -> x
+            ));
+    }
+    
     public static String getFormattedDatAndTime(LocalDateTime dateTime) {
         DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("EEEE, dd MMM, yyyy 'at' HH:mm a");
         return  dateTime.format(dateTimeFormat);
