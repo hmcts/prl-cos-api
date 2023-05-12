@@ -13,7 +13,8 @@ import lombok.RequiredArgsConstructor;
 public enum DocumentCategoryEnum {
 
     @JsonProperty("documentCategoryChecklistEnumValue1")
-    documentCategoryChecklistEnumValue1("documentCategoryChecklistEnumValue1", "Main application documents(Consent order, MIAM certificates, previous orders)"),
+    documentCategoryChecklistEnumValue1("documentCategoryChecklistEnumValue1",
+                                        "Main application documents(Consent order, MIAM certificates, previous orders)"),
     @JsonProperty("documentCategoryChecklistEnumValue2")
     documentCategoryChecklistEnumValue2("documentCategoryChecklistEnumValue2", "Correspondence"),
     @JsonProperty("documentCategoryChecklistEnumValue3")
