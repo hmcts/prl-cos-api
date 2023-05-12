@@ -462,12 +462,12 @@ public class NoticeOfChangePartiesService {
                     log.info("changeOrganisationRequest ==> " + changeOrganisationRequest);
                     caseDetails.getData()
                         .put("changeOrganisationRequestField", changeOrganisationRequest);
-                    AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
+                    /*AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
                         authorisation,
                         tokenGenerator.generate(),
                         decisionRequest(caseDetails)
                     );
-                    log.info("applyDecision response ==> " + response);
+                    log.info("applyDecision response ==> " + response);*/
                     Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
                     String solicitorName = oldRespondent.getFirstName() + " " + oldRespondent.getLastName();
                     if (changeOrganisationRequest != null) {
