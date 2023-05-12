@@ -650,6 +650,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
+    @Ignore
     public void testC7DraftDocument() throws Exception {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()

@@ -553,6 +553,16 @@ public class C100RespondentSolicitorService {
 
     public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
 
+        Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
+        Response response = solicitorRepresentedRespondent.getValue().getResponse();
+
+        Map<String, Object> respondentDetails = new HashMap<>();
+        respondentDetails.put("fullName", response.getCitizenDetails()
+            .getFirstName() + " " + response.getCitizenDetails()
+            .getLastName());
+        respondentDetails.put("dob", response.getCitizenDetails().getDateOfBirth());
+        log.info("citizen dob {}", respondentDetails.get("dob").toString());
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
