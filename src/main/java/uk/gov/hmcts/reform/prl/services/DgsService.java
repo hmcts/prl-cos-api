@@ -7,9 +7,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -33,11 +36,16 @@ public class DgsService {
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
         Map<String, Object> tempCaseDetails = new HashMap<>();
         if (caseDetails != null) {
-            Response response = caseDetails.getCaseData().getRespondents().get(0).getValue().getResponse();
-            tempCaseDetails.put("fullName", response.getCitizenDetails()
-                .getFirstName() + " " + response.getCitizenDetails()
-                .getLastName());
-            tempCaseDetails.put("dob", response.getCitizenDetails().getDateOfBirth());
+            for (Element<PartyDetails> respondent : caseDetails.getCaseData().getRespondents()){
+                if (respondent.getValue().getResponse().getActiveRespondent() == YesOrNo.Yes) {
+                    Response response = respondent.getValue().getResponse();
+                    log.info("response is equal to {}", response);
+                    tempCaseDetails.put("fullName", response.getCitizenDetails()
+                        .getFirstName() + " " + response.getCitizenDetails()
+                        .getLastName());
+                    tempCaseDetails.put("dob", response.getCitizenDetails().getDateOfBirth());
+                }
+            }
         }
         tempCaseDetails.put(CASE_DETAILS_STRING, AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
         GeneratedDocumentInfo generatedDocumentInfo = null;
