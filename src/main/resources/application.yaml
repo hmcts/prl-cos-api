@@ -121,8 +121,11 @@ uk:
             HEARING_CANCELLED: 408a5116-a9f5-42ce-afc2-7caec641498d
             CA_DA_CASE_WITHDRAWN: ee06226c-222c-444c-a5d2-50015e6d07d1
             CA_APPLICANT_SERVICE_APPLICATION: 7580f0a1-bbbc-481f-98fe-8c29190d68a4
+            CA_DA_SOLICITOR_NOC: 576b0181-eae7-4f38-b4f6-321a8c94177d
             RETURN_APPLICATION_CONSENT_ORDER: 96e26a9a-ca28-4b63-bd59-38e8ad14e373
             CA_AWAITING_PAYMENT: 3cf67615-8b67-4814-9e61-1ce786b986a1
+            CA_DA_APPLICANT_RESPONDENT_NOC: 27e885c4-907c-479f-8746-0c8d82125513
+            CA_DA_OTHER_PARTIES_NOC: d1b1da64-995f-49c6-86cf-63f11404038f
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             CITIZEN_CASE_SUBMISSION: 33462301-6357-4ae1-a1d0-1403ddc538b3
@@ -374,6 +377,12 @@ document:
       prl_c7_final_filename_eng: C7_Document.pdf
       prl_c7_final_template_wel: FL-PRL-GOR-WEL-C7R-Final.docx
       prl_c7_final_filename_wel: C7_Document_Welsh.pdf
+      prl_solicitor_c7_draft_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-DRAFT.docx
+      prl_solicitor_c7_draft_filename: C7_Response_Draft_Document.pdf
+      prl_solicitor_c7_final_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-FINAL.docx
+      prl_solicitor_c7_final_filename: C7_Response_Final_Document.pdf
+      prl_solicitor_c1a_draft_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-DRAFT.docx
+      prl_solicitor_c1a_draft_filename: C1A_Allegation_Of_Harm_Draft_Document.pdf
       prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
       prl_c8_blank_filename: C8BlankDocument.pdf
       prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
