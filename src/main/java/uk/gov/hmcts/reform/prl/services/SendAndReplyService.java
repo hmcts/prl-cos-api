@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.common.CodeAndLabel;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -322,7 +323,7 @@ public class SendAndReplyService {
                     serviceCode,
                     categoryId
                 ))
-                .linkedApplicationsList(getLinkedCasesDynamicList(authorization, caseReference))
+                .linkedApplicationsList(getOtherApllicationsist(caseData))
                 .submittedDocumentsList(documentCategoryList)
                 .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder().label(loggedInUserEmail).code(loggedInUserEmail).build())))
                 .futureHearingsList(getFutureHearingDynamicList(authorization, s2sToken, caseReference))
@@ -331,9 +332,6 @@ public class SendAndReplyService {
 
     private DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
         Hearings futureHearings = hearingService.getFutureHearings(authorization, caseId);
-
-        // label - hearingtypevalue - date
-        // code - hearing id - hearingtype
 
         if (futureHearings != null && futureHearings.getCaseHearings() != null && !futureHearings.getCaseHearings().isEmpty()) {
 
@@ -401,6 +399,36 @@ public class SendAndReplyService {
             authorization,
             caseId
         ));
+    }
+
+    public DynamicList getOtherApllicationsist(CaseData caseData) {
+
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements = null;
+
+        if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
+            List<DynamicListElement> dynamicListElements = new ArrayList<>();
+            additionalApplicationElements = caseData.getAdditionalApplicationsBundle();
+            additionalApplicationElements.stream().forEach(additionalApplicationsBundleElement ->  {
+                if (additionalApplicationsBundleElement.getValue().getOtherApplicationsBundle() != null) {
+                    dynamicListElements.add(DynamicListElement.builder().code("Other applications")
+                        .label("Other applications - "
+                                   .concat(additionalApplicationsBundleElement.getValue().getOtherApplicationsBundle().getUploadedDateTime()))
+                        .build());
+                   ;
+                }
+                if (additionalApplicationsBundleElement.getValue().getC2DocumentBundle() != null) {
+                    dynamicListElements.add(DynamicListElement.builder().code("C2 application")
+                        .label("C2 application - "
+                                   .concat(additionalApplicationsBundleElement.getValue().getC2DocumentBundle().getUploadedDateTime()))
+                        .build());
+                   ;
+                }
+            });
+            return  getDynamicList(dynamicListElements);
+        }
+
+        return DynamicList.builder()
+            .value(DynamicListElement.EMPTY).build();
     }
 
     /**
