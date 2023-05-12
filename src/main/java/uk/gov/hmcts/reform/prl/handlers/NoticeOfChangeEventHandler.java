@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -32,10 +33,10 @@ public class NoticeOfChangeEventHandler {
     public void notifyLegalRepresentative(final NoticeOfChangeEvent event) {
         CaseData caseData = event.getCaseData();
         //PRL-3211 - notify new LR
-        sendEmailToNewSolicitor(caseData, event);
+        sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_SOLICITOR_NOC);
 
         //PRL-3211 - notify LiP
-        sendEmailToLitigant(caseData, event);
+        sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_RESPONDENT_NOC);
 
         //PRL-3211 - notify applicants/respondents other parties except litigant
         sendEmailToApplicantsRespondents(caseData, event);
@@ -69,7 +70,7 @@ public class NoticeOfChangeEventHandler {
                 (key, value) -> emailService.send(
                     key,
                     EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC,
-                    noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, event.getSolicitorName(), value, true),
+                    noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, event.getSolicitorName(), value, true, ""),
                     LanguagePreference.getPreferenceLanguage(caseData)
                 ));
         }
@@ -85,32 +86,44 @@ public class NoticeOfChangeEventHandler {
                 (key, value) -> emailService.send(
                     key,
                     EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC,
-                    noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, event.getSolicitorName(), value, false),
+                    noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, event.getSolicitorName(), value, false, ""),
                     LanguagePreference.getPreferenceLanguage(caseData)
                 ));
         }
     }
 
-    private void sendEmailToLitigant(CaseData caseData, NoticeOfChangeEvent event) {
+    private void sendEmailToLitigant(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateName) {
         Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
+        String accessCode = getAccessCode(caseData, partyElement);
         if (null != partyElement && null != partyElement.getValue()) {
             PartyDetails partyDetails = partyElement.getValue();
             emailService.send(
                 partyDetails.getEmail(),
-                EmailTemplateNames.CA_DA_APPLICANT_RESPONDENT_NOC,
+                emailTemplateName,
                 noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, event.getSolicitorName(),
                                                                    partyDetails.getFirstName() + EMPTY_SPACE_STRING + partyDetails.getLastName(),
-                                                                   false
+                                                                   false, accessCode
                 ),
                 LanguagePreference.getPreferenceLanguage(caseData)
             );
         }
     }
 
-    private void sendEmailToNewSolicitor(CaseData caseData, NoticeOfChangeEvent event) {
+    private String getAccessCode(CaseData caseData, Element<PartyDetails> partyElement) {
+        if (null != caseData.getCaseInvites()) {
+            for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
+                if (caseInviteElement.getValue().getPartyId().equals(partyElement.getValue().getPartyId())) {
+                    return caseInviteElement.getValue().getAccessCode();
+                }
+            }
+        }
+        return "";
+    }
+
+    private void sendEmailToSolicitor(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateName) {
         emailService.send(
             event.getSolicitorEmailAddress(),
-            EmailTemplateNames.CA_DA_SOLICITOR_NOC,
+            emailTemplateName,
             noticeOfChangeContentProvider.buildNocEmailSolicitor(caseData, event.getSolicitorName()),
             LanguagePreference.getPreferenceLanguage(caseData)
         );
@@ -130,15 +143,9 @@ public class NoticeOfChangeEventHandler {
     public void notifyWhenRemoveLegalRepresentative(final NoticeOfChangeEvent event) {
         CaseData caseData = event.getCaseData();
         //PRL-3215 - notify old LR
-        sendEmailToOldSolicitor(caseData, event);
-    }
+        sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC);
 
-    private void sendEmailToOldSolicitor(CaseData caseData, NoticeOfChangeEvent event) {
-        emailService.send(
-            event.getSolicitorEmailAddress(),
-            EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC,
-            noticeOfChangeContentProvider.buildNocEmailSolicitor(caseData, event.getSolicitorName()),
-            LanguagePreference.getPreferenceLanguage(caseData)
-        );
+        //PRL-3211 - notify LiP
+        sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC);
     }
 }
