@@ -32,9 +32,11 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
         Map<String, Object> tempCaseDetails = new HashMap<>();
-        log.info("Respondent name is {}", caseDetails.getCaseData().getRespondentName());
         Response response = caseDetails.getCaseData().getRespondents().get(0).getValue().getResponse();
-        log.info("response object is {}", response.toString());
+        tempCaseDetails.put("fullName", response.getCitizenDetails()
+            .getFirstName() + " " + response.getCitizenDetails()
+            .getLastName());
+        tempCaseDetails.put("dob", response.getCitizenDetails().getDateOfBirth());
         tempCaseDetails.put(CASE_DETAILS_STRING, AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
