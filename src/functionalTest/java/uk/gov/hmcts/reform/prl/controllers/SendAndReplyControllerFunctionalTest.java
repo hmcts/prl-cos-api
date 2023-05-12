@@ -124,4 +124,18 @@ public class SendAndReplyControllerFunctionalTest {
 
     }
 
+    @Test
+    public void givenBodyWithNoMessages_whenSubmittedForSendOrReply() throws Exception {
+        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/send-and-reply-to-messages/send-or-reply-to-messages/submitted")
+            .then()
+            .assertThat().statusCode(200);
+
+    }
+
 }

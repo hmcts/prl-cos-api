@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -747,5 +748,34 @@ public class SendAndReplyServiceTest {
         CaseData caseData1 = sendAndReplyService.closeMessage(caseData);
         assertNotNull(caseData1);
     }
+
+    @Test
+    public void testSendNotificationEmailOther() {
+        EmailTemplateVars emailTemplateVars = SendAndReplyNotificationEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(manageCaseUrl + "/" + caseData.getId())
+            .build();
+        Message message = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com").recipientEmailAddresses("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .build();
+        sendAndReplyService.sendNotificationEmailOther(caseData,message);
+        verify(emailService, times(1)).send(
+            message.getRecipientEmail(),
+            EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,
+            emailTemplateVars,
+            LanguagePreference.english
+        );
+    }
+
 
 }

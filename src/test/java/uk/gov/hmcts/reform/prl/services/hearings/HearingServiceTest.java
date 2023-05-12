@@ -157,6 +157,24 @@ public class HearingServiceTest {
         Assert.assertEquals(new ArrayList<>(), response);
     }
 
+    @Test
+    @DisplayName("test case for HearingService getFutureHearings success.")
+    public void getFutureHearingsTestSuccess() {
+        Hearings response =
+            hearingService.getFutureHearings(authToken, caseReferenceNumber);
+
+        Assert.assertEquals(null, response);
+    }
+
+    @Test
+    @DisplayName("test case for HearingService getFutureHearings exception .")
+    public void getFutureHearingsTestException() {
+        when(hearingService.getFutureHearings(authToken,caseReferenceNumber)).thenThrow(new RuntimeException());
+        Hearings response =
+            hearingService.getFutureHearings(authToken, caseReferenceNumber);
+
+        Assert.assertEquals(null, response);
+    }
 
 
 
