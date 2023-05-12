@@ -16,7 +16,7 @@ plugins {
   id 'jacoco'
   id 'org.owasp.dependencycheck' version '8.2.1'
   id 'org.sonarqube' version '3.3'
-  id 'org.springframework.boot' version '2.7.11'
+  id 'org.springframework.boot' version '2.7.0'
   id 'au.com.dius.pact' version '4.2.6'
   id 'com.github.hmcts.rse-cft-lib' version '0.19.371'
 }
@@ -56,7 +56,7 @@ def versions = [
   sonarPitest                  : '0.5',
   springSecurityCrypto         : '5.4.5',
   springSecurityRsa            : '1.0.9.RELEASE',
-  springBoot                   : '2.7.11',
+  springBoot                   : '2.7.0',
   springCloud                  : '3.1.1',
   tomcat                       : '9.0.69',
   unirest                      : '1.4.9',
@@ -538,19 +538,9 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/*',
   '**uk/gov/hmcts/reform/prl/Application.*',
-  '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java',
-  '**uk/gov/hmcts/reform/prl/services/hearings/HearingService.java',
-  '**uk/gov/hmcts/reform/prl/services/HearingDataService.java',
-  '**uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController.java',
-  '**uk/gov/hmcts/reform/prl/controllers/DraftAnOrderController.java',
-  '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/tab/alltabs/AllTabServiceImpl.java',
-  '**uk/gov/hmcts/reform/prl/services/cafcass/HearingService.java',
-  '**uk/gov/hmcts/reform/prl/services/cafcass/CaseDataService.java',
-  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/ManageOrderEmailService.java',
-  '**uk/gov/hmcts/reform/prl/services/dynamicmultiselectlist/DynamicMultiSelectListService.java',
-  '**uk/gov/hmcts/reform/prl/controllers/ManageOrdersController.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/testingsupport/TestingSupportController.java',
+  '**/uk/gov/hmcts/reform/prl/services/TestingSupportService.java',
+  '**/uk/gov/hmcts/reform/prl/services/noticeofchange/NoticeOfChangeContentProvider.java'
   'src/main/java/uk/gov/hmcts/reform/prl/controllers/SendAndReplyController.java',
   'src/main/java/uk/gov/hmcts/reform/prl/services/SendAndReplyService.java'
 ]

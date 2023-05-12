@@ -106,6 +106,7 @@ public class CaseServiceTest {
     CaseUtils caseUtils;
 
     private CaseData caseData;
+    private CaseData caseDataWithOutPartyId;
     private CaseDetails caseDetails;
     private UserDetails userDetails;
     private Map<String, Object> caseDataMap;
@@ -125,27 +126,27 @@ public class CaseServiceTest {
                                                                          .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
                                                                          .accessCode("123").build()).build()))
             .build();
-        PartyDetails partyDetails1 = PartyDetails.builder()
-            .firstName("Test")
-            .lastName("User")
-            .user(User.builder()
-                      .email("test@gmail.com")
-                      .idamId("123")
-                      .solicitorRepresented(YesOrNo.Yes)
-                      .build())
-            .build();
+
         caseDataMap = new HashMap<>();
         caseDetails = CaseDetails.builder()
             .data(caseDataMap)
             .id(123L)
             .state("SUBMITTED_PAID")
             .build();
+        userDetails = UserDetails.builder().id("tesUserId").email("testEmail").build();
         updateCaseData = UpdateCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
-            .partyDetails(partyDetails1)
+            .partyDetails(PartyDetails.builder()
+                              .firstName("Test")
+                              .lastName("User")
+                              .user(User.builder()
+                                        .email("test@gmail.com")
+                                        .idamId("123")
+                                        .solicitorRepresented(YesOrNo.Yes)
+                                        .build())
+                              .build())
             .partyType(PartyEnum.applicant)
             .build();
-        userDetails = UserDetails.builder().build();
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
         when(caseRepository.updateCase(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(caseDetails);
@@ -160,6 +161,47 @@ public class CaseServiceTest {
     @Test
     public void testupdateCase() throws JsonProcessingException {
         CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","","linkCase","123");
+        assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test
+    public void testupdateCaseOfApplicantWithOutPartyId() throws JsonProcessingException {
+        User user = User.builder().build();
+        PartyDetails partyDetailsWithUser = PartyDetails.builder().user(user)
+            .firstName("")
+            .lastName("")
+            .build();
+        caseDataWithOutPartyId = CaseData.builder()
+            .applicantsFL401(partyDetailsWithUser)
+            .respondents(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
+                                                                         .partyId(null)
+                                                                         .accessCode("1234").build()).build()))
+            .build();
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataWithOutPartyId);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseDataWithOutPartyId, "", "","","linkCase","1234");
+        assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test
+    public void testupdateCaseOfRespondentWithOutPartyId() throws JsonProcessingException {
+        User user = User.builder().build();
+        PartyDetails partyDetailsWithUser = PartyDetails.builder().user(user)
+            .firstName("")
+            .lastName("")
+            .build();
+        caseDataWithOutPartyId = CaseData.builder()
+            .respondentsFL401(partyDetailsWithUser)
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)
+                                                                         .partyId(null)
+                                                                         .accessCode("1234").build()).build()))
+            .build();
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataWithOutPartyId);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseDataWithOutPartyId, "", "","","linkCase","1234");
         assertNotNull(caseDetailsAfterUpdate);
     }
 
