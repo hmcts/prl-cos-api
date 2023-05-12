@@ -36,7 +36,7 @@ public class DgsService {
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
         Map<String, Object> tempCaseDetails = new HashMap<>();
         if (caseDetails != null) {
-            for (Element<PartyDetails> respondent : caseDetails.getCaseData().getRespondents()){
+            for (Element<PartyDetails> respondent : caseDetails.getCaseData().getRespondents()) {
                 if (respondent.getValue().getResponse().getActiveRespondent() == YesOrNo.Yes) {
                     Response response = respondent.getValue().getResponse();
                     log.info("response is equal to {}", response);
