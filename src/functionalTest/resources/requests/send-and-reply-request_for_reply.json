@@ -4,7 +4,7 @@
     "case_data": {
       "applicantCaseName": "testCase",
       "caseTypeOfApplication": "C100",
-      "chooseSendOrReply": "SEND",
+      "chooseSendOrReply": "REPLY",
       "sendOrReplyMessage": {
         "openMessagesList": [{
           "id": "559c3c44-a2fc-475d-9822-42747c29469c",
