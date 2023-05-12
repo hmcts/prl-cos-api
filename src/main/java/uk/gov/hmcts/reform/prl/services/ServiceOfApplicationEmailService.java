@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,9 @@ public class ServiceOfApplicationEmailService {
 
     @Value("${citizen.url}")
     private String citizenUrl;
+
+    @Autowired
+    private final ObjectMapper objectMapper;
 
     public void sendEmailC100(CaseDetails caseDetails) throws Exception {
         log.info("Sending the serve Parties emails for C100 Application for caseId {}", caseDetails.getId());
@@ -95,6 +99,41 @@ public class ServiceOfApplicationEmailService {
         sendEmailToLocalAuthority(caseDetails, caseData);
     }
 
+    public void sendEmailNotificationToApplicantSolicitor(CaseDetails caseDetails, PartyDetails partyDetails,
+                                                              EmailTemplateNames templateName) throws Exception {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+
+        emailService.send(
+            partyDetails.getSolicitorEmail(),
+            templateName,
+            buildApplicantSolicitorEmail(caseDetails, partyDetails.getRepresentativeFirstName()
+                + " " + partyDetails.getRepresentativeLastName()),
+            LanguagePreference.getPreferenceLanguage(caseData));
+
+        log.info("Email notification for SoA sent successfully to applicant solicitor for caseId {}", caseDetails.getId());
+
+        sendEmailToLocalAuthority(caseDetails, caseData);
+    }
+
+    public void sendEmailNotificationToRespondentSolicitor(CaseDetails caseDetails, PartyDetails partyDetails,
+                                                          EmailTemplateNames templateName) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData caseData1 = emailService.getCaseData(caseDetails);
+        String respondentSolicitorName = partyDetails.getRepresentativeFirstName() + " "
+            + partyDetails.getRepresentativeLastName();
+        emailService.send(
+            partyDetails.getSolicitorEmail(),
+            EmailTemplateNames.RESPONDENT_SOLICITOR,
+            buildRespondentSolicitorEmail(caseDetails, respondentSolicitorName,
+                                          partyDetails.getFirstName() + " "
+                                              + partyDetails.getLastName()),
+            LanguagePreference.english
+        );
+        log.info("Email notification for SoA sent successfully to respondent solicitor for caseId {}", caseDetails.getId());
+        sendEmailToLocalAuthority(caseDetails, caseData);
+
+    }
+
     private void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) {
         if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
             for (Element<String> element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
@@ -139,6 +178,7 @@ public class ServiceOfApplicationEmailService {
 
         sendEmailToLocalAuthority(caseDetails, caseData);
     }
+
 
     private EmailTemplateVars buildApplicantSolicitorEmail(CaseDetails caseDetails, String solicitorName)
         throws Exception {

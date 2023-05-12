@@ -7,8 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -86,5 +91,175 @@ public class ServiceOfApplicationService {
             serviceOfApplicationPostService.sendDocs(caseData,authorization);
         }
         return caseData;
+    }
+
+    public CaseData sendNotificationForServiceOfApplication(CaseDetails caseDetails, String authorization) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        if (CaseCreatedBy.SOLICITOR.equals(caseData.getCaseCreatedBy())) {
+            sendNotificationToApplicantSolicitor(caseDetails,authorization);
+            sendNotificationToRespondentOrSolicitor(caseDetails,authorization);
+            /*Notifying other people in the case*/
+            caseData = sendPost(caseDetails, authorization);
+            caseInviteManager.generatePinAndSendNotificationEmail(caseData);
+        }
+
+        return caseData;
+    }
+
+    public CaseData sendNotificationToApplicantSolicitor(CaseDetails caseDetails, String authorization) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<Element<PartyDetails>> applicantsList = caseData.getApplicants();
+            applicantsList.forEach(applicant -> {
+                if (YesOrNo.Yes.getDisplayedValue()
+                    .equalsIgnoreCase(applicant.getValue().getSolicitorEmail())) {
+                    try {
+                        log.info("Sending the email notification to applicant solicitor for C100 Application for caseId {}", caseDetails.getId());
+
+                        serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(caseDetails, applicant.getValue(),
+                                                                                                       EmailTemplateNames.APPLICANT_SOLICITOR_CA);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    if (applicant.getValue().getSolicitorAddress() != null) {
+                        log.info("Sending the notification in post to applicant solicitor for C100 Application for caseId {}", caseDetails.getId());
+
+                        serviceOfApplicationPostService.sendPostNotificationToParty(caseData, authorization, applicant.getValue());
+                    } else {
+                        log.info("Unable to send any notification to applicant solicitor for C100 Application for caseId {} "
+                                     + "as no address available", caseDetails.getId());
+                    }
+
+                }
+
+            }
+            );
+        } else {
+            PartyDetails applicant = caseData.getApplicantsFL401();
+            if (YesOrNo.Yes.getDisplayedValue()
+                    .equalsIgnoreCase(applicant.getSolicitorEmail())) {
+                try {
+                    log.info("Sending the email notification to applicant solicitor for FL401 Application for caseId {}", caseDetails.getId());
+                    serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(caseDetails,
+                                                                                               applicant,EmailTemplateNames.APPLICANT_SOLICITOR_DA);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                if (applicant.getSolicitorAddress() != null) {
+                    log.info("Sending the notification in post to applicant solicitor for FL401 Application for caseId {}", caseDetails.getId());
+
+                    serviceOfApplicationPostService.sendPostNotificationToParty(caseData, authorization, applicant);
+                } else {
+                    log.info("Unable to send any notification to applicant solicitor for FL401 Application for caseId {} "
+                                 + "as no address available", caseDetails.getId());
+                }
+
+            }
+
+
+        }
+
+        return  caseData;
+    }
+
+    public CaseData sendNotificationToRespondentOrSolicitor(CaseDetails caseDetails, String authorization) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<Element<PartyDetails>> respondentListC100 = caseData.getRespondents();
+            respondentListC100.forEach(respondentc100 -> {
+                if (YesNoDontKnow.yes.equals(respondentc100.getValue().getDoTheyHaveLegalRepresentation())) {
+
+                    if (YesOrNo.Yes.getDisplayedValue()
+                        .equalsIgnoreCase(respondentc100.getValue().getSolicitorEmail())) {
+                        try {
+                            log.info("Sending the email notification to respondent solicitor for C100 Application for caseId {}",
+                                     caseDetails.getId());
+
+                            serviceOfApplicationEmailService.sendEmailNotificationToRespondentSolicitor(
+                                caseDetails,
+                                respondentc100.getValue(),
+                                EmailTemplateNames.APPLICANT_SOLICITOR_CA
+                            );
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        if (respondentc100.getValue().getSolicitorAddress() != null) {
+                            log.info("Sending the notification in post to respondent solicitor for C100 Application for caseId {}",
+                                                       caseDetails.getId());
+
+                            serviceOfApplicationPostService.sendPostNotificationToParty(
+                                                       caseData,
+                                                       authorization,
+                                                       respondentc100.getValue());
+                        } else {
+                            log.info("Unable to send any notification to respondent solicitor for C100 Application for caseId {} "
+                                         + "as no address available", caseDetails.getId());
+                        }
+
+                    }
+                } else {
+                    if (respondentc100.getValue().getAddress() != null) {
+                        log.info("Sending the notification in post to respondent for C100 Application for caseId {}",
+                                 caseDetails.getId());
+                        serviceOfApplicationPostService.sendPostNotificationToParty(
+                                                   caseData,
+                                                   authorization,
+                                                   respondentc100.getValue());
+                    }
+                }
+            });
+        } else {
+            PartyDetails respondentFL401 = caseData.getRespondentsFL401();
+            if (YesNoDontKnow.yes.equals(respondentFL401.getDoTheyHaveLegalRepresentation())) {
+                if (YesOrNo.Yes.getDisplayedValue().equalsIgnoreCase(respondentFL401.getSolicitorEmail())) {
+                    try {
+                        log.info(
+                            "Sending the email notification to respondent solicitor for FL401 Application for caseId {}",
+                            caseDetails.getId()
+                        );
+                        serviceOfApplicationEmailService.sendEmailNotificationToRespondentSolicitor(caseDetails,
+                                                                                                    respondentFL401,
+                                                                                                    EmailTemplateNames.APPLICANT_SOLICITOR_DA
+                        );
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    if (respondentFL401.getSolicitorAddress() != null) {
+                        log.info(
+                            "Sending the notification in post to respondent solicitor for FL401 Application for caseId {}",
+                            caseDetails.getId()
+                        );
+
+                        serviceOfApplicationPostService.sendPostNotificationToParty(
+                            caseData,
+                            authorization,
+                            respondentFL401
+                        );
+                    } else {
+                        log.info(
+                            "Unable to send any notification to respondent solicitor for FL401 Application for caseId {} "
+                                + "as no address available",
+                            caseDetails.getId()
+                        );
+                    }
+                }
+            } else {
+                if (respondentFL401.getAddress() != null) {
+                    log.info("Sending the notification in post to respondent for FL401 Application for caseId {}",
+                             caseDetails.getId());
+                    serviceOfApplicationPostService.sendPostNotificationToParty(
+                        caseData,
+                        authorization,
+                        respondentFL401);
+                }
+            }
+
+        }
+
+        return  caseData;
     }
 }

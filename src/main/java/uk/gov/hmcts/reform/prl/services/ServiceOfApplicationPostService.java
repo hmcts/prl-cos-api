@@ -108,6 +108,30 @@ public class ServiceOfApplicationPostService {
         return sentDocs;
     }
 
+    public void sendPostNotificationToParty(CaseData caseData, String authorisation, PartyDetails partyDetails) {
+        // Sends post
+        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
+        CaseData blankCaseData = CaseData.builder().build();
+        List<GeneratedDocumentInfo> docs = null;
+        List<Element<BulkPrintDetails>> printedDocCollectionList;
+        docs = getUploadedDocumentsServiceOfApplication(caseData);
+        try {
+            docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
+            docs.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
+        } catch (Exception e) {
+            log.info("*** Error while generating privacy notice to be served ***");
+        }
+        if (caseData.getBulkPrintDetails() != null) {
+            printedDocCollectionList = caseData.getBulkPrintDetails();
+        } else {
+            printedDocCollectionList = new ArrayList<>();
+        }
+        printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, docs)));
+        caseData.setBulkPrintDetails(printedDocCollectionList);
+    }
+
+
+
     private List<GeneratedDocumentInfo> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
         List<GeneratedDocumentInfo> docs = new ArrayList<>();
         docs.add(generateDocument(auth, getRespondentCaseData(partyDetails, caseData), DOCUMENT_COVER_SHEET_HINT));

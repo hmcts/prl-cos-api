@@ -133,7 +133,11 @@ public class ServiceOfApplicationController {
     public void handleSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
+        CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
         serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
+        caseData = serviceOfApplicationService.sendNotificationForServiceOfApplication(callbackRequest.getCaseDetails(), authorisation);
+        Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        log.info("inside submitted");
+        updatedCaseData.put("coverLetter1", serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData));
     }
 }
