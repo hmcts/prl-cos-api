@@ -35,11 +35,15 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
         Map<String, Object> tempCaseDetails = new HashMap<>();
+        log.info("Inside generate document");
         if (caseDetails != null) {
+            log.info("casedetails not null");
             for (Element<PartyDetails> respondent : caseDetails.getCaseData().getRespondents()) {
+                log.info("inside for loop");
                 if (respondent.getValue().getResponse().getActiveRespondent() == YesOrNo.Yes) {
+                    log.info("inside active respondent");
                     Response response = respondent.getValue().getResponse();
-                    log.info("response is equal to {}", response);
+                    log.info("response is equal to {}", response.toString());
                     tempCaseDetails.put("fullName", response.getCitizenDetails()
                         .getFirstName() + " " + response.getCitizenDetails()
                         .getLastName());
