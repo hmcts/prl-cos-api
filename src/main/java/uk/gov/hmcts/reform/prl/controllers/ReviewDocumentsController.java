@@ -100,7 +100,7 @@ public class ReviewDocumentsController {
 
                 String doctobereviewed = String
                     .join(format("<label class='govuk-label' for='more-detail'> Submitted by<li>%s</li></label>", "Legal professional"),
-                          format("<label class='govuk-label' for='more-detail'>Document category <li>%s</li></label>",
+                          format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
                                  doc.getCategory()),
                           format("<label class='govuk-label' for='more-detail'> Details/comments<li>%s</li></label>",
                          doc.getNotes()));
