@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
@@ -56,6 +57,7 @@ public class DgsServiceTest {
                                               .lastName("TestLast")
                                               .dateOfBirth(LocalDate.of(1990, 10, 20))
                                               .build())
+                          .activeRespondent(YesOrNo.Yes)
                           .build())
             .build();
 
