@@ -108,6 +108,7 @@ public class CallbackController {
     public static final String C100_DEFAULT_BASE_LOCATION_ID = "283922";
     public static final String C100_DEFAULT_REGION_NAME = "Midlands";
     public static final String C100_DEFAULT_REGION_ID = "2";
+    public static final String COURT_LIST = "courtList";
     private final CaseEventService caseEventService;
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final OrganisationService organisationService;
@@ -226,7 +227,7 @@ public class CallbackController {
             log.info("Court email not found for case id {}", caseData.getId());
         }
         List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
-        caseDataUpdated.put("courtList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
             .build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -303,7 +304,7 @@ public class CallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
-        caseDataUpdated.put("courtList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
             .build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -321,7 +322,7 @@ public class CallbackController {
         String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
         Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(baseLocationId, authorisation);
         caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
-        caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
+        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(caseData.getCourtList().getValue()).build());
         if (courtVenue.isPresent()) {
             String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
             caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
