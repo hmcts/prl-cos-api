@@ -152,6 +152,21 @@ public class SendAndReplyControllerFunctionalTest {
             .then()
             .assertThat().statusCode(200);
 
+
+    }
+
+    @Test
+    public void testMethod1() throws Exception {
+        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_SUBMIT);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/send-and-reply-to-messages/send-or-reply-to-messages/submitted")
+            .then()
+            .assertThat().statusCode(200);
+
     }
 
 }
