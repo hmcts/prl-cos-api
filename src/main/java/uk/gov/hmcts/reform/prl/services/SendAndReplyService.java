@@ -661,6 +661,10 @@ public class SendAndReplyService {
     private EmailTemplateVars buildNotificationEmailOther(CaseData caseData) {
         String caseLink = manageCaseUrl + "/" + caseData.getId();
 
+        log.info("Case reference ---> {}", caseData.getId());
+        log.info("caseData.getApplicantCaseName() ---> {}", caseData.getApplicantCaseName());
+        log.info("caseData caseLink ---> {}", caseLink);
+
         return  SendAndReplyNotificationEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
