@@ -37,12 +37,8 @@ public class DgsService {
         Map<String, Object> tempCaseDetails = new HashMap<>();
         if (caseDetails != null) {
             for (Element<PartyDetails> respondent : caseDetails.getCaseData().getRespondents()) {
-                log.info("inside for loop");
-                log.info("active respondent {}", respondent.getValue().getResponse().getActiveRespondent().toString());
                 if (respondent.getValue().getResponse().getActiveRespondent() == YesOrNo.Yes) {
-                    log.info("inside active respondent");
                     Response response = respondent.getValue().getResponse();
-                    log.info("response is equal to {}", response.toString());
                     tempCaseDetails.put("fullName", response.getCitizenDetails()
                         .getFirstName() + " " + response.getCitizenDetails()
                         .getLastName());

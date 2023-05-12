@@ -556,7 +556,7 @@ public class C100RespondentSolicitorService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseData = setActiveRespondent(callbackRequest, caseData);
+        setActiveRespondent(callbackRequest, caseData);
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
@@ -578,7 +578,7 @@ public class C100RespondentSolicitorService {
         return caseDataUpdated;
     }
 
-    private static CaseData setActiveRespondent(CallbackRequest callbackRequest, CaseData caseData) {
+    private static void setActiveRespondent(CallbackRequest callbackRequest, CaseData caseData) {
         String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
         if (!caseData.getRespondents().isEmpty()) {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingRespondent);
@@ -591,9 +591,7 @@ public class C100RespondentSolicitorService {
                 Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
                     .element(respondingParty.getId(), respondent);
                 caseData.getRespondents().set(activeRespondentIndex, updatedRepresentedRespondentElement);
-                return caseData;
             }
         }
-        return caseData;
     }
 }
