@@ -372,7 +372,7 @@ public class ManageOrdersController {
     }
 
     @PostMapping(path = "/amend-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to amend order mid-event")
+    @Operation(description = "Callback to amend order mid-event and set cafcassCymruEmail if the case is assigned to Welsh court")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse populateOrderToAmendDownloadLink(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
@@ -382,6 +382,11 @@ public class ManageOrdersController {
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
+        }
+        ManageOrders manageOrders = caseData.getManageOrders();
+        String courtEmail = manageOrderService.populateCafcassCymruEmailInManageOrders(caseData);
+        if (courtEmail != null) {
+            caseDataUpdated.put("manageOrders", manageOrders.toBuilder().cafcassCymruEmail(courtEmail).build());
         }
 
         caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
