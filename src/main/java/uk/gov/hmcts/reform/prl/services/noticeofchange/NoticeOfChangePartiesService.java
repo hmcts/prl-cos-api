@@ -444,6 +444,7 @@ public class NoticeOfChangePartiesService {
                 if (YesNoDontKnow.no.equals(partyDetailsElement.getValue().getDoTheyHaveLegalRepresentation())) {
                     int respondentIndex = caseData.getRespondents().indexOf(partyDetailsElement);
                     PartyDetails oldRespondent = oldCaseData.getRespondents().get(respondentIndex).getValue();
+                    log.info("oldRespondent ==> " + oldRespondent);
                     UserDetails userDetails = userService.getUserDetails(authorisation);
                     DynamicListElement roleItem = DynamicListElement.builder()
                         .code(CaseRole.C100RESPONDENTSOLICITOR1.formattedName())
@@ -478,6 +479,7 @@ public class NoticeOfChangePartiesService {
                             oldRespondent.getSolicitorEmail(),
                             "remove"
                         );
+                        log.info("noticeOfChangeEvent remove ==> " + noticeOfChangeEvent);
                         eventPublisher.publishEvent(noticeOfChangeEvent);
                     }
                 }
