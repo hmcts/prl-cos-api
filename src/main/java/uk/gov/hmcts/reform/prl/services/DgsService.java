@@ -39,7 +39,7 @@ public class DgsService {
             for (Element<PartyDetails> respondent : caseDetails.getCaseData().getRespondents()) {
                 log.info("inside for loop");
                 log.info("active respondent {}", respondent.getValue().getResponse().getActiveRespondent().toString());
-                if (respondent.getValue().getResponse().getActiveRespondent().equals(YesOrNo.Yes)) {
+                if (respondent.getValue().getResponse().getActiveRespondent() == YesOrNo.Yes) {
                     log.info("inside active respondent");
                     Response response = respondent.getValue().getResponse();
                     log.info("response is equal to {}", response.toString());
