@@ -16,8 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
@@ -116,9 +119,16 @@ public class ServiceOfApplicationController {
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);
         log.info("inside about to submit");
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("first")
+            .lastName("last")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("app@gmail.com")
+            .build();
         serviceOfApplicationPostService
             .sendBulkPrint(caseData, authorisation,
-                           List.of(serviceOfApplicationPostService.getCoverLetterGeneratedDocInfo(caseData, authorisation)));
+                           List.of(serviceOfApplicationPostService.getCoverLetterGeneratedDocInfo(caseData, authorisation)), applicant);
         log.info("Bulk print");
         //updatedCaseData.put("coverLetter", serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
@@ -133,9 +143,9 @@ public class ServiceOfApplicationController {
     public void handleSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
-        serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
-        caseData = serviceOfApplicationService.sendNotificationForServiceOfApplication(callbackRequest.getCaseDetails(), authorisation);
+        //CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
+        //serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
+        CaseData caseData = serviceOfApplicationService.sendNotificationForServiceOfApplication(callbackRequest.getCaseDetails(), authorisation);
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         log.info("inside submitted");
         updatedCaseData.put("coverLetter1", serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData));

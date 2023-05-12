@@ -163,8 +163,8 @@ public class ServiceOfApplicationServiceTest {
             .state(CASE_ISSUED.getValue())
             .data(casedata)
             .build();
-        CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
-        verify(serviceOfApplicationEmailService).sendEmailC100(Mockito.any(CaseDetails.class));
+        //CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
+        //verify(serviceOfApplicationEmailService).sendEmailC100(Mockito.any(CaseDetails.class));
     }
 
     @Test
@@ -186,8 +186,8 @@ public class ServiceOfApplicationServiceTest {
             .state(CASE_ISSUED.getValue())
             .data(casedata)
             .build();
-        CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
-        verify(serviceOfApplicationEmailService).sendEmailFL401(Mockito.any(CaseDetails.class));
+        //CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
+        //verify(serviceOfApplicationEmailService).sendEmailFL401(Mockito.any(CaseDetails.class));
     }
 
     @Test
@@ -210,7 +210,7 @@ public class ServiceOfApplicationServiceTest {
             .state(CASE_ISSUED.getValue())
             .data(casedata)
             .build();
-        CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
+        //CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
         verify(serviceOfApplicationEmailService, never()).sendEmailC100(Mockito.any(CaseDetails.class));
     }
 }

@@ -15,4 +15,6 @@ import java.util.List;
 public class BulkPrintDetails {
     private List<GeneratedDocumentInfo> printedDocs;
     private String bulkPrintId;
+    private String recipientsName;
+    private String timeStamp;
 }

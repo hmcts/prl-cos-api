@@ -112,7 +112,6 @@ public class ServiceOfApplicationEmailService {
 
         log.info("Email notification for SoA sent successfully to applicant solicitor for caseId {}", caseDetails.getId());
 
-        sendEmailToLocalAuthority(caseDetails, caseData);
     }
 
     public void sendEmailNotificationToRespondentSolicitor(CaseDetails caseDetails, PartyDetails partyDetails,
@@ -130,11 +129,11 @@ public class ServiceOfApplicationEmailService {
             LanguagePreference.english
         );
         log.info("Email notification for SoA sent successfully to respondent solicitor for caseId {}", caseDetails.getId());
-        sendEmailToLocalAuthority(caseDetails, caseData);
+
 
     }
 
-    private void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) {
+    public void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) {
         if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
             for (Element<String> element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
                 String email = element.getValue();

@@ -18,6 +18,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -76,7 +79,7 @@ public class ServiceOfApplicationPostService {
         return sentDocs;
     }
 
-    public List<GeneratedDocumentInfo> sendDocs(CaseData caseData, String authorisation) {
+    public CaseData sendDocs(CaseData caseData, String authorisation) {
         // Sends post to other parties
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         CaseData blankCaseData = CaseData.builder().build();
@@ -101,11 +104,11 @@ public class ServiceOfApplicationPostService {
                 } else {
                     printedDocCollectionList = new ArrayList<>();
                 }
-                printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, docs)));
+                printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, docs, partyDetails)));
                 caseData.setBulkPrintDetails(printedDocCollectionList);
             }
             ));
-        return sentDocs;
+        return caseData;
     }
 
     public void sendPostNotificationToParty(CaseData caseData, String authorisation, PartyDetails partyDetails) {
@@ -126,7 +129,7 @@ public class ServiceOfApplicationPostService {
         } else {
             printedDocCollectionList = new ArrayList<>();
         }
-        printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, docs)));
+        printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, docs, partyDetails)));
         caseData.setBulkPrintDetails(printedDocCollectionList);
     }
 
@@ -243,7 +246,8 @@ public class ServiceOfApplicationPostService {
         ));
     }
 
-    public Element<BulkPrintDetails> sendBulkPrint(CaseData caseData, String authorisation, List<GeneratedDocumentInfo> docs) {
+    public Element<BulkPrintDetails> sendBulkPrint(CaseData caseData, String authorisation,
+                                                   List<GeneratedDocumentInfo> docs, PartyDetails partyDetails) {
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         String bulkPrintedId = "";
         try {
@@ -257,13 +261,16 @@ public class ServiceOfApplicationPostService {
             );
             log.info("ID in the queue from bulk print service : {}", bulkPrintId);
             bulkPrintedId = String.valueOf(bulkPrintId);
-
             sentDocs.addAll(docs);
 
         } catch (Exception e) {
             log.info("The bulk print service has failed: {}", e);
         }
-        return element(BulkPrintDetails.builder().bulkPrintId(bulkPrintedId).printedDocs(sentDocs).build());
+        return element(BulkPrintDetails.builder()
+                           .bulkPrintId(bulkPrintedId)
+                           .printedDocs(sentDocs)
+                           .recipientsName(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+                           .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("Europe/London")))).build());
     }
 
 }
