@@ -537,7 +537,7 @@ public class CallbackController {
                 .value(QuarentineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
                            .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
                            .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxFurtherEvidence())
-                           .category(DocumentCategoryEnum.MAINAPPLICATION.getDisplayedValue())
+                           .category(DocumentCategoryEnum.documentCategoryChecklistEnumValue1.getDisplayedValue())
                            .build())
                     .id(element.getId()).build())
                 .collect(Collectors.toList()));
@@ -549,7 +549,7 @@ public class CallbackController {
                                .documentName(element.getValue().getDocumentName())
                                .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxCorrespondence())
                                .notes(element.getValue().getNotes())
-                               .category(DocumentCategoryEnum.CORRESPONDENCE.getDisplayedValue())
+                               .category(DocumentCategoryEnum.documentCategoryChecklistEnumValue2.getDisplayedValue())
                                .build())
                     .id(element.getId()).build())
                 .collect(Collectors.toList()));
@@ -561,7 +561,7 @@ public class CallbackController {
                                .documentType(element.getValue().getDocumentTypeOther().toString())
                                .notes(element.getValue().getNotes())
                                .documentName(element.getValue().getDocumentName())
-                               .category(DocumentCategoryEnum.OTHER.getDisplayedValue())
+                               .category(DocumentCategoryEnum.documentCategoryChecklistEnumValue3.getDisplayedValue())
                                .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxOtherDocuments())
                                .build())
                     .id(element.getId()).build())
