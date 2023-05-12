@@ -646,6 +646,8 @@ public class SendAndReplyService {
 
         if (recipientEmailAddresses.length > 0) {
             final EmailTemplateVars emailTemplateVars = buildNotificationEmailOther(caseData);
+
+            log.info("message dynamic variable ----> {}", emailTemplateVars);
             for (String recipientEmailAddress : recipientEmailAddresses) {
                 emailService.send(
                     recipientEmailAddress,
@@ -657,10 +659,12 @@ public class SendAndReplyService {
     }
 
     private EmailTemplateVars buildNotificationEmailOther(CaseData caseData) {
+        String caseLink = manageCaseUrl + "/" + caseData.getId();
 
         return  SendAndReplyNotificationEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
+            .caseLink(caseLink)
             .build();
     }
 
