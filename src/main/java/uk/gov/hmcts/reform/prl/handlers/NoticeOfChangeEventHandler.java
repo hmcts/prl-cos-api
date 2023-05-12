@@ -28,7 +28,7 @@ public class NoticeOfChangeEventHandler {
     private final EmailService emailService;
     private final NoticeOfChangeContentProvider noticeOfChangeContentProvider;
 
-    @EventListener
+    @EventListener(condition = "#event.typeOfEvent eq 'add'")
     public void notifyLegalRepresentative(final NoticeOfChangeEvent event) {
         CaseData caseData = event.getCaseData();
         //PRL-3211 - notify new LR
@@ -123,5 +123,22 @@ public class NoticeOfChangeEventHandler {
         } else {
             return caseData.getRespondents().get(representingPartyIndex);
         }
+    }
+
+
+    @EventListener(condition = "#event.typeOfEvent eq 'remove'")
+    public void notifyWhenRemoveLegalRepresentative(final NoticeOfChangeEvent event) {
+        CaseData caseData = event.getCaseData();
+        //PRL-3215 - notify old LR
+        sendEmailToOldSolicitor(caseData, event);
+    }
+
+    private void sendEmailToOldSolicitor(CaseData caseData, NoticeOfChangeEvent event) {
+        emailService.send(
+            event.getSolicitorEmailAddress(),
+            EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC,
+            noticeOfChangeContentProvider.buildNocEmailSolicitor(caseData, event.getSolicitorName()),
+            LanguagePreference.getPreferenceLanguage(caseData)
+        );
     }
 }

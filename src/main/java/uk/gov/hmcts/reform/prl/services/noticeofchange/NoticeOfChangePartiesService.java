@@ -13,11 +13,15 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.CaseRole;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
@@ -29,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
@@ -67,6 +72,7 @@ public class NoticeOfChangePartiesService {
     @Qualifier("allTabsService")
     private final AllTabServiceImpl tabService;
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
+    private final Time time;
 
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing) {
         return generate(caseData, representing, POPULATE);
@@ -195,7 +201,8 @@ public class NoticeOfChangePartiesService {
                 newCaseData,
                 solicitorRole,
                 solicitorName,
-                changeOrganisationRequest.getCreatedBy()
+                changeOrganisationRequest.getCreatedBy(),
+                "add"
             );
             eventPublisher.publishEvent(noticeOfChangeEvent);
         }
@@ -326,7 +333,8 @@ public class NoticeOfChangePartiesService {
     private NoticeOfChangeEvent prepareNoticeOfChangeEvent(CaseData newCaseData,
                                                            Optional<SolicitorRole> solicitorRole,
                                                            String solicitorName,
-                                                           String solicitorEmailAddress) {
+                                                           String solicitorEmailAddress,
+                                                           String typeOfEvent) {
         if (solicitorRole.isPresent()) {
             int partyIndex = solicitorRole.get().getIndex();
             return NoticeOfChangeEvent.builder()
@@ -335,6 +343,7 @@ public class NoticeOfChangePartiesService {
                 .solicitorName(solicitorName)
                 .representedPartyIndex(partyIndex)
                 .representing(solicitorRole.get().getRepresenting())
+                .typeOfEvent(typeOfEvent)
                 .build();
 
         }
@@ -426,5 +435,53 @@ public class NoticeOfChangePartiesService {
         log.info("Party details found - rest wip:: ", selectedPartyDetailsList);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         return caseDataUpdated;
+    }
+
+    public void updateLegalRepresentation(CallbackRequest callbackRequest, String authorisation, CaseDetails caseDetails, CaseData caseData) {
+        if ("amendRespondentsDetails".equalsIgnoreCase(callbackRequest.getEventId())) {
+            CaseData oldCaseData = objectMapper.convertValue(callbackRequest.getCaseDetailsBefore().getData(), CaseData.class);
+            caseData.getRespondents().stream().forEach(partyDetailsElement -> {
+                if (YesNoDontKnow.no.equals(partyDetailsElement.getValue().getDoTheyHaveLegalRepresentation())) {
+                    int respondentIndex = caseData.getRespondents().indexOf(partyDetailsElement);
+                    PartyDetails oldRespondent = oldCaseData.getRespondents().get(respondentIndex).getValue();
+                    UserDetails userDetails = userService.getUserDetails(authorisation);
+                    DynamicListElement roleItem = DynamicListElement.builder()
+                        .code(CaseRole.C100RESPONDENTSOLICITOR1.formattedName())
+                        .label(CaseRole.C100RESPONDENTSOLICITOR1.formattedName())
+                        .build();
+                    ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
+                        .organisationToRemove(oldRespondent.getSolicitorOrg())
+                        .createdBy(userDetails.getEmail())
+                        .caseRoleId(DynamicList.builder()
+                                        .value(roleItem)
+                                        .listItems(List.of(roleItem))
+                                        .build())
+                        .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
+                        .requestTimestamp(time.now())
+                        .build();
+                    log.info("changeOrganisationRequest ==> " + changeOrganisationRequest);
+                    caseDetails.getData()
+                        .put("changeOrganisationRequestField", changeOrganisationRequest);
+                    AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
+                        authorisation,
+                        tokenGenerator.generate(),
+                        decisionRequest(caseDetails)
+                    );
+                    log.info("applyDecision response ==> " + response);
+                    Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
+                    String solicitorName = oldRespondent.getFirstName() + " " + oldRespondent.getLastName();
+                    if (changeOrganisationRequest != null) {
+                        NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
+                            caseData,
+                            solicitorRole,
+                            solicitorName,
+                            oldRespondent.getSolicitorEmail(),
+                            "remove"
+                        );
+                        eventPublisher.publishEvent(noticeOfChangeEvent);
+                    }
+                }
+            });
+        }
     }
 }

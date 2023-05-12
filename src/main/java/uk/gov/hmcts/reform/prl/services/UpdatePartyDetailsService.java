@@ -8,21 +8,13 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.CaseRole;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
-import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.util.Collections;
@@ -39,7 +31,6 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
-import static uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest.decisionRequest;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -50,8 +41,6 @@ public class UpdatePartyDetailsService {
     private final UserService userService;
     private final AssignCaseAccessClient assignCaseAccessClient;
     private final AuthTokenGenerator tokenGenerator;
-
-    private final Time time;
 
     public Map<String, Object> updateApplicantAndChildNames(CallbackRequest callbackRequest, String authorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -103,46 +92,9 @@ public class UpdatePartyDetailsService {
             setApplicantFlag(caseData, updatedCaseData);
             setRespondentFlag(caseData, updatedCaseData);
         }
-        updateLegalRepresentation(callbackRequest, authorisation, caseDetails, caseData);
+        noticeOfChangePartiesService.updateLegalRepresentation(callbackRequest, authorisation, caseDetails, caseData);
 
         return updatedCaseData;
-    }
-
-    private void updateLegalRepresentation(CallbackRequest callbackRequest, String authorisation, CaseDetails caseDetails, CaseData caseData) {
-        log.info("callbackRequest.getCaseDetailsBefore() ==> " + callbackRequest.getCaseDetailsBefore());
-        if ("amendRespondentsDetails".equalsIgnoreCase(callbackRequest.getEventId())) {
-            CaseData oldCaseData = objectMapper.convertValue(callbackRequest.getCaseDetailsBefore().getData(), CaseData.class);
-            log.info("oldCaseData ==> " + oldCaseData);
-            caseData.getRespondents().stream().forEach(partyDetailsElement -> {
-                if (YesNoDontKnow.no.equals(partyDetailsElement.getValue().getDoTheyHaveLegalRepresentation())) {
-                    int respondentIndex = caseData.getRespondents().indexOf(partyDetailsElement);
-                    log.info("respondentIndex ==> " + respondentIndex);
-                    PartyDetails oldRespondent = oldCaseData.getRespondents().get(respondentIndex).getValue();
-                    UserDetails userDetails = userService.getUserDetails(authorisation);
-                    DynamicListElement roleItem = DynamicListElement.builder()
-                        .code(CaseRole.C100RESPONDENTSOLICITOR1.formattedName())
-                        .label(CaseRole.C100RESPONDENTSOLICITOR1.formattedName())
-                        .build();
-                    ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
-                        .organisationToRemove(oldRespondent.getSolicitorOrg())
-                        .createdBy(userDetails.getEmail())
-                        .caseRoleId(DynamicList.builder()
-                                        .value(roleItem)
-                                        .listItems(List.of(roleItem))
-                                        .build())
-                        .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
-                        .requestTimestamp(time.now())
-                        .build();
-                    caseDetails.getData()
-                        .put("changeOrganisationRequestField", changeOrganisationRequest);
-                    assignCaseAccessClient.applyDecision(
-                        authorisation,
-                        tokenGenerator.generate(),
-                        decisionRequest(caseDetails)
-                    );
-                }
-            });
-        }
     }
 
     private void setApplicantFlag(CaseData caseData, Map<String, Object> caseDetails) {
