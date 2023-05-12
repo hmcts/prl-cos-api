@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.launchdarkly.shaded.com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -36,7 +38,7 @@ public class UpdatePartyDetailsService {
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
 
-    public Map<String, Object> updateApplicantAndChildNames(CallbackRequest callbackRequest) {
+    public AboutToStartOrSubmitCallbackResponse updateApplicantAndChildNames(CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
 
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
@@ -46,47 +48,61 @@ public class UpdatePartyDetailsService {
         updatedCaseData.put("caseFlags", caseFlags);
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
-
             PartyDetails fl401Applicant = caseData
-                .getApplicantsFL401();
-            PartyDetails fl401respondent = caseData
-                .getRespondentsFL401();
-
-            if (Objects.nonNull(fl401Applicant)) {
-                CommonUtils.generatePartyUuidForFL401(caseData);
-                updatedCaseData.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
-                setFL401ApplicantFlag(updatedCaseData, fl401Applicant);
-
+                    .getApplicantsFL401();
+            if (Objects.nonNull(fl401Applicant) && isPostCodePresent(fl401Applicant)) {
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("please enter the postcode")).build();
             }
-
-            if (Objects.nonNull(fl401respondent)) {
-                CommonUtils.generatePartyUuidForFL401(caseData);
-                updatedCaseData.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
-                setFL401RespondentFlag(updatedCaseData, fl401respondent);
-            }
+            updateFl40lApplicantDetailsAndFlags(updatedCaseData, caseData);
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
+            log.info("applicants : {}",applicantsWrapped);
             if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
                 List<PartyDetails> applicants = applicantsWrapped.get()
-                    .stream()
-                    .map(Element::getValue)
-                    .collect(Collectors.toList());
+                        .stream()
+                        .map(Element::getValue)
+                        .collect(Collectors.toList());
                 PartyDetails applicant1 = applicants.get(0);
+                log.info("applicant1 : {}",new Gson().toJson(applicant1));
                 if (Objects.nonNull(applicant1)) {
+                    if (isPostCodePresent(applicant1)) {
+                        log.info("applicant1 true : {}",new Gson().toJson(applicant1));
+                        return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("please enter the postcode")).build();
+                    }
                     updatedCaseData.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
                 }
             }
-
             // set applicant and respondent case flag
             setApplicantFlag(caseData, updatedCaseData);
             setRespondentFlag(caseData, updatedCaseData);
         }
+        log.info("applicant1 false : ");
+        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
+    }
 
-        return updatedCaseData;
+    private void updateFl40lApplicantDetailsAndFlags(Map<String, Object> updatedCaseData, CaseData caseData) {
+        updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
+        updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
+
+        PartyDetails fl401Applicant = caseData
+            .getApplicantsFL401();
+
+        PartyDetails fl401respondent = caseData
+            .getRespondentsFL401();
+
+        if (Objects.nonNull(fl401Applicant)) {
+            CommonUtils.generatePartyUuidForFL401(caseData);
+            updatedCaseData.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
+            setFL401ApplicantFlag(updatedCaseData, fl401Applicant);
+        }
+
+        if (Objects.nonNull(fl401respondent)) {
+            CommonUtils.generatePartyUuidForFL401(caseData);
+            updatedCaseData.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
+            setFL401RespondentFlag(updatedCaseData, fl401respondent);
+        }
     }
 
     private void setApplicantFlag(CaseData caseData, Map<String, Object> caseDetails) {
@@ -145,5 +161,11 @@ public class UpdatePartyDetailsService {
         fl401respondent.setPartyLevelFlag(respondentFlag);
 
         caseDetails.put("respondentsFL401", fl401respondent);
+    }
+
+    private boolean isPostCodePresent(PartyDetails partyDetails) {
+        log.info("applicants boolean: {}",partyDetails.getAddress().getPostCode() == null || partyDetails.getAddress().getPostCode().isEmpty());
+        return partyDetails.getAddress().getPostCode() == null || partyDetails.getAddress().getPostCode().isEmpty();
+
     }
 }

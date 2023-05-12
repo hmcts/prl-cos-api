@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -55,6 +57,7 @@ public class UpdatePartyDetailsServiceTest {
             .firstName("test1")
             .lastName("test22")
             .canYouProvideEmailAddress(YesOrNo.No)
+                .address(Address.builder().postCode("1234").build())
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
@@ -173,6 +176,7 @@ public class UpdatePartyDetailsServiceTest {
             .firstName("test1")
             .lastName("test22")
             .canYouProvideEmailAddress(YesOrNo.No)
+                .address(Address.builder().postCode("1234").build())
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
@@ -219,6 +223,7 @@ public class UpdatePartyDetailsServiceTest {
             .firstName("applicant")
             .lastName("lastName")
             .canYouProvideEmailAddress(YesOrNo.No)
+                .address(Address.builder().postCode("1234").build())
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
@@ -315,6 +320,7 @@ public class UpdatePartyDetailsServiceTest {
             .firstName("test1")
             .lastName("test22")
             .canYouProvideEmailAddress(YesOrNo.No)
+                .address(Address.builder().postCode("1234").build())
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
@@ -408,6 +414,88 @@ public class UpdatePartyDetailsServiceTest {
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertNotNull("respondents");
+    }
+
+    @Test
+    public void testPostCodeApplicantsC100() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        PartyDetails applicant = PartyDetails.builder()
+                .firstName("test1")
+                .lastName("test22")
+                .canYouProvideEmailAddress(YesOrNo.No)
+                .address(Address.builder().postCode("1234").build())
+                .isAddressConfidential(YesOrNo.No)
+                .isPhoneNumberConfidential(YesOrNo.No)
+                .build();
+
+
+        Element<PartyDetails> wrappedApplicant1 = Element.<PartyDetails>builder().value(applicant).build();
+
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant1);
+
+        caseDataUpdated.put("applicants", "applicantList");
+
+        CaseData caseData = CaseData.builder()
+                .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+                .applicants(applicantList)
+                .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+
+        AboutToStartOrSubmitCallbackResponse response = updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
+        Assert.assertNull(response.getErrors());
+    }
+
+    @Test
+    public void testPostCodeNullApplicantsC100() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        PartyDetails applicant = PartyDetails.builder()
+                .firstName("test1")
+                .lastName("test22")
+                .canYouProvideEmailAddress(YesOrNo.No)
+                .address(Address.builder().build())
+                .isAddressConfidential(YesOrNo.No)
+                .isPhoneNumberConfidential(YesOrNo.No)
+                .build();
+
+
+        Element<PartyDetails> wrappedApplicant1 = Element.<PartyDetails>builder().value(applicant).build();
+
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant1);
+
+        caseDataUpdated.put("applicants", "applicantList");
+
+        CaseData caseData = CaseData.builder()
+                .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+                .applicants(applicantList)
+                .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+
+        AboutToStartOrSubmitCallbackResponse response = updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
+        Assert.assertNotNull(response.getErrors());
     }
 
 }

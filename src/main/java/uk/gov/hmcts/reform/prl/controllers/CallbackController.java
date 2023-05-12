@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.launchdarkly.shaded.com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -445,10 +446,11 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        return AboutToStartOrSubmitCallbackResponse
-            .builder()
-            .data(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest))
-            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
+        log.info("response data {} ",new Gson().toJson(response));
+        return response;
+
     }
 
     @PostMapping(path = "/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

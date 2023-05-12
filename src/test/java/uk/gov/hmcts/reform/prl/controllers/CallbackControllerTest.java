@@ -758,7 +758,7 @@ public class CallbackControllerTest {
                                                        .data(caseDataUpdated).build()).build();
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
         when(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest)).thenReturn(
-            caseDetailsUpdatedwithName);
+                AboutToStartOrSubmitCallbackResponse.builder().data(caseDetailsUpdatedwithName).build());
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.updatePartyDetails(
                 authToken,
