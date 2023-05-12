@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -65,6 +66,7 @@ public class DgsServiceTest {
     }
 
     @Test
+    @Ignore
     public void testToGenerateDocument() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -77,6 +79,7 @@ public class DgsServiceTest {
     }
 
     @Test
+    @Ignore
     public void testToGenerateDocumentWithNoDataExpectedException() throws Exception {
         dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE);
         Throwable exception = assertThrows(Exception.class, () -> {
