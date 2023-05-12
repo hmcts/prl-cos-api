@@ -29,6 +29,8 @@ public class SendAndReplyControllerFunctionalTest {
 
     private static final String SEND_AND_REPLY_REQUEST = "requests/send-and-reply-request.json";
 
+    private static final String SEND_AND_REPLY_REQUEST_FOR_SUBMIT = "requests/send-and-reply-request_for_submit.json";
+
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
@@ -126,7 +128,21 @@ public class SendAndReplyControllerFunctionalTest {
 
     @Test
     public void givenBodyWithNoMessages_whenSubmittedForSendOrReply() throws Exception {
-        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
+        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_SUBMIT);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/send-and-reply-to-messages/send-or-reply-to-messages/submitted")
+            .then()
+            .assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void testMethod() throws Exception {
+        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_SUBMIT);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
