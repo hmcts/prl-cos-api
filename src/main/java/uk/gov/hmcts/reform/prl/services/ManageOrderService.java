@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
@@ -50,6 +51,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -65,6 +67,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -471,6 +474,9 @@ public class ManageOrderService {
 
     @Autowired
     private final HearingService hearingService;
+
+    @Autowired
+    private final WelshCourtEmail welshCourtEmail;
 
 
     public Map<String, Object> populateHeader(CaseData caseData) {
@@ -1975,5 +1981,39 @@ public class ManageOrderService {
         } else {
             caseDataUpdated.put("markedToServeEmailNotification", No);
         }
+    }
+
+    public String populateCafcassCymruEmailInManageOrders(CaseData caseData) {
+
+        CaseManagementLocation caseManagementLocation = caseData.getCaseManagementLocation();
+        final String[] courtEmail = {""};
+
+        if (caseManagementLocation.getRegionId() != null) {
+
+            Arrays.stream(welshCourtEmail.getWelshCourtEmailMapping().split(",")).forEach(
+                value -> {
+                    List<String> courtMapping = Arrays.asList(value.split("--"));
+                    if (caseManagementLocation.getBaseLocationId().equals(courtMapping.get(0))
+                        && caseManagementLocation.getRegionId().equals(courtMapping.get(1))) {
+                        courtEmail[0] = courtMapping.get(3);
+                    }
+
+                }
+            );
+
+        } else if (caseManagementLocation.getRegion() != null) {
+            Arrays.stream(welshCourtEmail.getWelshCourtEmailMapping().split(",")).forEach(
+                value -> {
+                    List<String> courtMapping = Arrays.asList(value.split("--"));
+                    if (caseManagementLocation.getBaseLocation().equals(courtMapping.get(0))
+                        && caseManagementLocation.getRegion().equals(courtMapping.get(1))) {
+                        courtEmail[0] = courtMapping.get(3);
+                    }
+
+                }
+            );
+        }
+
+        return courtEmail[0] != null && courtEmail[0].length() > 1 ? courtEmail[0] : null;
     }
 }
