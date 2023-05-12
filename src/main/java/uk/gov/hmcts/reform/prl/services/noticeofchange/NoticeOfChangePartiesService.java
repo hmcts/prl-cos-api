@@ -441,9 +441,11 @@ public class NoticeOfChangePartiesService {
         if ("amendRespondentsDetails".equalsIgnoreCase(callbackRequest.getEventId())) {
             CaseData oldCaseData = objectMapper.convertValue(callbackRequest.getCaseDetailsBefore().getData(), CaseData.class);
             caseData.getRespondents().stream().forEach(partyDetailsElement -> {
-                if (YesNoDontKnow.no.equals(partyDetailsElement.getValue().getDoTheyHaveLegalRepresentation())) {
-                    int respondentIndex = caseData.getRespondents().indexOf(partyDetailsElement);
-                    PartyDetails oldRespondent = oldCaseData.getRespondents().get(respondentIndex).getValue();
+                PartyDetails currentRespondent = partyDetailsElement.getValue();
+                int respondentIndex = caseData.getRespondents().indexOf(partyDetailsElement);
+                PartyDetails oldRespondent = oldCaseData.getRespondents().get(respondentIndex).getValue();
+                if (YesNoDontKnow.no.equals(currentRespondent.getDoTheyHaveLegalRepresentation())
+                && YesNoDontKnow.yes.equals(oldRespondent.getDoTheyHaveLegalRepresentation()) ) {
                     log.info("oldRespondent ==> " + oldRespondent);
                     UserDetails userDetails = userService.getUserDetails(authorisation);
                     DynamicListElement roleItem = DynamicListElement.builder()
@@ -469,21 +471,25 @@ public class NoticeOfChangePartiesService {
                         decisionRequest(caseDetails)
                     );
                     log.info("applyDecision response ==> " + response);*/
-                    Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
-                    String solicitorName = oldRespondent.getFirstName() + " " + oldRespondent.getLastName();
                     if (changeOrganisationRequest != null) {
-                        NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
-                            caseData,
-                            solicitorRole,
-                            solicitorName,
-                            oldRespondent.getSolicitorEmail(),
-                            "remove"
-                        );
-                        log.info("noticeOfChangeEvent remove ==> " + noticeOfChangeEvent);
-                        eventPublisher.publishEvent(noticeOfChangeEvent);
+                        sendEmailOnRemovalOfLegalRepresentation(caseData, oldRespondent, changeOrganisationRequest);
                     }
                 }
             });
         }
+    }
+
+    private void sendEmailOnRemovalOfLegalRepresentation(CaseData caseData, PartyDetails oldRespondent, ChangeOrganisationRequest changeOrganisationRequest) {
+        Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
+        String solicitorName = oldRespondent.getRepresentativeFirstName() + " " + oldRespondent.getRepresentativeLastName();
+        NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
+            caseData,
+            solicitorRole,
+            solicitorName,
+            oldRespondent.getSolicitorEmail(),
+            "remove"
+        );
+        log.info("noticeOfChangeEvent remove ==> " + noticeOfChangeEvent);
+        eventPublisher.publishEvent(noticeOfChangeEvent);
     }
 }
