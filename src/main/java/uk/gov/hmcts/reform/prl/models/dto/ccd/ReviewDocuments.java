@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 @Data
 @Builder(toBuilder = true)
@@ -16,4 +17,5 @@ public class ReviewDocuments {
     private DynamicList reviewDocsDynamicList;
     private YesNoDontKnow reviewDecisionYesOrNo;
     private String docToBeReviewed;
+    private Document reviewDoc;
 }

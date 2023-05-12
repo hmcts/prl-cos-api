@@ -102,6 +102,7 @@ public class ReviewDocumentsController {
                           format("<label class='govuk-label' for='more-detail'> Details/comments<li>%s</li></label>",
                          doc.getNotes()));
                 caseDataUpdated.put("docToBeReviewed", doctobereviewed);
+                caseDataUpdated.put("reviewDoc", doc.getDocument());
             }
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
