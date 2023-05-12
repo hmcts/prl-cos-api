@@ -5,8 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarentineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+
+import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
@@ -18,4 +23,9 @@ public class ReviewDocuments {
     private YesNoDontKnow reviewDecisionYesOrNo;
     private String docToBeReviewed;
     private Document reviewDoc;
+    private List<Element<UploadedDocuments>> citizenUploadDocListConfTab;
+    private List<Element<UploadedDocuments>> citizenUploadedDocListDocTab;
+    private List<Element<QuarentineLegalDoc>> legalProfUploadDocListConfTab;
+    private List<Element<QuarentineLegalDoc>> legalProfUploadDocListDocTab;
+
 }
