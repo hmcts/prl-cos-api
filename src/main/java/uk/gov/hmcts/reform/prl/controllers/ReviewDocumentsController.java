@@ -202,7 +202,7 @@ public class ReviewDocumentsController {
             }
         }
         caseDataUpdated.put("legalProfQuarentineDocsList", caseData.getLegalProfQuarentineDocsList());
-        caseDataUpdated.put("citizenUploadQuarentineDocsList", caseData.getCitizenUploadQuarentineDocsList())
+        caseDataUpdated.put("citizenUploadQuarentineDocsList", caseData.getCitizenUploadQuarentineDocsList());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
