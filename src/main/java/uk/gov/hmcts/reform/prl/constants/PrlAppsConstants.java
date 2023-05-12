@@ -631,4 +631,7 @@ public class PrlAppsConstants {
     public static final String CAFCASS = "Cafcass";
     public static final String APPLICANTS = "applicants";
     public static final String RESPONDENTS = "respondents";
+    public static final String COMMA = ",";
+    public static final String EMPTY_STRING = "";
+
 }
