@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
@@ -21,8 +22,13 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
+import uk.gov.hmcts.reform.prl.services.HearingDataService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -32,6 +38,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -47,12 +55,21 @@ public class EditAndApproveDraftOrderControllerTest {
     private  ObjectMapper objectMapper;
     @Mock
     private  DraftAnOrderService draftAnOrderService;
+
+
     @Mock
     private ManageOrderService manageOrderService;
+
+    @Mock
+    private ManageOrderEmailService manageOrderEmailService;
+
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
     @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    @Mock
+    private HearingDataService  hearingDataService;
 
     @InjectMocks
     private EditAndApproveDraftOrderController editAndApproveDraftOrderController;
@@ -473,7 +490,6 @@ public class EditAndApproveDraftOrderControllerTest {
         Assert.assertNotNull(response);
     }
 
-    @Ignore
     @Test
     public void testSaveServeOrderDetails() {
 
@@ -483,8 +499,15 @@ public class EditAndApproveDraftOrderControllerTest {
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
 
+
+        Element<HearingData> hearingDataElement = Element.<HearingData>builder().build();
+
+        List<Element<HearingData>> hearingDataCollection = new ArrayList<>();
+        hearingDataCollection.add(hearingDataElement);
+
         CaseData caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
+            .manageOrders(ManageOrders.builder().solicitorOrdersHearingDetails(hearingDataCollection).build())
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .draftOrderDoc(Document.builder()
@@ -594,4 +617,180 @@ public class EditAndApproveDraftOrderControllerTest {
         Assert.assertNotNull(response);
 
     }
+
+    @Test
+    public void testPopulateSdoOtherFields() {
+
+        final String authorisation = "Bearer someAuthorisationToken";
+
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+
+        Element<HearingData> hearingDataElement = Element.<HearingData>builder().build();
+
+        List<Element<HearingData>> hearingDataCollection = new ArrayList<>();
+        hearingDataCollection.add(hearingDataElement);
+
+        CaseData caseData = CaseData.builder()
+            .welshLanguageRequirement(Yes)
+            .manageOrders(ManageOrders.builder().solicitorOrdersHearingDetails(hearingDataCollection).build())
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("c100DraftFilename.pdf")
+                               .build())
+            .id(123L)
+            .draftOrderDocWelsh(Document.builder()
+                                    .documentUrl(generatedDocumentInfo.getUrl())
+                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                    .documentHash(generatedDocumentInfo.getHashToken())
+                                    .documentFileName("c100DraftWelshFilename")
+                                    .build())
+            .draftOrderCollection(draftOrderCollection)
+            .serveOrderData(ServeOrderData.builder()
+                                .whatDoWithOrder(WhatToDoWithOrderEnum.finalizeSaveToServeLater)
+                                .doYouWantToServeOrder(Yes).build())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+            draftOrderCollection,
+            null,
+            DraftOrder::getLabelForOrdersDynamicList
+        ));
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId("adminEditAndApproveAnOrder")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
+            .populateSdoOtherFields(authorisation, callbackRequest);
+        Assert.assertNotNull(response);
+
+    }
+
+    @Test
+    public void testPopulateSdoOtherFieldsStandingOrderSelecFalse() {
+
+        final String authorisation = "Bearer someAuthorisationToken";
+
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+
+        Element<HearingData> hearingDataElement = Element.<HearingData>builder().build();
+
+        List<Element<HearingData>> hearingDataCollection = new ArrayList<>();
+        hearingDataCollection.add(hearingDataElement);
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoPreamblesList(new ArrayList<>())
+            .sdoHearingsAndNextStepsList(new ArrayList<>())
+            .sdoCafcassOrCymruList(new ArrayList<>())
+            .sdoLocalAuthorityList(new ArrayList<>())
+            .sdoCourtList(new ArrayList<>())
+            .sdoDocumentationAndEvidenceList(new ArrayList<>())
+            .sdoOtherList(new ArrayList<>())
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .standardDirectionOrder(standardDirectionOrder)
+            .welshLanguageRequirement(Yes)
+            .manageOrders(ManageOrders.builder().solicitorOrdersHearingDetails(hearingDataCollection).build())
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("c100DraftFilename.pdf")
+                               .build())
+            .id(123L)
+            .draftOrderDocWelsh(Document.builder()
+                                    .documentUrl(generatedDocumentInfo.getUrl())
+                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                    .documentHash(generatedDocumentInfo.getHashToken())
+                                    .documentFileName("c100DraftWelshFilename")
+                                    .build())
+            .draftOrderCollection(draftOrderCollection)
+            .serveOrderData(ServeOrderData.builder()
+                                .whatDoWithOrder(WhatToDoWithOrderEnum.finalizeSaveToServeLater)
+                                .doYouWantToServeOrder(Yes).build())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+            draftOrderCollection,
+            null,
+            DraftOrder::getLabelForOrdersDynamicList
+        ));
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId("adminEditAndApproveAnOrder")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
+            .populateSdoOtherFields(authorisation, callbackRequest);
+        Assert.assertNotNull(response);
+
+    }
+
+    @Test
+    public void testSendEmailNotificationToRecipientsServeOrder() {
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes).build())
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .id(123L)
+            .draftOrderCollection(draftOrderCollection)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        final String authorisation = "Bearer someAuthorisationToken";
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        editAndApproveDraftOrderController.sendEmailNotificationToRecipientsServeOrder(authorisation, callbackRequest);
+        verify(manageOrderEmailService, times(1))
+            .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
+    }
+
+
 }
