@@ -95,8 +95,12 @@ public class ReviewDocumentsController {
             log.info("** uuid ** {}", uuid);
             Optional<Element<QuarentineLegalDoc>> quarentineLegalDocElement = caseData.getLegalProfQuarentineDocsList().stream()
                 .filter(element -> element.getId().equals(uuid)).findFirst();
-            Optional<Element<UploadedDocuments>> quarentineCitizenDocElement = caseData.getCitizenUploadQuarentineDocsList().stream()
-                .filter(element -> element.getId().equals(uuid)).findFirst();
+            Optional<Element<UploadedDocuments>> quarentineCitizenDocElement = Optional.empty();
+            if (null != caseData.getCitizenUploadQuarentineDocsList()) {
+                quarentineCitizenDocElement = caseData.getCitizenUploadQuarentineDocsList().stream()
+                    .filter(element -> element.getId().equals(uuid)).findFirst();
+            }
+
             if (quarentineLegalDocElement.isPresent()) {
                 QuarentineLegalDoc doc = quarentineLegalDocElement.get().getValue();
                 log.info("** QuarentineLegalDoc ** {}", doc);
