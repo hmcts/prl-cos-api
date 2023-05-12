@@ -775,8 +775,8 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, nopNonPartiesDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, nopNonPartiesTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, nopNonPartiesFile);
-                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, nopNonPartiesWelshDraftFile);
-                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, nopNonPartiesWelshTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, nopNonPartiesWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, nopNonPartiesWelshDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, nopNonPartiesWelshTemplate);
                 fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, nopNonPartiesWelshFile);
                 break;
