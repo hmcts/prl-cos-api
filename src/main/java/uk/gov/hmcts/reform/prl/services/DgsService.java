@@ -7,13 +7,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -32,20 +28,8 @@ public class DgsService {
     private final DgsApiClient dgsApiClient;
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
-
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
         Map<String, Object> tempCaseDetails = new HashMap<>();
-        if (caseDetails != null) {
-            for (Element<PartyDetails> respondent : caseDetails.getCaseData().getRespondents()) {
-                if (respondent.getValue().getResponse().getActiveRespondent() == YesOrNo.Yes) {
-                    Response response = respondent.getValue().getResponse();
-                    tempCaseDetails.put("fullName", response.getCitizenDetails()
-                        .getFirstName() + " " + response.getCitizenDetails()
-                        .getLastName());
-                    tempCaseDetails.put("dob", response.getCitizenDetails().getDateOfBirth());
-                }
-            }
-        }
         tempCaseDetails.put(CASE_DETAILS_STRING, AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {

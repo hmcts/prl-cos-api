@@ -8,21 +8,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 
-import java.time.LocalDate;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -49,23 +41,8 @@ public class DgsServiceTest {
 
     @Before
     public void setUp() {
-        PartyDetails respondent = PartyDetails.builder()
-            .response(Response
-                          .builder()
-                          .citizenDetails(CitizenDetails.builder()
-                                              .firstName("TestFirst")
-                                              .lastName("TestLast")
-                                              .dateOfBirth(LocalDate.of(1990, 10, 20))
-                                              .build())
-                          .activeRespondent(YesOrNo.Yes)
-                          .build())
-            .build();
 
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
-
-        caseData = CaseData.builder().respondents(listOfRespondents)
-            .build();
+        caseData = CaseData.builder().build();
 
         caseDetails = CaseDetails.builder()
             .caseId("123")
@@ -101,7 +78,7 @@ public class DgsServiceTest {
 
     @Test
     public void testToGenerateDocumentWithNoDataExpectedException() throws Exception {
-        dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE);
+        dgsService.generateDocument(authToken,null, PRL_DRAFT_TEMPLATE);
         Throwable exception = assertThrows(Exception.class, () -> {
             throw new Exception("Error generating and storing document for case");
         });
