@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarentineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderElements;
@@ -94,19 +95,33 @@ public class ReviewDocumentsController {
             log.info("** uuid ** {}", uuid);
             Optional<Element<QuarentineLegalDoc>> quarentineLegalDocElement = caseData.getLegalProfQuarentineDocsList().stream()
                 .filter(element -> element.getId().equals(uuid)).findFirst();
+            Optional<Element<UploadedDocuments>> quarentineCitizenDocElement = caseData.getCitizenUploadQuarentineDocsList().stream()
+                .filter(element -> element.getId().equals(uuid)).findFirst();
             if (quarentineLegalDocElement.isPresent()) {
                 QuarentineLegalDoc doc = quarentineLegalDocElement.get().getValue();
                 log.info("** QuarentineLegalDoc ** {}", doc);
 
                 String doctobereviewed = String
-                    .join(format("<label class='govuk-label' for='more-detail'> Submitted by<li>%s</li></label>", "Legal professional"),
+                    .join(format("<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
+                                 "Legal professional"),
                           format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
                                  doc.getCategory()),
-                          format("<label class='govuk-label' for='more-detail'> Details/comments<li>%s</li></label>",
+                          format("<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
                          doc.getNotes()));
                 caseDataUpdated.put("docToBeReviewed", doctobereviewed);
                 caseDataUpdated.put("reviewDoc", doc.getDocument());
                 log.info("** review doc ** {}", doc.getDocument());
+            } else if (quarentineCitizenDocElement.isPresent()) {
+                UploadedDocuments doc = quarentineCitizenDocElement.get().getValue();
+                String doctobereviewed = String
+                    .join(format("<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
+                                 doc.getPartyName()),
+                          format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
+                                 doc.getDocumentType()),
+                          format("<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
+                                 " "));
+                caseDataUpdated.put("docToBeReviewed", doctobereviewed);
+                caseDataUpdated.put("reviewDoc", doc.getCitizenDocument());
             }
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
