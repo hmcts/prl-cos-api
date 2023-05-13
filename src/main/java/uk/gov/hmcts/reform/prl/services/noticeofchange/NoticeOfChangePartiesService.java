@@ -397,9 +397,9 @@ public class NoticeOfChangePartiesService {
                                                              CallbackRequest callbackRequest,
                                                              List<String> errorList) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<PartyDetails> selectedPartyDetailsList = new ArrayList<>();
-        log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsList.size());
-        log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsList);
+        Map<SolicitorRole, PartyDetails> selectedPartyDetailsMap = new HashMap<>();
+        log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsMap.size());
+        log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsMap);
         FindUserCaseRolesResponse findUserCaseRolesResponse
             = findUserCaseRoles(String.valueOf(callbackRequest.getCaseDetails().getId()), authorisation);
 
@@ -413,7 +413,8 @@ public class NoticeOfChangePartiesService {
                                 errorList,
                                 caseData,
                                 caseData.getApplicants().get(x.getIndex()),
-                                selectedPartyDetailsList
+                                selectedPartyDetailsMap,
+                                x
                             );
                             break;
                         case CARESPONDENT:
@@ -421,7 +422,8 @@ public class NoticeOfChangePartiesService {
                                 errorList,
                                 caseData,
                                 caseData.getRespondents().get(x.getIndex()),
-                                selectedPartyDetailsList
+                                selectedPartyDetailsMap,
+                                x
                             );
                             break;
                         //  case DAAPPLICANT:
@@ -433,16 +435,39 @@ public class NoticeOfChangePartiesService {
                         default:
                             break;
                     }
-                    log.info("Party details found - rest wip:: ", selectedPartyDetailsList);
+                    log.info("Party details found - rest wip:: ", selectedPartyDetailsMap);
                 });
         }
 
-
-        //        for (Optional<PartyDetails> partyDetails : selectedPartyDetailsList) {
-        //            if (partyDetails.isPresent()) {
-        //
-        //            }
-        //        }
+        selectedPartyDetailsMap.forEach((role, partyDetails) -> {
+            if (null != partyDetails.getSolicitorOrg()) {
+                log.info("partyDetails ==> " + partyDetails.getLabelForDynamicList());
+                UserDetails userDetails = userService.getUserDetails(authorisation);
+                DynamicListElement roleItem = DynamicListElement.builder()
+                    .code(role.getCaseRoleLabel())
+                    .label(role.getCaseRoleLabel())
+                    .build();
+                ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
+                    .organisationToRemove(partyDetails.getSolicitorOrg())
+                    .createdBy(userDetails.getEmail())
+                    .caseRoleId(DynamicList.builder()
+                                    .value(roleItem)
+                                    .listItems(List.of(roleItem))
+                                    .build())
+                    .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
+                    .requestTimestamp(time.now())
+                    .build();
+                log.info("changeOrganisationRequest ==> " + changeOrganisationRequest);
+                callbackRequest.getCaseDetails().getData()
+                    .put("changeOrganisationRequestField", changeOrganisationRequest);
+                AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
+                    authorisation,
+                    tokenGenerator.generate(),
+                    decisionRequest(callbackRequest.getCaseDetails())
+                );
+                log.info("applyDecision response ==> " + response);
+            }
+        });
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         return caseDataUpdated;
     }
@@ -450,7 +475,8 @@ public class NoticeOfChangePartiesService {
     private void findMatchingParty(List<String> errorList,
                                    CaseData caseData,
                                    Element<PartyDetails> partyDetailsElement,
-                                   List<PartyDetails> selectedPartyDetailsList) {
+                                   Map<SolicitorRole, PartyDetails> selectedPartyDetailsMap,
+                                   SolicitorRole role) {
         Optional<DynamicMultiselectListElement> match = caseData.getSolStopRepChooseParties()
             .getValue()
             .stream()
@@ -459,7 +485,7 @@ public class NoticeOfChangePartiesService {
             .findFirst();
 
         if (match.isPresent()) {
-            selectedPartyDetailsList.add(partyDetailsElement.getValue());
+            selectedPartyDetailsMap.put(role, partyDetailsElement.getValue());
         } else {
             errorList.add(INVALID_REPRESENTATION_ERROR);
         }
@@ -553,12 +579,18 @@ public class NoticeOfChangePartiesService {
                         case CARESPONDENT:
                             solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex()));
                             break;
-                        //  case DAAPPLICANT:
-                            //  solicitorRepresentedParties.add(Element.builder().value(PartyDetails.builder().build()).build());
-                            //  break;
-                        //  case DARESPONDENT:
-                            //  solicitorRepresentedParties.add(caseData.getRespondentsFL401());
-                            //  break;
+                        case DAAPPLICANT:
+                            solicitorRepresentedParties.add(ElementUtils.element(
+                                caseData.getApplicantsFL401().getPartyId(),
+                                caseData.getApplicantsFL401()
+                            ));
+                            break;
+                        case DARESPONDENT:
+                            solicitorRepresentedParties.add(ElementUtils.element(
+                                caseData.getRespondentsFL401().getPartyId(),
+                                caseData.getRespondentsFL401()
+                            ));
+                            break;
                         default:
                             break;
                     }
