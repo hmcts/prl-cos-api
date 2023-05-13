@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -94,39 +93,36 @@ public class NoticeOfChangeEventHandler {
 
     private void sendEmailToLitigant(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateName) {
         Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
-        String accessCode = getAccessCode(caseData, partyElement);
         if (null != partyElement && null != partyElement.getValue()) {
             PartyDetails partyDetails = partyElement.getValue();
-            emailService.send(
-                partyDetails.getEmail(),
-                emailTemplateName,
-                noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, event.getSolicitorName(),
-                                                                   partyDetails.getFirstName() + EMPTY_SPACE_STRING + partyDetails.getLastName(),
-                                                                   false, accessCode
-                ),
-                LanguagePreference.getPreferenceLanguage(caseData)
-            );
-        }
-    }
-
-    private String getAccessCode(CaseData caseData, Element<PartyDetails> partyElement) {
-        if (null != caseData.getCaseInvites()) {
-            for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
-                if (caseInviteElement.getValue().getPartyId().equals(partyElement.getValue().getPartyId())) {
-                    return caseInviteElement.getValue().getAccessCode();
-                }
+            if (null != partyDetails.getEmail()) {
+                emailService.send(
+                    partyDetails.getEmail(),
+                    emailTemplateName,
+                    noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, event.getSolicitorName(),
+                                                                       partyDetails.getFirstName() + EMPTY_SPACE_STRING + partyDetails.getLastName(),
+                                                                       false,
+                                                                       event.getAccessCode()
+                    ),
+                    LanguagePreference.getPreferenceLanguage(caseData)
+                );
+            } else {
+                log.info("Unable to send email to Litigant as the they don't have any email address");
             }
         }
-        return "";
     }
 
     private void sendEmailToSolicitor(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateName) {
-        emailService.send(
-            event.getSolicitorEmailAddress(),
-            emailTemplateName,
-            noticeOfChangeContentProvider.buildNocEmailSolicitor(caseData, event.getSolicitorName()),
-            LanguagePreference.getPreferenceLanguage(caseData)
-        );
+        if (null != event.getSolicitorEmailAddress()) {
+            emailService.send(
+                event.getSolicitorEmailAddress(),
+                emailTemplateName,
+                noticeOfChangeContentProvider.buildNocEmailSolicitor(caseData, event.getSolicitorName()),
+                LanguagePreference.getPreferenceLanguage(caseData)
+            );
+        } else {
+            log.info("Unable to send email to Solicitor as the they don't have any email address");
+        }
     }
 
     private Element<PartyDetails> getLitigantParty(CaseData caseData, NoticeOfChangeEvent event) {
