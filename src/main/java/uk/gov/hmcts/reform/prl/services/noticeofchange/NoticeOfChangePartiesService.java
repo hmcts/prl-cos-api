@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
@@ -79,6 +80,7 @@ public class NoticeOfChangePartiesService {
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
     private final Time time;
     private final CcdDataStoreService ccdDataStoreService;
+    private final SystemUserService systemUserService;
 
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing) {
         return generate(caseData, representing, POPULATE);
@@ -460,8 +462,9 @@ public class NoticeOfChangePartiesService {
                 log.info("changeOrganisationRequest ==> " + changeOrganisationRequest);
                 callbackRequest.getCaseDetails().getData()
                     .put("changeOrganisationRequestField", changeOrganisationRequest);
+                String userToken = systemUserService.getSysUserToken();
                 AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
-                    authorisation,
+                    userToken,
                     tokenGenerator.generate(),
                     decisionRequest(callbackRequest.getCaseDetails())
                 );
