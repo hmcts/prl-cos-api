@@ -489,8 +489,6 @@ public class NoticeOfChangePartiesService {
 
         if (match.isPresent()) {
             selectedPartyDetailsMap.put(role, partyDetailsElement.getValue());
-        } else {
-            errorList.add(INVALID_REPRESENTATION_ERROR);
         }
     }
 
