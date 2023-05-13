@@ -666,7 +666,6 @@ public class SendAndReplyService {
         lines.add("Urgent");
         lines.add(TABLE_ROW_DATA_END);
         lines.add(TABLE_ROW_DATA_BEGIN);
-       // lines.add(message.getInternalMessageUrgent().getDisplayedValue());
         lines.add("test22222");
         lines.add(TABLE_ROW_DATA_END);
         lines.add(TABLE_ROW_END);
