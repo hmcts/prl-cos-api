@@ -90,8 +90,11 @@ public class NoticeOfChangeController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse aboutToSubmitStopRepresentation(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
+        List<String> errorList = new ArrayList<>();
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(noticeOfChangePartiesService.aboutToSubmitStopRepresenting(authorisation, callbackRequest)).build();
+            .data(noticeOfChangePartiesService.aboutToSubmitStopRepresenting(authorisation, callbackRequest,
+                                                                             errorList
+            )).errors(errorList).build();
     }
 }

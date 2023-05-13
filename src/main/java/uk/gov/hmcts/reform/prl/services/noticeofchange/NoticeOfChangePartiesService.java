@@ -19,10 +19,13 @@ import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
+import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -31,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
+import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -61,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 @Slf4j
 public class NoticeOfChangePartiesService {
     public static final String NO_REPRESENTATION_FOUND_ERROR = "You do not represent anyone in this case.";
+    public static final String INVALID_REPRESENTATION_ERROR = "You do not represent selected party";
     public static final String SOL_STOP_REP_CHOOSE_PARTIES = "solStopRepChooseParties";
     public final NoticeOfChangePartiesConverter partiesConverter;
     public final RespondentPolicyConverter policyConverter;
@@ -73,6 +78,7 @@ public class NoticeOfChangePartiesService {
     private final AllTabServiceImpl tabService;
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
     private final Time time;
+    private final CcdDataStoreService ccdDataStoreService;
 
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing) {
         return generate(caseData, representing, POPULATE);
@@ -374,9 +380,10 @@ public class NoticeOfChangePartiesService {
                                                                       CallbackRequest callbackRequest,
                                                                       List<String> errorList) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Element<PartyDetails>> partyElementList = findSolicitorRepresentedParties(caseData, authorisation);
         DynamicMultiSelectList solicitorRepresentedParties
-            = dynamicMultiSelectListService.getSolicitorRepresentedParties(
-            authorisation, getCaseData(callbackRequest.getCaseDetails(), objectMapper));
+            = dynamicMultiSelectListService.getSolicitorRepresentedParties(partyElementList);
 
         if (solicitorRepresentedParties.getListItems().isEmpty()) {
             errorList.add(NO_REPRESENTATION_FOUND_ERROR);
@@ -386,66 +393,90 @@ public class NoticeOfChangePartiesService {
         return caseDataUpdated;
     }
 
-    public Map<String, Object> aboutToSubmitStopRepresenting(String authorisation, CallbackRequest callbackRequest) {
+    public Map<String, Object> aboutToSubmitStopRepresenting(String authorisation,
+                                                             CallbackRequest callbackRequest,
+                                                             List<String> errorList) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<Optional<PartyDetails>> selectedPartyDetailsList = new ArrayList<>();
+        List<PartyDetails> selectedPartyDetailsList = new ArrayList<>();
         log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsList.size());
         log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsList);
-        caseData.getSolStopRepChooseParties().getValue().forEach(value -> {
-            log.info("list code is ::" + value.getCode());
-            log.info("list code label is ::" + value.getLabel());
-            if (null != caseData.getRespondents()) {
-                log.info("C100 Respondent selected");
-                selectedPartyDetailsList.add(caseData.getRespondents()
-                                                 .stream()
-                                                 .filter(element -> element.getId().toString().equalsIgnoreCase(value.getCode()))
-                                                 .map(Element::getValue)
-                                                 .findFirst()
-                );
-                log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsList.size());
-                log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsList);
-            }
-            if (null != caseData.getApplicants()) {
-                log.info("C100 applicant selected");
-                selectedPartyDetailsList.add(caseData.getApplicants()
-                                                 .stream()
-                                                 .filter(element -> element.getId().toString().equalsIgnoreCase(value.getCode()))
-                                                 .map(Element::getValue)
-                                                 .findFirst()
-                );
-                log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsList.size());
-                log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsList);
-            }
-            if (null != caseData.getRespondentsFL401()
-                && value.getCode().equalsIgnoreCase(String.valueOf(caseData.getRespondentsFL401().getPartyId()))) {
-                log.info("FL401 Respondent selected");
-                selectedPartyDetailsList.add(Optional.ofNullable(caseData.getRespondentsFL401()));
-                log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsList.size());
-                log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsList);
-            }
-            if (null != caseData.getApplicantsFL401()
-                && value.getCode().equalsIgnoreCase(String.valueOf(caseData.getApplicantsFL401().getPartyId()))) {
-                log.info("FL401 Applicant selected");
-                selectedPartyDetailsList.add(Optional.ofNullable(caseData.getApplicantsFL401()));
-                log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsList.size());
-                log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsList);
-            }
-        });
+        FindUserCaseRolesResponse findUserCaseRolesResponse
+            = findUserCaseRoles(String.valueOf(callbackRequest.getCaseDetails().getId()), authorisation);
 
-        log.info("Party details found - rest wip:: ", selectedPartyDetailsList);
+        for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
+            log.info("caseUser is = " + caseUser + " and roles are " + caseUser.getCaseRole());
+            SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
+                x -> {
+                    switch (x.getRepresenting()) {
+                        case CAAPPLICANT:
+                            findMatchingParty(
+                                errorList,
+                                caseData,
+                                caseData.getApplicants().get(x.getIndex()),
+                                selectedPartyDetailsList
+                            );
+                            break;
+                        case CARESPONDENT:
+                            findMatchingParty(
+                                errorList,
+                                caseData,
+                                caseData.getRespondents().get(x.getIndex()),
+                                selectedPartyDetailsList
+                            );
+                            break;
+                        //  case DAAPPLICANT:
+                        //      solicitorRepresentedParties.add(Element.builder().value(PartyDetails.builder().build()).build());
+                        //      break;
+                        //  case DARESPONDENT:
+                        //      solicitorRepresentedParties.add(caseData.getRespondentsFL401());
+                        //      break;
+                        default:
+                            break;
+                    }
+                    log.info("Party details found - rest wip:: ", selectedPartyDetailsList);
+                });
+        }
+
+
+        //        for (Optional<PartyDetails> partyDetails : selectedPartyDetailsList) {
+        //            if (partyDetails.isPresent()) {
+        //
+        //            }
+        //        }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         return caseDataUpdated;
     }
 
+    private void findMatchingParty(List<String> errorList,
+                                   CaseData caseData,
+                                   Element<PartyDetails> partyDetailsElement,
+                                   List<PartyDetails> selectedPartyDetailsList) {
+        Optional<DynamicMultiselectListElement> match = caseData.getSolStopRepChooseParties()
+            .getValue()
+            .stream()
+            .filter(value ->
+                        partyDetailsElement.getId().toString().equalsIgnoreCase(value.getCode()))
+            .findFirst();
+
+        if (match.isPresent()) {
+            selectedPartyDetailsList.add(partyDetailsElement.getValue());
+        } else {
+            errorList.add(INVALID_REPRESENTATION_ERROR);
+        }
+    }
+
     public void updateLegalRepresentation(CallbackRequest callbackRequest, String authorisation, CaseDetails caseDetails, CaseData caseData) {
         if ("amendRespondentsDetails".equalsIgnoreCase(callbackRequest.getEventId())) {
-            CaseData oldCaseData = objectMapper.convertValue(callbackRequest.getCaseDetailsBefore().getData(), CaseData.class);
+            CaseData oldCaseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetailsBefore().getData(),
+                CaseData.class
+            );
             caseData.getRespondents().stream().forEach(partyDetailsElement -> {
                 PartyDetails currentRespondent = partyDetailsElement.getValue();
                 int respondentIndex = caseData.getRespondents().indexOf(partyDetailsElement);
                 PartyDetails oldRespondent = oldCaseData.getRespondents().get(respondentIndex).getValue();
                 if (YesNoDontKnow.no.equals(currentRespondent.getDoTheyHaveLegalRepresentation())
-                        && YesNoDontKnow.yes.equals(oldRespondent.getDoTheyHaveLegalRepresentation())) {
+                    && YesNoDontKnow.yes.equals(oldRespondent.getDoTheyHaveLegalRepresentation())) {
                     log.info("oldRespondent ==> " + oldRespondent);
                     UserDetails userDetails = userService.getUserDetails(authorisation);
                     DynamicListElement roleItem = DynamicListElement.builder()
@@ -492,5 +523,59 @@ public class NoticeOfChangePartiesService {
         );
         log.info("noticeOfChangeEvent remove ==> " + noticeOfChangeEvent);
         eventPublisher.publishEvent(noticeOfChangeEvent);
+    }
+
+    private List<Element<PartyDetails>> findSolicitorRepresentedParties(CaseData caseData, String authorisation) {
+        List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
+        FindUserCaseRolesResponse findUserCaseRolesResponse
+            = findUserCaseRoles(String.valueOf(caseData.getId()), authorisation);
+
+        if (findUserCaseRolesResponse != null) {
+            log.info("findUserCaseRolesResponse is not null ");
+            solicitorRepresentedParties = getSolicitorRepresentedParties(
+                caseData,
+                findUserCaseRolesResponse
+            );
+        }
+        return solicitorRepresentedParties;
+    }
+
+    private List<Element<PartyDetails>> getSolicitorRepresentedParties(CaseData caseData, FindUserCaseRolesResponse findUserCaseRolesResponse) {
+        List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
+        for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
+            log.info("caseUser is = " + caseUser + " and roles are " + caseUser.getCaseRole());
+            SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
+                x -> {
+                    switch (x.getRepresenting()) {
+                        case CAAPPLICANT:
+                            solicitorRepresentedParties.add(caseData.getApplicants().get(x.getIndex()));
+                            break;
+                        case CARESPONDENT:
+                            solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex()));
+                            break;
+                        //  case DAAPPLICANT:
+                            //  solicitorRepresentedParties.add(Element.builder().value(PartyDetails.builder().build()).build());
+                            //  break;
+                        //  case DARESPONDENT:
+                            //  solicitorRepresentedParties.add(caseData.getRespondentsFL401());
+                            //  break;
+                        default:
+                            break;
+                    }
+                }
+            );
+        }
+        log.info("finding solicitorRepresentedParties Party " + solicitorRepresentedParties);
+        return solicitorRepresentedParties;
+    }
+
+    private FindUserCaseRolesResponse findUserCaseRoles(String caseId, String authorisation) {
+        log.info("findUserCaseRoles : caseId is:: " + caseId);
+        FindUserCaseRolesResponse findUserCaseRolesResponse = ccdDataStoreService.findUserCaseRoles(
+            caseId,
+            authorisation
+        );
+        log.info("findUserCaseRolesResponse = " + findUserCaseRolesResponse);
+        return findUserCaseRolesResponse;
     }
 }
