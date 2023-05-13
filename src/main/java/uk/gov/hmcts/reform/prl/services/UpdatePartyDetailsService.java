@@ -55,6 +55,7 @@ public class UpdatePartyDetailsService {
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
+            noticeOfChangePartiesService.updateLegalRepresentation(callbackRequest, authorisation, caseData, updatedCaseData);
 
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
@@ -87,12 +88,11 @@ public class UpdatePartyDetailsService {
                     updatedCaseData.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
                 }
             }
-
+            noticeOfChangePartiesService.updateLegalRepresentation(callbackRequest, authorisation, caseData, updatedCaseData);
             // set applicant and respondent case flag
             setApplicantFlag(caseData, updatedCaseData);
             setRespondentFlag(caseData, updatedCaseData);
         }
-        noticeOfChangePartiesService.updateLegalRepresentation(callbackRequest, authorisation, caseDetails, caseData);
 
         return updatedCaseData;
     }
