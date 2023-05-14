@@ -114,7 +114,10 @@ uk:
             CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION: b6224e6a-f55c-46f8-bfc7-631d273070a4
             CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
             CA_AWAITING_PAYMENT: 3cf67615-8b67-4814-9e61-1ce786b986a1
-            RETURN_APPLICATION_CONSENT_ORDER: 96e26a9a-ca28-4b63-bd59-38e8ad14e373            
+            RETURN_APPLICATION_CONSENT_ORDER: 96e26a9a-ca28-4b63-bd59-38e8ad14e373
+            CA_DA_APPLICANT_RESPONDENT_NOC: 27e885c4-907c-479f-8746-0c8d82125513
+            CA_DA_OTHER_PARTIES_NOC: d1b1da64-995f-49c6-86cf-63f11404038f
+            CA_DA_SOLICITOR_NOC: 576b0181-eae7-4f38-b4f6-321a8c94177d
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             CA_AWAITING_PAYMENT: 312019d9-54f4-4c9a-a8b0-2dc7e4008a9e
@@ -405,6 +408,12 @@ document:
       prl_c6a_filename: Notice_Of_Parties_Order_C6a.pdf
       prl_c6a_draft_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Draft.docx
       prl_c6a_draft_filename: Notice_Of_Parties_Order_C6a_draft.pdf
+      prl_solicitor_c7_draft_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-DRAFT.docx
+      prl_solicitor_c7_draft_filename: C7_Response_Draft_Document.pdf
+      prl_solicitor_c7_final_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-FINAL.docx
+      prl_solicitor_c7_final_filename: C7_Response_Final_Document.pdf
+      prl_solicitor_c1a_draft_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-DRAFT.docx
+      prl_solicitor_c1a_draft_filename: C1A_Allegation_Of_Harm_Draft_Document.pdf
       prl_sdo_draft_template: FL-PRL-GOR-ENG-Standard-Directions-Order-Draft.docx
       prl_sdo_draft_filename: Standard_Directions_Order_draft.pdf
       prl_sdo_template: FL-PRL-GOR-ENG-Standard-Directions-Order-Final.docx
@@ -412,6 +421,9 @@ document:
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf
+    fl401listonnotice:
+      prl_fl404b_for_da_list_on_notice_template: PRL-GOR-ENG-FL401-LIST-ON-NOTICE-FL404B.docx
+      prl_fl404b_for_da_list_on_notice_filename: fl401-list-on-notice-fl404b.pdf
 
 southampton:
   court:

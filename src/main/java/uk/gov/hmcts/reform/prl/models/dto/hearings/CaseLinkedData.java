@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Builder(builderMethodName = "hearingValuesWith")
+@Builder(builderMethodName = "caseLinkedDataWith")
 @Schema(description = "The response object to hearing management")
 public class CaseLinkedData {
     public String caseReference;
