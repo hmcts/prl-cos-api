@@ -86,7 +86,7 @@ public class ElementUtils {
             .collect(toList());
     }
 
-    private static <T> Collection<T> nullSafeCollection(Collection<T> collection) {
+    public static <T> Collection<T> nullSafeCollection(Collection<T> collection) {
         return defaultIfNull(collection, emptyList());
     }
 

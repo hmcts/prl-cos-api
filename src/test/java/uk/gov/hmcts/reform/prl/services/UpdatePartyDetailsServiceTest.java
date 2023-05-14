@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.RESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class UpdatePartyDetailsServiceTest {
@@ -93,7 +93,7 @@ public class UpdatePartyDetailsServiceTest {
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
 
-        when(noticeOfChangePartiesService.generate(caseData, RESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertNotNull(nocMap);
@@ -125,7 +125,7 @@ public class UpdatePartyDetailsServiceTest {
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
 
-        when(noticeOfChangePartiesService.generate(caseData, RESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertNotNull(caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
@@ -155,7 +155,7 @@ public class UpdatePartyDetailsServiceTest {
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
 
-        when(noticeOfChangePartiesService.generate(caseData, RESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertNotNull(caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
@@ -202,7 +202,7 @@ public class UpdatePartyDetailsServiceTest {
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
 
-        when(noticeOfChangePartiesService.generate(caseData, RESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("respondentName"));
@@ -279,7 +279,7 @@ public class UpdatePartyDetailsServiceTest {
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
 
-        when(noticeOfChangePartiesService.generate(caseData, RESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
 
         //final PartyDetails applicantsFL401 = (PartyDetails) caseDataUpdated.get("applicantsFL401");
@@ -353,7 +353,7 @@ public class UpdatePartyDetailsServiceTest {
             .build();
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
-        when(noticeOfChangePartiesService.generate(caseData, RESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertNotNull(caseDataUpdated.get("applicants"));
@@ -405,7 +405,7 @@ public class UpdatePartyDetailsServiceTest {
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
 
-        when(noticeOfChangePartiesService.generate(caseData, RESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertNotNull("respondents");
     }
