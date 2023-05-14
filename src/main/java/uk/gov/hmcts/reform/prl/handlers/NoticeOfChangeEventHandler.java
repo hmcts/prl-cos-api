@@ -136,7 +136,7 @@ public class NoticeOfChangeEventHandler {
 
 
     @EventListener(condition = "#event.typeOfEvent eq 'remove'")
-    public void notifyWhenRemoveLegalRepresentative(final NoticeOfChangeEvent event) {
+    public void notifyWhenLegalRepresentativeRemoved(final NoticeOfChangeEvent event) {
         CaseData caseData = event.getCaseData();
         //PRL-3215 - notify old LR
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC);
