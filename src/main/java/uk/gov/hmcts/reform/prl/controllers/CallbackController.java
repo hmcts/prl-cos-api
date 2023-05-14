@@ -513,12 +513,10 @@ public class CallbackController {
         Optional<String> previousState = eventsForCase.stream()
             .map(CaseEventDetail::getStateId)
             .findFirst();
-        log.info("State during the fl401 add case number in addCaseNumberSubmitted: {}", previousState.get());
         previousState.ifPresent(s -> caseDataUpdated.put(
             VERIFY_CASE_NUMBER_ADDED,
             SUBMITTED_PAID.getLabel().equalsIgnoreCase(s) ? Yes : No
         ));
-        log.info("fl401 add case number flag: {}", caseDataUpdated.get("isAddCaseNumberAdded"));
         caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
