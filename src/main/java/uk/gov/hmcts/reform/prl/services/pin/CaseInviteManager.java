@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -57,23 +56,23 @@ public class CaseInviteManager {
     }
 
     public CaseInvite generatePinAfterLegalRepresentationRemoved(CaseData caseData, Element<PartyDetails> newRepresentedPartyDetails,
-                                                                 Optional<SolicitorRole> solicitorRole) {
+                                                                 SolicitorRole solicitorRole) {
         CaseInvite caseInvite = null;
         log.info(
             "Generating case invites to applicants/respondents with email address present after legal representation removed");
         if (Yes.equals(newRepresentedPartyDetails.getValue().getCanYouProvideEmailAddress())) {
-            if (CARESPONDENT.equals(solicitorRole.get().getRepresenting())) {
+            if (CARESPONDENT.equals(solicitorRole.getRepresenting())) {
                 caseInvite = c100CaseInviteService.generateCaseInvite(newRepresentedPartyDetails, No);
-            } else if (CAAPPLICANT.equals(solicitorRole.get().getRepresenting())
+            } else if (CAAPPLICANT.equals(solicitorRole.getRepresenting())
                 && launchDarklyClient.isFeatureEnabled("generate-ca-citizen-applicant-pin")
                 && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
                 caseInvite = c100CaseInviteService.generateCaseInvite(newRepresentedPartyDetails, Yes);
-            } else if (DARESPONDENT.equals(solicitorRole.get().getRepresenting())) {
+            } else if (DARESPONDENT.equals(solicitorRole.getRepresenting())) {
                 caseInvite = fl401CaseInviteService.generateCaseInvite(
                     newRepresentedPartyDetails.getValue(),
                     YesOrNo.No
                 );
-            } else if (DAAPPLICANT.equals(solicitorRole.get().getRepresenting())
+            } else if (DAAPPLICANT.equals(solicitorRole.getRepresenting())
                 && launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
                 caseInvite = fl401CaseInviteService.generateCaseInvite(
                     newRepresentedPartyDetails.getValue(),

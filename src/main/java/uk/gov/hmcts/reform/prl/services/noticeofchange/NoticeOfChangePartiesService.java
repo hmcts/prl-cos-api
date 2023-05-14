@@ -566,7 +566,9 @@ public class NoticeOfChangePartiesService {
         String accessCode = getAccessCode(caseData, newRepresentedPartyDetails);
         if (accessCode.equalsIgnoreCase(BLANK_STRING) && solicitorRole.isPresent()) {
             List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
-            CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(caseData, newRepresentedPartyDetails, solicitorRole);
+            CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(caseData,
+                                                                                                 newRepresentedPartyDetails,
+                                                                                                 solicitorRole.get());
             if (null != caseInvite) {
                 log.info("New pin generated for citizen after removing legal representation");
                 accessCode = caseInvite.getAccessCode();
