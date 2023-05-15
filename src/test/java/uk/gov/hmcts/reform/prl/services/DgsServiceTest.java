@@ -17,8 +17,7 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentReque
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -77,6 +76,12 @@ public class DgsServiceTest {
     }
 
     @Test
+    public void testToGenerateDocumentWithNoData() throws Exception {
+        Map<String, Object> respondentDetails = new HashMap<>();
+        assertNull(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE, respondentDetails));
+    }
+
+    @Test
     public void testToGenerateDocumentWithNoDataExpectedException() throws Exception {
         dgsService.generateDocument(authToken,null, PRL_DRAFT_TEMPLATE);
         Throwable exception = assertThrows(Exception.class, () -> {
@@ -94,6 +99,13 @@ public class DgsServiceTest {
             .build();
 
         assertEquals(dgsService.generateWelshDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE),generatedDocumentInfo);
+    }
+
+    @Test
+    public void testToGenerateWelshDocumentNoData() throws Exception {
+
+        Map<String, Object> respondentDetails = new HashMap<>();
+        assertNull(dgsService.generateWelshDocument(authToken, null, PRL_DRAFT_TEMPLATE, respondentDetails));
     }
 
     @Test
