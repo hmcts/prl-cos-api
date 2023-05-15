@@ -28,7 +28,7 @@ public class NoticeOfChangeEventHandler {
     private final EmailService emailService;
     private final NoticeOfChangeContentProvider noticeOfChangeContentProvider;
 
-    @EventListener(condition = "#event.typeOfEvent eq 'add'")
+    @EventListener(condition = "#event.typeOfEvent eq 'Add Legal Representation'")
     public void notifyLegalRepresentative(final NoticeOfChangeEvent event) {
         CaseData caseData = event.getCaseData();
         //PRL-3211 - notify new LR
@@ -135,7 +135,7 @@ public class NoticeOfChangeEventHandler {
     }
 
 
-    @EventListener(condition = "#event.typeOfEvent eq 'remove'")
+    @EventListener(condition = "#event.typeOfEvent eq 'Remove Legal Representation'")
     public void notifyWhenLegalRepresentativeRemoved(final NoticeOfChangeEvent event) {
         CaseData caseData = event.getCaseData();
         //PRL-3215 - notify old LR
