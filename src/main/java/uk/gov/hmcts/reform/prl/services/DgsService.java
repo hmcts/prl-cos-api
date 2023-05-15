@@ -31,7 +31,7 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName,
                                                   Map<String, Object> respondentDetails) throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = null;
+        GeneratedDocumentInfo generatedDocumentInfo;
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
@@ -64,7 +64,30 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName,
                                                        Map<String, Object> respondentDetails) throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = null;
+        GeneratedDocumentInfo generatedDocumentInfo;
+
+        respondentDetails.forEach((k, v) -> {
+            if (v != null) {
+                Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
+                                                                               PrlAppsConstants.C100_CASE_TYPE
+                                                                                   .equalsIgnoreCase(
+                                                                                       caseDetails.getCaseData()
+                                                                                           .getCaseTypeOfApplication()
+                                                                                   )
+                );
+                respondentDetails.put(k, updatedWelshObj);
+            }
+        });
+        try {
+            generatedDocumentInfo =
+                dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
+                    .builder().template(templateName).values(respondentDetails).build()
+                );
+
+        } catch (Exception ex) {
+            log.error(ERROR_MESSAGE, caseDetails.getCaseId());
+            throw new DocumentGenerationException(ex.getMessage(), ex);
+        }
         return generatedDocumentInfo;
     }
 

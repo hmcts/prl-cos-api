@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -119,10 +118,16 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testToGenerateWelshDocumentNoData() throws Exception {
+    public void testToGenerateWelshDocumentWithCaseData() throws Exception {
 
         Map<String, Object> respondentDetails = new HashMap<>();
-        assertNull(dgsService.generateWelshDocument(authToken, null, PRL_DRAFT_TEMPLATE, respondentDetails));
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        assertEquals(dgsService.generateWelshDocument(authToken, null, PRL_DRAFT_TEMPLATE,
+                                                    respondentDetails), generatedDocumentInfo);
     }
 
     @Test
