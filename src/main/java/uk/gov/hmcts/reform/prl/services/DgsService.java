@@ -64,7 +64,6 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName,
                                                        Map<String, Object> respondentDetails) throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo;
 
         respondentDetails.forEach((k, v) -> {
             if (v != null) {
@@ -76,16 +75,9 @@ public class DgsService {
                 respondentDetails.put(k, updatedWelshObj);
             }
         });
-        try {
-            generatedDocumentInfo =
-                dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
-                    .builder().template(templateName).values(respondentDetails).build()
-                );
-        } catch (Exception ex) {
-            log.error(ERROR_MESSAGE, caseDetails.getCaseId());
-            throw new DocumentGenerationException(ex.getMessage(), ex);
-        }
-        return generatedDocumentInfo;
+
+        return generateDocument(authorisation, caseDetails, templateName,
+                                respondentDetails);
     }
 
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
