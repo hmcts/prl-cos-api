@@ -549,7 +549,8 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Element<FurtherEvidence>> furtherEvidencesList = caseData.getFurtherEvidences();
         List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
-        List<Element<QuarentineLegalDoc>> quarentineDocs = new ArrayList<>();
+        List<Element<QuarentineLegalDoc>> quarentineDocs = caseData.getLegalProfQuarentineDocsList() != null
+        ? caseData.getLegalProfQuarentineDocsList() : new ArrayList<>();
         log.info("*** Category *** {}", caseData.getDocumentCategoryChecklist());
         if (furtherEvidencesList != null) {
             log.info("*** further evidences *** {}", furtherEvidencesList);
