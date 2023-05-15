@@ -46,6 +46,7 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.Respo
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -112,7 +113,10 @@ public class C100RespondentSolicitorServiceTest {
             .phoneNumber("1234567890")
             .response(Response.builder()
                           .consent(Consent.builder().build())
-                          .citizenDetails(CitizenDetails.builder().build())
+                          .citizenDetails(CitizenDetails.builder()
+                                              .firstName("test")
+                                              .lastName("test")
+                                              .build())
                           .c7ResponseSubmitted(No)
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
@@ -650,7 +654,6 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    @Ignore
     public void testC7DraftDocument() throws Exception {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -682,7 +685,7 @@ public class C100RespondentSolicitorServiceTest {
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
-            .eventId("c100ResSolViewResponseDraftDocumentC")
+            .eventId("c100ResSolViewResponseDraftDocumentA")
             .build();
 
         Map<String, Object> response = respondentSolicitorService.generateDraftDocumentsForRespondent(
@@ -723,7 +726,7 @@ public class C100RespondentSolicitorServiceTest {
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
-            .eventId("c100ResSolViewResponseDraftDocumentC")
+            .eventId("c100ResSolViewResponseDraftDocumentA")
             .build();
 
         response = respondentSolicitorService.generateDraftDocumentsForRespondent(

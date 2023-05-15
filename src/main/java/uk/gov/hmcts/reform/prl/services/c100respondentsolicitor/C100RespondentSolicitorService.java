@@ -561,7 +561,6 @@ public class C100RespondentSolicitorService {
             .getFirstName() + " " + response.getCitizenDetails()
             .getLastName());
         respondentDetails.put("dob", response.getCitizenDetails().getDateOfBirth());
-        log.info("citizen dob {}", respondentDetails.get("dob").toString());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -581,7 +580,8 @@ public class C100RespondentSolicitorService {
                 authorisation,
                 caseData,
                 SOLICITOR_C1A_DRAFT_DOCUMENT,
-                false
+                false,
+                respondentDetails
             );
             caseDataUpdated.put("draftC1ADoc", documentForC1A);
         }
