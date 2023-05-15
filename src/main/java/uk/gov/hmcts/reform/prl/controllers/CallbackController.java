@@ -557,6 +557,7 @@ public class CallbackController {
                 .value(QuarentineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
                            .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
                            .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxFurtherEvidence())
+                           .notes(caseData.getGiveDetails())
                            .category(DocumentCategoryEnum.documentCategoryChecklistEnumValue1.getDisplayedValue())
                            .build())
                     .id(element.getId()).build())
@@ -590,11 +591,11 @@ public class CallbackController {
         caseData.setLegalProfQuarentineDocsList(quarentineDocs);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("legalProfQuarentineDocsList", caseData.getLegalProfQuarentineDocsList());
-        caseDataUpdated.put("furtherEvidences", null);
-        caseDataUpdated.put("correspondence", null);
-        caseDataUpdated.put("otherDocuments", null);
-        caseDataUpdated.put("documentCategoryChecklist", null);
-        caseDataUpdated.put("giveDetails", null);
+        caseDataUpdated.remove("furtherEvidences");
+        caseDataUpdated.remove("correspondence");
+        caseDataUpdated.remove("otherDocuments");
+        caseDataUpdated.remove("documentCategoryChecklist");
+        caseDataUpdated.remove("giveDetails");
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
