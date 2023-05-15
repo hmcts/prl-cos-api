@@ -9,20 +9,20 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ResponseSubmitCheckerTest {
@@ -43,6 +43,9 @@ public class ResponseSubmitCheckerTest {
     AbilityToParticipateChecker abilityToParticipateChecker;
 
     @Mock
+    RespondentMiamChecker respondentMiamChecker;
+
+    @Mock
     AttendToCourtChecker attendToCourtChecker;
 
     @Mock
@@ -56,20 +59,24 @@ public class ResponseSubmitCheckerTest {
 
     CaseData emptyCaseData;
 
+    PartyDetails respondent;
+
+    PartyDetails emptyRespondent;
+
     @Before
     public void setup() {
+        emptyRespondent = PartyDetails.builder().build();
 
         PartyDetails respondent = PartyDetails.builder()
             .response(Response
                           .builder()
-                          .activeRespondent(Yes)
                           .consent(Consent
                                        .builder()
                                        .build())
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
                                                   .build())
-                          .abilityToParticipate(SolicitorAbilityToParticipateInProceedings
+                          .abilityToParticipate(AbilityToParticipate
                                                     .builder()
                                                     .build())
                           .attendToCourt(AttendToCourt
@@ -93,7 +100,7 @@ public class ResponseSubmitCheckerTest {
     @Test
     public void isStarted() {
 
-        Boolean bool = responseSubmitChecker.isStarted(emptyCaseData);
+        Boolean bool = responseSubmitChecker.isStarted(emptyRespondent);
         assertFalse(bool);
     }
 
@@ -109,8 +116,40 @@ public class ResponseSubmitCheckerTest {
         when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
 
 
-        Boolean bool = responseSubmitChecker.hasMandatoryCompleted(emptyCaseData);
+        Boolean bool = responseSubmitChecker.isFinished(emptyRespondent);
 
         assertFalse(bool);
+    }
+
+    @Test
+    public void hasMandatoryCompletedTrue() {
+
+        when(respondentEventsChecker.getConsentToApplicationChecker()).thenReturn(consentToApplicationChecker);
+        when(consentToApplicationChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getKeepDetailsPrivateChecker()).thenReturn(keepDetailsPrivateChecker);
+        when(keepDetailsPrivateChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getRespondentMiamChecker()).thenReturn(respondentMiamChecker);
+        when(respondentMiamChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getAbilityToParticipateChecker()).thenReturn(abilityToParticipateChecker);
+        when(abilityToParticipateChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getAttendToCourtChecker()).thenReturn(attendToCourtChecker);
+        when(attendToCourtChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getCurrentOrPastProceedingsChecker()).thenReturn(currentOrPastProceedingsChecker);
+        when(currentOrPastProceedingsChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getRespondentAllegationsOfHarmChecker()).thenReturn(respondentAllegationsOfHarmChecker);
+        when(respondentAllegationsOfHarmChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
+        when(respondentContactDetailsChecker.isFinished(respondent)).thenReturn(true);
+
+        Boolean bool = responseSubmitChecker.isFinished(respondent);
+
+        assertTrue(bool);
     }
 }

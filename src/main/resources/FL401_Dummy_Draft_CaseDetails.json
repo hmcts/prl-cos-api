@@ -89,7 +89,9 @@
         }
       }
     ],
-    "respondentTaskList": "<div class='width-50'><h3>Respond to the application</h3><p>This online response combines forms C7 and C8. It also allows you to make your own allegations of harm and violence (C1A) in the section of safety concerns.</p><div>\n\n<div class='width-50'>\n\n<br/>\n\n## 1. Consent to the Application\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolConsentingToApplication/c100ResSolConsentingToApplication1'>Do you give your consent?</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## 2. Your details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolKeepDetailsPrivate/c100ResSolKeepDetailsPrivate1'>Keep your details private</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolConfirmOrEditContactDetails/c100ResSolConfirmOrEditContactDetails1'>Edit your contact details</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolAttendingTheCourt/c100ResSolAttendingTheCourt1'>Attending the court</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## 3. Application details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolMiam/c100ResSolMiam1'>MIAM</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolCurrentOrPreviousProceedings/c100ResSolCurrentOrPreviousProceedings1'>Current or past proceedings</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## 4. Safety Concerns\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolAllegationsOfHarm/c100ResSolAllegationsOfHarm1'>Allegations of harm</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## 5. Additional information\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolInternationalElement/c100ResSolInternationalElement1'>International element</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolAbilityToParticipate/c100ResSolAbilityToParticipate1'>Ability to participate</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## 6. View PDF response\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolViewResponseDraftDocument/c100ResSolViewResponseDraftDocument1'>View a draft of your response</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## 7. Submit\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolSubmit/c100ResSolSubmit1'>Submit</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n</div>",
+    "respondentTaskList": "",
+    "respondentTaskListA": "",
+    "respondentTaskListB": "",
     "respondentsFL401": {
       "user": {
         "email": null,
@@ -405,7 +407,6 @@
           "communicationSupportOther": null,
           "safetyArrangementsDetails": null
         },
-        "activeRespondent": null,
         "safeToCallOption": null,
         "keepDetailsPrivate": {
           "confidentiality": null,
@@ -519,55 +520,25 @@
           "haveChildrenBeenInvolvedInCourtCase": null
         },
         "internationalElementChildInfo": {
-          "reasonForChild": null,
-          "reasonForParent": null,
-          "requestToAuthority": null,
-          "reasonForChildDetails": null,
-          "reasonForJurisdiction": null,
-          "reasonForParentDetails": null,
-          "requestToAuthorityDetails": null,
-          "reasonForJurisdictionDetails": null
+          "childrenLiveOutsideOfEnWl": null,
+          "parentsAnyOneLiveOutsideEnWl": null,
+          "anotherPersonOrderOutsideEnWl": null,
+          "anotherCountryAskedInformation": null,
+          "childrenLiveOutsideOfEnWlDetails": null,
+          "parentsAnyOneLiveOutsideEnWlDetails": null,
+          "anotherPersonOrderOutsideEnWlDetails": null,
+          "anotherCountryAskedInformationDetaails": null
         },
         "respondentExistingProceedings": [
 
         ],
-        "internationalElementParentInfo": {
-          "reasonForChild": null,
-          "reasonForParent": null,
-          "requestToAuthority": null,
-          "reasonForChildDetails": null,
-          "reasonForJurisdiction": null,
-          "reasonForParentDetails": null,
-          "requestToAuthorityDetails": null,
-          "reasonForJurisdictionDetails": null
-        },
         "respSolWillingnessToAttendMiam": {
           "attendedMiam": null,
           "willingToAttendMiam": null,
           "reasonNotAttendingMiam": null
         },
-        "internationalElementRequestInfo": {
-          "reasonForChild": null,
-          "reasonForParent": null,
-          "requestToAuthority": null,
-          "reasonForChildDetails": null,
-          "reasonForJurisdiction": null,
-          "reasonForParentDetails": null,
-          "requestToAuthorityDetails": null,
-          "reasonForJurisdictionDetails": null
-        },
         "currentOrPastProceedingsForChildren": null,
         "factorsAffectingAbilityToParticipate": null,
-        "internationalElementJurisdictionInfo": {
-          "reasonForChild": null,
-          "reasonForParent": null,
-          "requestToAuthority": null,
-          "reasonForChildDetails": null,
-          "reasonForJurisdiction": null,
-          "reasonForParentDetails": null,
-          "requestToAuthorityDetails": null,
-          "reasonForJurisdictionDetails": null
-        },
         "respKeepDetailsPrivateConfidentiality": {
           "confidentiality": null,
           "confidentialityList": [
@@ -1271,7 +1242,6 @@
           "communicationSupportOther": null,
           "safetyArrangementsDetails": null
         },
-        "activeRespondent": null,
         "safeToCallOption": null,
         "keepDetailsPrivate": {
           "confidentiality": null,
@@ -1385,55 +1355,25 @@
           "haveChildrenBeenInvolvedInCourtCase": null
         },
         "internationalElementChildInfo": {
-          "reasonForChild": null,
-          "reasonForParent": null,
-          "requestToAuthority": null,
-          "reasonForChildDetails": null,
-          "reasonForJurisdiction": null,
-          "reasonForParentDetails": null,
-          "requestToAuthorityDetails": null,
-          "reasonForJurisdictionDetails": null
+          "childrenLiveOutsideOfEnWl": null,
+          "parentsAnyOneLiveOutsideEnWl": null,
+          "anotherPersonOrderOutsideEnWl": null,
+          "anotherCountryAskedInformation": null,
+          "childrenLiveOutsideOfEnWlDetails": null,
+          "parentsAnyOneLiveOutsideEnWlDetails": null,
+          "anotherPersonOrderOutsideEnWlDetails": null,
+          "anotherCountryAskedInformationDetaails": null
         },
         "respondentExistingProceedings": [
 
         ],
-        "internationalElementParentInfo": {
-          "reasonForChild": null,
-          "reasonForParent": null,
-          "requestToAuthority": null,
-          "reasonForChildDetails": null,
-          "reasonForJurisdiction": null,
-          "reasonForParentDetails": null,
-          "requestToAuthorityDetails": null,
-          "reasonForJurisdictionDetails": null
-        },
         "respSolWillingnessToAttendMiam": {
           "attendedMiam": null,
           "willingToAttendMiam": null,
           "reasonNotAttendingMiam": null
         },
-        "internationalElementRequestInfo": {
-          "reasonForChild": null,
-          "reasonForParent": null,
-          "requestToAuthority": null,
-          "reasonForChildDetails": null,
-          "reasonForJurisdiction": null,
-          "reasonForParentDetails": null,
-          "requestToAuthorityDetails": null,
-          "reasonForJurisdictionDetails": null
-        },
         "currentOrPastProceedingsForChildren": null,
         "factorsAffectingAbilityToParticipate": null,
-        "internationalElementJurisdictionInfo": {
-          "reasonForChild": null,
-          "reasonForParent": null,
-          "requestToAuthority": null,
-          "reasonForChildDetails": null,
-          "reasonForJurisdiction": null,
-          "reasonForParentDetails": null,
-          "requestToAuthorityDetails": null,
-          "reasonForJurisdictionDetails": null
-        },
         "respKeepDetailsPrivateConfidentiality": {
           "confidentiality": null,
           "confidentialityList": [
@@ -1502,7 +1442,89 @@
 
       ],
       "isAtAddressLessThan5YearsWithDontKnow": null
+    },
+    "daApplicant": {
+      "firstName": "John",
+      "lastName": "Smith"
+    },
+    "daApplicantPolicy": {
+      "Organisation": {
+        "OrganisationID": "QO4A1Q8",
+        "OrganisationName": "FPRL-test-organisation"
+      },
+      "OrgPolicyCaseAssignedRole": "[FL401APPLICANTSOLICITOR]",
+      "OrgPolicyReference": null
+    },
+    "daRespondent": {
+      "firstName": "Elise",
+      "lastName": "Lynn"
+    },
+    "daRespondentPolicy": {
+      "Organisation": {
+      },
+      "OrgPolicyCaseAssignedRole": "[FL401RESPONDENTSOLICITOR]",
+      "OrgPolicyReference": null
     }
+  },
+  "caRespondent1Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR1]"
+  },
+  "caRespondent2Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR2]"
+  },
+  "caRespondent3Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR3]"
+  },
+  "caRespondent4Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR4]"
+  },
+  "caRespondent5Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR5]"
+  },
+  "caApplicant1Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR1]"
+  },
+  "caApplicant2Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR2]"
+  },
+  "caApplicant3Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR3]"
+  },
+  "caApplicant4Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR4]"
+  },
+  "caApplicant5Policy": {
+    "Organisation": {
+    },
+    "OrgPolicyReference": null,
+    "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR5]"
   },
   "security_classification": "PUBLIC",
   "callback_response_status": null
