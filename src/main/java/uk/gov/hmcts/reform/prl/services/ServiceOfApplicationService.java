@@ -118,19 +118,19 @@ public class ServiceOfApplicationService {
     public CaseData sendNotificationForServiceOfApplication(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getApplicantsList() != null) {
+            if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getApplicantsList() != null)) {
                 log.info("serving applicants");
                 caseData = sendNotificationToApplicantSolicitor(caseDetails,authorization);
             }
-            if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getRespondentsList() != null) {
+            if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getRespondentsList() != null)) {
                 log.info("serving respondents");
                 caseData = sendNotificationToRespondentOrSolicitor(caseDetails, authorization);
             }
-            if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
+            if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getOtherEmailAddressList() != null)) {
                 log.info("serving LA");
                 serviceOfApplicationEmailService.sendEmailToLocalAuthority(caseDetails, caseData);
             }
-            if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherPeopleList() != null) {
+            if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getOtherPeopleList() != null)) {
                 log.info("serving other people in case");
                 caseData = sendPostToOtherPeopleInCase(caseDetails, authorization);
             }
