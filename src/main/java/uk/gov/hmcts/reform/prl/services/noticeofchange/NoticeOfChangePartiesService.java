@@ -480,6 +480,7 @@ public class NoticeOfChangePartiesService {
                 log.info("applyDecision response ==> " + response.getData());
                 if (null != response.getData()) {
                     caseDataUpdated = response.getData();
+                    log.info("caseDataUpdated ==> " + caseDataUpdated);
                 }
             }
         }
