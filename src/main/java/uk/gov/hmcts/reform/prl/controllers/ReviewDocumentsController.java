@@ -67,7 +67,6 @@ public class ReviewDocumentsController {
     ) throws Exception {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errors = new ArrayList<>();
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
@@ -87,8 +86,8 @@ public class ReviewDocumentsController {
         if (dynamicListElements.size() == 0) {
             errors = List.of("No documents to review");
         }
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
         caseDataUpdated.put("reviewDocsDynamicList", DynamicList.builder().listItems(dynamicListElements).build());
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).errors(errors).build();
     }
 
