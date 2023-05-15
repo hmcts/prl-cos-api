@@ -17,7 +17,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 
 @RequiredArgsConstructor
 @Getter
-@Slf4j
 public enum SolicitorRole {
     C100APPLICANTSOLICITOR1("[C100APPLICANTSOLICITOR1]", 1, Representing.CAAPPLICANT, BLANK_STRING),
     C100APPLICANTSOLICITOR2("[C100APPLICANTSOLICITOR2]", 2, Representing.CAAPPLICANT, BLANK_STRING),
@@ -42,8 +41,6 @@ public enum SolicitorRole {
     }
 
     public static Optional<SolicitorRole> fromRepresentingAndIndex(Representing representing, int index) {
-        log.info("representing ==> " + representing);
-        log.info("index ==> " + index);
         return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
             .filter(role -> role.representing.equals(representing) && role.index == index)
             .findFirst();

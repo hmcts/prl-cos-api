@@ -485,7 +485,6 @@ public class NoticeOfChangePartiesService {
                     .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
                     .requestTimestamp(time.now())
                     .build();
-                log.info("changeOrganisationRequest ==> " + changeOrganisationRequest);
                 caseDetails.getData()
                     .put("changeOrganisationRequestField", changeOrganisationRequest);
                 String userToken = systemUserService.getSysUserToken();
@@ -496,16 +495,8 @@ public class NoticeOfChangePartiesService {
                 );
                 log.info("applyDecision response ==> " + response.getData());
                 if (null != response.getData()) {
-                    /*CaseData newCaseData = objectMapper.convertValue(response.getData(), CaseData.class);
-                    newCaseData = updateRepresentedPartyDetails(
-                        changeOrganisationRequest,
-                        newCaseData,
-                        userDetails,
-                        TypeOfNocEventEnum.removeLegalRepresentation
-                    );*/
                     caseDetails = caseDetails.toBuilder().data(response.getData()).build();
                     caseDataUpdated = response.getData();
-                    log.info("caseDataUpdated after removing legal representative ==> " + caseDataUpdated);
                 }
             }
         }
@@ -514,23 +505,19 @@ public class NoticeOfChangePartiesService {
 
     public void submittedStopRepresenting(CallbackRequest callbackRequest) {
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("newCaseData ==> " + newCaseData);
         DynamicMultiSelectList solStopRepChooseParties = newCaseData.getSolStopRepChooseParties();
         Map<Optional<SolicitorRole>, Element<PartyDetails>> removeSolPartyDetailsMap = new HashMap<>();
         for (DynamicMultiselectListElement solStopRepChoosePartyElement : solStopRepChooseParties.getValue()) {
-            log.info("solStopRepChoosePartyElement ===> " + solStopRepChoosePartyElement);
             removeSolPartyDetailsMap = getRemovedSolicitorRoles(
                 newCaseData,
                 solStopRepChoosePartyElement,
                 removeSolPartyDetailsMap
             );
         }
-        log.info("removeSolPartyDetailsMap ===> " + removeSolPartyDetailsMap);
         for (var entry : removeSolPartyDetailsMap.entrySet()) {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
             if (removeSolicitorRole.isPresent()) {
-                log.info("removeSolicitorRole ===> " + removeSolicitorRole.get().getCaseRoleLabel());
                 DynamicListElement roleItem = DynamicListElement.builder()
                     .code(removeSolicitorRole.get().getCaseRoleLabel())
                     .label(removeSolicitorRole.get().getCaseRoleLabel())
@@ -567,48 +554,57 @@ public class NoticeOfChangePartiesService {
     private Map<Optional<SolicitorRole>, Element<PartyDetails>> getRemovedSolicitorRoles(CaseData newCaseData,
                                                                                          DynamicMultiselectListElement solStopRepChoosePartyElement,
                                                                                          Map<Optional<SolicitorRole>,
-                                                                                             Element<PartyDetails>> selectedPartyDetailsMap) {
-        Optional<SolicitorRole> removeSolicitorRole;
+                                                                                             Element<PartyDetails>> removeSolPartyDetailsMap) {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(newCaseData))) {
-            boolean matched = false;
-            int partyIndex;
-            for (Element<PartyDetails> partyDetailsElement : newCaseData.getApplicants()) {
+            getRemovedSolicitorRolesForC100(newCaseData, solStopRepChoosePartyElement, removeSolPartyDetailsMap);
+        } else {
+            getRemovedSolicitorRolesForFl401(newCaseData, solStopRepChoosePartyElement, removeSolPartyDetailsMap);
+        }
+        return removeSolPartyDetailsMap;
+    }
+
+    private static void getRemovedSolicitorRolesForFl401(CaseData newCaseData, DynamicMultiselectListElement solStopRepChoosePartyElement,
+                                                         Map<Optional<SolicitorRole>, Element<PartyDetails>> removeSolPartyDetailsMap) {
+        Optional<SolicitorRole> removeSolicitorRole;
+        if (solStopRepChoosePartyElement.getCode().equalsIgnoreCase(newCaseData.getApplicantsFL401().getPartyId().toString())) {
+            removeSolicitorRole = Optional.of(SolicitorRole.FL401APPLICANTSOLICITOR);
+            removeSolPartyDetailsMap.put(removeSolicitorRole, element(
+                newCaseData.getApplicantsFL401().getPartyId(),
+                newCaseData.getApplicantsFL401()
+            ));
+        } else if (solStopRepChoosePartyElement.getCode().equalsIgnoreCase(newCaseData.getRespondentsFL401().getPartyId().toString())) {
+            removeSolicitorRole = Optional.of(SolicitorRole.FL401RESPONDENTSOLICITOR);
+            removeSolPartyDetailsMap.put(removeSolicitorRole, element(
+                newCaseData.getRespondentsFL401().getPartyId(),
+                newCaseData.getRespondentsFL401()
+            ));
+        }
+    }
+
+    private static void getRemovedSolicitorRolesForC100(CaseData newCaseData, DynamicMultiselectListElement solStopRepChoosePartyElement,
+                                                        Map<Optional<SolicitorRole>, Element<PartyDetails>> removeSolPartyDetailsMap) {
+        Optional<SolicitorRole> removeSolicitorRole;
+        boolean matched = false;
+        int partyIndex;
+        for (Element<PartyDetails> partyDetailsElement : newCaseData.getApplicants()) {
+            if (solStopRepChoosePartyElement.getCode().equalsIgnoreCase(partyDetailsElement.getId().toString())) {
+                partyIndex = newCaseData.getApplicants().indexOf(partyDetailsElement);
+                removeSolicitorRole = SolicitorRole.fromRepresentingAndIndex(CAAPPLICANT, partyIndex + 1);
+                removeSolPartyDetailsMap.put(removeSolicitorRole, partyDetailsElement);
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) {
+            for (Element<PartyDetails> partyDetailsElement : newCaseData.getRespondents()) {
                 if (solStopRepChoosePartyElement.getCode().equalsIgnoreCase(partyDetailsElement.getId().toString())) {
-                    partyIndex = newCaseData.getApplicants().indexOf(partyDetailsElement);
-                    log.info("partyIndex ===> " + partyIndex);
-                    removeSolicitorRole = SolicitorRole.fromRepresentingAndIndex(CAAPPLICANT, partyIndex + 1);
-                    selectedPartyDetailsMap.put(removeSolicitorRole, partyDetailsElement);
-                    matched = true;
+                    partyIndex = newCaseData.getRespondents().indexOf(partyDetailsElement);
+                    removeSolicitorRole = SolicitorRole.fromRepresentingAndIndex(CARESPONDENT, partyIndex + 1);
+                    removeSolPartyDetailsMap.put(removeSolicitorRole, partyDetailsElement);
                     break;
                 }
             }
-            if (!matched) {
-                for (Element<PartyDetails> partyDetailsElement : newCaseData.getRespondents()) {
-                    if (solStopRepChoosePartyElement.getCode().equalsIgnoreCase(partyDetailsElement.getId().toString())) {
-                        partyIndex = newCaseData.getRespondents().indexOf(partyDetailsElement);
-                        log.info("partyIndex ===> " + partyIndex);
-                        removeSolicitorRole = SolicitorRole.fromRepresentingAndIndex(CARESPONDENT, partyIndex + 1);
-                        selectedPartyDetailsMap.put(removeSolicitorRole, partyDetailsElement);
-                        break;
-                    }
-                }
-            }
-        } else {
-            if (solStopRepChoosePartyElement.getCode().equalsIgnoreCase(newCaseData.getApplicantsFL401().getPartyId().toString())) {
-                removeSolicitorRole = Optional.of(SolicitorRole.FL401APPLICANTSOLICITOR);
-                selectedPartyDetailsMap.put(removeSolicitorRole, element(
-                    newCaseData.getApplicantsFL401().getPartyId(),
-                    newCaseData.getApplicantsFL401()
-                ));
-            } else if (solStopRepChoosePartyElement.getCode().equalsIgnoreCase(newCaseData.getRespondentsFL401().getPartyId().toString())) {
-                removeSolicitorRole = Optional.of(SolicitorRole.FL401RESPONDENTSOLICITOR);
-                selectedPartyDetailsMap.put(removeSolicitorRole, element(
-                    newCaseData.getRespondentsFL401().getPartyId(),
-                    newCaseData.getRespondentsFL401()
-                ));
-            }
         }
-        return selectedPartyDetailsMap;
     }
 
     private void findMatchingParty(List<String> errorList,
