@@ -585,7 +585,7 @@ public class NoticeOfChangePartiesService {
             if (!matched) {
                 for (Element<PartyDetails> partyDetailsElement : newCaseData.getRespondents()) {
                     if (solStopRepChoosePartyElement.getCode().equalsIgnoreCase(partyDetailsElement.getId().toString())) {
-                        partyIndex = newCaseData.getApplicants().indexOf(partyDetailsElement);
+                        partyIndex = newCaseData.getRespondents().indexOf(partyDetailsElement);
                         log.info("partyIndex ===> " + partyIndex);
                         removeSolicitorRole = SolicitorRole.fromRepresentingAndIndex(CARESPONDENT, partyIndex + 1);
                         selectedPartyDetailsMap.put(removeSolicitorRole, partyDetailsElement);
