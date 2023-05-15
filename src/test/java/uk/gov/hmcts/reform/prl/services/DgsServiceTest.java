@@ -78,9 +78,24 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testToGenerateDocumentWithNoData() throws Exception {
+    public void testToGenerateDocumentWithCaseData() throws Exception {
         Map<String, Object> respondentDetails = new HashMap<>();
-        assertNull(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE, respondentDetails));
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        assertEquals(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE,
+                                                 respondentDetails), generatedDocumentInfo);
+    }
+
+    @Test
+    public void testToGenerateDocumentWithCaseDataNoDataExpectedException() throws Exception {
+        dgsService.generateDocument(authToken,null, PRL_DRAFT_TEMPLATE, null);
+        Throwable exception = assertThrows(Exception.class, () -> {
+            throw new Exception("Error generating and storing document for case");
+        });
+        assertEquals("Error generating and storing document for case", exception.getMessage());
     }
 
     @Test

@@ -32,6 +32,16 @@ public class DgsService {
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName,
                                                   Map<String, Object> respondentDetails) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
+        try {
+            generatedDocumentInfo =
+                dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
+                    .builder().template(templateName).values(respondentDetails).build()
+                );
+
+        } catch (Exception ex) {
+            log.error(ERROR_MESSAGE, caseDetails.getCaseId());
+            throw new DocumentGenerationException(ex.getMessage(), ex);
+        }
         return generatedDocumentInfo;
     }
 
