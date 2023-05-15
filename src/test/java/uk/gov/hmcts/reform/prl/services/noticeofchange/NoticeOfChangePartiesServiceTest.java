@@ -237,7 +237,7 @@ public class NoticeOfChangePartiesServiceTest {
                                                                     .forename("solicitorResp")
                                                                     .surname("test").build());
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, "testAuth");
-        verify(tabService, times(1)).updatePartyDetailsForNoc(Mockito.any(CaseData.class), Mockito.any());
+        verify(tabService, times(1)).updatePartyDetailsForNoc(Mockito.any(CaseData.class), Mockito.any(), Mockito.any());
         verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
     }
 
@@ -281,7 +281,7 @@ public class NoticeOfChangePartiesServiceTest {
                                                                     .forename("solicitorResp")
                                                                     .surname("test").build());
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, "testAuth");
-        verify(tabService, times(1)).updatePartyDetailsForNoc(Mockito.any(CaseData.class), Mockito.any());
+        verify(tabService, times(1)).updatePartyDetailsForNoc(Mockito.any(CaseData.class), Mockito.any(), Mockito.any());
         verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
     }
 
@@ -365,7 +365,7 @@ public class NoticeOfChangePartiesServiceTest {
                                                                     .forename("solicitorResp")
                                                                     .surname("test").build());
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, "testAuth");
-        verify(tabService, times(1)).updatePartyDetailsForNoc(Mockito.any(CaseData.class), Mockito.any());
+        verify(tabService, times(1)).updatePartyDetailsForNoc(Mockito.any(CaseData.class), Mockito.any(), Mockito.any());
         verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
     }
 

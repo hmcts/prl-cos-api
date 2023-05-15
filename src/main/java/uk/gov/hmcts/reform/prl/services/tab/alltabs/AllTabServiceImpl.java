@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,8 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -17,6 +20,7 @@ import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -174,7 +178,7 @@ public class AllTabServiceImpl implements AllTabsService {
         return getCombinedMap(caseData);
     }
 
-    public void updatePartyDetailsForNoc(CaseData caseData, Optional<SolicitorRole> solicitorRole) {
+    public void updatePartyDetailsForNoc(CaseData caseData, Optional<SolicitorRole> solicitorRole, List<Element<CaseInvite>> caseInvites) {
         Map<String, Object> caseDataUpdatedMap = new HashMap<>();
         if (caseData != null && solicitorRole.isPresent()) {
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -200,8 +204,14 @@ public class AllTabServiceImpl implements AllTabsService {
                     );
                 }
             }
-
+            setCaseInvitesIfNeeded(caseInvites, caseDataUpdatedMap);
             refreshCcdUsingEvent(caseData, caseDataUpdatedMap);
+        }
+    }
+
+    private static void setCaseInvitesIfNeeded(List<Element<CaseInvite>> caseInvites, Map<String, Object> caseDataUpdatedMap) {
+        if (CollectionUtils.isNotEmpty(caseInvites)) {
+            caseDataUpdatedMap.put("caseInvites", caseInvites);
         }
     }
 
