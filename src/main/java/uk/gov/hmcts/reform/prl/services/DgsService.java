@@ -72,9 +72,7 @@ public class DgsService {
                                                                                PrlAppsConstants.C100_CASE_TYPE
                                                                                    .equalsIgnoreCase(
                                                                                        caseDetails.getCaseData()
-                                                                                           .getCaseTypeOfApplication()
-                                                                                   )
-                );
+                                                                                           .getCaseTypeOfApplication()));
                 respondentDetails.put(k, updatedWelshObj);
             }
         });
@@ -83,7 +81,6 @@ public class DgsService {
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
                     .builder().template(templateName).values(respondentDetails).build()
                 );
-
         } catch (Exception ex) {
             log.error(ERROR_MESSAGE, caseDetails.getCaseId());
             throw new DocumentGenerationException(ex.getMessage(), ex);
