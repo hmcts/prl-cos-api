@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 @SpringBootTest
@@ -149,6 +150,8 @@ public class CallbackControllerFunctionalTest {
     @Test
     public void givenRequestWithCaseNumberAdded_ResponseContainsIssueDate() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        LocalDate date = LocalDate.now();
+        when(LocalDate.now()).thenReturn(date);
         request
             .header("Authorization", userToken)
             .body(requestBody)
@@ -156,7 +159,7 @@ public class CallbackControllerFunctionalTest {
             .contentType("application/json")
             .post("/fl401-add-case-number")
             .then()
-            .body("data.issueDate", equalTo(LocalDate.now().toString()))
+            .body("data.issueDate", equalTo(date.toString()))
             .assertThat().statusCode(200);
     }
 
