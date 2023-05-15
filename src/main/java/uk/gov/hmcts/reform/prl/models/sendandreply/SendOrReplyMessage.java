@@ -27,7 +27,7 @@ public class SendOrReplyMessage {
     private final List<Element<Message>> closedMessagesList;
 
     private DynamicList judicialOrMagistrateTierList;
-    private DynamicList linkedApplicationsList;
+    private DynamicList applicationsList;
     private DynamicList futureHearingsList;
     private DynamicList submittedDocumentsList;
     private DynamicList ctscEmailList;
