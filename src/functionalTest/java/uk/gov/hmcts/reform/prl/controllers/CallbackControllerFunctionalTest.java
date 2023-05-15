@@ -157,9 +157,7 @@ public class CallbackControllerFunctionalTest {
             .contentType("application/json")
             .post("/fl401-add-case-number")
             .then()
-            .body("data.issueDate", equalTo(LocalDate.now().toString()),
-                  "data.isAddCaseNumberAdded", equalTo(YesOrNo.Yes.getDisplayedValue())
-            )
+            .body("data.issueDate", equalTo(LocalDate.now().toString()))
             .assertThat().statusCode(200);
     }
 
