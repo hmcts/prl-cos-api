@@ -606,15 +606,18 @@ public class SendAndReplyServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                    .messageAbout(MessageAboutEnum.APPLICATION)
-                    .ctscEmailList(dynamicList1)
-                    .judicialOrMagistrateTierList(dynamicList1)
-                    .linkedApplicationsList(dynamicList1)
-                    .futureHearingsList(dynamicList1)
-                    .sendReplyJudgeName(judicialUser)
-                    .build())
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessageEnum(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendToEnum(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .messageAboutEnum(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList1)
+                            .judicialOrMagistrateTierList(dynamicList1)
+                            .linkedApplicationsList(dynamicList1)
+                            .futureHearingsList(dynamicList1)
+                            .sendReplyJudgeName(judicialUser)
+                            .build()
+                    ).build())
             .build();
 
         List<JudicialUsersApiResponse> judicialUsersApiResponseList = Arrays.asList(JudicialUsersApiResponse.builder().build());
@@ -636,15 +639,18 @@ public class SendAndReplyServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                    .messageAbout(MessageAboutEnum.APPLICATION)
-                    .ctscEmailList(dynamicList1)
-                    .judicialOrMagistrateTierList(dynamicList1)
-                    .linkedApplicationsList(dynamicList1)
-                    .futureHearingsList(dynamicList1)
-                    .sendReplyJudgeName(null)
-                    .build())
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessageEnum(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendToEnum(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .messageAboutEnum(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList1)
+                            .judicialOrMagistrateTierList(dynamicList1)
+                            .linkedApplicationsList(dynamicList1)
+                            .futureHearingsList(dynamicList1)
+                            .sendReplyJudgeName(null)
+                            .build()
+                    ).build())
             .build();
 
         Message message = sendAndReplyService.buildSendMessage(caseData);
@@ -659,15 +665,18 @@ public class SendAndReplyServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    //.externalPartiesList(DynamicMultiSelectList.builder().build())
-                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                    .messageAbout(MessageAboutEnum.APPLICATION)
-                    .ctscEmailList(dynamicList1)
-                    .judicialOrMagistrateTierList(dynamicList1)
-                    .linkedApplicationsList(dynamicList1)
-                    .futureHearingsList(dynamicList1)
-                    .submittedDocumentsList(dynamicList1)
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessageEnum(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendToEnum(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .messageAboutEnum(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList1)
+                            .judicialOrMagistrateTierList(dynamicList1)
+                            .linkedApplicationsList(dynamicList1)
+                            .futureHearingsList(dynamicList1)
+                            .sendReplyJudgeName(null)
+                            .build()
+                    )
                     .openMessagesList(messagesWithOneAdded)
                     .build())
             .build();

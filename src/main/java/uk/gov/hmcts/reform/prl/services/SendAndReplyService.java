@@ -322,17 +322,21 @@ public class SendAndReplyService {
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
         return caseData.toBuilder().sendOrReplyMessage(
             SendOrReplyMessage.builder()
-                .judicialOrMagistrateTierList(getJudiciaryTierDynamicList(
-                    authorization,
-                    s2sToken,
-                    serviceCode,
-                    categoryId
-                ))
-                .linkedApplicationsList(getLinkedCasesDynamicList(authorization, caseReference))
-                .submittedDocumentsList(documentCategoryList)
-                .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder().label(loggedInUserEmail).code(loggedInUserEmail).build())))
-                .futureHearingsList(getFutureHearingDynamicList(authorization, s2sToken, caseReference))
-                .build()).build();
+                .sendMessageObject(Message.builder()
+                                       .judicialOrMagistrateTierList(getJudiciaryTierDynamicList(
+                                           authorization,
+                                           s2sToken,
+                                           serviceCode,
+                                           categoryId
+                                       ))
+                                       .linkedApplicationsList(getLinkedCasesDynamicList(authorization, caseReference))
+                                       .submittedDocumentsList(documentCategoryList)
+                                       .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
+                                               .label(loggedInUserEmail).code(loggedInUserEmail).build())))
+                                       .futureHearingsList(getFutureHearingDynamicList(authorization, s2sToken, caseReference))
+                                       .build())
+                .build())
+            .build();
     }
 
     private DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
@@ -524,39 +528,36 @@ public class SendAndReplyService {
     public Message buildSendMessage(CaseData caseData) {
 
         final SendOrReplyMessage sendOrReplyMessage = caseData.getSendOrReplyMessage();
+        final Message sendMessage = sendOrReplyMessage.getSendMessageObject();
 
         return Message.builder()
             .status(OPEN)
             .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
-            .internalOrExternalMessage(sendOrReplyMessage.getInternalOrExternalMessage() != null
-                                           ? sendOrReplyMessage.getInternalOrExternalMessage().name() : null)
-            .internalMessageUrgent(sendOrReplyMessage.getInternalMessageUrgent())
-            .internalMessageWhoToSendTo(sendOrReplyMessage.getInternalMessageWhoToSendTo() != null
-                                            ? sendOrReplyMessage.getInternalMessageWhoToSendTo().name() : null)
-            .messageAbout(sendOrReplyMessage.getMessageAbout() != null
-                          ? sendOrReplyMessage.getMessageAbout().name() : null)
-            .judgeName(getJudgeName(sendOrReplyMessage.getSendReplyJudgeName()))
-            .messageSubject(sendOrReplyMessage.getMessageSubject())
-            .recipientEmailAddresses(sendOrReplyMessage.getRecipientEmailAddresses())
-            .selectedCtscEmail(sendOrReplyMessage.getCtscEmailList() != null
-                                   ? sendOrReplyMessage.getCtscEmailList().getValueCode() : null)
-            .judicialOrMagistrateTierCode(sendOrReplyMessage.getJudicialOrMagistrateTierList() != null
-                                              ? sendOrReplyMessage.getJudicialOrMagistrateTierList().getValueCode() : null)
-            .judicialOrMagistrateTierValue(sendOrReplyMessage.getJudicialOrMagistrateTierList() != null
-                                               ? sendOrReplyMessage.getJudicialOrMagistrateTierList().getValueLabel() : null)
-            .selectedLinkedApplicationCode(sendOrReplyMessage.getLinkedApplicationsList() != null
-                                               ? sendOrReplyMessage.getLinkedApplicationsList().getValueCode() : null)
-            .selectedLinkedApplicationValue(sendOrReplyMessage.getLinkedApplicationsList() != null
-                                                ? sendOrReplyMessage.getLinkedApplicationsList().getValueLabel() : null)
-            .selectedFutureHearingCode(sendOrReplyMessage.getFutureHearingsList() != null
-                                           ? sendOrReplyMessage.getFutureHearingsList().getValueCode() : null)
-            .selectedFutureHearingValue(sendOrReplyMessage.getFutureHearingsList() != null
-                                            ? sendOrReplyMessage.getFutureHearingsList().getValueLabel() : null)
-            .selectedSubmittedDocumentCode(sendOrReplyMessage.getSubmittedDocumentsList() != null
-                                               ? sendOrReplyMessage.getSubmittedDocumentsList().getValueCode() : null)
-            .selectedSubmittedDocumentValue(sendOrReplyMessage.getSubmittedDocumentsList() != null
-                                                ? sendOrReplyMessage.getSubmittedDocumentsList().getValueLabel() : null)
-            .latestMessage(caseData.getMessageContent())
+            .internalOrExternalMessageEnum(sendMessage.getInternalOrExternalMessageEnum())
+            .internalMessageUrgent(sendMessage.getInternalMessageUrgent())
+            .internalMessageWhoToSendToEnum(sendMessage.getInternalMessageWhoToSendToEnum())
+            .messageAboutEnum(sendMessage.getMessageAboutEnum())
+            .judgeName(getJudgeName(sendMessage.getSendReplyJudgeName()))
+            .messageSubject(sendMessage.getMessageSubject())
+            .recipientEmailAddresses(sendMessage.getRecipientEmailAddresses())
+            .selectedCtscEmail(sendMessage.getCtscEmailList() != null
+                                   ? sendMessage.getCtscEmailList().getValueCode() : null)
+            .judicialOrMagistrateTierCode(sendMessage.getJudicialOrMagistrateTierList() != null
+                                              ? sendMessage.getJudicialOrMagistrateTierList().getValueCode() : null)
+            .judicialOrMagistrateTierValue(sendMessage.getJudicialOrMagistrateTierList() != null
+                                               ? sendMessage.getJudicialOrMagistrateTierList().getValueLabel() : null)
+            .selectedLinkedApplicationCode(sendMessage.getLinkedApplicationsList() != null
+                                               ? sendMessage.getLinkedApplicationsList().getValueCode() : null)
+            .selectedLinkedApplicationValue(sendMessage.getLinkedApplicationsList() != null
+                                                ? sendMessage.getLinkedApplicationsList().getValueLabel() : null)
+            .selectedFutureHearingCode(sendMessage.getFutureHearingsList() != null
+                                           ? sendMessage.getFutureHearingsList().getValueCode() : null)
+            .selectedFutureHearingValue(sendMessage.getFutureHearingsList() != null
+                                            ? sendMessage.getFutureHearingsList().getValueLabel() : null)
+            .selectedSubmittedDocumentCode(sendMessage.getSubmittedDocumentsList() != null
+                                               ? sendMessage.getSubmittedDocumentsList().getValueCode() : null)
+            .selectedSubmittedDocumentValue(sendMessage.getSubmittedDocumentsList() != null
+                                                ? sendMessage.getSubmittedDocumentsList().getValueLabel() : null)
             .updatedTime(dateTime.now())
             .messageContent(caseData.getMessageContent())
             .replyHistory(Collections.emptyList())
@@ -654,28 +655,32 @@ public class SendAndReplyService {
         lines.add("<div class='width-50'>");
         lines.add("<table>");
 
-        lines.add(TABLE_ROW_BEGIN);
-        lines.add(TABLE_ROW_DATA_BEGIN);
-        lines.add("Date of the message");
-        lines.add(TABLE_ROW_DATA_END);
-        lines.add(TABLE_ROW_DATA_BEGIN);
-        lines.add(message.getDateSent());
-        lines.add(TABLE_ROW_DATA_END);
-        lines.add(TABLE_ROW_END);
-
-        lines.add(TABLE_ROW_BEGIN);
-        lines.add(TABLE_ROW_DATA_BEGIN);
-        lines.add("Urgent");
-        lines.add(TABLE_ROW_DATA_END);
-        lines.add(TABLE_ROW_DATA_BEGIN);
-        lines.add("test22222");
-        lines.add(TABLE_ROW_DATA_END);
-        lines.add(TABLE_ROW_END);
+        addRowToMessageTable(lines, "From", message.getSenderEmail());
+        addRowToMessageTable(lines, "To", message.getInternalMessageWhoToSendToEnum().name());
+        addRowToMessageTable(lines, "Message Date", message.getDateSent());
+        addRowToMessageTable(lines, "Urgent", message.getInternalMessageUrgent().getDisplayedValue());
+        addRowToMessageTable(lines, "Subject", message.getMessageSubject());
+        addRowToMessageTable(lines, "Message", message.getMessageContent());
 
         lines.add("</table>");
         lines.add("</div>");
 
         return String.join("\n\n", lines);
+    }
+
+    private List<String> addRowToMessageTable(List<String> lines,
+                                              String label,
+                                              String value) {
+        lines.add(TABLE_ROW_BEGIN);
+        lines.add(TABLE_ROW_DATA_BEGIN);
+        lines.add(label);
+        lines.add(TABLE_ROW_DATA_END);
+        lines.add(TABLE_ROW_DATA_BEGIN);
+        lines.add(value);
+        lines.add(TABLE_ROW_DATA_END);
+        lines.add(TABLE_ROW_END);
+
+        return lines;
     }
 
     /**
