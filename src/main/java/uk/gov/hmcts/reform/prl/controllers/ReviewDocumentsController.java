@@ -163,6 +163,7 @@ public class ReviewDocumentsController {
                     caseDataUpdated.put("legalProfUploadDocListConfTab", List.of(docDetails));
                 }
             }
+            log.info("*** legal prof docs dtab ** {}", caseDataUpdated.get("legalProfUploadDocListDocTab"));
             Optional<Element<UploadedDocuments>> quarentineCitizenDocElement = caseData.getCitizenUploadQuarentineDocsList().stream()
                 .filter(element -> element.getId().equals(uuid)).findFirst();
             if (quarentineCitizenDocElement.isPresent()) {
@@ -175,6 +176,7 @@ public class ReviewDocumentsController {
                     caseDataUpdated.put("citizenUploadDocListConfTab", List.of(docDetails));
                 }
             }
+            log.info("*** cit docs dtab ** {}", caseDataUpdated.get("citizenUploadedDocListDocTab"));
         } else if (YesNoDontKnow.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             Optional<Element<QuarentineLegalDoc>> quarentineLegalDocElement = caseData.getLegalProfQuarentineDocsList().stream()
                 .filter(element -> element.getId().equals(uuid)).findFirst();
@@ -188,6 +190,7 @@ public class ReviewDocumentsController {
                     caseDataUpdated.put("legalProfUploadDocListDocTab", List.of(docDetails));
                 }
             }
+            log.info("*** legal prof docs dtab ** {}", caseDataUpdated.get("legalProfUploadDocListDocTab"));
             Optional<Element<UploadedDocuments>> quarentineCitizenDocElement = caseData.getCitizenUploadQuarentineDocsList().stream()
                 .filter(element -> element.getId().equals(uuid)).findFirst();
             if (quarentineCitizenDocElement.isPresent()) {
@@ -200,7 +203,12 @@ public class ReviewDocumentsController {
                     caseDataUpdated.put("citizenUploadedDocListDocTab", List.of(docDetails));
                 }
             }
+            log.info("*** cit docs dtab ** {}", caseDataUpdated.get("citizenUploadedDocListDocTab"));
+
         }
+        log.info("*** Legal prof docs q ** {}", caseData.getLegalProfQuarentineDocsList());
+        log.info("***citizen docs q ** {}", caseData.getCitizenUploadQuarentineDocsList());
+
         caseDataUpdated.put("legalProfQuarentineDocsList", caseData.getLegalProfQuarentineDocsList());
         caseDataUpdated.put("citizenUploadQuarentineDocsList", caseData.getCitizenUploadQuarentineDocsList());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
