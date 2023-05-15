@@ -76,12 +76,15 @@ public class ReviewDocumentsController {
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
                     .label(element.getValue().getDocument().getDocumentFileName())
                     .build()).collect(Collectors.toList()));
-        } else if (null != caseData.getCitizenUploadQuarentineDocsList()) {
+        }
+        if (null != caseData.getCitizenUploadQuarentineDocsList()) {
             dynamicListElements.addAll(caseData.getCitizenUploadQuarentineDocsList().stream()
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
                     .label(element.getValue().getCitizenDocument().getDocumentFileName())
                     .build()).collect(Collectors.toList()));
-        } else {
+        }
+
+        if (dynamicListElements.size() == 0) {
             errors = List.of("No documents to review");
         }
         caseDataUpdated.put("reviewDocsDynamicList", DynamicList.builder().listItems(dynamicListElements).build());
