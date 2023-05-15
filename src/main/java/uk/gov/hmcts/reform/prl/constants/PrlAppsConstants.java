@@ -634,4 +634,5 @@ public class PrlAppsConstants {
     public static final String COMMA = ",";
     public static final String EMPTY_STRING = "";
 
+    public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
 }
