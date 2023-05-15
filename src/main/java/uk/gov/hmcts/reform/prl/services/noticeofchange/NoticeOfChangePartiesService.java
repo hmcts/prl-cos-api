@@ -502,7 +502,7 @@ public class NoticeOfChangePartiesService {
                         userDetails,
                         TypeOfNocEventEnum.removeLegalRepresentation
                     );
-                    caseDataUpdated = newCaseData.toMap(objectMapper);
+                    caseDataUpdated = objectMapper.convertValue(newCaseData, Map.class);;
                     log.info("caseDataUpdated after removing legal representative ==> " + caseDataUpdated);
                 }
             }
