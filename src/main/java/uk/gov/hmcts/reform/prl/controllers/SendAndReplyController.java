@@ -257,4 +257,22 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
+
+
+    @PostMapping("/send-or-reply-to-messages/submitted")
+    public AboutToStartOrSubmitCallbackResponse handleSubmittedSendAndReply(@RequestHeader("Authorization")
+                                                                @Parameter(hidden = true) String authorisation,
+                                                                @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        List<Element<Message>> messages = caseData.getSendOrReplyMessage().getOpenMessagesList();
+
+        messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+
+        Message mostRecentMessage = messages.get(0).getValue();
+        if (mostRecentMessage.getStatus().equals(MessageStatus.OPEN)) {
+            sendAndReplyService.sendNotificationEmailOther(caseData, mostRecentMessage);
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .build();
+    }
 }
