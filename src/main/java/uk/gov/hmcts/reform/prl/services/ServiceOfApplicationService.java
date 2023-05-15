@@ -70,7 +70,7 @@ public class ServiceOfApplicationService {
         return caseData;
     }
 
-    /*public CaseData sendEmail(CaseDetails caseDetails) throws Exception {
+    public CaseData sendEmail(CaseDetails caseDetails) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("Sending service of application email notifications");
         //PRL-3326 - send email to all applicants on application served & issued
@@ -85,7 +85,7 @@ public class ServiceOfApplicationService {
             }
         }
         return caseInviteManager.generatePinAndSendNotificationEmail(caseData);
-    }*/
+    }
 
     public CaseData sendPostToOtherPeopleInCase(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);

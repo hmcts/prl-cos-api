@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -24,6 +25,7 @@ import uk.gov.service.notify.NotificationClient;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -51,7 +53,7 @@ public class ServiceOfApplicationEmailService {
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
 
-    /*public void sendEmailC100(CaseDetails caseDetails) throws Exception {
+    public void sendEmailC100(CaseDetails caseDetails) throws Exception {
         log.info("Sending the serve Parties emails for C100 Application for caseId {}", caseDetails.getId());
 
         CaseData caseData = emailService.getCaseData(caseDetails);
@@ -87,7 +89,7 @@ public class ServiceOfApplicationEmailService {
             })
             .collect(Collectors.toList());
 
-        for (Map<String,List<String>> resSols : respondentSolicitors) {
+        for (Map<String, List<String>> resSols : respondentSolicitors) {
             String solicitorEmail = resSols.keySet().toArray()[0].toString();
             emailService.send(
                 solicitorEmail,
@@ -100,7 +102,7 @@ public class ServiceOfApplicationEmailService {
         }
 
         sendEmailToLocalAuthority(caseDetails, caseData);
-    }*/
+    }
 
     public void sendEmailNotificationToApplicantSolicitor(CaseDetails caseDetails, PartyDetails partyDetails,
                                                               EmailTemplateNames templateName) throws Exception {
@@ -165,7 +167,7 @@ public class ServiceOfApplicationEmailService {
         }
     }
 
-    /*public void sendEmailFL401(CaseDetails caseDetails) throws Exception {
+    public void sendEmailFL401(CaseDetails caseDetails) throws Exception {
         log.info("Sending the server Parties emails for FL401 Application for caseId {}", caseDetails.getId());
 
         CaseData caseData = emailService.getCaseData(caseDetails);
@@ -194,7 +196,7 @@ public class ServiceOfApplicationEmailService {
         }
 
         sendEmailToLocalAuthority(caseDetails, caseData);
-    }*/
+    }
 
 
     private EmailTemplateVars buildApplicantSolicitorEmail(CaseDetails caseDetails, String solicitorName)
