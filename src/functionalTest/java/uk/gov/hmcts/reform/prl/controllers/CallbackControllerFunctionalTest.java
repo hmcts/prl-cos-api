@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
 import java.time.LocalDate;
@@ -158,8 +157,7 @@ public class CallbackControllerFunctionalTest {
             .post("/fl401-add-case-number")
             .then()
             .body("data.issueDate", equalTo(LocalDate.now().toString()),
-                  "data.isAddCaseNumberAdded", YesOrNo.Yes
-            )
+                  "data.isAddCaseNumberAdded", "Yes")
             .assertThat().statusCode(200);
     }
 
