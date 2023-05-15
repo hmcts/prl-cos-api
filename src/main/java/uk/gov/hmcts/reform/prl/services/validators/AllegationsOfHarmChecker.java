@@ -64,9 +64,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
         Optional<YesOrNo> allegationsOfHarmYesNo = ofNullable(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo());
 
         boolean isFinished;
-
         if (allegationsOfHarmYesNo.isPresent() && allegationsOfHarmYesNo.get().equals(Yes)) {
-
             boolean behavioursCompleted = true;
 
             if (abusePresent(caseData)) {
@@ -100,7 +98,6 @@ public class AllegationsOfHarmChecker implements EventChecker {
             );
 
             isFinished = isSectionsFinished(caseData, behavioursCompleted, previousOrders);
-
         } else {
             isFinished = allegationsOfHarmYesNo.isPresent();
         }

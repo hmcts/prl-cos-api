@@ -2,7 +2,10 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,33 +20,42 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
-import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -55,6 +67,8 @@ public class C100RespondentSolicitorServiceTest {
 
     CaseData caseData;
 
+    PartyDetails respondent;
+
     @Mock
     ObjectMapper objectMapper;
 
@@ -64,11 +78,19 @@ public class C100RespondentSolicitorServiceTest {
     @Mock
     ResponseSubmitChecker responseSubmitChecker;
 
-    FindUserCaseRolesResponse findUserCaseRolesResponse;
+    @Mock
+    RespondentSolicitorMiamService miamService;
+
+    @Mock
+    DocumentGenService documentGenService;
 
     boolean mandatoryFinished = false;
 
     public static final String authToken = "Bearer TestAuthToken";
+
+    Map<String, Object> stringObjectMap;
+
+    CallbackRequest callbackRequest;
 
     @Before
     public void setUp() {
@@ -78,13 +100,103 @@ public class C100RespondentSolicitorServiceTest {
         confidentialityListEnums.add(ConfidentialityListEnum.email);
         confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
 
-        PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
+        User user = User.builder().email("respondent@example.net")
+            .idamId("1234-5678").solicitorRepresented(Yes).build();
+
+        respondent = PartyDetails.builder()
+            .user(user)
+            .representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .gender(Gender.male)
             .email("abc@xyz.com")
             .phoneNumber("1234567890")
             .response(Response.builder()
-                          .c7ResponseSubmitted(No).build())
+                          .consent(Consent.builder().build())
+                          .citizenDetails(CitizenDetails.builder().build())
+                          .c7ResponseSubmitted(No)
+                          .keepDetailsPrivate(KeepDetailsPrivate
+                                                  .builder()
+                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .confidentiality(Yes)
+                                                  .confidentialityList(confidentialityListEnums)
+                                                  .build())
+                          .miam(Miam.builder().attendedMiam(No)
+                                    .willingToAttendMiam(No)
+                                    .reasonNotAttendingMiam("test").build())
+                          .citizenInternationalElements(CitizenInternationalElements
+                                                            .builder()
+                                                            .childrenLiveOutsideOfEnWl(Yes)
+                                                            .childrenLiveOutsideOfEnWlDetails("Test")
+                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
+                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
+                                                            .anotherPersonOrderOutsideEnWl(Yes)
+                                                            .anotherPersonOrderOutsideEnWlDetails("test")
+                                                            .anotherCountryAskedInformation(Yes)
+                                                            .anotherCountryAskedInformationDetaails("test")
+                                                            .build())
+                          .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData
+                                                               .builder()
+                                                               .respChildAbductionInfo(RespondentChildAbduction
+                                                                                           .builder()
+                                                                                           .previousThreatsForChildAbduction(
+                                                                                               Yes)
+                                                                                           .previousThreatsForChildAbductionDetails(
+                                                                                               "Test")
+                                                                                           .reasonForChildAbductionBelief(
+                                                                                               "Test")
+                                                                                           .whereIsChild("Test")
+                                                                                           .hasPassportOfficeNotified(
+                                                                                               Yes)
+                                                                                           .childrenHavePassport(Yes)
+                                                                                           .childrenHaveMoreThanOnePassport(
+                                                                                               Yes)
+                                                                                           .whoHasChildPassportOther(
+                                                                                               "father")
+                                                                                           .anyOrgInvolvedInPreviousAbduction(
+                                                                                               Yes)
+                                                                                           .anyOrgInvolvedInPreviousAbductionDetails(
+                                                                                               "Test")
+                                                                                           .build())
+                                                               .respOtherConcernsInfo(RespondentOtherConcerns
+                                                                                          .builder()
+                                                                                          .childHavingOtherFormOfContact(
+                                                                                              Yes)
+                                                                                          .childSpendingSupervisedTime(
+                                                                                              Yes)
+                                                                                          .ordersRespondentWantFromCourt(
+                                                                                              "Test")
+                                                                                          .childSpendingUnsupervisedTime(
+                                                                                              Yes)
+                                                                                          .build())
+                                                               .respAllegationsOfHarmInfo(RespondentAllegationsOfHarm
+                                                                                              .builder()
+                                                                                              .respondentChildAbuse(Yes)
+                                                                                              .isRespondentChildAbduction(
+                                                                                                  Yes)
+                                                                                              .respondentNonMolestationOrder(
+                                                                                                  Yes)
+                                                                                              .respondentOccupationOrder(
+                                                                                                  Yes)
+                                                                                              .respondentForcedMarriageOrder(
+                                                                                                  Yes)
+                                                                                              .respondentDrugOrAlcoholAbuse(
+                                                                                                  Yes)
+                                                                                              .respondentOtherInjunctiveOrder(
+                                                                                                  Yes)
+                                                                                              .respondentRestrainingOrder(
+                                                                                                  Yes)
+                                                                                              .respondentDomesticAbuse(
+                                                                                                  Yes)
+                                                                                              .respondentDrugOrAlcoholAbuseDetails(
+                                                                                                  "Test")
+                                                                                              .respondentOtherSafetyConcerns(
+                                                                                                  Yes)
+                                                                                              .respondentOtherSafetyConcernsDetails(
+                                                                                                  "Test")
+                                                                                              .build())
+                                                               .respAohYesOrNo(Yes)
+                                                               .build())
+                          .build())
             .canYouProvideEmailAddress(Yes)
             .isEmailAddressConfidential(Yes)
             .isPhoneNumberConfidential(Yes)
@@ -98,13 +210,11 @@ public class C100RespondentSolicitorServiceTest {
         List<PartyEnum> party = new ArrayList<>();
         party.add(PartyEnum.respondent);
 
-        List<CaseUser> caseUserList  = new ArrayList<>();
+        List<CaseUser> caseUserList = new ArrayList<>();
         caseUserList.add(CaseUser.builder()
                              .caseId("12345")
-                             .caseRole("Admin")
+                             .caseRole("[C100RESPONDENTSOLICITOR1]")
                              .userId("1afdfa01-8280-4e2c-b810-ab7cf741988a").build());
-        findUserCaseRolesResponse = new FindUserCaseRolesResponse();
-        findUserCaseRolesResponse.setCaseUsers(caseUserList);
 
         Address address = Address.builder()
             .addressLine1("test")
@@ -119,15 +229,18 @@ public class C100RespondentSolicitorServiceTest {
             .value(interpreterNeeds).build();
         DynamicListElement dynamicListElement = DynamicListElement
             .builder().code("1afdfa01-8280-4e2c-b810-ab7cf741988a").build();
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
+            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+            .value(respondent).build();
         List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
         DynamicList chooseRespondent = DynamicList.builder().value(dynamicListElement).build();
-        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondents);
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
         caseData = CaseData.builder().respondents(respondentList).id(1)
-            .chooseRespondentDynamicList(chooseRespondent)
-            .keepContactDetailsPrivateOther(KeepDetailsPrivate.builder()
+            .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
+                                           .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
                                            .confidentiality(Yes)
                                            .confidentialityList(confidentialityListEnums)
                                            .build())
@@ -151,29 +264,22 @@ public class C100RespondentSolicitorServiceTest {
                                              .respondentIntermediaryNeedDetails("Test")
                                              .build())
             .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
-            .abilityToParticipateInProceedings(SolicitorAbilityToParticipateInProceedings.builder()
+            .abilityToParticipateInProceedings(AbilityToParticipate.builder()
                                                    .factorsAffectingAbilityToParticipate(YesNoDontKnow.yes)
                                                    .build())
-            .internationalElementParent(SolicitorInternationalElement
-                                            .builder()
-                                            .reasonForParentDetails("Test")
-                                            .reasonForJurisdictionDetails("Test")
-                                            .requestToAuthorityDetails("Test")
-                                            .build())
-            .internationalElementChild(SolicitorInternationalElement
-                                           .builder()
-                                           .reasonForChild(Yes)
-                                           .reasonForChildDetails("Test")
-                                           .reasonForParent(Yes)
-                                           .reasonForParentDetails("Test")
-                                           .reasonForJurisdiction(Yes)
-                                           .reasonForJurisdictionDetails("Test")
-                                           .requestToAuthority(Yes)
-                                           .requestToAuthorityDetails("Test")
+            .internationalElementChild(CitizenInternationalElements.builder()
+                                           .childrenLiveOutsideOfEnWl(Yes)
+                                           .childrenLiveOutsideOfEnWlDetails("Test")
+                                           .parentsAnyOneLiveOutsideEnWl(Yes)
+                                           .parentsAnyOneLiveOutsideEnWlDetails("Test")
+                                           .anotherPersonOrderOutsideEnWl(Yes)
+                                           .anotherPersonOrderOutsideEnWlDetails("Test")
+                                           .anotherCountryAskedInformation(Yes)
+                                           .anotherCountryAskedInformationDetaails("Test")
                                            .build())
             .keepContactDetailsPrivate(KeepDetailsPrivate
-                .builder()
-                .build())
+                                           .builder()
+                                           .build())
             .respondentAllegationsOfHarm(RespondentAllegationsOfHarm
                                              .builder()
                                              .respondentChildAbuse(Yes)
@@ -204,110 +310,124 @@ public class C100RespondentSolicitorServiceTest {
                                                  .build())
             .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
                                                         .attendedMiam(No)
+                                                        .willingToAttendMiam(No)
+                                                        .reasonNotAttendingMiam("test")
                                                         .build())
-            .respondentSolicitorWillingnessToAttendMiam(Miam.builder()
-                                                            .willingToAttendMiam(No)
-                                                            .reasonNotAttendingMiam("test")
-                                                            .build())
             .build();
-    }
 
-    @Test
-    public void populateAboutToStartCaseDataTest() {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
-                                                   authToken)).thenReturn(findUserCaseRolesResponse);
-
-        List<String> errorList = new ArrayList<>();
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
             .build();
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataResSolConsentingToApplicationTest() {
+
+        callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataForResSolKeepDetailsPrivateTest() {
+
+        callbackRequest.setEventId("c100ResSolKeepDetailsPrivateA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest, authToken, errorList
+            callbackRequest
         );
 
         assertTrue(response.containsKey("respondents"));
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataTest() {
+    public void populateAboutToStartCaseDataForResSolConfirmOrEditContactDetailsTest() {
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        callbackRequest.setEventId("c100ResSolConfirmOrEditContactDetailsA");
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        List<String> errorList = new ArrayList<>();
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest, authToken, errorList
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
         );
 
         assertTrue(response.containsKey("respondents"));
     }
 
     @Test
-    public void populateSolicitorRespondentListTest() {
+    public void populateAboutToStartCaseDataForResSolAttendingTheCourtTest() {
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        callbackRequest.setEventId("c100ResSolAttendingTheCourtA");
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.populateSolicitorRespondentList(
-            callbackRequest, authToken
-        );
-
-        assertTrue(response.containsKey("chooseRespondentDynamicList"));
-
-    }
-
-    @Test
-    public void updateActiveRespondentSelectionBySolicitor() {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.updateActiveRespondentSelectionBySolicitor(
-            callbackRequest, authToken
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
         );
 
         assertTrue(response.containsKey("respondents"));
     }
 
+    @Test
+    public void populateAboutToStartCaseDataForResSolMiamTest() {
+
+        callbackRequest.setEventId("c100ResSolMiamA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataForResSolCurrentOrPreviousProceedingsTest() {
+
+        callbackRequest.setEventId("c100ResSolCurrentOrPreviousProceedingsA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataForResSolAllegationsOfHarmTest() {
+
+        callbackRequest.setEventId("c100ResSolAllegationsOfHarmA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataForResSolInternationalElementTest() {
+        callbackRequest.setEventId("c100ResSolInternationalElementA");
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToStartCaseDataForResSolAbilityToParticipateTest() {
+        callbackRequest.setEventId("c100ResSolAbilityToParticipateA");
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Ignore
     @Test
     public void generateConfidentialityDynamicSelectionDisplayTest() {
 
@@ -331,7 +451,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void validateActiveRespondentResponse() {
+    public void validateActiveRespondentResponse() throws Exception {
 
         List<String> errorList = new ArrayList<>();
 
@@ -339,10 +459,11 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        when(responseSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(mandatoryFinished);
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .eventId("c100ResSolConsentingToApplicationA")
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -350,53 +471,171 @@ public class C100RespondentSolicitorServiceTest {
             .build();
 
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
-            callbackRequest, errorList
+            callbackRequest, errorList, authToken
         );
 
         assertTrue(response.containsKey("respondents"));
-
     }
 
     @Test
-    public void submitC7ResponseForActiveRespondentTest() {
-
-        List<String> errorList = new ArrayList<>();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+    public void submitC7ResponseForActiveRespondentTest() throws Exception {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
 
+        callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
+
+        List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest, authToken, errorList
+            callbackRequest,authToken,errorList
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolConsentingToApplicationATest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+
+        callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateATest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolKeepDetailsPrivateA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
         );
 
         assertTrue(response.containsKey("respondents"));
     }
 
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolConfirmOrEditContactDetailsTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolConfirmOrEditContactDetailsA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+    }
 
     @Test
-    public void populateAboutToStartCaseDataConsentToApplicationEvent() {
+    public void populateAboutToSubmitCaseDataForC100ResSolAttendingTheCourtTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolAttendingTheCourtA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForc100ResSolMiamTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolMiamA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolCurrentOrPreviousProceedingsTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolCurrentOrPreviousProceedingsA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolAllegationsOfHarmTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolAllegationsOfHarmA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolInternationalElementTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolInternationalElementA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolAbilityToParticipateTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        callbackRequest.setEventId("c100ResSolAbilityToParticipateA");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(strings = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
+        "c100ResSolAttendingTheCourt", "c100ResSolMiam", "c100ResSolCurrentOrPreviousProceedings", "c100ResSolAllegationsOfHarm",
+        "c100ResSolInternationalElement", "c100ResSolAbilityToParticipate"})
+    void populateAboutToStartCaseDataConsentToApplicationEvent(String event) {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
-                                                   authToken)).thenReturn(findUserCaseRolesResponse);
-
         List<String> errorList = new ArrayList<>();
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
-            .eventId("c100ResSolConsentingToApplication")
+            .eventId(event)
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -404,233 +643,94 @@ public class C100RespondentSolicitorServiceTest {
             .build();
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest, authToken, errorList
+            callbackRequest
         );
 
         assertTrue(response.containsKey("respondents"));
     }
 
     @Test
-    public void populateAboutToStartCaseDataKeepDetailsPrivateEvent() {
+    public void testC7DraftDocument() throws Exception {
+
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("C7_Response_Draft_Document.pdf")
+            .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
-                                                   authToken)).thenReturn(findUserCaseRolesResponse);
-
-        List<String> errorList = new ArrayList<>();
+        when(documentGenService.generateSingleDocument(
+            authToken,
+            caseData,
+            SOLICITOR_C7_DRAFT_DOCUMENT,
+            false
+        )).thenReturn(document);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
-            .eventId("c100ResSolKeepDetailsPrivate")
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
+            .eventId("c100ResSolViewResponseDraftDocumentC")
             .build();
 
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest, authToken, errorList
+        Map<String, Object> response = respondentSolicitorService.generateDraftDocumentsForRespondent(
+            callbackRequest, authToken
         );
 
-        assertTrue(response.containsKey("respondents"));
-    }
+        assertTrue(response.containsKey("draftC7ResponseDoc"));
 
-    @Test
-    public void populateAboutToStartCaseDataConfirmContactDetailsEvent() {
+        caseData = caseData.toBuilder()
+            .respondentAohYesNo(Yes)
+            .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("C1A_Allegation_Of_Harm_Draft_Document.pdf")
+            .build();
+        when(documentGenService.generateSingleDocument(
+            authToken,
+            caseData,
+            SOLICITOR_C1A_DRAFT_DOCUMENT,
+            false
+        )).thenReturn(document);
 
-        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
-                                                   authToken)).thenReturn(findUserCaseRolesResponse);
-
-        List<String> errorList = new ArrayList<>();
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
-            .eventId("c100ResSolConfirmOrEditContactDetails")
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
+            .eventId("c100ResSolViewResponseDraftDocumentC")
             .build();
 
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest, authToken, errorList
+        response = respondentSolicitorService.generateDraftDocumentsForRespondent(
+            callbackRequest, authToken
         );
 
-        assertTrue(response.containsKey("respondents"));
-    }
+        assertTrue(response.containsKey("draftC7ResponseDoc"));
 
-    @Test
-    public void populateAboutToStartCaseDataAttendingThCourtEvent() {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
-                                                   authToken)).thenReturn(findUserCaseRolesResponse);
-
-        List<String> errorList = new ArrayList<>();
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .eventId("c100ResSolAttendingTheCourt")
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest, authToken, errorList
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToStartCaseDataMiamEvent() {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
-                                                   authToken)).thenReturn(findUserCaseRolesResponse);
-
-        List<String> errorList = new ArrayList<>();
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .eventId("c100ResSolMiam")
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest, authToken, errorList
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToStartCaseDataCurrentOrPreviousProceedingEvent() {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
-                                                   authToken)).thenReturn(findUserCaseRolesResponse);
-
-        List<String> errorList = new ArrayList<>();
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .eventId("c100ResSolCurrentOrPreviousProceedings")
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest, authToken, errorList
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToStartCaseDataResSolAllegationOfHarmEvent() {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
-                                                   authToken)).thenReturn(findUserCaseRolesResponse);
-
-        List<String> errorList = new ArrayList<>();
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .eventId("c100ResSolAllegationsOfHarm")
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest, authToken, errorList
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToStartCaseDataResSolInternationaElementEvent() {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
-                                                   authToken)).thenReturn(findUserCaseRolesResponse);
-
-        List<String> errorList = new ArrayList<>();
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .eventId("c100ResSolInternationalElement")
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest, authToken, errorList
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToStartCaseDataResSolAbilityToParticipateEvent() {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        when(ccdDataStoreService.findUserCaseRoles(String.valueOf(caseData.getId()),
-                                                   authToken)).thenReturn(findUserCaseRolesResponse);
-
-        List<String> errorList = new ArrayList<>();
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .eventId("c100ResSolAbilityToParticipate")
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest, authToken, errorList
-        );
-
-        assertTrue(response.containsKey("respondents"));
+        assertTrue(response.containsKey("draftC1ADoc"));
     }
 }

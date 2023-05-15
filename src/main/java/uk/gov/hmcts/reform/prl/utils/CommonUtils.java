@@ -131,4 +131,15 @@ public class CommonUtils {
         return UUID.randomUUID();
     }
 
+    public static String formatDate(String pattern, LocalDate localDate) {
+        try {
+            if (localDate != null) {
+                return localDate.format(DateTimeFormatter.ofPattern(pattern));
+            }
+        } catch (Exception e) {
+            log.error(ERROR_STRING + e.getMessage());
+        }
+        return "";
+    }
+
 }
