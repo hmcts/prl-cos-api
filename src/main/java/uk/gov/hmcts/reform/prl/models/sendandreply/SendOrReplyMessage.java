@@ -5,12 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
+/*import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;*/
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+//import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class SendOrReplyMessage {
     @JsonProperty("closedMessagesList")
     private final List<Element<Message>> closedMessagesList;
 
-    private DynamicList judicialOrMagistrateTierList;
+    /*private DynamicList judicialOrMagistrateTierList;
     private DynamicList linkedApplicationsList;
     private DynamicList futureHearingsList;
     private DynamicList submittedDocumentsList;
@@ -38,11 +38,13 @@ public class SendOrReplyMessage {
     private YesOrNo internalMessageUrgent;
     private String recipientEmailAddresses;
     private String messageSubject;
-    private JudicialUser sendReplyJudgeName;
+    private JudicialUser sendReplyJudgeName;*/
 
     private DynamicList messageReplyDynamicList;
     private Message replyMessage;
     private YesOrNo respondToMessage;
     private String messageReplyTable;
+    private Message sendMessageObject;
+    private Message replyMessageObject;
 }
 
