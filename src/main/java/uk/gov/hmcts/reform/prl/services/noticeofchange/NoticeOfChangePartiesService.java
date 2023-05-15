@@ -513,23 +513,24 @@ public class NoticeOfChangePartiesService {
     }
 
     public void submittedStopRepresenting(CallbackRequest callbackRequest) {
-        CaseData oldCaseData = getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
-        log.info("oldCaseData ==> " + oldCaseData);
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("newCaseData ==> " + newCaseData);
         DynamicMultiSelectList solStopRepChooseParties = newCaseData.getSolStopRepChooseParties();
         Map<Optional<SolicitorRole>, Element<PartyDetails>> removeSolPartyDetailsMap = new HashMap<>();
         for (DynamicMultiselectListElement solStopRepChoosePartyElement : solStopRepChooseParties.getValue()) {
+            log.info("solStopRepChoosePartyElement ===> " + solStopRepChoosePartyElement);
             removeSolPartyDetailsMap = getRemovedSolicitorRoles(
                 newCaseData,
                 solStopRepChoosePartyElement,
                 removeSolPartyDetailsMap
             );
         }
+        log.info("removeSolPartyDetailsMap ===> " + removeSolPartyDetailsMap);
         for (var entry : removeSolPartyDetailsMap.entrySet()) {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
             if (removeSolicitorRole.isPresent()) {
+                log.info("removeSolicitorRole ===> " + removeSolicitorRole.get().getCaseRoleLabel());
                 DynamicListElement roleItem = DynamicListElement.builder()
                     .code(removeSolicitorRole.get().getCaseRoleLabel())
                     .label(removeSolicitorRole.get().getCaseRoleLabel())
@@ -555,8 +556,7 @@ public class NoticeOfChangePartiesService {
                     null,
                     TypeOfNocEventEnum.removeLegalRepresentation
                 );
-                Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
-                tabService.updatePartyDetailsForNoc(newCaseData, solicitorRole, caseInvites);
+                tabService.updatePartyDetailsForNoc(newCaseData, removeSolicitorRole, caseInvites);
             }
         }
         eventPublisher.publishEvent(new CaseDataChanged(newCaseData));
