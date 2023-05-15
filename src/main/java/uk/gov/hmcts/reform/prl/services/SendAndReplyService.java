@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.CodeAndLabel;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
+import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
@@ -709,6 +711,31 @@ public class SendAndReplyService {
             .caseName(caseData.getApplicantCaseName())
             .caseLink(caseLink)
             .build();
+    }
+
+    public List<Element<Message>> setReplyHistory(UUID messageId, CaseData caseData) {
+        List<Element<Message>> messages = caseData.getOpenMessages();
+        List<Element<MessageHistory>> msgHistoryElementList = new ArrayList<>();
+        messages.stream()
+            .filter(m -> m.getId().equals(messageId))
+            .map(Element::getValue)
+            .forEach(message -> {
+                if (message.getReplyHistory() != null) {
+                    msgHistoryElementList.addAll(message.getReplyHistory());
+                }
+
+                MessageHistory messageHistory = MessageHistory.builder()
+                    .messageFrom(message.getSenderEmail())
+                    .messageTo(message.getRecipientEmail())
+                    .messageDate(message.getUpdatedTime().toString())
+                    .isUrgent(YesOrNo.valueOf(message.getMessageUrgency()))
+                    .build();
+                Element<MessageHistory> messageElement = element(messageHistory);
+                msgHistoryElementList.add(messageElement);
+                message.setReplyHistory(msgHistoryElementList);
+                message.setUpdatedTime(dateTime.now());
+            });
+        return messages;
     }
 
 }

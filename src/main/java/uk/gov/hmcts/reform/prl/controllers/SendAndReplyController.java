@@ -266,6 +266,11 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         List<Element<Message>> messages = caseData.getSendOrReplyMessage().getOpenMessagesList();
 
+        UUID selectedValue = elementUtils
+            .getDynamicListSelectedValue(caseData.getReplyMessageDynamicList(), objectMapper);
+
+        messages = sendAndReplyService.setReplyHistory(selectedValue, caseData);
+
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
 
         Message mostRecentMessage = messages.get(0).getValue();
