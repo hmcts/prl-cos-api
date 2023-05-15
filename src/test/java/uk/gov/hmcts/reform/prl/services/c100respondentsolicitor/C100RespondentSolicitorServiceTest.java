@@ -46,7 +46,6 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.Respo
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
