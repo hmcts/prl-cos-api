@@ -117,20 +117,29 @@ public class ServiceOfApplicationPostService {
         CaseData blankCaseData = CaseData.builder().build();
         List<GeneratedDocumentInfo> docs = null;
         List<Element<BulkPrintDetails>> printedDocCollectionList;
-        docs = getUploadedDocumentsServiceOfApplication(caseData);
-        try {
-            docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
-            docs.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
-        } catch (Exception e) {
-            log.info("*** Error while generating privacy notice to be served ***");
-        }
-        if (caseData.getBulkPrintDetails() != null) {
-            printedDocCollectionList = caseData.getBulkPrintDetails();
+
+        if (YesOrNo.Yes.getDisplayedValue()
+            .equalsIgnoreCase(partyDetails.getIsCurrentAddressKnown().getDisplayedValue())) {
+            try {
+                log.info("*** Generating Document ***");
+                docs = getUploadedDocumentsServiceOfApplication(caseData);
+                //docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
+                docs.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
+            } catch (Exception e) {
+                log.info("*** Error while generating privacy notice to be served ***");
+            }
+            if (caseData.getBulkPrintDetails() != null) {
+                printedDocCollectionList = caseData.getBulkPrintDetails();
+            } else {
+                printedDocCollectionList = new ArrayList<>();
+            }
+            printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, docs, partyDetails)));
+            caseData.setBulkPrintDetails(printedDocCollectionList);
+            log.info("*** Bulk Print details set ***");
         } else {
-            printedDocCollectionList = new ArrayList<>();
+            log.info("*** No Post address available ***");
+
         }
-        printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, docs, partyDetails)));
-        caseData.setBulkPrintDetails(printedDocCollectionList);
     }
 
 

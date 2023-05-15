@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -18,15 +17,17 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.ApplicantS
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.LocalAuthorityEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
 
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -47,8 +48,10 @@ public class ServiceOfApplicationEmailService {
 
     @Autowired
     private final ObjectMapper objectMapper;
+    private final SendgridService sendgridService;
+    private final C100JsonMapper c100JsonMapper;
 
-    public void sendEmailC100(CaseDetails caseDetails) throws Exception {
+    /*public void sendEmailC100(CaseDetails caseDetails) throws Exception {
         log.info("Sending the serve Parties emails for C100 Application for caseId {}", caseDetails.getId());
 
         CaseData caseData = emailService.getCaseData(caseDetails);
@@ -97,18 +100,23 @@ public class ServiceOfApplicationEmailService {
         }
 
         sendEmailToLocalAuthority(caseDetails, caseData);
-    }
+    }*/
 
     public void sendEmailNotificationToApplicantSolicitor(CaseDetails caseDetails, PartyDetails partyDetails,
                                                               EmailTemplateNames templateName) throws Exception {
-        CaseData caseData = emailService.getCaseData(caseDetails);
+        log.info("*** About to send ***");
+        /*CaseData caseData = emailService.getCaseData(caseDetails);
 
         emailService.send(
             partyDetails.getSolicitorEmail(),
             templateName,
             buildApplicantSolicitorEmail(caseDetails, partyDetails.getRepresentativeFirstName()
                 + " " + partyDetails.getRepresentativeLastName()),
-            LanguagePreference.getPreferenceLanguage(caseData));
+            LanguagePreference.getPreferenceLanguage(caseData));*/
+
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        requireNonNull(caseData);
+        sendgridService.sendEmail(c100JsonMapper.map(caseData));
 
         log.info("Email notification for SoA sent successfully to applicant solicitor for caseId {}", caseDetails.getId());
 
@@ -116,6 +124,7 @@ public class ServiceOfApplicationEmailService {
 
     public void sendEmailNotificationToRespondentSolicitor(CaseDetails caseDetails, PartyDetails partyDetails,
                                                           EmailTemplateNames templateName) throws Exception {
+        log.info("*** About to send ***");
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         CaseData caseData1 = emailService.getCaseData(caseDetails);
         String respondentSolicitorName = partyDetails.getRepresentativeFirstName() + " "
@@ -128,26 +137,35 @@ public class ServiceOfApplicationEmailService {
                                               + partyDetails.getLastName()),
             LanguagePreference.english
         );
+
+        /*requireNonNull(caseData);
+        sendgridService.sendEmail(c100JsonMapper.map(caseData));*/
+
         log.info("Email notification for SoA sent successfully to respondent solicitor for caseId {}", caseDetails.getId());
 
 
     }
 
-    public void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) {
+    public void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) throws IOException {
+        log.info("*** About to send ***");
         if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
             for (Element<String> element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
                 String email = element.getValue();
-                emailService.send(
+                /*emailService.send(
                     email,
                     EmailTemplateNames.LOCAL_AUTHORITY,
                     buildLocalAuthorityEmail(caseDetails),
                     LanguagePreference.english
-                );
+                );*/
+                requireNonNull(caseData);
+                sendgridService.sendEmail(c100JsonMapper.map(caseData));
+
+                log.info("Email notification for SoA sent successfully to LA for caseId {}", caseDetails.getId());
             }
         }
     }
 
-    public void sendEmailFL401(CaseDetails caseDetails) throws Exception {
+    /*public void sendEmailFL401(CaseDetails caseDetails) throws Exception {
         log.info("Sending the server Parties emails for FL401 Application for caseId {}", caseDetails.getId());
 
         CaseData caseData = emailService.getCaseData(caseDetails);
@@ -176,7 +194,7 @@ public class ServiceOfApplicationEmailService {
         }
 
         sendEmailToLocalAuthority(caseDetails, caseData);
-    }
+    }*/
 
 
     private EmailTemplateVars buildApplicantSolicitorEmail(CaseDetails caseDetails, String solicitorName)

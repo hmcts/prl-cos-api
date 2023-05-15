@@ -87,11 +87,30 @@ public class ServiceOfApplicationService {
         return caseInviteManager.generatePinAndSendNotificationEmail(caseData);
     }*/
 
-    public CaseData sendPost(CaseDetails caseDetails, String authorization) throws Exception {
+    public CaseData sendPostToOtherPeopleInCase(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info(" Sending post to the parties involved ");
+        log.info(" Sending post to others involved ");
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            serviceOfApplicationPostService.sendDocs(caseData,authorization);
+            List<Element<PartyDetails>> otherPeopleInCase = caseData.getOthersToNotify();
+            DynamicMultiSelectList othersToNotify = caseData.getConfirmRecipients().getOtherPeopleList();
+            List<DynamicMultiselectListElement> othersList = othersToNotify.getListItems();
+            othersList.forEach(other -> {
+                Optional<Element<PartyDetails>> party = getParty(other.getCode(), otherPeopleInCase);
+                try {
+                    log.info(
+                        "Sending the post notification to others in case for C100 Application for caseId {}",
+                        caseDetails.getId()
+                    );
+
+                    serviceOfApplicationPostService.sendPostNotificationToParty(
+                        caseData,
+                        authorization,
+                        party.get().getValue()
+                    );
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
         return caseData;
     }
@@ -100,16 +119,21 @@ public class ServiceOfApplicationService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getApplicantsList() != null) {
+                log.info("serving applicants");
                 caseData = sendNotificationToApplicantSolicitor(caseDetails,authorization);
             }
             if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getRespondentsList() != null) {
+                log.info("serving respondents");
                 caseData = sendNotificationToRespondentOrSolicitor(caseDetails, authorization);
             }
             if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
+                log.info("serving LA");
                 serviceOfApplicationEmailService.sendEmailToLocalAuthority(caseDetails, caseData);
             }
-            /*Notifying other people in the case*/
-            caseData = sendPost(caseDetails, authorization);
+            if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherPeopleList() != null) {
+                log.info("serving other people in case");
+                caseData = sendPostToOtherPeopleInCase(caseDetails, authorization);
+            }
             caseInviteManager.generatePinAndSendNotificationEmail(caseData);
         }
 

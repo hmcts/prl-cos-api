@@ -145,9 +145,10 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         //CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
         //serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
+        log.info("inside submitted--start of notification");
         CaseData caseData = serviceOfApplicationService.sendNotificationForServiceOfApplication(callbackRequest.getCaseDetails(), authorisation);
+        log.info("inside submitted--end of notification");
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info("inside submitted");
         updatedCaseData.put("coverLetter1", serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData));
     }
 }

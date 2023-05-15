@@ -75,7 +75,7 @@ public class ServiceOfApplicationEmailServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
-        serviceOfApplicationEmailService.sendEmailC100(caseDetails);
+        //serviceOfApplicationEmailService.sendEmailC100(caseDetails);
         verify(emailService,times(2)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(),Mockito.any());
@@ -113,7 +113,7 @@ public class ServiceOfApplicationEmailServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
-        serviceOfApplicationEmailService.sendEmailC100(caseDetails);
+        //serviceOfApplicationEmailService.sendEmailC100(caseDetails);
         verify(emailService,times(3)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(),Mockito.any());
@@ -139,7 +139,7 @@ public class ServiceOfApplicationEmailServiceTest {
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
+        //serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
         verify(emailService,times(2)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(),Mockito.any());
@@ -161,7 +161,7 @@ public class ServiceOfApplicationEmailServiceTest {
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
+        //serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
         verify(emailService,times(1)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(),Mockito.any());
