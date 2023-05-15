@@ -413,6 +413,7 @@ public class NoticeOfChangePartiesService {
         log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsMap);
         FindUserCaseRolesResponse findUserCaseRolesResponse
             = findUserCaseRoles(String.valueOf(callbackRequest.getCaseDetails().getId()), authorisation);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
             log.info("caseUser is = " + caseUser + " and roles are " + caseUser.getCaseRole());
@@ -449,17 +450,16 @@ public class NoticeOfChangePartiesService {
                     log.info("Party details found - rest wip:: ", selectedPartyDetailsMap);
                 });
         }
-
-        selectedPartyDetailsMap.forEach((role, partyDetails) -> {
-            if (null != partyDetails.getSolicitorOrg()) {
-                log.info("partyDetails ==> " + partyDetails.getLabelForDynamicList());
+        for (var entry : selectedPartyDetailsMap.entrySet()) {
+            if (null != entry.getValue().getSolicitorOrg()) {
+                log.info("partyDetails ==> " + entry.getValue().getLabelForDynamicList());
                 UserDetails userDetails = userService.getUserDetails(authorisation);
                 DynamicListElement roleItem = DynamicListElement.builder()
-                    .code(role.getCaseRoleLabel())
-                    .label(role.getCaseRoleLabel())
+                    .code(entry.getKey().getCaseRoleLabel())
+                    .label(entry.getKey().getCaseRoleLabel())
                     .build();
                 ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
-                    .organisationToRemove(partyDetails.getSolicitorOrg())
+                    .organisationToRemove(entry.getValue().getSolicitorOrg())
                     .createdBy(userDetails.getEmail())
                     .caseRoleId(DynamicList.builder()
                                     .value(roleItem)
@@ -477,10 +477,12 @@ public class NoticeOfChangePartiesService {
                     tokenGenerator.generate(),
                     decisionRequest(callbackRequest.getCaseDetails())
                 );
-                log.info("applyDecision response ==> " + response);
+                log.info("applyDecision response ==> " + response.getData());
+                if (null != response.getData()) {
+                    caseDataUpdated = response.getData();
+                }
             }
-        });
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        }
         return caseDataUpdated;
     }
 
