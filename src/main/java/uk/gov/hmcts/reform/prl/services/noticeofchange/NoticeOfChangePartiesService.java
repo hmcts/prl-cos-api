@@ -423,13 +423,14 @@ public class NoticeOfChangePartiesService {
     public Map<String, Object> aboutToSubmitStopRepresenting(String authorisation,
                                                              CallbackRequest callbackRequest,
                                                              List<String> errorList) {
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = getCaseData(caseDetails, objectMapper);
         Map<SolicitorRole, PartyDetails> selectedPartyDetailsMap = new HashMap<>();
         log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsMap.size());
         log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsMap);
         FindUserCaseRolesResponse findUserCaseRolesResponse
-            = findUserCaseRoles(String.valueOf(callbackRequest.getCaseDetails().getId()), authorisation);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            = findUserCaseRoles(String.valueOf(caseDetails.getId()), authorisation);
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
 
         for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
             log.info("caseUser is = " + caseUser + " and roles are " + caseUser.getCaseRole());
@@ -485,13 +486,13 @@ public class NoticeOfChangePartiesService {
                     .requestTimestamp(time.now())
                     .build();
                 log.info("changeOrganisationRequest ==> " + changeOrganisationRequest);
-                callbackRequest.getCaseDetails().getData()
+                caseDetails.getData()
                     .put("changeOrganisationRequestField", changeOrganisationRequest);
                 String userToken = systemUserService.getSysUserToken();
                 AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
                     userToken,
                     tokenGenerator.generate(),
-                    decisionRequest(callbackRequest.getCaseDetails())
+                    decisionRequest(caseDetails)
                 );
                 log.info("applyDecision response ==> " + response.getData());
                 if (null != response.getData()) {
@@ -502,6 +503,7 @@ public class NoticeOfChangePartiesService {
                         userDetails,
                         TypeOfNocEventEnum.removeLegalRepresentation
                     );*/
+                    caseDetails = caseDetails.toBuilder().data(response.getData()).build();
                     caseDataUpdated = response.getData();
                     log.info("caseDataUpdated after removing legal representative ==> " + caseDataUpdated);
                 }
