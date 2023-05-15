@@ -571,7 +571,8 @@ public class C100RespondentSolicitorService {
             authorisation,
             caseData,
             SOLICITOR_C7_DRAFT_DOCUMENT,
-            false
+            false,
+            respondentDetails
         );
         caseDataUpdated.put("draftC7ResponseDoc", document);
 
