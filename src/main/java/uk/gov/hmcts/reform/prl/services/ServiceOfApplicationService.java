@@ -143,15 +143,15 @@ public class ServiceOfApplicationService {
     public CaseData sendNotificationToApplicantSolicitor(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            log.info("case type" +caseData.getCaseTypeOfApplication());
+            log.info("case type" + caseData.getCaseTypeOfApplication());
             List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
             DynamicMultiSelectList applicantsToNotify = caseData.getConfirmRecipients().getApplicantsList();
             List<DynamicMultiselectListElement> applicantsList = applicantsToNotify.getListItems();
             applicantsList.forEach(applicant -> {
                 Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
                 if (party.isPresent() && party.get().getValue().getSolicitorEmail() != null) {
-                    log.info("party" +party.get().getValue());
-                    log.info("party" +party.get().getValue().getSolicitorEmail());
+                    log.info("party" + party.get().getValue());
+                    log.info("party" + party.get().getValue().getSolicitorEmail());
                     try {
                         log.info("Sending the email notification to applicant solicitor for C100 Application for caseId {}", caseDetails.getId());
 
