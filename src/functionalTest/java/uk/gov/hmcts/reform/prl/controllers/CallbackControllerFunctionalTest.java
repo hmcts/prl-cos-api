@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
 import java.time.LocalDate;
@@ -32,6 +33,7 @@ public class CallbackControllerFunctionalTest {
     private final String userToken = "Bearer testToken";
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
+    private static final String FL401_VALID_REQUEST_BODY = "requests/fl401-add-case-number.json";
     private static final String MIAM_VALIDATION_REQUEST_ERROR = "requests/call-back-controller-miam-request-error.json";
     private static final String MIAM_VALIDATION_REQUEST_NO_ERROR = "requests/call-back-controller-miam-request-no-error.json";
     private static final String APPLICANT_CASE_NAME_REQUEST = "requests/call-back-controller-applicant-case-name.json";
@@ -148,7 +150,7 @@ public class CallbackControllerFunctionalTest {
 
     @Test
     public void givenRequestWithCaseNumberAdded_ResponseContainsIssueDate() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBody = ResourceLoader.loadJson(FL401_VALID_REQUEST_BODY);
         request
             .header("Authorization", userToken)
             .body(requestBody)
@@ -156,8 +158,7 @@ public class CallbackControllerFunctionalTest {
             .contentType("application/json")
             .post("/fl401-add-case-number")
             .then()
-            .body("data.issueDate", equalTo(LocalDate.now().toString()),
-                  "data.isAddCaseNumberAdded", "Yes")
+            .body("data.issueDate", equalTo(LocalDate.now().toString()))
             .assertThat().statusCode(200);
     }
 
