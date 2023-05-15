@@ -496,12 +496,12 @@ public class NoticeOfChangePartiesService {
                 log.info("applyDecision response ==> " + response.getData());
                 if (null != response.getData()) {
                     CaseData newCaseData = objectMapper.convertValue(response.getData(), CaseData.class);
-                    newCaseData = updateRepresentedPartyDetails(
+                    /*newCaseData = updateRepresentedPartyDetails(
                         changeOrganisationRequest,
                         newCaseData,
                         userDetails,
                         TypeOfNocEventEnum.removeLegalRepresentation
-                    );
+                    );*/
                     caseDataUpdated = objectMapper.convertValue(newCaseData, Map.class);;
                     log.info("caseDataUpdated after removing legal representative ==> " + caseDataUpdated);
                 }
