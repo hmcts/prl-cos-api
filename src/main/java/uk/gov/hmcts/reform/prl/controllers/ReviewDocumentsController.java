@@ -70,15 +70,22 @@ public class ReviewDocumentsController {
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errors = new ArrayList<>();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
         if (null != caseData.getLegalProfQuarentineDocsList()) {
-            List<DynamicListElement> dynamicListElements = caseData.getLegalProfQuarentineDocsList().stream()
+            dynamicListElements.addAll(caseData.getLegalProfQuarentineDocsList().stream()
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
                     .label(element.getValue().getDocument().getDocumentFileName())
-                    .build()).collect(Collectors.toList());
-            caseDataUpdated.put("reviewDocsDynamicList", DynamicList.builder().listItems(dynamicListElements).build());
+                    .build()).collect(Collectors.toList()));
+        } else if (null != caseData.getCitizenUploadQuarentineDocsList()) {
+            dynamicListElements.addAll(caseData.getCitizenUploadQuarentineDocsList().stream()
+                .map(element -> DynamicListElement.builder().code(element.getId().toString())
+                    .label(element.getValue().getCitizenDocument().getDocumentFileName())
+                    .build()).collect(Collectors.toList()));
         } else {
             errors = List.of("No documents to review");
         }
+        caseDataUpdated.put("reviewDocsDynamicList", DynamicList.builder().listItems(dynamicListElements).build());
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).errors(errors).build();
     }
 
@@ -151,64 +158,72 @@ public class ReviewDocumentsController {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
         if (YesNoDontKnow.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
-            Optional<Element<QuarentineLegalDoc>> quarentineLegalDocElement = caseData.getLegalProfQuarentineDocsList().stream()
-                .filter(element -> element.getId().equals(uuid)).findFirst();
-            if (quarentineLegalDocElement.isPresent()) {
-                Element<QuarentineLegalDoc> docDetails = caseData.getLegalProfQuarentineDocsList()
-                    .remove(caseData.getLegalProfQuarentineDocsList().indexOf(quarentineLegalDocElement.get()));
-                if (null != caseData.getReviewDocuments().getLegalProfUploadDocListConfTab()) {
-                    caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().add(docDetails);
-                    caseDataUpdated.put("legalProfUploadDocListConfTab", caseData.getReviewDocuments().getLegalProfUploadDocListConfTab());
-                } else {
-                    caseDataUpdated.put("legalProfUploadDocListConfTab", List.of(docDetails));
+            if (null != caseData.getLegalProfQuarentineDocsList()) {
+                Optional<Element<QuarentineLegalDoc>> quarentineLegalDocElement = caseData.getLegalProfQuarentineDocsList().stream()
+                    .filter(element -> element.getId().equals(uuid)).findFirst();
+                if (quarentineLegalDocElement.isPresent()) {
+                    Element<QuarentineLegalDoc> docDetails = caseData.getLegalProfQuarentineDocsList()
+                        .remove(caseData.getLegalProfQuarentineDocsList().indexOf(quarentineLegalDocElement.get()));
+                    if (null != caseData.getReviewDocuments().getLegalProfUploadDocListConfTab()) {
+                        caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().add(docDetails);
+                        caseDataUpdated.put("legalProfUploadDocListConfTab", caseData.getReviewDocuments().getLegalProfUploadDocListConfTab());
+                    } else {
+                        caseDataUpdated.put("legalProfUploadDocListConfTab", List.of(docDetails));
+                    }
                 }
             }
+            if (null != caseData.getCitizenUploadQuarentineDocsList()) {
+                Optional<Element<UploadedDocuments>> quarentineCitizenDocElement = caseData.getCitizenUploadQuarentineDocsList().stream()
+                    .filter(element -> element.getId().equals(uuid)).findFirst();
+                if (quarentineCitizenDocElement.isPresent()) {
+                    Element<UploadedDocuments> docDetails = caseData.getCitizenUploadQuarentineDocsList()
+                        .remove(caseData.getCitizenUploadQuarentineDocsList().indexOf(quarentineCitizenDocElement.get()));
+                    if (null != caseData.getReviewDocuments().getCitizenUploadDocListConfTab()) {
+                        caseData.getReviewDocuments().getCitizenUploadDocListConfTab().add(docDetails);
+                        caseDataUpdated.put("citizenUploadDocListConfTab", caseData.getReviewDocuments().getCitizenUploadDocListConfTab());
+                    } else {
+                        caseDataUpdated.put("citizenUploadDocListConfTab", List.of(docDetails));
+                    }
+                }
+            }
+
             log.info("*** legal prof docs dtab ** {}", caseDataUpdated.get("legalProfUploadDocListDocTab"));
-            Optional<Element<UploadedDocuments>> quarentineCitizenDocElement = caseData.getCitizenUploadQuarentineDocsList().stream()
-                .filter(element -> element.getId().equals(uuid)).findFirst();
-            if (quarentineCitizenDocElement.isPresent()) {
-                Element<UploadedDocuments> docDetails = caseData.getCitizenUploadQuarentineDocsList()
-                    .remove(caseData.getCitizenUploadQuarentineDocsList().indexOf(quarentineCitizenDocElement.get()));
-                if (null != caseData.getReviewDocuments().getCitizenUploadDocListConfTab()) {
-                    caseData.getReviewDocuments().getCitizenUploadDocListConfTab().add(docDetails);
-                    caseDataUpdated.put("citizenUploadDocListConfTab", caseData.getReviewDocuments().getCitizenUploadDocListConfTab());
-                } else {
-                    caseDataUpdated.put("citizenUploadDocListConfTab", List.of(docDetails));
-                }
-            }
+
             log.info("*** cit docs dtab ** {}", caseDataUpdated.get("citizenUploadedDocListDocTab"));
         } else if (YesNoDontKnow.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
-            Optional<Element<QuarentineLegalDoc>> quarentineLegalDocElement = caseData.getLegalProfQuarentineDocsList().stream()
-                .filter(element -> element.getId().equals(uuid)).findFirst();
-            if (quarentineLegalDocElement.isPresent()) {
-                Element<QuarentineLegalDoc> docDetails = caseData.getLegalProfQuarentineDocsList()
-                    .remove(caseData.getLegalProfQuarentineDocsList().indexOf(quarentineLegalDocElement.get()));
-                if (null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
-                    caseData.getReviewDocuments().getLegalProfUploadDocListDocTab().add(docDetails);
-                    caseDataUpdated.put("legalProfUploadDocListDocTab", caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());
-                } else {
-                    caseDataUpdated.put("legalProfUploadDocListDocTab", List.of(docDetails));
+            if (null != caseData.getLegalProfQuarentineDocsList()) {
+                Optional<Element<QuarentineLegalDoc>> quarentineLegalDocElement = caseData.getLegalProfQuarentineDocsList().stream()
+                    .filter(element -> element.getId().equals(uuid)).findFirst();
+                if (quarentineLegalDocElement.isPresent()) {
+                    Element<QuarentineLegalDoc> docDetails = caseData.getLegalProfQuarentineDocsList()
+                        .remove(caseData.getLegalProfQuarentineDocsList().indexOf(quarentineLegalDocElement.get()));
+                    if (null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
+                        caseData.getReviewDocuments().getLegalProfUploadDocListDocTab().add(docDetails);
+                        caseDataUpdated.put("legalProfUploadDocListDocTab", caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());
+                    } else {
+                        caseDataUpdated.put("legalProfUploadDocListDocTab", List.of(docDetails));
+                    }
+                }
+            }
+            if (null != caseData.getCitizenUploadQuarentineDocsList()) {
+                Optional<Element<UploadedDocuments>> quarentineCitizenDocElement = caseData.getCitizenUploadQuarentineDocsList().stream()
+                    .filter(element -> element.getId().equals(uuid)).findFirst();
+                if (quarentineCitizenDocElement.isPresent()) {
+                    Element<UploadedDocuments> docDetails = caseData.getCitizenUploadQuarentineDocsList()
+                        .remove(caseData.getCitizenUploadQuarentineDocsList().indexOf(quarentineCitizenDocElement.get()));
+                    if (null != caseData.getReviewDocuments().getCitizenUploadedDocListDocTab()) {
+                        caseData.getReviewDocuments().getCitizenUploadedDocListDocTab().add(docDetails);
+                        caseDataUpdated.put("citizenUploadedDocListDocTab", caseData.getReviewDocuments().getCitizenUploadedDocListDocTab());
+                    } else {
+                        caseDataUpdated.put("citizenUploadedDocListDocTab", List.of(docDetails));
+                    }
                 }
             }
             log.info("*** legal prof docs dtab ** {}", caseDataUpdated.get("legalProfUploadDocListDocTab"));
-            Optional<Element<UploadedDocuments>> quarentineCitizenDocElement = caseData.getCitizenUploadQuarentineDocsList().stream()
-                .filter(element -> element.getId().equals(uuid)).findFirst();
-            if (quarentineCitizenDocElement.isPresent()) {
-                Element<UploadedDocuments> docDetails = caseData.getCitizenUploadQuarentineDocsList()
-                    .remove(caseData.getCitizenUploadQuarentineDocsList().indexOf(quarentineCitizenDocElement.get()));
-                if (null != caseData.getReviewDocuments().getCitizenUploadedDocListDocTab()) {
-                    caseData.getReviewDocuments().getCitizenUploadedDocListDocTab().add(docDetails);
-                    caseDataUpdated.put("citizenUploadedDocListDocTab", caseData.getReviewDocuments().getCitizenUploadedDocListDocTab());
-                } else {
-                    caseDataUpdated.put("citizenUploadedDocListDocTab", List.of(docDetails));
-                }
-            }
             log.info("*** cit docs dtab ** {}", caseDataUpdated.get("citizenUploadedDocListDocTab"));
-
         }
         log.info("*** Legal prof docs q ** {}", caseData.getLegalProfQuarentineDocsList());
         log.info("***citizen docs q ** {}", caseData.getCitizenUploadQuarentineDocsList());
-
         caseDataUpdated.put("legalProfQuarentineDocsList", caseData.getLegalProfQuarentineDocsList());
         caseDataUpdated.put("citizenUploadQuarentineDocsList", caseData.getCitizenUploadQuarentineDocsList());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
