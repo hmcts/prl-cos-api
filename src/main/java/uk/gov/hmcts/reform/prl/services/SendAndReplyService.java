@@ -323,7 +323,7 @@ public class SendAndReplyService {
                     serviceCode,
                     categoryId
                 ))
-                .linkedApplicationsList(getOtherApllicationsist(caseData))
+                .applicationsList(getOtherApllicationsist(caseData))
                 .submittedDocumentsList(documentCategoryList)
                 .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder().label(loggedInUserEmail).code(loggedInUserEmail).build())))
                 .futureHearingsList(getFutureHearingDynamicList(authorization, s2sToken, caseReference))
@@ -502,7 +502,7 @@ public class SendAndReplyService {
             if (parentLabelString == null) {
                 if (category.getDocuments() != null) {
                     category.getDocuments().forEach(document -> dynamicListElementList.add(
-                        DynamicListElement.builder().code(category.getCategoryId() + "___"
+                        DynamicListElement.builder().code(category.getCategoryId() + "->"
                                                               + fetchDocumentIdFromUrl(document.getDocumentURL()))
                             .label(category.getCategoryName() + " --- " + document.getDocumentFilename()).build()
                     ));
@@ -519,9 +519,9 @@ public class SendAndReplyService {
                 if (category.getDocuments() != null) {
                     category.getDocuments().forEach(document -> dynamicListElementList.add(
                         DynamicListElement.builder()
-                            .code(parentCodeString + " -> " + category.getCategoryId() + "___"
+                            .code(parentCodeString + " -> " + category.getCategoryId() + "->"
                                       + fetchDocumentIdFromUrl(document.getDocumentURL()))
-                            .label(parentLabelString + " -> " + category.getCategoryName() + " --- "
+                            .label(parentLabelString + " -> " + category.getCategoryName() + " -> "
                                        + document.getDocumentFilename()).build()
                     ));
                 }
@@ -566,10 +566,10 @@ public class SendAndReplyService {
                                               ? sendOrReplyMessage.getJudicialOrMagistrateTierList().getValueCode() : null)
             .judicialOrMagistrateTierValue(sendOrReplyMessage.getJudicialOrMagistrateTierList() != null
                                                ? sendOrReplyMessage.getJudicialOrMagistrateTierList().getValueLabel() : null)
-            .selectedLinkedApplicationCode(sendOrReplyMessage.getLinkedApplicationsList() != null
-                                               ? sendOrReplyMessage.getLinkedApplicationsList().getValueCode() : null)
-            .selectedLinkedApplicationValue(sendOrReplyMessage.getLinkedApplicationsList() != null
-                                                ? sendOrReplyMessage.getLinkedApplicationsList().getValueLabel() : null)
+            .selectedApplicationCode(sendOrReplyMessage.getApplicationsList() != null
+                                               ? sendOrReplyMessage.getApplicationsList().getValueCode() : null)
+            .selectedApplicationValue(sendOrReplyMessage.getApplicationsList() != null
+                                                ? sendOrReplyMessage.getApplicationsList().getValueLabel() : null)
             .selectedFutureHearingCode(sendOrReplyMessage.getFutureHearingsList() != null
                                            ? sendOrReplyMessage.getFutureHearingsList().getValueCode() : null)
             .selectedFutureHearingValue(sendOrReplyMessage.getFutureHearingsList() != null
