@@ -805,5 +805,7 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
   
+    private final YesOrNo isAddCaseNumberAdded;
+
     private final ChangeOrganisationRequest changeOrganisationRequestField;
 }
