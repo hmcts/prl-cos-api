@@ -121,12 +121,13 @@ public class DgsServiceTest {
     public void testToGenerateWelshDocumentWithCaseData() throws Exception {
 
         Map<String, Object> respondentDetails = new HashMap<>();
+        respondentDetails.put("fullName", "test");
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        assertEquals(dgsService.generateWelshDocument(authToken, null, PRL_DRAFT_TEMPLATE,
+        assertEquals(dgsService.generateWelshDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE,
                                                     respondentDetails), generatedDocumentInfo);
     }
 
