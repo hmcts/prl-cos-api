@@ -590,6 +590,11 @@ public class CallbackController {
         caseData.setLegalProfQuarentineDocsList(quarentineDocs);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("legalProfQuarentineDocsList", caseData.getLegalProfQuarentineDocsList());
+        caseDataUpdated.put("furtherEvidences", null);
+        caseDataUpdated.put("correspondence", null);
+        caseDataUpdated.put("otherDocuments", null);
+        caseDataUpdated.put("documentCategoryChecklist", null);
+        caseDataUpdated.put("giveDetails", null);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
