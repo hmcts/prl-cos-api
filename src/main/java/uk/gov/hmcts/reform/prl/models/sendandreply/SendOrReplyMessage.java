@@ -41,7 +41,6 @@ public class SendOrReplyMessage {
     private JudicialUser sendReplyJudgeName;*/
 
     private DynamicList messageReplyDynamicList;
-    private Message replyMessage;
     private YesOrNo respondToMessage;
     private String messageReplyTable;
     private Message sendMessageObject;

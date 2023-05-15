@@ -210,7 +210,7 @@ public class SendAndReplyController extends AbstractCallbackController {
             if (CollectionUtils.isEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
                 errors.add("There are no messages to respond to.");
             } else {
-                caseData = sendAndReplyService.populateMessageReplyFields(caseData);
+                caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
             }
         } else {
             caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);

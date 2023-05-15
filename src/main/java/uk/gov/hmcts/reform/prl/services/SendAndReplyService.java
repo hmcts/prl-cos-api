@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -537,7 +539,9 @@ public class SendAndReplyService {
             .internalMessageUrgent(sendMessage.getInternalMessageUrgent())
             .internalMessageWhoToSendToEnum(sendMessage.getInternalMessageWhoToSendToEnum())
             .messageAboutEnum(sendMessage.getMessageAboutEnum())
-            .judgeName(getJudgeName(sendMessage.getSendReplyJudgeName()))
+            .judgeName((null != sendMessage.getSendReplyJudgeName()
+                && ArrayUtils.isNotEmpty(getPersonalCode(sendMessage.getSendReplyJudgeName())))
+                           ? getJudgeName(sendMessage.getSendReplyJudgeName()) : null)
             .messageSubject(sendMessage.getMessageSubject())
             .recipientEmailAddresses(sendMessage.getRecipientEmailAddresses())
             .selectedCtscEmail(sendMessage.getCtscEmailList() != null
@@ -560,6 +564,8 @@ public class SendAndReplyService {
                                                 ? sendMessage.getSubmittedDocumentsList().getValueLabel() : null)
             .updatedTime(dateTime.now())
             .messageContent(caseData.getMessageContent())
+            .senderEmail(null != caseData.getMessageMetaData()
+                             ? caseData.getMessageMetaData().getSenderEmail() : null)
             .replyHistory(Collections.emptyList())
             .build();
     }
@@ -574,15 +580,13 @@ public class SendAndReplyService {
     }
 
     private String getJudgeName(JudicialUser judicialUser) {
-        if (judicialUser != null && judicialUser.getPersonalCode() != null) {
-            final Optional<List<JudicialUsersApiResponse>> judicialUsersApiResponseList = ofNullable(getJudgeDetails(
-                judicialUser));
+        final Optional<List<JudicialUsersApiResponse>> judicialUsersApiResponseList = ofNullable(getJudgeDetails(
+            judicialUser));
 
-            if (judicialUsersApiResponseList.isPresent()) {
-                Optional<JudicialUsersApiResponse> judicialUsersApiResponse = judicialUsersApiResponseList.get().stream().findFirst();
-                if (judicialUsersApiResponse.isPresent()) {
-                    return judicialUsersApiResponse.get().getFullName();
-                }
+        if (judicialUsersApiResponseList.isPresent()) {
+            Optional<JudicialUsersApiResponse> judicialUsersApiResponse = judicialUsersApiResponseList.get().stream().findFirst();
+            if (judicialUsersApiResponse.isPresent()) {
+                return judicialUsersApiResponse.get().getFullName();
             }
         }
         return null;
@@ -623,7 +627,7 @@ public class SendAndReplyService {
         );
     }
 
-    public CaseData populateMessageReplyFields(CaseData caseData) {
+    public CaseData populateMessageReplyFields(CaseData caseData, String authorization) {
         UUID messageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
 
@@ -641,11 +645,23 @@ public class SendAndReplyService {
         //populate message table
         String messageReply = renderMessageTable(previousMessage.get());
 
+        final String loggedInUserEmail = getLoggedInUserEmail(authorization);
         return caseData.toBuilder()
             .sendOrReplyMessage(
                 caseData.getSendOrReplyMessage().toBuilder()
-                    .replyMessage(previousMessage.get())
-                    .messageReplyTable(messageReply).build())
+                    .messageReplyTable(messageReply)
+                    .replyMessageObject(
+                        Message.builder()
+                            .judicialOrMagistrateTierList(getJudiciaryTierDynamicList(
+                                authorization,
+                                authTokenGenerator.generate(),
+                                serviceCode,
+                                categoryId
+                            ))
+                            .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
+                                                                      .label(loggedInUserEmail).code(loggedInUserEmail).build())))
+                            .build())
+                    .build())
             .build();
     }
 
@@ -668,9 +684,9 @@ public class SendAndReplyService {
         return String.join("\n\n", lines);
     }
 
-    private List<String> addRowToMessageTable(List<String> lines,
-                                              String label,
-                                              String value) {
+    private void addRowToMessageTable(List<String> lines,
+                                      String label,
+                                      String value) {
         lines.add(TABLE_ROW_BEGIN);
         lines.add(TABLE_ROW_DATA_BEGIN);
         lines.add(label);
@@ -680,7 +696,6 @@ public class SendAndReplyService {
         lines.add(TABLE_ROW_DATA_END);
         lines.add(TABLE_ROW_END);
 
-        return lines;
     }
 
     /**
@@ -690,18 +705,19 @@ public class SendAndReplyService {
      * @param message Message
      */
     public void sendNotificationEmailOther(CaseData caseData, Message message) {
+        if (ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())) {
+            final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
 
-        final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
+            if (recipientEmailAddresses.length > 0) {
+                final EmailTemplateVars emailTemplateVars = buildNotificationEmailOther(caseData);
 
-        if (recipientEmailAddresses.length > 0) {
-            final EmailTemplateVars emailTemplateVars = buildNotificationEmailOther(caseData);
-
-            for (String recipientEmailAddress : recipientEmailAddresses) {
-                emailService.send(
-                    recipientEmailAddress,
-                    EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,
-                    emailTemplateVars,
-                    LanguagePreference.english);
+                for (String recipientEmailAddress : recipientEmailAddresses) {
+                    emailService.send(
+                        recipientEmailAddress,
+                        EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,
+                        emailTemplateVars,
+                        LanguagePreference.english);
+                }
             }
         }
     }
