@@ -495,14 +495,14 @@ public class NoticeOfChangePartiesService {
                 );
                 log.info("applyDecision response ==> " + response.getData());
                 if (null != response.getData()) {
-                    CaseData newCaseData = objectMapper.convertValue(response.getData(), CaseData.class);
-                    /*newCaseData = updateRepresentedPartyDetails(
+                    /*CaseData newCaseData = objectMapper.convertValue(response.getData(), CaseData.class);
+                    newCaseData = updateRepresentedPartyDetails(
                         changeOrganisationRequest,
                         newCaseData,
                         userDetails,
                         TypeOfNocEventEnum.removeLegalRepresentation
                     );*/
-                    caseDataUpdated = objectMapper.convertValue(newCaseData, Map.class);;
+                    caseDataUpdated = response.getData();
                     log.info("caseDataUpdated after removing legal representative ==> " + caseDataUpdated);
                 }
             }
