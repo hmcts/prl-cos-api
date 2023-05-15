@@ -514,12 +514,13 @@ public class NoticeOfChangePartiesService {
 
     public void submittedStopRepresenting(CallbackRequest callbackRequest) {
         CaseData oldCaseData = getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+        log.info("oldCaseData ==> " + oldCaseData);
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        DynamicMultiSelectList solStopRepChooseParties = oldCaseData.getSolStopRepChooseParties();
+        log.info("newCaseData ==> " + newCaseData);
+        DynamicMultiSelectList solStopRepChooseParties = newCaseData.getSolStopRepChooseParties();
         Map<Optional<SolicitorRole>, Element<PartyDetails>> removeSolPartyDetailsMap = new HashMap<>();
         for (DynamicMultiselectListElement solStopRepChoosePartyElement : solStopRepChooseParties.getValue()) {
             removeSolPartyDetailsMap = getRemovedSolicitorRoles(
-                oldCaseData,
                 newCaseData,
                 solStopRepChoosePartyElement,
                 removeSolPartyDetailsMap
@@ -563,13 +564,12 @@ public class NoticeOfChangePartiesService {
 
     }
 
-    private Map<Optional<SolicitorRole>, Element<PartyDetails>> getRemovedSolicitorRoles(CaseData oldCaseData,
-                                                                                         CaseData newCaseData,
+    private Map<Optional<SolicitorRole>, Element<PartyDetails>> getRemovedSolicitorRoles(CaseData newCaseData,
                                                                                          DynamicMultiselectListElement solStopRepChoosePartyElement,
                                                                                          Map<Optional<SolicitorRole>,
                                                                                              Element<PartyDetails>> selectedPartyDetailsMap) {
         Optional<SolicitorRole> removeSolicitorRole;
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(oldCaseData))) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(newCaseData))) {
             boolean matched = false;
             int partyIndex;
             for (Element<PartyDetails> partyDetailsElement : newCaseData.getApplicants()) {
