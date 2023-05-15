@@ -151,7 +151,6 @@ public class CallbackControllerFunctionalTest {
     public void givenRequestWithCaseNumberAdded_ResponseContainsIssueDate() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         LocalDate date = LocalDate.now();
-        when(LocalDate.now()).thenReturn(date);
         request
             .header("Authorization", userToken)
             .body(requestBody)
