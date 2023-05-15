@@ -13,9 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,6 +42,10 @@ public class SendgridService {
 
     @Value("${send-grid.rpa.email.from}")
     private String fromEmail;
+
+    private final DocumentGenService documentGenService;
+
+    private final AuthTokenGenerator authTokenGenerator;
 
     public void sendEmail(JsonObject caseData) throws IOException {
 
@@ -67,9 +73,11 @@ public class SendgridService {
         }
     }
 
-    /*public void sendEmailWithAttachments(Map<String,String> email, CaseData caseData) throws IOException {
+    //public void sendEmailWithAttachments(Map<String,Object> emailProps, List<Document> listOfAttcahments) throws IOException {
 
-        String subject = email.get("subject");
+        // TO_DO:Remya , get auth
+        // String s2sToken = authTokenGenerator.generate();
+       /* String subject = email.get("subject");
         Content content = new Content("text/plain", " ");
         Attachments attachments = new Attachments();
         if (!getUploadedDocumentsServiceOfApplication(caseData).isEmpty()) {
@@ -96,16 +104,12 @@ public class SendgridService {
             log.info("Notification to RPA sent successfully");
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
-        }
-    }*/
+        }*/
 
-    private List<GeneratedDocumentInfo> getUploadedDocumentsServiceOfApplication(CaseData caseData) {
-        List<GeneratedDocumentInfo> docs = new ArrayList<>();
-        Optional<Document> pd36qLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getPd36qLetter());
-        Optional<Document> specialArrangementLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs()
-                                                                              .getSpecialArrangementsLetter());
-        pd36qLetter.ifPresent(document -> docs.add(toGeneratedDocumentInfo(document)));
-        specialArrangementLetter.ifPresent(document -> docs.add(toGeneratedDocumentInfo(document)));
-        return docs;
-    }
+        //TO_DO:Remya
+        //listOfAttcahments loop for each document
+        //documentGenService.getDocumentBytes(String docUrl, String authToken, String s2sToken){
+        //build attachment object with the above data
+
+    //}
 }

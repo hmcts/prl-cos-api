@@ -155,6 +155,7 @@ public class ServiceOfApplicationService {
                     try {
                         log.info("Sending the email notification to applicant solicitor for C100 Application for caseId {}", caseDetails.getId());
 
+                        //TO_DO:Remya authorization to below call
                         serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(caseDetails, party.get().getValue(),
                                                                                                        EmailTemplateNames.APPLICANT_SOLICITOR_CA);
                     } catch (Exception e) {

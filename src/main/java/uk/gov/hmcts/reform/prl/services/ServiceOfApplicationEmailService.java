@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sendgrid.Attachments;
+import com.sendgrid.Content;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
@@ -76,15 +79,17 @@ public class ServiceOfApplicationEmailService {
                 LanguagePreference.getPreferenceLanguage(caseData)
             );
         }
-        List<Map<String,List<String>>> respondentSolicitors = caseData
+        List<Map<String, List<String>>> respondentSolicitors = caseData
             .getRespondents()
             .stream()
             .map(Element::getValue)
             .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
             .map(i -> {
                 Map<String, List<String>> temp = new HashMap<>();
-                temp.put(i.getSolicitorEmail(),List.of(i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
-                                                              i.getFirstName() + " " + i.getLastName()));
+                temp.put(i.getSolicitorEmail(), List.of(
+                    i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
+                    i.getFirstName() + " " + i.getLastName()
+                ));
                 return temp;
             })
             .collect(Collectors.toList());
@@ -95,7 +100,8 @@ public class ServiceOfApplicationEmailService {
                 solicitorEmail,
                 EmailTemplateNames.RESPONDENT_SOLICITOR,
                 buildRespondentSolicitorEmail(caseDetails, resSols.get(solicitorEmail).get(0),
-                                              resSols.get(solicitorEmail).get(1)),
+                                              resSols.get(solicitorEmail).get(1)
+                ),
                 LanguagePreference.english
             );
 
@@ -105,27 +111,61 @@ public class ServiceOfApplicationEmailService {
     }
 
     public void sendEmailNotificationToApplicantSolicitor(CaseDetails caseDetails, PartyDetails partyDetails,
-                                                              EmailTemplateNames templateName) throws Exception {
+                                                          EmailTemplateNames templateName) throws Exception {
         log.info("*** About to send ***");
-        /*CaseData caseData = emailService.getCaseData(caseDetails);
+        CaseData caseData = emailService.getCaseData(caseDetails);
 
         emailService.send(
             partyDetails.getSolicitorEmail(),
             templateName,
             buildApplicantSolicitorEmail(caseDetails, partyDetails.getRepresentativeFirstName()
                 + " " + partyDetails.getRepresentativeLastName()),
-            LanguagePreference.getPreferenceLanguage(caseData));*/
+            LanguagePreference.getPreferenceLanguage(caseData)
+        );
 
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         requireNonNull(caseData);
-        sendgridService.sendEmail(c100JsonMapper.map(caseData));
+        //TO_DO:Remya
+        // sendgridService.sendEmailWithAttachments(getCommonEmailProps(), getNotificationPack(caseData));
 
-        log.info("Email notification for SoA sent successfully to applicant solicitor for caseId {}", caseDetails.getId());
+        log.info(
+            "Email notification for SoA sent successfully to applicant solicitor for caseId {}",
+            caseDetails.getId()
+        );
 
     }
 
+    //TO_DO:Remya
+     /*
+    private List<Document> getNotificationPack(CaseData caseData, String requiredPack) {
+
+        switch(requiredPack){
+
+            case "R" : GeneratePackR()
+                        break;
+
+
+            List.add(caseData.getFinaldocument());
+
+
+       Optional<Document> pd36qLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getPd36qLetter());
+        Optional<Document> specialArrangementLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs()
+                                                                              .getSpecialArrangementsLetter());
+
+    }
+    */
+
+    public Map<String, String> getCommonEmailProps() {
+        Map<String, String> emailProps = new HashMap<>();
+        emailProps.put("subject", "");
+        emailProps.put("content", "");
+        emailProps.put("type", "");
+        emailProps.put("disPosition", "");
+
+        return emailProps;
+    }
+
     public void sendEmailNotificationToRespondentSolicitor(CaseDetails caseDetails, PartyDetails partyDetails,
-                                                          EmailTemplateNames templateName) throws Exception {
+                                                           EmailTemplateNames templateName) throws Exception {
         log.info("*** About to send ***");
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         CaseData caseData1 = emailService.getCaseData(caseDetails);
@@ -136,14 +176,18 @@ public class ServiceOfApplicationEmailService {
             EmailTemplateNames.RESPONDENT_SOLICITOR,
             buildRespondentSolicitorEmail(caseDetails, respondentSolicitorName,
                                           partyDetails.getFirstName() + " "
-                                              + partyDetails.getLastName()),
+                                              + partyDetails.getLastName()
+            ),
             LanguagePreference.english
         );
 
         /*requireNonNull(caseData);
         sendgridService.sendEmail(c100JsonMapper.map(caseData));*/
 
-        log.info("Email notification for SoA sent successfully to respondent solicitor for caseId {}", caseDetails.getId());
+        log.info(
+            "Email notification for SoA sent successfully to respondent solicitor for caseId {}",
+            caseDetails.getId()
+        );
 
 
     }
@@ -190,7 +234,8 @@ public class ServiceOfApplicationEmailService {
                 EmailTemplateNames.RESPONDENT_SOLICITOR,
                 buildRespondentSolicitorEmail(caseDetails, respondentSolicitorName,
                                               respondent.getFirstName() + " "
-                                                  + respondent.getLastName()),
+                                                  + respondent.getLastName()
+                ),
                 LanguagePreference.english
             );
         }
@@ -204,9 +249,11 @@ public class ServiceOfApplicationEmailService {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         Map<String, Object> privacy = new HashMap<>();
-        privacy.put("file",
-                    NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf"))
-                        .get("file"));
+        privacy.put(
+            "file",
+            NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf"))
+                .get("file")
+        );
         return ApplicantSolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
@@ -222,9 +269,11 @@ public class ServiceOfApplicationEmailService {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         Map<String, Object> privacy = new HashMap<>();
-        privacy.put("file",
-                    NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf"))
-                        .get("file"));
+        privacy.put(
+            "file",
+            NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf"))
+                .get("file")
+        );
         return RespondentSolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
@@ -268,7 +317,7 @@ public class ServiceOfApplicationEmailService {
                         EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION,
                         buildApplicantEmailVars(caseData, value),
                         LanguagePreference.getPreferenceLanguage(caseData)
-            ));
+                    ));
         }
     }
 
