@@ -65,7 +65,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendAndReplyService {
 
-    public static final String SEND_AND_REPLY_CATEGORYID = "sendAndReply";
+    public static final String SEND_AND_REPLY_CATEGORY_ID = "sendAndReply";
     private final EmailService emailService;
 
     private final UserService userService;
@@ -483,7 +483,7 @@ public class SendAndReplyService {
         documentMap = new HashMap<>();
 
         List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
-            .filter(category ->  !SEND_AND_REPLY_CATEGORYID.equals(category.getCategoryId()))
+            .filter(category ->  !SEND_AND_REPLY_CATEGORY_ID.equals(category.getCategoryId()))
             .sorted(Comparator.comparing(Category::getCategoryName))
             .collect(Collectors.toList());
 
