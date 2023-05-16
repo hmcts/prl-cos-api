@@ -482,7 +482,7 @@ public class SendAndReplyService {
         documentMap = new HashMap<>();
 
         List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
-            .filter(category ->  !category.getCategoryName().equals("sendAndReply"))
+            .filter(category ->  !category.getCategoryId().equals("sendAndReply"))
             .sorted(Comparator.comparing(Category::getCategoryName))
             .collect(Collectors.toList());
 
