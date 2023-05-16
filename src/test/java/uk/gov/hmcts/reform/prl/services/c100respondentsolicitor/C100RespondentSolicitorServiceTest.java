@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
+import uk.gov.hmcts.reform.prl.models.DxAddress;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
@@ -214,7 +215,11 @@ public class C100RespondentSolicitorServiceTest {
             .solicitorReference("test")
             .build();
 
-        List<ContactInformation> informationList = null;
+        List<ContactInformation> contactInformation = new ArrayList<>();
+        List<DxAddress> dxAddress = new ArrayList<>();
+        dxAddress.add(DxAddress.builder().dxNumber("dxNumber").build());
+        contactInformation.add(ContactInformation.builder()
+                                   .addressLine1("AddressLine1").dxAddress(dxAddress).build());
 
         respondent2 = PartyDetails.builder()
             .user(user)
@@ -320,7 +325,7 @@ public class C100RespondentSolicitorServiceTest {
             .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode("AB1 2MN").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .solicitorReference("test")
-            .organisations(Organisations.builder().contactInformation(informationList).build())
+            .organisations(Organisations.builder().contactInformation(contactInformation).build())
             .build();
 
         List<RespondentWelshNeedsListEnum> welshNeedsListEnum = new ArrayList<>();
