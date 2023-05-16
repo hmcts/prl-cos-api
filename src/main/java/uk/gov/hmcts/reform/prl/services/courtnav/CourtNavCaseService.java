@@ -91,7 +91,6 @@ public class CourtNavCaseService {
 
     public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
 
-        log.info("Entering inside the upload document in courtnav service:: ");
         if (null != document && null != document.getOriginalFilename()
             && checkFileFormat(document.getOriginalFilename())
             && checkTypeOfDocument(typeOfDocument)) {
@@ -118,7 +117,7 @@ public class CourtNavCaseService {
                 List.of(document)
             );
             log.info("Document uploaded successfully through caseDocumentClient");
-            CaseData updatedCaseData = updateCaseDataWithUploadedDocs(
+            updateCaseDataWithUploadedDocs(
                 caseId,
                 document.getOriginalFilename(),
                 typeOfDocument,
@@ -131,7 +130,7 @@ public class CourtNavCaseService {
                 .event(Event.builder()
                            .id(startEventResponse.getEventId())
                            .build())
-                .data(updatedCaseData).build();
+                .data(tempCaseData).build();
 
             coreCaseDataService.submitUpdate(authorisation,
                                              eventRequestData,
@@ -140,7 +139,6 @@ public class CourtNavCaseService {
                                              true);
 
             log.info("Document has been saved in caseData {}", document.getOriginalFilename());
-            log.info("Document details from caseData  {}", tempCaseData.getFl401UploadWitnessDocuments());
         } else {
             log.error("Un acceptable format/type of document {}", typeOfDocument);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -156,7 +154,7 @@ public class CourtNavCaseService {
         return null;
     }
 
-    private CaseData updateCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument,
+    private void updateCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument,
                                                 CaseData tempCaseData, Document document) {
         String partyName = tempCaseData.getApplicantCaseName() != null
             ? tempCaseData.getApplicantCaseName() : COURTNAV;
@@ -182,9 +180,7 @@ public class CourtNavCaseService {
             uploadedDocumentsList.add(uploadedDocsElement);
         }
 
-        tempCaseData = tempCaseData.toBuilder().courtNavUploadedDocs(uploadedDocumentsList).build();
-
-        return tempCaseData;
+        tempCaseData.builder().courtNavUploadedDocs(uploadedDocumentsList).build();
     }
 
     private boolean checkTypeOfDocument(String typeOfDocument) {
