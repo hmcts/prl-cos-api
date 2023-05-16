@@ -189,8 +189,8 @@ public class NoticeOfChangePartiesService {
         UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
             authorisation
         );
-        log.info("legalRepresentativeSolicitorDetails ===> " + legalRepresentativeSolicitorDetails.getId() + " "
-                     + legalRepresentativeSolicitorDetails.getEmail() + " "
+        log.info("legalRepresentativeSolicitorDetails ===> " + legalRepresentativeSolicitorDetails.getId() + "--"
+                     + legalRepresentativeSolicitorDetails.getEmail() + "--"
                      + legalRepresentativeSolicitorDetails.getFullName()
         );
 
@@ -209,8 +209,8 @@ public class NoticeOfChangePartiesService {
         UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
             authorisation
         );
-        log.info("legalRepresentativeSolicitorDetails ===> " + legalRepresentativeSolicitorDetails.getId() + " "
-                     + legalRepresentativeSolicitorDetails.getEmail() + " "
+        log.info("legalRepresentativeSolicitorDetails ===> " + legalRepresentativeSolicitorDetails.getId() + "--"
+                     + legalRepresentativeSolicitorDetails.getEmail() + "--"
                      + legalRepresentativeSolicitorDetails.getFullName()
         );
 
