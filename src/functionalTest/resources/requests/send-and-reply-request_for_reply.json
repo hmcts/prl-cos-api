@@ -2,13 +2,10 @@
   "case_details": {
     "callback_response_status": "string",
     "case_data": {
+      "applicantCaseName": "testCase",
       "caseTypeOfApplication": "C100",
-      "chooseSendOrReply": "SEND",
-      "messageReply": {
-        "isReplying": "Yes"
-      },
+      "chooseSendOrReply": "REPLY",
       "sendOrReplyMessage": {
-        "respondToMessage": "Yes",
         "openMessagesList": [{
           "id": "559c3c44-a2fc-475d-9822-42747c29469c",
           "value": {
