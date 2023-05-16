@@ -91,6 +91,7 @@ public class CourtNavCaseService {
 
     public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
 
+        log.info("Entering inside the upload document in courtnav service:: ");
         if (null != document && null != document.getOriginalFilename()
             && checkFileFormat(document.getOriginalFilename())
             && checkTypeOfDocument(typeOfDocument)) {

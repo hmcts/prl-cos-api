@@ -102,8 +102,10 @@ public class CourtNavCaseController {
 
             if (authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
                 log.info("uploading cafcass document");
+                log.info("Entering into if loop");
                 cafcassUploadDocService.uploadDocument(systemUserService.getSysUserToken(), file, typeOfDocument, caseId);
             } else {
+                log.info("Entering into else loop");
                 courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
             }
             return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
