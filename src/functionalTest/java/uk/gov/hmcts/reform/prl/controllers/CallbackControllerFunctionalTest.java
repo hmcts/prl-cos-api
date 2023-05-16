@@ -147,6 +147,19 @@ public class CallbackControllerFunctionalTest {
             .assertThat().statusCode(500);
     }
 
+    @Test
+    public void givenRequestWithApplicantOrRespondentCaseName_whenEndPointCalled_ResponseContainsCaseNameHmctsInternal() throws Exception {
+        String requestBody = ResourceLoader.loadJson(APPLICANT_CASE_NAME_REQUEST);
+        request
+            .header("Authorization", userToken)
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/about-to-submit-case-creation")
+            .then()
+            .body("data.caseNameHmctsInternal", equalTo("Test Name"))
+            .assertThat().statusCode(200);
+    }
 
     @Test
     public void givenRequestWithCaseNumberAdded_ResponseContainsIssueDate() throws Exception {
@@ -159,20 +172,6 @@ public class CallbackControllerFunctionalTest {
             .post("/fl401-add-case-number")
             .then()
             .body("data.issueDate", equalTo(LocalDate.now().toString()))
-            .assertThat().statusCode(200);
-    }
-
-    @Test
-    public void givenRequestWithApplicantOrRespondentCaseName_whenEndPointCalled_ResponseContainsCaseNameHmctsInternal() throws Exception {
-        String requestBody = ResourceLoader.loadJson(APPLICANT_CASE_NAME_REQUEST);
-        request
-            .header("Authorization", userToken)
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/about-to-submit-case-creation")
-            .then()
-            .body("data.caseNameHmctsInternal", equalTo("Test Name"))
             .assertThat().statusCode(200);
     }
 
