@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.SubmitConsentEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -83,20 +82,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
-import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
@@ -686,6 +671,9 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final RespondentSolicitorData respondentSolicitorData;
+
+    @JsonProperty("cafcassUploadedDocs")
+    private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
 
     // C100 Rebuild
     @JsonUnwrapped

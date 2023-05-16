@@ -4,21 +4,22 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.SubmitConsentEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
@@ -47,10 +48,7 @@ public class RespondentSolicitorData {
     /**
      * Respondent solicitor's international element.
      */
-    private final SolicitorInternationalElement internationalElementChild;
-    private final SolicitorInternationalElement internationalElementParent;
-    private final SolicitorInternationalElement internationalElementJurisdiction;
-    private final SolicitorInternationalElement internationalElementRequest;
+    private final CitizenInternationalElements internationalElementChild;
 
     /**
      * Respondent solicitor's allegations of harm.
@@ -65,8 +63,17 @@ public class RespondentSolicitorData {
     /** Confirm or Edit your contact details. **/
     private final CitizenDetails resSolConfirmEditContactDetails;
 
+    /**
+     * Respondent solicitor's Draft PDF response.
+     */
+    private final String viewC7PdflinkText;
+    private final String isEngC7DocGen;
     private final Document draftC7ResponseDoc;
+    private final Document finalC7ResponseDoc;
 
+    private final List<SubmitConsentEnum> respondentAgreeStatement;
+
+    private final Document draftC1ADoc;
     /**
      * Respondent solicitor's Current or Past proceedings.
      */
@@ -76,5 +83,5 @@ public class RespondentSolicitorData {
     /**
      * Respondent solicitor's Ability to participate proceedings.
      */
-    private final SolicitorAbilityToParticipateInProceedings abilityToParticipateInProceedings;
+    private final AbilityToParticipate abilityToParticipateInProceedings;
 }
