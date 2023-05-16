@@ -245,8 +245,6 @@ public class SendAndReplyController extends AbstractCallbackController {
             }
         }
 
-        log.info("updated case data after adding open message in the list  ----> {}", caseDataMap);
-
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
