@@ -19,7 +19,6 @@ import java.time.LocalDate;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.when;
 
 @Slf4j
 @SpringBootTest
