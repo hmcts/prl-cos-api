@@ -131,6 +131,7 @@ public class ServiceOfApplicationService {
 
     public CaseData sendNotificationForServiceOfApplication(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        log.info("Confirm recipients {}", caseData.getConfirmRecipients());
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getApplicantsList() != null)) {
                 log.info("serving applicants");

@@ -115,6 +115,7 @@ public class ServiceOfApplicationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
+        log.info("Confirm recipients in about to submit {}", caseData.getConfirmRecipients());
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);
