@@ -624,15 +624,13 @@ public class NoticeOfChangePartiesService {
         }
     }
 
-    public void updateLegalRepresentation(CallbackRequest callbackRequest, String authorisation, CaseData caseData,
-                                          Map<String, Object> updatedCaseData) {
+    public void updateLegalRepresentation(CallbackRequest callbackRequest, String authorisation, CaseData caseData) {
         if ("amendRespondentsDetails".equalsIgnoreCase(callbackRequest.getEventId())) {
             CaseData oldCaseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetailsBefore().getData(),
                 CaseData.class
             );
             caseData.getRespondents().stream().forEach(newRepresentedPartyElement -> {
-                PartyDetails currentRespondent = newRepresentedPartyElement.getValue();
                 int respondentIndex = caseData.getRespondents().indexOf(newRepresentedPartyElement);
                 Element<PartyDetails> oldRepresentedPartyElement = oldCaseData.getRespondents().get(respondentIndex);
                 if (YesNoDontKnow.no.equals(newRepresentedPartyElement.getValue().getDoTheyHaveLegalRepresentation())
