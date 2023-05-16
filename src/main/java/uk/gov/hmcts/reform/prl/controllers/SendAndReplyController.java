@@ -227,31 +227,28 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
-        log.info("Case Data New about to submit ----> {}", caseDataMap);
-
         if (caseData.getChooseSendOrReply().equals(SEND)) {
-            Message newMessage = sendAndReplyService.buildSendMessage(caseData);
+            Message newMessage = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                           caseData.getSendOrReplyMessage().getSendMessageObject());
 
             log.info("New message object created ----> {}", newMessage);
 
             List<Element<Message>> listOfMessages = sendAndReplyService.addNewOpenMessage(caseData, newMessage);
-
-            log.info("listOfMessages created ----> {}", listOfMessages);
-
             caseDataMap.put("openMessagesList", listOfMessages);
 
         } else {
-            //Reply message
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
+                //Reply & close
                 caseData = sendAndReplyService.closeMessage(caseData);
                 caseDataMap.put("closedMessagesList", caseData.getSendOrReplyMessage().getClosedMessagesList());
                 caseDataMap.put("openMessagesList", caseData.getSendOrReplyMessage().getOpenMessagesList());
+            } else {
+                //Reply & append history
+                caseDataMap.put("openMessagesList", sendAndReplyService.replyAndAppendMessageHistory(caseData));
             }
         }
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
-
-        log.info("updated case data after adding open message in the list  ----> {}", caseDataMap);
 
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 

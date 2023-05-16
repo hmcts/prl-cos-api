@@ -409,13 +409,14 @@ public class SendAndReplyControllerTest {
             .chooseSendOrReply(SEND)
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
+            .sendOrReplyMessage(SendOrReplyMessage.builder().build())
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).buildSendMessage(caseData);
+        verify(sendAndReplyService).buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject());
     }
 
     @Test

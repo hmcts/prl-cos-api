@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.CodeAndLabel;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
+import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
@@ -104,6 +106,7 @@ public class SendAndReplyService {
     private static final String TABLE_ROW_END = "</tr>";
     private static final String TABLE_ROW_DATA_BEGIN = "<td>";
     private static final String TABLE_ROW_DATA_END = "</td>";
+    private static final String HORIZONTAL_LINE = "<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>";
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -529,41 +532,43 @@ public class SendAndReplyService {
 
     }
 
-    public Message buildSendMessage(CaseData caseData) {
+    public Message buildSendReplyMessage(CaseData caseData, Message message) {
+        log.info("Message :{}", message);
+        if (null == message) {
+            return Message.builder().build();
+        }
 
-        final SendOrReplyMessage sendOrReplyMessage = caseData.getSendOrReplyMessage();
-        final Message sendMessage = sendOrReplyMessage.getSendMessageObject();
-        JudicialUser judicialUser = sendMessage.getSendReplyJudgeName();
+        JudicialUser judicialUser = message.getSendReplyJudgeName();
 
         return Message.builder()
             .status(OPEN)
             .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
-            .internalOrExternalMessageEnum(sendMessage.getInternalOrExternalMessageEnum())
-            .internalMessageUrgent(sendMessage.getInternalMessageUrgent())
-            .internalMessageWhoToSendToEnum(sendMessage.getInternalMessageWhoToSendToEnum())
-            .messageAboutEnum(sendMessage.getMessageAboutEnum())
+            .internalOrExternalMessageEnum(message.getInternalOrExternalMessageEnum())
+            .internalMessageUrgent(message.getInternalMessageUrgent())
+            .internalMessageWhoToSendToEnum(message.getInternalMessageWhoToSendToEnum())
+            .messageAboutEnum(message.getMessageAboutEnum())
             .judgeName((null != judicialUser && isNotBlank(judicialUser.getPersonalCode()))
                            ? getJudgeName(judicialUser) : null)
-            .messageSubject(sendMessage.getMessageSubject())
-            .recipientEmailAddresses(sendMessage.getRecipientEmailAddresses())
-            .selectedCtscEmail(sendMessage.getCtscEmailList() != null
-                                   ? sendMessage.getCtscEmailList().getValueCode() : null)
-            .judicialOrMagistrateTierCode(sendMessage.getJudicialOrMagistrateTierList() != null
-                                              ? sendMessage.getJudicialOrMagistrateTierList().getValueCode() : null)
-            .judicialOrMagistrateTierValue(sendMessage.getJudicialOrMagistrateTierList() != null
-                                               ? sendMessage.getJudicialOrMagistrateTierList().getValueLabel() : null)
-            .selectedLinkedApplicationCode(sendMessage.getLinkedApplicationsList() != null
-                                               ? sendMessage.getLinkedApplicationsList().getValueCode() : null)
-            .selectedLinkedApplicationValue(sendMessage.getLinkedApplicationsList() != null
-                                                ? sendMessage.getLinkedApplicationsList().getValueLabel() : null)
-            .selectedFutureHearingCode(sendMessage.getFutureHearingsList() != null
-                                           ? sendMessage.getFutureHearingsList().getValueCode() : null)
-            .selectedFutureHearingValue(sendMessage.getFutureHearingsList() != null
-                                            ? sendMessage.getFutureHearingsList().getValueLabel() : null)
-            .selectedSubmittedDocumentCode(sendMessage.getSubmittedDocumentsList() != null
-                                               ? sendMessage.getSubmittedDocumentsList().getValueCode() : null)
-            .selectedSubmittedDocumentValue(sendMessage.getSubmittedDocumentsList() != null
-                                                ? sendMessage.getSubmittedDocumentsList().getValueLabel() : null)
+            .messageSubject(message.getMessageSubject())
+            .recipientEmailAddresses(message.getRecipientEmailAddresses())
+            .selectedCtscEmail(message.getCtscEmailList() != null
+                                   ? message.getCtscEmailList().getValueCode() : null)
+            .judicialOrMagistrateTierCode(message.getJudicialOrMagistrateTierList() != null
+                                              ? message.getJudicialOrMagistrateTierList().getValueCode() : null)
+            .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierList() != null
+                                               ? message.getJudicialOrMagistrateTierList().getValueLabel() : null)
+            .selectedLinkedApplicationCode(message.getLinkedApplicationsList() != null
+                                               ? message.getLinkedApplicationsList().getValueCode() : null)
+            .selectedLinkedApplicationValue(message.getLinkedApplicationsList() != null
+                                                ? message.getLinkedApplicationsList().getValueLabel() : null)
+            .selectedFutureHearingCode(message.getFutureHearingsList() != null
+                                           ? message.getFutureHearingsList().getValueCode() : null)
+            .selectedFutureHearingValue(message.getFutureHearingsList() != null
+                                            ? message.getFutureHearingsList().getValueLabel() : null)
+            .selectedSubmittedDocumentCode(message.getSubmittedDocumentsList() != null
+                                               ? message.getSubmittedDocumentsList().getValueCode() : null)
+            .selectedSubmittedDocumentValue(message.getSubmittedDocumentsList() != null
+                                                ? message.getSubmittedDocumentsList().getValueLabel() : null)
             .updatedTime(dateTime.now())
             .messageContent(caseData.getMessageContent())
             .senderEmail(null != caseData.getMessageMetaData()
@@ -673,6 +678,23 @@ public class SendAndReplyService {
         lines.add("<div class='width-50'>");
         lines.add("<table>");
 
+        //previous history
+        log.info("Message history :{}", message.getReplyHistory());
+        if (null != message.getReplyHistory()) {
+            message.getReplyHistory().stream()
+                .map(Element::getValue)
+                .forEach(history -> {
+                    addRowToMessageTable(lines, "From", history.getMessageFrom());
+                    addRowToMessageTable(lines, "To", history.getMessageTo());
+                    addRowToMessageTable(lines, "Message Date", history.getMessageDate());
+                    addRowToMessageTable(lines, "Urgent", history.getIsUrgent().getDisplayedValue());
+                    lines.add(HORIZONTAL_LINE);
+                });
+        }
+
+        lines.add(HORIZONTAL_LINE);
+        lines.add(HORIZONTAL_LINE);
+        //latest message
         addRowToMessageTable(lines, "From", message.getSenderEmail());
         addRowToMessageTable(lines, "To", message.getInternalMessageWhoToSendToEnum().name());
         addRowToMessageTable(lines, "Message Date", message.getDateSent());
@@ -707,6 +729,7 @@ public class SendAndReplyService {
      * @param message Message
      */
     public void sendNotificationEmailOther(CaseData caseData, Message message) {
+        log.info("RecipientEmailAddresses {}", message.getRecipientEmailAddresses());
         if (ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())) {
             final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
 
@@ -734,4 +757,40 @@ public class SendAndReplyService {
             .build();
     }
 
+    public List<Element<Message>> replyAndAppendMessageHistory(CaseData caseData) {
+        UUID replyMessageId = elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
+
+        Message replyMessage = this.buildSendReplyMessage(caseData,
+                                                          caseData.getSendOrReplyMessage().getReplyMessageObject());
+
+        List<Element<MessageHistory>> messageHistoryList = new ArrayList<>();
+        return caseData.getSendOrReplyMessage().getOpenMessagesList().stream()
+            .map(messageElement -> {
+                if (replyMessageId.equals(messageElement.getId())) {
+                    Message message = messageElement.getValue();
+
+                    MessageHistory messageHistory = buildReplyMessageHistory(message);
+                    if (null != message.getReplyHistory()) {
+                        messageHistoryList.addAll(message.getReplyHistory());
+                    }
+                    messageHistoryList.add(element(messageHistory));
+
+                    replyMessage.setReplyHistory(messageHistoryList);
+                    replyMessage.setUpdatedTime(dateTime.now());
+
+                    return element(messageElement.getId(), replyMessage);
+                }
+                return messageElement;
+            }).collect(Collectors.toList());
+    }
+
+    private MessageHistory buildReplyMessageHistory(Message message) {
+        return MessageHistory.builder()
+            .messageFrom(message.getSenderEmail())
+            .messageTo(message.getRecipientEmail())
+            .messageDate(message.getUpdatedTime().toString())
+            .isUrgent(YesOrNo.valueOf(message.getMessageUrgency()))
+            .build();
+    }
 }
