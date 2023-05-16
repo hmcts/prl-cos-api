@@ -204,7 +204,7 @@ public class C100RespondentSolicitorServiceTest {
             .isEmailAddressConfidential(Yes)
             .isPhoneNumberConfidential(Yes)
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
-            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode("AB1 2MN").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
