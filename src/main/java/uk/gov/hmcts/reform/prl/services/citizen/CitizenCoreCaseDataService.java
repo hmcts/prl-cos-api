@@ -116,7 +116,6 @@ public class CitizenCoreCaseDataService {
         try {
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
             EventRequestData eventRequestData = eventRequest(caseEvent, userDetails.getId());
-
             StartEventResponse startEventResponse = ccdCoreCaseDataService.startUpdate(
                 authorisation,
                 eventRequestData,
