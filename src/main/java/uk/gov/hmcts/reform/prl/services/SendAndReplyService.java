@@ -696,9 +696,13 @@ public class SendAndReplyService {
         lines.add(HORIZONTAL_LINE);
         //latest message
         addRowToMessageTable(lines, "From", message.getSenderEmail());
-        addRowToMessageTable(lines, "To", message.getInternalMessageWhoToSendToEnum().name());
+        if (null != message.getInternalMessageWhoToSendToEnum()) {
+            addRowToMessageTable(lines, "To", message.getInternalMessageWhoToSendToEnum().name());
+        }
         addRowToMessageTable(lines, "Message Date", message.getDateSent());
-        addRowToMessageTable(lines, "Urgent", message.getInternalMessageUrgent().getDisplayedValue());
+        if (null != message.getInternalMessageUrgent()) {
+            addRowToMessageTable(lines, "Urgent", message.getInternalMessageUrgent().getDisplayedValue());
+        }
         addRowToMessageTable(lines, "Subject", message.getMessageSubject());
         addRowToMessageTable(lines, "Message", message.getMessageContent());
 
