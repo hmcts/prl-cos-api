@@ -30,7 +30,6 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -68,12 +67,25 @@ public class ServiceOfApplicationController {
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
         caseDataUpdated.put(
             "serviceOfApplicationScreen1",
             dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, null)
         );
+        caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
 
+    @PostMapping(path = "/mid", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Serve Parties Email Notification")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleMidEvent(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
+        log.info("Confirm recipients in mid before {}", caseData.getConfirmRecipients());
         Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
             .getApplicantsMultiSelectList(caseData);
         List<DynamicMultiselectListElement> applicantList = applicantDetails.get("applicants");
@@ -102,9 +114,10 @@ public class ServiceOfApplicationController {
                                  .build())
             .build();
         caseData = caseData.toBuilder().confirmRecipients(confirmRecipients).build();
+        log.info("Confirm recipients in mid after {}", caseData.getConfirmRecipients());
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
-        caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
-        log.info("recipients {}", confirmRecipients);
+        log.info("Confirm recipients in mid from map {}", caseDataUpdated.get("confirmRecipients"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
