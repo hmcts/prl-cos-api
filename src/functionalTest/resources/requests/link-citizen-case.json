@@ -2703,8 +2703,8 @@
   "serveOrderDynamicList": {
     "value": [
       {
-      "code": "string",
-      "label": "string"
+        "code": "string",
+        "label": "string"
       }
     ],
     "list_items": [
@@ -3491,12 +3491,10 @@
     "otherEmailOptionChecked": [
       "Other(Optional)"
     ],
-    "cafcassEmailAddressList": [
-      {
-        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "value": "string"
-      }
-    ],
+    "cafcassEmailAddressForNotifications": {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": "string"
+    },
     "otherEmailAddressList": [
       {
         "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
