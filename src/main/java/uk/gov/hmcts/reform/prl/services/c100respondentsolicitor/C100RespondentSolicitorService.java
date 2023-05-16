@@ -557,15 +557,15 @@ public class C100RespondentSolicitorService {
         Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
         Response response = solicitorRepresentedRespondent.getValue().getResponse();
 
-        Map<String, Object> respondentDetails = new HashMap<>();
-        respondentDetails.put("courtName", callbackRequest.getCaseDetails().getData().get(COURT_NAME).toString());
-        respondentDetails.put("caseNumber", callbackRequest.getCaseDetails().getId());
-        respondentDetails.put("fullName", response.getCitizenDetails()
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("courtName", callbackRequest.getCaseDetails().getData().get(COURT_NAME).toString());
+        dataMap.put("caseNumber", callbackRequest.getCaseDetails().getId());
+        dataMap.put("fullName", response.getCitizenDetails()
             .getFirstName() + " " + response.getCitizenDetails()
             .getLastName());
-        respondentDetails.put("dob", response.getCitizenDetails().getDateOfBirth());
-        respondentDetails.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
-        respondentDetails.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
+        dataMap.put("dob", response.getCitizenDetails().getDateOfBirth());
+        dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
+        dataMap.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -576,7 +576,7 @@ public class C100RespondentSolicitorService {
             caseData,
             SOLICITOR_C7_DRAFT_DOCUMENT,
             false,
-            respondentDetails
+            dataMap
         );
         caseDataUpdated.put("draftC7ResponseDoc", document);
 
@@ -586,7 +586,7 @@ public class C100RespondentSolicitorService {
                 caseData,
                 SOLICITOR_C1A_DRAFT_DOCUMENT,
                 false,
-                respondentDetails
+                dataMap
             );
             caseDataUpdated.put("draftC1ADoc", documentForC1A);
         }

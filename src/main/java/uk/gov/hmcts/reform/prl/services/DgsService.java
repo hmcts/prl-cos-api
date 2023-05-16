@@ -30,13 +30,12 @@ public class DgsService {
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
 
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName,
-                                                  Map<String, Object> respondentDetails) throws Exception {
+                                                  Map<String, Object> dataMap) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo;
-        log.info("swanky palceholder name {}", templateName);
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
-                    .builder().template(templateName).values(respondentDetails).build()
+                    .builder().template(templateName).values(dataMap).build()
                 );
 
         } catch (Exception ex) {

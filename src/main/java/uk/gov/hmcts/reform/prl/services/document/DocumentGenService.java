@@ -635,7 +635,7 @@ public class DocumentGenService {
     }
 
     private GeneratedDocumentInfo generateDocument(String authorisation, String template, CaseData caseData,
-                                                   boolean isWelsh, Map<String, Object> respondentDetails)
+                                                   boolean isWelsh, Map<String, Object> dataMap)
         throws Exception {
         log.info("Generating the {} document for case id {} ", template, caseData.getId());
         GeneratedDocumentInfo generatedDocumentInfo = null;
@@ -645,7 +645,7 @@ public class DocumentGenService {
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
                 template,
-                respondentDetails
+                dataMap
             );
         } else {
             log.info("Generating document for {} ", template);
@@ -653,7 +653,7 @@ public class DocumentGenService {
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
                 template,
-                respondentDetails
+                dataMap
             );
         }
         if (null != generatedDocumentInfo) {
