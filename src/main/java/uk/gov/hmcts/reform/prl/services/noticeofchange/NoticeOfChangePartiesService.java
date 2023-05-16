@@ -467,12 +467,12 @@ public class NoticeOfChangePartiesService {
                                 x
                             );
                             break;
-                        //  case DAAPPLICANT:
-                        //      solicitorRepresentedParties.add(Element.builder().value(PartyDetails.builder().build()).build());
-                        //      break;
-                        //  case DARESPONDENT:
-                        //      solicitorRepresentedParties.add(caseData.getRespondentsFL401());
-                        //      break;
+                        case DAAPPLICANT:
+                            selectedPartyDetailsMap.put(SolicitorRole.FL401APPLICANTSOLICITOR, caseData.getApplicantsFL401());
+                            break;
+                        case DARESPONDENT:
+                            selectedPartyDetailsMap.put(SolicitorRole.FL401RESPONDENTSOLICITOR, caseData.getRespondentsFL401());
+                            break;
                         default:
                             break;
                     }
