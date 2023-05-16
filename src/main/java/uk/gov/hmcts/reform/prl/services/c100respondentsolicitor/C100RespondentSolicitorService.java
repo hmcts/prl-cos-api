@@ -564,6 +564,8 @@ public class C100RespondentSolicitorService {
             .getFirstName() + " " + response.getCitizenDetails()
             .getLastName());
         respondentDetails.put("dob", response.getCitizenDetails().getDateOfBirth());
+        respondentDetails.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
+        respondentDetails.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
