@@ -140,6 +140,7 @@ public class CourtNavCaseService {
                                              true);
 
             log.info("Document has been saved in caseData {}", document.getOriginalFilename());
+            log.info("Document details from caseData  {}", tempCaseData.getFl401UploadWitnessDocuments());
         } else {
             log.error("Un acceptable format/type of document {}", typeOfDocument);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
