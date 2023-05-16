@@ -406,7 +406,7 @@ public class SendAndReplyService {
 
     public DynamicList getOtherApllicationsist(CaseData caseData) {
 
-        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements = null;
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements;
 
         if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
             List<DynamicListElement> dynamicListElements = new ArrayList<>();
@@ -417,14 +417,12 @@ public class SendAndReplyService {
                         .label("Other applications - "
                                    .concat(additionalApplicationsBundleElement.getValue().getOtherApplicationsBundle().getUploadedDateTime()))
                         .build());
-                   ;
                 }
                 if (additionalApplicationsBundleElement.getValue().getC2DocumentBundle() != null) {
                     dynamicListElements.add(DynamicListElement.builder().code("C2 application")
                         .label("C2 application - "
                                    .concat(additionalApplicationsBundleElement.getValue().getC2DocumentBundle().getUploadedDateTime()))
                         .build());
-                   ;
                 }
             });
             return  getDynamicList(dynamicListElements);
@@ -475,7 +473,6 @@ public class SendAndReplyService {
         } catch (Exception e) {
             log.error("Error in getCategoriesAndDocuments method", e);
         }
-        log.info("Document Map for dropdown documents ---> {}", documentMap);
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY).build();
     }
@@ -485,6 +482,7 @@ public class SendAndReplyService {
         documentMap = new HashMap<>();
 
         List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
+            .filter(category ->  !category.getCategoryName().equals("sendAndReply"))
             .sorted(Comparator.comparing(Category::getCategoryName))
             .collect(Collectors.toList());
 
@@ -492,6 +490,7 @@ public class SendAndReplyService {
         createDynamicListFromSubCategories(parentCategories, dynamicListElementList, null, null);
 
         categoriesAndDocuments.getUncategorisedDocuments().forEach(document -> {
+
             dynamicListElementList.add(
                 DynamicListElement.builder().code(fetchDocumentIdFromUrl(document.getDocumentURL()))
                     .label(document.getDocumentFilename()).build()
