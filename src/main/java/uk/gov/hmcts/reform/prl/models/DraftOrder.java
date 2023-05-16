@@ -11,14 +11,17 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -48,12 +51,16 @@ public class DraftOrder {
     private final List<Element<MagistrateLastName>> magistrateLastName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
-    private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate approvalDate;
+    private final YesOrNo isTheOrderAboutAllChildren;
     private final String recitalsOrPreamble;
     @JsonProperty("orderDirections")
     private final String orderDirections;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
+    @JsonProperty("furtherInformationIfRequired")
+    private final String furtherInformationIfRequired;
     private final String parentName;
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
     private final String manageOrdersFl402CourtName;
@@ -109,6 +116,26 @@ public class DraftOrder {
     private final LocalDate underTakingDateExpiry;
     private final String underTakingExpiryTime;
     private final YesOrNo underTakingFormSign;
+
+    private final String orderSelectionType;
+    private final String orderCreatedBy;
+    @JsonProperty("isOrderUploadedByJudgeOrAdmin")
+    private final YesOrNo isOrderUploadedByJudgeOrAdmin;
+    private final String childrenList;
+    @JsonProperty("manageOrderHearingDetails")
+    private final List<Element<HearingData>> manageOrderHearingDetails;
+    private final YesOrNo isTheOrderAboutChildren;
+    @JsonProperty("childOption")
+    private final DynamicMultiSelectList childOption;
+    private final C21OrderOptionsEnum c21OrderOptions;
+    //PRL-3318 - Added for storing hearing dropdown
+    private DynamicList hearingsType;
+
+    @JsonProperty("hasJudgeProvidedHearingDetails")
+    private YesOrNo hasJudgeProvidedHearingDetails;
+
+    private final SdoDetails sdoDetails;
+    private final YesOrNo isOrderCreatedBySolicitor;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {

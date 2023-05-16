@@ -40,6 +40,7 @@ public class Child {
     private final List<LiveWithEnum> childLiveWith;
     private final List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild;
     private final String parentalResponsibilityDetails;
+    private final YesOrNo isFinalOrderIssued;
 
     public boolean hasConfidentialInfo() {
         return YesOrNo.Yes.equals(this.isChildAddressConfidential);

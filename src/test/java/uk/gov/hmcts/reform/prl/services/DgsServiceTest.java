@@ -94,7 +94,6 @@ public class DgsServiceTest {
             .build();
 
         assertEquals(dgsService.generateWelshDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE),generatedDocumentInfo);
-
     }
 
     @Test

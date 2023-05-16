@@ -37,6 +37,10 @@ public enum DomesticAbuseOrdersEnum {
     hospitalOrder("hospitalOrder", "Hospital order (FL413)"),
     @JsonProperty("guardianshipOrder")
     guardianshipOrder("guardianshipOrder", "Guardianship order (FL414)"),
+    @JsonProperty("statementOfService")
+    statementOfService("statementOfService", "Statement of service (FL415)"),
+    @JsonProperty("blankOrderFL415")
+    blankOrderFL415("blankOrderFL415", "Blank order (FL415)"),
     @JsonProperty("landlordOrMortgageNotice")
     landlordOrMortgageNotice("landlordOrMortgageNotice", "Notice to landlord or mortgage company (FL416)");
 

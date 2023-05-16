@@ -27,7 +27,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUE;
+import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationServiceTest {
@@ -115,7 +115,7 @@ public class ServiceOfApplicationServiceTest {
         CaseDetails caseDetails = CaseDetails
             .builder()
             .id(123L)
-            .state(CASE_ISSUE.getValue())
+            .state(CASE_ISSUED.getValue())
             .data(casedata)
             .build();
         CaseData caseData1 = serviceOfApplicationService.sendPost(caseDetails,"test auth");
@@ -137,7 +137,7 @@ public class ServiceOfApplicationServiceTest {
         CaseDetails caseDetails = CaseDetails
             .builder()
             .id(123L)
-            .state(CASE_ISSUE.getValue())
+            .state(CASE_ISSUED.getValue())
             .data(casedata)
             .build();
         CaseData caseData1 = serviceOfApplicationService.sendPost(caseDetails,"test auth");
@@ -160,7 +160,7 @@ public class ServiceOfApplicationServiceTest {
         CaseDetails caseDetails = CaseDetails
             .builder()
             .id(123L)
-            .state(CASE_ISSUE.getValue())
+            .state(CASE_ISSUED.getValue())
             .data(casedata)
             .build();
         CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
@@ -183,7 +183,7 @@ public class ServiceOfApplicationServiceTest {
         CaseDetails caseDetails = CaseDetails
             .builder()
             .id(123L)
-            .state(CASE_ISSUE.getValue())
+            .state(CASE_ISSUED.getValue())
             .data(casedata)
             .build();
         CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
@@ -207,7 +207,7 @@ public class ServiceOfApplicationServiceTest {
         CaseDetails caseDetails = CaseDetails
             .builder()
             .id(123L)
-            .state(CASE_ISSUE.getValue())
+            .state(CASE_ISSUED.getValue())
             .data(casedata)
             .build();
         CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
