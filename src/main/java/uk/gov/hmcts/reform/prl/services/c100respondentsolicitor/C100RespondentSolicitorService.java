@@ -583,14 +583,15 @@ public class C100RespondentSolicitorService {
         dataMap.put("repEmail", solicitorRepresentedRespondent.getValue().getSolicitorEmail());
         if (solicitorRepresentedRespondent.getValue().getDxNumber() != null) {
             dataMap.put("dxNumber", solicitorRepresentedRespondent.getValue().getDxNumber());
-        } else {
-            if (solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation() != null) {
-                for (ContactInformation contactInformation : solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation()) {
-                    for (DxAddress dxAddress : contactInformation.getDxAddress()) {
-                        dataMap.put("dxNumber", dxAddress.getDxNumber());
-                    }
+        } else if (solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation() != null) {
+            log.info("swanky {}", solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation());
+            for (ContactInformation contactInformation : solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation()) {
+                for (DxAddress dxAddress : contactInformation.getDxAddress()) {
+                    dataMap.put("dxNumber", dxAddress.getDxNumber());
                 }
             }
+        } else {
+            dataMap.put("dxNumber", " ");
         }
         dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
 
