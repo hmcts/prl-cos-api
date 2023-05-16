@@ -579,6 +579,13 @@ public class C100RespondentSolicitorService {
         if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getPostCode() != null) {
             dataMap.put("repPostcode", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getPostCode());
         }
+        dataMap.put("repEmail", solicitorRepresentedRespondent.getValue().getSolicitorEmail());
+        if (solicitorRepresentedRespondent.getValue().getDxNumber() != null) {
+            dataMap.put("dxNumber", solicitorRepresentedRespondent.getValue().getDxNumber());
+        } else {
+            dataMap.put("organisationInfo", solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation());
+        }
+        dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
