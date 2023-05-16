@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.Respo
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
