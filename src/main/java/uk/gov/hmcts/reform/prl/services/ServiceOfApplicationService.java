@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
@@ -24,7 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.A;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.B;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.Q;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.R;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.S;
+
 
 @Service
 @Slf4j
@@ -105,7 +112,8 @@ public class ServiceOfApplicationService {
                     serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
                         authorization,
-                        party.get().getValue()
+                        party.get().getValue(),
+                        getNotificationPack(caseData, "O")
                     );
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -113,6 +121,12 @@ public class ServiceOfApplicationService {
             });
         }
         return caseData;
+    }
+
+    public void sendEmailToOtherEmails(String authorization, CaseDetails caseDetails, CaseData caseData) throws Exception {
+        serviceOfApplicationEmailService.sendEmailNotificationToOtherEmails(authorization, caseDetails, caseData,
+                                                                                   getNotificationPack(caseData, "G"));
+
     }
 
     public CaseData sendNotificationForServiceOfApplication(CaseDetails caseDetails, String authorization) throws Exception {
@@ -128,14 +142,15 @@ public class ServiceOfApplicationService {
             }
             if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getOtherEmailAddressList() != null)) {
                 log.info("serving LA");
-                serviceOfApplicationEmailService.sendEmailToLocalAuthority(caseDetails, caseData);
+                sendEmailToOtherEmails(authorization, caseDetails, caseData);
             }
             if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getOtherPeopleList() != null)) {
                 log.info("serving other people in case");
                 caseData = sendPostToOtherPeopleInCase(caseDetails, authorization);
             }
-            caseInviteManager.generatePinAndSendNotificationEmail(caseData);
+
         }
+        caseInviteManager.generatePinAndSendNotificationEmail(caseData);
 
         return caseData;
     }
@@ -149,15 +164,17 @@ public class ServiceOfApplicationService {
             List<DynamicMultiselectListElement> applicantsList = applicantsToNotify.getListItems();
             applicantsList.forEach(applicant -> {
                 Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
+                String docPackFlag = "";
                 if (party.isPresent() && party.get().getValue().getSolicitorEmail() != null) {
                     log.info("party" + party.get().getValue());
                     log.info("party" + party.get().getValue().getSolicitorEmail());
                     try {
                         log.info("Sending the email notification to applicant solicitor for C100 Application for caseId {}", caseDetails.getId());
 
-                        //TO_DO:Remya authorization to below call
-                        serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(caseDetails, party.get().getValue(),
-                                                                                                       EmailTemplateNames.APPLICANT_SOLICITOR_CA);
+                        docPackFlag = "Q";
+                        serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(authorization, caseDetails, party.get().getValue(),
+                                                                                                   EmailTemplateNames.APPLICANT_SOLICITOR_CA,
+                                                                                                   getNotificationPack(caseData, docPackFlag));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -165,7 +182,14 @@ public class ServiceOfApplicationService {
                     if (party.get().getValue().getSolicitorAddress() != null) {
                         log.info("Sending the notification in post to applicant solicitor for C100 Application for caseId {}", caseDetails.getId());
 
-                        serviceOfApplicationPostService.sendPostNotificationToParty(caseData, authorization, party.get().getValue());
+                        docPackFlag = "Q";
+                        try {
+                            serviceOfApplicationPostService.sendPostNotificationToParty(caseData, authorization, party.get().getValue(),
+                                                                                        getNotificationPack(caseData, docPackFlag));
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+
                     } else {
                         log.info("Unable to send any notification to applicant solicitor for C100 Application for caseId {} "
                                      + "as no address available", caseDetails.getId());
@@ -177,12 +201,15 @@ public class ServiceOfApplicationService {
             );
         } else {
             PartyDetails applicant = caseData.getApplicantsFL401();
+            String docPackFlag = "";
             if (caseData.getConfirmRecipients().getApplicantsList().getListItems().contains(applicant) && YesOrNo.Yes.getDisplayedValue()
                     .equalsIgnoreCase(applicant.getSolicitorEmail())) {
                 try {
                     log.info("Sending the email notification to applicant solicitor for FL401 Application for caseId {}", caseDetails.getId());
-                    serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(caseDetails,
-                                                                                               applicant,EmailTemplateNames.APPLICANT_SOLICITOR_DA);
+                    docPackFlag = "A";
+                    serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(authorization,caseDetails,
+                                                                                               applicant,EmailTemplateNames.APPLICANT_SOLICITOR_DA,
+                                                                                               getNotificationPack(caseData, docPackFlag));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -190,8 +217,9 @@ public class ServiceOfApplicationService {
                 .equalsIgnoreCase(applicant.getSolicitorEmail())) {
                 if (applicant.getSolicitorAddress() != null) {
                     log.info("Sending the notification in post to applicant solicitor for FL401 Application for caseId {}", caseDetails.getId());
-
-                    serviceOfApplicationPostService.sendPostNotificationToParty(caseData, authorization, applicant);
+                    docPackFlag = "A";
+                    serviceOfApplicationPostService.sendPostNotificationToParty(caseData, authorization, applicant,
+                                                                                getNotificationPack(caseData, docPackFlag));
                 } else {
                     log.info("Unable to send any notification to applicant solicitor for FL401 Application for caseId {} "
                                  + "as no address available", caseDetails.getId());
@@ -213,6 +241,7 @@ public class ServiceOfApplicationService {
             List<DynamicMultiselectListElement> respondentsList = respondentsToNotify.getListItems();
             respondentsList.forEach(respondentc100 -> {
                 Optional<Element<PartyDetails>> party = getParty(respondentc100.getCode(), respondentListC100);
+                String docPackFlag = "";
                 if (party.isPresent() && YesNoDontKnow.yes.equals(party.get().getValue().getDoTheyHaveLegalRepresentation())) {
 
                     if (YesOrNo.Yes.getDisplayedValue()
@@ -221,10 +250,12 @@ public class ServiceOfApplicationService {
                             log.info("Sending the email notification to respondent solicitor for C100 Application for caseId {}",
                                      caseDetails.getId());
 
+                            docPackFlag = "S";
                             serviceOfApplicationEmailService.sendEmailNotificationToRespondentSolicitor(
-                                caseDetails,
+                                authorization,caseDetails,
                                 party.get().getValue(),
-                                EmailTemplateNames.APPLICANT_SOLICITOR_CA
+                                EmailTemplateNames.RESPONDENT_SOLICITOR,
+                                getNotificationPack(caseData, docPackFlag)
                             );
                         } catch (Exception e) {
                             throw new RuntimeException(e);
@@ -234,10 +265,15 @@ public class ServiceOfApplicationService {
                             log.info("Sending the notification in post to respondent solicitor for C100 Application for caseId {}",
                                                        caseDetails.getId());
 
-                            serviceOfApplicationPostService.sendPostNotificationToParty(
-                                                       caseData,
-                                                       authorization,
-                                                       party.get().getValue());
+                            docPackFlag = "S";
+                            try {
+                                serviceOfApplicationPostService.sendPostNotificationToParty(
+                                                           caseData,authorization,
+                                                           party.get().getValue(),
+                                                           getNotificationPack(caseData, docPackFlag));
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
                         } else {
                             log.info("Unable to send any notification to respondent solicitor for C100 Application for caseId {} "
                                          + "as no address available", caseDetails.getId());
@@ -248,14 +284,21 @@ public class ServiceOfApplicationService {
                     if (party.get().getValue().getAddress() != null) {
                         log.info("Sending the notification in post to respondent for C100 Application for caseId {}",
                                  caseDetails.getId());
-                        serviceOfApplicationPostService.sendPostNotificationToParty(
-                                                   caseData,
-                                                   authorization,
-                                                   party.get().getValue());
+                        docPackFlag = "R";
+                        try {
+                            serviceOfApplicationPostService.sendPostNotificationToParty(
+                                                       caseData,
+                                                       authorization,
+                                                       party.get().getValue(),
+                                                       getNotificationPack(caseData, docPackFlag));
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             });
         } else {
+            String docPackFlag = "";
             PartyDetails respondentFL401 = caseData.getRespondentsFL401();
             PartyDetails applicantFL401 = caseData.getApplicantsFL401();
             if (caseData.getConfirmRecipients().getRespondentsList().getListItems().contains(respondentFL401)
@@ -266,9 +309,11 @@ public class ServiceOfApplicationService {
                             "Sending the email notification to respondent solicitor for FL401 Application for caseId {}",
                             caseDetails.getId()
                         );
-                        serviceOfApplicationEmailService.sendEmailNotificationToRespondentSolicitor(caseDetails,
-                                                                                                    applicantFL401,
-                                                                                                    EmailTemplateNames.APPLICANT_SOLICITOR_DA
+                        docPackFlag = "B";
+                        serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(authorization,caseDetails,
+                                                                                                    respondentFL401,
+                                                                                                    EmailTemplateNames.APPLICANT_SOLICITOR_DA,
+                                                                                                   getNotificationPack(caseData, docPackFlag)
                         );
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -279,11 +324,12 @@ public class ServiceOfApplicationService {
                             "Sending the notification in post to respondent solicitor for FL401 Application for caseId {}",
                             caseDetails.getId()
                         );
-
+                        docPackFlag = "B";
                         serviceOfApplicationPostService.sendPostNotificationToParty(
                             caseData,
                             authorization,
-                            applicantFL401
+                            respondentFL401,
+                            getNotificationPack(caseData, docPackFlag)
                         );
                     } else {
                         log.info(
@@ -307,4 +353,95 @@ public class ServiceOfApplicationService {
 
         return party;
     }
+
+    private List<Document> getNotificationPack(CaseData caseData, String requiredPack) throws Exception {
+        List<Document> docs = new ArrayList<>();
+        switch (requiredPack) {
+            case Q:
+                docs.addAll(generatePackQ(caseData));
+                break;
+            case S:
+                docs.addAll(generatePackS(caseData));
+                break;
+            case R:
+                docs.addAll(generatePackR(caseData));
+                break;
+            case A:
+                docs.addAll(generatePackA(caseData));
+                break;
+            case B:
+                docs.addAll(generatePackB(caseData));
+                break;
+            default:
+                break;
+        }
+        return  docs;
+
+    }
+
+    private List<Document> generatePackQ(CaseData caseData) throws Exception {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getMandatoryCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        return docs;
+    }
+
+    private List<Document> generatePackS(CaseData caseData) throws Exception {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getMandatoryCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        return docs;
+    }
+
+    private List<Document> generatePackR(CaseData caseData) throws Exception {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getMandatoryCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        return docs;
+    }
+
+    private List<Document> generatePackA(CaseData caseData) throws Exception {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getMandatoryCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        return docs;
+    }
+
+    private List<Document> generatePackB(CaseData caseData) throws Exception {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getMandatoryCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        return docs;
+    }
+
+    private List<Document> getMandatoryCaseDocs(CaseData caseData) {
+        List<Document> docs = new ArrayList<>();
+        if (YesOrNo.Yes.equals(caseData.getLanguagePreferenceWelsh())) {
+            if (null != caseData.getFinalWelshDocument()) {
+                docs.add(caseData.getFinalWelshDocument());
+            }
+            if (null != caseData.getC1AWelshDocument()) {
+                docs.add(caseData.getC1AWelshDocument());
+            }
+        } else {
+            if (null != caseData.getFinalDocument()) {
+                docs.add(caseData.getFinalDocument());
+            }
+            if (null != caseData.getC1ADocument()) {
+                docs.add(caseData.getC1ADocument());
+            }
+        }
+        return docs;
+    }
+
+    private List<Document> getDocumentsUploadedInServiceOfApplication(CaseData caseData) {
+        List<Document> docs = new ArrayList<>();
+        Optional<Document> pd36qLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getPd36qLetter());
+        Optional<Document> specialArrangementLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs()
+                                                                              .getSpecialArrangementsLetter());
+        pd36qLetter.ifPresent(document -> docs.add(document));
+        specialArrangementLetter.ifPresent(document -> docs.add(document));
+        return docs;
+    }
+
 }

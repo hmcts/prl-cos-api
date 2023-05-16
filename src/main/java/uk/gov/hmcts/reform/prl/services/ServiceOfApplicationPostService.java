@@ -111,20 +111,20 @@ public class ServiceOfApplicationPostService {
         return caseData;
     }
 
-    public void sendPostNotificationToParty(CaseData caseData, String authorisation, PartyDetails partyDetails) {
+    public void sendPostNotificationToParty(CaseData caseData, String authorisation, PartyDetails partyDetails, List<Document> docs) {
         // Sends post
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         CaseData blankCaseData = CaseData.builder().build();
-        List<GeneratedDocumentInfo> docs = null;
+        List<GeneratedDocumentInfo> documents = null;
         List<Element<BulkPrintDetails>> printedDocCollectionList;
 
         if (YesOrNo.Yes.getDisplayedValue()
             .equalsIgnoreCase(partyDetails.getIsCurrentAddressKnown().getDisplayedValue())) {
             try {
                 log.info("*** Generating Document ***");
-                docs = getUploadedDocumentsServiceOfApplication(caseData);
+                documents = getDocsAsGeneratedDocumentInfo(docs);
                 //docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
-                docs.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
+                documents.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
             } catch (Exception e) {
                 log.info("*** Error while generating privacy notice to be served ***");
             }
@@ -133,7 +133,7 @@ public class ServiceOfApplicationPostService {
             } else {
                 printedDocCollectionList = new ArrayList<>();
             }
-            printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, docs, partyDetails)));
+            printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, documents, partyDetails)));
             caseData.setBulkPrintDetails(printedDocCollectionList);
             log.info("*** Bulk Print details set ***");
         } else {
@@ -281,5 +281,14 @@ public class ServiceOfApplicationPostService {
                            .recipientsName(partyDetails.getFirstName() + " " + partyDetails.getLastName())
                            .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("Europe/London")))).build());
     }
+
+    private List<GeneratedDocumentInfo> getDocsAsGeneratedDocumentInfo(List<Document> docs) {
+        List<GeneratedDocumentInfo> documents = new ArrayList<>();
+        docs.forEach(doc -> {
+            documents.add(toGeneratedDocumentInfo(doc));
+        });
+        return documents;
+    }
+
 
 }

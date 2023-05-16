@@ -16,11 +16,13 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -203,6 +205,8 @@ public class ServiceOfApplicationEmailServiceTest {
     @Ignore
     @Test
     public void testSendEmailNotificationToApplicantSolicitorCA() throws Exception {
+        String authorization = "";
+        List<Document> docs = new ArrayList<>();
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -220,8 +224,8 @@ public class ServiceOfApplicationEmailServiceTest {
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(caseDetails, caseData.getApplicantsFL401(),
-                                                                                   EmailTemplateNames.APPLICANT_SOLICITOR_CA);
+        serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(authorization, caseDetails, caseData.getApplicantsFL401(),
+                                                                                   EmailTemplateNames.APPLICANT_SOLICITOR_CA, docs);
         verify(emailService,times(1)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(),Mockito.any());

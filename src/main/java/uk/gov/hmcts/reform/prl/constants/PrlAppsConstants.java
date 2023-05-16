@@ -628,4 +628,15 @@ public class PrlAppsConstants {
     //PRL-3254 - hearing status - Completed
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
+
+    public static final String Q = "Q";
+
+    public static final String S = "S";
+
+    public static final String R = "R";
+
+    public static final String A = "A";
+
+    public static final String B = "B";
+
 }

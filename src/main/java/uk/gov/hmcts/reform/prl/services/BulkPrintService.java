@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
@@ -38,9 +37,9 @@ public class BulkPrintService {
 
     private final SendLetterApi sendLetterApi;
 
-    private final AuthTokenGenerator authTokenGenerator;
+    private final CaseDocumentClient caseDocumentClient;
 
-    private final DocumentGenService documentGenService;
+    private final AuthTokenGenerator authTokenGenerator;
 
 
     public UUID send(String caseId, String userToken, String letterType, List<GeneratedDocumentInfo> documents) {
@@ -48,7 +47,7 @@ public class BulkPrintService {
         String s2sToken = authTokenGenerator.generate();
 
         final List<String> stringifiedDocuments = documents.stream()
-            .map(docInfo -> documentGenService.getDocumentBytes(docInfo.getUrl(), userToken, s2sToken))
+            .map(docInfo -> getDocumentBytes(docInfo.getUrl(), userToken, s2sToken))
             .map(getEncoder()::encodeToString)
             .collect(toList());
 
@@ -71,5 +70,23 @@ public class BulkPrintService {
         return additionalData;
     }
 
+    private byte[] getDocumentBytes(String docUrl, String authToken, String s2sToken) {
+        String fileName = FilenameUtils.getName(docUrl);
+        ResponseEntity<Resource> resourceResponseEntity = caseDocumentClient.getDocumentBinary(
+            authToken,
+            s2sToken,
+            docUrl
+        );
 
+        return Optional.ofNullable(resourceResponseEntity)
+            .map(ResponseEntity::getBody)
+            .map(resource -> {
+                try {
+                    return resource.getInputStream().readAllBytes();
+                } catch (IOException e) {
+                    throw new InvalidResourceException("Doc name " + fileName, e);
+                }
+            })
+            .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
+    }
 }
