@@ -596,8 +596,31 @@ public class SendAndReplyService {
             .selectedSubmittedDocumentValue(sendOrReplyMessage.getSubmittedDocumentsList() != null
                                                 ? sendOrReplyMessage.getSubmittedDocumentsList().getValueLabel() : null)
             .latestMessage(caseData.getMessageContent())
+            .selectedDocument(getSelectedDocument(documentMap, sendOrReplyMessage.getSubmittedDocumentsList() != null
+                ? sendOrReplyMessage.getSubmittedDocumentsList().getValueCode() : null))
             .updatedTime(dateTime.now())
             .build();
+    }
+
+    private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(Map<String, Document> documentMap,
+                                                                                  String selectedSubmittedDocumentCode) {
+
+        if (documentMap != null && !documentMap.isEmpty()) {
+            if (selectedSubmittedDocumentCode != null) {
+                final String[] documentPath = selectedSubmittedDocumentCode.split("->");
+                log.info("documentPath --> {}", documentPath);
+                final String documentId = documentPath[documentPath.length - 1];
+                log.info("documentId --> {}", documentId);
+                final Document document = documentMap.get(documentId);
+                log.info("document from map --> {}", documentId);
+                return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                    .documentUrl(document.getDocumentURL())
+                    .documentBinaryUrl(document.getDocumentBinaryURL())
+                    .documentFileName(document.getDocumentFilename())
+                    .build();
+            }
+        }
+        return null;
     }
 
 
