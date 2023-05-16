@@ -584,9 +584,11 @@ public class C100RespondentSolicitorService {
         if (solicitorRepresentedRespondent.getValue().getDxNumber() != null) {
             dataMap.put("dxNumber", solicitorRepresentedRespondent.getValue().getDxNumber());
         } else {
-            for (ContactInformation contactInformation : solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation()) {
-                for (DxAddress dxAddress : contactInformation.getDxAddress()) {
-                    dataMap.put("dxNumber", dxAddress.getDxNumber());
+            if (solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation() != null) {
+                for (ContactInformation contactInformation : solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation()) {
+                    for (DxAddress dxAddress : contactInformation.getDxAddress()) {
+                        dataMap.put("dxNumber", dxAddress.getDxNumber());
+                    }
                 }
             }
         }
