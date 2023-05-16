@@ -189,7 +189,10 @@ public class NoticeOfChangePartiesService {
         UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
             authorisation
         );
-        log.info("legalRepresentativeSolicitorDetails ===> " + legalRepresentativeSolicitorDetails);
+        log.info("legalRepresentativeSolicitorDetails ===> " + legalRepresentativeSolicitorDetails.getId() + " "
+                     + legalRepresentativeSolicitorDetails.getEmail() + " "
+                     + legalRepresentativeSolicitorDetails.getFullName()
+        );
 
         return assignCaseAccessClient.applyDecision(
             authorisation,
@@ -206,7 +209,10 @@ public class NoticeOfChangePartiesService {
         UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
             authorisation
         );
-        log.info("legalRepresentativeSolicitorDetails ===> " + legalRepresentativeSolicitorDetails);
+        log.info("legalRepresentativeSolicitorDetails ===> " + legalRepresentativeSolicitorDetails.getId() + " "
+                     + legalRepresentativeSolicitorDetails.getEmail() + " "
+                     + legalRepresentativeSolicitorDetails.getFullName()
+        );
 
         newCaseData = updateRepresentedPartyDetails(
             changeOrganisationRequest,
