@@ -32,6 +32,7 @@ public class DgsService {
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName,
                                                   Map<String, Object> respondentDetails) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo;
+        log.info("swanky palceholder name {}", templateName);
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
