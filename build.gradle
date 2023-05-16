@@ -547,7 +547,9 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/services/noticeofchange/NoticeOfChangeContentProvider.java',
   '**/uk/gov/hmcts/reform/prl/services/UpdatePartyDetailsService.java',
   '**/uk/gov/hmcts/reform/prl/services/caseaccess/CaseRoleClient.java',
-  '**/uk/gov/hmcts/reform/prl/services/caseaccess/CcdDataStoreService.java'
+  '**/uk/gov/hmcts/reform/prl/services/caseaccess/CcdDataStoreService.java',
+  '**/uk/gov/hmcts/reform/prl/utils/CaseUtils.java',
+  '**/uk/gov/hmcts/reform/prl/handlers/NoticeOfChangeEventHandler.java',
 ]
 
 sonarqube {

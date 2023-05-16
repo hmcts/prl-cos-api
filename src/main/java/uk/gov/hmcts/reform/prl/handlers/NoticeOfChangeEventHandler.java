@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -15,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangeContentProvider;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -127,11 +127,24 @@ public class NoticeOfChangeEventHandler {
 
     private Element<PartyDetails> getLitigantParty(CaseData caseData, NoticeOfChangeEvent event) {
         int representingPartyIndex = event.getRepresentedPartyIndex();
-        if (SolicitorRole.Representing.CAAPPLICANT.equals(event.getRepresenting())) {
-            return caseData.getApplicants().get(representingPartyIndex);
-        } else {
-            return caseData.getRespondents().get(representingPartyIndex);
+        Element<PartyDetails> partyDetailsElement = null;
+        switch (event.getRepresenting()) {
+            case CAAPPLICANT:
+                partyDetailsElement = caseData.getApplicants().get(representingPartyIndex);
+                break;
+            case CARESPONDENT:
+                partyDetailsElement = caseData.getRespondents().get(representingPartyIndex);
+                break;
+            case DAAPPLICANT:
+                partyDetailsElement = ElementUtils.element(caseData.getApplicantsFL401().getPartyId(),caseData.getApplicantsFL401());
+                break;
+            case DARESPONDENT:
+                partyDetailsElement = ElementUtils.element(caseData.getRespondentsFL401().getPartyId(),caseData.getRespondentsFL401());
+                break;
+            default:
+                break;
         }
+        return partyDetailsElement;
     }
 
 
