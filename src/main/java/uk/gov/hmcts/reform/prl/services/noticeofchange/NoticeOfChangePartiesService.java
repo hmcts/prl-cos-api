@@ -186,6 +186,11 @@ public class NoticeOfChangePartiesService {
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String authorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
+            authorisation
+        );
+        log.info("legalRepresentativeSolicitorDetails ===> " + legalRepresentativeSolicitorDetails);
+
         return assignCaseAccessClient.applyDecision(
             authorisation,
             tokenGenerator.generate(),
@@ -201,6 +206,7 @@ public class NoticeOfChangePartiesService {
         UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
             authorisation
         );
+        log.info("legalRepresentativeSolicitorDetails ===> " + legalRepresentativeSolicitorDetails);
 
         newCaseData = updateRepresentedPartyDetails(
             changeOrganisationRequest,
