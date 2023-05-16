@@ -60,6 +60,7 @@ public class CallbackControllerFunctionalTest {
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
