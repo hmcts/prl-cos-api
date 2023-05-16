@@ -369,4 +369,47 @@ public class NoticeOfChangePartiesServiceTest {
         verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
     }
 
+    @Test
+    public void testUpdateLegalRepresentation() {
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code("[C100RESPONDENTSOLICITOR1]")
+            .label("Respondent solicitor A")
+            .build();
+
+        List<Element<PartyDetails>> respondents = new ArrayList<>();
+        respondents.add(element(partyDetails));
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .respondents(respondents)
+            .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
+                                                .createdBy("test_solicitor@mailinator.com")
+                                                .caseRoleId(DynamicList.builder()
+                                                                .value(dynamicListElement)
+                                                                .listItems(List.of(dynamicListElement))
+                                                                .build())
+                                                .organisationToAdd(Organisation.builder()
+                                                                       .organisationID("EOILU2A")
+                                                                       .organisationName("FPRL-test-organisation")
+                                                                       .build())
+                                                .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails("testAuth")).thenReturn(UserDetails.builder()
+                                                                    .forename("solicitorResp")
+                                                                    .surname("test").build());
+        noticeOfChangePartiesService.updateLegalRepresentation(callbackRequest, "testAuth", caseData);
+        verify(assignCaseAccessClient, times(0)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
 }
