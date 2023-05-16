@@ -194,6 +194,7 @@ public class NoticeOfChangePartiesService {
     }
 
     public void nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
+        log.info("authorisation when nocRequestSubmitted ===> " + authorisation);
         CaseData oldCaseData = getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         ChangeOrganisationRequest changeOrganisationRequest = oldCaseData.getChangeOrganisationRequestField();
@@ -352,7 +353,7 @@ public class NoticeOfChangePartiesService {
             .solicitorEmail(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
                                 ? changeOrganisationRequest.getCreatedBy() : null)
             .representativeFirstName(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
-                                         ? legalRepresentativeSolicitorDetails.getFullName() : null)
+                                         ? legalRepresentativeSolicitorDetails.getForename() : null)
             .representativeLastName(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
                                         ? legalRepresentativeSolicitorDetails.getSurname().orElse(
                 "") : null)
