@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
-import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -192,7 +191,7 @@ public class C100RespondentSolicitorControllerTest {
     @Test
     public void testKeepDetailsPrivateAsYes() {
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = new HashMap<>();
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
@@ -202,10 +201,10 @@ public class C100RespondentSolicitorControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
-
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest)).thenReturn(
             stringObjectMap);
-
+        when(confidentialDetailsMapper.mapConfidentialData(caseData)).thenReturn(caseData);
         CallbackResponse response = c100RespondentSolicitorController
             .generateConfidentialityDynamicSelectionDisplay(callbackRequest);
 
