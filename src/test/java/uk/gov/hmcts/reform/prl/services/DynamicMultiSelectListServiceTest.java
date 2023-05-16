@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
@@ -68,6 +69,8 @@ public class DynamicMultiSelectListServiceTest {
             .children(children)
             .applicants(partyDetails)
             .manageOrders(ManageOrders.builder()
+                              .isTheOrderAboutAllChildren(YesOrNo.No)
+                              .isTheOrderAboutChildren((YesOrNo.Yes))
                               .childOption(DynamicMultiSelectList.builder()
                                                .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID)
                                                                   .label("")
@@ -219,4 +222,12 @@ public class DynamicMultiSelectListServiceTest {
             .getChildrenForDocmosis(caseData);
         assertNotNull(str);
     }
+
+    @Test
+    public void testGetApplicantChildDetailsForDocmosis() {
+        List<Element<ApplicantChild>> str = dynamicMultiSelectListService
+            .getApplicantChildDetailsForDocmosis(caseData);
+        assertNotNull(str);
+    }
+
 }
