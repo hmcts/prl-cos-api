@@ -566,7 +566,6 @@ public class C100RespondentSolicitorService {
         dataMap.put("dob", response.getCitizenDetails().getDateOfBirth());
         dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
         dataMap.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
-        log.info("swanky {}", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine1());
         if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine1() != null) {
             dataMap.put("repAddressLine1", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine1());
         }
@@ -583,7 +582,7 @@ public class C100RespondentSolicitorService {
         if (solicitorRepresentedRespondent.getValue().getDxNumber() != null) {
             dataMap.put("dxNumber", solicitorRepresentedRespondent.getValue().getDxNumber());
         } else {
-            dataMap.put("organisationInfo", solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation());
+            dataMap.put("organisationInfo", solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation().toString());
         }
         dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
 
