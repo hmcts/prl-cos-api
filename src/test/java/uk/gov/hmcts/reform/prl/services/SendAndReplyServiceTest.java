@@ -621,7 +621,8 @@ public class SendAndReplyServiceTest {
         List<JudicialUsersApiResponse> judicialUsersApiResponseList = Arrays.asList(JudicialUsersApiResponse.builder().build());
 
         when(sendAndReplyService.getJudgeDetails(judicialUser)).thenReturn(judicialUsersApiResponseList);
-        Message message = sendAndReplyService.buildSendMessage(caseData);
+        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject());
 
         assertNotNull(message);
     }
@@ -651,7 +652,8 @@ public class SendAndReplyServiceTest {
                     ).build())
             .build();
 
-        Message message = sendAndReplyService.buildSendMessage(caseData);
+        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject());
 
         assertNotNull(message);
     }
@@ -673,13 +675,15 @@ public class SendAndReplyServiceTest {
                             .linkedApplicationsList(dynamicList1)
                             .futureHearingsList(dynamicList1)
                             .sendReplyJudgeName(null)
+                            .updatedTime(dateTime.now())
                             .build()
                     )
                     .openMessagesList(messagesWithOneAdded)
                     .build())
             .build();
 
-        List<Element<Message>> message = sendAndReplyService.addNewOpenMessage(caseData,message1);
+        List<Element<Message>> message = sendAndReplyService.addNewOpenMessage(caseData,
+                                                                               caseData.getSendOrReplyMessage().getSendMessageObject());
 
         assertNotNull(message);
     }
