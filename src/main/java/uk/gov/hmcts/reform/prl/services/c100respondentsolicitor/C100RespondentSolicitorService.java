@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitor
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
+import uk.gov.hmcts.reform.prl.models.ContactInformation;
+import uk.gov.hmcts.reform.prl.models.DxAddress;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
@@ -582,7 +584,11 @@ public class C100RespondentSolicitorService {
         if (solicitorRepresentedRespondent.getValue().getDxNumber() != null) {
             dataMap.put("dxNumber", solicitorRepresentedRespondent.getValue().getDxNumber());
         } else {
-            dataMap.put("organisationInfo", solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation().toString());
+            for (ContactInformation contactInformation : solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation()) {
+                for (DxAddress dxAddress : contactInformation.getDxAddress()) {
+                    dataMap.put("dxNumber", dxAddress.getDxNumber());
+                }
+            }
         }
         dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
 
