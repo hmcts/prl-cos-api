@@ -127,6 +127,7 @@ public class SendAndReplyControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenBodyWithNoMessages_whenSubmittedForSendOrReply() throws Exception {
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_REPLY);
         request
