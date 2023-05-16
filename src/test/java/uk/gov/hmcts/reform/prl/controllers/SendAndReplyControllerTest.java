@@ -456,9 +456,10 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        Message mostRecentMessage = messages.get(0).getValue();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
-        verify(sendAndReplyService).sendNotificationEmailOther(caseData, caseData.getSendOrReplyMessage().getReplyMessageObject());
+        verify(sendAndReplyService).sendNotificationEmailOther(caseData, mostRecentMessage);
     }
 
 }
