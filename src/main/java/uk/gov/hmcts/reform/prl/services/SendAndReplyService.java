@@ -176,9 +176,11 @@ public class SendAndReplyService {
     public CaseData closeMessage(CaseData caseData) {
         UUID messageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
+        List<Element<Message>> openMessages = new ArrayList<>();
+        openMessages.addAll(caseData.getSendOrReplyMessage().getOpenMessagesList());
 
-        List<Element<Message>> openMessages = caseData.getSendOrReplyMessage().getOpenMessagesList();
-        List<Element<Message>> closedMessages = caseData.getSendOrReplyMessage().getClosedMessagesList();
+        List<Element<Message>> closedMessages = new ArrayList<>();
+        closedMessages.addAll(caseData.getSendOrReplyMessage().getClosedMessagesList());
 
         //find & remove from open messages list
         Optional<Element<Message>> closedMessage = openMessages.stream()
