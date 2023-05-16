@@ -102,6 +102,7 @@ public class ServiceOfApplicationController {
             .build();
         caseDataUpdated.put("confirmRecipients",confirmRecipients);
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
+        log.info("recipients {}", confirmRecipients);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
