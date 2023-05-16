@@ -168,7 +168,7 @@ public class CallbackControllerFunctionalTest {
 
     @Test
     public void givenRequestWithCaseNumberAdded_ResponseContainsIssueDate() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBody = ResourceLoader.loadJson(FL401_VALID_REQUEST_BODY);
         mockMvc.perform(post("/fl401-add-case-number")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", userToken)
