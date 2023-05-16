@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,6 +52,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
+import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
@@ -531,6 +531,7 @@ public class SendAndReplyService {
 
         final SendOrReplyMessage sendOrReplyMessage = caseData.getSendOrReplyMessage();
         final Message sendMessage = sendOrReplyMessage.getSendMessageObject();
+        JudicialUser judicialUser = sendMessage.getSendReplyJudgeName();
 
         return Message.builder()
             .status(OPEN)
@@ -539,9 +540,8 @@ public class SendAndReplyService {
             .internalMessageUrgent(sendMessage.getInternalMessageUrgent())
             .internalMessageWhoToSendToEnum(sendMessage.getInternalMessageWhoToSendToEnum())
             .messageAboutEnum(sendMessage.getMessageAboutEnum())
-            .judgeName((null != sendMessage.getSendReplyJudgeName()
-                && ArrayUtils.isNotEmpty(getPersonalCode(sendMessage.getSendReplyJudgeName())))
-                           ? getJudgeName(sendMessage.getSendReplyJudgeName()) : null)
+            .judgeName((null != judicialUser && isNotBlank(judicialUser.getPersonalCode()))
+                           ? getJudgeName(judicialUser) : null)
             .messageSubject(sendMessage.getMessageSubject())
             .recipientEmailAddresses(sendMessage.getRecipientEmailAddresses())
             .selectedCtscEmail(sendMessage.getCtscEmailList() != null
@@ -716,7 +716,7 @@ public class SendAndReplyService {
                         recipientEmailAddress,
                         EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,
                         emailTemplateVars,
-                        LanguagePreference.english);
+                        LanguagePreference.getPreferenceLanguage(caseData));
                 }
             }
         }

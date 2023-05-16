@@ -264,14 +264,17 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                 @Parameter(hidden = true) String authorisation,
                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        List<Element<Message>> messages = caseData.getSendOrReplyMessage().getOpenMessagesList();
-
-        messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
-
-        Message mostRecentMessage = messages.get(0).getValue();
-        if (mostRecentMessage.getStatus().equals(MessageStatus.OPEN)) {
-            sendAndReplyService.sendNotificationEmailOther(caseData, mostRecentMessage);
+        Message message = null;
+        if (caseData.getChooseSendOrReply().equals(SEND)) {
+            message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        } else {
+            message = caseData.getSendOrReplyMessage().getReplyMessageObject();
         }
+        //send emails in case of sending to others with emails
+        if (null != message) {
+            sendAndReplyService.sendNotificationEmailOther(caseData, message);
+        }
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .build();
     }
