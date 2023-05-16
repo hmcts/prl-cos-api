@@ -57,6 +57,7 @@ import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
+import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -569,7 +570,7 @@ public class SendAndReplyService {
             .selectedSubmittedDocumentValue(message.getSubmittedDocumentsList() != null
                                                 ? message.getSubmittedDocumentsList().getValueLabel() : null)
             .updatedTime(dateTime.now())
-            .messageContent(caseData.getMessageContent())
+            .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
             .senderEmail(null != caseData.getMessageMetaData()
                              ? caseData.getMessageMetaData().getSenderEmail() : null)
             .replyHistory(Collections.emptyList())
