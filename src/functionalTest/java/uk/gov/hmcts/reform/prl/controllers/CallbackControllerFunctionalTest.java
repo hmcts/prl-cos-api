@@ -147,6 +147,7 @@ public class CallbackControllerFunctionalTest {
             .assertThat().statusCode(500);
     }
 
+
     @Test
     public void givenRequestWithCaseNumberAdded_ResponseContainsIssueDate() throws Exception {
         String requestBody = ResourceLoader.loadJson(FL401_VALID_REQUEST_BODY);
