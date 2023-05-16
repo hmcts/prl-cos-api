@@ -191,6 +191,9 @@ public class NoticeOfChangePartiesServiceTest {
 
     @Test
     public void testApplyDecision() {
+        when(userService.getUserDetails("testAuth")).thenReturn(UserDetails.builder()
+                                                                    .forename("solicitorResp")
+                                                                    .surname("test").build());
         when(tokenGenerator.generate()).thenReturn("s2sToken");
         noticeOfChangePartiesService.applyDecision(CallbackRequest.builder().build(), "testAuth");
         verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.anyString(), Mockito.anyString(), Mockito.any(
