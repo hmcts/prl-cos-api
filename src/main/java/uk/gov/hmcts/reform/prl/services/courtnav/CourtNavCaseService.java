@@ -91,7 +91,6 @@ public class CourtNavCaseService {
 
     public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
 
-        log.info("Entering inside the upload document in courtnav service:: ");
         if (null != document && null != document.getOriginalFilename()
             && checkFileFormat(document.getOriginalFilename())
             && checkTypeOfDocument(typeOfDocument)) {
@@ -140,7 +139,7 @@ public class CourtNavCaseService {
                                              true);
 
             log.info("Document has been saved in caseData {}", document.getOriginalFilename());
-            log.info("Document details from caseData  {}", tempCaseData.getFl401UploadWitnessDocuments());
+            log.info("Document details from caseData  {}", updatedCaseData.getFl401UploadWitnessDocuments());
         } else {
             log.error("Un acceptable format/type of document {}", typeOfDocument);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
