@@ -246,6 +246,13 @@ public class SendAndReplyController extends AbstractCallbackController {
                 caseData = sendAndReplyService.closeMessage(caseData);
                 caseDataMap.put("closedMessagesList", caseData.getSendOrReplyMessage().getClosedMessagesList());
                 caseDataMap.put("openMessagesList", caseData.getSendOrReplyMessage().getOpenMessagesList());
+            }else{
+                List<Element<Message>> messages = caseData.getSendOrReplyMessage().getOpenMessagesList();
+
+                UUID selectedValue = elementUtils
+                    .getDynamicListSelectedValue(caseData.getReplyMessageDynamicList(), objectMapper);
+                messages = sendAndReplyService.setReplyHistory(selectedValue, caseData);
+                messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
             }
         }
         //clear temp fields
@@ -265,11 +272,6 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         List<Element<Message>> messages = caseData.getSendOrReplyMessage().getOpenMessagesList();
-
-        UUID selectedValue = elementUtils
-            .getDynamicListSelectedValue(caseData.getReplyMessageDynamicList(), objectMapper);
-
-        messages = sendAndReplyService.setReplyHistory(selectedValue, caseData);
 
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
 
