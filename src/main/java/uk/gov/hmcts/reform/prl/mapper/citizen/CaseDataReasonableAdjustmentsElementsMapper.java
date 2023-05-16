@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum;
@@ -74,6 +75,8 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                 ? Arrays.stream(c100RebuildReasonableAdjustmentsElements.getCommunicationHelp())
                 .collect(Collectors.toList()) : Collections.emptyList();
 
+        YesOrNo isWelshRequired = isWelshRequired(languageList);
+
         caseDataBuilder
             .attendHearing(AttendHearing.builder()
                                .isWelshNeeded(buildIsWelshNeeded(languageList))
@@ -89,7 +92,17 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                                .isDisabilityPresent(buildIsDisabilityPresent(disabilityRequirementsList))
                                .adjustmentsRequired(buildAdjustmentRequired(disabilityRequirementsList,
                                                                             c100RebuildReasonableAdjustmentsElements))
-                               .build());
+                               .build())
+            //PRL-3382 - Update Welsh language requirements for c100 citizen application
+            .welshLanguageRequirement(isWelshRequired)
+            .welshLanguageRequirementApplication(YesOrNo.Yes.equals(isWelshRequired)
+                                                     ? LanguagePreference.welsh : LanguagePreference.english)
+            .welshLanguageRequirementApplicationNeedEnglish(YesOrNo.Yes);
+    }
+
+    private static YesOrNo isWelshRequired(List<String> languageList) {
+        return !languageList.isEmpty()
+            && languageList.contains(READ_WRITE_WELSH) ? YesOrNo.Yes : YesOrNo.No;
     }
 
     private static List<Element<InterpreterNeed>> buildInterpreterNeeds(List<String> languageList,

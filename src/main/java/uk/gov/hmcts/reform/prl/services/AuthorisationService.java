@@ -23,6 +23,8 @@ public class AuthorisationService {
 
     private final IdamClient idamClient;
 
+    private UserInfo userInfo;
+
     public Boolean authoriseService(String serviceAuthHeader) {
         String callingService;
         try {
@@ -40,7 +42,7 @@ public class AuthorisationService {
 
     public Boolean authoriseUser(String authorisation) {
         try {
-            UserInfo userInfo = idamClient.getUserInfo(authorisation);
+            userInfo = idamClient.getUserInfo(authorisation);
             if (null != userInfo) {
                 return true;
             }
@@ -49,5 +51,9 @@ public class AuthorisationService {
             log.error("User token is invalid");
         }
         return false;
+    }
+
+    public UserInfo getUserInfo() {
+        return this.userInfo;
     }
 }
