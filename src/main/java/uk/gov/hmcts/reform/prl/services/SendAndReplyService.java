@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -97,6 +98,8 @@ public class SendAndReplyService {
     private final RefDataUserService refDataUserService;
 
     private final HearingService hearingService;
+
+    private Map<String, Document> documentMap;
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -472,11 +475,14 @@ public class SendAndReplyService {
         } catch (Exception e) {
             log.error("Error in getCategoriesAndDocuments method", e);
         }
+        log.info("Document Map for dropdown documents ---> {}", documentMap);
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY).build();
     }
 
     private DynamicList createDynamicList(CategoriesAndDocuments categoriesAndDocuments) {
+
+        documentMap = new HashMap<>();
 
         List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
             .sorted(Comparator.comparing(Category::getCategoryName))
@@ -485,10 +491,14 @@ public class SendAndReplyService {
         List<DynamicListElement> dynamicListElementList = new ArrayList<>();
         createDynamicListFromSubCategories(parentCategories, dynamicListElementList, null, null);
 
-        categoriesAndDocuments.getUncategorisedDocuments().forEach(document -> dynamicListElementList.add(
-            DynamicListElement.builder().code(fetchDocumentIdFromUrl(document.getDocumentURL()))
-                .label(document.getDocumentFilename()).build()
-        ));
+        categoriesAndDocuments.getUncategorisedDocuments().forEach(document -> {
+            dynamicListElementList.add(
+                DynamicListElement.builder().code(fetchDocumentIdFromUrl(document.getDocumentURL()))
+                    .label(document.getDocumentFilename()).build()
+            );
+
+            documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
+        });
 
         return DynamicList.builder().value(DynamicListElement.EMPTY)
             .listItems(dynamicListElementList).build();
@@ -501,11 +511,15 @@ public class SendAndReplyService {
         categoryList.forEach(category -> {
             if (parentLabelString == null) {
                 if (category.getDocuments() != null) {
-                    category.getDocuments().forEach(document -> dynamicListElementList.add(
-                        DynamicListElement.builder().code(category.getCategoryId() + "->"
-                                                              + fetchDocumentIdFromUrl(document.getDocumentURL()))
-                            .label(category.getCategoryName() + " --- " + document.getDocumentFilename()).build()
-                    ));
+                    category.getDocuments().forEach(document -> {
+                        dynamicListElementList.add(
+                            DynamicListElement.builder().code(category.getCategoryId() + "->"
+                                                                  + fetchDocumentIdFromUrl(document.getDocumentURL()))
+                                .label(category.getCategoryName() + " -> " + document.getDocumentFilename()).build()
+                        );
+                        documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
+
+                    });
                 }
                 if (category.getSubCategories() != null) {
                     createDynamicListFromSubCategories(
@@ -517,13 +531,16 @@ public class SendAndReplyService {
                 }
             } else {
                 if (category.getDocuments() != null) {
-                    category.getDocuments().forEach(document -> dynamicListElementList.add(
-                        DynamicListElement.builder()
-                            .code(parentCodeString + " -> " + category.getCategoryId() + "->"
-                                      + fetchDocumentIdFromUrl(document.getDocumentURL()))
-                            .label(parentLabelString + " -> " + category.getCategoryName() + " -> "
-                                       + document.getDocumentFilename()).build()
-                    ));
+                    category.getDocuments().forEach(document -> {
+                        dynamicListElementList.add(
+                            DynamicListElement.builder()
+                                .code(parentCodeString + " -> " + category.getCategoryId() + "->"
+                                          + fetchDocumentIdFromUrl(document.getDocumentURL()))
+                                .label(parentLabelString + " -> " + category.getCategoryName() + " -> "
+                                           + document.getDocumentFilename()).build()
+                        );
+                        documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
+                    });
                 }
                 if (category.getSubCategories() != null) {
                     createDynamicListFromSubCategories(category.getSubCategories(), dynamicListElementList,
@@ -608,6 +625,8 @@ public class SendAndReplyService {
     }
 
     public List<Element<Message>> addNewOpenMessage(CaseData caseData, Message newMessage) {
+        log.info("Document Map in addNewOpenMessage ---> {}", documentMap);
+
         List<Element<Message>> messages = new ArrayList<>();
         Element<Message> messageElement = element(newMessage);
         if (isNotEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
@@ -669,7 +688,7 @@ public class SendAndReplyService {
      * @param message Message
      */
     public void sendNotificationEmailOther(CaseData caseData, Message message) {
-
+        log.info("Document Map in sendNotificationEmailOther Method ---> {}", documentMap);
         final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
 
         if (recipientEmailAddresses.length > 0) {

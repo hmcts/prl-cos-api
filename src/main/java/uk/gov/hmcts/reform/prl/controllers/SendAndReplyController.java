@@ -227,16 +227,10 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
-        log.info("Case Data New about to submit ----> {}", caseDataMap);
-
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             Message newMessage = sendAndReplyService.buildSendMessage(caseData);
 
-            log.info("New message object created ----> {}", newMessage);
-
             List<Element<Message>> listOfMessages = sendAndReplyService.addNewOpenMessage(caseData, newMessage);
-
-            log.info("listOfMessages created ----> {}", listOfMessages);
 
             caseDataMap.put("openMessagesList", listOfMessages);
 
