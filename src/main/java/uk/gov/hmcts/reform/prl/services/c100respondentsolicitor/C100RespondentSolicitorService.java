@@ -38,9 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -557,6 +555,8 @@ public class C100RespondentSolicitorService {
         Response response = solicitorRepresentedRespondent.getValue().getResponse();
 
         Map<String, Object> respondentDetails = new HashMap<>();
+        respondentDetails.put("courtName", callbackRequest.getCaseDetails().getData().get(COURT_NAME).toString());
+        respondentDetails.put("caseNumber", callbackRequest.getCaseDetails().getId());
         respondentDetails.put("fullName", response.getCitizenDetails()
             .getFirstName() + " " + response.getCitizenDetails()
             .getLastName());

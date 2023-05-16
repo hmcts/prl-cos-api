@@ -242,6 +242,7 @@ public class C100RespondentSolicitorServiceTest {
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
         caseData = CaseData.builder().respondents(respondentList).id(1)
+            .courtName("Hull Court")
             .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
                                            .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
                                            .confidentiality(Yes)
