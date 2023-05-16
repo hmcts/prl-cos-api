@@ -65,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendAndReplyService {
 
+    public static final String SEND_AND_REPLY_CATEGORYID = "sendAndReply";
     private final EmailService emailService;
 
     private final UserService userService;
@@ -482,7 +483,7 @@ public class SendAndReplyService {
         documentMap = new HashMap<>();
 
         List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
-            .filter(category ->  !category.getCategoryId().equals("sendAndReply"))
+            .filter(category ->  !SEND_AND_REPLY_CATEGORYID.equals(category.getCategoryId()))
             .sorted(Comparator.comparing(Category::getCategoryName))
             .collect(Collectors.toList());
 
@@ -607,16 +608,15 @@ public class SendAndReplyService {
         if (documentMap != null && !documentMap.isEmpty()) {
             if (selectedSubmittedDocumentCode != null) {
                 final String[] documentPath = selectedSubmittedDocumentCode.split("->");
-                log.info("documentPath --> {}", documentPath);
                 final String documentId = documentPath[documentPath.length - 1];
-                log.info("documentId --> {}", documentId);
                 final Document document = documentMap.get(documentId);
-                log.info("document from map --> {}", documentId);
-                return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                    .documentUrl(document.getDocumentURL())
-                    .documentBinaryUrl(document.getDocumentBinaryURL())
-                    .documentFileName(document.getDocumentFilename())
-                    .build();
+                if (document != null) {
+                    return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                        .documentUrl(document.getDocumentURL())
+                        .documentBinaryUrl(document.getDocumentBinaryURL())
+                        .documentFileName(document.getDocumentFilename())
+                        .build();
+                }
             }
         }
         return null;
@@ -647,7 +647,6 @@ public class SendAndReplyService {
     }
 
     public List<Element<Message>> addNewOpenMessage(CaseData caseData, Message newMessage) {
-        log.info("Document Map in addNewOpenMessage ---> {}", documentMap);
 
         List<Element<Message>> messages = new ArrayList<>();
         Element<Message> messageElement = element(newMessage);
@@ -710,7 +709,6 @@ public class SendAndReplyService {
      * @param message Message
      */
     public void sendNotificationEmailOther(CaseData caseData, Message message) {
-        log.info("Document Map in sendNotificationEmailOther Method ---> {}", documentMap);
         final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
 
         if (recipientEmailAddresses.length > 0) {
