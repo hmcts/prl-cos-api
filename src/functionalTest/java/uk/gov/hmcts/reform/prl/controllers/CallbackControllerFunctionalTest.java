@@ -46,6 +46,7 @@ public class CallbackControllerFunctionalTest {
     private final String userToken = "Bearer testToken";
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
+    private static final String FL401_VALID_REQUEST_BODY = "requests/fl401-add-case-number.json";
     private static final String MIAM_VALIDATION_REQUEST_ERROR = "requests/call-back-controller-miam-request-error.json";
     private static final String MIAM_VALIDATION_REQUEST_NO_ERROR = "requests/call-back-controller-miam-request-no-error.json";
     private static final String APPLICANT_CASE_NAME_REQUEST = "requests/call-back-controller-applicant-case-name.json";
