@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -100,7 +101,8 @@ public class ServiceOfApplicationController {
                                  .listItems(otherPeopleList)
                                  .build())
             .build();
-        caseDataUpdated.put("confirmRecipients",confirmRecipients);
+        caseData = caseData.toBuilder().confirmRecipients(confirmRecipients).build();
+        caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
         log.info("recipients {}", confirmRecipients);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
