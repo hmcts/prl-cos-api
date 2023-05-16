@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -462,9 +463,6 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testPopulateDynamicListsForSendAndReply() {
-
-
-
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
 
         LocalDateTime hearingStartDate = LocalDateTime.now().plusDays(5).withNano(1);
@@ -685,5 +683,108 @@ public class SendAndReplyServiceTest {
 
         assertNotNull(message);
     }
+
+    @Test
+    public void testSetSenderAndGenerateMessageReplyList() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .openMessagesList(messagesWithOneAdded)
+                    .build())
+            .build();
+
+        Map<String,Object> data = sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData,auth);
+        assertNotNull(data.get("messageObject"));
+
+    }
+
+    @Test
+    public void testPopulateMessageReplyFieldst() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .openMessagesList(messagesWithOneAdded)
+                    .messageReplyDynamicList(dynamicList)
+                    .build())
+            .build();
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(messagesWithOneAdded.get(0).getId());
+        CaseData data = sendAndReplyService.populateMessageReplyFields(caseData);
+        assertEquals("This is message 1 body",data.getSendOrReplyMessage().getReplyMessage().getMessageContent());
+
+    }
+
+    @Test
+    public void testPopulateMessageReplyFieldsWithNoPrevMsg() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .messageReplyDynamicList(dynamicList)
+                    .build())
+            .build();
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(messagesWithOneAdded.get(0).getId());
+        CaseData data = sendAndReplyService.populateMessageReplyFields(caseData);
+        assertNotNull(data);
+
+    }
+
+    @Test
+    public void testCloseMessage() {
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(messagesWithOneAdded.get(0).getId());
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .messageReplyDynamicList(dynamicList)
+                    .openMessagesList(messagesWithOneAdded)
+                    .closedMessagesList(messages)
+                    .build())
+            .build();
+        CaseData caseData1 = sendAndReplyService.closeMessage(caseData);
+        assertNotNull(caseData1);
+    }
+
+    @Test
+    public void testSendNotificationEmailOther() {
+        EmailTemplateVars emailTemplateVars = SendAndReplyNotificationEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(manageCaseUrl + "/" + caseData.getId())
+            .build();
+        Message message = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com").recipientEmailAddresses("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .build();
+        sendAndReplyService.sendNotificationEmailOther(caseData,message);
+        verify(emailService, times(1)).send(
+            message.getRecipientEmail(),
+            EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,
+            emailTemplateVars,
+            LanguagePreference.english
+        );
+    }
+
 
 }
