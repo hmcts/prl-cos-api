@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -48,6 +49,8 @@ public class ServiceOfApplicationController {
     @Autowired
     DynamicMultiSelectListService dynamicMultiSelectListService;
 
+    @Autowired
+    WelshCourtEmail welshCourtEmail;
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for add case number submit event")
@@ -73,7 +76,8 @@ public class ServiceOfApplicationController {
             .getRespondentsMultiSelectList(caseData);
         List<DynamicMultiselectListElement> respondentList = respondentDetails.get("respondents");
         List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
-        List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
+            caseData);
 
         ConfirmRecipients confirmRecipients = ConfirmRecipients.builder()
             .applicantsList(DynamicMultiSelectList.builder()
@@ -91,8 +95,10 @@ public class ServiceOfApplicationController {
             .otherPeopleList(DynamicMultiSelectList.builder()
                                  .listItems(otherPeopleList)
                                  .build())
+            .cafcassEmailAddressForNotifications(
+                welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData))
             .build();
-        caseDataUpdated.put("confirmRecipients",confirmRecipients);
+        caseDataUpdated.put("confirmRecipients", confirmRecipients);
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -108,7 +114,7 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
         serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
-        Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         updatedCaseData.put("caseInvites", caseData.getCaseInvites());
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);
