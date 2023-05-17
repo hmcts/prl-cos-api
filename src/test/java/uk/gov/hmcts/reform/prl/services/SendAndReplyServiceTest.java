@@ -864,5 +864,82 @@ public class SendAndReplyServiceTest {
         );
     }
 
+    @Test
+    public void testReplyAndAppendMessageHistoryForReply() {
+
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+
+        openMessagesList.add(element(message1));
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .chooseSendOrReply(SendOrReply.REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .messageReplyDynamicList(dynamicList)
+                    .openMessagesList(openMessagesList)
+                    .replyMessageObject(
+                        Message.builder()
+                        .internalOrExternalMessageEnum(InternalExternalMessageEnum.EXTERNAL)
+                        .internalMessageWhoToSendToEnum(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                        .messageAboutEnum(MessageAboutEnum.APPLICATION)
+                            .messageContent("Reply Message Content")
+                        .build()
+                )
+                    .build())
+            .build();
+
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
+        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData);
+
+        assertEquals(1,msgList.get(0).getValue().getReplyHistory().size());
+    }
+
+    @Test
+    public void testReplyAndAppendMessageHistoryForReplyToReply() {
+
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+
+        Message message1 = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .replyHistory(messageHistoryList)
+            .internalMessageWhoToSendToEnum(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageUrgent(YesOrNo.Yes)
+            .build();
+
+        openMessagesList.add(element(message1));
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .chooseSendOrReply(SendOrReply.REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .messageReplyDynamicList(dynamicList)
+                    .openMessagesList(openMessagesList)
+                    .replyMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessageEnum(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendToEnum(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .messageAboutEnum(MessageAboutEnum.APPLICATION)
+                            .messageContent("Reply Message Content")
+                            .build()
+                    )
+                    .build())
+            .build();
+
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
+        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData);
+
+        assertEquals(2,msgList.get(0).getValue().getReplyHistory().size());
+    }
+
 
 }
