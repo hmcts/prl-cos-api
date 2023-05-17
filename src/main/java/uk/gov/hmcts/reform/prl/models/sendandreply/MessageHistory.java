@@ -24,10 +24,7 @@ public class MessageHistory {
     private String judgeName;
     private String selectedCtscEmail;
     private String recipientEmailAddresses;
-    private String selectedLinkedApplicationCode;
     private String selectedLinkedApplicationValue;
-    private String selectedFutureHearingCode;
     private String selectedFutureHearingValue;
-    private String selectedSubmittedDocumentCode;
     private String selectedSubmittedDocumentValue;
 }
