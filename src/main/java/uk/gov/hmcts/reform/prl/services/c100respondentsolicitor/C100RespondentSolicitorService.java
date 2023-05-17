@@ -603,6 +603,7 @@ public class C100RespondentSolicitorService {
         }
         dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
+        dataMap.put("respondents", response.getCurrentOrPreviousProceedings().getProceedingsList());
         dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication());
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
         dataMap.put("permissionFromCourt", response.getConsent().getPermissionFromCourt());
