@@ -55,11 +55,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.Emai
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.*;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -102,6 +98,9 @@ public class ManageOrderServiceTest {
 
     @Mock
     private DgsService dgsService;
+
+    @Mock
+    private WelshCourtEmail welshCourtEmail;
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
@@ -2713,5 +2712,52 @@ public class ManageOrderServiceTest {
         manageOrderService.resetChildOptions(callbackRequest);
         Assert.assertEquals(null,callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
     }
+
+    @Test
+    public void testPopulateCafcassCymruEmailInManageOrdersRegion() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .caseManagementLocation(CaseManagementLocation.builder().region("region1").baseLocation("baseLoc1").build())
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+
+        String welshCourtEmails = "baseLoc1--region1--baseName1--test1@test.com, baseLoc2--regiond2--baseName2--test2@test.com";
+        when(welshCourtEmail.getWelshCourtEmailMapping()).thenReturn(welshCourtEmails);
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        String response = manageOrderService.populateCafcassCymruEmailInManageOrders(caseData);
+        Assert.assertEquals("test1@test.com",response);
+    }
+
+    @Test
+    public void testPopulateCafcassCymruEmailInManageOrdersWithRegionId() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .caseManagementLocation(CaseManagementLocation.builder().regionId("regiondId1").baseLocationId("baseLocId1").build())
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+
+        String welshCourtEmails = "baseLocId1--regiondId1--baseName1--test1@test.com, baseLocId2--regiondId2--baseName2--test2@test.com";
+        when(welshCourtEmail.getWelshCourtEmailMapping()).thenReturn(welshCourtEmails);
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        String response = manageOrderService.populateCafcassCymruEmailInManageOrders(caseData);
+        Assert.assertEquals("test1@test.com",response);
+    }
+
 
 }
