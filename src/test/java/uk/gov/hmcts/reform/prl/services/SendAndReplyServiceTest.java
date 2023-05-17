@@ -769,7 +769,12 @@ public class SendAndReplyServiceTest {
             .latestMessage("Message 1 latest message")
             .messageHistory("")
             .build();
-        sendAndReplyService.sendNotificationEmailOther(caseData,message);
+        caseData = caseData.toBuilder().sendOrReplyMessage(
+            SendOrReplyMessage.builder()
+                .openMessagesList(Collections.singletonList(element(message)))
+                .build())
+            .build();
+        sendAndReplyService.sendNotificationEmailOther(caseData);
         verify(emailService, times(1)).send(
             message.getRecipientEmail(),
             EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,
