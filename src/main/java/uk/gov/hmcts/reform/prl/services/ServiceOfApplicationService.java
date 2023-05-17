@@ -131,21 +131,21 @@ public class ServiceOfApplicationService {
 
     public CaseData sendNotificationForServiceOfApplication(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("Confirm recipients {}", caseData.getConfirmRecipients());
+        log.info("Confirm recipients {}", caseData.getServiceOfApplication());
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getApplicantsList().getValue() != null)) {
+            if ((caseData.getServiceOfApplication().getSoaApplicantsList() != null) && (caseData.getServiceOfApplication().getSoaApplicantsList().getValue() != null)) {
                 log.info("serving applicants");
                 caseData = sendNotificationToApplicantSolicitor(caseDetails,authorization);
             }
-            if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getRespondentsList().getValue() != null)) {
+            if ((caseData.getServiceOfApplication().getSoaRespondentsList() != null) && (caseData.getServiceOfApplication().getSoaRespondentsList().getValue() != null)) {
                 log.info("serving respondents");
                 caseData = sendNotificationToRespondentOrSolicitor(caseDetails, authorization);
             }
-            if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getOtherEmailAddressList() != null)) {
+            if ((caseData.getServiceOfApplication().getSoaOtherEmailAddressList() != null)) {
                 log.info("serving LA");
                 sendEmailToOtherEmails(authorization, caseDetails, caseData);
             }
-            if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getOtherPeopleList().getValue() != null)) {
+            if ((caseData.getServiceOfApplication().getSoaOtherPeopleList() != null) && (caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue() != null)) {
                 log.info("serving other people in case");
                 caseData = sendPostToOtherPeopleInCase(caseDetails, authorization);
             }
@@ -160,7 +160,7 @@ public class ServiceOfApplicationService {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             log.info("***In sendNotificationToApplicantSolicitor*** case type" + caseData.getCaseTypeOfApplication());
             List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
-            List<DynamicMultiselectListElement> applicantsList = caseData.getConfirmRecipients().getApplicantsList().getValue();
+            List<DynamicMultiselectListElement> applicantsList = caseData.getServiceOfApplication().getSoaApplicantsList().getValue();
             applicantsList.forEach(applicant -> {
                 Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
                 log.info("party" + party.get().getValue());

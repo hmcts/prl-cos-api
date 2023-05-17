@@ -56,6 +56,8 @@ public class ServiceOfApplicationController {
     @Autowired
     private ServiceOfApplicationPostService serviceOfApplicationPostService;
 
+    private Map<String, Object> caseDataUpdated;
+
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for add case number submit event")
@@ -110,7 +112,7 @@ public class ServiceOfApplicationController {
             .build();
         caseData = caseData.toBuilder().serviceOfApplication(confirmRecipients).build();
         log.info("Confirm recipients in mid after {}", caseData.getServiceOfApplication());
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         log.info("Confirm recipients in mid from map {}", caseDataUpdated.get("confirmRecipients"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -126,7 +128,7 @@ public class ServiceOfApplicationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("Confirm recipients in about to submit {}", caseData.getServiceOfApplication());
+        log.info("Confirm recipients in about to submit from casedata {}", caseData.getServiceOfApplication());
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);
@@ -159,7 +161,7 @@ public class ServiceOfApplicationController {
         //serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("inside submitted--start of notification");
-        log.info("Confirm recipients {}", caseData.getConfirmRecipients());
+        log.info("Confirm recipients {}", caseData.getServiceOfApplication());
         caseData = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             callbackRequest.getCaseDetails(),
             authorisation
