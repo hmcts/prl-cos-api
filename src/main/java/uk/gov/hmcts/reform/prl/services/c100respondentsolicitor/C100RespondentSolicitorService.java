@@ -607,14 +607,14 @@ public class C100RespondentSolicitorService {
         dataMap.put("willingToAttendMiam", response.getMiam().getWillingToAttendMiam());
         dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
         dataMap.put("currentOrPastProceedingsForChildren", response.getCurrentOrPastProceedingsForChildren());
-        dataMap.put("reasonForChild", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl());
-        dataMap.put("reasonForChildDetails", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWlDetails());
-        dataMap.put("reasonForParent", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl());
-        dataMap.put("reasonForParentDetails", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWlDetails());
-        dataMap.put("reasonForJurisdiction", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl());
-        dataMap.put("reasonForJurisdictionDetails", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl());
-        dataMap.put("requestToAuthority", response.getCitizenInternationalElements().getAnotherCountryAskedInformation());
-        dataMap.put("requestToAuthorityDetails", response.getCitizenInternationalElements().getAnotherCountryAskedInformationDetaails());
+        dataMap.put("childrenLiveOutsideOfEnWl", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl());
+        dataMap.put("childrenLiveOutsideOfEnWlDetails", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWlDetails());
+        dataMap.put("parentsAnyOneLiveOutsideOfEnWl", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl());
+        dataMap.put("parentsAnyOneLiveOutsideOfEnWlDetails", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWlDetails());
+        dataMap.put("anotherPersonOrderOutsideEnWl", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl());
+        dataMap.put("anotherPersonOrderOutsideEnWlDetails", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWlDetails());
+        dataMap.put("anotherCountryAskedInformation", response.getCitizenInternationalElements().getAnotherCountryAskedInformation());
+        dataMap.put("anotherCountryAskedInformationDetails", response.getCitizenInternationalElements().getAnotherCountryAskedInformationDetaails());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
