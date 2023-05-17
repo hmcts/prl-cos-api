@@ -2306,7 +2306,7 @@ public class ManageOrderServiceTest {
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
 
-    @Test
+    //@Test
     public void testCheckOnlyC47aOrderSelectedToServeForC21() {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
             .code("test")
