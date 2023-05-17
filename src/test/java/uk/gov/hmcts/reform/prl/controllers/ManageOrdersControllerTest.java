@@ -1168,6 +1168,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
         when(manageOrderService.getOrderToAmendDownloadLink(caseData)).thenReturn(new HashMap<>());
+        when(manageOrderService.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn("test1@test.com");
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateOrderToAmendDownloadLink(
             authToken,
