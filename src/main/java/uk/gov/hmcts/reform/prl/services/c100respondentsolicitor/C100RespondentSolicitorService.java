@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.models.DxAddress;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
@@ -606,6 +605,7 @@ public class C100RespondentSolicitorService {
         dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
         List<Element<Proceedings>> proceedingsList = response.getCurrentOrPreviousProceedings().getProceedingsList();
+        log.info("yodal: {}", proceedingsList.toString());
         dataMap.put("respondents", proceedingsList);
         dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication());
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
