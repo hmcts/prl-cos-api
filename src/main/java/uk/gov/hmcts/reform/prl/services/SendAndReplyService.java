@@ -688,6 +688,8 @@ public class SendAndReplyService {
                     addRowToMessageTable(lines, "To", history.getMessageTo());
                     addRowToMessageTable(lines, "Message Date", history.getMessageDate());
                     addRowToMessageTable(lines, "Urgent", history.getIsUrgent().getDisplayedValue());
+                    addRowToMessageTable(lines, "Message subject", history.getMessageSubject());
+                    addRowToMessageTable(lines, "Judge Name", history.getJudgeName());
                     lines.add("</table>");
                     lines.add(HORIZONTAL_LINE);
                 });
@@ -797,6 +799,7 @@ public class SendAndReplyService {
             .messageTo(message.getRecipientEmail())
             .messageDate(message.getUpdatedTime().toString())
             .isUrgent(message.getInternalMessageUrgent())
+            .messageSubject(message.getMessageSubject())
             .internalMessageWhoToSendToEnum(message.getInternalMessageWhoToSendToEnum())
             .internalOrExternalMessageEnum(message.getInternalOrExternalMessageEnum())
             .messageAboutEnum(message.getMessageAboutEnum())
