@@ -17,11 +17,11 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ServiceOfApplication {
-    @JsonProperty("applicantsList")
+    @JsonProperty("soaApplicantsList")
     private final DynamicMultiSelectList soaApplicantsList;
-    @JsonProperty("respondentsList")
+    @JsonProperty("soaRespondentsList")
     private final DynamicMultiSelectList soaRespondentsList;
-    @JsonProperty("otherPeopleList")
+    @JsonProperty("soaOtherPeopleList")
     private final DynamicMultiSelectList soaOtherPeopleList;
     private final List<CafcassServiceApplicationEnum> soaCafcassEmailOptionChecked;
     private final List<OtherEnum> soaOtherEmailOptionChecked;
