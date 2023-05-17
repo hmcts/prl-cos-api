@@ -214,7 +214,7 @@ public class C100RespondentSolicitorServiceTest {
             .solicitorReference("test")
             .build();
 
-        List<ContactInformation> contactInformation = new ArrayList<>();
+        List<ContactInformation> contactInformation = null;
         List<DxAddress> dxAddress = new ArrayList<>();
         dxAddress.add(DxAddress.builder().dxNumber("dxNumber").build());
         contactInformation.add(ContactInformation.builder()
