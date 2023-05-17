@@ -45,7 +45,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -587,7 +586,8 @@ public class C100RespondentSolicitorService {
             dataMap.put("dxNumber", solicitorRepresentedRespondent.getValue().getDxNumber());
         } else {
             if (solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation() != null) {
-                for (ContactInformation contactInformationLoop : solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation()) {
+                for (ContactInformation contactInformationLoop : solicitorRepresentedRespondent
+                    .getValue().getOrganisations().getContactInformation()) {
                     for (DxAddress dxAddress : contactInformationLoop.getDxAddress()) {
                         dataMap.put("dxNumber", dxAddress.getDxNumber());
                     }
