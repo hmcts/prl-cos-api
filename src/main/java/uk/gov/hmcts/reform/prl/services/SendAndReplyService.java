@@ -806,11 +806,8 @@ public class SendAndReplyService {
             .judgeName(message.getJudgeName())
             .recipientEmailAddresses(message.getRecipientEmailAddresses())
             .selectedCtscEmail(message.getSelectedCtscEmail())
-            .selectedLinkedApplicationCode(message.getSelectedLinkedApplicationCode())
             .selectedLinkedApplicationValue(message.getSelectedLinkedApplicationValue())
-            .selectedFutureHearingCode(message.getSelectedFutureHearingCode())
             .selectedFutureHearingValue(message.getSelectedFutureHearingValue())
-            .selectedSubmittedDocumentCode(message.getSelectedSubmittedDocumentCode())
             .selectedSubmittedDocumentValue(message.getSelectedSubmittedDocumentValue())
             .build();
     }
