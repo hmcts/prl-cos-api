@@ -102,7 +102,7 @@ public class ServiceOfApplicationController {
                                    .listItems(applicantList)
                                    .build())
             .soaRespondentsList(DynamicMultiSelectList.builder()
-                                    .listItems(respondentSolicitorList)
+                                    .listItems(respondentList)
                                     .build())
             .soaOtherPeopleList(DynamicMultiSelectList.builder()
                                     .listItems(otherPeopleList)
