@@ -585,7 +585,7 @@ public class C100RespondentSolicitorService {
         if (solicitorRepresentedRespondent.getValue().getDxNumber() != null) {
             dataMap.put("dxNumber", solicitorRepresentedRespondent.getValue().getDxNumber());
         } else {
-            if (solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation() != null) {
+            if (solicitorRepresentedRespondent.getValue().getOrganisations() != null) {
                 for (ContactInformation contactInformationLoop : solicitorRepresentedRespondent
                     .getValue().getOrganisations().getContactInformation()) {
                     for (DxAddress dxAddress : contactInformationLoop.getDxAddress()) {
