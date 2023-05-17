@@ -133,11 +133,13 @@ public class ServiceOfApplicationService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("Confirm recipients {}", caseData.getServiceOfApplication());
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            if ((caseData.getServiceOfApplication().getSoaApplicantsList() != null) && (caseData.getServiceOfApplication().getSoaApplicantsList().getValue() != null)) {
+            if ((caseData.getServiceOfApplication().getSoaApplicantsList() != null)
+                && (caseData.getServiceOfApplication().getSoaApplicantsList().getValue() != null)) {
                 log.info("serving applicants");
                 caseData = sendNotificationToApplicantSolicitor(caseDetails,authorization);
             }
-            if ((caseData.getServiceOfApplication().getSoaRespondentsList() != null) && (caseData.getServiceOfApplication().getSoaRespondentsList().getValue() != null)) {
+            if ((caseData.getServiceOfApplication().getSoaRespondentsList() != null)
+                && (caseData.getServiceOfApplication().getSoaRespondentsList().getValue() != null)) {
                 log.info("serving respondents");
                 caseData = sendNotificationToRespondentOrSolicitor(caseDetails, authorization);
             }
@@ -145,7 +147,8 @@ public class ServiceOfApplicationService {
                 log.info("serving LA");
                 sendEmailToOtherEmails(authorization, caseDetails, caseData);
             }
-            if ((caseData.getServiceOfApplication().getSoaOtherPeopleList() != null) && (caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue() != null)) {
+            if ((caseData.getServiceOfApplication().getSoaOtherPeopleList() != null)
+                && (caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue() != null)) {
                 log.info("serving other people in case");
                 caseData = sendPostToOtherPeopleInCase(caseDetails, authorization);
             }
