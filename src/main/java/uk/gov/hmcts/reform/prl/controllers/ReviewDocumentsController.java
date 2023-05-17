@@ -124,7 +124,7 @@ public class ReviewDocumentsController {
                           format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
                                  doc.getCategory()),
                           format("<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
-                         doc.getNotes()));
+                         doc.getNotes()), "<br/>");
                 caseDataUpdated.put("docToBeReviewed", doctobereviewed);
                 caseDataUpdated.put("reviewDoc", doc.getDocument());
                 log.info("** review doc ** {}", doc.getDocument());
