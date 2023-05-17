@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
@@ -111,22 +112,22 @@ public class C100RespondentSolicitorService {
                     caseDataUpdated.put(
                         event.getCaseFieldName(),
                         CitizenDetails.builder()
-                            .address(Optional.ofNullable(citizenDetails.getAddress()).orElse(partyDetails.getAddress()))
-                            .addressHistory(Optional.ofNullable(citizenDetails.getAddressHistory()).orElse(
+                            .address(ofNullable(citizenDetails.getAddress()).orElse(partyDetails.getAddress()))
+                            .addressHistory(ofNullable(citizenDetails.getAddressHistory()).orElse(
                                 AddressHistory.builder().isAtAddressLessThan5Years(partyDetails.getIsAtAddressLessThan5Years())
                                     .build()
                             ))
-                            .contact(Optional.ofNullable(citizenDetails.getContact()).orElse(Contact.builder()
+                            .contact(ofNullable(citizenDetails.getContact()).orElse(Contact.builder()
                                                                                                  .phoneNumber(
                                                                                                      partyDetails
                                                                                                          .getPhoneNumber())
                                                                                                  .email(partyDetails.getEmail())
                                                                                                  .build()))
-                            .dateOfBirth(Optional.ofNullable(citizenDetails.getDateOfBirth()).orElse(partyDetails.getDateOfBirth()))
-                            .firstName(Optional.ofNullable(citizenDetails.getFirstName()).orElse(partyDetails.getFirstName()))
-                            .lastName(Optional.ofNullable(citizenDetails.getLastName()).orElse(partyDetails.getLastName()))
-                            .placeOfBirth(Optional.ofNullable(citizenDetails.getPlaceOfBirth()).orElse(partyDetails.getPlaceOfBirth()))
-                            .previousName(Optional.ofNullable(citizenDetails.getPreviousName()).orElse(partyDetails.getPreviousName()))
+                            .dateOfBirth(ofNullable(citizenDetails.getDateOfBirth()).orElse(partyDetails.getDateOfBirth()))
+                            .firstName(ofNullable(citizenDetails.getFirstName()).orElse(partyDetails.getFirstName()))
+                            .lastName(ofNullable(citizenDetails.getLastName()).orElse(partyDetails.getLastName()))
+                            .placeOfBirth(ofNullable(citizenDetails.getPlaceOfBirth()).orElse(partyDetails.getPlaceOfBirth()))
+                            .previousName(ofNullable(citizenDetails.getPreviousName()).orElse(partyDetails.getPreviousName()))
                             .build()
                     );
                     break;
@@ -583,15 +584,14 @@ public class C100RespondentSolicitorService {
         dataMap.put("repEmail", solicitorRepresentedRespondent.getValue().getSolicitorEmail());
         if (solicitorRepresentedRespondent.getValue().getDxNumber() != null) {
             dataMap.put("dxNumber", solicitorRepresentedRespondent.getValue().getDxNumber());
-        } else if (solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation() != null) {
-            log.info("swanky {}", solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation());
-            for (ContactInformation contactInformation : solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation()) {
-                for (DxAddress dxAddress : contactInformation.getDxAddress()) {
-                    dataMap.put("dxNumber", dxAddress.getDxNumber());
+        } else {
+            if (solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation() != null) {
+                for (ContactInformation contactInformationLoop : solicitorRepresentedRespondent.getValue().getOrganisations().getContactInformation()) {
+                    for (DxAddress dxAddress : contactInformationLoop.getDxAddress()) {
+                        dataMap.put("dxNumber", dxAddress.getDxNumber());
+                    }
                 }
             }
-        } else {
-            dataMap.put("dxNumber", " ");
         }
         dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
 
