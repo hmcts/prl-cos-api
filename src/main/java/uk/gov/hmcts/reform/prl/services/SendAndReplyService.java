@@ -730,13 +730,17 @@ public class SendAndReplyService {
      *  This method will send notification, when internal
      *  other message is sent.
      * @param caseData CaseData
-     * @param message Message
      */
-    public void sendNotificationEmailOther(CaseData caseData, Message message) {
-        log.info("RecipientEmailAddresses {}", message.getRecipientEmailAddresses());
-        if (ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())) {
-            final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
+    public void sendNotificationEmailOther(CaseData caseData) {
+        //get the latest message
+        Message message = nullSafeCollection(caseData.getSendOrReplyMessage().getOpenMessagesList()).stream()
+            .min(Comparator.comparing(element -> element.getValue().getUpdatedTime(), Comparator.reverseOrder()))
+            .map(Element::getValue)
+            .filter(msg -> OPEN.equals(msg.getStatus()))
+            .orElse(null);
 
+        if (null != message && ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())) {
+            final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
             if (recipientEmailAddresses.length > 0) {
                 final EmailTemplateVars emailTemplateVars = buildNotificationEmailOther(caseData);
 
@@ -745,7 +749,8 @@ public class SendAndReplyService {
                         recipientEmailAddress,
                         EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,
                         emailTemplateVars,
-                        LanguagePreference.getPreferenceLanguage(caseData));
+                        LanguagePreference.getPreferenceLanguage(caseData)
+                    );
                 }
             }
         }
@@ -782,6 +787,8 @@ public class SendAndReplyService {
 
                     replyMessage.setReplyHistory(messageHistoryList);
                     replyMessage.setUpdatedTime(dateTime.now());
+                    //retain the original subject
+                    replyMessage.setMessageSubject(message.getMessageSubject());
 
                     return element(messageElement.getId(), replyMessage);
                 }
