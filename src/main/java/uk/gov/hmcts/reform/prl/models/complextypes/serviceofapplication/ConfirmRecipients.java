@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 
 import java.util.List;
 
+//This class is no more in use as the dynamic multi select list is not working as expected with ina complex type
 @Data
 @Builder
 @AllArgsConstructor
