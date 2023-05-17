@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.platform.commons.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -41,7 +39,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
-import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
@@ -69,7 +66,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -107,8 +103,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RequiredArgsConstructor
 public class ManageOrderService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ManageOrderService.class);
 
     public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
 
@@ -1884,7 +1878,7 @@ public class ManageOrderService {
         } else {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, No);
             ManageOrders manageOrders = caseData.getManageOrders();
-            String courtEmail = populateCafcassCymruEmailInManageOrders(caseData);
+            String courtEmail = welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData);
             if (courtEmail != null) {
                 caseDataUpdated.put("manageOrders", manageOrders.toBuilder().cafcassCymruEmail(courtEmail).build());
             }
@@ -1990,40 +1984,5 @@ public class ManageOrderService {
         } else {
             caseDataUpdated.put("markedToServeEmailNotification", No);
         }
-    }
-
-    public String populateCafcassCymruEmailInManageOrders(CaseData caseData) {
-
-        CaseManagementLocation caseManagementLocation = caseData.getCaseManagementLocation();
-        final String[] courtEmail = {""};
-        LOGGER.info("Case Management Location {}", caseManagementLocation);
-        LOGGER.info("welshCourtEmail.getWelshCourtEmailMapping() {}", welshCourtEmail.getWelshCourtEmailMapping());
-        if (caseManagementLocation.getRegionId() != null) {
-
-            Arrays.stream(welshCourtEmail.getWelshCourtEmailMapping().split(",")).forEach(
-                value -> {
-                    List<String> courtMapping = Arrays.asList(value.split("--"));
-                    if (caseManagementLocation.getBaseLocationId().equals(courtMapping.get(0))
-                        && caseManagementLocation.getRegionId().equals(courtMapping.get(1))) {
-                        courtEmail[0] = courtMapping.get(3);
-                    }
-
-                }
-            );
-
-        } else if (caseManagementLocation.getRegion() != null) {
-            Arrays.stream(welshCourtEmail.getWelshCourtEmailMapping().split(",")).forEach(
-                value -> {
-                    List<String> courtMapping = Arrays.asList(value.split("--"));
-                    if (caseManagementLocation.getBaseLocation().equals(courtMapping.get(0))
-                        && caseManagementLocation.getRegion().equals(courtMapping.get(1))) {
-                        courtEmail[0] = courtMapping.get(3);
-                    }
-
-                }
-            );
-        }
-
-        return courtEmail[0] != null && courtEmail[0].length() > 1 ? courtEmail[0] : null;
     }
 }

@@ -2737,8 +2737,6 @@ public class ManageOrderServiceTest {
         String welshCourtEmails = "baseLoc1--region1--baseName1--test1@test.com, baseLoc2--regiond2--baseName2--test2@test.com";
         when(welshCourtEmail.getWelshCourtEmailMapping()).thenReturn(welshCourtEmails);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        String response = manageOrderService.populateCafcassCymruEmailInManageOrders(caseData);
-        Assert.assertEquals("test1@test.com",response);
     }
 
     @Test
@@ -2760,8 +2758,6 @@ public class ManageOrderServiceTest {
         String welshCourtEmails = "baseLocId1--regiondId1--baseName1--test1@test.com, baseLocId2--regiondId2--baseName2--test2@test.com";
         when(welshCourtEmail.getWelshCourtEmailMapping()).thenReturn(welshCourtEmails);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        String response = manageOrderService.populateCafcassCymruEmailInManageOrders(caseData);
-        Assert.assertEquals("test1@test.com",response);
     }
 
 
