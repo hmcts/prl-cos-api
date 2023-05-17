@@ -247,11 +247,7 @@ public class ManageOrdersController {
         caseDataUpdated.put(DIO_FHDRA_HEARING_DETAILS, hearingData);
         caseDataUpdated.put(DIO_WITHOUT_NOTICE_HEARING_DETAILS, hearingData);
         caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
-        ManageOrders manageOrders = caseData.getManageOrders();
-        String courtEmail = manageOrderService.populateCafcassCymruEmailInManageOrders(caseData);
-        if (courtEmail != null) {
-            caseDataUpdated.put("manageOrders", manageOrders.toBuilder().cafcassCymruEmail(courtEmail).build());
-        }
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
@@ -387,11 +383,6 @@ public class ManageOrdersController {
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
-        }
-        ManageOrders manageOrders = caseData.getManageOrders();
-        String courtEmail = manageOrderService.populateCafcassCymruEmailInManageOrders(caseData);
-        if (courtEmail != null) {
-            caseDataUpdated.put("manageOrders", manageOrders.toBuilder().cafcassCymruEmail(courtEmail).build());
         }
 
         caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
