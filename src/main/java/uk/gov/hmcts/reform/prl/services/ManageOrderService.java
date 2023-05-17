@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.platform.commons.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -105,6 +107,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RequiredArgsConstructor
 public class ManageOrderService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ManageOrderService.class);
 
     public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
 
@@ -1987,7 +1991,8 @@ public class ManageOrderService {
 
         CaseManagementLocation caseManagementLocation = caseData.getCaseManagementLocation();
         final String[] courtEmail = {""};
-
+        LOGGER.info("Case Management Location {}", caseManagementLocation);
+        LOGGER.info("welshCourtEmail.getWelshCourtEmailMapping() {}", welshCourtEmail.getWelshCourtEmailMapping());
         if (caseManagementLocation.getRegionId() != null) {
 
             Arrays.stream(welshCourtEmail.getWelshCourtEmailMapping().split(",")).forEach(
