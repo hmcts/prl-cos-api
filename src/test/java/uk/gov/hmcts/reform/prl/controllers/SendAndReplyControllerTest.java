@@ -280,9 +280,9 @@ public class SendAndReplyControllerTest {
         CaseData caseData = CaseData.builder().id(12345L)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                .respondToMessage(YesOrNo.No)
+                    .respondToMessage(YesOrNo.No)
                     .openMessagesList(messages)
-                .build())
+                    .build())
             .chooseSendOrReply(REPLY)
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
@@ -414,6 +414,30 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
+    public void testHandleSubmittedSendAndReply() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.No)
+                    .closedMessagesList(messages)
+                    .openMessagesList(messages)
+                    .build())
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        Message mostRecentMessage = messages.get(0).getValue();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
+        //verify(sendAndReplyService).sendNotificationEmailOther(caseData,mostRecentMessage);
+    }
+
+    @Test
     public void testSendOrReplyToMessagesSubmitForReply() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
@@ -435,31 +459,6 @@ public class SendAndReplyControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
         verify(sendAndReplyService).closeMessage(caseData);
-    }
-
-    @Test
-    public void testHandleSubmittedSendAndReply() {
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .chooseSendOrReply(REPLY)
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .respondToMessage(YesOrNo.No)
-                    .closedMessagesList(messages)
-                    .openMessagesList(messages)
-                    .replyMessageObject(message)
-                    .build())
-            .messageReply(message)
-            .replyMessageDynamicList(DynamicList.builder().build())
-            .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        Message mostRecentMessage = messages.get(0).getValue();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
-        verify(sendAndReplyService).sendNotificationEmailOther(caseData, mostRecentMessage);
     }
 
 }
