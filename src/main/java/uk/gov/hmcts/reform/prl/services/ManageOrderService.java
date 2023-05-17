@@ -1752,6 +1752,7 @@ public class ManageOrderService {
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
+            .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .build();
 
 
