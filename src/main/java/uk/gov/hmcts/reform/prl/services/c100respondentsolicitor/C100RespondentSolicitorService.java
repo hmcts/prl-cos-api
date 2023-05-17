@@ -569,6 +569,9 @@ public class C100RespondentSolicitorService {
         dataMap.put("dob", response.getCitizenDetails().getDateOfBirth());
         dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
         dataMap.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
+        dataMap.put("repFullName", solicitorRepresentedRespondent
+            .getValue().getRepresentativeLastName() + " " + solicitorRepresentedRespondent
+            .getValue().getRepresentativeLastName());
         if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine1() != null) {
             dataMap.put("repAddressLine1", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine1());
         }
@@ -603,6 +606,15 @@ public class C100RespondentSolicitorService {
         dataMap.put("attendedMiam", response.getMiam().getAttendedMiam());
         dataMap.put("willingToAttendMiam", response.getMiam().getWillingToAttendMiam());
         dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
+        dataMap.put("currentOrPastProceedingsForChildren", response.getCurrentOrPastProceedingsForChildren());
+        dataMap.put("reasonForChild", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl());
+        dataMap.put("reasonForChildDetails", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWlDetails());
+        dataMap.put("reasonForParent", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl());
+        dataMap.put("reasonForParentDetails", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWlDetails());
+        dataMap.put("reasonForJurisdiction", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl());
+        dataMap.put("reasonForJurisdictionDetails", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl());
+        dataMap.put("requestToAuthority", response.getCitizenInternationalElements().getAnotherCountryAskedInformation());
+        dataMap.put("requestToAuthorityDetails", response.getCitizenInternationalElements().getAnotherCountryAskedInformationDetaails());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
