@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class HearingDateTimeOption {
 
     @JsonProperty("hearingDateTimeOption")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS aa")
     private LocalDateTime hearingDateTimeOption;
 
     @JsonCreator
