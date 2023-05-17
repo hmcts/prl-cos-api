@@ -800,8 +800,6 @@ public class CaseData implements MappableObject {
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
     //PRL-3454 - send and reply message enhancements
-    @JsonUnwrapped
-    @Builder.Default
     private SendOrReplyMessage sendOrReplyMessage;
 
 }
