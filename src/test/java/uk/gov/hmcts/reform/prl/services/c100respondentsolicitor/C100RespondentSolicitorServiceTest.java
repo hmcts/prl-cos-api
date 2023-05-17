@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
@@ -134,6 +135,7 @@ public class C100RespondentSolicitorServiceTest {
                           .miam(Miam.builder().attendedMiam(No)
                                     .willingToAttendMiam(No)
                                     .reasonNotAttendingMiam("test").build())
+                          .currentOrPreviousProceedings(CurrentOrPreviousProceedings.builder().build())
                           .citizenInternationalElements(CitizenInternationalElements
                                                             .builder()
                                                             .childrenLiveOutsideOfEnWl(Yes)
@@ -250,6 +252,7 @@ public class C100RespondentSolicitorServiceTest {
                           .miam(Miam.builder().attendedMiam(No)
                                     .willingToAttendMiam(No)
                                     .reasonNotAttendingMiam("test").build())
+                          .currentOrPreviousProceedings(CurrentOrPreviousProceedings.builder().build())
                           .citizenInternationalElements(CitizenInternationalElements
                                                             .builder()
                                                             .childrenLiveOutsideOfEnWl(Yes)
