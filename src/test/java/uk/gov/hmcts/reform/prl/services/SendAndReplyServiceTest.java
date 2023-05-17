@@ -67,14 +67,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
-import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -121,7 +119,7 @@ public class SendAndReplyServiceTest {
 
     List<Element<Message>> listOfClosedMessages;
 
-    List <Element<MessageHistory>> messageHistoryList;
+    List<Element<MessageHistory>> messageHistoryList;
 
     MessageMetaData metaData;
     DynamicList dynamicList;
@@ -197,7 +195,7 @@ public class SendAndReplyServiceTest {
             .messageHistory("Message 3 message history")
             .build();
 
-        messageHistoryList =new ArrayList<>();
+        messageHistoryList = new ArrayList<>();
         MessageHistory messageHistory = MessageHistory.builder().messageFrom("sender1@email.com")
             .messageTo("testRecipient1@email.com").messageDate(dateSent).isUrgent(YesOrNo.Yes).build();
         messageHistoryElement = element(messageHistory);
@@ -592,7 +590,8 @@ public class SendAndReplyServiceTest {
         CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
 
         assertNotNull(updatedCaseData);
-        assertEquals("123 - hearingType1",updatedCaseData.getSendOrReplyMessage().getSendMessageObject().getFutureHearingsList().getListItems().get(0).getCode());
+        assertEquals("123 - hearingType1",updatedCaseData.getSendOrReplyMessage().getSendMessageObject()
+            .getFutureHearingsList().getListItems().get(0).getCode());
     }
 
     @Test
@@ -623,7 +622,8 @@ public class SendAndReplyServiceTest {
         CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
 
         assertNotNull(updatedCaseData);
-        assertEquals("categoryId___documentURL",updatedCaseData.getSendOrReplyMessage().getSendMessageObject().getSubmittedDocumentsList().getListItems().get(0).getCode());
+        assertEquals("categoryId___documentURL",updatedCaseData.getSendOrReplyMessage()
+            .getSendMessageObject().getSubmittedDocumentsList().getListItems().get(0).getCode());
     }
 
     @Test
@@ -815,7 +815,8 @@ public class SendAndReplyServiceTest {
             .build();
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesListWithReplyHistory.get(0).getId());
         CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(caseData,auth);
-        String messageTo = updatedCaseData.getSendOrReplyMessage().getOpenMessagesList().get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo();
+        String messageTo = updatedCaseData.getSendOrReplyMessage().getOpenMessagesList()
+            .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo();
 
         assertEquals("testRecipient1@email.com",messageTo);
     }
