@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.DxAddress;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -603,7 +605,8 @@ public class C100RespondentSolicitorService {
         }
         dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
-        dataMap.put("respondents", response.getCurrentOrPreviousProceedings().getProceedingsList());
+        List<Element<Proceedings>> proceedingsList = response.getCurrentOrPreviousProceedings().getProceedingsList();
+        dataMap.put("respondents", proceedingsList);
         dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication());
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
         dataMap.put("permissionFromCourt", response.getConsent().getPermissionFromCourt());
