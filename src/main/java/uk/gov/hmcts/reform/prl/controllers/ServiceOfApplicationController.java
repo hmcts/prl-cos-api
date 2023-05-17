@@ -138,13 +138,9 @@ public class ServiceOfApplicationController {
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("app@gmail.com")
             .build();
-        serviceOfApplicationPostService
-            .sendBulkPrint(caseData, authorisation,
-                List.of(serviceOfApplicationPostService.getCoverLetterGeneratedDocInfo(
-                    caseData,
-                    authorisation
-                )), applicant
-            );
+        serviceOfApplicationPostService.sendBulkPrint(caseData, authorisation,
+                List.of(serviceOfApplicationPostService.getCoverLetterGeneratedDocInfo(caseData, authorisation)), applicant
+        );
         log.info("Bulk print");
         //updatedCaseData.put("coverLetter", serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
