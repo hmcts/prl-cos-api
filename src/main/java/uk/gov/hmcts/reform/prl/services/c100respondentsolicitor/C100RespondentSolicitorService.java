@@ -597,9 +597,7 @@ public class C100RespondentSolicitorService {
         dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
         dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication());
-        if(response.getConsent().getConsentToTheApplication() == No) {
-            dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
-        }
+        dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
