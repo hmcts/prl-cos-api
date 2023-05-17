@@ -327,6 +327,8 @@ public class TestingSupportService {
     }
 
     private boolean isAuthorized(String authorisation) {
+        log.info("TESTING_SUPPORT_LD_FLAG_ENABLED ==> " + launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED));
+        log.info("authorisationService.authoriseUser(authorisation) ==> " + authorisationService.authoriseUser(authorisation));
         return launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)
             && Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation));
     }
