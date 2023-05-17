@@ -18,6 +18,7 @@ public class MessageHistory {
     private String messageDate;
     private YesOrNo isUrgent;
     private  String messageSubject;
+    private String messageContent;
     private InternalExternalMessageEnum internalOrExternalMessageEnum;
     private InternalMessageWhoToSendToEnum internalMessageWhoToSendToEnum;
     private MessageAboutEnum messageAboutEnum;
