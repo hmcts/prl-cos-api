@@ -624,7 +624,7 @@ public class SendAndReplyControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
-        verify(sendAndReplyService).sendNotificationEmailOther(caseData,mostRecentMessage);
+        verify(sendAndReplyService).sendNotificationEmailOther(caseData);
     }
 
 
