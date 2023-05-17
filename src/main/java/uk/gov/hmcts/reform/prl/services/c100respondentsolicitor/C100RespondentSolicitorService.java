@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -594,6 +595,11 @@ public class C100RespondentSolicitorService {
             }
         }
         dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
+        dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
+        dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication());
+        if(response.getConsent().getConsentToTheApplication() == No) {
+            dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
+        }
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 

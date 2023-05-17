@@ -49,6 +49,7 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.Respo
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -121,6 +122,10 @@ public class C100RespondentSolicitorServiceTest {
                                               .lastName("test")
                                               .build())
                           .c7ResponseSubmitted(No)
+                          .consent(Consent.builder()
+                                       .consentToTheApplication(No)
+                                       .noConsentReason("test")
+                                       .build())
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
                                                   .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
@@ -214,7 +219,7 @@ public class C100RespondentSolicitorServiceTest {
             .solicitorReference("test")
             .build();
 
-        List<ContactInformation> contactInformation = null;
+        List<ContactInformation> contactInformation = new ArrayList<>();
         List<DxAddress> dxAddress = new ArrayList<>();
         dxAddress.add(DxAddress.builder().dxNumber("dxNumber").build());
         contactInformation.add(ContactInformation.builder()
@@ -232,6 +237,10 @@ public class C100RespondentSolicitorServiceTest {
                                               .firstName("test")
                                               .lastName("test")
                                               .build())
+                          .consent(Consent.builder()
+                                       .consentToTheApplication(No)
+                                       .noConsentReason("test")
+                                       .build())
                           .c7ResponseSubmitted(No)
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
