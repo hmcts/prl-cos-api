@@ -27,9 +27,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
@@ -604,8 +604,8 @@ public class C100RespondentSolicitorService {
         }
         dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
-        List<Element<Proceedings>> proceedingsList = response.getCurrentOrPreviousProceedings().getProceedingsList();
-        log.info("yodal: {}", proceedingsList.toString());
+        List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
+        log.info("Swanky: {}", proceedingsList);
         dataMap.put("respondents", proceedingsList);
         dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication());
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
@@ -623,8 +623,7 @@ public class C100RespondentSolicitorService {
         dataMap.put("reasonForJurisdictionDetails", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWlDetails());
         dataMap.put("requestToAuthority", response.getCitizenInternationalElements().getAnotherCountryAskedInformation());
         dataMap.put("requestToAuthorityDetails", response.getCitizenInternationalElements().getAnotherCountryAskedInformationDetaails());
-
-        log.info("Swanky {}", dataMap.get("respondents"));
+        log.info("Swankier: {}", dataMap.get("respondents"));
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 

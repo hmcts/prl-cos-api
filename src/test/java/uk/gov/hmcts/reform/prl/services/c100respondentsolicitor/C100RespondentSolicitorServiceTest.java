@@ -36,14 +36,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -107,12 +106,16 @@ public class C100RespondentSolicitorServiceTest {
         confidentialityListEnums.add(ConfidentialityListEnum.email);
         confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
 
-        Proceedings proceedingDetails = Proceedings.builder()
+        RespondentProceedingDetails proceedingDetails = RespondentProceedingDetails.builder()
+            .caseNumber("122344")
+            .nameAndOffice("testoffice")
+            .nameOfCourt("testCourt")
             .build();
 
-        Element<Proceedings> proceedingDetailsElement = Element.<Proceedings>builder()
+        Element<RespondentProceedingDetails> proceedingDetailsElement = Element.<RespondentProceedingDetails>builder()
             .value(proceedingDetails).build();
-        List<Element<Proceedings>> proceedingsList = Collections.singletonList(proceedingDetailsElement);
+        List<Element<RespondentProceedingDetails>> proceedingsList = Collections.singletonList(proceedingDetailsElement);
+
 
         User user = User.builder().email("respondent@example.net")
             .idamId("1234-5678").solicitorRepresented(Yes).build();
@@ -143,7 +146,7 @@ public class C100RespondentSolicitorServiceTest {
                           .miam(Miam.builder().attendedMiam(No)
                                     .willingToAttendMiam(No)
                                     .reasonNotAttendingMiam("test").build())
-                          .currentOrPreviousProceedings(CurrentOrPreviousProceedings.builder().proceedingsList(proceedingsList).build())
+                          .respondentExistingProceedings(proceedingsList)
                           .citizenInternationalElements(CitizenInternationalElements
                                                             .builder()
                                                             .childrenLiveOutsideOfEnWl(Yes)
@@ -260,7 +263,7 @@ public class C100RespondentSolicitorServiceTest {
                           .miam(Miam.builder().attendedMiam(No)
                                     .willingToAttendMiam(No)
                                     .reasonNotAttendingMiam("test").build())
-                          .currentOrPreviousProceedings(CurrentOrPreviousProceedings.builder().proceedingsList(proceedingsList).build())
+                          .respondentExistingProceedings(proceedingsList)
                           .citizenInternationalElements(CitizenInternationalElements
                                                             .builder()
                                                             .childrenLiveOutsideOfEnWl(Yes)
