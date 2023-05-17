@@ -22,8 +22,8 @@ import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -139,13 +139,11 @@ public class ServiceOfApplicationController {
             .email("app@gmail.com")
             .build();
         serviceOfApplicationPostService
-            .sendBulkPrint(caseData,
-                           authorisation,
-                           List.of(serviceOfApplicationPostService.getCoverLetterGeneratedDocInfo(
-                               caseData,
-                               authorisation
-                           )),
-                           applicant
+            .sendBulkPrint(caseData, authorisation,
+                List.of(serviceOfApplicationPostService.getCoverLetterGeneratedDocInfo(
+                    caseData,
+                    authorisation
+                )), applicant
             );
         log.info("Bulk print");
         //updatedCaseData.put("coverLetter", serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData));
