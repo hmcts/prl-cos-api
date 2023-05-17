@@ -157,8 +157,10 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         //CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
         //serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("inside submitted--start of notification");
-        CaseData caseData = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+        log.info("Confirm recipients {}", caseData.getConfirmRecipients());
+        caseData = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             callbackRequest.getCaseDetails(),
             authorisation
         );

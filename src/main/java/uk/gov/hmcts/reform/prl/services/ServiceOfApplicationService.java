@@ -133,11 +133,11 @@ public class ServiceOfApplicationService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("Confirm recipients {}", caseData.getConfirmRecipients());
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getApplicantsList() != null)) {
+            if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getApplicantsList().getValue() != null)) {
                 log.info("serving applicants");
                 caseData = sendNotificationToApplicantSolicitor(caseDetails,authorization);
             }
-            if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getRespondentsList() != null)) {
+            if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getRespondentsList().getValue() != null)) {
                 log.info("serving respondents");
                 caseData = sendNotificationToRespondentOrSolicitor(caseDetails, authorization);
             }
@@ -145,7 +145,7 @@ public class ServiceOfApplicationService {
                 log.info("serving LA");
                 sendEmailToOtherEmails(authorization, caseDetails, caseData);
             }
-            if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getOtherPeopleList() != null)) {
+            if ((caseData.getConfirmRecipients() != null) && (caseData.getConfirmRecipients().getOtherPeopleList().getValue() != null)) {
                 log.info("serving other people in case");
                 caseData = sendPostToOtherPeopleInCase(caseDetails, authorization);
             }
@@ -158,10 +158,9 @@ public class ServiceOfApplicationService {
     public CaseData sendNotificationToApplicantSolicitor(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            log.info("case type" + caseData.getCaseTypeOfApplication());
+            log.info("***In sendNotificationToApplicantSolicitor*** case type" + caseData.getCaseTypeOfApplication());
             List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
-            DynamicMultiSelectList applicantsToNotify = caseData.getConfirmRecipients().getApplicantsList();
-            List<DynamicMultiselectListElement> applicantsList = applicantsToNotify.getListItems();
+            List<DynamicMultiselectListElement> applicantsList = caseData.getConfirmRecipients().getApplicantsList().getValue();
             applicantsList.forEach(applicant -> {
                 Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
                 log.info("party" + party.get().getValue());
