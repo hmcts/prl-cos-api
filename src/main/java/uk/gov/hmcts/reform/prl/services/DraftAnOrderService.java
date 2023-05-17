@@ -657,6 +657,7 @@ public class DraftAnOrderService {
             .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .isOrderCreatedBySolicitor(draftOrder.getIsOrderCreatedBySolicitor())
             .hearingsType(caseData.getManageOrders().getHearingsType())
+            .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
             .build();
     }
 
