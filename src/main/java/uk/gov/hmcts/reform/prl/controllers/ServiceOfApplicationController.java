@@ -131,6 +131,43 @@ public class ServiceOfApplicationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(),objectMapper);
+        log.info("**************DEBUGGING  START*******************");
+        log.info("Confirm recipients in about-to-submit before setting in casedata {}", caseData.getConfirmRecipients());
+        Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
+            .getApplicantsMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> applicantList = applicantDetails.get("applicants");
+        List<DynamicMultiselectListElement> applicantSolicitorList = applicantDetails.get("applicantSolicitors");
+        Map<String, List<DynamicMultiselectListElement>> respondentDetails = dynamicMultiSelectListService
+            .getRespondentsMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> respondentList = respondentDetails.get("respondents");
+        List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
+        List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData);
+
+        ConfirmRecipients confirmRecipients = ConfirmRecipients.builder()
+            .applicantsList(DynamicMultiSelectList.builder()
+                                .listItems(applicantList)
+                                .build())
+            .applicantSolicitorList(DynamicMultiSelectList.builder()
+                                        .listItems(applicantSolicitorList)
+                                        .build())
+            .respondentsList(DynamicMultiSelectList.builder()
+                                 .listItems(respondentList)
+                                 .build())
+            .respondentSolicitorList(DynamicMultiSelectList.builder()
+                                         .listItems(respondentSolicitorList)
+                                         .build())
+            .otherPeopleList(DynamicMultiSelectList.builder()
+                                 .listItems(otherPeopleList)
+                                 .build())
+            .build();
+        caseData = caseData.toBuilder().confirmRecipients(confirmRecipients).build();
+        log.info("Confirm recipients in about-to-submit after  setting in casedata{}", caseData.getConfirmRecipients());
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
+        log.info("Confirm recipients in about-to-submit  from map {}", caseDataUpdated.get("confirmRecipients"));
+        log.info("**************DEBUGGING  END*******************");
+
+
         log.info("Confirm recipients in about to submit {}", caseData.getConfirmRecipients());
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);

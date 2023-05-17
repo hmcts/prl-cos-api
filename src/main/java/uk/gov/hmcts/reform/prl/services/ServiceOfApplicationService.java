@@ -152,7 +152,6 @@ public class ServiceOfApplicationService {
 
         }
         caseInviteManager.generatePinAndSendNotificationEmail(caseData);
-
         return caseData;
     }
 
@@ -165,9 +164,9 @@ public class ServiceOfApplicationService {
             List<DynamicMultiselectListElement> applicantsList = applicantsToNotify.getListItems();
             applicantsList.forEach(applicant -> {
                 Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
+                log.info("party" + party.get().getValue());
                 String docPackFlag = "";
                 if (party.isPresent() && party.get().getValue().getSolicitorEmail() != null) {
-                    log.info("party" + party.get().getValue());
                     log.info("party" + party.get().getValue().getSolicitorEmail());
                     try {
                         log.info("Sending the email notification to applicant solicitor for C100 Application for caseId {}", caseDetails.getId());
