@@ -598,6 +598,11 @@ public class C100RespondentSolicitorService {
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
         dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication());
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
+        dataMap.put("permissionFromCourt", response.getConsent().getPermissionFromCourt());
+        dataMap.put("courtOrderDetails", response.getConsent().getCourtOrderDetails());
+        dataMap.put("attendedMiam", response.getMiam().getAttendedMiam());
+        dataMap.put("willingToAttendMiam", response.getMiam().getWillingToAttendMiam());
+        dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
