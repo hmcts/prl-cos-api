@@ -488,3 +488,6 @@ commonData:
   api:
     url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
 
+welsh:
+  court:
+    email-mapping: ${WELSH_COURT_MAPPING:}
