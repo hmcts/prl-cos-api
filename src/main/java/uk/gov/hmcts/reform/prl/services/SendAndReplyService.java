@@ -676,7 +676,6 @@ public class SendAndReplyService {
         final List<String> lines = new LinkedList<>();
 
         lines.add("<div class='width-50'>");
-        lines.add("<table>");
 
         //previous history
         log.info("Message history :{}", message.getReplyHistory());
@@ -684,10 +683,12 @@ public class SendAndReplyService {
             message.getReplyHistory().stream()
                 .map(Element::getValue)
                 .forEach(history -> {
+                    lines.add("<table>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
                     addRowToMessageTable(lines, "Message Date", history.getMessageDate());
                     addRowToMessageTable(lines, "Urgent", history.getIsUrgent().getDisplayedValue());
+                    lines.add("</table>");
                     lines.add(HORIZONTAL_LINE);
                 });
         }
@@ -695,6 +696,7 @@ public class SendAndReplyService {
         lines.add(HORIZONTAL_LINE);
         lines.add(HORIZONTAL_LINE);
         //latest message
+        lines.add("<table>");
         addRowToMessageTable(lines, "From", message.getSenderEmail());
         if (null != message.getInternalMessageWhoToSendToEnum()) {
             addRowToMessageTable(lines, "To", message.getInternalMessageWhoToSendToEnum().name());
@@ -795,6 +797,20 @@ public class SendAndReplyService {
             .messageTo(message.getRecipientEmail())
             .messageDate(message.getUpdatedTime().toString())
             .isUrgent(message.getInternalMessageUrgent())
+            .internalMessageWhoToSendToEnum(message.getInternalMessageWhoToSendToEnum())
+            .internalOrExternalMessageEnum(message.getInternalOrExternalMessageEnum())
+            .messageAboutEnum(message.getMessageAboutEnum())
+            .judgeName(message.getJudgeName())
+            .recipientEmailAddresses(message.getRecipientEmailAddresses())
+            .selectedCtscEmail(message.getSelectedCtscEmail())
+            .selectedLinkedApplicationCode(message.getSelectedLinkedApplicationCode())
+            .selectedLinkedApplicationValue(message.getSelectedLinkedApplicationValue())
+            .selectedFutureHearingCode(message.getSelectedFutureHearingCode())
+            .selectedFutureHearingValue(message.getSelectedFutureHearingValue())
+            .selectedSubmittedDocumentCode(message.getSelectedSubmittedDocumentCode())
+            .selectedSubmittedDocumentValue(message.getSelectedSubmittedDocumentValue())
             .build();
     }
+
+
 }
