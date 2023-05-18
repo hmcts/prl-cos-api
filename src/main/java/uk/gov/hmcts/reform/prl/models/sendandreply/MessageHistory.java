@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 @Data
 @AllArgsConstructor
@@ -26,7 +27,8 @@ public class MessageHistory {
     private String judgeName;
     private String selectedCtscEmail;
     private String recipientEmailAddresses;
-    private String selectedLinkedApplicationValue;
+    private String selectedApplicationValue;
     private String selectedFutureHearingValue;
     private String selectedSubmittedDocumentValue;
+    private Document selectedDocument;
 }
