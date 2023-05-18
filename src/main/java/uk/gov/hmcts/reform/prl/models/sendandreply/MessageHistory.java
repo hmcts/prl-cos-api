@@ -19,7 +19,6 @@ public class MessageHistory {
     private YesOrNo isUrgent;
     private  String messageSubject;
     private String messageContent;
-    private String judicialOrMagistrateTierCode;
     private InternalExternalMessageEnum internalOrExternalMessageEnum;
     private InternalMessageWhoToSendToEnum internalMessageWhoToSendToEnum;
     private MessageAboutEnum messageAboutEnum;

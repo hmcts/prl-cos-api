@@ -837,7 +837,6 @@ public class SendAndReplyService {
             .selectedLinkedApplicationValue(message.getSelectedLinkedApplicationValue())
             .selectedFutureHearingValue(message.getSelectedFutureHearingValue())
             .selectedSubmittedDocumentValue(message.getSelectedSubmittedDocumentValue())
-            .judicialOrMagistrateTierCode(message.getJudicialOrMagistrateTierCode())
             .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierValue())
             .build();
     }
