@@ -1079,6 +1079,14 @@ public class DraftAnOrderService {
             "dioPermissionHearingCourtDynamicList", courtDynamicList);
         caseDataUpdated.put(
             "dioTransferApplicationCourtDynamicList", courtDynamicList);
+
+        List<Element<SdoDisclosureOfPapersCaseNumber>> elementList = new ArrayList<>();
+        SdoDisclosureOfPapersCaseNumber sdoDisclosureOfPapersCaseNumbers = SdoDisclosureOfPapersCaseNumber.builder()
+                .sdoDisclosureCourtList(courtDynamicList)
+                .build();
+        elementList.add(element(sdoDisclosureOfPapersCaseNumbers));
+        caseDataUpdated.put(
+                "dioDisclosureOfPapersCaseNumbers", elementList);
     }
 
     public Map<String, Object> getDraftOrderInfo(String authorisation, CaseData caseData) throws Exception {
