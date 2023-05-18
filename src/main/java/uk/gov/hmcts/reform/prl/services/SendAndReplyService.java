@@ -683,7 +683,7 @@ public class SendAndReplyService {
             message.getReplyHistory().stream()
                 .map(Element::getValue)
                 .forEach(history -> {
-                    lines.add("<table wi>");
+                    lines.add("<table>");
                     lines.add("<h3>Message</h3>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
@@ -743,9 +743,9 @@ public class SendAndReplyService {
         if (value != null) {
             lines.add(TABLE_ROW_BEGIN);
             lines.add(TABLE_ROW_DATA_BEGIN);
-            lines.add("<b>");
+            lines.add("<h4>");
             lines.add(label);
-            lines.add("</b>");
+            lines.add("</h4>");
             lines.add(TABLE_ROW_DATA_END);
             lines.add(TABLE_ROW_DATA_BEGIN);
             lines.add(value);
