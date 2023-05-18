@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.common.CodeAndLabel;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -63,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendAndReplyService {
 
+    public static final String SEND_AND_REPLY_CATEGORY_ID = "sendAndReply";
     private final EmailService emailService;
 
     private final UserService userService;
@@ -96,6 +99,8 @@ public class SendAndReplyService {
     private final RefDataUserService refDataUserService;
 
     private final HearingService hearingService;
+
+    private Map<String, Document> documentMap;
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -324,7 +329,7 @@ public class SendAndReplyService {
                     serviceCode,
                     categoryId
                 ))
-                .linkedApplicationsList(getLinkedCasesDynamicList(authorization, caseReference))
+                .applicationsList(getOtherApllicationsist(caseData))
                 .submittedDocumentsList(documentCategoryList)
                 .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder().label(loggedInUserEmail).code(loggedInUserEmail).build())))
                 .futureHearingsList(getFutureHearingDynamicList(authorization, s2sToken, caseReference))
@@ -333,9 +338,6 @@ public class SendAndReplyService {
 
     private DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
         Hearings futureHearings = hearingService.getFutureHearings(authorization, caseId);
-
-        // label - hearingtypevalue - date
-        // code - hearing id - hearingtype
 
         if (futureHearings != null && futureHearings.getCaseHearings() != null && !futureHearings.getCaseHearings().isEmpty()) {
 
@@ -405,6 +407,34 @@ public class SendAndReplyService {
         ));
     }
 
+    public DynamicList getOtherApllicationsist(CaseData caseData) {
+
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements;
+
+        if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
+            List<DynamicListElement> dynamicListElements = new ArrayList<>();
+            additionalApplicationElements = caseData.getAdditionalApplicationsBundle();
+            additionalApplicationElements.stream().forEach(additionalApplicationsBundleElement ->  {
+                if (additionalApplicationsBundleElement.getValue().getOtherApplicationsBundle() != null) {
+                    dynamicListElements.add(DynamicListElement.builder().code("Other applications")
+                        .label("Other applications - "
+                                   .concat(additionalApplicationsBundleElement.getValue().getOtherApplicationsBundle().getUploadedDateTime()))
+                        .build());
+                }
+                if (additionalApplicationsBundleElement.getValue().getC2DocumentBundle() != null) {
+                    dynamicListElements.add(DynamicListElement.builder().code("C2 application")
+                        .label("C2 application - "
+                                   .concat(additionalApplicationsBundleElement.getValue().getC2DocumentBundle().getUploadedDateTime()))
+                        .build());
+                }
+            });
+            return  getDynamicList(dynamicListElements);
+        }
+
+        return DynamicList.builder()
+            .value(DynamicListElement.EMPTY).build();
+    }
+
     /**
      *  This method will call refdata api and create Dynamic List
      *  for Judicier tier.
@@ -452,17 +482,25 @@ public class SendAndReplyService {
 
     private DynamicList createDynamicList(CategoriesAndDocuments categoriesAndDocuments) {
 
+        documentMap = new HashMap<>();
+
         List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
+            .filter(category ->  !SEND_AND_REPLY_CATEGORY_ID.equals(category.getCategoryId()))
             .sorted(Comparator.comparing(Category::getCategoryName))
             .collect(Collectors.toList());
 
         List<DynamicListElement> dynamicListElementList = new ArrayList<>();
         createDynamicListFromSubCategories(parentCategories, dynamicListElementList, null, null);
 
-        categoriesAndDocuments.getUncategorisedDocuments().forEach(document -> dynamicListElementList.add(
-            DynamicListElement.builder().code(fetchDocumentIdFromUrl(document.getDocumentURL()))
-                .label(document.getDocumentFilename()).build()
-        ));
+        categoriesAndDocuments.getUncategorisedDocuments().forEach(document -> {
+
+            dynamicListElementList.add(
+                DynamicListElement.builder().code(fetchDocumentIdFromUrl(document.getDocumentURL()))
+                    .label(document.getDocumentFilename()).build()
+            );
+
+            documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
+        });
 
         return DynamicList.builder().value(DynamicListElement.EMPTY)
             .listItems(dynamicListElementList).build();
@@ -475,11 +513,15 @@ public class SendAndReplyService {
         categoryList.forEach(category -> {
             if (parentLabelString == null) {
                 if (category.getDocuments() != null) {
-                    category.getDocuments().forEach(document -> dynamicListElementList.add(
-                        DynamicListElement.builder().code(category.getCategoryId() + "___"
-                                                              + fetchDocumentIdFromUrl(document.getDocumentURL()))
-                            .label(category.getCategoryName() + " --- " + document.getDocumentFilename()).build()
-                    ));
+                    category.getDocuments().forEach(document -> {
+                        dynamicListElementList.add(
+                            DynamicListElement.builder().code(category.getCategoryId() + "->"
+                                                                  + fetchDocumentIdFromUrl(document.getDocumentURL()))
+                                .label(category.getCategoryName() + " -> " + document.getDocumentFilename()).build()
+                        );
+                        documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
+
+                    });
                 }
                 if (category.getSubCategories() != null) {
                     createDynamicListFromSubCategories(
@@ -491,13 +533,16 @@ public class SendAndReplyService {
                 }
             } else {
                 if (category.getDocuments() != null) {
-                    category.getDocuments().forEach(document -> dynamicListElementList.add(
-                        DynamicListElement.builder()
-                            .code(parentCodeString + " -> " + category.getCategoryId() + "___"
-                                      + fetchDocumentIdFromUrl(document.getDocumentURL()))
-                            .label(parentLabelString + " -> " + category.getCategoryName() + " --- "
-                                       + document.getDocumentFilename()).build()
-                    ));
+                    category.getDocuments().forEach(document -> {
+                        dynamicListElementList.add(
+                            DynamicListElement.builder()
+                                .code(parentCodeString + " -> " + category.getCategoryId() + "->"
+                                          + fetchDocumentIdFromUrl(document.getDocumentURL()))
+                                .label(parentLabelString + " -> " + category.getCategoryName() + " -> "
+                                           + document.getDocumentFilename()).build()
+                        );
+                        documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
+                    });
                 }
                 if (category.getSubCategories() != null) {
                     createDynamicListFromSubCategories(category.getSubCategories(), dynamicListElementList,
@@ -540,10 +585,10 @@ public class SendAndReplyService {
                                               ? sendOrReplyMessage.getJudicialOrMagistrateTierList().getValueCode() : null)
             .judicialOrMagistrateTierValue(sendOrReplyMessage.getJudicialOrMagistrateTierList() != null
                                                ? sendOrReplyMessage.getJudicialOrMagistrateTierList().getValueLabel() : null)
-            .selectedLinkedApplicationCode(sendOrReplyMessage.getLinkedApplicationsList() != null
-                                               ? sendOrReplyMessage.getLinkedApplicationsList().getValueCode() : null)
-            .selectedLinkedApplicationValue(sendOrReplyMessage.getLinkedApplicationsList() != null
-                                                ? sendOrReplyMessage.getLinkedApplicationsList().getValueLabel() : null)
+            .selectedApplicationCode(sendOrReplyMessage.getApplicationsList() != null
+                                               ? sendOrReplyMessage.getApplicationsList().getValueCode() : null)
+            .selectedApplicationValue(sendOrReplyMessage.getApplicationsList() != null
+                                                ? sendOrReplyMessage.getApplicationsList().getValueLabel() : null)
             .selectedFutureHearingCode(sendOrReplyMessage.getFutureHearingsList() != null
                                            ? sendOrReplyMessage.getFutureHearingsList().getValueCode() : null)
             .selectedFutureHearingValue(sendOrReplyMessage.getFutureHearingsList() != null
@@ -553,8 +598,30 @@ public class SendAndReplyService {
             .selectedSubmittedDocumentValue(sendOrReplyMessage.getSubmittedDocumentsList() != null
                                                 ? sendOrReplyMessage.getSubmittedDocumentsList().getValueLabel() : null)
             .latestMessage(caseData.getMessageContent())
+            .selectedDocument(getSelectedDocument(documentMap, sendOrReplyMessage.getSubmittedDocumentsList() != null
+                ? sendOrReplyMessage.getSubmittedDocumentsList().getValueCode() : null))
             .updatedTime(dateTime.now())
             .build();
+    }
+
+    private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(Map<String, Document> documentMap,
+                                                                                  String selectedSubmittedDocumentCode) {
+
+        if (documentMap != null && !documentMap.isEmpty()) {
+            if (selectedSubmittedDocumentCode != null) {
+                final String[] documentPath = selectedSubmittedDocumentCode.split("->");
+                final String documentId = documentPath[documentPath.length - 1];
+                final Document document = documentMap.get(documentId);
+                if (document != null) {
+                    return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                        .documentUrl(document.getDocumentURL())
+                        .documentBinaryUrl(document.getDocumentBinaryURL())
+                        .documentFileName(document.getDocumentFilename())
+                        .build();
+                }
+            }
+        }
+        return null;
     }
 
 
@@ -582,6 +649,7 @@ public class SendAndReplyService {
     }
 
     public List<Element<Message>> addNewOpenMessage(CaseData caseData, Message newMessage) {
+
         List<Element<Message>> messages = new ArrayList<>();
         Element<Message> messageElement = element(newMessage);
         if (isNotEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
@@ -643,7 +711,6 @@ public class SendAndReplyService {
      * @param message Message
      */
     public void sendNotificationEmailOther(CaseData caseData, Message message) {
-
         final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
 
         if (recipientEmailAddresses.length > 0) {
