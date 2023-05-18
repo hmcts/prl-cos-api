@@ -236,9 +236,8 @@ public class SendAndReplyController extends AbstractCallbackController {
             Message newMessage = sendAndReplyService.buildSendReplyMessage(caseData,
                                                                            caseData.getSendOrReplyMessage().getSendMessageObject());
 
-            log.info("New message object created ----> {}", newMessage);
-
             List<Element<Message>> listOfMessages = sendAndReplyService.addNewOpenMessage(caseData, newMessage);
+
             caseDataMap.put("openMessagesList", listOfMessages);
 
         } else {
@@ -252,6 +251,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                 caseDataMap.put("openMessagesList", sendAndReplyService.replyAndAppendMessageHistory(caseData));
             }
         }
+
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
 
