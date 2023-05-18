@@ -543,10 +543,10 @@ public class SendAndReplyService {
         return Message.builder()
             .status(OPEN)
             .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
-            .internalOrExternalMessageEnum(message.getInternalOrExternalMessageEnum())
+            .internalOrExternalMessage(message.getInternalOrExternalMessage())
             .internalMessageUrgent(message.getInternalMessageUrgent())
-            .internalMessageWhoToSendToEnum(message.getInternalMessageWhoToSendToEnum())
-            .messageAboutEnum(message.getMessageAboutEnum())
+            .internalMessageWhoToSendTo(message.getInternalMessageWhoToSendTo())
+            .messageAbout(message.getMessageAbout())
             .judgeName((null != judicialUser && isNotBlank(judicialUser.getPersonalCode()))
                            ? getJudgeName(judicialUser) : null)
             .messageSubject(message.getMessageSubject())
@@ -723,12 +723,12 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, "Internal message urgent?",  message.getInternalMessageUrgent() != null
             ? message.getInternalMessageUrgent().getDisplayedValue() : null);
         addRowToMessageTable(lines, "submitted document", message.getSelectedSubmittedDocumentValue());
-        addRowToMessageTable(lines, "Are you sending an internal message?", message.getInternalOrExternalMessageEnum() != null
-            ? message.getInternalOrExternalMessageEnum().name() : null);
-        addRowToMessageTable(lines, "Who to send to", message.getInternalMessageWhoToSendToEnum() != null
-            ? message.getInternalMessageWhoToSendToEnum().name() : null);
-        addRowToMessageTable(lines, "Message about?", message.getMessageAboutEnum() != null
-            ? message.getMessageAboutEnum().name() : null);
+        addRowToMessageTable(lines, "Are you sending an internal message?", message.getInternalOrExternalMessage() != null
+            ? message.getInternalOrExternalMessage().name() : null);
+        addRowToMessageTable(lines, "Who to send to", message.getInternalMessageWhoToSendTo() != null
+            ? message.getInternalMessageWhoToSendTo().name() : null);
+        addRowToMessageTable(lines, "Message about?", message.getMessageAbout() != null
+            ? message.getMessageAbout().name() : null);
         addRowToMessageTable(lines, "Selected Future Hearing", message.getSelectedFutureHearingValue());
 
         lines.add("</table>");
@@ -833,9 +833,9 @@ public class SendAndReplyService {
             .messageSubject(message.getMessageSubject())
             .isUrgent(message.getInternalMessageUrgent())
             .messageContent(message.getMessageContent())
-            .internalMessageWhoToSendToEnum(message.getInternalMessageWhoToSendToEnum())
-            .internalOrExternalMessageEnum(message.getInternalOrExternalMessageEnum())
-            .messageAboutEnum(message.getMessageAboutEnum())
+            .internalMessageWhoToSendToEnum(message.getInternalMessageWhoToSendTo())
+            .internalOrExternalMessageEnum(message.getInternalOrExternalMessage())
+            .messageAboutEnum(message.getMessageAbout())
             .judgeName(message.getJudgeName())
             .recipientEmailAddresses(message.getRecipientEmailAddresses())
             .selectedCtscEmail(message.getSelectedCtscEmail())
