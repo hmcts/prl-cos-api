@@ -778,7 +778,6 @@ public class DraftAnOrderService {
     }
 
     public void populateStandardDirectionOrderDefaultFields(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
-        log.info("getsdoCafcassOrCymruList" + caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList());
         populateRightToAskCourt(caseData, caseDataUpdated);
         populateHearingAndNextStepsText(caseData, caseDataUpdated);
         populateCafcassNextSteps(caseData, caseDataUpdated);
