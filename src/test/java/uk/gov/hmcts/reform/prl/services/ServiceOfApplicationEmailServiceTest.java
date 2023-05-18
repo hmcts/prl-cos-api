@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -29,6 +30,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationEmailServiceTest {
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     @Mock
     private EmailService emailService;
@@ -70,6 +74,7 @@ public class ServiceOfApplicationEmailServiceTest {
 
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
+        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         serviceOfApplicationEmailService.sendEmailC100(caseDetails);
@@ -107,6 +112,7 @@ public class ServiceOfApplicationEmailServiceTest {
                                              .build())))
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
+        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         serviceOfApplicationEmailService.sendEmailC100(caseDetails);
@@ -134,6 +140,7 @@ public class ServiceOfApplicationEmailServiceTest {
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
         serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
         verify(emailService,times(2)).send(Mockito.anyString(),
                                            Mockito.any(),
@@ -155,6 +162,7 @@ public class ServiceOfApplicationEmailServiceTest {
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
         serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
         verify(emailService,times(1)).send(Mockito.anyString(),
                                            Mockito.any(),
@@ -181,6 +189,7 @@ public class ServiceOfApplicationEmailServiceTest {
             .applicants(applicantList)
             .build();
 
+        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
         serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
 
         verify(emailService,times(1)).send(Mockito.anyString(),

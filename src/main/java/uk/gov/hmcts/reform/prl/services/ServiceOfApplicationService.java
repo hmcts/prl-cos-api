@@ -23,9 +23,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 @Slf4j
 @RequiredArgsConstructor
 public class ServiceOfApplicationService {
-
-    @Autowired
-    private LaunchDarklyClient launchDarklyClient;
+    private final LaunchDarklyClient launchDarklyClient;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
