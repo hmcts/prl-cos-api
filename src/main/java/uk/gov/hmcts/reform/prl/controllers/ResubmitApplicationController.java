@@ -176,8 +176,8 @@ public class ResubmitApplicationController {
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
         if (previousStates.isPresent() && (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get()))) {
-            caseData = caseData.toBuilder().state(State.fromValue((previousStates.get()))).build();
-            caseDataUpdated.put(STATE_FIELD, State.fromValue((previousStates.get())));
+            caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
+            caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
             caseData = caseData.setDateSubmittedDate();
             caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
@@ -185,8 +185,8 @@ public class ResubmitApplicationController {
         }
         if (previousStates.isPresent() && (State.CASE_ISSUED.getValue().equalsIgnoreCase(previousStates.get())
             || (State.JUDICIAL_REVIEW.getValue().equalsIgnoreCase(previousStates.get())))) {
-            caseData = caseData.toBuilder().state(State.CASE_ISSUED).build();
-            caseDataUpdated.put(STATE_FIELD, State.CASE_ISSUED);
+            caseData = caseData.toBuilder().state(State.fromValue(previousStates.get())).build();
+            caseDataUpdated.put(STATE_FIELD, State.fromValue(previousStates.get()));
             caseData = caseData.setIssueDate();
             caseDataUpdated.put(ISSUE_DATE_FIELD, caseData.getIssueDate());
         }
