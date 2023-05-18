@@ -605,7 +605,7 @@ public class C100RespondentSolicitorService {
         dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
         List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
-        dataMap.put("respondents", proceedingsList);
+        dataMap.put("respondentsExistingProceedings", proceedingsList);
         dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication());
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
         dataMap.put("permissionFromCourt", response.getConsent().getPermissionFromCourt());
@@ -623,8 +623,8 @@ public class C100RespondentSolicitorService {
         dataMap.put("reasonForJurisdictionDetails", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWlDetails());
         dataMap.put("requestToAuthority", response.getCitizenInternationalElements().getAnotherCountryAskedInformation());
         dataMap.put("requestToAuthorityDetails", response.getCitizenInternationalElements().getAnotherCountryAskedInformationDetaails());
-        log.info("Swankier: {}", dataMap.get("respondents"));
-        log.info("Swanky {}", dataMap.get("childAbuseInfo"));
+        log.info("Respondentexistingproceedings: {}", dataMap.get("respondentsExistingProceedings"));
+        log.info("childabuseinfo {}", dataMap.get("childAbuseInfo"));
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
