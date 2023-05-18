@@ -117,29 +117,26 @@ public class ServiceOfApplicationPostService {
         CaseData blankCaseData = CaseData.builder().build();
         List<GeneratedDocumentInfo> documents = null;
         List<Element<BulkPrintDetails>> printedDocCollectionList;
+        log.info("*** About to send post ***");
 
-        if (YesOrNo.Yes.getDisplayedValue()
-            .equalsIgnoreCase(partyDetails.getIsCurrentAddressKnown().getDisplayedValue())) {
-            try {
-                log.info("*** Generating Document ***");
-                documents = getDocsAsGeneratedDocumentInfo(docs);
-                //docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
-                documents.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
-            } catch (Exception e) {
-                log.info("*** Error while generating privacy notice to be served ***");
-            }
-            if (caseData.getBulkPrintDetails() != null) {
-                printedDocCollectionList = caseData.getBulkPrintDetails();
-            } else {
-                printedDocCollectionList = new ArrayList<>();
-            }
-            printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, documents, partyDetails)));
-            caseData.setBulkPrintDetails(printedDocCollectionList);
-            log.info("*** Bulk Print details set ***");
-        } else {
-            log.info("*** No Post address available ***");
-
+        try {
+            log.info("*** Generating Document ***");
+            documents = getDocsAsGeneratedDocumentInfo(docs);
+            //docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
+            documents.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
+            log.info("*** Documents generated ***" + docs);
+        } catch (Exception e) {
+            log.info("*** Error while generating document ***");
         }
+        if (caseData.getBulkPrintDetails() != null) {
+            printedDocCollectionList = caseData.getBulkPrintDetails();
+        } else {
+            printedDocCollectionList = new ArrayList<>();
+        }
+        log.info("*** calling Bulk Print ***");
+        printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, documents, partyDetails)));
+        caseData.setBulkPrintDetails(printedDocCollectionList);
+        log.info("*** Bulk Print details set in case data ***");
     }
 
 

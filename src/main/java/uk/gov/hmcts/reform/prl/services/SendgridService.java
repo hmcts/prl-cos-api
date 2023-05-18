@@ -14,14 +14,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import javax.json.JsonObject;
+
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @Slf4j
@@ -68,8 +75,8 @@ public class SendgridService {
         }
     }
 
-    public void sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
-                                         String emailAddress, List<Document> listOfAttachments)
+    public Element<EmailNotificationDetails> sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
+                                                                      String emailAddress, List<Document> listOfAttachments)
         throws IOException {
 
         String subject = emailProps.get("subject");
@@ -87,13 +94,19 @@ public class SendgridService {
             request.setBody(mail.build());
             sg.api(request);
             log.info("Notification to RPA sent successfully");
+
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
         }
-
+        return element(EmailNotificationDetails.builder()
+                           .emailAddress(emailAddress)
+                           .printedDocs(listOfAttachments)
+                           .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of(
+                               "Europe/London")))).build());
     }
 
-    private void attachFiles(String authorization, Mail mail, Map<String,String> emailProps, List<Document> documents) throws IOException {
+
+    private void attachFiles(String authorization, Mail mail, Map<String, String> emailProps, List<Document> documents) throws IOException {
         String s2sToken = authTokenGenerator.generate();
         for (Document d : documents) {
             Attachments attachments = new Attachments();
@@ -101,7 +114,11 @@ public class SendgridService {
             attachments.setType(emailProps.get("attachmentType"));
             attachments.setDisposition(emailProps.get("disposition"));
             attachments.setContent(Base64.getEncoder().encodeToString(documentGenService
-                                                                          .getDocumentBytes(d.getDocumentUrl(), authorization, s2sToken)));
+                                                                          .getDocumentBytes(
+                                                                              d.getDocumentUrl(),
+                                                                              authorization,
+                                                                              s2sToken
+                                                                          )));
             mail.addAttachments(attachments);
 
         }

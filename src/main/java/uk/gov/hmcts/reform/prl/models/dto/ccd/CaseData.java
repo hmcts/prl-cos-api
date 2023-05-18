@@ -104,6 +104,7 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.Fl401ListOnNotice;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -796,6 +797,7 @@ public class CaseData implements MappableObject {
 
     private NextHearingDetails nextHearingDetails;
     private List<Element<BulkPrintDetails>> bulkPrintDetails;
+    private List<Element<EmailNotificationDetails>> emailNotificationDetails;
     @JsonProperty("coverPageAddress")
     private Address coverPageAddress;
 

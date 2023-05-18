@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.ApplicantSolicitorEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.LocalAuthorityEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -111,7 +113,9 @@ public class ServiceOfApplicationEmailService {
     public void sendEmailNotificationToApplicantSolicitor(String authorization, CaseDetails caseDetails, PartyDetails partyDetails,
                                                           EmailTemplateNames templateName, List<Document> docs) throws Exception {
         log.info("*** About to send email ***");
+        log.info("*** email id ***" + partyDetails.getSolicitorEmail());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
         //CaseData caseData = emailService.getCaseData(caseDetails);
 
         emailService.send(
@@ -122,21 +126,31 @@ public class ServiceOfApplicationEmailService {
             LanguagePreference.getPreferenceLanguage(caseData)
         );
 
+        if (caseData.getEmailNotificationDetails() != null) {
+            emailNotifyCollectionList = caseData.getEmailNotificationDetails();
+        } else {
+            emailNotifyCollectionList = new ArrayList<>();
+        }
+        log.info("*** About to call sendgrid ***");
         requireNonNull(caseData);
-        sendgridService.sendEmailWithAttachments(authorization, getCommonEmailProps(), partyDetails.getSolicitorEmail(), docs);
-
+        emailNotifyCollectionList
+            .add(sendgridService.sendEmailWithAttachments(authorization,
+                                                          getCommonEmailProps(), partyDetails.getSolicitorEmail(), docs));
         log.info(
             "Email notification for SoA sent successfully to applicant solicitor for caseId {}",
-            caseDetails.getId()
-        );
+            caseDetails.getId());
+        caseData.setEmailNotificationDetails(emailNotifyCollectionList);
+        log.info("*** Email Notification details set in case data ***");
 
     }
 
     public void sendEmailNotificationToRespondentSolicitor(String authorization, CaseDetails caseDetails, PartyDetails partyDetails,
                                                            EmailTemplateNames templateName, List<Document> docs) throws Exception {
         log.info("*** About to send ***");
+        log.info("*** email id ***" + partyDetails.getSolicitorEmail());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         //CaseData caseData1 = emailService.getCaseData(caseDetails);
+        List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
         String respondentSolicitorName = partyDetails.getRepresentativeFirstName() + " "
             + partyDetails.getRepresentativeLastName();
         emailService.send(
@@ -149,19 +163,28 @@ public class ServiceOfApplicationEmailService {
             LanguagePreference.english
         );
 
+        if (caseData.getEmailNotificationDetails() != null) {
+            emailNotifyCollectionList = caseData.getEmailNotificationDetails();
+        } else {
+            emailNotifyCollectionList = new ArrayList<>();
+        }
+        log.info("*** About to call sendgrid ***");
         requireNonNull(caseData);
-        sendgridService.sendEmailWithAttachments(authorization, getCommonEmailProps(), partyDetails.getSolicitorEmail(), docs);
+        emailNotifyCollectionList
+            .add(sendgridService.sendEmailWithAttachments(authorization, getCommonEmailProps(),
+                                                          partyDetails.getSolicitorEmail(), docs));
 
         log.info(
             "Email notification for SoA sent successfully to respondent solicitor for caseId {}",
-            caseDetails.getId()
-        );
-
+            caseDetails.getId());
+        caseData.setEmailNotificationDetails(emailNotifyCollectionList);
+        log.info("*** Email Notification details set in case data ***");
 
     }
 
     public void sendEmailNotificationToOtherEmails(String authorization, CaseDetails caseDetails,
                                                    CaseData caseData, List<Document> docs) throws Exception {
+        List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
         log.info("*** About to send ***");
         if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
             for (Element<String> element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
@@ -173,10 +196,21 @@ public class ServiceOfApplicationEmailService {
                     LanguagePreference.english
                 );
 
+                if (caseData.getEmailNotificationDetails() != null) {
+                    emailNotifyCollectionList = caseData.getEmailNotificationDetails();
+                } else {
+                    emailNotifyCollectionList = new ArrayList<>();
+                }
+
+                log.info("*** About to call sendgrid ***");
                 requireNonNull(caseData);
-                sendgridService.sendEmailWithAttachments(authorization, getCommonEmailProps(), email, docs);
+                emailNotifyCollectionList
+                    .add(sendgridService.sendEmailWithAttachments(authorization,
+                                                                  getCommonEmailProps(), email, docs));
 
                 log.info("Email notification for SoA sent successfully to Other Emails included for caseId {}", caseDetails.getId());
+                caseData.setEmailNotificationDetails(emailNotifyCollectionList);
+                log.info("*** Email Notification details set in case data ***");
             }
         }
 
@@ -184,6 +218,7 @@ public class ServiceOfApplicationEmailService {
     }
 
     public void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) throws IOException {
+        List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
         log.info("*** About to send ***");
         if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
             for (Element<String> element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
@@ -202,10 +237,10 @@ public class ServiceOfApplicationEmailService {
 
     public Map<String, String> getCommonEmailProps() {
         Map<String, String> emailProps = new HashMap<>();
-        emailProps.put("subject", "");
-        emailProps.put("content", "");
-        emailProps.put("attachmentType", "");
-        emailProps.put("disposition", "");
+        emailProps.put("subject", "casedocuments");
+        emailProps.put("content", "casedetails");
+        emailProps.put("attachmentType", "pdf");
+        emailProps.put("disposition", "attachment");
 
         return emailProps;
     }
