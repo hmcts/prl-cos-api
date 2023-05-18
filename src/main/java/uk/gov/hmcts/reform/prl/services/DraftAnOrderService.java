@@ -1166,7 +1166,8 @@ public class DraftAnOrderService {
             && (!(((OrderStatusEnum.createdByCA.getDisplayedValue().equalsIgnoreCase(orderStatus))
             && AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.getDisplayedValue().equalsIgnoreCase(
             reviewRequiredBy)) || OrderStatusEnum.reviewedByJudge.getDisplayedValue().equalsIgnoreCase(orderStatus)
-            || OrderStatusEnum.draftedByLR.getDisplayedValue().equalsIgnoreCase(orderStatus)))) {
+            || OrderStatusEnum.draftedByLR.getDisplayedValue().equalsIgnoreCase(orderStatus)
+            || OrderStatusEnum.createdByJudge.getDisplayedValue().equalsIgnoreCase(orderStatus)))) {
             errorMessage = "Selected order can not be reviewed by Judge.";
         }
         return errorMessage;
