@@ -243,8 +243,7 @@ public class ServiceOfApplicationService {
                 String docPackFlag = "";
                 if (party.isPresent() && YesNoDontKnow.yes.equals(party.get().getValue().getDoTheyHaveLegalRepresentation())) {
 
-                    if (YesOrNo.Yes.getDisplayedValue()
-                        .equalsIgnoreCase(party.get().getValue().getSolicitorEmail())) {
+                    if (party.get().getValue().getSolicitorEmail() != null) {
                         try {
                             log.info("Sending the email notification to respondent solicitor for C100 Application for caseId {}",
                                      caseDetails.getId());
