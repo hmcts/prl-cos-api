@@ -686,22 +686,12 @@ public class SendAndReplyService {
                     lines.add("<table>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
-                    addRowToMessageTable(lines, "Date Sent", history.getMessageDate());
+                    addRowToMessageTable(lines, "Urgent", history.getIsUrgent().getDisplayedValue());
                     addRowToMessageTable(lines, "Message subject", history.getMessageSubject());
-                    addRowToMessageTable(lines, "Message", history.getMessageContent());
-                    addRowToMessageTable(lines, "Judicial or magistrate Tier", history.getJudicialOrMagistrateTierValue());
-                    addRowToMessageTable(lines, "Judge Name", history.getJudgeName());
-                    addRowToMessageTable(lines, "CTSC email", history.getSelectedCtscEmail());
-                    addRowToMessageTable(lines, "Recipient email addresses", history.getRecipientEmailAddresses());
-                    addRowToMessageTable(lines, "Internal message urgent?", history.getIsUrgent() != null
-                        ? history.getIsUrgent().getDisplayedValue() : null);
-                    addRowToMessageTable(lines, "submitted document", history.getSelectedSubmittedDocumentValue());
-                    addRowToMessageTable(lines, "Are you sending an internal message?", history.getInternalOrExternalMessageEnum() != null
-                        ? history.getInternalOrExternalMessageEnum().name() : null);
-                    addRowToMessageTable(lines, "Who to send to", history.getInternalMessageWhoToSendToEnum() != null
-                        ? history.getInternalMessageWhoToSendToEnum().name() : null);
-                    addRowToMessageTable(lines, "Message about?", history.getMessageAboutEnum() != null
-                        ? history.getMessageAboutEnum().name() : null);
+                    if (history.getJudgeName() != null) {
+                        addRowToMessageTable(lines, "Judge Name", history.getJudgeName());
+                    }
+                    addRowToMessageTable(lines, "The Message", history.getMessageContent());
                     lines.add("</table>");
                     lines.add(HORIZONTAL_LINE);
                 });
@@ -710,22 +700,15 @@ public class SendAndReplyService {
         //latest message
         lines.add("<table>");
         addRowToMessageTable(lines, "From", message.getSenderEmail());
-        addRowToMessageTable(lines, "Date Sent", message.getDateSent());
-        addRowToMessageTable(lines, "Message subject", message.getMessageSubject());
+        if (null != message.getInternalMessageWhoToSendToEnum()) {
+            addRowToMessageTable(lines, "To", message.getInternalMessageWhoToSendToEnum().name());
+        }
+        addRowToMessageTable(lines, "Message Date", message.getDateSent());
+        if (null != message.getInternalMessageUrgent()) {
+            addRowToMessageTable(lines, "Urgent", message.getInternalMessageUrgent().getDisplayedValue());
+        }
+        addRowToMessageTable(lines, "Subject", message.getMessageSubject());
         addRowToMessageTable(lines, "Message", message.getMessageContent());
-        addRowToMessageTable(lines, "CTSC email", message.getSelectedCtscEmail());
-        addRowToMessageTable(lines, "Recipient email addresses", message.getRecipientEmailAddresses());
-        addRowToMessageTable(lines, "Judicial or magistrate Tier", message.getJudicialOrMagistrateTierValue());
-        addRowToMessageTable(lines, "Judge Name", message.getJudgeName());
-        addRowToMessageTable(lines, "Internal message urgent?",  message.getInternalMessageUrgent() != null
-            ? message.getInternalMessageUrgent().getDisplayedValue() : null);
-        addRowToMessageTable(lines, "submitted document", message.getSelectedSubmittedDocumentValue());
-        addRowToMessageTable(lines, "Are you sending an internal message?", message.getInternalOrExternalMessageEnum() != null
-            ? message.getInternalOrExternalMessageEnum().name() : null);
-        addRowToMessageTable(lines, "Who to send to", message.getInternalMessageWhoToSendToEnum() != null
-                             ? message.getInternalMessageWhoToSendToEnum().name() : null);
-        addRowToMessageTable(lines, "Message about?", message.getMessageAboutEnum() != null
-                             ? message.getMessageAboutEnum().name() : null);
 
         lines.add("</table>");
         lines.add("</div>");
@@ -736,16 +719,15 @@ public class SendAndReplyService {
     private void addRowToMessageTable(List<String> lines,
                                       String label,
                                       String value) {
-        if (value != null) {
-            lines.add(TABLE_ROW_BEGIN);
-            lines.add(TABLE_ROW_DATA_BEGIN);
-            lines.add("<B>" + label + "</B>");
-            lines.add(TABLE_ROW_DATA_END);
-            lines.add(TABLE_ROW_DATA_BEGIN);
-            lines.add(value);
-            lines.add(TABLE_ROW_DATA_END);
-            lines.add(TABLE_ROW_END);
-        }
+        lines.add(TABLE_ROW_BEGIN);
+        lines.add(TABLE_ROW_DATA_BEGIN);
+        lines.add(label);
+        lines.add(TABLE_ROW_DATA_END);
+        lines.add(TABLE_ROW_DATA_BEGIN);
+        lines.add(value);
+        lines.add(TABLE_ROW_DATA_END);
+        lines.add(TABLE_ROW_END);
+
     }
 
     /**
@@ -817,6 +799,7 @@ public class SendAndReplyService {
             .messageTo(message.getRecipientEmail())
             .messageDate(message.getUpdatedTime().toString())
             .isUrgent(message.getInternalMessageUrgent())
+            .messageSubject(message.getMessageSubject())
             .messageContent(message.getMessageContent())
             .internalMessageWhoToSendToEnum(message.getInternalMessageWhoToSendToEnum())
             .internalOrExternalMessageEnum(message.getInternalOrExternalMessageEnum())
@@ -827,8 +810,6 @@ public class SendAndReplyService {
             .selectedLinkedApplicationValue(message.getSelectedLinkedApplicationValue())
             .selectedFutureHearingValue(message.getSelectedFutureHearingValue())
             .selectedSubmittedDocumentValue(message.getSelectedSubmittedDocumentValue())
-            .judicialOrMagistrateTierCode(message.getJudicialOrMagistrateTierCode())
-            .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierValue())
             .build();
     }
 
