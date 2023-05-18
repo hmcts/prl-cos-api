@@ -675,7 +675,7 @@ public class SendAndReplyService {
     private String renderMessageTable(Message message) {
         final List<String> lines = new LinkedList<>();
 
-        lines.add("<div class='width-50'>");
+        lines.add("<div class='width-500'>");
 
         //previous history
         log.info("Message history :{}", message.getReplyHistory());
@@ -684,6 +684,7 @@ public class SendAndReplyService {
                 .map(Element::getValue)
                 .forEach(history -> {
                     lines.add("<table>");
+                    lines.add("<h3>Message</h3>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
                     addRowToMessageTable(lines, "Date Sent", history.getMessageDate());
@@ -710,6 +711,7 @@ public class SendAndReplyService {
 
         //latest message
         lines.add("<table>");
+        lines.add("<h3>Message</h3>");
         addRowToMessageTable(lines, "From", message.getSenderEmail());
         addRowToMessageTable(lines, "Date Sent", message.getDateSent());
         addRowToMessageTable(lines, "Message subject", message.getMessageSubject());
@@ -741,7 +743,9 @@ public class SendAndReplyService {
         if (value != null) {
             lines.add(TABLE_ROW_BEGIN);
             lines.add(TABLE_ROW_DATA_BEGIN);
-            lines.add("<b>" + label + "</b>");
+            lines.add("<b>");
+            lines.add(label);
+            lines.add("</b>");
             lines.add(TABLE_ROW_DATA_END);
             lines.add(TABLE_ROW_DATA_BEGIN);
             lines.add(value);
@@ -826,6 +830,7 @@ public class SendAndReplyService {
             .messageFrom(message.getSenderEmail())
             .messageTo(message.getRecipientEmail())
             .messageDate(message.getUpdatedTime().toString())
+            .messageSubject(message.getMessageSubject())
             .isUrgent(message.getInternalMessageUrgent())
             .messageContent(message.getMessageContent())
             .internalMessageWhoToSendToEnum(message.getInternalMessageWhoToSendToEnum())
