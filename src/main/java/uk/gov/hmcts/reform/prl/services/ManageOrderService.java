@@ -989,21 +989,7 @@ public class ManageOrderService {
         } else {
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
         }
-        log.info("Case Type of application:: {}::",null != caseData ? caseData.getCaseTypeOfApplication() : null);
-        log.info("getselecttype of order:: {}::",null != caseData.getSelectTypeOfOrder()
-            ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null);
-        log.info("Get serve order option for order:: {}::",null != caseData.getServeOrderData()
-            ? caseData.getServeOrderData()
-            .getDoYouWantToServeOrder() : null);
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            && finl.equals(caseData.getSelectTypeOfOrder())
-            && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-            orderMap.put("childOption", (DynamicMultiSelectList.builder()
-                .listItems(dynamicMultiSelectListService.removeServedChildrenFromChildList(caseData))
-                .build())
-            );
-            log.info("Children list after removing the served children {}", orderMap.get("childOption"));
-        }
+
         orderMap.put("orderCollection", orderCollection);
         return orderMap;
     }
