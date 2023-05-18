@@ -95,6 +95,8 @@ public class ResubmitApplicationControllerTest {
     private CaseData caseData;
     private CaseData caseDataSubmitted;
     private CaseData caseDataIssued;
+
+    private CaseData caseDataGateKeeping;
     private AllegationOfHarm allegationOfHarm;
     private static final String auth = "auth";
 
@@ -121,6 +123,12 @@ public class ResubmitApplicationControllerTest {
         caseDataIssued = CaseData.builder()
             .id(12345L)
             .state(State.CASE_ISSUED)
+            .allegationOfHarm(allegationOfHarm)
+            .build();
+
+        caseDataGateKeeping = CaseData.builder()
+            .id(12345L)
+            .state(State.JUDICIAL_REVIEW)
             .allegationOfHarm(allegationOfHarm)
             .build();
 
@@ -164,6 +172,42 @@ public class ResubmitApplicationControllerTest {
         verify(caseWorkerEmailService).sendEmail(caseDetails);
         verify(solicitorEmailService).sendReSubmitEmail(caseDetails);
         verify(allTabService).getAllTabsFields(caseDataSubmitted);
+
+    }
+
+    @Test
+    public void whenLastEventWasGatkepping_thenGatekeepingPathFollowed() throws Exception {
+        List<CaseEventDetail> caseEvents = List.of(
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.JUDICIAL_REVIEW.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
+        );
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(true)
+            .isGenWelsh(false)
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
+        when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
+            .thenReturn(Map.of(DOCUMENT_FIELD_C8, "test",
+                               DOCUMENT_FIELD_C1A, "test",
+                               DOCUMENT_FIELD_FINAL, "test"
+            ));
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
+
+        assertEquals(State.JUDICIAL_REVIEW, response.getData().get("state"));
+        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
+        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C1A));
+        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL));
+        verify(caseWorkerEmailService).sendEmailToCourtAdmin(caseDetails);
+        verify(allTabService).getAllTabsFields(caseDataGateKeeping);
 
     }
 
@@ -276,8 +320,8 @@ public class ResubmitApplicationControllerTest {
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
             .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test",
-                              DOCUMENT_FIELD_FINAL_WELSH, "test",
-                              DOCUMENT_FIELD_C1A_WELSH, "test"
+                               DOCUMENT_FIELD_FINAL_WELSH, "test",
+                               DOCUMENT_FIELD_C1A_WELSH, "test"
             ));
 
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
@@ -315,6 +359,31 @@ public class ResubmitApplicationControllerTest {
         assertTrue(response.getData().containsKey("isNotificationSent"));
         assertTrue(response.getData().containsKey(STATE_FIELD));
         assertTrue(response.getData().containsKey(CASE_DATE_AND_TIME_SUBMITTED_FIELD));
+
+    }
+
+    @Test
+    public void testResubmitForFl401_whenGateKeeping() throws Exception {
+        List<CaseEventDetail> caseEvents = List.of(
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.JUDICIAL_REVIEW.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
+        );
+        when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
+            "applicantsConfidentialDetails",
+            List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
+            "childrenConfidentialDetails",
+            List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
+        ));
+        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        assertTrue(response.getData().containsKey("applicantsConfidentialDetails"));
+        assertTrue(response.getData().containsKey("childrenConfidentialDetails"));
 
     }
 
