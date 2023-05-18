@@ -124,7 +124,7 @@ public class ServiceOfApplicationPostService {
             documents = getDocsAsGeneratedDocumentInfo(docs);
             //docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
             documents.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
-            log.info("*** Documents generated ***" + docs);
+            log.info("*** Documents generated ***" + documents);
         } catch (Exception e) {
             log.info("*** Error while generating document ***");
         }
@@ -136,7 +136,7 @@ public class ServiceOfApplicationPostService {
         log.info("*** calling Bulk Print ***");
         printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, documents, partyDetails)));
         caseData.setBulkPrintDetails(printedDocCollectionList);
-        log.info("*** Bulk Print details set in case data ***");
+        log.info("*** Bulk Print details set in case data ***" +caseData.getBulkPrintDetails());
     }
 
 

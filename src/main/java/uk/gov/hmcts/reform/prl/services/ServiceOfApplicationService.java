@@ -28,6 +28,8 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.B;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.G;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.O;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.Q;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.R;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.S;
@@ -143,7 +145,7 @@ public class ServiceOfApplicationService {
                 sendNotificationToRespondentOrSolicitor(caseDetails, authorization);
             }
             if ((caseData.getServiceOfApplication().getSoaOtherEmailAddressList() != null)) {
-                log.info("serving LA");
+                log.info("serving OtherEmails");
                 sendEmailToOtherEmails(authorization, caseDetails, caseData);
             }
             if ((caseData.getServiceOfApplication().getSoaOtherPeopleList() != null)
@@ -234,7 +236,7 @@ public class ServiceOfApplicationService {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             List<Element<PartyDetails>> respondentListC100 = caseData.getRespondents();
             List<DynamicMultiselectListElement> respondentsList = caseData.getServiceOfApplication()
-                .getSoaApplicantsList().getValue();
+                .getSoaRespondentsList().getValue();
             respondentsList.forEach(respondentc100 -> {
                 Optional<Element<PartyDetails>> party = getParty(respondentc100.getCode(), respondentListC100);
                 Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -373,6 +375,12 @@ public class ServiceOfApplicationService {
             case B:
                 docs.addAll(generatePackB(caseData));
                 break;
+            case G:
+                docs.addAll(generatePackG(caseData));
+                break;
+            case O:
+                docs.addAll(generatePackO(caseData));
+                break;
             default:
                 break;
         }
@@ -409,6 +417,20 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> generatePackB(CaseData caseData) throws Exception {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getMandatoryCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        return docs;
+    }
+
+    private List<Document> generatePackG(CaseData caseData) throws Exception {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getMandatoryCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        return docs;
+    }
+
+    private List<Document> generatePackO(CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));

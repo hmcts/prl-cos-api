@@ -639,4 +639,8 @@ public class PrlAppsConstants {
 
     public static final String B = "B";
 
+    public static final String G = "G";
+
+    public static final String O = "O";
+
 }

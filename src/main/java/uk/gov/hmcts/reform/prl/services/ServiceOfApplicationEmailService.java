@@ -141,7 +141,7 @@ public class ServiceOfApplicationEmailService {
             "Email notification for SoA sent successfully to applicant solicitor for caseId {}",
             caseDetails.getId());
         caseData.setEmailNotificationDetails(emailNotifyCollectionList);
-        log.info("*** Email Notification details set in case data ***");
+        log.info("*** Email Notification details set in case data ***" +caseData.getEmailNotificationDetails());
 
     }
 
@@ -181,7 +181,7 @@ public class ServiceOfApplicationEmailService {
             "Email notification for SoA sent successfully to respondent solicitor for caseId {}",
             caseDetails.getId());
         caseData.setEmailNotificationDetails(emailNotifyCollectionList);
-        log.info("*** Email Notification details set in case data ***");
+        log.info("*** Email Notification details set in case data ***" +caseData.getEmailNotificationDetails());
 
     }
 
@@ -214,7 +214,7 @@ public class ServiceOfApplicationEmailService {
 
                 log.info("Email notification for SoA sent successfully to Other Emails included for caseId {}", caseDetails.getId());
                 caseData.setEmailNotificationDetails(emailNotifyCollectionList);
-                log.info("*** Email Notification details set in case data ***");
+                log.info("*** Email Notification details set in case data ***" +caseData.getEmailNotificationDetails());
             }
         }
 
