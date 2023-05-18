@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -22,6 +23,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 @Slf4j
 @RequiredArgsConstructor
 public class ServiceOfApplicationService {
+    private final LaunchDarklyClient launchDarklyClient;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
@@ -47,7 +49,8 @@ public class ServiceOfApplicationService {
         collapsible.add("</summary>");
         collapsible.add("<div class='govuk-details__text'>");
         collapsible.add("Documents that will be sent out (if applicable to the case):<br/>");
-        collapsible.add("<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (blank)</li><li>C8 (Cafcass and Local Authority only)</li>");
+        collapsible.add(
+            "<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (blank)</li><li>C8 (Cafcass and Local Authority only)</li>");
         collapsible.add("<li>Annex Z</li><li>Privacy notice</li><li>Any orders and"
                             + " hearing notices created at the initial gatekeeping stage</li></ul>");
         collapsible.add("</div>");
@@ -55,9 +58,9 @@ public class ServiceOfApplicationService {
         return String.join("\n\n", collapsible);
     }
 
-    public Map<String,Object> getOrderSelectionsEnumValues(List<String> orderList, Map<String,Object> caseData) {
+    public Map<String, Object> getOrderSelectionsEnumValues(List<String> orderList, Map<String, Object> caseData) {
         for (String s : orderList) {
-            caseData.put(CreateSelectOrderOptionsEnum.mapOptionFromDisplayedValue(s),"1");
+            caseData.put(CreateSelectOrderOptionsEnum.mapOptionFromDisplayedValue(s), "1");
         }
         return caseData;
     }
@@ -76,14 +79,17 @@ public class ServiceOfApplicationService {
                 serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
             }
         }
-        return caseInviteManager.generatePinAndSendNotificationEmail(caseData);
+        if (launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
+            caseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
+        }
+        return caseData;
     }
 
     public CaseData sendPost(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info(" Sending post to the parties involved ");
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            serviceOfApplicationPostService.sendDocs(caseData,authorization);
+            serviceOfApplicationPostService.sendDocs(caseData, authorization);
         }
         return caseData;
     }
