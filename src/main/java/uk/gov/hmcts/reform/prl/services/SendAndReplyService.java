@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -603,10 +602,10 @@ public class SendAndReplyService {
                                               ? message.getJudicialOrMagistrateTierList().getValueCode() : null)
             .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierList() != null
                                                ? message.getJudicialOrMagistrateTierList().getValueLabel() : null)
-            .selectedLinkedApplicationCode(message.getLinkedApplicationsList() != null
-                                               ? message.getLinkedApplicationsList().getValueCode() : null)
-            .selectedLinkedApplicationValue(message.getLinkedApplicationsList() != null
-                                                ? message.getLinkedApplicationsList().getValueLabel() : null)
+            .selectedApplicationCode(message.getApplicationsList() != null
+                                               ? message.getApplicationsList().getValueCode() : null)
+            .selectedApplicationValue(message.getApplicationsList() != null
+                                                ? message.getApplicationsList().getValueLabel() : null)
             .selectedFutureHearingCode(message.getFutureHearingsList() != null
                                            ? message.getFutureHearingsList().getValueCode() : null)
             .selectedFutureHearingValue(message.getFutureHearingsList() != null
@@ -620,8 +619,8 @@ public class SendAndReplyService {
             .senderEmail(null != caseData.getMessageMetaData()
                              ? caseData.getMessageMetaData().getSenderEmail() : null)
             .replyHistory(Collections.emptyList())
-            .selectedDocument(getSelectedDocument(documentMap, sendOrReplyMessage.getSubmittedDocumentsList() != null
-                ? sendOrReplyMessage.getSubmittedDocumentsList().getValueCode() : null))
+            .selectedDocument(getSelectedDocument(documentMap, message.getSubmittedDocumentsList() != null
+                ? message.getSubmittedDocumentsList().getValueCode() : null))
             .build();
     }
 

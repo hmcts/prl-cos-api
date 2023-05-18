@@ -60,7 +60,7 @@ public class Message extends MessageMetaData {
 
     private JudicialUser sendReplyJudgeName;
     private DynamicList judicialOrMagistrateTierList;
-    private DynamicList linkedApplicationsList;
+    private DynamicList applicationsList;
     private DynamicList futureHearingsList;
     private DynamicList submittedDocumentsList;
     private DynamicList ctscEmailList;
