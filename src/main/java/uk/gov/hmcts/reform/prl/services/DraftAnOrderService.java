@@ -1163,12 +1163,11 @@ public class DraftAnOrderService {
             reviewRequiredBy) || OrderStatusEnum.draftedByLR.getDisplayedValue().equalsIgnoreCase(orderStatus))) {
             errorMessage = "Selected order is not reviewed by Judge.";
         } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
-            && (!(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.getDisplayedValue().equalsIgnoreCase(
-            reviewRequiredBy))
-            || OrderStatusEnum.reviewedByJudge.getDisplayedValue().equalsIgnoreCase(orderStatus)
-            || OrderStatusEnum.draftedByLR.getDisplayedValue().equalsIgnoreCase(orderStatus))
-
-        ) {
+            && (!(((OrderStatusEnum.createdByCA.getDisplayedValue().equalsIgnoreCase(orderStatus))
+            && AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.getDisplayedValue().equalsIgnoreCase(
+            reviewRequiredBy)) || OrderStatusEnum.reviewedByJudge.getDisplayedValue().equalsIgnoreCase(orderStatus)
+            || OrderStatusEnum.draftedByLR.getDisplayedValue().equalsIgnoreCase(orderStatus)
+            || OrderStatusEnum.createdByJudge.getDisplayedValue().equalsIgnoreCase(orderStatus)))) {
             errorMessage = "Selected order can not be reviewed by Judge.";
         }
         return errorMessage;
