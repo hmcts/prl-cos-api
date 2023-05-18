@@ -676,6 +676,7 @@ public class SendAndReplyService {
         final List<String> lines = new LinkedList<>();
 
         lines.add("<div>");
+        lines.add("<font size=\"3\">");
 
         //previous history
         log.info("Message history :{}", message.getReplyHistory());
