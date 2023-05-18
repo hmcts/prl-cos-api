@@ -36,7 +36,7 @@ public class CallbackControllerFunctionalTest {
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
-
+  
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
