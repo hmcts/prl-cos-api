@@ -40,12 +40,9 @@ public class Message extends MessageMetaData {
     private String replyTo;
 
     //PRL-3454 - send & reply message enhancements
-    //private String internalOrExternalMessage;
-    private InternalExternalMessageEnum internalOrExternalMessageEnum;
-    //private String internalMessageWhoToSendTo;
-    private InternalMessageWhoToSendToEnum internalMessageWhoToSendToEnum;
-    //private String messageAbout;
-    private MessageAboutEnum messageAboutEnum;
+    private InternalExternalMessageEnum internalOrExternalMessage;
+    private InternalMessageWhoToSendToEnum internalMessageWhoToSendTo;
+    private MessageAboutEnum messageAbout;
     private String judicialOrMagistrateTierCode;
     private String judicialOrMagistrateTierValue;
     private String judgeName;
