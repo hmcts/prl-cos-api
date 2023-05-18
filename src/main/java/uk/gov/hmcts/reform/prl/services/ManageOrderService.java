@@ -1295,7 +1295,7 @@ public class ManageOrderService {
         );
         for (DynamicMultiselectListElement element : caseData.getManageOrders().getChildOption().getListItems()) {
             for (Element<Child> childElement:caseData.getChildren()) {
-                if (element.getCode().equals(childElement.getId())) {
+                if (element.getCode().equals(childElement.getId().toString())) {
                     childElement.getValue().toBuilder().isFinalOrderIssued(Yes).build();
                 }
             }
