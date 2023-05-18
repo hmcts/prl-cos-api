@@ -341,7 +341,7 @@ public class SendAndReplyService {
                                            serviceCode,
                                            categoryId
                                        ))
-                                       .applicationsList(getOtherApllicationsist(caseData))
+                                       .applicationsList(getOtherApllicationsList(caseData))
                                        .submittedDocumentsList(documentCategoryList)
                                        .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                .label(loggedInUserEmail).code(loggedInUserEmail).build())))
@@ -422,7 +422,7 @@ public class SendAndReplyService {
         ));
     }
 
-    public DynamicList getOtherApllicationsist(CaseData caseData) {
+    public DynamicList getOtherApllicationsList(CaseData caseData) {
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements;
 
@@ -766,6 +766,10 @@ public class SendAndReplyService {
                     addRowToMessageTable(lines, "Internal message urgent?", history.getIsUrgent() != null
                         ? history.getIsUrgent().getDisplayedValue() : null);
                     addRowToMessageTable(lines, "submitted document", history.getSelectedSubmittedDocumentValue());
+                    if (history.getSelectedDocument() != null) {
+                        lines.add("<tr><td>Document</td></tr>");
+                        lines.add("<tr><td>"+history.getSelectedDocument()+"</td></tr>");
+                    }
                     addRowToMessageTable(lines, "Are you sending an internal message?", history.getInternalOrExternalMessageEnum() != null
                         ? history.getInternalOrExternalMessageEnum().name() : null);
                     addRowToMessageTable(lines, "Who to send to", history.getInternalMessageWhoToSendToEnum() != null
@@ -773,6 +777,7 @@ public class SendAndReplyService {
                     addRowToMessageTable(lines, "Message about?", history.getMessageAboutEnum() != null
                         ? history.getMessageAboutEnum().name() : null);
                     addRowToMessageTable(lines, "Selected Future Hearing", history.getSelectedFutureHearingValue());
+                    addRowToMessageTable(lines, "Selected Application", history.getSelectedApplicationValue());
                     lines.add("</table>");
                     lines.add(HORIZONTAL_LINE);
                 });
@@ -799,6 +804,8 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, "Message about?", message.getMessageAbout() != null
             ? message.getMessageAbout().name() : null);
         addRowToMessageTable(lines, "Selected Future Hearing", message.getSelectedFutureHearingValue());
+        addRowToMessageTable(lines, "Selected Application", message.getSelectedApplicationValue());
+
 
         lines.add("</table>");
         lines.add("</div>");
@@ -908,10 +915,11 @@ public class SendAndReplyService {
             .judgeName(message.getJudgeName())
             .recipientEmailAddresses(message.getRecipientEmailAddresses())
             .selectedCtscEmail(message.getSelectedCtscEmail())
-            .selectedLinkedApplicationValue(message.getSelectedLinkedApplicationValue())
+            .selectedApplicationValue(message.getSelectedApplicationValue())
             .selectedFutureHearingValue(message.getSelectedFutureHearingValue())
             .selectedSubmittedDocumentValue(message.getSelectedSubmittedDocumentValue())
             .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierValue())
+            .selectedDocument(message.getSelectedDocument())
             .build();
     }
 }
