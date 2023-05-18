@@ -768,7 +768,7 @@ public class SendAndReplyService {
                     addRowToMessageTable(lines, "submitted document", history.getSelectedSubmittedDocumentValue());
                     if (history.getSelectedDocument() != null) {
                         lines.add("<tr><td>Document</td></tr>");
-                        lines.add("<tr><td>"+history.getSelectedDocument()+"</td></tr>");
+                        lines.add("<tr><td>" + history.getSelectedDocument() + "</td></tr>");
                     }
                     addRowToMessageTable(lines, "Are you sending an internal message?", history.getInternalOrExternalMessageEnum() != null
                         ? history.getInternalOrExternalMessageEnum().name() : null);
