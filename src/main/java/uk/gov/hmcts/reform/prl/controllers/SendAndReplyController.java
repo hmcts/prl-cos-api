@@ -269,7 +269,8 @@ public class SendAndReplyController extends AbstractCallbackController {
         //send emails in case of sending to others with emails
         sendAndReplyService.sendNotificationEmailOther(caseData);
 
-        if (REPLY.equals(caseData.getChooseSendOrReply())) {
+        if (REPLY.equals(caseData.getChooseSendOrReply())
+            && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
             return ok(SubmittedCallbackResponse.builder().confirmationBody(
                 REPLY_AND_CLOSE_MESSAGE
             ).build());
