@@ -236,9 +236,8 @@ public class SendAndReplyController extends AbstractCallbackController {
             Message newMessage = sendAndReplyService.buildSendReplyMessage(caseData,
                                                                            caseData.getSendOrReplyMessage().getSendMessageObject());
 
-            log.info("New message object created ----> {}", newMessage);
-
             List<Element<Message>> listOfMessages = sendAndReplyService.addNewOpenMessage(caseData, newMessage);
+
             caseDataMap.put("openMessagesList", listOfMessages);
 
         } else {
@@ -252,6 +251,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                 caseDataMap.put("openMessagesList", sendAndReplyService.replyAndAppendMessageHistory(caseData));
             }
         }
+
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
 
@@ -269,7 +269,8 @@ public class SendAndReplyController extends AbstractCallbackController {
         //send emails in case of sending to others with emails
         sendAndReplyService.sendNotificationEmailOther(caseData);
 
-        if (REPLY.equals(caseData.getChooseSendOrReply())) {
+        if (REPLY.equals(caseData.getChooseSendOrReply())
+            && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
             return ok(SubmittedCallbackResponse.builder().confirmationBody(
                 REPLY_AND_CLOSE_MESSAGE
             ).build());
