@@ -167,7 +167,7 @@ public class SendAndReplyServiceTest {
             .status(OPEN)
             .latestMessage("Message 1 latest message")
             .messageHistory("")
-            .internalMessageWhoToSendToEnum(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
             .internalMessageUrgent(YesOrNo.Yes)
             .build();
         message2 = Message.builder()
@@ -213,7 +213,7 @@ public class SendAndReplyServiceTest {
             .latestMessage("Message 4 latest message")
             .messageHistory("")
             .replyHistory(messageHistoryList)
-            .internalMessageWhoToSendToEnum(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
             .internalMessageUrgent(YesOrNo.Yes)
             .build();
 
@@ -390,7 +390,7 @@ public class SendAndReplyServiceTest {
             .status(OPEN)
             .latestMessage("This is message 2 body")
             .messageHistory("testReply@email.com - This is message 2 body")
-            .internalMessageWhoToSendToEnum(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
             .internalMessageUrgent(YesOrNo.Yes)
             .build();
 
@@ -886,9 +886,9 @@ public class SendAndReplyServiceTest {
                     .openMessagesList(openMessagesList)
                     .replyMessageObject(
                         Message.builder()
-                        .internalOrExternalMessageEnum(InternalExternalMessageEnum.EXTERNAL)
-                        .internalMessageWhoToSendToEnum(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                        .messageAboutEnum(MessageAboutEnum.APPLICATION)
+                        .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                        .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                        .messageAbout(MessageAboutEnum.APPLICATION)
                             .messageContent("Reply Message Content")
                         .build()
                 )
@@ -917,7 +917,7 @@ public class SendAndReplyServiceTest {
             .status(OPEN)
             .latestMessage("Message 1 latest message")
             .replyHistory(messageHistoryList)
-            .internalMessageWhoToSendToEnum(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
             .internalMessageUrgent(YesOrNo.Yes)
             .build();
 
@@ -932,9 +932,9 @@ public class SendAndReplyServiceTest {
                     .openMessagesList(openMessagesList)
                     .replyMessageObject(
                         Message.builder()
-                            .internalOrExternalMessageEnum(InternalExternalMessageEnum.EXTERNAL)
-                            .internalMessageWhoToSendToEnum(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                            .messageAboutEnum(MessageAboutEnum.APPLICATION)
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
                             .messageContent("Reply Message Content")
                             .build()
                     )
