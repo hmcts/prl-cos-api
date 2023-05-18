@@ -136,7 +136,7 @@ public class ServiceOfApplicationPostService {
         log.info("*** calling Bulk Print ***");
         printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, documents, partyDetails)));
         caseData.setBulkPrintDetails(printedDocCollectionList);
-        log.info("*** Bulk Print details set in case data ***" +caseData.getBulkPrintDetails());
+        log.info("*** Bulk Print details set in case data ***" + caseData.getBulkPrintDetails());
     }
 
 
