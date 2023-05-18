@@ -104,7 +104,7 @@ public class SendAndReplyService {
 
     private static final String TABLE_ROW_BEGIN = "<tr>";
     private static final String TABLE_ROW_END = "</tr>";
-    private static final String TABLE_ROW_DATA_BEGIN = "<td>";
+    private static final String TABLE_ROW_DATA_BEGIN = "<td width=\"50%\">";
     private static final String TABLE_ROW_DATA_END = "</td>";
     private static final String HORIZONTAL_LINE = "<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>";
 
@@ -675,7 +675,7 @@ public class SendAndReplyService {
     private String renderMessageTable(Message message) {
         final List<String> lines = new LinkedList<>();
 
-        lines.add("<div class='width-500'>");
+        lines.add("<div>");
 
         //previous history
         log.info("Message history :{}", message.getReplyHistory());
@@ -683,7 +683,7 @@ public class SendAndReplyService {
             message.getReplyHistory().stream()
                 .map(Element::getValue)
                 .forEach(history -> {
-                    lines.add("<table>");
+                    lines.add("<table wi>");
                     lines.add("<h3>Message</h3>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
@@ -710,7 +710,7 @@ public class SendAndReplyService {
         }
 
         //latest message
-        lines.add("<table>");
+        lines.add("<table width=\"50%\">");
         lines.add("<h3>Message</h3>");
         addRowToMessageTable(lines, "From", message.getSenderEmail());
         addRowToMessageTable(lines, "Date Sent", message.getDateSent());
