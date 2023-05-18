@@ -1877,11 +1877,6 @@ public class ManageOrderService {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, Yes);
         } else {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, No);
-            ManageOrders manageOrders = caseData.getManageOrders();
-            String courtEmail = welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData);
-            if (courtEmail != null) {
-                caseDataUpdated.put("manageOrders", manageOrders.toBuilder().cafcassCymruEmail(courtEmail).build());
-            }
         }
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
@@ -1984,5 +1979,16 @@ public class ManageOrderService {
         } else {
             caseDataUpdated.put("markedToServeEmailNotification", No);
         }
+    }
+
+    public CaseData populateCafcassCymruEmailAddress(CaseData caseData) {
+        String courtEmail = welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData);
+        if (courtEmail != null) {
+            return caseData.toBuilder()
+                .manageOrders(caseData.getManageOrders().toBuilder()
+                                  .cafcassCymruEmail(courtEmail).build())
+                .build();
+        }
+        return caseData;
     }
 }
