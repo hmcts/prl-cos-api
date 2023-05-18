@@ -738,14 +738,16 @@ public class SendAndReplyService {
     private void addRowToMessageTable(List<String> lines,
                                       String label,
                                       String value) {
-        lines.add(TABLE_ROW_BEGIN);
-        lines.add(TABLE_ROW_DATA_BEGIN);
-        lines.add(label);
-        lines.add(TABLE_ROW_DATA_END);
-        lines.add(TABLE_ROW_DATA_BEGIN);
-        lines.add(value);
-        lines.add(TABLE_ROW_DATA_END);
-        lines.add(TABLE_ROW_END);
+        if (value != null) {
+            lines.add(TABLE_ROW_BEGIN);
+            lines.add(TABLE_ROW_DATA_BEGIN);
+            lines.add("<b>" + label + "</b>");
+            lines.add(TABLE_ROW_DATA_END);
+            lines.add(TABLE_ROW_DATA_BEGIN);
+            lines.add(value);
+            lines.add(TABLE_ROW_DATA_END);
+            lines.add(TABLE_ROW_END);
+        }
 
     }
 
