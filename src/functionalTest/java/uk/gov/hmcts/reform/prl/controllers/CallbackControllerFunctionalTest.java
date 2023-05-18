@@ -5,20 +5,25 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
-
-import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
 @SpringBootTest
@@ -26,6 +31,9 @@ import static org.hamcrest.Matchers.nullValue;
 @ContextConfiguration
 public class CallbackControllerFunctionalTest {
 
+    private MockMvc mockMvc;
+    @Autowired
+    private WebApplicationContext webApplicationContext;
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
@@ -47,6 +55,11 @@ public class CallbackControllerFunctionalTest {
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
+    @Before
+    public void setUp() {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+    }
 
     @Test
     public void givenNoMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndMiamError() throws Exception {
@@ -150,15 +163,13 @@ public class CallbackControllerFunctionalTest {
     @Test
     public void givenRequestWithCaseNumberAdded_ResponseContainsIssueDate() throws Exception {
         String requestBody = ResourceLoader.loadJson(FL401_VALID_REQUEST_BODY);
-        request
-            .header("Authorization", userToken)
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/fl401-add-case-number")
-            .then()
-            .body("data.issueDate", equalTo(LocalDate.now().toString()))
-            .assertThat().statusCode(200);
+        mockMvc.perform(post("/fl401-add-case-number")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", userToken)
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @Test

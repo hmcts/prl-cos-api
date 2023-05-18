@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,12 +50,13 @@ public class Message extends MessageMetaData {
     private String selectedCtscEmail;
     private String recipientEmailAddresses;
     private YesOrNo internalMessageUrgent;
-    private String selectedLinkedApplicationCode;
-    private String selectedLinkedApplicationValue;
+    private String selectedApplicationCode;
+    private String selectedApplicationValue;
     private String selectedFutureHearingCode;
     private String selectedFutureHearingValue;
     private String selectedSubmittedDocumentCode;
     private String selectedSubmittedDocumentValue;
+    private Document selectedDocument;
 
     private JudicialUser sendReplyJudgeName;
     private DynamicList judicialOrMagistrateTierList;
