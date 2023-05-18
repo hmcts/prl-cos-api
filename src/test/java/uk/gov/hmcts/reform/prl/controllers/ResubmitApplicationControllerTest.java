@@ -431,7 +431,6 @@ public class ResubmitApplicationControllerTest {
         ));
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.fl401resubmitApplication(auth, callbackRequest);
-        assertTrue(response.getData().containsKey("applicantsConfidentialDetails"));
-        assertTrue(response.getData().containsKey("childrenConfidentialDetails"));
+        assertTrue(response.getData().containsKey("fl401ConfidentialityCheckResubmit"));
     }
 }
