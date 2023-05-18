@@ -677,7 +677,7 @@ public class C100RespondentSolicitorService {
             .getRespAllegationsOfHarmInfo().getRespondentDrugOrAlcoholAbuse());
         dataMap.put("otherConcerns", response.getRespondentAllegationsOfHarmData()
             .getRespAllegationsOfHarmInfo().getRespondentOtherSafetyConcerns());
-        dataMap.put("otherConcerns", response.getRespondentAllegationsOfHarmData()
+        dataMap.put("ordersRespondentWantsFromCourt", response.getRespondentAllegationsOfHarmData()
             .getRespOtherConcernsInfo().getOrdersRespondentWantFromCourt());
         dataMap.put("childSpendingUnsupervisedTime", response.getRespondentAllegationsOfHarmData()
             .getRespOtherConcernsInfo().getChildSpendingUnsupervisedTime());
