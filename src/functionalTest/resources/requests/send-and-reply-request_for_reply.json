@@ -2,67 +2,6 @@
   "case_details": {
     "callback_response_status": "string",
     "case_data": {
-      "listWithoutNoticeHearingDetails": [
-        {
-          "value": {
-            "hearingDateConfirmOptionEnum": "dateConfirmedInHearingsTab",
-            "fillingFormRenderingInfo": "<details class='govuk-details'>\n\n<summary class='govuk-details__summary'>\n\n<span class='govuk-details__summary-text'>\n\nWhen should I fill this in?\n\n</span>\n\n</summary>\n\n<div class='govuk-details__text'>\n\n<p><strong>Only fill the following if you haven't requested the hearing yet</strong></p></br>\n\n</div>\n\n</details>",
-            "firstDateOfTheHearing": null,
-            "hearingMustTakePlaceAtHour": "0",
-            "hearingMustTakePlaceAtMinute": "0",
-            "earliestHearingDate": null,
-            "latestHearingDate": null,
-            "hearingPriorityTypeEnum": null,
-            "hearingEstimatedDays": "0",
-            "hearingEstimatedHours": "0",
-            "hearingEstimatedMinutes": "0",
-            "hearingChannelsEnum": null,
-            "hearingVideoChannels": null,
-            "hearingTelephoneChannels": null,
-            "allPartiesAttendHearingSameWayYesOrNo": null,
-            "applicantHearingChannel": null,
-            "applicantSolicitorHearingChannel": null,
-            "respondentHearingChannel": null,
-            "respondentSolicitorHearingChannel": null,
-            "cafcassHearingChannel": null,
-            "cafcassCymruHearingChannel": null,
-            "localAuthorityHearingChannel": null,
-            "courtList": null,
-            "hearingAuthority": null,
-            "hearingJudgePersonalCode": null,
-            "hearingJudgeLastName": null,
-            "hearingJudgeEmailAddress": null,
-            "hearingListedLinkedCases": null,
-            "confirmedHearingDates": {
-              "value": {
-                "code": "2023-04-13T09:00",
-                "label": "13-04-2023"
-              },
-              "list_items": [
-                {
-                  "code": "2023-04-13T09:00",
-                  "label": "13-04-2023"
-                }
-              ]
-            },
-            "additionalHearingDetails": "sdD",
-            "customDetails": null,
-            "instructionsForRemoteHearing": "SDASDAS",
-            "hearingChannels": null,
-            "applicantName": "dasfds dsfds",
-            "applicantSolicitor": "sdsa,sadsa",
-            "respondentName": "asdas sadsa",
-            "respondentSolicitor": null,
-            "hearingDateTimes": [],
-            "hearingJudgeNameAndEmail": {
-              "idamId": "",
-              "personalCode": ""
-            }
-          },
-          "id": "8eb7fb1d-442b-4d0d-aa86-ed8e63081ba2"
-        }
-      ],
-      "sendOrReplyMessage": {
         "messageReplyDynamicList": {
           "value": {
             "code": "17d3499b-d25b-4fb1-8afd-75f6d53922d7",
@@ -82,7 +21,7 @@
         "replyMessageObject": {
           "internalMessageWhoToSendToEnum": "LEGAL_ADVISER",
           "internalMessageUrgent": "Yes",
-          "messageContent": "testtttttt",
+          "messageContent": "test",
           "senderEmail": null,
           "recipientEmail": null,
           "dateSent": null,
@@ -127,8 +66,7 @@
             },
             "id": "8eb7fb1d-442b-4d0d-aa86-ed8e63081ba2"
           }
-        ]
-      },
+        ],
       "applicantCaseName": "testCase",
       "caseTypeOfApplication": "C100",
       "chooseSendOrReply": "REPLY",
