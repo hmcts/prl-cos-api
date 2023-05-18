@@ -468,23 +468,4 @@ public class ManageOrdersController {
         );
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
-    @PostMapping(path = "/manage-orders/serve-order/populate-cafcass-cymru-email", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to fetch case data and custom order fields")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Child details are fetched"),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public CallbackResponse fetchCafcassCymruEmail(
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        caseData = manageOrderService.populateCafcassCymruEmailAddress(caseData);
-        
-        return CallbackResponse.builder()
-            .data(caseData)
-            .build();
-    }
 }
