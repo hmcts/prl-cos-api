@@ -386,11 +386,9 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "c)  a risk assessment in respect of  ((party’s / parties’ names separated by commas))";
 
-    public static final String CAFCASS_CYMRU_NEXT_STEPS_CONTENT = "a)  a completed letter  "
-        + System.lineSeparator()
-        + "b)  enhanced checks in respect of ((party’s / parties’ names separated by commas))"
-        + System.lineSeparator()
-        + "c)  a risk assessment in respect of  ((party’s / parties’ names separated by commas))";
+    public static final String CAFCASS_CYMRU_NEXT_STEPS_CONTENT = "CAFCASS Cymru must send a safeguarding enquiries report "
+        + "to the court and to the parties [and their solicitors if details are available], unless considered inappropriate by "
+        + "CAFCASS Cymru, by no later than 6 weeks after receipt of this order.";
 
     public static final String SECTION7_EDIT_CONTENT = "a)  with whom the ((child or children)) should live"
         + System.lineSeparator()
