@@ -117,6 +117,7 @@ public class ServiceOfApplicationEmailService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
         //CaseData caseData = emailService.getCaseData(caseDetails);
+        log.info("*** document list ***" + docs);
 
         emailService.send(
             partyDetails.getSolicitorEmail(),
@@ -153,6 +154,8 @@ public class ServiceOfApplicationEmailService {
         List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
         String respondentSolicitorName = partyDetails.getRepresentativeFirstName() + " "
             + partyDetails.getRepresentativeLastName();
+        log.info("*** document list ***" + docs);
+
         emailService.send(
             partyDetails.getSolicitorEmail(),
             EmailTemplateNames.RESPONDENT_SOLICITOR,
@@ -186,8 +189,9 @@ public class ServiceOfApplicationEmailService {
                                                    CaseData caseData, List<Document> docs) throws Exception {
         List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
         log.info("*** About to send ***");
-        if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
-            for (Element<String> element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
+        log.info("*** document list ***" + docs);
+        if (caseData.getServiceOfApplication() != null && caseData.getServiceOfApplication().getSoaOtherEmailAddressList() != null) {
+            for (Element<String> element : caseData.getServiceOfApplication().getSoaOtherEmailAddressList()) {
                 String email = element.getValue();
                 emailService.send(
                     email,

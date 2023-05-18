@@ -100,9 +100,8 @@ public class ServiceOfApplicationService {
         log.info(" Sending post to others involved ");
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             List<Element<PartyDetails>> otherPeopleInCase = caseData.getOthersToNotify();
-            DynamicMultiSelectList othersToNotify = caseData.getConfirmRecipients().getOtherPeopleList();
-            List<DynamicMultiselectListElement> othersList = othersToNotify.getListItems();
-            othersList.forEach(other -> {
+            List<DynamicMultiselectListElement> othersToNotify = caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue();
+            othersToNotify.forEach(other -> {
                 Optional<Element<PartyDetails>> party = getParty(other.getCode(), otherPeopleInCase);
                 try {
                     log.info(
@@ -280,6 +279,7 @@ public class ServiceOfApplicationService {
 
                     }
                 } else if (party.isPresent() && YesNoDontKnow.no.equals(party.get().getValue().getDoTheyHaveLegalRepresentation())) {
+                    log.info("The respondent is unrepresented");
                     if (party.get().getValue().getAddress() != null) {
                         log.info("Sending the notification in post to respondent for C100 Application for caseId {}",
                                  caseDetails.getId());
@@ -293,6 +293,9 @@ public class ServiceOfApplicationService {
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
+                    } else {
+                        log.info("Unable to send any notification to respondent for C100 Application for caseId {} "
+                                     + "as no address available", caseDetails.getId());
                     }
                 }
             });
