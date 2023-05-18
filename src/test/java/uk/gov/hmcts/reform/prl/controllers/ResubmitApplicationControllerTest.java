@@ -320,8 +320,8 @@ public class ResubmitApplicationControllerTest {
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
             .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test",
-                              DOCUMENT_FIELD_FINAL_WELSH, "test",
-                              DOCUMENT_FIELD_C1A_WELSH, "test"
+                               DOCUMENT_FIELD_FINAL_WELSH, "test",
+                               DOCUMENT_FIELD_C1A_WELSH, "test"
             ));
 
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
@@ -409,5 +409,28 @@ public class ResubmitApplicationControllerTest {
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
         assertTrue(response.getData().containsKey("applicantsConfidentialDetails"));
         assertTrue(response.getData().containsKey("childrenConfidentialDetails"));
+    }
+
+    @Test
+    public void testFl401resubmitApplication() throws Exception {
+        List<CaseEventDetail> caseEvents = List.of(
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.JUDICIAL_REVIEW.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
+        );
+        when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
+            "applicantsConfidentialDetails",
+            List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
+            "childrenConfidentialDetails",
+            List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
+        ));
+        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.fl401resubmitApplication(auth, callbackRequest);
+        assertTrue(response.getData().containsKey("fl401ConfidentialityCheckResubmit"));
     }
 }
