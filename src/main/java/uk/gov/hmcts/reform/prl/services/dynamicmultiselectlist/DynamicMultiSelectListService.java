@@ -71,6 +71,15 @@ public class DynamicMultiSelectListService {
         return listItems;
     }
 
+    public List<DynamicMultiselectListElement> removeServedChildrenFromChildList(CaseData caseData) {
+
+        List<DynamicMultiselectListElement> existingChildListItems = caseData.getManageOrders().getChildOption().getListItems();
+        existingChildListItems.removeIf(childListItems -> caseData.getManageOrders().getChildOption().getValue().contains(
+            childListItems));
+
+        return existingChildListItems;
+    }
+
     public Map<String, List<DynamicMultiselectListElement>> getRespondentsMultiSelectList(CaseData caseData) {
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();

@@ -96,6 +96,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum.finl;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -988,6 +989,16 @@ public class ManageOrderService {
         } else {
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
         }
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && finl.equals(CaseUtils.getSelectTypeOfOrder(caseData))
+            && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+            orderMap.put("childOption", (DynamicMultiSelectList.builder()
+                .listItems(dynamicMultiSelectListService.removeServedChildrenFromChildList(caseData))
+                .build())
+            );
+
+            log.info("Children list after removing the served children {}", orderMap.get("childOption"));
+        }
         orderMap.put("orderCollection", orderCollection);
         return orderMap;
     }
@@ -1740,7 +1751,7 @@ public class ManageOrderService {
                               : dynamicMultiSelectListService
                 .getStringFromDynamicMultiSelectListFromListItems(caseData.getManageOrders()
                                                                       .getChildOption()))
-            .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
+            .orderClosesCase(finl.equals(typeOfOrder)
                                  ? caseData.getDoesOrderClosesCase() : null)
             .serveOrderDetails(buildServeOrderDetails(serveOrderData))
             .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
@@ -1968,7 +1979,7 @@ public class ManageOrderService {
         }
         //TODO need to add check  for closing case for children
 
-        if (SelectTypeOfOrderEnum.finl.equals(caseDataMap.containsKey("typeOfOrder")
+        if (finl.equals(caseDataMap.containsKey("typeOfOrder")
                                                   ? caseDataMap.get("typeOfOrder") : "")
                 && !isTheOrderAboutAllChildrenForCA) {
             updateChildrenWitCaseCloseStatus(callbackRequest);
