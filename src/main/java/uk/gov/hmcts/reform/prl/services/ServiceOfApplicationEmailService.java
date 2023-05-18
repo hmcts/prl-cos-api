@@ -221,6 +221,42 @@ public class ServiceOfApplicationEmailService {
 
     }
 
+    public void sendEmailNotificationToCafcass(String authorization, CaseDetails caseDetails,
+                                                   CaseData caseData, List<Document> docs) throws Exception {
+        List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
+        log.info("*** About to send ***");
+        log.info("*** document list ***" + docs);
+        if (caseData.getServiceOfApplication() != null && caseData.getServiceOfApplication().getSoaCafcassEmailAddressList() != null) {
+            for (Element<String> element : caseData.getServiceOfApplication().getSoaCafcassEmailAddressList()) {
+                String email = element.getValue();
+                emailService.send(
+                    email,
+                    EmailTemplateNames.CAFCASS_OTHER,
+                    buildLocalAuthorityEmail(caseDetails),
+                    LanguagePreference.english
+                );
+
+                if (caseData.getEmailNotificationDetails() != null) {
+                    emailNotifyCollectionList = caseData.getEmailNotificationDetails();
+                } else {
+                    emailNotifyCollectionList = new ArrayList<>();
+                }
+
+                log.info("*** About to call sendgrid ***");
+                requireNonNull(caseData);
+                emailNotifyCollectionList
+                    .add(sendgridService.sendEmailWithAttachments(authorization,
+                                                                  getCommonEmailProps(), email, docs));
+
+                log.info("Email notification for SoA sent successfully to Cafcass for caseId {}", caseDetails.getId());
+                caseData.setEmailNotificationDetails(emailNotifyCollectionList);
+                log.info("*** Email Notification details set in case data ***" + caseData.getEmailNotificationDetails());
+            }
+        }
+
+
+    }
+
     public void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) throws IOException {
         List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
         log.info("*** About to send ***");

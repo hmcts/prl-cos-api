@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -16,7 +17,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
+import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -33,6 +36,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.O;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.Q;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.R;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.S;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasLegalRepresentation;
 
 
 @Service
@@ -53,6 +58,14 @@ public class ServiceOfApplicationService {
 
     @Autowired
     private final ObjectMapper objectMapper;
+
+    @Autowired
+    private LaunchDarklyClient launchDarklyClient;
+
+    @Autowired
+    private C100CaseInviteService c100CaseInviteService;
+    @Autowired
+    private FL401CaseInviteService fl401CaseInviteService;
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -99,34 +112,38 @@ public class ServiceOfApplicationService {
     public CaseData sendPostToOtherPeopleInCase(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info(" Sending post to others involved ");
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            List<Element<PartyDetails>> otherPeopleInCase = caseData.getOthersToNotify();
-            List<DynamicMultiselectListElement> othersToNotify = caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue();
-            othersToNotify.forEach(other -> {
-                Optional<Element<PartyDetails>> party = getParty(other.getCode(), otherPeopleInCase);
-                try {
-                    log.info(
-                        "Sending the post notification to others in case for C100 Application for caseId {}",
-                        caseDetails.getId()
-                    );
+        List<Element<PartyDetails>> otherPeopleInCase = caseData.getOthersToNotify();
+        List<DynamicMultiselectListElement> othersToNotify = caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue();
+        othersToNotify.forEach(other -> {
+            Optional<Element<PartyDetails>> party = getParty(other.getCode(), otherPeopleInCase);
+            try {
+                log.info(
+                    "Sending the post notification to others in case for C100 Application for caseId {}",
+                    caseDetails.getId()
+                );
 
-                    serviceOfApplicationPostService.sendPostNotificationToParty(
+                serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
                         authorization,
                         party.get().getValue(),
                         getNotificationPack(caseData, "O")
-                    );
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        }
+                );
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
         return caseData;
     }
 
     public void sendEmailToOtherEmails(String authorization, CaseDetails caseDetails, CaseData caseData) throws Exception {
         serviceOfApplicationEmailService.sendEmailNotificationToOtherEmails(authorization, caseDetails, caseData,
                                                                                    getNotificationPack(caseData, "G"));
+
+    }
+
+    public void sendEmailToCafcassInCase(String authorization, CaseDetails caseDetails, CaseData caseData) throws Exception {
+        serviceOfApplicationEmailService.sendEmailNotificationToCafcass(authorization, caseDetails, caseData,
+                                                                            getNotificationPack(caseData, "O"));
 
     }
 
@@ -144,19 +161,52 @@ public class ServiceOfApplicationService {
                 log.info("serving respondents");
                 sendNotificationToRespondentOrSolicitor(caseDetails, authorization);
             }
+            if ((C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
+                && (caseData.getServiceOfApplication().getSoaCafcassEmailAddressList() != null)) {
+                log.info("serving cafcass");
+                sendEmailToCafcassInCase(authorization,caseDetails, caseData);
+            }
             if ((caseData.getServiceOfApplication().getSoaOtherEmailAddressList() != null)) {
                 log.info("serving OtherEmails");
                 sendEmailToOtherEmails(authorization, caseDetails, caseData);
             }
-            if ((caseData.getServiceOfApplication().getSoaOtherPeopleList() != null)
+            if ((C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
                 && (caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue() != null)) {
                 log.info("serving other people in case");
                 caseData = sendPostToOtherPeopleInCase(caseDetails, authorization);
             }
 
+        } else {
+            //CITIZEN SCENARIO
+            if (caseData.getServiceOfApplication().getSoaApplicantsList().getValue() != null) {
+                generatePinAndSendNotificationEmailForCitizen(caseData);
+            }
         }
-        caseInviteManager.generatePinAndSendNotificationEmail(caseData);
         return caseData;
+    }
+
+    public CaseData generatePinAndSendNotificationEmailForCitizen(CaseData caseData) {
+        if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                log.info("In Generating and sending PIN to Citizen C100");
+                List<Element<PartyDetails>> citizensInCase = caseData.getApplicants();
+                List<DynamicMultiselectListElement> citizenList = caseData.getServiceOfApplication().getSoaApplicantsList().getValue();
+                citizenList.forEach(applicant -> {
+                    Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), citizensInCase);
+                    if (party.isPresent()) {
+                        c100CaseInviteService.generateAndSendCaseInviteEmailForC100Citizen(caseData,party.get().getValue());
+                    }
+                });
+            } else {
+                log.info("In Generating and sending PIN to Citizen FL401");
+                PartyDetails applicant = caseData.getApplicantsFL401();
+                if (caseData.getServiceOfApplication().getSoaApplicantsList().getValue().contains(applicant)) {
+                    fl401CaseInviteService.generateAndSendCaseInviteEmailForFL401Citizen(caseData,applicant);
+                }
+
+            }
+        }
+        return  caseData;
     }
 
     public CaseData sendNotificationToApplicantSolicitor(CaseDetails caseDetails, String authorization) throws Exception {
@@ -297,6 +347,11 @@ public class ServiceOfApplicationService {
                         log.info("Unable to send any notification to respondent for C100 Application for caseId {} "
                                      + "as no address available", caseDetails.getId());
                     }
+                    if (!hasLegalRepresentation(party.get().getValue())
+                        && Yes.equals(party.get().getValue().getCanYouProvideEmailAddress())) {
+                        c100CaseInviteService.generateAndSendCaseInviteForC100Respondent(caseData, party.get().getValue());
+                    }
+
                 }
             });
         } else {
@@ -341,7 +396,11 @@ public class ServiceOfApplicationService {
                         );
                     }
                 }
+            } else if (YesNoDontKnow.no.equals(respondentFL401.getDoTheyHaveLegalRepresentation())
+                    && Yes.equals(respondentFL401.getCanYouProvideEmailAddress())) {
+                fl401CaseInviteService.generateAndSendCaseInviteForFL401Respondent(caseData, respondentFL401);
             }
+
 
         }
 

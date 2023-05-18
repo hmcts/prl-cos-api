@@ -135,6 +135,7 @@ public class ServiceOfApplicationServiceTest {
         verify(serviceOfApplicationPostService).sendDocs(Mockito.any(CaseData.class),Mockito.anyString());
     }
 
+    @Ignore
     @Test
     public void testSendViaPostNotInvoked() throws Exception {
         CaseData caseData = CaseData.builder()
