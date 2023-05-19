@@ -9,10 +9,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -73,6 +75,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 public class SendAndReplyService {
 
     public static final String SEND_AND_REPLY_CATEGORY_ID = "sendAndReply";
+    public static final String SEND_MESSAGE_OBJECT = "sendMessageObject";
     private final EmailService emailService;
 
     private final UserService userService;
@@ -925,5 +928,33 @@ public class SendAndReplyService {
             .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierValue())
             .selectedDocument(message.getSelectedDocument())
             .build();
+    }
+
+    public void resetSendAndReplyDynamicLists(CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+
+        if (caseDataMap.containsKey(SEND_MESSAGE_OBJECT)) {
+            final Message sendMessageObject = (Message) caseDataMap.get(SEND_MESSAGE_OBJECT);
+            if (!InternalMessageWhoToSendToEnum.JUDICIARY.equals(sendMessageObject.getInternalMessageWhoToSendTo())) {
+                sendMessageObject.setJudicialOrMagistrateTierList(DynamicList.builder()
+                                                                      .value(DynamicListElement.EMPTY).build());
+            }
+            if (!InternalMessageWhoToSendToEnum.OTHER.equals(sendMessageObject.getInternalMessageWhoToSendTo())) {
+                sendMessageObject.setCtscEmailList(DynamicList.builder()
+                                                       .value(DynamicListElement.EMPTY).build());
+            }
+            if (!MessageAboutEnum.APPLICATION.equals(sendMessageObject.getMessageAbout())) {
+                sendMessageObject.setApplicationsList(DynamicList.builder()
+                                                                      .value(DynamicListElement.EMPTY).build());
+            }
+            if (!MessageAboutEnum.HEARING.equals(sendMessageObject.getMessageAbout())) {
+                sendMessageObject.setFutureHearingsList(DynamicList.builder()
+                                                                      .value(DynamicListElement.EMPTY).build());
+            }
+            if (!MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS.equals(sendMessageObject.getMessageAbout())) {
+                sendMessageObject.setSubmittedDocumentsList(DynamicList.builder()
+                                                                      .value(DynamicListElement.EMPTY).build());
+            }
+        }
     }
 }
