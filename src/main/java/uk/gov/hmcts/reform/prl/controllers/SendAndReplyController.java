@@ -89,12 +89,13 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
 
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
         // clearing selection while loading on first screen
         sendAndReplyService.removeTemporaryFields(caseDataMap, "chooseSendOrReply");
+
+        caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
 
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
