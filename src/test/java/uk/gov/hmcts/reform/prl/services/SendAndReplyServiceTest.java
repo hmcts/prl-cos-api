@@ -28,6 +28,9 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
@@ -585,6 +588,14 @@ public class SendAndReplyServiceTest {
         ReflectionTestUtils.setField(
             sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
 
+
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder()
+                                                     .otherApplicationsBundle(OtherApplicationsBundle.builder().uploadedDateTime(dateSent).build())
+                                                     .c2DocumentBundle(C2DocumentBundle.builder().uploadedDateTime(dateSent).build())
+                                                     .build()));
+
+        caseData = caseData.toBuilder().additionalApplicationsBundle(additionalApplicationsBundle).build();
         when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataCategoryValueMap);
 
         CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
@@ -622,7 +633,7 @@ public class SendAndReplyServiceTest {
         CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
 
         assertNotNull(updatedCaseData);
-        assertEquals("categoryId___documentURL",updatedCaseData.getSendOrReplyMessage()
+        assertEquals("categoryId->documentURL",updatedCaseData.getSendOrReplyMessage()
             .getSendMessageObject().getSubmittedDocumentsList().getListItems().get(0).getCode());
     }
 
@@ -878,6 +889,7 @@ public class SendAndReplyServiceTest {
         openMessagesList.add(element(message1));
 
         CaseData caseData = CaseData.builder()
+
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .chooseSendOrReply(SendOrReply.REPLY)
             .sendOrReplyMessage(
@@ -890,6 +902,7 @@ public class SendAndReplyServiceTest {
                         .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
                         .messageAbout(MessageAboutEnum.APPLICATION)
                             .messageContent("Reply Message Content")
+                            .submittedDocumentsList(dynamicList)
                         .build()
                 )
                     .build())
