@@ -728,10 +728,6 @@ public class C100RespondentSolicitorService {
         dataMap.put("reasonForJurisdictionDetails", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWlDetails());
         dataMap.put("requestToAuthority", response.getCitizenInternationalElements().getAnotherCountryAskedInformation());
         dataMap.put("requestToAuthorityDetails", response.getCitizenInternationalElements().getAnotherCountryAskedInformationDetaails());
-        log.info("childabuse: {}", dataMap.get("childAbuse"));
-        log.info("childabuseinfo {}", dataMap.get("childAbuseInfo"));
-        log.info("domesticabuse: {}", dataMap.get("domesticAbuse"));
-        log.info("domesticabuseinfo {}", dataMap.get("domesticAbuseInfo"));
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
