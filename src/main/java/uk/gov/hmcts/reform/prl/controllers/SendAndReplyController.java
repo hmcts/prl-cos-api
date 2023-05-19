@@ -237,6 +237,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                           @Parameter(hidden = true) String authorisation,
                                                           @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Case Details in about to submit --> {}", caseDetails);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 

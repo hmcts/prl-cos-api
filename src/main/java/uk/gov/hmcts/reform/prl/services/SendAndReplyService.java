@@ -701,7 +701,7 @@ public class SendAndReplyService {
         return ElementUtils.asDynamicList(
             openMessages,
             null,
-            Message::getLabelForDynamicList
+            Message::getLabelForReplyDynamicList
         );
     }
 

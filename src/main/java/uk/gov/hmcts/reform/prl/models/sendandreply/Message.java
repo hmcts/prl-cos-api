@@ -75,8 +75,19 @@ public class Message extends MessageMetaData {
             "%s, %s, %s",
             super.getMessageSubject(),
             this.dateSent,
-            ofNullable(super.getMessageUrgency()).orElse(internalMessageUrgent.getDisplayedValue())
+            ofNullable(super.getMessageUrgency()).orElse("")
         );
+    }
+
+    @JsonIgnore
+    public String getLabelForReplyDynamicList() {
+        return String.format(
+            "%s, %s, %s",
+            super.getMessageSubject(),
+            this.dateSent,
+            YesOrNo.Yes.equals(this.internalMessageUrgent) ? "Urgent" : "Not Urgent"
+            );
+
     }
 }
 
