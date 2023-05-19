@@ -16,12 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
@@ -137,18 +134,6 @@ public class ServiceOfApplicationController {
         updatedCaseData.putAll(allTabsFields);
       
         log.info("inside about to submit");
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("first")
-            .lastName("last")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .email("app@gmail.com")
-            .build();
-        serviceOfApplicationPostService.sendBulkPrint(caseData, authorisation,
-                List.of(serviceOfApplicationPostService.getCoverLetterGeneratedDocInfo(caseData, authorisation)), applicant
-        );
-        log.info("Bulk print");
-        //updatedCaseData.put("coverLetter", serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
 
