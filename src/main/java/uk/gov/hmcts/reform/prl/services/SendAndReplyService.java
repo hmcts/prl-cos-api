@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
+import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
@@ -41,6 +43,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -52,9 +55,11 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
+import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
+import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -99,6 +104,12 @@ public class SendAndReplyService {
     private final RefDataUserService refDataUserService;
 
     private final HearingService hearingService;
+
+    private static final String TABLE_ROW_BEGIN = "<tr>";
+    private static final String TABLE_ROW_END = "</tr>";
+    private static final String TABLE_ROW_DATA_BEGIN = "<td>";
+    private static final String TABLE_ROW_DATA_END = "</td>";
+    private static final String HORIZONTAL_LINE = "<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>";
 
     private Map<String, Document> documentMap;
 
@@ -323,17 +334,21 @@ public class SendAndReplyService {
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
         return caseData.toBuilder().sendOrReplyMessage(
             SendOrReplyMessage.builder()
-                .judicialOrMagistrateTierList(getJudiciaryTierDynamicList(
-                    authorization,
-                    s2sToken,
-                    serviceCode,
-                    categoryId
-                ))
-                .applicationsList(getOtherApllicationsist(caseData))
-                .submittedDocumentsList(documentCategoryList)
-                .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder().label(loggedInUserEmail).code(loggedInUserEmail).build())))
-                .futureHearingsList(getFutureHearingDynamicList(authorization, s2sToken, caseReference))
-                .build()).build();
+                .sendMessageObject(Message.builder()
+                                       .judicialOrMagistrateTierList(getJudiciaryTierDynamicList(
+                                           authorization,
+                                           s2sToken,
+                                           serviceCode,
+                                           categoryId
+                                       ))
+                                       .applicationsList(getOtherApllicationsist(caseData))
+                                       .submittedDocumentsList(documentCategoryList)
+                                       .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
+                                               .label(loggedInUserEmail).code(loggedInUserEmail).build())))
+                                       .futureHearingsList(getFutureHearingDynamicList(authorization, s2sToken, caseReference))
+                                       .build())
+                .build())
+            .build();
     }
 
     private DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
@@ -562,45 +577,50 @@ public class SendAndReplyService {
 
     }
 
-    public Message buildSendMessage(CaseData caseData) {
+    public Message buildSendReplyMessage(CaseData caseData, Message message) {
+        log.info("Message :{}", message);
+        if (null == message) {
+            return Message.builder().build();
+        }
 
-        final SendOrReplyMessage sendOrReplyMessage = caseData.getSendOrReplyMessage();
+        JudicialUser judicialUser = message.getSendReplyJudgeName();
 
         return Message.builder()
             .status(OPEN)
             .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
-            .internalOrExternalMessage(sendOrReplyMessage.getInternalOrExternalMessage() != null
-                                           ? sendOrReplyMessage.getInternalOrExternalMessage().name() : null)
-            .internalMessageUrgent(sendOrReplyMessage.getInternalMessageUrgent())
-            .internalMessageWhoToSendTo(sendOrReplyMessage.getInternalMessageWhoToSendTo() != null
-                                            ? sendOrReplyMessage.getInternalMessageWhoToSendTo().name() : null)
-            .messageAbout(sendOrReplyMessage.getMessageAbout() != null
-                          ? sendOrReplyMessage.getMessageAbout().name() : null)
-            .judgeName(getJudgeName(sendOrReplyMessage.getSendReplyJudgeName()))
-            .messageSubject(sendOrReplyMessage.getMessageSubject())
-            .recipientEmailAddresses(sendOrReplyMessage.getRecipientEmailAddresses())
-            .selectedCtscEmail(sendOrReplyMessage.getCtscEmailList() != null
-                                   ? sendOrReplyMessage.getCtscEmailList().getValueCode() : null)
-            .judicialOrMagistrateTierCode(sendOrReplyMessage.getJudicialOrMagistrateTierList() != null
-                                              ? sendOrReplyMessage.getJudicialOrMagistrateTierList().getValueCode() : null)
-            .judicialOrMagistrateTierValue(sendOrReplyMessage.getJudicialOrMagistrateTierList() != null
-                                               ? sendOrReplyMessage.getJudicialOrMagistrateTierList().getValueLabel() : null)
-            .selectedApplicationCode(sendOrReplyMessage.getApplicationsList() != null
-                                               ? sendOrReplyMessage.getApplicationsList().getValueCode() : null)
-            .selectedApplicationValue(sendOrReplyMessage.getApplicationsList() != null
-                                                ? sendOrReplyMessage.getApplicationsList().getValueLabel() : null)
-            .selectedFutureHearingCode(sendOrReplyMessage.getFutureHearingsList() != null
-                                           ? sendOrReplyMessage.getFutureHearingsList().getValueCode() : null)
-            .selectedFutureHearingValue(sendOrReplyMessage.getFutureHearingsList() != null
-                                            ? sendOrReplyMessage.getFutureHearingsList().getValueLabel() : null)
-            .selectedSubmittedDocumentCode(sendOrReplyMessage.getSubmittedDocumentsList() != null
-                                               ? sendOrReplyMessage.getSubmittedDocumentsList().getValueCode() : null)
-            .selectedSubmittedDocumentValue(sendOrReplyMessage.getSubmittedDocumentsList() != null
-                                                ? sendOrReplyMessage.getSubmittedDocumentsList().getValueLabel() : null)
-            .latestMessage(caseData.getMessageContent())
-            .selectedDocument(getSelectedDocument(documentMap, sendOrReplyMessage.getSubmittedDocumentsList() != null
-                ? sendOrReplyMessage.getSubmittedDocumentsList().getValueCode() : null))
+            .internalOrExternalMessage(message.getInternalOrExternalMessage())
+            .internalMessageUrgent(message.getInternalMessageUrgent())
+            .internalMessageWhoToSendTo(message.getInternalMessageWhoToSendTo())
+            .messageAbout(message.getMessageAbout())
+            .judgeName((null != judicialUser && isNotBlank(judicialUser.getPersonalCode()))
+                           ? getJudgeName(judicialUser) : null)
+            .messageSubject(message.getMessageSubject())
+            .recipientEmailAddresses(message.getRecipientEmailAddresses())
+            .selectedCtscEmail(message.getCtscEmailList() != null
+                                   ? message.getCtscEmailList().getValueCode() : null)
+            .judicialOrMagistrateTierCode(message.getJudicialOrMagistrateTierList() != null
+                                              ? message.getJudicialOrMagistrateTierList().getValueCode() : null)
+            .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierList() != null
+                                               ? message.getJudicialOrMagistrateTierList().getValueLabel() : null)
+            .selectedApplicationCode(message.getApplicationsList() != null
+                                               ? message.getApplicationsList().getValueCode() : null)
+            .selectedApplicationValue(message.getApplicationsList() != null
+                                                ? message.getApplicationsList().getValueLabel() : null)
+            .selectedFutureHearingCode(message.getFutureHearingsList() != null
+                                           ? message.getFutureHearingsList().getValueCode() : null)
+            .selectedFutureHearingValue(message.getFutureHearingsList() != null
+                                            ? message.getFutureHearingsList().getValueLabel() : null)
+            .selectedSubmittedDocumentCode(message.getSubmittedDocumentsList() != null
+                                               ? message.getSubmittedDocumentsList().getValueCode() : null)
+            .selectedSubmittedDocumentValue(message.getSubmittedDocumentsList() != null
+                                                ? message.getSubmittedDocumentsList().getValueLabel() : null)
             .updatedTime(dateTime.now())
+            .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
+            .senderEmail(null != caseData.getMessageMetaData()
+                             ? caseData.getMessageMetaData().getSenderEmail() : null)
+            .replyHistory(Collections.emptyList())
+            .selectedDocument(getSelectedDocument(documentMap, message.getSubmittedDocumentsList() != null
+                ? message.getSubmittedDocumentsList().getValueCode() : null))
             .build();
     }
 
@@ -634,15 +654,13 @@ public class SendAndReplyService {
     }
 
     private String getJudgeName(JudicialUser judicialUser) {
-        if (judicialUser != null && judicialUser.getPersonalCode() != null) {
-            final Optional<List<JudicialUsersApiResponse>> judicialUsersApiResponseList = ofNullable(getJudgeDetails(
-                judicialUser));
+        final Optional<List<JudicialUsersApiResponse>> judicialUsersApiResponseList = ofNullable(getJudgeDetails(
+            judicialUser));
 
-            if (judicialUsersApiResponseList.isPresent()) {
-                Optional<JudicialUsersApiResponse> judicialUsersApiResponse = judicialUsersApiResponseList.get().stream().findFirst();
-                if (judicialUsersApiResponse.isPresent()) {
-                    return judicialUsersApiResponse.get().getFullName();
-                }
+        if (judicialUsersApiResponseList.isPresent()) {
+            Optional<JudicialUsersApiResponse> judicialUsersApiResponse = judicialUsersApiResponseList.get().stream().findFirst();
+            if (judicialUsersApiResponse.isPresent()) {
+                return judicialUsersApiResponse.get().getFullName();
             }
         }
         return null;
@@ -684,7 +702,7 @@ public class SendAndReplyService {
         );
     }
 
-    public CaseData populateMessageReplyFields(CaseData caseData) {
+    public CaseData populateMessageReplyFields(CaseData caseData, String authorization) {
         UUID messageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
 
@@ -699,29 +717,109 @@ public class SendAndReplyService {
             return caseData;
         }
 
+        //populate message table
+        String messageReply = renderMessageTable(previousMessage.get());
+
+        final String loggedInUserEmail = getLoggedInUserEmail(authorization);
         return caseData.toBuilder()
             .sendOrReplyMessage(
-                caseData.getSendOrReplyMessage().toBuilder().replyMessage(previousMessage.get()).build()).build();
+                caseData.getSendOrReplyMessage().toBuilder()
+                    .messageReplyTable(messageReply)
+                    .replyMessageObject(
+                        Message.builder()
+                            .judicialOrMagistrateTierList(getJudiciaryTierDynamicList(
+                                authorization,
+                                authTokenGenerator.generate(),
+                                serviceCode,
+                                categoryId
+                            ))
+                            .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
+                                                                      .label(loggedInUserEmail).code(loggedInUserEmail).build())))
+                            .build())
+                    .build())
+            .build();
+    }
+
+    private String renderMessageTable(Message message) {
+        final List<String> lines = new LinkedList<>();
+
+        lines.add("<div class='width-50'>");
+        lines.add("<table>");
+
+        //previous history
+        log.info("Message history :{}", message.getReplyHistory());
+        if (null != message.getReplyHistory()) {
+            message.getReplyHistory().stream()
+                .map(Element::getValue)
+                .forEach(history -> {
+                    addRowToMessageTable(lines, "From", history.getMessageFrom());
+                    addRowToMessageTable(lines, "To", history.getMessageTo());
+                    addRowToMessageTable(lines, "Message Date", history.getMessageDate());
+                    addRowToMessageTable(lines, "Urgent", history.getIsUrgent().getDisplayedValue());
+                    lines.add(HORIZONTAL_LINE);
+                });
+        }
+
+        lines.add(HORIZONTAL_LINE);
+        lines.add(HORIZONTAL_LINE);
+        //latest message
+        addRowToMessageTable(lines, "From", message.getSenderEmail());
+        if (null != message.getInternalMessageWhoToSendTo()) {
+            addRowToMessageTable(lines, "To", message.getInternalMessageWhoToSendTo().name());
+        }
+        addRowToMessageTable(lines, "Message Date", message.getDateSent());
+        if (null != message.getInternalMessageUrgent()) {
+            addRowToMessageTable(lines, "Urgent", message.getInternalMessageUrgent().getDisplayedValue());
+        }
+        addRowToMessageTable(lines, "Subject", message.getMessageSubject());
+        addRowToMessageTable(lines, "Message", message.getMessageContent());
+
+        lines.add("</table>");
+        lines.add("</div>");
+
+        return String.join("\n\n", lines);
+    }
+
+    private void addRowToMessageTable(List<String> lines,
+                                      String label,
+                                      String value) {
+        lines.add(TABLE_ROW_BEGIN);
+        lines.add(TABLE_ROW_DATA_BEGIN);
+        lines.add(label);
+        lines.add(TABLE_ROW_DATA_END);
+        lines.add(TABLE_ROW_DATA_BEGIN);
+        lines.add(value);
+        lines.add(TABLE_ROW_DATA_END);
+        lines.add(TABLE_ROW_END);
+
     }
 
     /**
      *  This method will send notification, when internal
      *  other message is sent.
      * @param caseData CaseData
-     * @param message Message
      */
-    public void sendNotificationEmailOther(CaseData caseData, Message message) {
-        final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
+    public void sendNotificationEmailOther(CaseData caseData) {
+        //get the latest message
+        Message message = nullSafeCollection(caseData.getSendOrReplyMessage().getOpenMessagesList()).stream()
+            .min(Comparator.comparing(element -> element.getValue().getUpdatedTime(), Comparator.reverseOrder()))
+            .map(Element::getValue)
+            .filter(msg -> OPEN.equals(msg.getStatus()))
+            .orElse(null);
 
-        if (recipientEmailAddresses.length > 0) {
-            final EmailTemplateVars emailTemplateVars = buildNotificationEmailOther(caseData);
+        if (null != message && ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())) {
+            final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
+            if (recipientEmailAddresses.length > 0) {
+                final EmailTemplateVars emailTemplateVars = buildNotificationEmailOther(caseData);
 
-            for (String recipientEmailAddress : recipientEmailAddresses) {
-                emailService.send(
-                    recipientEmailAddress,
-                    EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,
-                    emailTemplateVars,
-                    LanguagePreference.english);
+                for (String recipientEmailAddress : recipientEmailAddresses) {
+                    emailService.send(
+                        recipientEmailAddress,
+                        EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,
+                        emailTemplateVars,
+                        LanguagePreference.getPreferenceLanguage(caseData)
+                    );
+                }
             }
         }
     }
@@ -736,4 +834,42 @@ public class SendAndReplyService {
             .build();
     }
 
+    public List<Element<Message>> replyAndAppendMessageHistory(CaseData caseData) {
+        UUID replyMessageId = elementUtils.getDynamicListSelectedValue(
+            caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
+
+        Message replyMessage = this.buildSendReplyMessage(caseData,
+                                                          caseData.getSendOrReplyMessage().getReplyMessageObject());
+
+        List<Element<MessageHistory>> messageHistoryList = new ArrayList<>();
+        return caseData.getSendOrReplyMessage().getOpenMessagesList().stream()
+            .map(messageElement -> {
+                if (replyMessageId.equals(messageElement.getId())) {
+                    Message message = messageElement.getValue();
+
+                    MessageHistory messageHistory = buildReplyMessageHistory(message);
+                    if (null != message.getReplyHistory()) {
+                        messageHistoryList.addAll(message.getReplyHistory());
+                    }
+                    messageHistoryList.add(element(messageHistory));
+
+                    replyMessage.setReplyHistory(messageHistoryList);
+                    replyMessage.setUpdatedTime(dateTime.now());
+                    //retain the original subject
+                    replyMessage.setMessageSubject(message.getMessageSubject());
+
+                    return element(messageElement.getId(), replyMessage);
+                }
+                return messageElement;
+            }).collect(Collectors.toList());
+    }
+
+    private MessageHistory buildReplyMessageHistory(Message message) {
+        return MessageHistory.builder()
+            .messageFrom(message.getSenderEmail())
+            .messageTo(message.getRecipientEmail())
+            .messageDate(message.getUpdatedTime().toString())
+            .isUrgent(message.getInternalMessageUrgent())
+            .build();
+    }
 }
