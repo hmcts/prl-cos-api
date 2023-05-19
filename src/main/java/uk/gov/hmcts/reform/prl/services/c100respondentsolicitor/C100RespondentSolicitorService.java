@@ -694,6 +694,8 @@ public class C100RespondentSolicitorService {
         dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
         dataMap.put("currentOrPastProceedingsForChildren", response.getCurrentOrPastProceedingsForChildren());
         dataMap.put("childAbuseInfo", response.getRespondentAllegationsOfHarmData().getRespChildAbuseInfo());
+        dataMap.put("childAbuse", response.getRespondentAllegationsOfHarmData()
+            .getRespAllegationsOfHarmInfo().getRespondentChildAbuse());
         dataMap.put("childAbductionInfo", response.getRespondentAllegationsOfHarmData()
             .getRespAllegationsOfHarmInfo().getIsRespondentChildAbduction());
         dataMap.put("reasonChildAbductionBelief", response.getRespondentAllegationsOfHarmData()
