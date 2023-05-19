@@ -82,33 +82,6 @@ public class ServiceOfApplicationEmailService {
                 LanguagePreference.getPreferenceLanguage(caseData)
             );
         }
-      
-        List<Map<String, List<String>>> respondentSolicitors = caseData
-            .getRespondents()
-            .stream()
-            .map(Element::getValue)
-            .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
-            .map(i -> {
-                Map<String, List<String>> temp = new HashMap<>();
-                temp.put(i.getSolicitorEmail(), List.of(
-                    i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
-                    i.getFirstName() + " " + i.getLastName()
-                ));
-                return temp;
-            })
-            .collect(Collectors.toList());
-
-        for (Map<String, List<String>> resSols : respondentSolicitors) {
-            String solicitorEmail = resSols.keySet().toArray()[0].toString();
-            emailService.send(
-                solicitorEmail,
-                EmailTemplateNames.RESPONDENT_SOLICITOR,
-                buildRespondentSolicitorEmail(caseDetails, resSols.get(solicitorEmail).get(0),
-                                              resSols.get(solicitorEmail).get(1)
-                ),
-                LanguagePreference.english
-            );
-
         if (launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
             List<Map<String, List<String>>> respondentSolicitors = caseData
                 .getRespondents()
