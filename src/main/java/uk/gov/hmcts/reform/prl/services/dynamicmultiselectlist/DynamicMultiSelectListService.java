@@ -84,7 +84,7 @@ public class DynamicMultiSelectListService {
     public List<Element<Child>> updateChildrenWithCaseCloseStatus(CaseData caseData) {
         List<Element<Child>> childList = new ArrayList<>();
 
-        for (DynamicMultiselectListElement element : caseData.getManageOrders().getChildOption().getListItems()) {
+        for (DynamicMultiselectListElement element : caseData.getManageOrders().getChildOption().getValue()) {
             for (Element<Child> childElement:caseData.getChildren()) {
                 if (element.getCode().equals(childElement.getId().toString())) {
                     childElement.getValue().toBuilder().isFinalOrderIssued(Yes).build();
