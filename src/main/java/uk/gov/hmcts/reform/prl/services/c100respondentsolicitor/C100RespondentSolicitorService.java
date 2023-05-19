@@ -282,7 +282,12 @@ public class C100RespondentSolicitorService {
         PartyDetails amended = party.getValue().toBuilder()
             .response(buildResponseForRespondent).build();
         log.info(" *** Respondent updated details after keep details private *** {}", amended);
-        respondents.set(respondents.indexOf(party), element(party.getId(), amended));
+        log.info(" *** index of party *** {}", respondents.indexOf(party));
+        log.info(" *** party *** {}", party);
+        int index = respondents.indexOf(party);
+        if (index != -1) {
+            respondents.set(index, element(party.getId(), amended));
+        }
     }
 
     private Response buildAbilityToParticipateResponse(CaseData caseData, Response buildResponseForRespondent) {
