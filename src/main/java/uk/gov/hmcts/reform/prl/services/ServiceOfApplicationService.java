@@ -114,12 +114,12 @@ public class ServiceOfApplicationService {
 
     public CaseData sendPostToOtherPeopleInCase(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info(" Sending post to others involved ");
         List<Element<PartyDetails>> otherPeopleInCase = caseData.getOthersToNotify();
         List<DynamicMultiselectListElement> othersToNotify = caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue();
         othersToNotify.forEach(other -> {
             Optional<Element<PartyDetails>> party = getParty(other.getCode(), otherPeopleInCase);
             try {
+                log.info(" Sending post to others involved ");
                 log.info(
                     "Sending the post notification to others in case for C100 Application for caseId {}",
                     caseDetails.getId()
@@ -164,14 +164,15 @@ public class ServiceOfApplicationService {
                 log.info("serving respondents");
                 sendNotificationToRespondentOrSolicitor(caseDetails, authorization);
             }
-            if ((caseData.getServiceOfApplication().getSoaOtherEmailAddressList() != null)) {
-                log.info("serving OtherEmails");
-                sendEmailToOtherEmails(authorization, caseDetails, caseData);
-            }
             if ((C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
                 && (caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue() != null)) {
                 log.info("serving other people in case");
                 caseData = sendPostToOtherPeopleInCase(caseDetails, authorization);
+            }
+            if ((caseData.getServiceOfApplication() != null
+                && caseData.getServiceOfApplication().getSoaOtherEmailAddressList() != null)) {
+                log.info("serving OtherEmails");
+                sendEmailToOtherEmails(authorization, caseDetails, caseData);
             }
             if ((C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
                 && (caseData.getServiceOfApplication().getSoaCafcassEmailAddressList() != null)) {
@@ -359,6 +360,7 @@ public class ServiceOfApplicationService {
                     }
                     if (!hasLegalRepresentation(party.get().getValue())
                         && Yes.equals(party.get().getValue().getCanYouProvideEmailAddress())) {
+
                         c100CaseInviteService.generateAndSendCaseInviteForC100Respondent(caseData, party.get().getValue());
                     }
 
@@ -429,10 +431,6 @@ public class ServiceOfApplicationService {
     private List<Document> getNotificationPack(String authorization, CaseData caseData, String requiredPack,
                                                String flag) throws Exception {
         List<Document> docs = new ArrayList<>();
-        if (flag.equals("Post")) {
-            docs.add(DocumentUtils.toDocument(serviceOfApplicationPostService
-                                                  .getCoverLetterGeneratedDocInfo(caseData, authorization)));
-        }
         switch (requiredPack) {
             case Q:
                 docs.addAll(generatePackQ(caseData));
@@ -457,6 +455,10 @@ public class ServiceOfApplicationService {
                 break;
             default:
                 break;
+        }
+        if (flag.equals("Post")) {
+            docs.add(DocumentUtils.toDocument(serviceOfApplicationPostService
+                                                  .getCoverLetterGeneratedDocInfo(caseData, authorization)));
         }
         log.info("DOCUMENTS IN THE PACK" + docs);
         return  docs;

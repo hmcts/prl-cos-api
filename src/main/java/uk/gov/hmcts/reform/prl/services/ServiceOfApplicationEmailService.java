@@ -188,10 +188,9 @@ public class ServiceOfApplicationEmailService {
     public void sendEmailNotificationToOtherEmails(String authorization, CaseDetails caseDetails,
                                                    CaseData caseData, List<Document> docs) throws Exception {
         List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
-        log.info("*** About to send ***");
-        log.info("*** document list ***" + docs);
         if (caseData.getServiceOfApplication() != null && caseData.getServiceOfApplication().getSoaOtherEmailAddressList() != null) {
             for (Element<String> element : caseData.getServiceOfApplication().getSoaOtherEmailAddressList()) {
+                log.info("*** About to send ***");
                 String email = element.getValue();
                 emailService.send(
                     email,
