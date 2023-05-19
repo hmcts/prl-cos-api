@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -84,6 +86,9 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     DocumentGenService documentGenService;
+
+    @Mock
+    ConfidentialDetailsMapper confidentialDetailsMapper;
 
     boolean mandatoryFinished = false;
 
@@ -329,6 +334,7 @@ public class C100RespondentSolicitorServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        when(confidentialDetailsMapper.mapConfidentialData(Mockito.any(CaseData.class))).thenReturn(caseData);
     }
 
     @Test
@@ -611,7 +617,6 @@ public class C100RespondentSolicitorServiceTest {
 
         when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
         callbackRequest.setEventId("c100ResSolAbilityToParticipateA");
-
         Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
             callbackRequest
         );
