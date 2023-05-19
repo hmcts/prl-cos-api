@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -79,7 +78,6 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class SendAndReplyServiceTest {
     @InjectMocks
@@ -186,6 +184,8 @@ public class SendAndReplyServiceTest {
             .status(CLOSED)
             .latestMessage("Message 2 latest message")
             .messageHistory("Message 2 message history")
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.LEGAL_ADVISER)
+            .internalMessageUrgent(YesOrNo.Yes)
             .build();
         message3 = Message.builder()
             .senderEmail("sender@email.com")
@@ -198,6 +198,8 @@ public class SendAndReplyServiceTest {
             .status(OPEN)
             .latestMessage("Message 3 latest message")
             .messageHistory("Message 3 message history")
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageUrgent(YesOrNo.Yes)
             .build();
 
         messageHistoryList = new ArrayList<>();

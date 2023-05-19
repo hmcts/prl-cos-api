@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -52,7 +51,6 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class SendAndReplyControllerTest {
 
@@ -126,6 +124,8 @@ public class SendAndReplyControllerTest {
             .status(OPEN)
             .latestMessage("Message 1 latest message")
             .messageHistory("")
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.LEGAL_ADVISER)
+            .internalMessageUrgent(YesOrNo.Yes)
             .build();
 
         message2 = Message.builder()
@@ -139,6 +139,8 @@ public class SendAndReplyControllerTest {
             .status(CLOSED)
             .latestMessage("Message 2 latest message")
             .messageHistory("Message 2 message history")
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.LEGAL_ADVISER)
+            .internalMessageUrgent(YesOrNo.Yes)
             .build();
 
         message1Element = element(message1);
@@ -170,7 +172,6 @@ public class SendAndReplyControllerTest {
         when(sendAndReplyService.setSenderAndGenerateMessageReplyList(sendCaseData, auth)).thenReturn(aboutToStartMap);
         sendAndReplyController.handleSendOrMessageAboutToStart(auth, sendCallbackRequest);
         verify(sendAndReplyService).setSenderAndGenerateMessageReplyList(sendCaseData, auth);
-        verifyNoMoreInteractions(sendAndReplyService);
     }
 
     @Test
@@ -424,7 +425,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesSubmitForSend() {
+    public void testSendOrReplyToMessagesSubmitForMessageAboutOtherForSend() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
 
         Message newMessage = Message.builder()
@@ -438,6 +439,7 @@ public class SendAndReplyControllerTest {
             .status(OPEN)
             .latestMessage("Message 1 latest message")
             .messageHistory("")
+            .messageAbout(MessageAboutEnum.OTHER)
             .build();
 
         CaseData caseData = CaseData.builder().id(12345L)
@@ -454,6 +456,7 @@ public class SendAndReplyControllerTest {
             )
                     .respondToMessage(YesOrNo.No)
                     .openMessagesList(messages)
+                    .closedMessagesList(listOfClosedMessages)
                     .build())
             .build();
 
@@ -463,7 +466,54 @@ public class SendAndReplyControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject())).thenReturn(newMessage);
-        when(sendAndReplyService.addNewOpenMessage(caseData,newMessage)).thenReturn(msgListWithNewMessage);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
+        verify(sendAndReplyService).buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject());
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesSubmitForMessageAboutReviewSubmittedDocForSend() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+
+        Message newMessage = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .messageAbout(MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS)
+            .build();
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .build()
+                    )
+                    .respondToMessage(YesOrNo.No)
+                    .openMessagesList(messages)
+                    .closedMessagesList(listOfClosedMessages)
+                    .build())
+            .build();
+
+        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
+        msgListWithNewMessage.addAll(messages);
+        msgListWithNewMessage.add(element(newMessage));
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject())).thenReturn(newMessage);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
