@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -32,6 +33,8 @@ import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationServiceTest {
 
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     @InjectMocks
     private ServiceOfApplicationService serviceOfApplicationService;
@@ -156,6 +159,7 @@ public class ServiceOfApplicationServiceTest {
         Map<String,Object> casedata = new HashMap<>();
         casedata.put("caseTyoeOfApplication","C100");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
         when(caseInviteManager.generatePinAndSendNotificationEmail(Mockito.any(CaseData.class))).thenReturn(caseData);
         CaseDetails caseDetails = CaseDetails
             .builder()
@@ -179,6 +183,7 @@ public class ServiceOfApplicationServiceTest {
         Map<String,Object> casedata = new HashMap<>();
         casedata.put("caseTyoeOfApplication","C100");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
         when(caseInviteManager.generatePinAndSendNotificationEmail(Mockito.any(CaseData.class))).thenReturn(caseData);
         CaseDetails caseDetails = CaseDetails
             .builder()
@@ -203,6 +208,7 @@ public class ServiceOfApplicationServiceTest {
         Map<String,Object> casedata = new HashMap<>();
         casedata.put("caseTyoeOfApplication","C100");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
         when(caseInviteManager.generatePinAndSendNotificationEmail(Mockito.any(CaseData.class))).thenReturn(caseData);
         CaseDetails caseDetails = CaseDetails
             .builder()
