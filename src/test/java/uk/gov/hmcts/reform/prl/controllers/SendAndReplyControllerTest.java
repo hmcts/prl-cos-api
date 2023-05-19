@@ -10,9 +10,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -284,9 +281,6 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                 .respondToMessage(YesOrNo.No)
-                .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                .messageAbout(MessageAboutEnum.APPLICATION)
                     .openMessagesList(messages)
                 .build())
             .chooseSendOrReply(REPLY)
@@ -299,7 +293,7 @@ public class SendAndReplyControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest);
-        verify(sendAndReplyService).populateMessageReplyFields(caseData);
+        verify(sendAndReplyService).populateMessageReplyFields(caseData, auth);
 
     }
 
@@ -409,13 +403,14 @@ public class SendAndReplyControllerTest {
             .chooseSendOrReply(SEND)
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
+            .sendOrReplyMessage(SendOrReplyMessage.builder().build())
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).buildSendMessage(caseData);
+        verify(sendAndReplyService).buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject());
     }
 
     @Test
@@ -428,9 +423,6 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .respondToMessage(YesOrNo.No)
-                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                    .messageAbout(MessageAboutEnum.APPLICATION)
                     .closedMessagesList(messages)
                     .build())
             .messageReply(message)
@@ -455,21 +447,18 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .respondToMessage(YesOrNo.No)
-                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                    .messageAbout(MessageAboutEnum.APPLICATION)
                     .closedMessagesList(messages)
                     .openMessagesList(messages)
+                    .replyMessageObject(message)
                     .build())
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        Message mostRecentMessage = messages.get(0).getValue();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
-        verify(sendAndReplyService).sendNotificationEmailOther(caseData,mostRecentMessage);
+        verify(sendAndReplyService).sendNotificationEmailOther(caseData);
     }
 
 }

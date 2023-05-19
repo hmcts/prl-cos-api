@@ -485,7 +485,8 @@ public class CaseData implements MappableObject {
             "replyMessageDynamicList", "messageReply", "messageContent",
             "messageReply", "messageMetaData", "messageAbout", "internalMessageUrgent",
             "recipientEmailAddresses", "sendReplyJudgeName", "internalOrExternalMessage",
-            "submittedDocumentsList", "ctscEmailList"
+            "submittedDocumentsList", "ctscEmailList", "messageReplyDynamicList",
+            "sendMessageObject", "replyMessageObject", "messageReplyTable"
         };
     }
 

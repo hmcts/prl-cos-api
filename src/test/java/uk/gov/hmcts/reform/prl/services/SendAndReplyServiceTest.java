@@ -604,21 +604,25 @@ public class SendAndReplyServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                    .messageAbout(MessageAboutEnum.APPLICATION)
-                    .ctscEmailList(dynamicList1)
-                    .judicialOrMagistrateTierList(dynamicList1)
-                    .applicationsList(dynamicList1)
-                    .futureHearingsList(dynamicList1)
-                    .sendReplyJudgeName(judicialUser)
-                    .build())
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList1)
+                            .judicialOrMagistrateTierList(dynamicList1)
+                            .applicationsList(dynamicList1)
+                            .futureHearingsList(dynamicList1)
+                            .sendReplyJudgeName(judicialUser)
+                            .build()
+                    ).build())
             .build();
 
         List<JudicialUsersApiResponse> judicialUsersApiResponseList = Arrays.asList(JudicialUsersApiResponse.builder().build());
 
         when(sendAndReplyService.getJudgeDetails(judicialUser)).thenReturn(judicialUsersApiResponseList);
-        Message message = sendAndReplyService.buildSendMessage(caseData);
+        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject());
 
         assertNotNull(message);
     }
@@ -634,18 +638,22 @@ public class SendAndReplyServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                    .messageAbout(MessageAboutEnum.APPLICATION)
-                    .ctscEmailList(dynamicList1)
-                    .judicialOrMagistrateTierList(dynamicList1)
-                    .applicationsList(dynamicList1)
-                    .futureHearingsList(dynamicList1)
-                    .sendReplyJudgeName(null)
-                    .build())
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList1)
+                            .judicialOrMagistrateTierList(dynamicList1)
+                            .applicationsList(dynamicList1)
+                            .futureHearingsList(dynamicList1)
+                            .sendReplyJudgeName(null)
+                            .build()
+                    ).build())
             .build();
 
-        Message message = sendAndReplyService.buildSendMessage(caseData);
+        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject());
 
         assertNotNull(message);
     }
@@ -657,20 +665,25 @@ public class SendAndReplyServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    //.externalPartiesList(DynamicMultiSelectList.builder().build())
-                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                    .messageAbout(MessageAboutEnum.APPLICATION)
-                    .ctscEmailList(dynamicList1)
-                    .judicialOrMagistrateTierList(dynamicList1)
-                    .applicationsList(dynamicList1)
-                    .futureHearingsList(dynamicList1)
-                    .submittedDocumentsList(dynamicList1)
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList1)
+                            .judicialOrMagistrateTierList(dynamicList1)
+                            .applicationsList(dynamicList1)
+                            .futureHearingsList(dynamicList1)
+                            .sendReplyJudgeName(null)
+                            .updatedTime(dateTime.now())
+                            .build()
+                    )
                     .openMessagesList(messagesWithOneAdded)
                     .build())
             .build();
 
-        List<Element<Message>> message = sendAndReplyService.addNewOpenMessage(caseData,message1);
+        List<Element<Message>> message = sendAndReplyService.addNewOpenMessage(caseData,
+                                                                               caseData.getSendOrReplyMessage().getSendMessageObject());
 
         assertNotNull(message);
     }
@@ -681,9 +694,6 @@ public class SendAndReplyServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                    .messageAbout(MessageAboutEnum.APPLICATION)
                     .openMessagesList(messagesWithOneAdded)
                     .build())
             .build();
@@ -699,16 +709,13 @@ public class SendAndReplyServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                    .messageAbout(MessageAboutEnum.APPLICATION)
                     .openMessagesList(messagesWithOneAdded)
                     .messageReplyDynamicList(dynamicList)
                     .build())
             .build();
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(messagesWithOneAdded.get(0).getId());
-        CaseData data = sendAndReplyService.populateMessageReplyFields(caseData);
-        assertEquals("This is message 1 body",data.getSendOrReplyMessage().getReplyMessage().getMessageContent());
+        CaseData data = sendAndReplyService.populateMessageReplyFields(caseData, auth);
+        assertNotNull(data.getSendOrReplyMessage().getReplyMessageObject());
 
     }
 
@@ -718,14 +725,11 @@ public class SendAndReplyServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                    .messageAbout(MessageAboutEnum.APPLICATION)
                     .messageReplyDynamicList(dynamicList)
                     .build())
             .build();
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(messagesWithOneAdded.get(0).getId());
-        CaseData data = sendAndReplyService.populateMessageReplyFields(caseData);
+        CaseData data = sendAndReplyService.populateMessageReplyFields(caseData, auth);
         assertNotNull(data);
 
     }
@@ -737,9 +741,6 @@ public class SendAndReplyServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                    .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                    .messageAbout(MessageAboutEnum.APPLICATION)
                     .messageReplyDynamicList(dynamicList)
                     .openMessagesList(messagesWithOneAdded)
                     .closedMessagesList(messages)
@@ -768,7 +769,12 @@ public class SendAndReplyServiceTest {
             .latestMessage("Message 1 latest message")
             .messageHistory("")
             .build();
-        sendAndReplyService.sendNotificationEmailOther(caseData,message);
+        caseData = caseData.toBuilder().sendOrReplyMessage(
+            SendOrReplyMessage.builder()
+                .openMessagesList(Collections.singletonList(element(message)))
+                .build())
+            .build();
+        sendAndReplyService.sendNotificationEmailOther(caseData);
         verify(emailService, times(1)).send(
             message.getRecipientEmail(),
             EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,

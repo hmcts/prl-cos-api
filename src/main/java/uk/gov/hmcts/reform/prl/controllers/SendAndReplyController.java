@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
@@ -35,6 +37,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
@@ -59,6 +62,8 @@ public class SendAndReplyController extends AbstractCallbackController {
 
     @Autowired
     AllTabServiceImpl allTabService;
+
+    public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n A judge will review your message and advise.";
 
 
     @PostMapping("/about-to-start")
@@ -210,7 +215,7 @@ public class SendAndReplyController extends AbstractCallbackController {
             if (CollectionUtils.isEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
                 errors.add("There are no messages to respond to.");
             } else {
-                caseData = sendAndReplyService.populateMessageReplyFields(caseData);
+                caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
             }
         } else {
             caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
@@ -228,22 +233,27 @@ public class SendAndReplyController extends AbstractCallbackController {
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
-            Message newMessage = sendAndReplyService.buildSendMessage(caseData);
+            Message newMessage = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                           caseData.getSendOrReplyMessage().getSendMessageObject());
 
             List<Element<Message>> listOfMessages = sendAndReplyService.addNewOpenMessage(caseData, newMessage);
 
             caseDataMap.put("openMessagesList", listOfMessages);
 
-            sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
-
         } else {
-            //Reply message
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
+                //Reply & close
                 caseData = sendAndReplyService.closeMessage(caseData);
                 caseDataMap.put("closedMessagesList", caseData.getSendOrReplyMessage().getClosedMessagesList());
                 caseDataMap.put("openMessagesList", caseData.getSendOrReplyMessage().getOpenMessagesList());
+            } else {
+                //Reply & append history
+                caseDataMap.put("openMessagesList", sendAndReplyService.replyAndAppendMessageHistory(caseData));
             }
         }
+
+        //clear temp fields
+        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
 
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
@@ -252,19 +262,19 @@ public class SendAndReplyController extends AbstractCallbackController {
 
 
     @PostMapping("/send-or-reply-to-messages/submitted")
-    public AboutToStartOrSubmitCallbackResponse handleSubmittedSendAndReply(@RequestHeader("Authorization")
+    public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReply(@RequestHeader("Authorization")
                                                                 @Parameter(hidden = true) String authorisation,
-                                                                @RequestBody CallbackRequest callbackRequest) {
+                                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        List<Element<Message>> messages = caseData.getSendOrReplyMessage().getOpenMessagesList();
+        //send emails in case of sending to others with emails
+        sendAndReplyService.sendNotificationEmailOther(caseData);
 
-        messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
-
-        Message mostRecentMessage = messages.get(0).getValue();
-        if (mostRecentMessage.getStatus().equals(MessageStatus.OPEN)) {
-            sendAndReplyService.sendNotificationEmailOther(caseData, mostRecentMessage);
+        if (REPLY.equals(caseData.getChooseSendOrReply())
+            && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
+            return ok(SubmittedCallbackResponse.builder().confirmationBody(
+                REPLY_AND_CLOSE_MESSAGE
+            ).build());
         }
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .build();
+        return ok(SubmittedCallbackResponse.builder().build());
     }
 }
