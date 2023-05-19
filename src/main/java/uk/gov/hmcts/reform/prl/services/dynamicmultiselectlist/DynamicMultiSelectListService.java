@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum.finl;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -82,13 +84,21 @@ public class DynamicMultiSelectListService {
     }
 
     public List<Element<Child>> updateChildrenWithCaseCloseStatus(CaseData caseData) {
-        List<Element<Child>> childList = new ArrayList<>();
+        List<Element<Child>> childList = caseData.getChildren();
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && finl.equals(caseData.getSelectTypeOfOrder())
+            && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
 
-        for (DynamicMultiselectListElement element : caseData.getManageOrders().getChildOption().getValue()) {
-            for (Element<Child> childElement:caseData.getChildren()) {
-                if (!element.getCode().equals(childElement.getId().toString())) {
-                    childElement.getValue().toBuilder().isFinalOrderIssued(Yes).build();
-                    childList.add(childElement);
+            for (Element<Child> childElement : caseData.getChildren()) {
+                for (DynamicMultiselectListElement childOptionElement : caseData.getManageOrders().getChildOption().getValue()) {
+                    log.info("Child option Dynamicmulti list element :: {} ", childOptionElement.getCode());
+
+                    if (childElement.getId().toString().equals(childOptionElement.getCode())) {
+                        childElement.getValue().toBuilder().isFinalOrderIssued(Yes).build();
+                        log.info("Child Element is finalOrderIssued:: {} ", childElement.getValue().getIsFinalOrderIssued());
+                        log.info("Child Element is UUID:: {} ", childElement.getId());
+                        childList.add(childElement);
+                    }
                 }
             }
         }

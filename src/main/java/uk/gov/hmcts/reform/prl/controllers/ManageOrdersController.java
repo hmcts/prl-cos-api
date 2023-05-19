@@ -52,7 +52,6 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_FHDRA_HEARING_DETAILS;
@@ -66,7 +65,6 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum.finl;
 
 @Slf4j
 @RestController
@@ -313,12 +311,9 @@ public class ManageOrdersController {
             ));
         }
 
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            && finl.equals(caseData.getSelectTypeOfOrder())
-            && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-            caseDataUpdated.put("children", dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData));
-            log.info("Children list after updating the isFinalOrderIssued flag in child {}", caseDataUpdated.get("children"));
-        }
+        caseDataUpdated.put("children", dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData));
+        log.info("Children list after updating the isFinalOrderIssued flag in child {}", caseDataUpdated.get("children"));
+
         manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
         manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
