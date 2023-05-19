@@ -190,7 +190,7 @@ public class ServiceOfApplicationEmailService {
         List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
         if (caseData.getServiceOfApplication() != null && caseData.getServiceOfApplication().getSoaOtherEmailAddressList() != null) {
             for (Element<String> element : caseData.getServiceOfApplication().getSoaOtherEmailAddressList()) {
-                log.info("*** About to send ***");
+                log.info("**SERVING OTHER EMAILS**");
                 String email = element.getValue();
                 emailService.send(
                     email,
@@ -223,8 +223,7 @@ public class ServiceOfApplicationEmailService {
     public void sendEmailNotificationToCafcass(String authorization, CaseDetails caseDetails,
                                                    CaseData caseData, List<Document> docs) throws Exception {
         List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
-        log.info("*** About to send ***");
-        log.info("*** document list ***" + docs);
+        log.info("**SERVING EMAIL TO CAFCASS**");
         if (caseData.getServiceOfApplication() != null && caseData.getServiceOfApplication().getSoaCafcassEmailAddressList() != null) {
             for (Element<String> element : caseData.getServiceOfApplication().getSoaCafcassEmailAddressList()) {
                 String email = element.getValue();

@@ -119,7 +119,7 @@ public class ServiceOfApplicationService {
         othersToNotify.forEach(other -> {
             Optional<Element<PartyDetails>> party = getParty(other.getCode(), otherPeopleInCase);
             try {
-                log.info(" Sending post to others involved ");
+                log.info("***SERVING OTHER PEOPLE IN CASE AND SENDING POST***");
                 log.info(
                     "Sending the post notification to others in case for C100 Application for caseId {}",
                     caseDetails.getId()
@@ -164,19 +164,19 @@ public class ServiceOfApplicationService {
                 log.info("serving respondents");
                 sendNotificationToRespondentOrSolicitor(caseDetails, authorization);
             }
+            //serving other people in case
             if ((C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
                 && (caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue() != null)) {
-                log.info("serving other people in case");
                 caseData = sendPostToOtherPeopleInCase(caseDetails, authorization);
             }
+            //serving other emails
             if ((caseData.getServiceOfApplication() != null
                 && caseData.getServiceOfApplication().getSoaOtherEmailAddressList() != null)) {
-                log.info("serving OtherEmails");
                 sendEmailToOtherEmails(authorization, caseDetails, caseData);
             }
+            //serving cafcass
             if ((C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
                 && (caseData.getServiceOfApplication().getSoaCafcassEmailAddressList() != null)) {
-                log.info("serving cafcass");
                 sendEmailToCafcassInCase(authorization,caseDetails, caseData);
             }
 
