@@ -45,11 +45,12 @@ public class BulkPrintService {
     public UUID send(String caseId, String userToken, String letterType, List<GeneratedDocumentInfo> documents) {
 
         String s2sToken = authTokenGenerator.generate();
-
+        log.info("*** Documents from bulk print service before stringify ***" + documents);
         final List<String> stringifiedDocuments = documents.stream()
             .map(docInfo -> getDocumentBytes(docInfo.getUrl(), userToken, s2sToken))
             .map(getEncoder()::encodeToString)
             .collect(toList());
+        log.info("*** Documents from bulk print service after stringify ***" + documents);
 
         log.info("Sending {} for case {}", letterType, caseId);
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(
