@@ -31,12 +31,8 @@ public class ConfidentialDetailsMapper {
     private final AllTabServiceImpl allTabsService;
 
     public CaseData mapConfidentialData(CaseData caseData) {
-
         List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = new ArrayList<>();
-
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-
-
             Optional<List<Element<PartyDetails>>> respondentsList = ofNullable(caseData.getRespondents());
             if (respondentsList.isPresent()) {
                 List<PartyDetails> respondents = caseData.getRespondents()
@@ -60,14 +56,10 @@ public class ConfidentialDetailsMapper {
             caseData = caseData.toBuilder()
                 .respondentConfidentialDetails(respondentsConfidentialDetails)
                 .build();
-
             log.info("respondentsConfidentialDetails {}", caseData.getRespondentConfidentialDetails());
         }
-
         allTabsService.updateAllTabsIncludingConfTab(caseData);
-
         return caseData;
-
     }
 
     private List<Element<ApplicantConfidentialityDetails>> getRespondentConfidentialDetails(List<PartyDetails> currentRespondents) {
@@ -90,13 +82,11 @@ public class ConfidentialDetailsMapper {
                     .add(getRespondentConfidentialityElement(addressSet, emailSet, phoneSet, respondent));
             }
         }
-
         return tempConfidentialApplicants;
     }
 
     private Element<ApplicantConfidentialityDetails> getRespondentConfidentialityElement(boolean addressSet,
                                                                                         boolean emailSet, boolean phoneSet, PartyDetails respondent) {
-
         return Element
             .<ApplicantConfidentialityDetails>builder()
             .value(ApplicantConfidentialityDetails.builder()

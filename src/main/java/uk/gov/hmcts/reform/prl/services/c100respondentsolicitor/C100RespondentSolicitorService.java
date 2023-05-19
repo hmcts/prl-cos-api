@@ -239,7 +239,7 @@ public class C100RespondentSolicitorService {
                     .consent(respondentConsentToApplication).build();
                 break;
             case KEEP_DETAILS_PRIVATE:
-                buildResponseForRespondent = buildKeepYourDetailsPrivateResponse(caseData, buildResponseForRespondent);
+                buildResponseForRespondent = buildKeepYourDetailsPrivateResponse(caseData, buildResponseForRespondent, party);
                 break;
             case CONFIRM_EDIT_CONTACT_DETAILS:
                 buildResponseForRespondent = buildCitizenDetailsResponse(caseData, buildResponseForRespondent);
@@ -281,6 +281,7 @@ public class C100RespondentSolicitorService {
         }
         PartyDetails amended = party.getValue().toBuilder()
             .response(buildResponseForRespondent).build();
+        log.info(" *** Respondent updated details after keep details private *** {}", amended);
         respondents.set(respondents.indexOf(party), element(party.getId(), amended));
     }
 
@@ -417,12 +418,23 @@ public class C100RespondentSolicitorService {
         return buildResponseForRespondent;
     }
 
-    private Response buildKeepYourDetailsPrivateResponse(CaseData caseData, Response buildResponseForRespondent) {
+    private Response buildKeepYourDetailsPrivateResponse(CaseData caseData, Response buildResponseForRespondent,
+                                                         Element<PartyDetails> respondent) {
         List<ConfidentialityListEnum> confList = null;
         if (null != caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
             && YesOrNo.Yes.equals(caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate().getConfidentiality())) {
             confList = caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate().getConfidentialityList();
+            if (confList.contains(ConfidentialityListEnum.address)) {
+                respondent.getValue().setIsAddressConfidential(Yes);
+            }
+            if (confList.contains(ConfidentialityListEnum.email)) {
+                respondent.getValue().setIsEmailAddressConfidential(Yes);
+            }
+            if (confList.contains(ConfidentialityListEnum.phoneNumber)) {
+                respondent.getValue().setIsPhoneNumberConfidential(Yes);
+            }
         }
+
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
             .keepDetailsPrivate(KeepDetailsPrivate.builder()
                                     .otherPeopleKnowYourContactDetails(

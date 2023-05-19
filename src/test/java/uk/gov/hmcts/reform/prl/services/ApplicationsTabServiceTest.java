@@ -1012,10 +1012,10 @@ public class ApplicationsTabServiceTest {
                     .build())
                 .build();
 
-        Map<String, Object> expected =   Map.of("isPhoneNumberConfidential","This information is to be kept confidential",
+        Map<String, Object> expected =   Map.of("isPhoneNumberConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
             "isEmailAddressConfidential",
-            "This information is to be kept confidential",
-                                                   "isAddressConfidential","This information is to be kept confidential");
+            THIS_INFORMATION_IS_CONFIDENTIAL,
+                                                   "isAddressConfidential",THIS_INFORMATION_IS_CONFIDENTIAL);
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFl401ApplicantsTable(caseData);
         assertEquals(expected, result);
@@ -1064,8 +1064,8 @@ public class ApplicationsTabServiceTest {
             .build();
 
         Map<String, Object> expected =   Map.of("firstName","testUser", "lastName","test test","isPhoneNumberConfidential",
-            "This information is to be kept confidential", "isEmailAddressConfidential","This information is to be kept confidential",
-                                               "isAddressConfidential","This information is to be kept confidential");
+            THIS_INFORMATION_IS_CONFIDENTIAL, "isEmailAddressConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
+                                               "isAddressConfidential",THIS_INFORMATION_IS_CONFIDENTIAL);
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFl401RespondentTable(caseDataWithParties);
         assertEquals(expected, result);
@@ -1089,8 +1089,8 @@ public class ApplicationsTabServiceTest {
         Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing","Test data",
             "applicantWantToStopFromRespondentDoingToChild",
             "Being violent or threatening towards their child or children","isPhoneNumberConfidential",
-            "This information is to be kept confidential",
-            "isEmailAddressConfidential","This information is to be kept confidential",
+            THIS_INFORMATION_IS_CONFIDENTIAL,
+            "isEmailAddressConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
                                                "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFl401RespondentBehaviourTable(caseDataWithParties);
@@ -1114,8 +1114,8 @@ public class ApplicationsTabServiceTest {
 
         Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing","Test data",
                                               "isPhoneNumberConfidential",
-                                              "This information is to be kept confidential",
-                                              "isEmailAddressConfidential","This information is to be kept confidential",
+                                              THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "isEmailAddressConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
                                               "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFl401RespondentBehaviourTable(caseDataWithParties);
@@ -1141,8 +1141,8 @@ public class ApplicationsTabServiceTest {
 
         Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing","Test data",
             "applicantWantToStopFromRespondentDoingToChild",
-            "Being violent or threatening towards their child or children","isPhoneNumberConfidential","This information is to be kept confidential",
-            "isEmailAddressConfidential","This information is to be kept confidential",
+            "Being violent or threatening towards their child or children","isPhoneNumberConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
+            "isEmailAddressConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
                                                "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFl401RelationshipToRespondentTable(caseData);
@@ -1182,8 +1182,8 @@ public class ApplicationsTabServiceTest {
         Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
                                                 "Test data",
             "applicantWantToStopFromRespondentDoingToChild","Being violent or threatening towards their child or children",
-            "isPhoneNumberConfidential","This information is to be kept confidential", "isEmailAddressConfidential",
-            "This information is to be kept confidential",
+            "isPhoneNumberConfidential",THIS_INFORMATION_IS_CONFIDENTIAL, "isEmailAddressConfidential",
+            THIS_INFORMATION_IS_CONFIDENTIAL,
                                                "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
@@ -1222,9 +1222,9 @@ public class ApplicationsTabServiceTest {
                                                 "Test data",
                                                 "applicantWantToStopFromRespondentDoingToChild",
                                                 "Being violent or threatening towards their child or children",
-                                                "isPhoneNumberConfidential","This information is to be kept confidential",
+                                                "isPhoneNumberConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
                                                 "isEmailAddressConfidential",
-                                                "This information is to be kept confidential",
+                                                THIS_INFORMATION_IS_CONFIDENTIAL,
                                                 "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
@@ -1266,9 +1266,9 @@ public class ApplicationsTabServiceTest {
                                                 "applicantWantToStopFromRespondentDoingToChild",
                                                 "Being violent or threatening towards their child or children",
                                                 "isPhoneNumberConfidential",
-                                                "This information is to be kept confidential",
+                                                THIS_INFORMATION_IS_CONFIDENTIAL,
                                                 "isEmailAddressConfidential",
-                                                "This information is to be kept confidential",
+                                                THIS_INFORMATION_IS_CONFIDENTIAL,
                                                 "applicantWantToStopFromRespondentDoing",
                                                 "Being violent or threatening towards them");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
@@ -1312,9 +1312,9 @@ public class ApplicationsTabServiceTest {
                                                 "applicantWantToStopFromRespondentDoingToChild",
                                                 "Being violent or threatening towards their child or children",
                                                 "isPhoneNumberConfidential",
-                                                "This information is to be kept confidential",
+                                                THIS_INFORMATION_IS_CONFIDENTIAL,
                                                 "isEmailAddressConfidential",
-                                                "This information is to be kept confidential",
+                                                THIS_INFORMATION_IS_CONFIDENTIAL,
                                                 "applicantWantToStopFromRespondentDoing",
                                                 "Being violent or threatening towards them");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
@@ -1344,8 +1344,8 @@ public class ApplicationsTabServiceTest {
 
         Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing","Test data",
             "applicantWantToStopFromRespondentDoingToChild",
-            "Being violent or threatening towards their child or children","isPhoneNumberConfidential","This information is to be kept confidential",
-            "isEmailAddressConfidential","This information is to be kept confidential",
+            "Being violent or threatening towards their child or children","isPhoneNumberConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
+            "isEmailAddressConfidential",THIS_INFORMATION_IS_CONFIDENTIAL,
                                                "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getApplicantsFamilyDetails(caseData);
