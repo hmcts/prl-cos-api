@@ -123,7 +123,7 @@ public class ServiceOfApplicationPostService {
             log.info("*** Generating Document ***");
             documents = getDocsAsGeneratedDocumentInfo(docs);
             //docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
-            documents.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
+            //documents.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
             log.info("*** Documents generated ***" + documents);
         } catch (Exception e) {
             log.info("*** Error while generating document ***");

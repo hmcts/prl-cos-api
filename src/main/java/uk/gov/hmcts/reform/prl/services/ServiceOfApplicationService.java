@@ -164,11 +164,6 @@ public class ServiceOfApplicationService {
                 log.info("serving respondents");
                 sendNotificationToRespondentOrSolicitor(caseDetails, authorization);
             }
-            if ((C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
-                && (caseData.getServiceOfApplication().getSoaCafcassEmailAddressList() != null)) {
-                log.info("serving cafcass");
-                sendEmailToCafcassInCase(authorization,caseDetails, caseData);
-            }
             if ((caseData.getServiceOfApplication().getSoaOtherEmailAddressList() != null)) {
                 log.info("serving OtherEmails");
                 sendEmailToOtherEmails(authorization, caseDetails, caseData);
@@ -177,6 +172,11 @@ public class ServiceOfApplicationService {
                 && (caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue() != null)) {
                 log.info("serving other people in case");
                 caseData = sendPostToOtherPeopleInCase(caseDetails, authorization);
+            }
+            if ((C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
+                && (caseData.getServiceOfApplication().getSoaCafcassEmailAddressList() != null)) {
+                log.info("serving cafcass");
+                sendEmailToCafcassInCase(authorization,caseDetails, caseData);
             }
 
         } else {
@@ -429,7 +429,7 @@ public class ServiceOfApplicationService {
     private List<Document> getNotificationPack(String authorization, CaseData caseData, String requiredPack,
                                                String flag) throws Exception {
         List<Document> docs = new ArrayList<>();
-        if (flag.equals("post")) {
+        if (flag.equals("Post")) {
             docs.add(DocumentUtils.toDocument(serviceOfApplicationPostService
                                                   .getCoverLetterGeneratedDocInfo(caseData, authorization)));
         }
@@ -458,6 +458,7 @@ public class ServiceOfApplicationService {
             default:
                 break;
         }
+        log.info("DOCUMENTS IN THE PACK" +docs);
         return  docs;
 
     }
