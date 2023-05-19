@@ -458,7 +458,7 @@ public class ServiceOfApplicationService {
             default:
                 break;
         }
-        log.info("DOCUMENTS IN THE PACK" +docs);
+        log.info("DOCUMENTS IN THE PACK" + docs);
         return  docs;
 
     }
