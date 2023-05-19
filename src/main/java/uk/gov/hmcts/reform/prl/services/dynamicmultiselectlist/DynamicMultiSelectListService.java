@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -78,6 +79,20 @@ public class DynamicMultiSelectListService {
             childListItems));
 
         return existingChildListItems;
+    }
+
+    public List<Element<Child>> updateChildrenWithCaseCloseStatus(CaseData caseData) {
+        List<Element<Child>> childList = new ArrayList<>();
+
+        for (DynamicMultiselectListElement element : caseData.getManageOrders().getChildOption().getListItems()) {
+            for (Element<Child> childElement:caseData.getChildren()) {
+                if (element.getCode().equals(childElement.getId().toString())) {
+                    childElement.getValue().toBuilder().isFinalOrderIssued(Yes).build();
+                    childList.add(childElement);
+                }
+            }
+        }
+        return childList;
     }
 
     public Map<String, List<DynamicMultiselectListElement>> getRespondentsMultiSelectList(CaseData caseData) {

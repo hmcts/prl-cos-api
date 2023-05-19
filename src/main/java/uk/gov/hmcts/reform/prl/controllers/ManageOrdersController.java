@@ -312,20 +312,12 @@ public class ManageOrdersController {
                 caseData
             ));
         }
-        log.info("Case Type of application:: {}::",null != caseData ? caseData.getCaseTypeOfApplication() : null);
-        log.info("getselecttype of order:: {}::",null != caseData.getSelectTypeOfOrder()
-            ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null);
-        log.info("Get serve order option for order:: {}::",null != caseData.getServeOrderData()
-            ? caseData.getServeOrderData()
-            .getDoYouWantToServeOrder() : null);
+
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && finl.equals(caseData.getSelectTypeOfOrder())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-            caseDataUpdated.put("childOption", (DynamicMultiSelectList.builder()
-                .listItems(dynamicMultiSelectListService.removeServedChildrenFromChildList(caseData))
-                .build())
-            );
-            log.info("Children list after removing the served children {}", caseDataUpdated.get("childOption"));
+            caseDataUpdated.put("children", dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData));
+            log.info("Children list after updating the isFinalOrderIssued flag in child {}", caseDataUpdated.get("children"));
         }
         manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
         manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);

@@ -1290,7 +1290,7 @@ public class ManageOrderService {
         );
     }
 
-    private void updateChildrenWitCaseCloseStatus(CallbackRequest callbackRequest) {
+    private void updateChildrenWithCaseCloseStatus(CallbackRequest callbackRequest) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -1973,7 +1973,7 @@ public class ManageOrderService {
         if (finl.equals(caseDataMap.containsKey("typeOfOrder")
                                                   ? caseDataMap.get("typeOfOrder") : "")
                 && !isTheOrderAboutAllChildrenForCA) {
-            updateChildrenWitCaseCloseStatus(callbackRequest);
+            updateChildrenWithCaseCloseStatus(callbackRequest);
         }
     }
 
