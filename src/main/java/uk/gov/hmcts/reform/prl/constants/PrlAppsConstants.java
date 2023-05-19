@@ -643,4 +643,8 @@ public class PrlAppsConstants {
 
     public static final String O = "O";
 
+    public static final String POST = "Post";
+
+    public static final String EMAIL = "Email";
+
 }

@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,8 +32,10 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.B;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.G;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.O;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.Q;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.R;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.S;
@@ -126,7 +129,7 @@ public class ServiceOfApplicationService {
                         caseData,
                         authorization,
                         party.get().getValue(),
-                        getNotificationPack(caseData, "O")
+                        getNotificationPack(authorization,caseData, O,POST)
                 );
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -137,13 +140,13 @@ public class ServiceOfApplicationService {
 
     public void sendEmailToOtherEmails(String authorization, CaseDetails caseDetails, CaseData caseData) throws Exception {
         serviceOfApplicationEmailService.sendEmailNotificationToOtherEmails(authorization, caseDetails, caseData,
-                                                                                   getNotificationPack(caseData, "G"));
+                                                                                   getNotificationPack(authorization,caseData, G,EMAIL));
 
     }
 
     public void sendEmailToCafcassInCase(String authorization, CaseDetails caseDetails, CaseData caseData) throws Exception {
         serviceOfApplicationEmailService.sendEmailNotificationToCafcass(authorization, caseDetails, caseData,
-                                                                            getNotificationPack(caseData, "O"));
+                                                                            getNotificationPack(authorization,caseData, O,EMAIL));
 
     }
 
@@ -225,7 +228,8 @@ public class ServiceOfApplicationService {
                         docPackFlag = "Q";
                         serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(authorization, caseDetails, party.get().getValue(),
                                                                                                    EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                                                                                                   getNotificationPack(caseData, docPackFlag));
+                                                                                                   getNotificationPack(authorization, caseData,
+                                                                                                                       docPackFlag,EMAIL));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -236,7 +240,8 @@ public class ServiceOfApplicationService {
                         docPackFlag = "Q";
                         try {
                             serviceOfApplicationPostService.sendPostNotificationToParty(caseData, authorization, party.get().getValue(),
-                                                                                        getNotificationPack(caseData, docPackFlag));
+                                                                                        getNotificationPack(authorization,caseData,
+                                                                                                            docPackFlag, POST));
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -260,7 +265,8 @@ public class ServiceOfApplicationService {
                     docPackFlag = "A";
                     serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(authorization,caseDetails,
                                                                                                applicant,EmailTemplateNames.APPLICANT_SOLICITOR_DA,
-                                                                                               getNotificationPack(caseData, docPackFlag));
+                                                                                               getNotificationPack(authorization, caseData,
+                                                                                                                   docPackFlag,EMAIL));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -270,7 +276,8 @@ public class ServiceOfApplicationService {
                     log.info("Sending the notification in post to applicant solicitor for FL401 Application for caseId {}", caseDetails.getId());
                     docPackFlag = "A";
                     serviceOfApplicationPostService.sendPostNotificationToParty(caseData, authorization, applicant,
-                                                                                getNotificationPack(caseData, docPackFlag));
+                                                                                getNotificationPack(authorization, caseData,
+                                                                                                    docPackFlag,POST));
                 } else {
                     log.info("Unable to send any notification to applicant solicitor for FL401 Application for caseId {} "
                                  + "as no address available", caseDetails.getId());
@@ -303,7 +310,8 @@ public class ServiceOfApplicationService {
                                 authorization,caseDetails,
                                 party.get().getValue(),
                                 EmailTemplateNames.RESPONDENT_SOLICITOR,
-                                getNotificationPack(caseData, docPackFlag)
+                                getNotificationPack(authorization, caseData,
+                                                    docPackFlag, EMAIL)
                             );
                         } catch (Exception e) {
                             throw new RuntimeException(e);
@@ -318,7 +326,8 @@ public class ServiceOfApplicationService {
                                 serviceOfApplicationPostService.sendPostNotificationToParty(
                                                            caseData,authorization,
                                                            party.get().getValue(),
-                                                           getNotificationPack(caseData, docPackFlag));
+                                                           getNotificationPack(authorization, caseData,
+                                                                               docPackFlag, POST));
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
@@ -339,7 +348,8 @@ public class ServiceOfApplicationService {
                                                        caseData,
                                                        authorization,
                                                        party.get().getValue(),
-                                                       getNotificationPack(caseData, docPackFlag));
+                                                       getNotificationPack(authorization, caseData,
+                                                                           docPackFlag, POST));
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -370,7 +380,8 @@ public class ServiceOfApplicationService {
                         serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(authorization,caseDetails,
                                                                                                     respondentFL401,
                                                                                                     EmailTemplateNames.APPLICANT_SOLICITOR_DA,
-                                                                                                   getNotificationPack(caseData, docPackFlag)
+                                                                                                   getNotificationPack(authorization, caseData,
+                                                                                                                       docPackFlag, EMAIL)
                         );
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -386,7 +397,7 @@ public class ServiceOfApplicationService {
                             caseData,
                             authorization,
                             respondentFL401,
-                            getNotificationPack(caseData, docPackFlag)
+                            getNotificationPack(authorization, caseData, docPackFlag, POST)
                         );
                     } else {
                         log.info(
@@ -415,8 +426,13 @@ public class ServiceOfApplicationService {
         return party;
     }
 
-    private List<Document> getNotificationPack(CaseData caseData, String requiredPack) throws Exception {
+    private List<Document> getNotificationPack(String authorization, CaseData caseData, String requiredPack,
+                                               String flag) throws Exception {
         List<Document> docs = new ArrayList<>();
+        if (flag.equals("post")) {
+            docs.add(DocumentUtils.toDocument(serviceOfApplicationPostService
+                                                  .getCoverLetterGeneratedDocInfo(caseData, authorization)));
+        }
         switch (requiredPack) {
             case Q:
                 docs.addAll(generatePackQ(caseData));

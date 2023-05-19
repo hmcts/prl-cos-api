@@ -173,6 +173,7 @@ public class ServiceOfApplicationPostService {
     public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        log.info("**GETTING COVER LETTER**");
         log.info("documentLanguage.isGenEng() {}", documentLanguage.isGenEng());
         log.info("documentGenService.getTemplate {}", documentGenService.getTemplate(caseData, DOCUMENT_COVER_SHEET_HINT, false));
         if (documentLanguage.isGenEng()) {
