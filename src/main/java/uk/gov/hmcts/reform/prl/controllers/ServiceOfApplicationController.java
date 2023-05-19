@@ -76,8 +76,7 @@ public class ServiceOfApplicationController {
             .getRespondentsMultiSelectList(caseData);
         List<DynamicMultiselectListElement> respondentList = respondentDetails.get("respondents");
         List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
-        List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
-            caseData);
+        List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData);
 
         ConfirmRecipients confirmRecipients = ConfirmRecipients.builder()
             .applicantsList(DynamicMultiSelectList.builder()
@@ -98,7 +97,7 @@ public class ServiceOfApplicationController {
             .cafcassEmailAddressForNotifications(
                 welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData))
             .build();
-        caseDataUpdated.put("confirmRecipients", confirmRecipients);
+        caseDataUpdated.put("confirmRecipients",confirmRecipients);
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -113,8 +112,8 @@ public class ServiceOfApplicationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
-        serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        //serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
+        Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         updatedCaseData.put("caseInvites", caseData.getCaseInvites());
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);
