@@ -282,12 +282,17 @@ public class C100RespondentSolicitorService {
         PartyDetails amended = party.getValue().toBuilder()
             .response(buildResponseForRespondent).build();
         log.info(" *** Respondent updated details after keep details private *** {}", amended);
-        log.info(" *** index of party *** {}", respondents.indexOf(party));
-        log.info(" *** party *** {}", party);
-        int index = respondents.indexOf(party);
-        if (index != -1) {
-            respondents.set(index, element(party.getId(), amended));
+        Optional<Element<PartyDetails>> partyElement= respondents.stream().filter(element -> element.getId()
+            .equals(party.getId())).findFirst();
+        log.info(" *** party *** {}", partyElement);
+        if (partyElement.isPresent()) {
+            int index = respondents.indexOf(partyElement.get());
+            log.info(" *** index of party *** {}", index);
+            if (index != -1) {
+                respondents.set(index, element(party.getId(), amended));
+            }
         }
+
     }
 
     private Response buildAbilityToParticipateResponse(CaseData caseData, Response buildResponseForRespondent) {
