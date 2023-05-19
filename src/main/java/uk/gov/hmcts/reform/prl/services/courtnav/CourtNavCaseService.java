@@ -117,7 +117,7 @@ public class CourtNavCaseService {
                 List.of(document)
             );
             log.info("Document uploaded successfully through caseDocumentClient");
-            updateCaseDataWithUploadedDocs(
+            CaseData updatedCaseData = updateCaseDataWithUploadedDocs(
                 caseId,
                 document.getOriginalFilename(),
                 typeOfDocument,
@@ -130,7 +130,7 @@ public class CourtNavCaseService {
                 .event(Event.builder()
                            .id(startEventResponse.getEventId())
                            .build())
-                .data(tempCaseData).build();
+                .data(updatedCaseData).build();
 
             coreCaseDataService.submitUpdate(authorisation,
                                              eventRequestData,
@@ -154,7 +154,7 @@ public class CourtNavCaseService {
         return null;
     }
 
-    private void updateCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument,
+    private CaseData updateCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument,
                                                 CaseData tempCaseData, Document document) {
         String partyName = tempCaseData.getApplicantCaseName() != null
             ? tempCaseData.getApplicantCaseName() : COURTNAV;
@@ -180,7 +180,9 @@ public class CourtNavCaseService {
             uploadedDocumentsList.add(uploadedDocsElement);
         }
 
-        tempCaseData.builder().courtNavUploadedDocs(uploadedDocumentsList).build();
+        tempCaseData = tempCaseData.toBuilder().courtNavUploadedDocs(uploadedDocumentsList).build();
+
+        return tempCaseData;
     }
 
     private boolean checkTypeOfDocument(String typeOfDocument) {
