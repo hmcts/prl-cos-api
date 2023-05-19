@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -42,6 +43,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_AP
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @Slf4j
@@ -88,6 +90,11 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
+
+        //clear temp fields
+        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
+        // clearing selection while loading on first screen
+        sendAndReplyService.removeTemporaryFields(caseDataMap, "chooseSendOrReply");
 
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
@@ -236,9 +243,18 @@ public class SendAndReplyController extends AbstractCallbackController {
             Message newMessage = sendAndReplyService.buildSendReplyMessage(caseData,
                                                                            caseData.getSendOrReplyMessage().getSendMessageObject());
 
-            List<Element<Message>> listOfMessages = sendAndReplyService.addNewOpenMessage(caseData, newMessage);
+            if (MessageAboutEnum.OTHER.equals(newMessage.getMessageAbout())) {
+                List<Element<Message>> closedMessages = new ArrayList<>();
+                log.info("Close Message Other before ---> {}", caseData.getSendOrReplyMessage().getClosedMessagesList());
+                closedMessages.addAll(caseData.getSendOrReplyMessage().getClosedMessagesList());
+                closedMessages.add(element(newMessage));
+                log.info("Close Message Other After ---> {}", closedMessages);
+                caseDataMap.put("closedMessagesList", closedMessages);
 
-            caseDataMap.put("openMessagesList", listOfMessages);
+            } else {
+                List<Element<Message>> listOfMessages = sendAndReplyService.addNewOpenMessage(caseData, newMessage);
+                caseDataMap.put("openMessagesList", listOfMessages);
+            }
 
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {

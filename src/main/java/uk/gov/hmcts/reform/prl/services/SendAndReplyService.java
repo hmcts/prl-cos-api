@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.CodeAndLabel;
@@ -58,6 +59,7 @@ import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
@@ -586,7 +588,8 @@ public class SendAndReplyService {
         JudicialUser judicialUser = message.getSendReplyJudgeName();
 
         return Message.builder()
-            .status(OPEN)
+            // in case of Other, change status to Close while sending message
+            .status(MessageAboutEnum.OTHER.equals(message.getMessageAbout()) ? CLOSED : OPEN)
             .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
             .internalOrExternalMessage(message.getInternalOrExternalMessage())
             .internalMessageUrgent(message.getInternalMessageUrgent())
@@ -767,8 +770,9 @@ public class SendAndReplyService {
                         ? history.getIsUrgent().getDisplayedValue() : null);
                     addRowToMessageTable(lines, "submitted document", history.getSelectedSubmittedDocumentValue());
                     if (history.getSelectedDocument() != null) {
-                        lines.add("<tr><td>Document</td></tr>");
-                        lines.add("<tr><td>" + history.getSelectedDocument() + "</td></tr>");
+                    //                        lines.add("<tr><td>Document</td></tr>");
+                        //   lines.add("<tr><td><ccd-read-document-field class=\"ng-star-inserted\">" + history.getSelectedDocument()
+                    //                                      + "</ccd-read-document-field></td></tr>");
                     }
                     addRowToMessageTable(lines, "Are you sending an internal message?", history.getInternalOrExternalMessageEnum() != null
                         ? history.getInternalOrExternalMessageEnum().name() : null);
