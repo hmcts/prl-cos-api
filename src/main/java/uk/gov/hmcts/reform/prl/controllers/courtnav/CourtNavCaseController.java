@@ -104,7 +104,7 @@ public class CourtNavCaseController {
                 log.info("uploading cafcass document");
                 cafcassUploadDocService.uploadDocument(systemUserService.getSysUserToken(), file, typeOfDocument, caseId);
             } else {
-                courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
+                courtNavCaseService.uploadDocument(systemUserService.getSysUserToken(), file, typeOfDocument, caseId);
             }
             return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
                                                                     + file.getOriginalFilename()));
