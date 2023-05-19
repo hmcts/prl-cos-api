@@ -152,7 +152,6 @@ public class ServiceOfApplicationService {
 
     public CaseData sendNotificationForServiceOfApplication(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("Confirm recipients {}", caseData.getServiceOfApplication());
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             if ((caseData.getServiceOfApplication().getSoaApplicantsList() != null)
                 && (caseData.getServiceOfApplication().getSoaApplicantsList().getValue() != null)) {
@@ -431,6 +430,10 @@ public class ServiceOfApplicationService {
     private List<Document> getNotificationPack(String authorization, CaseData caseData, String requiredPack,
                                                String flag) throws Exception {
         List<Document> docs = new ArrayList<>();
+        if (flag.equals("Post")) {
+            docs.add(DocumentUtils.toDocument(serviceOfApplicationPostService
+                                                  .getCoverLetterGeneratedDocInfo(caseData, authorization)));
+        }
         switch (requiredPack) {
             case Q:
                 docs.addAll(generatePackQ(caseData));
@@ -455,10 +458,6 @@ public class ServiceOfApplicationService {
                 break;
             default:
                 break;
-        }
-        if (flag.equals("Post")) {
-            docs.add(DocumentUtils.toDocument(serviceOfApplicationPostService
-                                                  .getCoverLetterGeneratedDocInfo(caseData, authorization)));
         }
         log.info("DOCUMENTS IN THE PACK" + docs);
         return  docs;

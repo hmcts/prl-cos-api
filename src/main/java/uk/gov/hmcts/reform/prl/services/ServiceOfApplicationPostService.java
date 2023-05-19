@@ -113,17 +113,11 @@ public class ServiceOfApplicationPostService {
 
     public void sendPostNotificationToParty(CaseData caseData, String authorisation, PartyDetails partyDetails, List<Document> docs) {
         // Sends post
-        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
-        CaseData blankCaseData = CaseData.builder().build();
         List<GeneratedDocumentInfo> documents = null;
         List<Element<BulkPrintDetails>> printedDocCollectionList;
-        log.info("*** About to send post ***");
-
         try {
             log.info("*** Generating Document ***");
             documents = getDocsAsGeneratedDocumentInfo(docs);
-            //docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
-            //documents.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
             log.info("*** Documents generated ***" + documents);
         } catch (Exception e) {
             log.info("*** Error while generating document ***");
@@ -134,7 +128,7 @@ public class ServiceOfApplicationPostService {
             printedDocCollectionList = new ArrayList<>();
         }
         log.info("*** calling Bulk Print ***");
-        printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, documents, partyDetails)));
+        printedDocCollectionList.add(sendBulkPrint(caseData, authorisation, documents, partyDetails));
         caseData.setBulkPrintDetails(printedDocCollectionList);
         log.info("*** Bulk Print details set in case data ***" + caseData.getBulkPrintDetails());
     }
@@ -173,9 +167,6 @@ public class ServiceOfApplicationPostService {
     public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info("**Getting Cover Letter**");
-        log.info("documentLanguage.isGenEng() {}", documentLanguage.isGenEng());
-        log.info("documentGenService.getTemplate {}", documentGenService.getTemplate(caseData, DOCUMENT_COVER_SHEET_HINT, false));
         if (documentLanguage.isGenEng()) {
             log.info("inside");
             generatedDocumentInfo = dgsService.generateDocument(
@@ -188,7 +179,6 @@ public class ServiceOfApplicationPostService {
                 documentGenService.getTemplate(caseData, DOCUMENT_COVER_SHEET_HINT, false)
             );
         }
-        log.info("generatedDocumentInfo***** {}", generatedDocumentInfo);
         return generatedDocumentInfo;
     }
 
