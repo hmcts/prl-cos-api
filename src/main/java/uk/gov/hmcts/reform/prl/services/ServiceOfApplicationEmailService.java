@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -42,8 +41,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @Slf4j
 @RequiredArgsConstructor
 public class ServiceOfApplicationEmailService {
-    @Autowired
-    private LaunchDarklyClient launchDarklyClient;
 
     @Autowired
     private EmailService emailService;
@@ -82,7 +79,6 @@ public class ServiceOfApplicationEmailService {
                 LanguagePreference.getPreferenceLanguage(caseData)
             );
         }
-      
         List<Map<String, List<String>>> respondentSolicitors = caseData
             .getRespondents()
             .stream()
@@ -109,37 +105,9 @@ public class ServiceOfApplicationEmailService {
                 LanguagePreference.english
             );
 
-        if (launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
-            List<Map<String, List<String>>> respondentSolicitors = caseData
-                .getRespondents()
-                .stream()
-                .map(Element::getValue)
-                .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
-                .map(i -> {
-                    Map<String, List<String>> temp = new HashMap<>();
-                    temp.put(i.getSolicitorEmail(), List.of(
-                        i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
-                        i.getFirstName() + " " + i.getLastName()
-                    ));
-                    return temp;
-                })
-                .collect(Collectors.toList());
-
-            for (Map<String, List<String>> resSols : respondentSolicitors) {
-                String solicitorEmail = resSols.keySet().toArray()[0].toString();
-                emailService.send(
-                    solicitorEmail,
-                    EmailTemplateNames.RESPONDENT_SOLICITOR,
-                    buildRespondentSolicitorEmail(caseDetails, resSols.get(solicitorEmail).get(0),
-                                                  resSols.get(solicitorEmail).get(1)
-                    ),
-                    LanguagePreference.english
-                );
-
-            }
-
-            sendEmailToLocalAuthority(caseDetails, caseData);
         }
+
+        sendEmailToLocalAuthority(caseDetails, caseData);
     }
 
     public void sendEmailNotificationToApplicantSolicitor(String authorization, CaseDetails caseDetails, PartyDetails partyDetails,
@@ -332,8 +300,7 @@ public class ServiceOfApplicationEmailService {
             LanguagePreference.english
         );
 
-        if (YesNoDontKnow.yes.equals(respondent.getDoTheyHaveLegalRepresentation())
-            && launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
+        if (YesNoDontKnow.yes.equals(respondent.getDoTheyHaveLegalRepresentation())) {
             String respondentSolicitorName = respondent.getRepresentativeFirstName() + " "
                 + respondent.getRepresentativeLastName();
             emailService.send(

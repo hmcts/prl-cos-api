@@ -44,7 +44,6 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasLegalRepresentation;
 @Slf4j
 @RequiredArgsConstructor
 public class ServiceOfApplicationService {
-    private final LaunchDarklyClient launchDarklyClient;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
@@ -78,8 +77,7 @@ public class ServiceOfApplicationService {
         collapsible.add("</summary>");
         collapsible.add("<div class='govuk-details__text'>");
         collapsible.add("Documents that will be sent out (if applicable to the case):<br/>");
-        collapsible.add(
-            "<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (blank)</li><li>C8 (Cafcass and Local Authority only)</li>");
+        collapsible.add("<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (blank)</li><li>C8 (Cafcass and Local Authority only)</li>");
         collapsible.add("<li>Annex Z</li><li>Privacy notice</li><li>Any orders and"
                             + " hearing notices created at the initial gatekeeping stage</li></ul>");
         collapsible.add("</div>");
@@ -87,9 +85,9 @@ public class ServiceOfApplicationService {
         return String.join("\n\n", collapsible);
     }
 
-    public Map<String, Object> getOrderSelectionsEnumValues(List<String> orderList, Map<String, Object> caseData) {
+    public Map<String,Object> getOrderSelectionsEnumValues(List<String> orderList, Map<String,Object> caseData) {
         for (String s : orderList) {
-            caseData.put(CreateSelectOrderOptionsEnum.mapOptionFromDisplayedValue(s), "1");
+            caseData.put(CreateSelectOrderOptionsEnum.mapOptionFromDisplayedValue(s),"1");
         }
         return caseData;
     }
@@ -108,15 +106,11 @@ public class ServiceOfApplicationService {
                 serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
             }
         }
-        if (launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
-            caseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
-        }
-        return caseData;
+        return caseInviteManager.generatePinAndSendNotificationEmail(caseData);
     }
 
     public CaseData sendPostToOtherPeopleInCase(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
         log.info(" Sending post to others involved ");
         List<Element<PartyDetails>> otherPeopleInCase = caseData.getOthersToNotify();
         List<DynamicMultiselectListElement> othersToNotify = caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue();

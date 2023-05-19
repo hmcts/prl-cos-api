@@ -11,12 +11,12 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum SdoCafcassOrCymruEnum {
 
-    @JsonProperty("safeguardingCafcassOnly")
-    safeguardingCafcassOnly("safeguardingCafcassOnly", "Safeguarding checks: next steps(Cafcass)"),
+    @JsonProperty("safeguardingCafcass")
+    safeguardingCafcass("safeguardingCafcass", "Safeguarding checks: next steps(Cafcass)"),
     @JsonProperty("safeguardingCafcassCymru")
     safeguardingCafcassCymru("safeguardingCafcassCymru", "Safeguarding checks: next steps Cafcass Cymru"),
-    @JsonProperty("partyToProvideDetailsOnly")
-    partyToProvideDetailsOnly("partyToProvideDetailsOnly", "Party to provide details of new partner to Cafcass"),
+    @JsonProperty("partyToProvideDetails")
+    partyToProvideDetails("partyToProvideDetails", "Party to provide details of new partner to Cafcass"),
     @JsonProperty("partyToProvideDetailsCmyru")
     partyToProvideDetailsCmyru("partyToProvideDetailsCmyru", "Party to provide details of new partner to Cafcass Cymru"),
     @JsonProperty("section7Report")

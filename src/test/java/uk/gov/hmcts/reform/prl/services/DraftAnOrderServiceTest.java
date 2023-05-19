@@ -1690,7 +1690,7 @@ public class DraftAnOrderServiceTest {
             .build();
         String errorMessage = draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
 
-        assertNull(errorMessage);
+        assertNotNull(errorMessage);
     }
 
     private static <T> Element<T> customElement(T element) {

@@ -127,15 +127,11 @@ public class ServiceOfApplicationController {
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("Confirm recipients in about to submit from casedata {}", caseData.getServiceOfApplication());
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        updatedCaseData.put("caseInvites", caseData.getCaseInvites());
-
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);
-      
         log.info("inside about to submit");
         PartyDetails applicant = PartyDetails.builder()
             .firstName("first")
