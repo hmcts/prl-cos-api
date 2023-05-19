@@ -73,7 +73,7 @@ public class Message extends MessageMetaData {
             "%s, %s, %s",
             super.getMessageSubject(),
             this.dateSent,
-            ofNullable(super.getMessageUrgency()).orElse("")
+            ofNullable(super.getMessageUrgency()).orElse(internalMessageUrgent.getDisplayedValue())
         );
     }
 }
