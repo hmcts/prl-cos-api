@@ -86,7 +86,7 @@ public class DynamicMultiSelectListService {
 
         for (DynamicMultiselectListElement element : caseData.getManageOrders().getChildOption().getValue()) {
             for (Element<Child> childElement:caseData.getChildren()) {
-                if (element.getCode().equals(childElement.getId().toString())) {
+                if (!element.getCode().equals(childElement.getId().toString())) {
                     childElement.getValue().toBuilder().isFinalOrderIssued(Yes).build();
                     childList.add(childElement);
                 }
