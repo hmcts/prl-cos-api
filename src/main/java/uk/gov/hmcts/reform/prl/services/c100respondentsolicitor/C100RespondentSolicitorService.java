@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitor
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
@@ -41,6 +42,7 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -64,6 +66,8 @@ public class C100RespondentSolicitorService {
 
     @Autowired
     private final ResponseSubmitChecker responseSubmitChecker;
+
+    private final ConfidentialDetailsMapper confidentialDetailsMapper;
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -223,6 +227,8 @@ public class C100RespondentSolicitorService {
             ));
 
         updatedCaseData.put(RESPONDENTS, respondents);
+        log.info("** Party details *** {}", caseData.getRespondents());
+        confidentialDetailsMapper.mapConfidentialData(caseData);
         return updatedCaseData;
     }
 
@@ -281,13 +287,10 @@ public class C100RespondentSolicitorService {
         }
         PartyDetails amended = party.getValue().toBuilder()
             .response(buildResponseForRespondent).build();
-        log.info(" *** Respondent updated details after keep details private *** {}", amended);
         Optional<Element<PartyDetails>> partyElement = respondents.stream().filter(element -> element.getId()
             .equals(party.getId())).findFirst();
-        log.info(" *** party *** {}", partyElement);
         if (partyElement.isPresent()) {
             int index = respondents.indexOf(partyElement.get());
-            log.info(" *** index of party *** {}", index);
             if (index != -1) {
                 respondents.set(index, element(party.getId(), amended));
             }
@@ -435,12 +438,18 @@ public class C100RespondentSolicitorService {
             confList = caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate().getConfidentialityList();
             if (confList.contains(ConfidentialityListEnum.address)) {
                 respondent.getValue().setIsAddressConfidential(Yes);
+            } else {
+                respondent.getValue().setIsAddressConfidential(No);
             }
             if (confList.contains(ConfidentialityListEnum.email)) {
                 respondent.getValue().setIsEmailAddressConfidential(Yes);
+            } else {
+                respondent.getValue().setIsEmailAddressConfidential(No);
             }
             if (confList.contains(ConfidentialityListEnum.phoneNumber)) {
                 respondent.getValue().setIsPhoneNumberConfidential(Yes);
+            } else {
+                respondent.getValue().setIsPhoneNumberConfidential(No);
             }
         }
 
