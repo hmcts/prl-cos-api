@@ -92,7 +92,7 @@ public class AllTabServiceImpl implements AllTabsService {
     }
 
     public void updateAllTabsIncludingConfTab(CaseData caseData) {
-        log.info("*** 1 Respondents *** {}", caseData.getRespondents() != null ? caseData.getRespondents().get(0) : " none ");
+        log.info("*** 1 Respondents *** {}", caseData.getRespondents());
         Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(caseData);
         log.info("*** 2 Respondents *** {}", confidentialDetails.get("respondents"));
         Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
