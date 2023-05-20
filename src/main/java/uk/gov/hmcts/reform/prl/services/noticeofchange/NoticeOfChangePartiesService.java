@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.noticeofchange;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -514,8 +515,8 @@ public class NoticeOfChangePartiesService {
                     tokenGenerator.generate(),
                     decisionRequest(caseDetails)
                 );
-                log.info("applyDecision response ==> " + response.getData());
-                if (null != response.getData()) {
+                if (null != response && null != response.getData()) {
+                    log.info("applyDecision response ==> " + response.getData());
                     caseDetails = caseDetails.toBuilder().data(response.getData()).build();
                     caseDataUpdated = response.getData();
                 }
@@ -695,9 +696,9 @@ public class NoticeOfChangePartiesService {
     }
 
     private String getAccessCode(CaseData caseData, Element<PartyDetails> partyDetails) {
-        if (null != caseData.getCaseInvites()) {
+        if (CollectionUtils.isNotEmpty(caseData.getCaseInvites())) {
             for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
-                if (caseInviteElement.getValue().getPartyId().equals(partyDetails.getId())) {
+                if (partyDetails.getId().equals(caseInviteElement.getValue().getPartyId())) {
                     return caseInviteElement.getValue().getAccessCode();
                 }
             }
@@ -745,6 +746,7 @@ public class NoticeOfChangePartiesService {
         );
         if (null != caseInvite) {
             log.info("New pin generated for citizen after removing legal representation");
+            caseInvite = null!= caseInvite.getPartyId() ? caseInvite : caseInvite.toBuilder().partyId(newPartyDetails.getId()).build();
             accessCode = caseInvite.getAccessCode();
             caseInvites.add(element(caseInvite));
         }
