@@ -89,15 +89,14 @@ public class DynamicMultiSelectListService {
             && finl.equals(caseData.getSelectTypeOfOrder())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
 
-            for (Element<Child> childElement : caseData.getChildren()) {
-                for (DynamicMultiselectListElement childOptionElement : caseData.getManageOrders().getChildOption().getValue()) {
-                    log.info("Child option Dynamicmulti list element :: {} ", childOptionElement.getCode());
+            for (DynamicMultiselectListElement element : caseData.getManageOrders().getChildOption().getListItems()) {
+                log.info("Child option Dynamic multi list element :: {} ", element.getCode());
 
-                    if (childElement.getId().toString().equals(childOptionElement.getCode())) {
+                for (Element<Child> childElement:caseData.getChildren()) {
+                    if (element.getCode().equals(childElement.getId().toString())) {
                         childElement.getValue().toBuilder().isFinalOrderIssued(Yes).build();
                         log.info("Child Element is finalOrderIssued:: {} ", childElement.getValue().getIsFinalOrderIssued());
                         log.info("Child Element is UUID:: {} ", childElement.getId());
-                        childList.add(childElement);
                     }
                 }
             }
