@@ -693,7 +693,7 @@ public class NoticeOfChangePartiesService {
     private String getAccessCode(CaseData caseData, Element<PartyDetails> partyDetails) {
         if (CollectionUtils.isNotEmpty(caseData.getCaseInvites())) {
             for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
-                if (caseInviteElement.getValue().getPartyId().equals(partyDetails.getId())) {
+                if (partyDetails.getId().equals(caseInviteElement.getValue().getPartyId())) {
                     return caseInviteElement.getValue().getAccessCode();
                 }
             }
