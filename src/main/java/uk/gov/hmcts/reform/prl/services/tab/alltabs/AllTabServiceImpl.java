@@ -197,7 +197,7 @@ public class AllTabServiceImpl implements AllTabsService {
                         applicationsTabService.getFl401ApplicantsTable(caseData)
                     );
                 } else if (DARESPONDENT.equals(solicitorRole.get().getRepresenting())) {
-                    caseDataUpdatedMap.put(FL401_RESPONDENTS, caseData.getApplicantsFL401());
+                    caseDataUpdatedMap.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
                     caseDataUpdatedMap.put(
                         FL401_RESPONDENT_TABLE,
                         applicationsTabService.getFl401RespondentTable(caseData)
