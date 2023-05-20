@@ -469,15 +469,7 @@ public class NoticeOfChangePartiesServiceTest {
             .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
             .build();
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
-            .build();
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .caseDetailsBefore(caseDetails)
-            .build();
+
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
         findUserCaseRolesResponse.setCaseUsers(List.of(CaseUser.builder().caseId("12345678").caseRole(
@@ -493,6 +485,15 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(new ObjectMapper())).build());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest, new ArrayList<>());
         verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
     }
@@ -516,15 +517,7 @@ public class NoticeOfChangePartiesServiceTest {
             .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
             .build();
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
-            .build();
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .caseDetailsBefore(caseDetails)
-            .build();
+
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
         findUserCaseRolesResponse.setCaseUsers(List.of(CaseUser.builder().caseId("12345678").caseRole(
@@ -540,6 +533,15 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(new ObjectMapper())).build());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest, new ArrayList<>());
         verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
     }
@@ -560,15 +562,8 @@ public class NoticeOfChangePartiesServiceTest {
             .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
             .build();
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
-            .build();
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .caseDetailsBefore(caseDetails)
-            .build();
+
+
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
         findUserCaseRolesResponse.setCaseUsers(List.of(CaseUser.builder().caseId("12345678").caseRole(
@@ -584,6 +579,15 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(new ObjectMapper())).build());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest, new ArrayList<>());
         verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
     }
@@ -604,15 +608,7 @@ public class NoticeOfChangePartiesServiceTest {
             .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
             .build();
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseData.toMap(new ObjectMapper()))
-            .build();
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .caseDetailsBefore(caseDetails)
-            .build();
+
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
         findUserCaseRolesResponse.setCaseUsers(List.of(CaseUser.builder().caseId("12345678").caseRole(
@@ -628,6 +624,15 @@ public class NoticeOfChangePartiesServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
         when(assignCaseAccessClient.applyDecision(anyString(), anyString(), any(DecisionRequest.class))).thenReturn(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData.toMap(new ObjectMapper())).build());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest, new ArrayList<>());
         verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
     }
