@@ -509,8 +509,8 @@ public class NoticeOfChangePartiesService {
                     tokenGenerator.generate(),
                     decisionRequest(caseDetails)
                 );
-                log.info("applyDecision response ==> " + response.getData());
-                if (null != response.getData()) {
+                if (null != response && null != response.getData()) {
+                    log.info("applyDecision response ==> " + response.getData());
                     caseDetails = caseDetails.toBuilder().data(response.getData()).build();
                     caseDataUpdated = response.getData();
                 }
