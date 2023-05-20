@@ -84,24 +84,41 @@ public class DynamicMultiSelectListService {
     }
 
     public List<Element<Child>> updateChildrenWithCaseCloseStatus(CaseData caseData) {
-        List<Element<Child>> childList = caseData.getChildren();
+
+        List<Element<Child>> children = caseData.getChildren();
+        List<DynamicMultiselectListElement> valueItems = caseData.getManageOrders().getChildOption().getListItems();
+
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && finl.equals(caseData.getSelectTypeOfOrder())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
 
-            for (DynamicMultiselectListElement element : caseData.getManageOrders().getChildOption().getListItems()) {
-                log.info("Child option Dynamic multi list element :: {} ", element.getCode());
+            /*for (DynamicMultiselectListElement element : caseData.getManageOrders().getChildOption().getListItems()) {
+                log.info("Child option Dynamic multilist element ID :: {} ", element.getCode());
 
                 for (Element<Child> childElement:caseData.getChildren()) {
                     if (element.getCode().equals(childElement.getId().toString())) {
-                        childElement.getValue().toBuilder().isFinalOrderIssued(Yes).build();
-                        log.info("Child Element is finalOrderIssued:: {} ", childElement.getValue().getIsFinalOrderIssued());
+                        childDetailsMap.put("isFinalOrderIssued", Yes);
+                        //childElement.getValue().toBuilder().isFinalOrderIssued(Yes).build();
+                        log.info("Child Element is finalOrderIssued:: {} ", childDetailsMap.get("isFinalOrderIssued"));
                         log.info("Child Element is UUID:: {} ", childElement.getId());
                     }
                 }
+            }*/
+            if (children != null) {
+
+                children.forEach(child -> {
+                    valueItems.forEach(value -> {
+                        if (child.getId().toString().equals(value.getCode())) {
+                            log.info("Child option Dynamic multilist element ID :: {} ", value.getCode());
+                            child.getValue().toBuilder().isFinalOrderIssued(Yes).build();
+                            log.info("Child Element is finalOrderIssued:: {} ", child.getValue().getIsFinalOrderIssued());
+                            log.info("Child Element is UUID:: {} ", child.getId());
+                        }
+                    });
+                });
             }
         }
-        return childList;
+        return children;
     }
 
     public Map<String, List<DynamicMultiselectListElement>> getRespondentsMultiSelectList(CaseData caseData) {
