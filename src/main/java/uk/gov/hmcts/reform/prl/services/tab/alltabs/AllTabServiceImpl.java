@@ -82,6 +82,8 @@ public class AllTabServiceImpl implements AllTabsService {
     }
 
     private void refreshCcdUsingEvent(CaseData caseData, Map<String, Object> combinedFieldsMap) {
+        log.info("*** 1 Respondents *** {}", caseData.getRespondents());
+        log.info("*** 2 Respondents *** {}", combinedFieldsMap.get("respondents"));
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
@@ -92,11 +94,8 @@ public class AllTabServiceImpl implements AllTabsService {
     }
 
     public void updateAllTabsIncludingConfTab(CaseData caseData) {
-        log.info("*** 1 Respondents *** {}", caseData.getRespondents());
         Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(caseData);
-        log.info("*** 2 Respondents *** {}", confidentialDetails.get("respondents"));
         Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
-        log.info("*** 2 Respondents *** {}", combinedFieldsMap.get("respondents"));
         combinedFieldsMap.putAll(confidentialDetails);
         combinedFieldsMap.put("respondentConfidentialDetails", caseData.getRespondentConfidentialDetails());
 
