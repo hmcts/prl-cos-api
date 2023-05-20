@@ -93,9 +93,7 @@ public class AllTabServiceImpl implements AllTabsService {
 
     public void updateAllTabsIncludingConfTab(CaseData caseData) {
         Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(caseData);
-        log.info("*** 1 Respondents *** {}", caseData.getRespondents());
         Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
-        log.info("*** 2 Respondents *** {}", caseData.getRespondents());
         combinedFieldsMap.putAll(confidentialDetails);
         combinedFieldsMap.put("respondentConfidentialDetails", caseData.getRespondentConfidentialDetails());
 
@@ -162,14 +160,13 @@ public class AllTabServiceImpl implements AllTabsService {
     private Map<String, Object> getCombinedMap(CaseData caseData) {
         Map<String, Object> applicationTabFields = applicationsTabService.updateTab(
             caseData);
-
+        log.info("*** 1 Respondents *** {}", caseData.getRespondents());
         Map<String, Object> summaryTabFields = caseSummaryTabService.updateTab(caseData);
-
+        log.info("*** 2 Respondents *** {}", caseData.getRespondents());
         return Stream.concat(
             applicationTabFields.entrySet().stream(),
             summaryTabFields.entrySet().stream()
         ).collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue()), HashMap::putAll);
-
     }
 
     @Override
