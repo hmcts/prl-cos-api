@@ -181,6 +181,7 @@ public class AllTabServiceImpl implements AllTabsService {
     public void updatePartyDetailsForNoc(CaseData caseData, Optional<SolicitorRole> solicitorRole, List<Element<CaseInvite>> caseInvites) {
         Map<String, Object> caseDataUpdatedMap = new HashMap<>();
         if (caseData != null && solicitorRole.isPresent()) {
+            log.info("Solicitor role is present::" + solicitorRole.get().getRepresenting());
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 if (CARESPONDENT.equals(solicitorRole.get().getRepresenting())) {
                     caseDataUpdatedMap.put(C100_RESPONDENTS, caseData.getRespondents());
@@ -190,7 +191,13 @@ public class AllTabServiceImpl implements AllTabsService {
                     caseDataUpdatedMap.put(C100_APPLICANT_TABLE, applicationsTabService.getApplicantsTable(caseData));
                 }
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                log.info("Inside FL401 case::" + caseData.getApplicantsFL401().getPhoneNumber()
+                             + " " + caseData.getApplicantsFL401().getEmail());
                 if (DAAPPLICANT.equals(solicitorRole.get().getRepresenting())) {
+                    log.info("DA Applicant match ::caseData.getApplicantsFL401() ====> "
+                                 + caseData.getApplicantsFL401());
+                    log.info("DA Applicant match ::caseData.getFl401ApplicantsTable() ====> "
+                                 + applicationsTabService.getFl401ApplicantsTable(caseData));
                     caseDataUpdatedMap.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                     caseDataUpdatedMap.put(
                         FL401_APPLICANT_TABLE,

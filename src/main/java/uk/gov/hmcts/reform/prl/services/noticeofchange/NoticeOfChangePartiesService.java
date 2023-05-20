@@ -204,7 +204,12 @@ public class NoticeOfChangePartiesService {
     public void nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData oldCaseData = getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        log.info("This is start oldCaseData ==> " + oldCaseData);
+        log.info("This is start newCaseData ==> " + newCaseData);
         ChangeOrganisationRequest changeOrganisationRequest = oldCaseData.getChangeOrganisationRequestField();
+
+        log.info("This is start changeOrganisationRequest ==> " + changeOrganisationRequest);
 
         UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
             authorisation
