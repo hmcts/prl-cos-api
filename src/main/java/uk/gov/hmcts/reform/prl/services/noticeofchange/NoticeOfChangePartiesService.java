@@ -697,9 +697,17 @@ public class NoticeOfChangePartiesService {
 
     private String getAccessCode(CaseData caseData, Element<PartyDetails> partyDetails) {
         if (CollectionUtils.isNotEmpty(caseData.getCaseInvites())) {
-            for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
-                if (partyDetails.getId().equals(caseInviteElement.getValue().getPartyId())) {
-                    return caseInviteElement.getValue().getAccessCode();
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
+                    if (partyDetails.getId().equals(caseInviteElement.getValue().getPartyId())) {
+                        return caseInviteElement.getValue().getAccessCode();
+                    }
+                }
+            } else {
+                for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
+                    if (partyDetails.getValue().getEmail().equals(caseInviteElement.getValue().getCaseInviteEmail())) {
+                        return caseInviteElement.getValue().getAccessCode();
+                    }
                 }
             }
         }
@@ -746,7 +754,6 @@ public class NoticeOfChangePartiesService {
         );
         if (null != caseInvite) {
             log.info("New pin generated for citizen after removing legal representation");
-            caseInvite = null != caseInvite.getPartyId() ? caseInvite : caseInvite.toBuilder().partyId(newPartyDetails.getId()).build();
             accessCode = caseInvite.getAccessCode();
             caseInvites.add(element(caseInvite));
         }
