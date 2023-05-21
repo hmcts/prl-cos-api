@@ -83,8 +83,9 @@ public class DynamicMultiSelectListService {
         return existingChildListItems;
     }
 
-    public List<Element<Child>> updateChildrenWithCaseCloseStatus(CaseData caseData) {
+    public Map<String, Object> updateChildrenWithCaseCloseStatus(CaseData caseData) {
 
+        Map<String, Object> childListMap = new HashMap<>();
         List<Element<Child>> children = caseData.getChildren();
         List<DynamicMultiselectListElement> valueItems = caseData.getManageOrders().getChildOption().getListItems();
 
@@ -110,15 +111,15 @@ public class DynamicMultiSelectListService {
                     valueItems.forEach(value -> {
                         if (child.getId().toString().equals(value.getCode())) {
                             log.info("Child option Dynamic multilist element ID :: {} ", value.getCode());
-                            child.getValue().toBuilder().isFinalOrderIssued(Yes).build();
-                            log.info("Child Element is finalOrderIssued:: {} ", child.getValue().getIsFinalOrderIssued());
+                            childListMap.put("isFinalOrderIssued", Yes);
+                            log.info("Child Element is finalOrderIssued:: {} ", childListMap.get("isFinalOrderIssued"));
                             log.info("Child Element is UUID:: {} ", child.getId());
                         }
                     });
                 });
             }
         }
-        return children;
+        return childListMap;
     }
 
     public Map<String, List<DynamicMultiselectListElement>> getRespondentsMultiSelectList(CaseData caseData) {
