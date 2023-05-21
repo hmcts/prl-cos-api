@@ -66,6 +66,7 @@ public class ServiceOfApplicationPostService {
                     List<GeneratedDocumentInfo> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
                     log.info("*** Initiating request to Bulk print service ***");
                     bulkPrintService.send(
+                        getCoverLetterGeneratedDocInfo(caseData, authorisation),
                         String.valueOf(caseData.getId()),
                         authorisation,
                         LETTER_TYPE,
@@ -132,7 +133,6 @@ public class ServiceOfApplicationPostService {
         caseData.setBulkPrintDetails(printedDocCollectionList);
         log.info("*** Bulk Print details set in case data ***" + caseData.getBulkPrintDetails());
     }
-
 
 
     private List<GeneratedDocumentInfo> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
@@ -251,6 +251,7 @@ public class ServiceOfApplicationPostService {
             log.info("*** Initiating request to Bulk print service ***");
             log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
             UUID bulkPrintId = bulkPrintService.send(
+                getCoverLetterGeneratedDocInfo(caseData, authorisation),
                 String.valueOf(caseData.getId()),
                 authorisation,
                 LETTER_TYPE,
@@ -267,7 +268,8 @@ public class ServiceOfApplicationPostService {
                            .bulkPrintId(bulkPrintedId)
                            .printedDocs(sentDocs)
                            .recipientsName(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-                           .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("Europe/London")))).build());
+                           .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of(
+                               "Europe/London")))).build());
     }
 
     private List<GeneratedDocumentInfo> getDocsAsGeneratedDocumentInfo(List<Document> docs) {

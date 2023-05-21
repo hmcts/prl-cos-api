@@ -45,6 +45,7 @@ public class BulkPrintServiceTest {
     private UUID uuid;
 
     private GeneratedDocumentInfo generatedDocumentInfo;
+    private GeneratedDocumentInfo generatedDocumentInfo1;
     private String authToken;
     private String s2sToken;
 
@@ -60,6 +61,13 @@ public class BulkPrintServiceTest {
             .mimeType("xyz")
             .hashToken("testHashToken")
             .build();
+        generatedDocumentInfo1 = GeneratedDocumentInfo.builder()
+            .url("TestUrl1")
+            .createdOn("somedate1")
+            .binaryUrl("binaryUrl1")
+            .mimeType("xyz1")
+            .hashToken("testHashToken1")
+            .build();
     }
 
     @Test
@@ -73,14 +81,28 @@ public class BulkPrintServiceTest {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, "TestUrl"))
             .thenReturn(expectedResponse);
-        assertEquals(bulkPrintService.send("123", authToken, "abc",
-                                           List.of(generatedDocumentInfo)), uuid);
+        when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, "TestUrl1"))
+            .thenReturn(expectedResponse);
+        assertEquals(bulkPrintService.send(GeneratedDocumentInfo.builder().binaryUrl("abc").build(),
+                                           "123",
+                                           authToken,
+                                           "abc",
+                                           List.of(generatedDocumentInfo, generatedDocumentInfo1)
+        ), uuid);
 
     }
 
     @Test
     public void senLetterServiceWithInValidInput() {
-        assertThrows(NullPointerException.class, () -> bulkPrintService.send("123", authToken, "abc", null));
+        assertThrows(
+            NullPointerException.class,
+            () -> bulkPrintService.send(GeneratedDocumentInfo.builder().binaryUrl("abc").build(),
+                                        "123",
+                                        authToken,
+                                        "abc",
+                                        null
+            )
+        );
     }
 
 }

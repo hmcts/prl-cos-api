@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,20 +43,30 @@ public class BulkPrintService {
     private final AuthTokenGenerator authTokenGenerator;
 
 
-    public UUID send(String caseId, String userToken, String letterType, List<GeneratedDocumentInfo> documents) {
+    public UUID send(GeneratedDocumentInfo coverDoc, String caseId, String userToken, String letterType, List<GeneratedDocumentInfo> documents) {
+
 
         String s2sToken = authTokenGenerator.generate();
-        log.info("*** Documents from bulk print service before stringify ***" + documents);
-        final List<String> stringifiedDocuments = documents.stream()
+        String coverDocument = null;
+        List<String> docsToSendToBulkPrint = new ArrayList<>();
+        if (null != coverDoc) {
+            coverDocument = getEncoder().encodeToString(getDocumentBytes(coverDoc.getUrl(), userToken, s2sToken));
+            docsToSendToBulkPrint.add(coverDocument);
+        }
+        final String stringifiedDocuments = documents.stream()
             .map(docInfo -> getDocumentBytes(docInfo.getUrl(), userToken, s2sToken))
             .map(getEncoder()::encodeToString)
-            .collect(toList());
-        log.info("*** Documents from bulk print service after stringify ***" + documents);
-
+            .collect(toList()).toString();
+        docsToSendToBulkPrint.add(stringifiedDocuments);
+        log.info("*** Documents from bulk print service after stringify ***" + docsToSendToBulkPrint);
         log.info("Sending {} for case {}", letterType, caseId);
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(
             s2sToken,
-            new LetterWithPdfsRequest(stringifiedDocuments, XEROX_TYPE_PARAMETER, getAdditionalData(caseId, letterType))
+            new LetterWithPdfsRequest(
+                docsToSendToBulkPrint,
+                XEROX_TYPE_PARAMETER,
+                getAdditionalData(caseId, letterType)
+            )
         );
 
         log.info("Letter service produced the following letter Id {} for case {}", sendLetterResponse.letterId, caseId);
