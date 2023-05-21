@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
@@ -76,6 +77,7 @@ public class AllTabServiceImplTest {
         when(CASE_DATA.getDateSubmitted()).thenReturn("2022-02-02");
         when(CASE_DATA.getCourtName()).thenReturn("TEST COURT");
         when(CASE_DATA.getCourtId()).thenReturn("COURT_!");
+        when(CASE_DATA.getApplicantsFL401()).thenReturn(PartyDetails.builder().build());
 
         doNothing().when(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
     }
