@@ -11,11 +11,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.CaseRole;
@@ -90,9 +86,7 @@ public class NoticeOfChangePartiesService {
     private final AllTabServiceImpl tabService;
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
     private final Time time;
-    private final CcdCoreCaseDataService ccdCoreCaseDataService;
-
-    private final CcdDataStoreService userDataStoreService;
+    private final CcdDataStoreService ccdDataStoreService;
     private final SystemUserService systemUserService;
 
     private final CaseInviteManager caseInviteManager;
@@ -233,38 +227,7 @@ public class NoticeOfChangePartiesService {
             TypeOfNocEventEnum.addLegalRepresentation
         );
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
-
-        String systemAuthorisation = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
-        EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
-            CaseEvent.UPDATE_ALL_TABS,
-            systemUpdateUserId
-        );
-        StartEventResponse allTabsUpdateStartEventResponse =
-            ccdCoreCaseDataService.startUpdate(
-                authorisation,
-                allTabsUpdateEventRequestData,
-                String.valueOf(newCaseData.getId()),
-                true
-            );
-
-        CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
-            allTabsUpdateStartEventResponse,
-            objectMapper
-        );
-        log.info(
-            "Refreshing tab for caseid {} ",
-            newCaseData.getId()
-        );
-
-        tabService.updateAllTabsIncludingConfTabRefactored(
-            authorisation,
-            String.valueOf(newCaseData.getId()),
-            allTabsUpdateStartEventResponse,
-            allTabsUpdateEventRequestData,
-            allTabsUpdateCaseData
-        );
-        // tabService.updatePartyDetailsForNoc(newCaseData, solicitorRole, null);
+        tabService.updatePartyDetailsForNoc(newCaseData, solicitorRole, null);
 
         String solicitorName = legalRepresentativeSolicitorDetails.getFullName();
 
@@ -515,16 +478,10 @@ public class NoticeOfChangePartiesService {
                             );
                             break;
                         case DAAPPLICANT:
-                            selectedPartyDetailsMap.put(
-                                SolicitorRole.FL401APPLICANTSOLICITOR,
-                                caseData.getApplicantsFL401()
-                            );
+                            selectedPartyDetailsMap.put(SolicitorRole.FL401APPLICANTSOLICITOR, caseData.getApplicantsFL401());
                             break;
                         case DARESPONDENT:
-                            selectedPartyDetailsMap.put(
-                                SolicitorRole.FL401RESPONDENTSOLICITOR,
-                                caseData.getRespondentsFL401()
-                            );
+                            selectedPartyDetailsMap.put(SolicitorRole.FL401RESPONDENTSOLICITOR, caseData.getRespondentsFL401());
                             break;
                         default:
                             break;
@@ -789,7 +746,7 @@ public class NoticeOfChangePartiesService {
         );
         if (null != caseInvite) {
             log.info("New pin generated for citizen after removing legal representation");
-            caseInvite = null != caseInvite.getPartyId() ? caseInvite : caseInvite.toBuilder().partyId(newPartyDetails.getId()).build();
+            caseInvite = null!= caseInvite.getPartyId() ? caseInvite : caseInvite.toBuilder().partyId(newPartyDetails.getId()).build();
             accessCode = caseInvite.getAccessCode();
             caseInvites.add(element(caseInvite));
         }
@@ -848,7 +805,7 @@ public class NoticeOfChangePartiesService {
 
     private FindUserCaseRolesResponse findUserCaseRoles(String caseId, String authorisation) {
         log.info("findUserCaseRoles : caseId is:: " + caseId);
-        FindUserCaseRolesResponse findUserCaseRolesResponse = userDataStoreService.findUserCaseRoles(
+        FindUserCaseRolesResponse findUserCaseRolesResponse = ccdDataStoreService.findUserCaseRoles(
             caseId,
             authorisation
         );
