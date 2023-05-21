@@ -63,7 +63,7 @@ public class BulkPrintService {
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(
             s2sToken,
             new LetterWithPdfsRequest(
-                docsToSendToBulkPrint,
+                List.of(coverDocument, stringifiedDocuments),
                 XEROX_TYPE_PARAMETER,
                 getAdditionalData(caseId, letterType)
             )
