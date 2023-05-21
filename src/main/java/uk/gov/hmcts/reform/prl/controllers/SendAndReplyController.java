@@ -265,6 +265,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReply(@RequestHeader("Authorization")
                                                                 @Parameter(hidden = true) String authorisation,
                                                                                  @RequestBody CallbackRequest callbackRequest) {
+
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         //send emails in case of sending to others with emails
         sendAndReplyService.sendNotificationEmailOther(caseData);
