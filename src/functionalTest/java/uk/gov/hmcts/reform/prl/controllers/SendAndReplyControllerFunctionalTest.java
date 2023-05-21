@@ -112,6 +112,7 @@ public class SendAndReplyControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+
     @Test
     @Ignore
     public void givenBodyWithNoMessages_whenAboutToSubmitForSendOrReply() throws Exception {
