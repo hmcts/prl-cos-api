@@ -49,21 +49,20 @@ public class BulkPrintService {
         String s2sToken = authTokenGenerator.generate();
         String coverDocument = null;
         List<String> docsToSendToBulkPrint = new ArrayList<>();
-        if (null != coverDoc) {
-            coverDocument = getEncoder().encodeToString(getDocumentBytes(coverDoc.getUrl(), userToken, s2sToken));
-            docsToSendToBulkPrint.add(coverDocument);
-        }
-        final String stringifiedDocuments = documents.stream()
+        final List<String> stringifiedDocuments = documents.stream()
             .map(docInfo -> getDocumentBytes(docInfo.getUrl(), userToken, s2sToken))
             .map(getEncoder()::encodeToString)
-            .collect(toList()).toString();
-        docsToSendToBulkPrint.add(stringifiedDocuments);
-        log.info("*** Documents from bulk print service after stringify ***" + docsToSendToBulkPrint);
+            .collect(toList());
+        if (null != coverDoc) {
+            coverDocument = getEncoder().encodeToString(getDocumentBytes(coverDoc.getUrl(), userToken, s2sToken));
+            stringifiedDocuments.add(0, coverDocument);
+        }
+        log.info("*** Documents from bulk print service after stringify ***" + stringifiedDocuments);
         log.info("Sending {} for case {}", letterType, caseId);
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(
             s2sToken,
             new LetterWithPdfsRequest(
-                List.of(coverDocument, stringifiedDocuments),
+                stringifiedDocuments,
                 XEROX_TYPE_PARAMETER,
                 getAdditionalData(caseId, letterType)
             )
