@@ -33,7 +33,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class ServiceOfApplicationPostServiceTest {
 
@@ -113,7 +112,6 @@ public class ServiceOfApplicationPostServiceTest {
         ))
             .thenReturn(coverSheet);
         when(bulkPrintService.send(
-            Mockito.any(),
             Mockito.any(),
             Mockito.any(),
             Mockito.any(),

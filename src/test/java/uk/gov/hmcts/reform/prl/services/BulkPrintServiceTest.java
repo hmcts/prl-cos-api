@@ -46,7 +46,6 @@ public class BulkPrintServiceTest {
     private UUID uuid;
 
     private GeneratedDocumentInfo generatedDocumentInfo;
-    private GeneratedDocumentInfo generatedDocumentInfo1;
     private String authToken;
     private String s2sToken;
 
@@ -62,16 +61,8 @@ public class BulkPrintServiceTest {
             .mimeType("xyz")
             .hashToken("testHashToken")
             .build();
-        generatedDocumentInfo1 = GeneratedDocumentInfo.builder()
-            .url("TestUrl1")
-            .createdOn("somedate1")
-            .binaryUrl("binaryUrl1")
-            .mimeType("xyz1")
-            .hashToken("testHashToken1")
-            .build();
     }
 
-    @Ignore
     @Test
     public void senLetterServiceWithValidInput() {
         Resource expectedResource = new ClassPathResource("task-list-markdown.md");
@@ -85,22 +76,19 @@ public class BulkPrintServiceTest {
             .thenReturn(expectedResponse);
         when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, "TestUrl1"))
             .thenReturn(expectedResponse);
-        assertEquals(bulkPrintService.send(GeneratedDocumentInfo.builder().binaryUrl("abc").build(),
-                                           "123",
+        assertEquals(bulkPrintService.send("123",
                                            authToken,
                                            "abc",
-                                           List.of(generatedDocumentInfo, generatedDocumentInfo1)
+                                           List.of(generatedDocumentInfo)
         ), uuid);
 
     }
 
-    @Ignore
     @Test
     public void senLetterServiceWithInValidInput() {
         assertThrows(
             NullPointerException.class,
-            () -> bulkPrintService.send(GeneratedDocumentInfo.builder().binaryUrl("abc").build(),
-                                        "123",
+            () -> bulkPrintService.send("123",
                                         authToken,
                                         "abc",
                                         null
