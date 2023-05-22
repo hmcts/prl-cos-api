@@ -1198,6 +1198,7 @@ public class ManageOrderService {
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, order);
+                        dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData,order);
                     } else {
                         servedFL401Order(caseData, orders, order);
                     }

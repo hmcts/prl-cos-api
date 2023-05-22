@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,21 +84,23 @@ public class DynamicMultiSelectListService {
         return existingChildListItems;
     }
 
-    public List<Element<Child>> updateChildrenWithCaseCloseStatus(CaseData caseData) {
+    public void updateChildrenWithCaseCloseStatus(CaseData caseData, Element<OrderDetails> order) {
 
         List<Element<Child>> children = caseData.getChildren();
-        List<DynamicMultiselectListElement> valueItems = caseData.getManageOrders().getChildOption().getValue();
-
+        String childrenFromOrder = order.getValue().getChildrenList();
+        List<String> childrenList = Arrays.asList(childrenFromOrder.split(", "));
+        log.info("Children list from the orderCollection :=========: {}", childrenList);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && finl.equals(caseData.getSelectTypeOfOrder())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
 
             if (children != null) {
-
                 children.forEach(child -> {
-                    valueItems.forEach(value -> {
-                        if (child.getId().toString().equals(value.getCode())) {
-                            log.info("Child option Dynamic multilist element ID :: {} ", value.getCode());
+                    String childName = child.getValue().getFirstName() + " " + child.getValue().getLastName();
+                    log.info("Child name from the children:: {}", childName);
+                    childrenList.forEach(value -> {
+                        log.info("Child name from the order childrenlist:: {}", value);
+                        if (childName.equalsIgnoreCase(value)) {
                             child.getValue().setIsFinalOrderIssued(Yes);
                             log.info("Child Element is finalOrderIssued:: {} ", child.getValue().getIsFinalOrderIssued());
                             log.info("Child Element is UUID:: {} ", child.getId());
@@ -106,7 +109,7 @@ public class DynamicMultiSelectListService {
                 });
             }
         }
-        return children;
+        log.info("Children value for isfinalorderissued is set::{{}", caseData.getChildren());
     }
 
     public Map<String, List<DynamicMultiselectListElement>> getRespondentsMultiSelectList(CaseData caseData) {
