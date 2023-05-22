@@ -45,6 +45,7 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
@@ -751,6 +752,17 @@ public class C100RespondentSolicitorService {
                 dataMap
             );
             caseDataUpdated.put("draftC1ADoc", documentForC1A);
+        }
+
+        if (Yes.equals(response.getKeepDetailsPrivate().getConfidentiality())) {
+            Document documentForC8 = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                DOCUMENT_C8_BLANK_HINT,
+                false,
+                dataMap
+            );
+            caseDataUpdated.put("draftC8Doc", documentForC8);
         }
 
         return caseDataUpdated;
