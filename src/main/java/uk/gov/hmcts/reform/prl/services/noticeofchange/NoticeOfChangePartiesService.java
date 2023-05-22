@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.noticeofchange;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -192,7 +193,11 @@ public class NoticeOfChangePartiesService {
         UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
             authorisation
         );
-        log.info("caseDetails for applyDecision ==>" + caseDetails);
+        try {
+            log.info("caseDetails for applyDecision ==>" + objectMapper.writeValueAsString(caseDetails));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         log.info("legalRepresentativeSolicitorDetails ===> " + legalRepresentativeSolicitorDetails.getId() + "--"
                      + legalRepresentativeSolicitorDetails.getEmail() + "--"
                      + legalRepresentativeSolicitorDetails.getFullName()
