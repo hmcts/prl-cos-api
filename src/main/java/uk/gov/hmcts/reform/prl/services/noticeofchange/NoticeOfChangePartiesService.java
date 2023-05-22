@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -90,6 +91,7 @@ public class NoticeOfChangePartiesService {
     private final SystemUserService systemUserService;
 
     private final CaseInviteManager caseInviteManager;
+    private final IdamClient idamClient;
 
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing) {
         return generate(caseData, representing, POPULATE);
@@ -215,7 +217,7 @@ public class NoticeOfChangePartiesService {
         UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
             authorisation
         );
-        log.info("legalRepresentativeSolicitorDetails ===> " + legalRepresentativeSolicitorDetails.getId() + "--"
+        log.info("legalRepresentativeSolicitorDetails before ===> " + legalRepresentativeSolicitorDetails.getId() + "--"
                      + legalRepresentativeSolicitorDetails.getEmail() + "--"
                      + legalRepresentativeSolicitorDetails.getFullName()
         );
@@ -229,6 +231,12 @@ public class NoticeOfChangePartiesService {
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         tabService.updatePartyDetailsForNoc(newCaseData, solicitorRole, null);
 
+        legalRepresentativeSolicitorDetails = getSolictiorUserDetails(
+            authorisation,
+            newCaseData,
+            legalRepresentativeSolicitorDetails,
+            solicitorRole
+        );
         String solicitorName = legalRepresentativeSolicitorDetails.getFullName();
 
         if (changeOrganisationRequest != null) {
@@ -244,6 +252,25 @@ public class NoticeOfChangePartiesService {
         }
 
         eventPublisher.publishEvent(new CaseDataChanged(newCaseData));
+    }
+
+    private UserDetails getSolictiorUserDetails(String authorisation, CaseData newCaseData,
+                                                UserDetails legalRepresentativeSolicitorDetails, Optional<SolicitorRole> solicitorRole) {
+        FindUserCaseRolesResponse findUserCaseRolesResponse
+            = findUserCaseRoles(String.valueOf(newCaseData.getId()), authorisation);
+        if (null != findUserCaseRolesResponse && solicitorRole.isPresent()) {
+            for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
+                if (caseUser.getCaseRole().equalsIgnoreCase(solicitorRole.get().getCaseRoleLabel())) {
+                    String userToken = systemUserService.getSysUserToken();
+                    legalRepresentativeSolicitorDetails = idamClient.getUserByUserId(userToken, caseUser.getUserId());
+                    log.info("legalRepresentativeSolicitorDetails after ===> " + legalRepresentativeSolicitorDetails.getId() + "--"
+                                 + legalRepresentativeSolicitorDetails.getEmail() + "--"
+                                 + legalRepresentativeSolicitorDetails.getFullName()
+                    );
+                }
+            }
+        }
+        return legalRepresentativeSolicitorDetails;
     }
 
     private CaseData updateRepresentedPartyDetails(ChangeOrganisationRequest changeOrganisationRequest,
