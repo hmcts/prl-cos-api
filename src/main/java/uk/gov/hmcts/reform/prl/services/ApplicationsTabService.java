@@ -118,8 +118,10 @@ public class ApplicationsTabService implements TabService {
         Map<String, Object> applicationTab = new HashMap<>();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
+            log.info("*** Respondents before table {}", caseData.getRespondents());
             applicationTab.put("applicantTable", getApplicantsTable(caseData));
             applicationTab.put("respondentTable", getRespondentsTable(caseData));
+            log.info("*** Respondents after table {}", caseData.getRespondents());
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
             applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
             applicationTab.put("allegationsOfHarmOverviewTable", getAllegationsOfHarmOverviewTable(caseData));
