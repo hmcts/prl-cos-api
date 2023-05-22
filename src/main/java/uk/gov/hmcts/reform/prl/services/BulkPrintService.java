@@ -45,7 +45,7 @@ public class BulkPrintService {
 
     public UUID send(GeneratedDocumentInfo coverDoc, String caseId, String userToken, String letterType, List<GeneratedDocumentInfo> documents) {
 
-
+        log.info("***Bulkprint pack size {}***", documents.size());
         String s2sToken = authTokenGenerator.generate();
         String coverDocument = null;
         List<String> docsToSendToBulkPrint = new ArrayList<>();
@@ -55,7 +55,8 @@ public class BulkPrintService {
             .collect(toList());
         if (null != coverDoc) {
             coverDocument = getEncoder().encodeToString(getDocumentBytes(coverDoc.getUrl(), userToken, s2sToken));
-            stringifiedDocuments.add(0, coverDocument);
+            //stringifiedDocuments.add(0, coverDocument);
+            log.info("***NOT ADDING COVERLETTER WITH IN BULKPRINT***");
         }
         log.info("*** Documents from bulk print service after stringify ***" + stringifiedDocuments);
         log.info("Sending {} for case {}", letterType, caseId);
