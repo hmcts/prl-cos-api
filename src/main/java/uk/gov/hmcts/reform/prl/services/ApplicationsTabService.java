@@ -337,7 +337,7 @@ public class ApplicationsTabService implements TabService {
             return respondents;
         }
         List<Element<PartyDetails>> tempRespondents = new ArrayList<>(localCaseData.getRespondents());
-        log.info("*** Respondents 1 {}", tempRespondents);
+        log.info("*** Respondents 1 {}", caseData.getRespondents());
         List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(tempRespondents);
         log.info("*** Respondents 2 {}", caseData.getRespondents());
         for (Element<PartyDetails> respondent : currentRespondents) {
