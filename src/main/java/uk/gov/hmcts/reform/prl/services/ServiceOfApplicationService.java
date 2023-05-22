@@ -383,7 +383,7 @@ public class ServiceOfApplicationService {
                         );
                         docPackFlag = "B";
                         serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(authorization,caseDetails,
-                                                                                                    respondentFL401,
+                                                                                                    applicantFL401,
                                                                                                     EmailTemplateNames.APPLICANT_SOLICITOR_DA,
                                                                                                    getNotificationPack(authorization, caseData,
                                                                                                                        docPackFlag, EMAIL)
