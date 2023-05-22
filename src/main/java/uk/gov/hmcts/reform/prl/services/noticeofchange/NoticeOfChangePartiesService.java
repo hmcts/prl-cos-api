@@ -192,6 +192,7 @@ public class NoticeOfChangePartiesService {
         UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
             authorisation
         );
+        log.info("caseDetails for applyDecision ==>" + caseDetails);
         log.info("legalRepresentativeSolicitorDetails ===> " + legalRepresentativeSolicitorDetails.getId() + "--"
                      + legalRepresentativeSolicitorDetails.getEmail() + "--"
                      + legalRepresentativeSolicitorDetails.getFullName()
