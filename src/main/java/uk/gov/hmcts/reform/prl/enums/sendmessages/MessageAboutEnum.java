@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.enums.sendmessages;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -26,6 +27,7 @@ public enum MessageAboutEnum {
         return displayedValue;
     }
 
+    @JsonCreator
     public static MessageAboutEnum getValue(String key) {
         return MessageAboutEnum.valueOf(key);
     }

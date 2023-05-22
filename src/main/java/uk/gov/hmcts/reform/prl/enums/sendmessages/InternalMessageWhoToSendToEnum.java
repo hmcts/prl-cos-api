@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.enums.sendmessages;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -26,6 +27,7 @@ public enum InternalMessageWhoToSendToEnum {
         return displayedValue;
     }
 
+    @JsonCreator
     public static InternalMessageWhoToSendToEnum getValue(String key) {
         return InternalMessageWhoToSendToEnum.valueOf(key);
     }
