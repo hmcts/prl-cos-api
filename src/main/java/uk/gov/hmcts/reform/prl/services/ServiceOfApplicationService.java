@@ -414,7 +414,7 @@ public class ServiceOfApplicationService {
                 }
             } else {
                 log.info("The respondent is unrepresented");
-                if(respondentFL401.getEmail() != null) {
+                if (respondentFL401.getEmail() != null) {
                     fl401CaseInviteService.generateAndSendCaseInviteForFL401Respondent(caseData, respondentFL401);
                 }
             }
