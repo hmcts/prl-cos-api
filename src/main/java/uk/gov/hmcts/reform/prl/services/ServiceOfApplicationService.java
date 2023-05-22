@@ -259,8 +259,7 @@ public class ServiceOfApplicationService {
             log.info("applicant FL401 sol email" + applicant.getSolicitorEmail());
             log.info("soa applicant list  FL401" + caseData.getServiceOfApplication().getSoaApplicantsList().getValue());
             String docPackFlag = "";
-            if (caseData.getServiceOfApplication().getSoaApplicantsList().getValue().contains(applicant) && YesOrNo.Yes.getDisplayedValue()
-                    .equalsIgnoreCase(applicant.getSolicitorEmail())) {
+            if (YesOrNo.Yes.getDisplayedValue().equalsIgnoreCase(applicant.getSolicitorEmail())) {
                 try {
                     log.info("Sending the email notification to applicant solicitor for FL401 Application for caseId {}", caseDetails.getId());
                     docPackFlag = "A";
@@ -271,8 +270,7 @@ public class ServiceOfApplicationService {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if (caseData.getServiceOfApplication().getSoaApplicantsList().getValue().contains(applicant) && YesOrNo.No.getDisplayedValue()
-                .equalsIgnoreCase(applicant.getSolicitorEmail())) {
+            } else if (YesOrNo.No.getDisplayedValue().equalsIgnoreCase(applicant.getSolicitorEmail())) {
                 if (applicant.getSolicitorAddress() != null) {
                     log.info("Sending the notification in post to applicant solicitor for FL401 Application for caseId {}", caseDetails.getId());
                     docPackFlag = "A";
@@ -374,8 +372,7 @@ public class ServiceOfApplicationService {
             log.info("applicantFL401  sol email" + applicantFL401.getSolicitorEmail());
             log.info("soa resp list  FL401" + caseData.getServiceOfApplication().getSoaRespondentsList().getValue());
 
-            if (caseData.getServiceOfApplication().getSoaRespondentsList().getValue().contains(respondentFL401)
-                && YesNoDontKnow.yes.equals(applicantFL401.getDoTheyHaveLegalRepresentation())) {
+            if (YesNoDontKnow.yes.equals(applicantFL401.getDoTheyHaveLegalRepresentation())) {
                 if (YesOrNo.Yes.getDisplayedValue().equalsIgnoreCase(applicantFL401.getSolicitorEmail())) {
                     try {
                         log.info(
