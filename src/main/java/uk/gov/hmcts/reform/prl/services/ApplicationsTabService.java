@@ -94,9 +94,7 @@ import java.util.stream.Collectors;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_AND_CAFCASS_OFFICER_DETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -119,8 +117,7 @@ public class ApplicationsTabService implements TabService {
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
             applicationTab.put("applicantTable", getApplicantsTable(caseData));
-            applicationTab.put("respondentTable", getRespondentsTable(caseData));
-            log.info("*** casedata after table {}", caseData);
+            applicationTab.put(C100_RESPONDENT_TABLE, getRespondentsTable(caseData));
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
             applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
             applicationTab.put("allegationsOfHarmOverviewTable", getAllegationsOfHarmOverviewTable(caseData));
@@ -328,6 +325,7 @@ public class ApplicationsTabService implements TabService {
 
     public List<Element<Respondent>> getRespondentsTable(CaseData caseData) {
         List<Element<Respondent>> respondents = new ArrayList<>();
+        log.info("*** Respondents 1 {}", caseData.getRespondents());
         Optional<List<Element<PartyDetails>>> checkRespondents = ofNullable(caseData.getRespondents());
         if (checkRespondents.isEmpty()) {
             respondents.add(Element.<Respondent>builder().value(Respondent.builder().build()).build());
@@ -339,6 +337,7 @@ public class ApplicationsTabService implements TabService {
             Element<Respondent> app = Element.<Respondent>builder().id(respondent.getId()).value(a).build();
             respondents.add(app);
         }
+        log.info("*** Respondents 2 {}", caseData.getRespondents());
         return respondents;
     }
 
