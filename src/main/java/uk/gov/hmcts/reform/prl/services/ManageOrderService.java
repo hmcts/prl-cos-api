@@ -990,7 +990,7 @@ public class ManageOrderService {
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-            orderCollection.stream()
+            caseData.getOrderCollection().stream()
                 .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-"
                                                                + order.getValue().getDateCreated()))
                 .forEach(order -> {
@@ -1208,7 +1208,6 @@ public class ManageOrderService {
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, order);
-                        dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData,order);
                     } else {
                         servedFL401Order(caseData, orders, order);
                     }
