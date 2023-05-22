@@ -11,11 +11,8 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.CaseRole;
@@ -90,12 +87,11 @@ public class NoticeOfChangePartiesService {
     private final AllTabServiceImpl tabService;
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
     private final Time time;
-    private final CcdCoreCaseDataService ccdCoreCaseDataService;
-
-    private final CcdDataStoreService userDataStoreService;
+    private final CcdDataStoreService ccdDataStoreService;
     private final SystemUserService systemUserService;
 
     private final CaseInviteManager caseInviteManager;
+    private final IdamClient idamClient;
 
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing) {
         return generate(caseData, representing, POPULATE);
@@ -221,7 +217,7 @@ public class NoticeOfChangePartiesService {
         UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
             authorisation
         );
-        log.info("legalRepresentativeSolicitorDetails ===> " + legalRepresentativeSolicitorDetails.getId() + "--"
+        log.info("legalRepresentativeSolicitorDetails before ===> " + legalRepresentativeSolicitorDetails.getId() + "--"
                      + legalRepresentativeSolicitorDetails.getEmail() + "--"
                      + legalRepresentativeSolicitorDetails.getFullName()
         );
@@ -233,39 +229,14 @@ public class NoticeOfChangePartiesService {
             TypeOfNocEventEnum.addLegalRepresentation
         );
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
+        tabService.updatePartyDetailsForNoc(newCaseData, solicitorRole, null);
 
-        String systemAuthorisation = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
-        EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
-            CaseEvent.UPDATE_ALL_TABS,
-            systemUpdateUserId
-        );
-        StartEventResponse allTabsUpdateStartEventResponse =
-            ccdCoreCaseDataService.startUpdate(
-                authorisation,
-                allTabsUpdateEventRequestData,
-                String.valueOf(newCaseData.getId()),
-                true
-            );
-
-        CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
-            allTabsUpdateStartEventResponse,
-            objectMapper
-        );
-        log.info(
-            "Refreshing tab for caseid {} ",
-            newCaseData.getId()
-        );
-
-        tabService.updateAllTabsIncludingConfTabRefactored(
+        legalRepresentativeSolicitorDetails = getSolictiorUserDetails(
             authorisation,
-            String.valueOf(newCaseData.getId()),
-            allTabsUpdateStartEventResponse,
-            allTabsUpdateEventRequestData,
-            allTabsUpdateCaseData
+            newCaseData,
+            legalRepresentativeSolicitorDetails,
+            solicitorRole
         );
-        // tabService.updatePartyDetailsForNoc(newCaseData, solicitorRole, null);
-
         String solicitorName = legalRepresentativeSolicitorDetails.getFullName();
 
         if (changeOrganisationRequest != null) {
@@ -281,6 +252,25 @@ public class NoticeOfChangePartiesService {
         }
 
         eventPublisher.publishEvent(new CaseDataChanged(newCaseData));
+    }
+
+    private UserDetails getSolictiorUserDetails(String authorisation, CaseData newCaseData,
+                                                UserDetails legalRepresentativeSolicitorDetails, Optional<SolicitorRole> solicitorRole) {
+        FindUserCaseRolesResponse findUserCaseRolesResponse
+            = findUserCaseRoles(String.valueOf(newCaseData.getId()), authorisation);
+        if (null != findUserCaseRolesResponse && solicitorRole.isPresent()) {
+            for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
+                if (caseUser.getCaseRole().equalsIgnoreCase(solicitorRole.get().getCaseRoleLabel())) {
+                    String userToken = systemUserService.getSysUserToken();
+                    legalRepresentativeSolicitorDetails = idamClient.getUserByUserId(userToken, caseUser.getUserId());
+                    log.info("legalRepresentativeSolicitorDetails after ===> " + legalRepresentativeSolicitorDetails.getId() + "--"
+                                 + legalRepresentativeSolicitorDetails.getEmail() + "--"
+                                 + legalRepresentativeSolicitorDetails.getFullName()
+                    );
+                }
+            }
+        }
+        return legalRepresentativeSolicitorDetails;
     }
 
     private CaseData updateRepresentedPartyDetails(ChangeOrganisationRequest changeOrganisationRequest,
@@ -515,16 +505,10 @@ public class NoticeOfChangePartiesService {
                             );
                             break;
                         case DAAPPLICANT:
-                            selectedPartyDetailsMap.put(
-                                SolicitorRole.FL401APPLICANTSOLICITOR,
-                                caseData.getApplicantsFL401()
-                            );
+                            selectedPartyDetailsMap.put(SolicitorRole.FL401APPLICANTSOLICITOR, caseData.getApplicantsFL401());
                             break;
                         case DARESPONDENT:
-                            selectedPartyDetailsMap.put(
-                                SolicitorRole.FL401RESPONDENTSOLICITOR,
-                                caseData.getRespondentsFL401()
-                            );
+                            selectedPartyDetailsMap.put(SolicitorRole.FL401RESPONDENTSOLICITOR, caseData.getRespondentsFL401());
                             break;
                         default:
                             break;
@@ -855,7 +839,7 @@ public class NoticeOfChangePartiesService {
 
     private FindUserCaseRolesResponse findUserCaseRoles(String caseId, String authorisation) {
         log.info("findUserCaseRoles : caseId is:: " + caseId);
-        FindUserCaseRolesResponse findUserCaseRolesResponse = userDataStoreService.findUserCaseRoles(
+        FindUserCaseRolesResponse findUserCaseRolesResponse = ccdDataStoreService.findUserCaseRoles(
             caseId,
             authorisation
         );
