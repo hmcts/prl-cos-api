@@ -439,8 +439,8 @@ public class ApplicationsTabServiceTest {
 
         assertEquals(1, List.of(partyDetails1).size());
         assertEquals(
-            List.of(expectedPartDetails),
-            applicationsTabService.maskConfidentialDetails(List.of(element(partyDetails1)))
+            List.of(getElement(expectedPartDetails)),
+            applicationsTabService.maskConfidentialDetails(List.of(getElement(partyDetails1)))
         );
     }
 
@@ -1457,6 +1457,11 @@ public class ApplicationsTabServiceTest {
         assertNotNull(applicationsTabService.updateTab(caseDataWithParties));
     }
 
-
+    private Element<PartyDetails> getElement(PartyDetails partyDetails) {
+        return Element.<PartyDetails>builder()
+            .id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+            .value(partyDetails)
+            .build();
+    }
 
 }
