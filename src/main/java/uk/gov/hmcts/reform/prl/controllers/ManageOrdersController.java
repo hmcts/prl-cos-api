@@ -311,9 +311,8 @@ public class ManageOrdersController {
             ));
         }
 
-        caseDataUpdated.putAll(dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData));
+        caseDataUpdated.put("children", dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData));
         log.info("Children list after updating the isFinalOrderIssued flag in child {}", caseDataUpdated.get("children"));
-
         manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
         manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
