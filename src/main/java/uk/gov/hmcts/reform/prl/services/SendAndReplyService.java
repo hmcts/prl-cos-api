@@ -76,6 +76,7 @@ public class SendAndReplyService {
 
     public static final String SEND_AND_REPLY_CATEGORY_ID = "sendAndReply";
     public static final String SEND_MESSAGE_OBJECT = "sendMessageObject";
+    public static final String REPLY_MESSAGE_OBJECT = "replyMessageObject";
     private final EmailService emailService;
 
     private final UserService userService;
@@ -954,6 +955,18 @@ public class SendAndReplyService {
             if (!MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS.equals(sendMessageObject.getMessageAbout())) {
                 sendMessageObject.setSubmittedDocumentsList(DynamicList.builder()
                                                                       .value(DynamicListElement.EMPTY).build());
+            }
+        }
+
+        if (caseDataMap.containsKey(REPLY_MESSAGE_OBJECT)) {
+            final Message replyMessageObject = (Message) caseDataMap.get(REPLY_MESSAGE_OBJECT);
+            if (!InternalMessageWhoToSendToEnum.JUDICIARY.equals(replyMessageObject.getInternalMessageWhoToSendTo())) {
+                replyMessageObject.setJudicialOrMagistrateTierList(DynamicList.builder()
+                                                                      .value(DynamicListElement.EMPTY).build());
+            }
+            if (!InternalMessageWhoToSendToEnum.OTHER.equals(replyMessageObject.getInternalMessageWhoToSendTo())) {
+                replyMessageObject.setCtscEmailList(DynamicList.builder()
+                                                       .value(DynamicListElement.EMPTY).build());
             }
         }
     }
