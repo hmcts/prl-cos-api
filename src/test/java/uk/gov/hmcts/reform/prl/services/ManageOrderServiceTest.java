@@ -1638,6 +1638,7 @@ public class ManageOrderServiceTest {
             .build();
 
         ManageOrders manageOrders = ManageOrders.builder()
+            .otherParties(dynamicMultiSelectList)
             .cafcassServedOptions(YesOrNo.Yes)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
@@ -1656,12 +1657,80 @@ public class ManageOrderServiceTest {
                                                  Address.builder().postCode("NE65LA").build()).build()).build()))
             .build();
 
+        OrderDetails orderDetails = OrderDetails.builder().typeOfOrder("kkkkk").dateCreated(LocalDateTime.now()).build();
+        Element<OrderDetails> orders1 = element(orderDetails);
         Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
                                                                                           .builder()
+                                                                                          .orderTypeId(TEST_UUID)
                                                                                           .orderDocument(Document
                                                                                                              .builder()
                                                                                                              .build())
-                                                                                          .dateCreated(dateTime.now())
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderList)
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+
+    }
+
+    @Test
+    public void testServeOrderCaCafcassServedOptionsYesAndOtherPartiesOnlyC47a() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .otherPartiesOnlyC47a(dynamicMultiSelectList)
+            .cafcassServedOptions(YesOrNo.Yes)
+            .serveOrderDynamicList(dynamicMultiSelectList)
+            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+                                                       .value(Document.builder().documentFileName(
+                                                           "abc.pdf").build())
+                                                       .build()))
+            .serveToRespondentOptions(YesOrNo.Yes)
+            .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
+            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .cafcassCymruEmail("test")
+            .deliveryByOptionsCA(DeliveryByEnum.post)
+            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                            .value(EmailInformation.builder().emailAddress("test").build()).build()))
+            .postalInformationCA(List.of(Element.<PostalInformation>builder()
+                                             .value(PostalInformation.builder().postalAddress(
+                                                 Address.builder().postCode("NE65LA").build()).build()).build()))
+            .build();
+
+        OrderDetails orderDetails = OrderDetails.builder().typeOfOrder("kkkkk").dateCreated(LocalDateTime.now()).build();
+        Element<OrderDetails> orders1 = element(orderDetails);
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .orderType("null")
+                                                                                          .orderTypeId(TEST_UUID)
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
                                                                                           .otherDetails(
                                                                                               OtherOrderDetails.builder().build())
                                                                                           .build()).build();
@@ -2377,7 +2446,6 @@ public class ManageOrderServiceTest {
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
 
-
     @Test
     public void testPopulatePreviewOrder() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -2437,8 +2505,12 @@ public class ManageOrderServiceTest {
         ReflectionTestUtils.setField(manageOrderService, "c21DraftWelshTemplate", "c21DraftWelshTemplate");
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails
             = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().data(stringObjectMap).build();
+
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsBefore
+            = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().data(stringObjectMap).build();
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetailsBefore)
             .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2789,49 +2861,6 @@ public class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         manageOrderService.resetChildOptions(callbackRequest);
         Assert.assertNotNull(null,callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
-    }
-
-
-    @Test
-    public void testPopulateCafcassCymruEmailInManageOrdersRegion() {
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicantCaseName("Test Case 45678")
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .fl401FamilymanCaseNumber("familyman12345")
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
-            .manageOrders(manageOrders)
-            .caseManagementLocation(CaseManagementLocation.builder().region("region1").baseLocation("baseLoc1").build())
-            .build();
-        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
-
-        String welshCourtEmails = "baseLoc1--region1--baseName1--test1@test.com, baseLoc2--regiond2--baseName2--test2@test.com";
-        when(welshCourtEmail.getWelshCourtEmailMapping()).thenReturn(welshCourtEmails);
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-    }
-
-    @Test
-    public void testPopulateCafcassCymruEmailInManageOrdersWithRegionId() {
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicantCaseName("Test Case 45678")
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .fl401FamilymanCaseNumber("familyman12345")
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
-            .manageOrders(manageOrders)
-            .caseManagementLocation(CaseManagementLocation.builder().regionId("regiondId1").baseLocationId("baseLocId1").build())
-            .build();
-        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
-
-        String welshCourtEmails = "baseLocId1--regiondId1--baseName1--test1@test.com, baseLocId2--regiondId2--baseName2--test2@test.com";
-        when(welshCourtEmail.getWelshCourtEmailMapping()).thenReturn(welshCourtEmails);
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
     }
 
     @Test
