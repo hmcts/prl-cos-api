@@ -97,9 +97,9 @@ public class DynamicMultiSelectListService {
             if (children != null) {
                 children.forEach(child -> {
                     String childName = child.getValue().getFirstName() + " " + child.getValue().getLastName();
-                    log.info("Child name from the children:: {}", childName);
+                    log.info("Child name from the children::{};;", childName);
                     childrenList.forEach(value -> {
-                        log.info("Child name from the order childrenlist:: {}", value);
+                        log.info("Child name from the order childrenlist::{};;;", value);
                         if (childName.equalsIgnoreCase(value)) {
                             child.getValue().setIsFinalOrderIssued(Yes);
                             log.info("Child Element is finalOrderIssued:: {} ", child.getValue().getIsFinalOrderIssued());
