@@ -160,9 +160,7 @@ public class AllTabServiceImpl implements AllTabsService {
     private Map<String, Object> getCombinedMap(CaseData caseData) {
         Map<String, Object> applicationTabFields = applicationsTabService.updateTab(
             caseData);
-        log.info("*** 1 Respondents *** {}", caseData.getRespondents());
         Map<String, Object> summaryTabFields = caseSummaryTabService.updateTab(caseData);
-        log.info("*** 2 Respondents *** {}", caseData.getRespondents());
         return Stream.concat(
             applicationTabFields.entrySet().stream(),
             summaryTabFields.entrySet().stream()
