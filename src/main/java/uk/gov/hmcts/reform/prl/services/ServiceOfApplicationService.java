@@ -255,6 +255,9 @@ public class ServiceOfApplicationService {
             );
         } else {
             PartyDetails applicant = caseData.getApplicantsFL401();
+            log.info("applicant FL401" + applicant);
+            log.info("applicant FL401 sol email" + applicant.getSolicitorEmail());
+            log.info("soa applicant list  FL401" + caseData.getServiceOfApplication().getSoaApplicantsList().getValue());
             String docPackFlag = "";
             if (caseData.getServiceOfApplication().getSoaApplicantsList().getValue().contains(applicant) && YesOrNo.Yes.getDisplayedValue()
                     .equalsIgnoreCase(applicant.getSolicitorEmail())) {
@@ -367,6 +370,10 @@ public class ServiceOfApplicationService {
             String docPackFlag = "";
             PartyDetails respondentFL401 = caseData.getRespondentsFL401();
             PartyDetails applicantFL401 = caseData.getApplicantsFL401();
+            log.info("respondentFL401 FL401" + respondentFL401);
+            log.info("applicantFL401  sol email" + applicantFL401.getSolicitorEmail());
+            log.info("soa resp list  FL401" + caseData.getServiceOfApplication().getSoaRespondentsList().getValue());
+
             if (caseData.getServiceOfApplication().getSoaRespondentsList().getValue().contains(respondentFL401)
                 && YesNoDontKnow.yes.equals(applicantFL401.getDoTheyHaveLegalRepresentation())) {
                 if (YesOrNo.Yes.getDisplayedValue().equalsIgnoreCase(applicantFL401.getSolicitorEmail())) {
