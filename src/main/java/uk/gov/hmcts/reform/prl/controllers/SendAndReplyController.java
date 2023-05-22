@@ -38,6 +38,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
@@ -66,6 +67,9 @@ public class SendAndReplyController extends AbstractCallbackController {
     AllTabServiceImpl allTabService;
 
     public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n A judge will review your message and advise.";
+
+    public static final String OPEN_MESSAGES_LIST = "openMessagesList";
+    public static final String CLOSED_MESSAGES_LIST = "closedMessagesList";
 
 
     @PostMapping("/about-to-start")
@@ -247,26 +251,26 @@ public class SendAndReplyController extends AbstractCallbackController {
 
             if (MessageAboutEnum.OTHER.equals(newMessage.getMessageAbout())) {
                 List<Element<Message>> closedMessages = new ArrayList<>();
-                log.info("Close Message Other before ---> {}", caseData.getSendOrReplyMessage().getClosedMessagesList());
-                closedMessages.addAll(caseData.getSendOrReplyMessage().getClosedMessagesList());
+                if (isNotEmpty(caseData.getSendOrReplyMessage().getClosedMessagesList())) {
+                    closedMessages.addAll(caseData.getSendOrReplyMessage().getClosedMessagesList());
+                }
                 closedMessages.add(element(newMessage));
-                log.info("Close Message Other After ---> {}", closedMessages);
-                caseDataMap.put("closedMessagesList", closedMessages);
+                caseDataMap.put(CLOSED_MESSAGES_LIST, closedMessages);
 
             } else {
                 List<Element<Message>> listOfMessages = sendAndReplyService.addNewOpenMessage(caseData, newMessage);
-                caseDataMap.put("openMessagesList", listOfMessages);
+                caseDataMap.put(OPEN_MESSAGES_LIST, listOfMessages);
             }
 
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
                 caseData = sendAndReplyService.closeMessage(caseData);
-                caseDataMap.put("closedMessagesList", caseData.getSendOrReplyMessage().getClosedMessagesList());
-                caseDataMap.put("openMessagesList", caseData.getSendOrReplyMessage().getOpenMessagesList());
+                caseDataMap.put(CLOSED_MESSAGES_LIST, caseData.getSendOrReplyMessage().getClosedMessagesList());
+                caseDataMap.put(OPEN_MESSAGES_LIST, caseData.getSendOrReplyMessage().getOpenMessagesList());
             } else {
                 //Reply & append history
-                caseDataMap.put("openMessagesList", sendAndReplyService.replyAndAppendMessageHistory(caseData));
+                caseDataMap.put(OPEN_MESSAGES_LIST, sendAndReplyService.replyAndAppendMessageHistory(caseData));
             }
         }
 
