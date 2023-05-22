@@ -303,7 +303,10 @@ public class ApplicationsTabService implements TabService {
                 party.getValue().setPhoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL);
             }
             if ((YesOrNo.Yes).equals(party.getValue().getIsEmailAddressConfidential())) {
-                party.getValue().setEmail(THIS_INFORMATION_IS_CONFIDENTIAL);
+                party = Element.<PartyDetails>builder()
+                    .value(party.getValue().toBuilder().email(THIS_INFORMATION_IS_CONFIDENTIAL).build())
+                    .id(party.getId())
+                    .build();
             }
             if ((YesOrNo.Yes).equals(party.getValue().getIsAddressConfidential())) {
                 party.getValue().setAddress(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build());
