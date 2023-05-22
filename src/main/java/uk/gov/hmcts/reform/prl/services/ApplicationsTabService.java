@@ -297,8 +297,8 @@ public class ApplicationsTabService implements TabService {
     }
 
     public List<Element<PartyDetails>> maskConfidentialDetails(List<Element<PartyDetails>> parties) {
-        List<Element<PartyDetails>> updatedPartyDetails = new ArrayList<>();
-        for (Element<PartyDetails> party : parties) {
+        List<Element<PartyDetails>> updatedPartyDetails = parties;
+        for (Element<PartyDetails> party : updatedPartyDetails) {
             if ((YesOrNo.Yes).equals(party.getValue().getIsPhoneNumberConfidential())) {
                 party.getValue().setPhoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL);
             }
@@ -308,7 +308,6 @@ public class ApplicationsTabService implements TabService {
             if ((YesOrNo.Yes).equals(party.getValue().getIsAddressConfidential())) {
                 party.getValue().setAddress(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build());
             }
-            updatedPartyDetails.add(party);
         }
         return updatedPartyDetails;
     }
