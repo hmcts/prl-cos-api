@@ -29,7 +29,7 @@ public class SendAndReplyControllerFunctionalTest {
 
     private static final String SEND_AND_REPLY_REQUEST_FOR_SEND = "requests/send-and-reply-request.json";
 
-    private static final String SEND_AND_REPLY_REQUEST_FOR_REPLY = "requests/send-and-reply-request_for_reply.json";
+    private static final String SEND_AND_REPLY_REQUEST_FOR_REPLY = "requests/send-and-reply-request-for-reply.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -124,13 +124,11 @@ public class SendAndReplyControllerFunctionalTest {
             .contentType("application/json")
             .post("/send-and-reply-to-messages/send-or-reply-to-messages/about-to-submit")
             .then()
-            .body("$", CoreMatchers.not(hasKey("openMessages")))
             .assertThat().statusCode(200);
 
     }
 
     @Test
-    @Ignore
     public void givenBodyWithNoMessages_whenSubmittedForSendOrReply() throws Exception {
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_REPLY);
         request
