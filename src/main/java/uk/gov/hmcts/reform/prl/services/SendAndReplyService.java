@@ -590,7 +590,8 @@ public class SendAndReplyService {
 
         return Message.builder()
             // in case of Other, change status to Close while sending message
-            .status(MessageAboutEnum.OTHER.equals(message.getMessageAbout()) ? CLOSED : OPEN)
+            .status(InternalMessageWhoToSendToEnum.OTHER
+                        .equals(message.getInternalMessageWhoToSendTo()) ? CLOSED : OPEN)
             .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
             .internalOrExternalMessage(message.getInternalOrExternalMessage())
             .internalMessageUrgent(message.getInternalMessageUrgent())
@@ -775,12 +776,9 @@ public class SendAndReplyService {
                         //   lines.add("<tr><td><ccd-read-document-field class=\"ng-star-inserted\">" + history.getSelectedDocument()
                     //                                      + "</ccd-read-document-field></td></tr>");
                     }
-                    addRowToMessageTable(lines, "Are you sending an internal message?", history.getInternalOrExternalMessageEnum() != null
-                        ? history.getInternalOrExternalMessageEnum().name() : null);
-                    addRowToMessageTable(lines, "Who to send to", history.getInternalMessageWhoToSendToEnum() != null
-                        ? history.getInternalMessageWhoToSendToEnum().name() : null);
-                    addRowToMessageTable(lines, "Message about?", history.getMessageAboutEnum() != null
-                        ? history.getMessageAboutEnum().name() : null);
+                    addRowToMessageTable(lines, "Are you sending an internal message?", history.getInternalOrExternalMessage());
+                    addRowToMessageTable(lines, "Who to send to", history.getInternalMessageWhoToSendTo());
+                    addRowToMessageTable(lines, "Message about?", history.getMessageAbout());
                     addRowToMessageTable(lines, "Selected Future Hearing", history.getSelectedFutureHearingValue());
                     addRowToMessageTable(lines, "Selected Application", history.getSelectedApplicationValue());
                     lines.add("</table>");
@@ -914,9 +912,12 @@ public class SendAndReplyService {
             .messageSubject(message.getMessageSubject())
             .isUrgent(message.getInternalMessageUrgent())
             .messageContent(message.getMessageContent())
-            .internalMessageWhoToSendToEnum(message.getInternalMessageWhoToSendTo())
-            .internalOrExternalMessageEnum(message.getInternalOrExternalMessage())
-            .messageAboutEnum(message.getMessageAbout())
+            .internalMessageWhoToSendTo(null != message.getInternalMessageWhoToSendTo()
+                                            ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null)
+            .internalOrExternalMessage(null != message.getInternalOrExternalMessage()
+                                           ? message.getInternalOrExternalMessage().getDisplayedValue() : null)
+            .messageAbout(null != message.getMessageAbout()
+                              ? message.getMessageAbout().getDisplayedValue() : null)
             .judgeName(message.getJudgeName())
             .recipientEmailAddresses(message.getRecipientEmailAddresses())
             .selectedCtscEmail(message.getSelectedCtscEmail())
@@ -937,11 +938,13 @@ public class SendAndReplyService {
                 && null != sendMessageObject.getJudicialOrMagistrateTierList()) {
                 sendMessageObject.setJudicialOrMagistrateTierList(sendMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
+                sendMessageObject.setSendReplyJudgeName(JudicialUser.builder().build());
             }
             if (!InternalMessageWhoToSendToEnum.OTHER.equals(sendMessageObject.getInternalMessageWhoToSendTo())
                 && null != sendMessageObject.getCtscEmailList()) {
                 sendMessageObject.setCtscEmailList(sendMessageObject.getCtscEmailList().toBuilder()
                                                        .value(DynamicListElement.EMPTY).build());
+                sendMessageObject.setRecipientEmailAddresses(null);
             }
             if (!MessageAboutEnum.APPLICATION.equals(sendMessageObject.getMessageAbout())
                 && null != sendMessageObject.getApplicationsList()) {
@@ -966,11 +969,13 @@ public class SendAndReplyService {
                 && null != replyMessageObject.getJudicialOrMagistrateTierList()) {
                 replyMessageObject.setJudicialOrMagistrateTierList(replyMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
+                replyMessageObject.setSendReplyJudgeName(JudicialUser.builder().build());
             }
             if (!InternalMessageWhoToSendToEnum.OTHER.equals(replyMessageObject.getInternalMessageWhoToSendTo())
                 && null != replyMessageObject.getCtscEmailList()) {
                 replyMessageObject.setCtscEmailList(replyMessageObject.getCtscEmailList().toBuilder()
                                                        .value(DynamicListElement.EMPTY).build());
+                replyMessageObject.setRecipientEmailAddresses(null);
             }
         }
 
