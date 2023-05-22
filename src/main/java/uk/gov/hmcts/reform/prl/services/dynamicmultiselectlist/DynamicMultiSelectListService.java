@@ -84,7 +84,7 @@ public class DynamicMultiSelectListService {
         return existingChildListItems;
     }
 
-    public void updateChildrenWithCaseCloseStatus(CaseData caseData, Element<OrderDetails> order) {
+    public List<Element<Child>> updateChildrenWithCaseCloseStatus(CaseData caseData, Element<OrderDetails> order) {
 
         List<Element<Child>> children = caseData.getChildren();
         String childrenFromOrder = order.getValue().getChildrenList();
@@ -109,7 +109,7 @@ public class DynamicMultiSelectListService {
                 });
             }
         }
-        log.info("Children value for isfinalorderissued is set::{{}", caseData.getChildren());
+        return children;
     }
 
     public Map<String, List<DynamicMultiselectListElement>> getRespondentsMultiSelectList(CaseData caseData) {

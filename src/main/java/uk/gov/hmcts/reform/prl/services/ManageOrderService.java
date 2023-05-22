@@ -988,8 +988,19 @@ public class ManageOrderService {
             }
         } else {
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
-        }
+            List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
+            orderCollection.stream()
+                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-"
+                                                               + order.getValue().getDateCreated()))
+                .forEach(order -> {
+                    if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
 
+                        orderMap.put("children", dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData, order));
+                    }
+                });
+            log.info("Children list after updating the isFinalOrderIssued flag in child {}", orderMap.get("children"));
+        }
         orderMap.put("orderCollection", orderCollection);
         return orderMap;
     }
