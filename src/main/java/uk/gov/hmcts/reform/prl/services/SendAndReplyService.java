@@ -933,23 +933,28 @@ public class SendAndReplyService {
         Message replyMessageObject = null;
         if (null != caseData.getSendOrReplyMessage().getSendMessageObject()) {
             sendMessageObject = caseData.getSendOrReplyMessage().getSendMessageObject();
-            if (!InternalMessageWhoToSendToEnum.JUDICIARY.equals(sendMessageObject.getInternalMessageWhoToSendTo())) {
+            if (!InternalMessageWhoToSendToEnum.JUDICIARY.equals(sendMessageObject.getInternalMessageWhoToSendTo())
+                && null != sendMessageObject.getJudicialOrMagistrateTierList()) {
                 sendMessageObject.setJudicialOrMagistrateTierList(sendMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
             }
-            if (!InternalMessageWhoToSendToEnum.OTHER.equals(sendMessageObject.getInternalMessageWhoToSendTo())) {
+            if (!InternalMessageWhoToSendToEnum.OTHER.equals(sendMessageObject.getInternalMessageWhoToSendTo())
+                && null != sendMessageObject.getCtscEmailList()) {
                 sendMessageObject.setCtscEmailList(sendMessageObject.getCtscEmailList().toBuilder()
                                                        .value(DynamicListElement.EMPTY).build());
             }
-            if (!MessageAboutEnum.APPLICATION.equals(sendMessageObject.getMessageAbout())) {
+            if (!MessageAboutEnum.APPLICATION.equals(sendMessageObject.getMessageAbout())
+                && null != sendMessageObject.getApplicationsList()) {
                 sendMessageObject.setApplicationsList(sendMessageObject.getApplicationsList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
             }
-            if (!MessageAboutEnum.HEARING.equals(sendMessageObject.getMessageAbout())) {
+            if (!MessageAboutEnum.HEARING.equals(sendMessageObject.getMessageAbout())
+                && null != sendMessageObject.getFutureHearingsList()) {
                 sendMessageObject.setFutureHearingsList(sendMessageObject.getFutureHearingsList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
             }
-            if (!MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS.equals(sendMessageObject.getMessageAbout())) {
+            if (!MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS.equals(sendMessageObject.getMessageAbout())
+                && null != sendMessageObject.getSubmittedDocumentsList()) {
                 sendMessageObject.setSubmittedDocumentsList(sendMessageObject.getSubmittedDocumentsList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
             }
@@ -957,11 +962,13 @@ public class SendAndReplyService {
 
         if (null != caseData.getSendOrReplyMessage().getReplyMessageObject()) {
             replyMessageObject = caseData.getSendOrReplyMessage().getReplyMessageObject();
-            if (!InternalMessageWhoToSendToEnum.JUDICIARY.equals(replyMessageObject.getInternalMessageWhoToSendTo())) {
+            if (!InternalMessageWhoToSendToEnum.JUDICIARY.equals(replyMessageObject.getInternalMessageWhoToSendTo())
+                && null != replyMessageObject.getJudicialOrMagistrateTierList()) {
                 replyMessageObject.setJudicialOrMagistrateTierList(replyMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
             }
-            if (!InternalMessageWhoToSendToEnum.OTHER.equals(replyMessageObject.getInternalMessageWhoToSendTo())) {
+            if (!InternalMessageWhoToSendToEnum.OTHER.equals(replyMessageObject.getInternalMessageWhoToSendTo())
+                && null != replyMessageObject.getCtscEmailList()) {
                 replyMessageObject.setCtscEmailList(replyMessageObject.getCtscEmailList().toBuilder()
                                                        .value(DynamicListElement.EMPTY).build());
             }
