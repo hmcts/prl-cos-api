@@ -762,7 +762,7 @@ public class C100RespondentSolicitorService {
                 false,
                 dataMap
             );
-            caseDataUpdated.put("draftC8Doc", documentForC8);
+            caseDataUpdated.put("draftC8ResponseDoc", documentForC8);
         }
 
         return caseDataUpdated;
