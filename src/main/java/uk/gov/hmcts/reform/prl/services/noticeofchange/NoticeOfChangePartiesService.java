@@ -797,6 +797,7 @@ public class NoticeOfChangePartiesService {
         );
         if (null != caseInvite) {
             log.info("New pin generated for citizen after removing legal representation");
+            caseInvite = null != caseInvite.getPartyId() ? caseInvite : caseInvite.toBuilder().partyId(newPartyDetails.getId()).build();
             accessCode = caseInvite.getAccessCode();
             caseInvites.add(element(caseInvite));
         }
