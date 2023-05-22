@@ -167,7 +167,6 @@ public class ServiceOfApplicationPostService {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
-            log.info("inside");
             generatedDocumentInfo = dgsService.generateDocument(
                 auth,
                 CaseDetails.builder().caseData(caseData.toBuilder()

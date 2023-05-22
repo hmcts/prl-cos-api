@@ -155,7 +155,6 @@ public class ServiceOfApplicationService {
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             if ((caseData.getServiceOfApplication().getSoaApplicantsList() != null)
                 && (caseData.getServiceOfApplication().getSoaApplicantsList().getValue() != null)) {
-                log.info("serving applicants");
                 caseData = sendNotificationToApplicantSolicitor(caseDetails,authorization);
             }
             if ((caseData.getServiceOfApplication().getSoaRespondentsList() != null)
@@ -215,7 +214,6 @@ public class ServiceOfApplicationService {
     public CaseData sendNotificationToApplicantSolicitor(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            log.info("***In sendNotificationToApplicantSolicitor*** case type" + caseData.getCaseTypeOfApplication());
             List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
             List<DynamicMultiselectListElement> applicantsList = caseData.getServiceOfApplication().getSoaApplicantsList().getValue();
             applicantsList.forEach(applicant -> {

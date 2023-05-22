@@ -50,7 +50,6 @@ public class BulkPrintService {
             .map(docInfo -> getDocumentBytes(docInfo.getUrl(), userToken, s2sToken))
             .map(getEncoder()::encodeToString)
             .collect(toList());
-        log.info("*** Documents from bulk print service after stringify ***" + stringifiedDocuments);
         log.info("Sending {} for case {}", letterType, caseId);
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(
             s2sToken,

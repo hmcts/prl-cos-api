@@ -223,9 +223,9 @@ public class ServiceOfApplicationEmailService {
     public void sendEmailNotificationToCafcass(String authorization, CaseDetails caseDetails,
                                                    CaseData caseData, List<Document> docs) throws Exception {
         List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
-        log.info("**SERVING EMAIL TO CAFCASS**");
         if (caseData.getServiceOfApplication() != null && caseData.getServiceOfApplication().getSoaCafcassEmailAddressList() != null) {
             for (Element<String> element : caseData.getServiceOfApplication().getSoaCafcassEmailAddressList()) {
+                log.info("**SERVING EMAIL TO CAFCASS**");
                 String email = element.getValue();
                 emailService.send(
                     email,
