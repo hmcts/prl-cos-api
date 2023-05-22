@@ -995,7 +995,6 @@ public class ManageOrderService {
                                                                + order.getValue().getDateCreated()))
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-
                         orderMap.put("children", dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData, order));
                     }
                 });

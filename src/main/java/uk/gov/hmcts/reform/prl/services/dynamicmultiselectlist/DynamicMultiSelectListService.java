@@ -88,7 +88,7 @@ public class DynamicMultiSelectListService {
 
         List<Element<Child>> children = caseData.getChildren();
         String childrenFromOrder = order.getValue().getChildrenList();
-        List<String> childrenList = Arrays.asList(childrenFromOrder.trim().split(", "));
+        List<String> childrenList = Arrays.asList(childrenFromOrder.trim().split(","));
         log.info("Children list from the orderCollection :=========: {}", childrenList);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && finl.equals(caseData.getSelectTypeOfOrder())
@@ -100,7 +100,7 @@ public class DynamicMultiSelectListService {
                     log.info("Child name from the children::{};;", childName);
                     childrenList.forEach(value -> {
                         log.info("Child name from the order childrenlist::{};;;", value);
-                        if (childName.trim().equalsIgnoreCase(value.trim())) {
+                        if (childName.equalsIgnoreCase(value)) {
                             child.getValue().setIsFinalOrderIssued(Yes);
                             log.info("Child Element is finalOrderIssued:: {} ", child.getValue().getIsFinalOrderIssued());
                             log.info("Child Element is UUID:: {} ", child.getId());
