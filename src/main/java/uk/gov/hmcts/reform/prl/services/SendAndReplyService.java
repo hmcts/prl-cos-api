@@ -934,23 +934,23 @@ public class SendAndReplyService {
         if (null != caseData.getSendOrReplyMessage().getSendMessageObject()) {
             sendMessageObject = caseData.getSendOrReplyMessage().getSendMessageObject();
             if (!InternalMessageWhoToSendToEnum.JUDICIARY.equals(sendMessageObject.getInternalMessageWhoToSendTo())) {
-                sendMessageObject.setJudicialOrMagistrateTierList(DynamicList.builder()
+                sendMessageObject.setJudicialOrMagistrateTierList(sendMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
             }
             if (!InternalMessageWhoToSendToEnum.OTHER.equals(sendMessageObject.getInternalMessageWhoToSendTo())) {
-                sendMessageObject.setCtscEmailList(DynamicList.builder()
+                sendMessageObject.setCtscEmailList(sendMessageObject.getCtscEmailList().toBuilder()
                                                        .value(DynamicListElement.EMPTY).build());
             }
             if (!MessageAboutEnum.APPLICATION.equals(sendMessageObject.getMessageAbout())) {
-                sendMessageObject.setApplicationsList(DynamicList.builder()
+                sendMessageObject.setApplicationsList(sendMessageObject.getApplicationsList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
             }
             if (!MessageAboutEnum.HEARING.equals(sendMessageObject.getMessageAbout())) {
-                sendMessageObject.setFutureHearingsList(DynamicList.builder()
+                sendMessageObject.setFutureHearingsList(sendMessageObject.getFutureHearingsList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
             }
             if (!MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS.equals(sendMessageObject.getMessageAbout())) {
-                sendMessageObject.setSubmittedDocumentsList(DynamicList.builder()
+                sendMessageObject.setSubmittedDocumentsList(sendMessageObject.getSubmittedDocumentsList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
             }
         }
@@ -958,11 +958,11 @@ public class SendAndReplyService {
         if (null != caseData.getSendOrReplyMessage().getReplyMessageObject()) {
             replyMessageObject = caseData.getSendOrReplyMessage().getReplyMessageObject();
             if (!InternalMessageWhoToSendToEnum.JUDICIARY.equals(replyMessageObject.getInternalMessageWhoToSendTo())) {
-                replyMessageObject.setJudicialOrMagistrateTierList(DynamicList.builder()
+                replyMessageObject.setJudicialOrMagistrateTierList(replyMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
             }
             if (!InternalMessageWhoToSendToEnum.OTHER.equals(replyMessageObject.getInternalMessageWhoToSendTo())) {
-                replyMessageObject.setCtscEmailList(DynamicList.builder()
+                replyMessageObject.setCtscEmailList(replyMessageObject.getCtscEmailList().toBuilder()
                                                        .value(DynamicListElement.EMPTY).build());
             }
         }
