@@ -440,7 +440,7 @@ public class ApplicationsTabServiceTest {
         assertEquals(1, List.of(partyDetails1).size());
         assertEquals(
             List.of(expectedPartDetails),
-            applicationsTabService.maskConfidentialDetails(List.of(partyDetails1))
+            applicationsTabService.maskConfidentialDetails(List.of(element(partyDetails1)))
         );
     }
 
