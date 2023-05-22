@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
@@ -75,8 +74,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 public class SendAndReplyService {
 
     public static final String SEND_AND_REPLY_CATEGORY_ID = "sendAndReply";
-    public static final String SEND_MESSAGE_OBJECT = "sendMessageObject";
-    public static final String REPLY_MESSAGE_OBJECT = "replyMessageObject";
     private final EmailService emailService;
 
     private final UserService userService;
@@ -931,11 +928,11 @@ public class SendAndReplyService {
             .build();
     }
 
-    public void resetSendAndReplyDynamicLists(CallbackRequest callbackRequest) {
-        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-
-        if (caseDataMap.containsKey(SEND_MESSAGE_OBJECT)) {
-            final Message sendMessageObject = (Message) caseDataMap.get(SEND_MESSAGE_OBJECT);
+    public CaseData resetSendAndReplyDynamicLists(CaseData caseData) {
+        Message sendMessageObject = null;
+        Message replyMessageObject = null;
+        if (null != caseData.getSendOrReplyMessage().getSendMessageObject()) {
+            sendMessageObject = caseData.getSendOrReplyMessage().getSendMessageObject();
             if (!InternalMessageWhoToSendToEnum.JUDICIARY.equals(sendMessageObject.getInternalMessageWhoToSendTo())) {
                 sendMessageObject.setJudicialOrMagistrateTierList(DynamicList.builder()
                                                                       .value(DynamicListElement.EMPTY).build());
@@ -958,8 +955,8 @@ public class SendAndReplyService {
             }
         }
 
-        if (caseDataMap.containsKey(REPLY_MESSAGE_OBJECT)) {
-            final Message replyMessageObject = (Message) caseDataMap.get(REPLY_MESSAGE_OBJECT);
+        if (null != caseData.getSendOrReplyMessage().getReplyMessageObject()) {
+            replyMessageObject = caseData.getSendOrReplyMessage().getReplyMessageObject();
             if (!InternalMessageWhoToSendToEnum.JUDICIARY.equals(replyMessageObject.getInternalMessageWhoToSendTo())) {
                 replyMessageObject.setJudicialOrMagistrateTierList(DynamicList.builder()
                                                                       .value(DynamicListElement.EMPTY).build());
@@ -969,5 +966,12 @@ public class SendAndReplyService {
                                                        .value(DynamicListElement.EMPTY).build());
             }
         }
+
+        return caseData.toBuilder().sendOrReplyMessage(
+            caseData.getSendOrReplyMessage().toBuilder()
+                .sendMessageObject(sendMessageObject)
+                .replyMessageObject(replyMessageObject)
+                .build()
+            ).build();
     }
 }

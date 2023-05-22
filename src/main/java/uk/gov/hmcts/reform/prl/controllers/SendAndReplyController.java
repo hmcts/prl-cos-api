@@ -300,15 +300,15 @@ public class SendAndReplyController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse clearDynamicLists(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest) {
-        log.info("Case data before clearing dynamic lists --> {}", callbackRequest.getCaseDetails().getData());
-        //reset dynamic list fields
-        sendAndReplyService.resetSendAndReplyDynamicLists(callbackRequest);
-        log.info("Case data after clearing dynamic lists --> {}", callbackRequest.getCaseDetails().getData());
-
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
+        log.info("Case data before clearing dynamic lists --> {}", callbackRequest.getCaseDetails().getData());
+        //reset dynamic list fields
+        caseData = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
+        log.info("Case data after clearing dynamic lists --> {}", callbackRequest.getCaseDetails().getData());
+
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
