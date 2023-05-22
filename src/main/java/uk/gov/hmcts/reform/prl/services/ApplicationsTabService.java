@@ -328,19 +328,20 @@ public class ApplicationsTabService implements TabService {
 
     public List<Element<Respondent>> getRespondentsTable(CaseData caseData) {
         List<Element<Respondent>> respondents = new ArrayList<>();
-        log.info("*** Respondents 1 {}", caseData.getRespondents());
         Optional<List<Element<PartyDetails>>> checkRespondents = ofNullable(caseData.getRespondents());
         if (checkRespondents.isEmpty()) {
             respondents.add(Element.<Respondent>builder().value(Respondent.builder().build()).build());
             return respondents;
         }
-        List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(caseData.getRespondents());
+        List<Element<PartyDetails>> tempRespondents = caseData.getRespondents();
+        log.info("*** Respondents 1 {}", tempRespondents);
+        List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(tempRespondents);
         for (Element<PartyDetails> respondent : currentRespondents) {
             Respondent a = objectMapper.convertValue(respondent.getValue(), Respondent.class);
             Element<Respondent> app = Element.<Respondent>builder().id(respondent.getId()).value(a).build();
             respondents.add(app);
         }
-        log.info("*** Respondents 2 {}", caseData.getRespondents());
+        log.info("*** Respondents 2 {}", currentRespondents);
         return respondents;
     }
 
