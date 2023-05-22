@@ -341,7 +341,7 @@ public class ApplicationsTabService implements TabService {
             Element<Respondent> app = Element.<Respondent>builder().id(respondent.getId()).value(a).build();
             respondents.add(app);
         }
-        log.info("*** Respondents 2 {}", currentRespondents);
+        log.info("*** Respondents 2 {}", caseData.getRespondents());
         return respondents;
     }
 
