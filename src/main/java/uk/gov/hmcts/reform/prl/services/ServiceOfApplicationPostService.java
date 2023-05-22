@@ -66,6 +66,7 @@ public class ServiceOfApplicationPostService {
                     List<GeneratedDocumentInfo> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
                     log.info("*** Initiating request to Bulk print service ***");
                     log.info("*** Documents before calling Bulk Print Service:" + docs);
+
                     bulkPrintService.send(
                         String.valueOf(caseData.getId()),
                         authorisation,

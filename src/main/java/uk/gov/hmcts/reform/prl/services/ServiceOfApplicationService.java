@@ -406,7 +406,7 @@ public class ServiceOfApplicationService {
                         );
                     }
                 }
-            } else if (YesNoDontKnow.no.equals(respondentFL401.getDoTheyHaveLegalRepresentation())
+            } else if (YesNoDontKnow.no.equals(applicantFL401.getDoTheyHaveLegalRepresentation())
                     && Yes.equals(respondentFL401.getCanYouProvideEmailAddress())) {
                 fl401CaseInviteService.generateAndSendCaseInviteForFL401Respondent(caseData, respondentFL401);
             }
