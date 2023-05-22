@@ -65,6 +65,7 @@ public class ServiceOfApplicationPostService {
                 try {
                     List<GeneratedDocumentInfo> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
                     log.info("*** Initiating request to Bulk print service ***");
+                    log.info("*** Documents before calling Bulk Print Service:" + docs);
                     bulkPrintService.send(
                         String.valueOf(caseData.getId()),
                         authorisation,
@@ -248,6 +249,8 @@ public class ServiceOfApplicationPostService {
         try {
             log.info("*** Initiating request to Bulk print service ***");
             log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
+            log.info("*** Documents before calling Bulk Print Service:" + docs);
+            log.info("*** calling Bulk Print ***");
             UUID bulkPrintId = bulkPrintService.send(
                 String.valueOf(caseData.getId()),
                 authorisation,

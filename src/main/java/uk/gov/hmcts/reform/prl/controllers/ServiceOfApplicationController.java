@@ -21,16 +21,20 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
+import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @RestController
 @RequestMapping("/service-of-application")
@@ -52,6 +56,9 @@ public class ServiceOfApplicationController {
     //added temp to test cover latter
     @Autowired
     private ServiceOfApplicationPostService serviceOfApplicationPostService;
+
+    @Autowired
+    CoreCaseDataService coreCaseDataService;
 
     private Map<String, Object> caseDataUpdated;
 
@@ -151,7 +158,12 @@ public class ServiceOfApplicationController {
             callbackRequest.getCaseDetails(),
             authorisation
         );
+        Map<String, Object> soa = new HashMap<>();
+        soa.put("bulkPrintDetails", null);
+        soa.put("emailNotificationDetails", null);
+        coreCaseDataService.triggerEvent(JURISDICTION, CASE_TYPE, caseData.getId(),"internal-update-all-tabs",soa);
         log.info("inside submitted--end of notification");
+
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         updatedCaseData.put(
             "coverLetter1",
