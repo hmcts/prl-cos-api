@@ -373,7 +373,7 @@ public class ServiceOfApplicationService {
             log.info("applicantFL401  sol email" + applicantFL401.getSolicitorEmail());
             log.info("soa resp list  FL401" + caseData.getServiceOfApplication().getSoaRespondentsList().getValue());
 
-            if (YesNoDontKnow.yes.equals(applicantFL401.getDoTheyHaveLegalRepresentation())) {
+            if (applicantFL401.getSolicitorEmail() != null) {
                 log.info("The respondent is represented");
                 if (applicantFL401.getSolicitorEmail() != null) {
                     try {
@@ -412,10 +412,11 @@ public class ServiceOfApplicationService {
                         );
                     }
                 }
-            } else if (YesNoDontKnow.no.equals(applicantFL401.getDoTheyHaveLegalRepresentation())
-                    && (respondentFL401.getEmail() != null)) {
+            } else {
                 log.info("The respondent is unrepresented");
-                fl401CaseInviteService.generateAndSendCaseInviteForFL401Respondent(caseData, respondentFL401);
+                if(respondentFL401.getEmail() != null) {
+                    fl401CaseInviteService.generateAndSendCaseInviteForFL401Respondent(caseData, respondentFL401);
+                }
             }
 
 
