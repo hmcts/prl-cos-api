@@ -43,7 +43,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_DRAFT_C8;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -752,7 +758,7 @@ public class C100RespondentSolicitorService {
             Document documentForC8 = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
-                DOCUMENT_C8_BLANK_HINT,
+                DOCUMENT_FIELD_DRAFT_C8,
                 false,
                 dataMap
             );
