@@ -720,7 +720,7 @@ public class CaseData implements MappableObject {
     private final String isEngC7DocGen;
     private final Document draftC7ResponseDoc;
     private final Document finalC7ResponseDoc;
-    private final Document draftC8Doc;
+    private final Document draftC8ResponseDoc;
 
     private final List<SubmitConsentEnum> respondentAgreeStatement;
 
