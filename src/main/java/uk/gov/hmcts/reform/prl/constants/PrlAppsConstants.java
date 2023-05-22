@@ -186,9 +186,9 @@ public class PrlAppsConstants {
         "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties"};
     public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without hearing may ask the court to reconsider this order. "
         + "You must do that within seven days of receiving the order by writing to the court"
-        + "(and notifying any other party) and asking the court to reconsider. "
+        + "(and notifying any other party) and asking the court to reconsider."
         + System.lineSeparator() + System.lineSeparator()
-        + "Alternatively, the court may reconsider the directions at the first hearing";
+        + "Alternatively, the court may reconsider the directions at the first hearing.";
     public static final String SAFE_GUARDING_LETTER = "The court has considered the safeguarding letter from Cafcass or Cafcass Cymru "
         + "and made a decision on how to progress your case.";
     public static final String HEARING_NOT_NEEDED = "A[Judge/justices' legal adviser] has decided that appropriate directions "
@@ -205,7 +205,7 @@ public class PrlAppsConstants {
         + "b. the measure or measures that would be likely to maximise as fas as practicable the "
         + "quality of their evidence or participation and why;"
         + System.lineSeparator() + System.lineSeparator()
-        + "c.written confirmations from any relevant witness of his/her views.";
+        + "c. written confirmations from any relevant witness of his/her views.";
     public static final String JOINING_INSTRUCTIONS = "Joining instructions";
     public static final String UPDATE_CONTACT_DETAILS = "The parties must, if their contact details have changed or missing from "
         + "the applications, contact Cafcass or Cafcass Cymru quoting the case "
@@ -252,13 +252,13 @@ public class PrlAppsConstants {
         + System.lineSeparator() + System.lineSeparator()
         + "a. The required activity is a Separated Parenting Information programme"
         + System.lineSeparator() + System.lineSeparator()
-        + "b. The Court shall spend this order to Cafcass/Cafcass Cymeru with parties contact details"
+        + "b. The Court shall spend this order to Cafcass/Cafcass Cymru with parties contact details"
         + System.lineSeparator() + System.lineSeparator()
         + "c. The activity provider must notify the Court whether the course was at the conclusion of the activity directed";
-    public static final String PARENT_WITHCARE = "The application is transferred to the Family Court at [place]"
+    public static final String PARENT_WITHCARE = "The application is transferred to the Family Court at [place]."
         + System.lineSeparator() + System.lineSeparator()
         + "The reason for transfer is another court is in the the area where the child usually lives / there "
-        + "are on-going proceedings in another court / free-text box reason";
+        + "are on-going proceedings in another court / free-text box reason.";
 
     public static final String DIO_RIGHT_TO_ASK =   "As the direction has been made without hearing may ask the court to reconsider this order. "
         + "You must do that within seven days of receiving the order by writing to the court"
@@ -386,11 +386,9 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "c)  a risk assessment in respect of  ((party’s / parties’ names separated by commas))";
 
-    public static final String CAFCASS_CYMRU_NEXT_STEPS_CONTENT = "a)  a completed letter  "
-        + System.lineSeparator()
-        + "b)  enhanced checks in respect of ((party’s / parties’ names separated by commas))"
-        + System.lineSeparator()
-        + "c)  a risk assessment in respect of  ((party’s / parties’ names separated by commas))";
+    public static final String CAFCASS_CYMRU_NEXT_STEPS_CONTENT = "CAFCASS Cymru must send a safeguarding enquiries report "
+        + "to the court and to the parties [and their solicitors if details are available], unless considered inappropriate by "
+        + "CAFCASS Cymru, by no later than 6 weeks after receipt of this order.";
 
     public static final String SECTION7_EDIT_CONTENT = "a)  with whom the ((child or children)) should live"
         + System.lineSeparator()
