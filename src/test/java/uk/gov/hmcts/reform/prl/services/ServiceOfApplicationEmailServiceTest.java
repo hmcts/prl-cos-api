@@ -13,9 +13,11 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.CafcassServiceApplicationEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -57,9 +59,16 @@ public class ServiceOfApplicationEmailServiceTest {
 
     @Test
     public void testC100EmailNotification() throws Exception {
+        CafcassServiceApplicationEnum cafcassServiceApplicationEnum = CafcassServiceApplicationEnum.cafcass;
+
+        element("test@test.com");
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
+            .confirmRecipients(ConfirmRecipients.builder()
+                                   .otherEmailAddressList(List.of(element("test@test.com")))
+                                   .cafcassEmailOptionChecked(List.of(cafcassServiceApplicationEnum)).build())
             .applicants(List.of(element(PartyDetails.builder()
                                             .solicitorEmail("test@gmail.com")
                                             .representativeLastName("LastName")
@@ -78,7 +87,7 @@ public class ServiceOfApplicationEmailServiceTest {
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         serviceOfApplicationEmailService.sendEmailC100(caseDetails);
-        verify(emailService,times(2)).send(Mockito.anyString(),
+        verify(emailService,times(3)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(),Mockito.any());
     }

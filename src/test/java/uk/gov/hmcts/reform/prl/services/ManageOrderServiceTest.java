@@ -2723,6 +2723,76 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    public void testResetChildOptionsWithIsTheOderAboutAllChildren() {
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code("test")
+            .label("testC47A")
+            .build();
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .cafcassCymruServedOptions(YesOrNo.No)
+            .isTheOrderAboutAllChildren(YesOrNo.Yes)
+            .serveOrderDynamicList(dynamicMultiSelectList)
+            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+                                                       .value(Document.builder().documentFileName(
+                                                           "abc.pdf").build())
+                                                       .build()))
+            .serveToRespondentOptions(YesOrNo.No)
+            .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
+            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .cafcassCymruEmail("test")
+            .deliveryByOptionsCA(DeliveryByEnum.post)
+            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                            .value(EmailInformation.builder().emailAddress("test").build()).build()))
+            .postalInformationCA(List.of(Element.<PostalInformation>builder()
+                                             .value(PostalInformation.builder().postalAddress(
+                                                 Address.builder().postCode("NE65LA").build()).build()).build()))
+            .build();
+
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
+                                                                                          .dateCreated(now)
+                                                                                          .isTheOrderAboutChildren(YesOrNo.Yes)
+                                                                                          .orderTypeId(TEST_UUID)
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderList)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        manageOrderService.resetChildOptions(callbackRequest);
+        Assert.assertNotNull(null,callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
+    }
+
+
+    @Test
     public void testPopulateCafcassCymruEmailInManageOrdersRegion() {
 
         CaseData caseData = CaseData.builder()
