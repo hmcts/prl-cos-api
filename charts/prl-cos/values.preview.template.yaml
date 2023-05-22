@@ -59,3 +59,4 @@ java:
     JUDICIAL_USERS_API: http://rd-judicial-api-aat.service.core-compute-aat.internal
     STAFF_DETAILS_API: http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal
     COMMON_DATA_API: http://rd-commondata-api-aat.service.core-compute-aat.internal
+
