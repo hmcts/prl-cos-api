@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -127,6 +128,7 @@ public class ManageOrderService {
     public static final String RECIPIENTS_OPTIONS = "recipientsOptions";
 
     public static final String OTHER_PARTIES = "otherParties";
+    public static final String SERVEDPARTIES = "servedParties";
 
     @Value("${document.templates.common.prl_sdo_draft_template}")
     protected String sdoDraftTemplate;
@@ -1219,9 +1221,11 @@ public class ManageOrderService {
                 postalInformation = caseData.getManageOrders().getPostalInformationDA();
             }
         }
+        List<Element<ServedParties>> servedParties  = new ArrayList<>();
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
+        servedOrderDetails.put(SERVEDPARTIES, servedParties);
 
         updateServedOrderDetails(
             servedOrderDetails,
@@ -1266,7 +1270,7 @@ public class ManageOrderService {
             cafcassCymruServedOptions = caseData.getManageOrders().getCafcassCymruServedOptions();
             cafcassCymruEmail = caseData.getManageOrders().getCafcassCymruEmail();
         }
-
+        List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
         servedOrderDetails.put(CAFCASS_CYMRU_SERVED, cafcassCymruServedOptions);
@@ -1276,6 +1280,7 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
+        servedOrderDetails.put(SERVEDPARTIES, servedParties);
 
         updateServedOrderDetails(
             servedOrderDetails,
@@ -1286,6 +1291,38 @@ public class ManageOrderService {
             emailInformation,
             caseData.getManageOrders().getServeOrderAdditionalDocuments()
         );
+    }
+
+    private List<Element<ServedParties>> getServedParties(CaseData caseData) {
+        List<Element<ServedParties>> servedParties = new ArrayList<>();
+        if (caseData.getManageOrders()
+            .getRecipientsOptions() != null) {
+            servedParties = dynamicMultiSelectListService
+                .getServedPartyDetailsFromDynamicSelectList(caseData
+                                                                .getManageOrders()
+                                                                .getRecipientsOptions());
+        } else if (caseData.getManageOrders()
+            .getRecipientsOptionsOnlyC47a() != null) {
+            servedParties = dynamicMultiSelectListService
+                .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
+                                                         .getRecipientsOptionsOnlyC47a());
+        }
+        if (caseData.getManageOrders().getChildOption() != null) {
+            servedParties.addAll(dynamicMultiSelectListService
+                                     .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
+                                                                                     .getChildOption()));
+        }
+
+        if (caseData.getManageOrders().getOtherParties() != null) {
+            servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
+                caseData.getManageOrders().getOtherParties()
+            ));
+        } else if (caseData.getManageOrders().getOtherPartiesOnlyC47a() != null) {
+            servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
+                caseData.getManageOrders().getOtherPartiesOnlyC47a()
+            ));
+        }
+        return servedParties;
     }
 
     private static ServingRespondentsEnum getServingRespondentsOptions(CaseData caseData) {
@@ -1372,6 +1409,8 @@ public class ManageOrderService {
         ServingRespondentsEnum servingRespondentsOptions = null;
         String recipients = null;
         String otherParties = null;
+        List<Element<ServedParties>> servedParties = new ArrayList<>();
+
 
         if (servedOrderDetails.containsKey(CAFCASS_EMAIL) && null != servedOrderDetails.get(CAFCASS_EMAIL)) {
             cafcassEmail = (String) servedOrderDetails.get(CAFCASS_EMAIL);
@@ -1397,7 +1436,9 @@ public class ManageOrderService {
         if (servedOrderDetails.containsKey(OTHER_PARTIES)) {
             otherParties = (String) servedOrderDetails.get(OTHER_PARTIES);
         }
-
+        if (servedOrderDetails.containsKey(SERVEDPARTIES)) {
+            servedParties = (List<Element<ServedParties>>)servedOrderDetails.get(SERVEDPARTIES);
+        }
         ServeOrderDetails tempServeOrderDetails;
         if (order.getValue().getServeOrderDetails() != null) {
             tempServeOrderDetails = order.getValue().getServeOrderDetails();
@@ -1416,6 +1457,7 @@ public class ManageOrderService {
             .postalInformation(postalInformation)
             .emailInformation(emailInformation)
             .additionalDocuments(additionalDocuments)
+            .servedParties(servedParties)
             .build();
 
         OrderDetails amended = order.getValue().toBuilder()
