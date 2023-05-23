@@ -116,13 +116,21 @@ public class CaseService {
         List<Element<uk.gov.hmcts.reform.ccd.client.model.Document>> uploadDssDocs = new ArrayList<>();
         List<Element<uk.gov.hmcts.reform.ccd.client.model.Document>> uploadAdditionalDssDocs = new ArrayList<>();
         dssCaseData.getApplicantApplicationFormDocuments()
-            .stream().map(edgeCaseDocumentElement ->
-                              uploadDssDocs.add(Element.<uk.gov.hmcts.reform.ccd.client.model.Document>builder()
-                                                    .value(
-                                                        edgeCaseDocumentElement.getValue().getDocumentLink()).build())
+            .stream()
+            .forEach(
+                edgeCaseDocumentElement -> {
+                    uk.gov.hmcts.reform.ccd.client.model.Document document = edgeCaseDocumentElement.getValue().getDocumentLink();
+                    System.out.println("document---------------" + document);
+                    uploadDssDocs.add(Element.<uk.gov.hmcts.reform.ccd.client.model.Document>builder()
+                                          .value(document)
+                                          .build());
+                    System.out.println("**************");
+                    System.out.println("uploadDssDocs ==========" + uploadDssDocs);
+
+                }
             );
 
-        dssCaseData.getApplicantAdditionalDocuments().stream().map(edgeCaseDocumentElement ->
+        dssCaseData.getApplicantAdditionalDocuments().stream().forEach(edgeCaseDocumentElement ->
                                                                        uploadAdditionalDssDocs
                                                                            .add(Element.<uk.gov.hmcts.reform.ccd.client.model.Document>builder()
                                                                                     .value(
