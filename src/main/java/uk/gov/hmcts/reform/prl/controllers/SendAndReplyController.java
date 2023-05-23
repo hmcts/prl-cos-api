@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -37,11 +38,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @Slf4j
@@ -65,6 +68,9 @@ public class SendAndReplyController extends AbstractCallbackController {
 
     public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n A judge will review your message and advise.";
 
+    public static final String OPEN_MESSAGES_LIST = "openMessagesList";
+    public static final String CLOSED_MESSAGES_LIST = "closedMessagesList";
+
 
     @PostMapping("/about-to-start")
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(@RequestHeader("Authorization")
@@ -87,6 +93,12 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+
+        //clear temp fields
+        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
+        // clearing selection while loading on first screen
+        sendAndReplyService.removeTemporaryFields(caseDataMap, "chooseSendOrReply");
+
         caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
 
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
@@ -229,6 +241,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                           @Parameter(hidden = true) String authorisation,
                                                           @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Case Details in about to submit --> {}", caseDetails);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
@@ -236,19 +249,28 @@ public class SendAndReplyController extends AbstractCallbackController {
             Message newMessage = sendAndReplyService.buildSendReplyMessage(caseData,
                                                                            caseData.getSendOrReplyMessage().getSendMessageObject());
 
-            List<Element<Message>> listOfMessages = sendAndReplyService.addNewOpenMessage(caseData, newMessage);
+            if (InternalMessageWhoToSendToEnum.OTHER.equals(newMessage.getInternalMessageWhoToSendTo())) {
+                List<Element<Message>> closedMessages = new ArrayList<>();
+                if (isNotEmpty(caseData.getSendOrReplyMessage().getClosedMessagesList())) {
+                    closedMessages.addAll(caseData.getSendOrReplyMessage().getClosedMessagesList());
+                }
+                closedMessages.add(element(newMessage));
+                caseDataMap.put(CLOSED_MESSAGES_LIST, closedMessages);
 
-            caseDataMap.put("openMessagesList", listOfMessages);
+            } else {
+                List<Element<Message>> listOfMessages = sendAndReplyService.addNewOpenMessage(caseData, newMessage);
+                caseDataMap.put(OPEN_MESSAGES_LIST, listOfMessages);
+            }
 
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
                 caseData = sendAndReplyService.closeMessage(caseData);
-                caseDataMap.put("closedMessagesList", caseData.getSendOrReplyMessage().getClosedMessagesList());
-                caseDataMap.put("openMessagesList", caseData.getSendOrReplyMessage().getOpenMessagesList());
+                caseDataMap.put(CLOSED_MESSAGES_LIST, caseData.getSendOrReplyMessage().getClosedMessagesList());
+                caseDataMap.put(OPEN_MESSAGES_LIST, caseData.getSendOrReplyMessage().getOpenMessagesList());
             } else {
                 //Reply & append history
-                caseDataMap.put("openMessagesList", sendAndReplyService.replyAndAppendMessageHistory(caseData));
+                caseDataMap.put(OPEN_MESSAGES_LIST, sendAndReplyService.replyAndAppendMessageHistory(caseData));
             }
         }
 
@@ -276,5 +298,23 @@ public class SendAndReplyController extends AbstractCallbackController {
             ).build());
         }
         return ok(SubmittedCallbackResponse.builder().build());
+    }
+
+    @PostMapping("/send-or-reply-to-messages/clear-dynamic-lists")
+    public AboutToStartOrSubmitCallbackResponse clearDynamicLists(@RequestHeader("Authorization")
+                                                                            @Parameter(hidden = true) String authorisation,
+                                                                            @RequestBody CallbackRequest callbackRequest) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        log.info("Case data before clearing dynamic lists --> {}", callbackRequest.getCaseDetails().getData());
+        //reset dynamic list fields
+        caseData = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
+        log.info("Case data after clearing dynamic lists --> {}", callbackRequest.getCaseDetails().getData());
+
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 }
