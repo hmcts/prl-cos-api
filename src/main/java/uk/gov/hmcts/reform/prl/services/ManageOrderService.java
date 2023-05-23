@@ -2039,4 +2039,23 @@ public class ManageOrderService {
             caseDataUpdated.put("markedToServeEmailNotification", No);
         }
     }
+
+    public YesOrNo getAllChildrenFinalOrderIssuedStatus(CaseData caseData) {
+
+        YesOrNo finalOrderStatus = null;
+        List<Child> children = caseData
+            .getChildren()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<YesOrNo> finalOrderIssuedList = children.stream()
+            .map(Child::getIsFinalOrderIssued)
+            .collect(Collectors.toList());
+
+        for (YesOrNo isFinalOrder: finalOrderIssuedList) {
+            finalOrderStatus = Yes.equals(isFinalOrder) ? Yes : No;
+        }
+        return finalOrderStatus;
+    }
 }

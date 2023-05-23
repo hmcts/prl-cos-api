@@ -322,6 +322,8 @@ public class ManageOrdersController {
                     .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
             }
         }
+        caseDataUpdated.put("isFinalOrderIssuedForAllChildren", manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData));
+
         log.info("***performingUser***{}", performingUser);
         log.info("***performingAction***{}", performingAction);
         log.info("***judgeLaReviewRequired***{}", judgeLaReviewRequired);
