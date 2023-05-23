@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -191,6 +192,21 @@ public class DynamicMultiSelectListServiceTest {
                                                      .value(List.of(listElement, listElement))
                                                      .build());
         assertEquals("Child , Child ", str);
+    }
+
+    @Test
+    public void testGetServedPartiesFromDynMulSelectList() {
+        DynamicMultiselectListElement listElement = DynamicMultiselectListElement.builder()
+            .code("2323WDWDw2322")
+            .label("Child (Child 1)")
+            .build();
+        List<Element<ServedParties>> servedParties = dynamicMultiSelectListService
+            .getServedPartyDetailsFromDynamicSelectList(DynamicMultiSelectList
+                                                     .builder()
+                                                     .value(List.of(listElement, listElement))
+                                                     .build());
+        assertEquals(listElement.getCode(), servedParties.get(0).getValue().getPartyId());
+        assertEquals(listElement.getLabel(), servedParties.get(0).getValue().getPartyName());
     }
 
     @Test

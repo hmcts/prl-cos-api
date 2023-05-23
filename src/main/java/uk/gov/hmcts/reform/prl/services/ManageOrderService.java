@@ -1262,7 +1262,7 @@ public class ManageOrderService {
         return orders;
     }
 
-    private static void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
+    private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
         ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getServingRespondentsOptionsDA();
         YesOrNo otherPartiesServed = No;
@@ -1277,7 +1277,7 @@ public class ManageOrderService {
                 postalInformation = caseData.getManageOrders().getPostalInformationDA();
             }
         }
-        List<Element<ServedParties>> servedParties  = new ArrayList<>();
+        List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
