@@ -1041,6 +1041,10 @@ public class ManageOrderService {
             }
         } else {
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                orderMap.put("children", dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData,  caseData.getOrderCollection()));
+            }
+            log.info("Children list after updating the isFinalOrderIssued flag in child {}", orderMap.get("children"));
         }
         orderMap.put("orderCollection", orderCollection);
         return orderMap;
