@@ -115,7 +115,7 @@ public class ServiceOfApplicationEmailService {
         }
     }
 
-    public void sendEmailNotificationToApplicantSolicitor(String authorization, CaseDetails caseDetails, PartyDetails partyDetails,
+    public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseDetails caseDetails, PartyDetails partyDetails,
                                                           EmailTemplateNames templateName, List<Document> docs) throws Exception {
         log.info("*** About to send email ***");
         log.info("*** email id ***" + partyDetails.getSolicitorEmail());
@@ -130,7 +130,7 @@ public class ServiceOfApplicationEmailService {
             buildApplicantSolicitorEmail(caseDetails, partyDetails.getRepresentativeFirstName()
                 + " " + partyDetails.getRepresentativeLastName()),
             LanguagePreference.getPreferenceLanguage(caseData)
-        );
+        );/*
 
         if (caseData.getEmailNotificationDetails() != null) {
             log.info("*** EmailNotificationDetails object available in case data ***" + caseData.getEmailNotificationDetails());
@@ -138,21 +138,20 @@ public class ServiceOfApplicationEmailService {
         } else {
             log.info("*** EmailNotificationDetails object empty in case data ***");
             emailNotifyCollectionList = new ArrayList<>();
-        }
+        }*/
         log.info("*** About to call sendgrid ***");
         requireNonNull(caseData);
-        emailNotifyCollectionList
-            .add(sendgridService.sendEmailWithAttachments(authorization,
-                                                          getCommonEmailProps(), partyDetails.getSolicitorEmail(), docs));
-        log.info(
+        return sendgridService.sendEmailWithAttachments(authorization,
+                                                          getCommonEmailProps(), partyDetails.getSolicitorEmail(), docs);
+        /*log.info(
             "Email notification for SoA sent successfully to applicant solicitor for caseId {}",
             caseDetails.getId());
         caseData.setEmailNotificationDetails(emailNotifyCollectionList);
-        log.info("*** Email Notification details set in case data ***" + caseData.getEmailNotificationDetails());
+        log.info("*** Email Notification details set in case data ***" + caseData.getEmailNotificationDetails());*/
 
     }
 
-    public void sendEmailNotificationToRespondentSolicitor(String authorization, CaseDetails caseDetails, PartyDetails partyDetails,
+    public EmailNotificationDetails sendEmailNotificationToRespondentSolicitor(String authorization, CaseDetails caseDetails, PartyDetails partyDetails,
                                                            EmailTemplateNames templateName, List<Document> docs) throws Exception {
         log.info("*** About to send ***");
         log.info("*** email id ***" + partyDetails.getSolicitorEmail());
@@ -173,22 +172,16 @@ public class ServiceOfApplicationEmailService {
             LanguagePreference.english
         );
 
-        if (caseData.getEmailNotificationDetails() != null) {
-            emailNotifyCollectionList = caseData.getEmailNotificationDetails();
-        } else {
-            emailNotifyCollectionList = new ArrayList<>();
-        }
         log.info("*** About to call sendgrid ***");
         requireNonNull(caseData);
-        emailNotifyCollectionList
-            .add(sendgridService.sendEmailWithAttachments(authorization, getCommonEmailProps(),
+        return sendgridService.sendEmailWithAttachments(authorization, getCommonEmailProps(),
                                                           partyDetails.getSolicitorEmail(), docs));
 
-        log.info(
+        /*log.info(
             "Email notification for SoA sent successfully to respondent solicitor for caseId {}",
             caseDetails.getId());
         caseData.setEmailNotificationDetails(emailNotifyCollectionList);
-        log.info("*** Email Notification details set in case data ***" + caseData.getEmailNotificationDetails());
+        log.info("*** Email Notification details set in case data ***" + caseData.getEmailNotificationDetails());*/
 
     }
 

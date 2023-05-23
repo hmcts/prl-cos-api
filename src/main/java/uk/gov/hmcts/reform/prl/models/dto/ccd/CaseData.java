@@ -109,6 +109,7 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
@@ -796,8 +797,6 @@ public class CaseData implements MappableObject {
     private final Fl401ListOnNotice fl401ListOnNotice;
 
     private NextHearingDetails nextHearingDetails;
-    private List<Element<BulkPrintDetails>> bulkPrintDetails;
-    private List<Element<EmailNotificationDetails>> emailNotificationDetails;
     @JsonProperty("coverPageAddress")
     private Address coverPageAddress;
 
@@ -808,4 +807,7 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final ServiceOfApplication serviceOfApplication;
+
+    @JsonProperty("servedApplicationDetails")
+    private List<Element<ServedApplicationDetails>> servedApplicationDetails;
 }

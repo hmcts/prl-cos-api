@@ -113,7 +113,7 @@ public class ServiceOfApplicationPostService {
         return caseData;
     }
 
-    public void sendPostNotificationToParty(CaseData caseData, String authorisation, PartyDetails partyDetails, List<Document> docs) {
+    public BulkPrintDetails sendPostNotificationToParty(CaseData caseData, String authorisation, PartyDetails partyDetails, List<Document> docs) {
         // Sends post
         List<GeneratedDocumentInfo> documents = null;
         List<Element<BulkPrintDetails>> printedDocCollectionList = new ArrayList<>();
@@ -123,17 +123,17 @@ public class ServiceOfApplicationPostService {
         } catch (Exception e) {
             log.info("*** Error while generating document ***");
         }
-        if (caseData.getBulkPrintDetails() != null) {
+        /*if (caseData.getBulkPrintDetails() != null) {
             log.info("*** BulkPrintdetails object available in case data ***" + caseData.getBulkPrintDetails());
             caseData.getBulkPrintDetails().forEach(printedDocCollectionList::add);
         } else {
             log.info("*** BulkPrintdetails object empty in case data ***");
             printedDocCollectionList = new ArrayList<>();
-        }
+        }*/
         log.info("*** calling Bulk Print ***");
-        printedDocCollectionList.add(sendBulkPrint(caseData, authorisation, documents, partyDetails));
-        caseData.setBulkPrintDetails(printedDocCollectionList);
-        log.info("*** Bulk Print details updated in case data ***" + caseData.getBulkPrintDetails());
+        return sendBulkPrint(caseData, authorisation, documents, partyDetails);
+        /*caseData.setBulkPrintDetails(printedDocCollectionList);
+        log.info("*** Bulk Print details updated in case data ***" + caseData.getBulkPrintDetails());*/
     }
 
 
@@ -247,7 +247,7 @@ public class ServiceOfApplicationPostService {
         ));
     }
 
-    public Element<BulkPrintDetails> sendBulkPrint(CaseData caseData, String authorisation,
+    public BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
                                                    List<GeneratedDocumentInfo> docs, PartyDetails partyDetails) {
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         String bulkPrintedId = "";
@@ -269,12 +269,12 @@ public class ServiceOfApplicationPostService {
         } catch (Exception e) {
             log.info("The bulk print service has failed: {}", e);
         }
-        return element(BulkPrintDetails.builder()
+        return BulkPrintDetails.builder()
                            .bulkPrintId(bulkPrintedId)
                            .printedDocs(sentDocs)
                            .recipientsName(partyDetails.getFirstName() + " " + partyDetails.getLastName())
                            .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of(
-                               "Europe/London")))).build());
+                               "Europe/London")))).build();
     }
 
     private List<GeneratedDocumentInfo> getDocsAsGeneratedDocumentInfo(List<Document> docs) {

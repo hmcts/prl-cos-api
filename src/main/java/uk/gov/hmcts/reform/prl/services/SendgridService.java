@@ -75,7 +75,7 @@ public class SendgridService {
         }
     }
 
-    public Element<EmailNotificationDetails> sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
+    public EmailNotificationDetails sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
                                                                       String emailAddress, List<Document> listOfAttachments)
         throws IOException {
 
@@ -98,11 +98,11 @@ public class SendgridService {
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
         }
-        return element(EmailNotificationDetails.builder()
+        return EmailNotificationDetails.builder()
                            .emailAddress(emailAddress)
                            .printedDocs(listOfAttachments)
                            .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of(
-                               "Europe/London")))).build());
+                               "Europe/London")))).build();
     }
 
 

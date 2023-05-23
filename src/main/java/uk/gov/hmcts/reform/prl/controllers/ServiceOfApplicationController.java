@@ -17,10 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
@@ -28,6 +30,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -149,31 +152,23 @@ public class ServiceOfApplicationController {
     public void handleSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        //CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
-        //serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
+        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList ;
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("inside submitted--start of notification");
         log.info("Confirm recipients {}", caseData.getServiceOfApplication());
-        caseData = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+        if (caseData.getServedApplicationDetails() != null) {
+            finalServedApplicationDetailsList = caseData.getServedApplicationDetails();
+        } else {
+            log.info("*** BulkPrintdetails object empty in case data ***");
+            finalServedApplicationDetailsList = new ArrayList<>();
+        }
+        finalServedApplicationDetailsList.addAll(serviceOfApplicationService.sendNotificationForServiceOfApplication(
             callbackRequest.getCaseDetails(),
             authorisation
-        );
-        Map<String, Object> soa = new HashMap<>();
-        if (caseData.getBulkPrintDetails() != null) {
-            log.info("BulkPrintDetails in Controller" + caseData.getBulkPrintDetails());
-            soa.put("bulkPrintDetails", caseData.getBulkPrintDetails());
-        }
-        if (caseData.getEmailNotificationDetails() != null) {
-            log.info("EmailNotificationDetails in Controller" + caseData.getEmailNotificationDetails());
-            soa.put("emailNotificationDetails", caseData.getEmailNotificationDetails());
-        }
-        coreCaseDataService.triggerEvent(JURISDICTION, CASE_TYPE, caseData.getId(),"internal-update-all-tabs",soa);
+        ));
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
+        coreCaseDataService.triggerEvent(JURISDICTION, CASE_TYPE, caseData.getId(),"internal-update-all-tabs", caseDataMap);
         log.info("inside submitted--end of notification");
-
-        /*Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        updatedCaseData.put(
-            "coverLetter1",
-            serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData)
-        );*/
     }
 }
