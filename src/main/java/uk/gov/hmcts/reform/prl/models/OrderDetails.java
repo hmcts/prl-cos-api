@@ -50,6 +50,7 @@ public class OrderDetails {
     private final YesOrNo cafcassCymruServedOptions;
     private final String cafcassCymruEmail;
     private final YesOrNo isOrderCreatedBySolicitor;
+    private final String typeOfChildArrangementsOrder;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
