@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
@@ -24,6 +26,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -209,9 +212,26 @@ public class CaseUtils {
                 (x, y) -> x
             ));
     }
-    
+
     public static String getFormattedDatAndTime(LocalDateTime dateTime) {
         DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("EEEE, dd MMM, yyyy 'at' HH:mm a");
         return  dateTime.format(dateTimeFormat);
+    }
+
+    public static void createCategorySubCategoryDynamicList(List<Category> categoryList,
+                                                            List<DynamicListElement> dynamicListElementList) {
+        nullSafeCollection(categoryList).forEach(category -> {
+            if (category.getSubCategories() == null) {
+                dynamicListElementList.add(
+                    DynamicListElement.builder().code(category.getCategoryId())
+                        .label(category.getCategoryName()).build()
+                );
+            } else {
+                createCategorySubCategoryDynamicList(
+                    category.getSubCategories(),
+                    dynamicListElementList
+                );
+            }
+        });
     }
 }

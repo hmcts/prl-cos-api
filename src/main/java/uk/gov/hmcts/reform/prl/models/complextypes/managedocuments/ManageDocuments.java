@@ -1,10 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.managedocuments;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -12,10 +9,8 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
 
-@Data
-@Builder
-@RequiredArgsConstructor
-@JsonSerialize(using = CustomEnumSerializer.class)
+@AllArgsConstructor
+@Builder(toBuilder = true)
 public class ManageDocuments {
 
     private final DocumentPartyEnum documentParty;
