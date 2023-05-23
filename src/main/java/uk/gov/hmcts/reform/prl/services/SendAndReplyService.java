@@ -801,11 +801,11 @@ public class SendAndReplyService {
             ? message.getInternalMessageUrgent().getDisplayedValue() : null);
         addRowToMessageTable(lines, "submitted document", message.getSelectedSubmittedDocumentValue());
         addRowToMessageTable(lines, "Are you sending an internal message?", message.getInternalOrExternalMessage() != null
-            ? message.getInternalOrExternalMessage().name() : null);
+            ? message.getInternalOrExternalMessage().getDisplayedValue() : null);
         addRowToMessageTable(lines, "Who to send to", message.getInternalMessageWhoToSendTo() != null
-            ? message.getInternalMessageWhoToSendTo().name() : null);
+            ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null);
         addRowToMessageTable(lines, "Message about?", message.getMessageAbout() != null
-            ? message.getMessageAbout().name() : null);
+            ? message.getMessageAbout().getDisplayedValue() : null);
         addRowToMessageTable(lines, "Selected Future Hearing", message.getSelectedFutureHearingValue());
         addRowToMessageTable(lines, "Selected Application", message.getSelectedApplicationValue());
 
