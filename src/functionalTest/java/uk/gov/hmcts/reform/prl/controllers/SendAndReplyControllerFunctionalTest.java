@@ -5,7 +5,6 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.CoreMatchers;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +39,6 @@ public class SendAndReplyControllerFunctionalTest {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
-    @Ignore
     public void givenValidUserDetails_whenAboutToSubmitEndPoint_thenBodyContainsUserEmail() throws Exception {
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_SEND);
         request
@@ -134,6 +132,20 @@ public class SendAndReplyControllerFunctionalTest {
             .when()
             .contentType("application/json")
             .post("/send-and-reply-to-messages/send-or-reply-to-messages/submitted")
+            .then()
+            .assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void givenBodyMessagesWithUnclearedFields_whenClearDynamicListsForSendOrReply() throws Exception {
+        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_REPLY);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/send-and-reply-to-messages/send-or-reply-to-messages/clear-dynamic-lists")
             .then()
             .assertThat().statusCode(200);
 
