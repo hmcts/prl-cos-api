@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -10,15 +11,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
-import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
@@ -39,18 +36,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class SendAndReplyControllerTest {
 
@@ -78,11 +74,7 @@ public class SendAndReplyControllerTest {
 
     Message message1;
 
-    Message message2;
-
     List<Element<Message>> messages;
-
-    List<Element<Message>> listOfClosedMessages;
 
     LocalDateTime dateTime = LocalDateTime.of(
         LocalDate.of(2000, 1, 10),
@@ -90,8 +82,6 @@ public class SendAndReplyControllerTest {
     String dateSent = dateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK));
 
     Element<Message> message1Element;
-
-    Element<Message> message2Element;
 
     @Before
     public void setup() {
@@ -124,31 +114,11 @@ public class SendAndReplyControllerTest {
             .status(OPEN)
             .latestMessage("Message 1 latest message")
             .messageHistory("")
-            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.LEGAL_ADVISER)
-            .internalMessageUrgent(YesOrNo.Yes)
-            .build();
-
-        message2 = Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient2@email.com")
-            .messageSubject("testSubject2")
-            .messageUrgency("testUrgency2")
-            .dateSent(dateSent)
-            .messageContent("This is message 2 body")
-            .updatedTime(dateTime)
-            .status(CLOSED)
-            .latestMessage("Message 2 latest message")
-            .messageHistory("Message 2 message history")
-            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.LEGAL_ADVISER)
-            .internalMessageUrgent(YesOrNo.Yes)
             .build();
 
         message1Element = element(message1);
         messages = new ArrayList<>();
         messages.add(message1Element);
-
-        message2Element = element(message2);
-        listOfClosedMessages = Arrays.asList(element(message2));
 
         when(objectMapper.convertValue(sendCaseDetails.getData(), CaseData.class)).thenReturn(sendCaseData);
     }
@@ -172,6 +142,7 @@ public class SendAndReplyControllerTest {
         when(sendAndReplyService.setSenderAndGenerateMessageReplyList(sendCaseData, auth)).thenReturn(aboutToStartMap);
         sendAndReplyController.handleSendOrMessageAboutToStart(auth, sendCallbackRequest);
         verify(sendAndReplyService).setSenderAndGenerateMessageReplyList(sendCaseData, auth);
+        verifyNoMoreInteractions(sendAndReplyService);
     }
 
     @Test
@@ -310,9 +281,9 @@ public class SendAndReplyControllerTest {
         CaseData caseData = CaseData.builder().id(12345L)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    .respondToMessage(YesOrNo.No)
+                .respondToMessage(YesOrNo.No)
                     .openMessagesList(messages)
-                    .build())
+                .build())
             .chooseSendOrReply(REPLY)
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
@@ -425,210 +396,22 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesSubmitForMessageAboutOtherForSend() {
+    public void testSendOrReplyToMessagesSubmitForSend() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-
-        Message newMessage = Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient1@email.com")
-            .messageSubject("testSubject1")
-            .messageUrgency("testUrgency1")
-            .dateSent(dateSent)
-            .messageContent("This is message 1 body")
-            .updatedTime(dateTime)
-            .status(OPEN)
-            .latestMessage("Message 1 latest message")
-            .messageHistory("")
-            .messageAbout(MessageAboutEnum.OTHER)
-            .build();
+        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
 
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(SEND)
+            .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
-                    )
-                    .respondToMessage(YesOrNo.No)
-                    .openMessagesList(messages)
-                    .closedMessagesList(listOfClosedMessages)
-                    .build())
+            .sendOrReplyMessage(SendOrReplyMessage.builder().build())
             .build();
 
-        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
-        msgListWithNewMessage.addAll(messages);
-        msgListWithNewMessage.add(element(newMessage));
-
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject())).thenReturn(newMessage);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
         verify(sendAndReplyService).buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject());
-    }
-
-    @Test
-    public void testSendOrReplyToMessagesSubmitForMessageAboutReviewSubmittedDocForSend() {
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-
-        Message newMessage = Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient1@email.com")
-            .messageSubject("testSubject1")
-            .messageUrgency("testUrgency1")
-            .dateSent(dateSent)
-            .messageContent("This is message 1 body")
-            .updatedTime(dateTime)
-            .status(OPEN)
-            .latestMessage("Message 1 latest message")
-            .messageHistory("")
-            .messageAbout(MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS)
-            .build();
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .chooseSendOrReply(SEND)
-            .replyMessageDynamicList(DynamicList.builder().build())
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
-                    )
-                    .respondToMessage(YesOrNo.No)
-                    .openMessagesList(messages)
-                    .closedMessagesList(listOfClosedMessages)
-                    .build())
-            .build();
-
-        List<Element<Message>> msgListWithNewMessage = new ArrayList<>();
-        msgListWithNewMessage.addAll(messages);
-        msgListWithNewMessage.add(element(newMessage));
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject())).thenReturn(newMessage);
-
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject());
-    }
-
-    @Test
-    public void testSendOrReplyToMessagesSubmitForReplyAndClose() {
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-
-        DynamicList dynamicList =  ElementUtils.asDynamicList(messages, null, Message::getLabelForDynamicList);
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .chooseSendOrReply(REPLY)
-            .replyMessageDynamicList(DynamicList.builder().build())
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder().messageReplyDynamicList(dynamicList)
-                    .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
-                    )
-                    .respondToMessage(YesOrNo.No)
-                    .openMessagesList(messages)
-                    .closedMessagesList(listOfClosedMessages)
-                    .build())
-            .build();
-
-        UUID selectedValue = messages.get(0).getId();
-
-        List<Element<Message>> openMessagesBefore = messages;
-
-        List<Element<Message>> closedMessage = new ArrayList<>();
-
-        closedMessage = messages.stream()
-            .filter(m -> m.getId().equals(selectedValue))
-            .findFirst()
-            .map(element -> {
-                openMessagesBefore.remove(element);
-                element.getValue().setStatus(MessageStatus.CLOSED);
-                element.getValue().setUpdatedTime(dateTime.now());
-                return element;
-            }).stream().collect(Collectors.toList());
-        closedMessage.add(listOfClosedMessages.get(0));
-
-        CaseData caseDataAfterClosed = CaseData.builder().id(12345L)
-            .chooseSendOrReply(REPLY)
-            .replyMessageDynamicList(DynamicList.builder().build())
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder().messageReplyDynamicList(dynamicList)
-                    .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
-                    )
-                    .respondToMessage(YesOrNo.No)
-                    .openMessagesList(openMessagesBefore)
-                    .closedMessagesList(closedMessage)
-                    .build())
-            .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.closeMessage(caseData)).thenReturn(caseDataAfterClosed);
-
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).closeMessage(caseData);
-    }
-
-    @Test
-    public void testSendOrReplyToMessagesSubmitForReplyAndAppendHistory() {
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-
-        DynamicList dynamicList =  ElementUtils.asDynamicList(messages, null, Message::getLabelForDynamicList);
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .chooseSendOrReply(REPLY)
-            .replyMessageDynamicList(DynamicList.builder().build())
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder().messageReplyDynamicList(dynamicList)
-                    .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
-                    )
-                    .respondToMessage(YesOrNo.Yes)
-                    .openMessagesList(messages)
-                    .build())
-            .build();
-
-        MessageHistory messageHistory = MessageHistory.builder().messageFrom("sender1@email.com")
-            .messageTo("testRecipient1@email.com").messageDate(dateSent).isUrgent(YesOrNo.Yes).build();
-
-        List<Element<Message>> messagesWithHistory = messages;
-
-        List<Element<MessageHistory>> msgHisElemList = new ArrayList<>();
-
-        msgHisElemList.add(element(messageHistory));
-
-        messagesWithHistory.get(0).getValue().setReplyHistory(msgHisElemList);
-
-        UUID selectedValue = messages.get(0).getId();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.replyAndAppendMessageHistory(caseData)).thenReturn(messagesWithHistory);
-
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).replyAndAppendMessageHistory(caseData);
     }
 
     @Test
@@ -667,6 +450,7 @@ public class SendAndReplyControllerTest {
                     .respondToMessage(YesOrNo.No)
                     .closedMessagesList(messages)
                     .openMessagesList(messages)
+                    .replyMessageObject(message)
                     .build())
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())

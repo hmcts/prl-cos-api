@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.sendandreply;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -27,6 +28,7 @@ import static java.util.Optional.ofNullable;
 @SuperBuilder(toBuilder = true)
 @ToString(callSuper = true)
 @NoArgsConstructor
+@AllArgsConstructor
 public class Message extends MessageMetaData {
 
     private String dateSent;
@@ -75,6 +77,17 @@ public class Message extends MessageMetaData {
             this.dateSent,
             ofNullable(super.getMessageUrgency()).orElse("")
         );
+    }
+
+    @JsonIgnore
+    public String getLabelForReplyDynamicList() {
+        return String.format(
+            "%s, %s, %s",
+            super.getMessageSubject(),
+            this.dateSent,
+            YesOrNo.Yes.equals(this.internalMessageUrgent) ? "Urgent" : "Not Urgent"
+            );
+
     }
 }
 
