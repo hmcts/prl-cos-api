@@ -16,4 +16,5 @@ public class QuarentineLegalDoc {
     private final String documentType;
     private final String category;
     private final List<RestrictToCafcassHmcts> restrictCheckboxCorrespondence;
+    private final String documentParty;
 }
