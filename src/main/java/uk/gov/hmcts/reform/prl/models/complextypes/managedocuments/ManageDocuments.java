@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.managedocuments;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Builder;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
@@ -10,6 +12,8 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
 
+@Data
+@Builder
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public class ManageDocuments {
