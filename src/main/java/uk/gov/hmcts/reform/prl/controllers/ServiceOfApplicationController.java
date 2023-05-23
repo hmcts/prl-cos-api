@@ -159,8 +159,14 @@ public class ServiceOfApplicationController {
             authorisation
         );
         Map<String, Object> soa = new HashMap<>();
-        soa.put("bulkPrintDetails", null);
-        soa.put("emailNotificationDetails", null);
+        if (caseData.getBulkPrintDetails() != null) {
+            log.info("BulkPrintDetails in Controller" + caseData.getBulkPrintDetails());
+            soa.put("bulkPrintDetails", caseData.getBulkPrintDetails());
+        }
+        if (caseData.getEmailNotificationDetails() != null) {
+            log.info("EmailNotificationDetails in Controller" + caseData.getEmailNotificationDetails());
+            soa.put("emailNotificationDetails", caseData.getEmailNotificationDetails());
+        }
         coreCaseDataService.triggerEvent(JURISDICTION, CASE_TYPE, caseData.getId(),"internal-update-all-tabs",soa);
         log.info("inside submitted--end of notification");
 
