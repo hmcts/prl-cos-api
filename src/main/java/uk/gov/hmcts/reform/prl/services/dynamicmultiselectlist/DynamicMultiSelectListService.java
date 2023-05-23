@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -314,8 +315,8 @@ public class DynamicMultiSelectListService {
                           .builder()
                           .code(String.valueOf(id))
                           .label(partyDetails.getRepresentativeFirstName()
-                                     + BLANK_STRING + partyDetails.getRepresentativeLastName()
-                                     + representingText + partyDetails.getFirstName()
+                                     + EMPTY_SPACE_STRING + partyDetails.getRepresentativeLastName() + EMPTY_SPACE_STRING
+                                     + representingText + EMPTY_SPACE_STRING + partyDetails.getFirstName() + EMPTY_SPACE_STRING
                                      + partyDetails.getLastName())
                           .build());
     }
