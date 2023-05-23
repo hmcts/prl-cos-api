@@ -130,10 +130,6 @@ public class DynamicMultiSelectListService {
             && finl.equals(caseData.getSelectTypeOfOrder())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             && null != children) {
-
-            log.info("Children details before isfinalOrderIssued is set:: ***** {} **** ", null != caseData
-                ? caseData.getChildren() : null);
-
             for (Element<Child> child:children) {
                 String childName = child.getValue().getFirstName() + " " + child.getValue().getLastName();
                 log.info("Child name from the children::{};;", childName);
@@ -144,9 +140,6 @@ public class DynamicMultiSelectListService {
                     }
                 }
             }
-            caseData = caseData.toBuilder().children(children).build();
-            log.info("Children details after isfinalOrderIssued is set:: ======= {} ======= ", null != caseData
-                ? caseData.getChildren() : null);
         }
     }
 

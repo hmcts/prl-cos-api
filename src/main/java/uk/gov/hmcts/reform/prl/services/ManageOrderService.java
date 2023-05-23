@@ -1042,8 +1042,14 @@ public class ManageOrderService {
         } else {
             log.info("entering into final else loop::");
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
+            log.info("Children details before isfinalOrderIssued in addOrderDetailsAndReturnReverseSortedList:: ======= {} ======= ", null != caseData
+                ? caseData.getChildren() : null);
         }
+
         orderMap.put("orderCollection", orderCollection);
+        orderMap.put("children", caseData.getChildren());
+        log.info("Children details after isfinalOrderIssued in addOrderDetailsAndReturnReverseSortedList:: ======= {} ======= ", null != caseData
+            ? caseData.getChildren() : null);
         return orderMap;
     }
 
@@ -1254,6 +1260,8 @@ public class ManageOrderService {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, order);
                         dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData,order);
+                        log.info("Children details after isfinalOrderIssued in serveOrder:: ======= {} ======= ", null != caseData
+                            ? caseData.getChildren() : null);
                     } else {
                         servedFL401Order(caseData, orders, order);
                     }
