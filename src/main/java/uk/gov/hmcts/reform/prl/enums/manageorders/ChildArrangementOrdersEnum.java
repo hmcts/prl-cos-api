@@ -50,7 +50,7 @@ public enum ChildArrangementOrdersEnum {
     @JsonProperty("committalWarrantFC604")
     committalWarrantFC604("committalWarrantFC604", "Warrant of committal (FC604)"),
     @JsonProperty("directionOnIssue")
-    directionOnIssueOrder("directionOnIssue", "Direction on issue");
+    directionOnIssueOrder("directionOnIssue", "Directions on issue");
 
 
     private final String id;
