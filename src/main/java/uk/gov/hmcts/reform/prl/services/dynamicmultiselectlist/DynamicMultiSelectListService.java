@@ -117,26 +117,21 @@ public class DynamicMultiSelectListService {
 
     public void updateChildrenWithCaseCloseStatus(CaseData caseData, Element<OrderDetails> order) {
 
-        log.info("entering into updateChildrenWithCaseCloseStatus method::");
-
         List<Element<Child>> children = caseData.getChildren();
         String childrenFromOrder = order.getValue().getChildrenList();
         List<String> childrenList = Stream.of(childrenFromOrder.split(","))
             .map(String::trim)
             .map(elem -> new String(elem))
             .collect(Collectors.toList());
-        log.info("Children list from the orderCollection :=========: {} :========", childrenList);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && finl.equals(caseData.getSelectTypeOfOrder())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             && null != children) {
             for (Element<Child> child:children) {
                 String childName = child.getValue().getFirstName() + " " + child.getValue().getLastName();
-                log.info("Child name from the children::{};;", childName);
                 for (String childValue : childrenList) {
                     if (childName.equalsIgnoreCase(childValue.trim())) {
                         child.getValue().setIsFinalOrderIssued(Yes);
-                        log.info("Child Element is finalOrderIssued:: {} ", child.getValue().getIsFinalOrderIssued());
                     }
                 }
             }

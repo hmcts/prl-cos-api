@@ -323,6 +323,7 @@ public class ManageOrdersController {
             }
         }
         caseDataUpdated.put("isFinalOrderIssuedForAllChildren", manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData));
+        log.info("isFinalOrderIssuedForAllChildren flag has been set {}", caseDataUpdated.get("isFinalOrderIssuedForAllChildren"));
 
         log.info("***performingUser***{}", performingUser);
         log.info("***performingAction***{}", performingAction);
