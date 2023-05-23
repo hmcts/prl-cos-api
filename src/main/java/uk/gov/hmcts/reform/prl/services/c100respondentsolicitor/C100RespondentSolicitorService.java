@@ -227,7 +227,6 @@ public class C100RespondentSolicitorService {
             ));
 
         updatedCaseData.put(RESPONDENTS, respondents);
-        confidentialDetailsMapper.mapConfidentialData(caseData);
         return updatedCaseData;
     }
 

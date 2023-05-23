@@ -300,7 +300,10 @@ public class ApplicationsTabService implements TabService {
         List<Element<PartyDetails>> updatedPartyDetails = new ArrayList<>(parties);
         for (Element<PartyDetails> party : updatedPartyDetails) {
             if ((YesOrNo.Yes).equals(party.getValue().getIsPhoneNumberConfidential())) {
-                party.getValue().setPhoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL);
+                party = Element.<PartyDetails>builder()
+                    .value(party.getValue().toBuilder().phoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL).build())
+                    .id(party.getId())
+                    .build();
             }
             if ((YesOrNo.Yes).equals(party.getValue().getIsEmailAddressConfidential())) {
                 party = Element.<PartyDetails>builder()
@@ -309,7 +312,11 @@ public class ApplicationsTabService implements TabService {
                     .build();
             }
             if ((YesOrNo.Yes).equals(party.getValue().getIsAddressConfidential())) {
-                party.getValue().setAddress(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build());
+                party = Element.<PartyDetails>builder()
+                    .value(party.getValue().toBuilder().address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL)
+                                                                    .build()).build())
+                    .id(party.getId())
+                    .build();
             }
         }
         return updatedPartyDetails;
