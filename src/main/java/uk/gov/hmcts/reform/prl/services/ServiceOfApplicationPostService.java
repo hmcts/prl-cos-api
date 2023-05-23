@@ -129,7 +129,7 @@ public class ServiceOfApplicationPostService {
             caseData.getBulkPrintDetails().forEach(printedDocCollectionList::add);
         } else {
             log.info("*** BulkPrintdetails object empty in case data ***");
-            printedDocCollectionList = null;
+            printedDocCollectionList = new ArrayList<>();
         }
         log.info("*** calling Bulk Print ***");
         printedDocCollectionList.add(sendBulkPrint(caseData, authorisation, documents, partyDetails));

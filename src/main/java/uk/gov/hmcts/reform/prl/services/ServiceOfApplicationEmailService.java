@@ -137,7 +137,7 @@ public class ServiceOfApplicationEmailService {
             caseData.getEmailNotificationDetails().forEach(emailNotifyCollectionList::add);
         } else {
             log.info("*** EmailNotificationDetails object empty in case data ***");
-            emailNotifyCollectionList = null;
+            emailNotifyCollectionList = new ArrayList<>();
         }
         log.info("*** About to call sendgrid ***");
         requireNonNull(caseData);
