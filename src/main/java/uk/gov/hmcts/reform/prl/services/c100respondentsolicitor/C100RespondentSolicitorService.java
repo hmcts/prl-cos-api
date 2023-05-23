@@ -534,6 +534,31 @@ public class C100RespondentSolicitorService {
                 dataMap
             );
             caseDataUpdated.put("finalC7ResponseDoc", document);
+
+            if (Yes.equals(caseData.getRespondentAohYesNo())) {
+                Document documentForC1A = documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    SOLICITOR_C1A_DRAFT_DOCUMENT,
+                    false,
+                    dataMap
+                );
+                caseDataUpdated.put("finalC1AResponseDoc", documentForC1A);
+            }
+
+            Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
+            Response response = solicitorRepresentedRespondent.getValue().getResponse();
+
+            if (Yes.equals(response.getKeepDetailsPrivate().getConfidentiality())) {
+                Document documentForC8 = documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    C8_DRAFT_HINT,
+                    false,
+                    dataMap
+                );
+                caseDataUpdated.put("finalC8ResponseDoc", documentForC8);
+            }
         }
         return caseDataUpdated;
     }
