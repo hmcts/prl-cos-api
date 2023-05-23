@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
 
@@ -30,14 +32,14 @@ import java.util.Map;
 public class C100RespondentSolicitorTaskListController extends AbstractCallbackController {
 
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
-
+    private final ObjectMapper objectMapper;
 
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(
         @RequestBody CallbackRequest callbackRequest,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation) {
 
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         publishEvent(new CaseDataChanged(caseData));
         confidentialDetailsMapper.mapConfidentialData(caseData);
