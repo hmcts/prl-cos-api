@@ -971,7 +971,7 @@ public class NoticeOfChangePartiesService {
 
         legalRepAndLipNameMapping.forEach((key, value) -> legalRepAndLipNames.append(key)
             .append(" is no longer representing ")
-            .append(String.join(", "))
+            .append(String.join(", ", value))
             .append(" in this case. All other parties have been notified about this change\n\n")
         );
         String representativeRemovedBodyPrefix = legalRepAndLipNames.append(REPRESENTATIVE_REMOVED_STATUS_LABEL).toString();
