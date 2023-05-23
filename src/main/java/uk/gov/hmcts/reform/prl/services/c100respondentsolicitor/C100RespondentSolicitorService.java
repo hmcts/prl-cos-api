@@ -569,8 +569,9 @@ public class C100RespondentSolicitorService {
 
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("courtName", callbackRequest.getCaseDetails().getData().get(COURT_NAME));
-        dataMap.put("caseNumber", callbackRequest.getCaseDetails().getId());
+        dataMap.put("id", callbackRequest.getCaseDetails().getId());
         dataMap.put("issueDate", callbackRequest.getCaseDetails().getData().get(ISSUE_DATE_FIELD));
+        dataMap.put("applicants", solicitorRepresentedRespondent.getValue());
         dataMap.put("fullName", response.getCitizenDetails()
             .getFirstName() + " " + response.getCitizenDetails()
             .getLastName());
