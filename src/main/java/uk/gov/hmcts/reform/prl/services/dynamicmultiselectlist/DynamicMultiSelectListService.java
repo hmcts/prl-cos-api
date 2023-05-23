@@ -128,20 +128,25 @@ public class DynamicMultiSelectListService {
         log.info("Children list from the orderCollection :=========: {} :========", childrenList);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && finl.equals(caseData.getSelectTypeOfOrder())
-            && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+            && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+            && null != children) {
+
+            log.info("Children details before isfinalOrderIssued is set:: ***** {} **** ", null != caseData
+                ? caseData.getChildren() : null);
 
             for (Element<Child> child:children) {
                 String childName = child.getValue().getFirstName() + " " + child.getValue().getLastName();
                 log.info("Child name from the children::{};;", childName);
                 for (String childValue : childrenList) {
-                    log.info("Child name from the order childrenlist::{};;;", childValue);
                     if (childName.equalsIgnoreCase(childValue.trim())) {
                         child.getValue().setIsFinalOrderIssued(Yes);
                         log.info("Child Element is finalOrderIssued:: {} ", child.getValue().getIsFinalOrderIssued());
-                        log.info("Child Element is UUID:: {} ", child.getId());
                     }
                 }
             }
+            caseData = caseData.toBuilder().children(children).build();
+            log.info("Children details after isfinalOrderIssued is set:: ======= {} ======= ", null != caseData
+                ? caseData.getChildren() : null);
         }
     }
 
