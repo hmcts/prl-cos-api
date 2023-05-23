@@ -68,8 +68,8 @@ public class AuthorisationServiceTest {
 
     @Test
     public void checkIsAuthorizedForUserAndService() {
-        when(authorisationService.authoriseService("s2s token")).thenReturn(true);
-        when(authorisationService.authoriseUser("Bearer abcasda")).thenReturn(true);
+        when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(UUID.randomUUID().toString()).build());
+        when(serviceAuthorisationApi.getServiceName(any())).thenReturn("unknown_api");
         assertFalse(authorisationService.isAuthorized("Bearer abcasda", "s2s token"));
     }
 }
