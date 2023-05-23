@@ -516,7 +516,6 @@ public class C100RespondentSolicitorService {
                     && respondingParty.getValue().getUser() != null
                     && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
 
-                    log.info("Inside respondingParty");
                     mandatoryFinished = responseSubmitChecker.isFinished(respondingParty.getValue());
                 }
             }
@@ -525,12 +524,14 @@ public class C100RespondentSolicitorService {
             errorList.add(
                 "Response submission is not allowed for this case unless you finish all the mandatory information");
         } else {
-            log.info("Generating c7 document log");
+            Map<String, Object> dataMap = populateDataMap(callbackRequest);
+
             Document document = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
                 SOLICITOR_C7_FINAL_DOCUMENT,
-                false
+                false,
+                dataMap
             );
             caseDataUpdated.put("finalC7ResponseDoc", document);
         }
@@ -562,8 +563,7 @@ public class C100RespondentSolicitorService {
         return updatedCaseData;
     }
 
-    public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
-
+    public Map<String, Object> populateDataMap(CallbackRequest callbackRequest) {
         Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
         Response response = solicitorRepresentedRespondent.getValue().getResponse();
 
@@ -732,6 +732,12 @@ public class C100RespondentSolicitorService {
         dataMap.put("requestToAuthority", response.getCitizenInternationalElements().getAnotherCountryAskedInformation());
         dataMap.put("requestToAuthorityDetails", response.getCitizenInternationalElements().getAnotherCountryAskedInformationDetaails());
 
+        return dataMap;
+    }
+
+    public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
+
+        Map<String, Object> dataMap = populateDataMap(callbackRequest);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -755,6 +761,9 @@ public class C100RespondentSolicitorService {
             );
             caseDataUpdated.put("draftC1ADoc", documentForC1A);
         }
+
+        Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
+        Response response = solicitorRepresentedRespondent.getValue().getResponse();
 
         if (Yes.equals(response.getKeepDetailsPrivate().getConfidentiality())) {
             Document documentForC8 = documentGenService.generateSingleDocument(
