@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
@@ -761,20 +760,6 @@ public class C100RespondentSolicitorService {
                 dataMap
             );
             caseDataUpdated.put("draftC1ADoc", documentForC1A);
-        }
-
-        Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
-        Response response = solicitorRepresentedRespondent.getValue().getResponse();
-
-        if (Yes.equals(response.getKeepDetailsPrivate().getConfidentiality())) {
-            Document documentForC8 = documentGenService.generateSingleDocument(
-                authorisation,
-                caseData,
-                C8_DRAFT_HINT,
-                false,
-                dataMap
-            );
-            caseDataUpdated.put("draftC8ResponseDoc", documentForC8);
         }
 
         return caseDataUpdated;
