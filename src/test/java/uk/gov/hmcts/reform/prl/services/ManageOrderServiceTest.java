@@ -1570,6 +1570,11 @@ public class ManageOrderServiceTest {
             .build();
 
 
+        List<DynamicMultiselectListElement> elements = new ArrayList<>();
+        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
+            .code("1234")
+            .label("test label").build();
+        elements.add(element);
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(YesOrNo.No)
             .serveOrderDynamicList(dynamicMultiSelectList)
@@ -1577,6 +1582,15 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
+            .recipientsOptions(DynamicMultiSelectList.builder()
+                                   .listItems(elements)
+                                   .build())
+            .childOption(DynamicMultiSelectList.builder()
+                                   .listItems(elements)
+                                   .build())
+            .otherParties(DynamicMultiSelectList.builder()
+                             .listItems(elements)
+                             .build())
             .serveToRespondentOptions(YesOrNo.Yes)
             .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
@@ -1707,7 +1721,11 @@ public class ManageOrderServiceTest {
                                                                                           .build()).build();
         List<Element<OrderDetails>> orderList = new ArrayList<>();
         orderList.add(orders);
-
+        List<DynamicMultiselectListElement> elements = new ArrayList<>();
+        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
+            .code("1234")
+            .label("test label").build();
+        elements.add(element);
         ManageOrders manageOrders = ManageOrders.builder()
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
@@ -1715,6 +1733,15 @@ public class ManageOrderServiceTest {
                                                            "abc.pdf").build())
                                                        .build()))
             .servingRespondentsOptionsDA(ServingRespondentsEnum.courtAdmin)
+            .recipientsOptionsOnlyC47a(DynamicMultiSelectList.builder()
+                                   .listItems(elements)
+                                   .build())
+            .childOption(DynamicMultiSelectList.builder()
+                             .listItems(elements)
+                             .build())
+            .otherPartiesOnlyC47a(DynamicMultiSelectList.builder()
+                              .listItems(elements)
+                              .build())
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .deliveryByOptionsDA(DeliveryByEnum.post)
             .emailInformationCA(List.of(Element.<EmailInformation>builder()
