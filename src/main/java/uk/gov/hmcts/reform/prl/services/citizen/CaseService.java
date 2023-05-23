@@ -149,7 +149,7 @@ public class CaseService {
             .dssUploadedDocuments(uploadDssDocs)
             .dssUploadedAdditionalDocuments(uploadAdditionalDssDocs)
             .build();
-
+        System.out.println("updatedCaseData --" + updatedCaseData);
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
 
     }
