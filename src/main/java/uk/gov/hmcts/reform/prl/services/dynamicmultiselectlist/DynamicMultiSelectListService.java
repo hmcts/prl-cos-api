@@ -131,7 +131,7 @@ public class DynamicMultiSelectListService {
                 log.info("Child name from the children::{};;", childName);
                 for (String childValue : childrenList) {
                     log.info("Child name from the order childrenlist::{};;;", childValue);
-                    if (childName.equalsIgnoreCase(childValue)) {
+                    if (childName.equalsIgnoreCase(childValue.trim())) {
                         child.getValue().setIsFinalOrderIssued(Yes);
                         log.info("Child Element is finalOrderIssued:: {} ", child.getValue().getIsFinalOrderIssued());
                         log.info("Child Element is UUID:: {} ", child.getId());
