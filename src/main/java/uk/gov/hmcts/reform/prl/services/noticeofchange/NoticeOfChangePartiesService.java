@@ -76,7 +76,10 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class NoticeOfChangePartiesService {
     public static final String NO_REPRESENTATION_FOUND_ERROR = "You do not represent anyone in this case.";
     public static final String INVALID_REPRESENTATION_ERROR = "You do not represent selected party";
+    public static final String CASE_NOT_REPRESENTED_BY_SOLICITOR_ERROR = "This case is not represented by solicitor anymore.";
     public static final String SOL_STOP_REP_CHOOSE_PARTIES = "solStopRepChooseParties";
+
+    public static final String LEGAL_REPRESENTATIVE_AND_PARTIES_LIST = "legalRepAndPartiesList";
     public final NoticeOfChangePartiesConverter partiesConverter;
     public final RespondentPolicyConverter policyConverter;
     private final AuthTokenGenerator tokenGenerator;
@@ -851,5 +854,21 @@ public class NoticeOfChangePartiesService {
         );
         log.info("findUserCaseRolesResponse = " + findUserCaseRolesResponse);
         return findUserCaseRolesResponse;
+    }
+
+    public Map<String, Object> populateAboutToStartAdminRemoveLegalRepresentative(String authorisation,
+                                                                      CallbackRequest callbackRequest,
+                                                                      List<String> errorList) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        DynamicMultiSelectList legalRepAndPartiesList
+            = dynamicMultiSelectListService.getLegalRepAndPartiesList(caseData);
+
+        if (legalRepAndPartiesList.getListItems().isEmpty()) {
+            errorList.add(CASE_NOT_REPRESENTED_BY_SOLICITOR_ERROR);
+        } else {
+            caseDataUpdated.put(LEGAL_REPRESENTATIVE_AND_PARTIES_LIST, legalRepAndPartiesList);
+        }
+        return caseDataUpdated;
     }
 }
