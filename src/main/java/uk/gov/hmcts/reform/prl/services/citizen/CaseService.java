@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -30,6 +31,8 @@ import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -105,16 +108,46 @@ public class CaseService {
     }
 
     public CaseDetails updateCaseForDss(String authToken,
-                                  String caseId, String eventId, DssCaseData dssCaseData) throws JsonProcessingException {
+                                        String caseId, String eventId, DssCaseData dssCaseData) throws JsonProcessingException {
 
         System.out.println("dssCaseDate recieved " + dssCaseData);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        List<Element<uk.gov.hmcts.reform.ccd.client.model.Document>> uploadDssDocs = new ArrayList<>();
+        List<Element<uk.gov.hmcts.reform.ccd.client.model.Document>> uploadAdditionalDssDocs = new ArrayList<>();
+        dssCaseData.getApplicantApplicationFormDocuments()
+            .stream().map(edgeCaseDocumentElement ->
+                              uploadDssDocs.add(Element.<uk.gov.hmcts.reform.ccd.client.model.Document>builder()
+                                                    .value(
+                                                        edgeCaseDocumentElement.getValue().getDocumentLink()).build())
+            );
+
+        dssCaseData.getApplicantAdditionalDocuments().stream().map(edgeCaseDocumentElement ->
+                                                                       uploadAdditionalDssDocs
+                                                                           .add(Element.<uk.gov.hmcts.reform.ccd.client.model.Document>builder()
+                                                                                    .value(
+                                                                                        edgeCaseDocumentElement.getValue().getDocumentLink()).build())
+        );
+
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName(dssCaseData.getApplicantFirstName())
+            .email(dssCaseData.getApplicantEmailAddress())
+            .address(Address.builder()
+                         .addressLine1(dssCaseData.getApplicantAddress1())
+                         .addressLine2(dssCaseData.getApplicantAddress2())
+                         .country("United Kingdom")
+                         .postCode(dssCaseData.getApplicantAddressPostCode())
+                         .build())
+            .dateOfBirth(LocalDate.parse(dssCaseData.getApplicantDateOfBirth(), dateTimeFormatter))
+            .lastName(dssCaseData.getApplicantLastName())
+            .phoneNumber(dssCaseData.getApplicantPhoneNumber())
             .build();
-        Element<PartyDetails> element = Element.<PartyDetails>builder().value(partyDetails).build();
+        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(partyDetails).build();
         CaseData updatedCaseData = CaseData.builder()
             .id(Long.parseLong(caseId))
-            .applicants(List.of(element))
+            .applicants(List.of(partyDetailsElement))
+            .dssUploadedDocuments(uploadDssDocs)
+            .dssUploadedAdditionalDocuments(uploadAdditionalDssDocs)
             .build();
 
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));

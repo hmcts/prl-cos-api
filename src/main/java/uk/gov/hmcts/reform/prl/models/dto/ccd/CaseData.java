@@ -796,4 +796,9 @@ public class CaseData implements MappableObject {
     private final YesOrNo isAddCaseNumberAdded;
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
+
+    private final List<Element<uk.gov.hmcts.reform.ccd.client.model.Document>> dssUploadedDocuments;
+
+    private final List<Element<uk.gov.hmcts.reform.ccd.client.model.Document>> dssUploadedAdditionalDocuments;
+
 }
