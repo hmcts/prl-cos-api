@@ -158,6 +158,8 @@ public class StandardDirectionOrder {
     private final LocalDate sdoCafcassCymruReportSentByDate;
     @JsonProperty("sdoLocalAuthorityName")
     private final String sdoLocalAuthorityName;
+    @JsonProperty("sdoLocalAuthorityTextArea")
+    private final String sdoLocalAuthorityTextArea;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoLocalAuthorityReportSubmitByDate;
     private final DynamicList sdoTransferApplicationCourtDynamicList;

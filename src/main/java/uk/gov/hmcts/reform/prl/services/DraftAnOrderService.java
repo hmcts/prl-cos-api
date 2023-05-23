@@ -82,6 +82,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_UPDATE_CONT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEEDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
@@ -795,6 +796,7 @@ public class DraftAnOrderService {
         populateParentWithCare(caseData, caseDataUpdated);
         List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
         populateCourtDynamicList(courtList, caseDataUpdated, caseData);
+        populateLocalAuthorityDetails(caseData, caseDataUpdated);
 
         if (caseData.getStandardDirectionOrder().getSdoInstructionsFilingPartiesDynamicList() == null
             || CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInstructionsFilingPartiesDynamicList().getListItems())) {
@@ -802,6 +804,16 @@ public class DraftAnOrderService {
             caseDataUpdated.put("sdoInstructionsFilingPartiesDynamicList", partiesList);
         }
         populateHearingDetails(authorisation, caseData, caseDataUpdated);
+    }
+
+    private void populateLocalAuthorityDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        caseDataUpdated.put("sdoLocalAuthorityName","City and County of Swansea");
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoLocalAuthorityTextArea())) {
+            caseDataUpdated.put(
+                "sdoLocalAuthorityTextArea",
+                LOCAL_AUTHORUTY_LETTER
+            );
+        }
     }
 
     private static void populateCrossExaminationProhibition(CaseData caseData, Map<String, Object> caseDataUpdated) {
