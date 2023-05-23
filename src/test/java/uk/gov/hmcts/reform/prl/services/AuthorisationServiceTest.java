@@ -18,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class AuthorisationServiceTest {
 
     @InjectMocks
@@ -66,4 +66,10 @@ public class AuthorisationServiceTest {
         assertFalse(authorisationService.authoriseUser("Bearer malformed"));
     }
 
+    @Test
+    public void checkIsAuthorizedForUserAndService() {
+        when(authorisationService.authoriseService("s2s token")).thenReturn(true);
+        when(authorisationService.authoriseUser("Bearer abcasda")).thenReturn(true);
+        assertFalse(authorisationService.isAuthorized("Bearer abcasda", "s2s token"));
+    }
 }
