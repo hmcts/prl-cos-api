@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.ManageOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -1819,6 +1820,9 @@ public class ManageOrderService {
                              ? typeOfOrder.getDisplayedValue() : null)
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
+            .typeOfChildArrangementsOrder(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder
+                                              .equals(CreateSelectOrderOptionsEnum.getValue(flagSelectedOrderId))
+                                              ? getChildArrangementOrder(caseData) : "")
             .childrenList((Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
                 || No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren()))
                               ? dynamicMultiSelectListService
@@ -1903,6 +1907,16 @@ public class ManageOrderService {
                            .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
                                                     ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
                            .build());
+    }
+
+    private String getChildArrangementOrder(CaseData caseData) {
+        String childArrangementOrder = caseData.getManageOrders().getChildArrangementsOrdersToIssue()
+            .stream()
+            .map(OrderTypeEnum::getDisplayedValue)
+            .collect(Collectors.joining(", "));
+
+        return childArrangementOrder + " ," + caseData.getManageOrders()
+            .getSelectChildArrangementsOrder().getDisplayedValue();
     }
 
     private String getWithdrawRequestInfo(CaseData caseData) {
